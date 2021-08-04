@@ -25,22 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_RENDERING_SCENE_PASS_
-#define CRIMILD_CORE_RENDERING_SCENE_PASS_
+#ifndef CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
+#define CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
 
-#include "Foundation/SharedObject.hpp"
-#include "Rendering/CommandBuffer.hpp"
-#include "Rendering/FrameGraphOperation.hpp"
-#include "Rendering/RenderResource.hpp"
+#include "Foundation/Memory.hpp"
 
 namespace crimild {
 
-    class ScenePass : public FrameGraphOperation {
-    public:
-        virtual ~ScenePass( void ) = default;
+    class FrameGraphOperation;
+    class FrameGraphResource;
 
-        inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::SCENE_PASS; }
-    };
+    namespace framegraph {
+
+        SharedPointer< FrameGraphOperation > debugLightCascades(
+            SharedPointer< FrameGraphResource > const &albedo,
+            SharedPointer< FrameGraphResource > const &positions,
+            SharedPointer< FrameGraphResource > const &normals,
+            SharedPointer< FrameGraphResource > const &materials,
+            SharedPointer< FrameGraphResource > const &depth,
+            SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
+
+    }
 
 }
 

@@ -58,7 +58,6 @@ static SharedPointer< GraphicsPipeline > createPipeline( Light::Type lightType )
                         layout ( location = 2 ) in vec2 inTextureCoord;
 
                         layout ( set = 0, binding = 0 ) uniform LightUniforms {
-                            //mat4 lightSpaceMatrix;
                             mat4 proj;
                             mat4 view;
                             vec3 lightPos;
@@ -141,12 +140,6 @@ static SharedPointer< GraphicsPipeline > createPipeline( Light::Type lightType )
 
     return pipeline;
 }
-
-struct LightUniforms {
-    alignas( 16 ) Matrix4f proj;
-    alignas( 16 ) Matrix4f view;
-    alignas( 16 ) Vector3f lightPos;
-};
 
 size_t recordPointLightCommands(
     CommandBuffer *commandBuffer,

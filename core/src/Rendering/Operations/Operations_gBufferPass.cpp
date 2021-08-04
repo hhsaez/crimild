@@ -102,7 +102,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 
                                     outViewMatrix3 = mat3( inverse( view ) );
                                     outNormal = normalize( nMatrix * inNormal );
-                                    outPosition = vec3( model * vec4( inPosition, 1.0 ) );
+                                    outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
                                     outViewPosition = ( view * model * vec4( inPosition, 1.0 ) ).xyz;
                                     outEyePosition = inverse( view )[ 3 ].xyz;
                                     outTexCoord = inTexCoord;
@@ -185,7 +185,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 	                                roughness = clamp( roughness, 0.05, 0.999 );
 
                                     outAlbedo = vec4( albedo, 1.0 );
-                                    outPosition = vec4( P, gl_FragCoord.z );// inViewPosition.z );
+
+                                    //outPosition = vec4( P, inViewPosition.z );
+                                    outPosition = vec4( P, gl_FragCoord.z );
                                     outNormal = vec4( N, 1.0 );
                                     outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                                 }

@@ -367,35 +367,35 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::lightingPass(
                                     return ( kD * albedo / PI + specular ) * radiance * NdotL;
                                 }
 
-float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, float bias )
-{
-    // perform perspective divide
-    vec3 projCoords = ligthSpacePosition.xyz / ligthSpacePosition.w;
-    projCoords.t = 1.0 - projCoords.t;
+                                float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, float bias )
+                                {
+                                    // perform perspective divide
+                                    vec3 projCoords = ligthSpacePosition.xyz / ligthSpacePosition.w;
+                                    projCoords.t = 1.0 - projCoords.t;
 
-    // Compute shadow PCF
-    float depth = projCoords.z;
-    float shadow = 0.0f;
-    vec2 texelSize = 1.0 / textureSize( uShadowAtlas, 0 );
-    for ( int y = -1; y <= 1; ++y ) {
-        for ( int x = -1; x <= 1; ++x ) {
-            vec2 uv = projCoords.st + vec2( x, y ) * texelSize;
-            uv.x = viewport.x + uv.x * viewport.z;
-            uv.y = viewport.y + uv.y * viewport.w;
-            float pcfDepth = texture( uShadowAtlas, uv ).x;
-            shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 9.0;
+                                    // Compute shadow PCF
+                                    float depth = projCoords.z;
+                                    float shadow = 0.0f;
+                                    vec2 texelSize = 1.0 / textureSize( uShadowAtlas, 0 );
+                                    for ( int y = -1; y <= 1; ++y ) {
+                                        for ( int x = -1; x <= 1; ++x ) {
+                                            vec2 uv = projCoords.st + vec2( x, y ) * texelSize;
+                                            uv.x = viewport.x + uv.x * viewport.z;
+                                            uv.y = viewport.y + uv.y * viewport.w;
+                                            float pcfDepth = texture( uShadowAtlas, uv ).x;
+                                            shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
+                                        }
+                                    }
+                                    shadow /= 9.0;
 
-    return shadow;
-}
+                                    return shadow;
+                                }
 
                                 float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
                                 {
                                     float depth = dist;
                                     float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
-                                    return depth <= ( shadow + bias ) ? 0.0 : 1.0;
+                                    return depth <= ( shadow + bias ) ? 0.0 : 0.85;
                                 }
 
                                 void main()
@@ -429,6 +429,8 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                     vec3 radiance = vec3( 0 );
                                     float shadow = 0.0;
 
+                                    vec3 debugColor = vec3( 1 );
+
                                     if ( uLight.type == 2 ) {
                                         // directional
                                         L = normalize( -uLight.direction.xyz );
@@ -440,12 +442,15 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                             // these are all negative values. Lower means farther away from the eye
                                             float depth = viewSpacePositionDepth;
                                             int cascadeId = 0;
+
                                             if ( depth < cascadeSplits[ 0 ] ) {
                                                 cascadeId = 1;
                                             }
+
                                             if ( depth < cascadeSplits[ 1 ] ) {
                                                 cascadeId = 2;
                                             }
+
                                             if ( depth < cascadeSplits[ 2 ] ) {
                                                 cascadeId = 3;
                                             }
@@ -500,6 +505,8 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                         float attenuation = 1.0 / ( dist * dist );
                                         radiance = uLight.color.rgb * uLight.energy * attenuation;
 
+                                        debugColor = vec3(dist / 100.0);
+
                                         if ( uLight.castShadows == 1 ) {
                                             shadow = calculatePointShadow(
                                                 uShadowAtlas,
@@ -508,6 +515,9 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                                 uLight.viewport,
                                                 uLight.shadowBias
                                             );
+
+                                            //shadow = textureCubeUV( uShadowAtlas, -L, uLight.viewport ).r;
+                                            //debugColor = vec3(shadow / 100.0);
                                         }
                                     }
 
@@ -515,6 +525,7 @@ float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, f
                                     vec3 Lo = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
 
                                     Lo *= 1.0 - shadow;
+                                    //Lo = debugColor;
 
                                     outColor = vec4( Lo, 1.0 );
                                 }

@@ -31,6 +31,8 @@
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
+#include "Rendering/Operations/Operations_debugLightCascades.hpp"
+#include "Rendering/Operations/Operations_debugShadowAtlas.hpp"
 #include "Rendering/Operations/Operations_ssao.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/ScenePass.hpp"
@@ -120,19 +122,19 @@ void RenderSystem::start( void ) noexcept
                 return present( normals );
             }
 
-//            auto reflectionAtlasPass = computeReflectionMap( envRenderables );
-//            auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
-//            auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
-//            auto brdfLutPass = computeBRDFLUT( nullptr );
+            //            auto reflectionAtlasPass = computeReflectionMap( envRenderables );
+            //            auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
+            //            auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
+            //            auto brdfLutPass = computeBRDFLUT( nullptr );
 
-//            auto shadowAtlasPass = renderShadowAtlas( litRenderables );
+            auto shadowAtlasPass = renderShadowAtlas( litRenderables );
 
             // TODO
-            auto shadowAtlas = Image::ONE;// useResource( shadowAtlasPass );
-            auto reflectionAtlas = Image::ZERO;//useResource( reflectionAtlasPass );
-            auto irradianceAtlas = Image::ZERO;//useResource( irradianceMapPass );
-            auto prefilterAtlas = Image::ZERO;//useResource( prefilterMapPass );
-            auto brdfLUT = Image::ONE;//useResource( brdfLutPass );
+            auto shadowAtlas = useResource( shadowAtlasPass );
+            auto reflectionAtlas = Image::ZERO; //useResource( reflectionAtlasPass );
+            auto irradianceAtlas = Image::ZERO; //useResource( irradianceMapPass );
+            auto prefilterAtlas = Image::ZERO;  //useResource( prefilterMapPass );
+            auto brdfLUT = Image::ONE;          //useResource( brdfLutPass );
 
             // todo: rename to "localLightingPass"
             auto lit = lightingPass(
@@ -194,7 +196,7 @@ void RenderSystem::start( void ) noexcept
             auto ret = composed;
             auto tonemapped = composed;
 
-            if ( settings->get< Bool >( "video.bloom.enabled", true ) ) {
+            if ( settings->get< Bool >( "video.bloom.enabled", false ) ) {
                 auto bloom = brightPassFilter(
                     useResource( composed ),
                     Vector3f { 0.2126f, 0.7152f, 0.0722f } );
@@ -224,6 +226,16 @@ void RenderSystem::start( void ) noexcept
                 } );
 
             if ( settings->get< Bool >( "debug.show_render_passes", false ) ) {
+                auto lightCascades = debugLightCascades(
+                    albedo,
+                    positions,
+                    normals,
+                    materials,
+                    depth,
+                    shadowAtlas );
+
+                auto shadowAtlasDebug = debugShadowAtlas( shadowAtlas );
+
                 ret = debug(
                     {
                         useResource( ret ),
@@ -232,11 +244,12 @@ void RenderSystem::start( void ) noexcept
                         normals,
                         materials,
                         depth,
-                        shadowAtlas,
+                        useResource( shadowAtlasDebug ),
                         reflectionAtlas,
                         irradianceAtlas,
                         prefilterAtlas,
                         brdfLUT,
+                        useResource( lightCascades ),
                         useResource( lit ),
                         useResource( ibl ),
                         useResource( tonemapped ),
