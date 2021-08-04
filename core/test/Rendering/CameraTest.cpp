@@ -27,6 +27,14 @@
 
 #include "SceneGraph/Camera.hpp"
 
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
+#include "Mathematics/io.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/SelectNodes.hpp"
@@ -41,21 +49,167 @@ TEST( CameraTest, construction )
     auto camera = crimild::alloc< Camera >();
 }
 
-TEST( CameraTest, viewMatrix )
+TEST( CameraTest, view_matrix )
 {
-    /*
-	auto camera = crimild::alloc< Camera >();
-	camera->local().setTranslate( 0.0f, 1.0f, 5.0f );
-	camera->perform( UpdateWorldState() );
+    auto camera = crimild::alloc< Camera >();
 
-	Matrix4f view = camera->getViewMatrix();
+    camera->setLocal(
+        lookAt(
+            Point3 { 1, 3, 2 },
+            Point3 { 4, -2, 8 },
+            Vector3 { 1, 1, 0 } ) );
+    camera->perform( UpdateWorldState() );
 
-	EXPECT_EQ( 0.0f, view[ 12 ] );
-	EXPECT_EQ( -1.0f, view[ 13 ] );
-	EXPECT_EQ( -5.0f, view[ 14 ] );
-    */
+    constexpr auto M = Matrix4 {
+        { -0.50709, 0.76772, -0.35857, 0 },
+        { 0.50709, 0.60609, 0.59761, 0 },
+        { 0.67612, 0.12122, -0.71714, 0 },
+        { -2.36643, -2.82843, 0, 1 },
+    };
 
-    FAIL();
+    const auto view = camera->getViewMatrix();
+
+    // always compare with inverse matrix
+    EXPECT_EQ( M, view );
+}
+
+TEST( CameraTest, get_ray_through_the_center_of_the_canvas )
+{
+    const auto width = Int( 202 );
+    const auto height = Int( 102 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    auto px = Real( 101 ) / Real( width );
+    auto py = Real( 51 ) / Real( height );
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
+
+    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
+    EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
+}
+
+TEST( CameraTest, get_ray_through_the_corner_of_the_canvas )
+{
+    const auto width = Int( 201 );
+    const auto height = Int( 101 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( 0, 0, ray ) );
+
+    std::cout << origin( ray ) << " " << direction( ray ) << std::endl;
+
+    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
+    EXPECT_EQ( ( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
+}
+
+TEST( CameraTest, get_ray_for_translated_camera )
+{
+    const auto width = Int( 201 );
+    const auto height = Int( 101 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    camera->setLocal( translation( 0, -2, 5 ) );
+
+    auto px = Real( 100 + 0.5 ) / Real( width );
+    auto py = Real( 50 + 0.5 ) / Real( height );
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
+
+    EXPECT_EQ( ( Point3 { 0, -2, 5 } ), origin( ray ) );
+    EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
+}
+
+TEST( CameraTest, get_ray_for_rotated_camera )
+{
+    const auto width = Int( 201 );
+    const auto height = Int( 101 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    camera->setLocal( rotationY( -numbers::PI_DIV_2 ) );
+
+    auto px = Real( 100 + 0.5 ) / Real( width );
+    auto py = Real( 50 + 0.5 ) / Real( height );
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
+
+    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
+    EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
+}
+
+TEST( CameraTest, get_ray_for_transformed_camera )
+{
+    const auto width = Int( 201 );
+    const auto height = Int( 101 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    camera->setLocal( translation( 2, 1, -1 ) * rotationX( -numbers::PI_DIV_4 ) );
+
+    auto px = Real( 100 + 0.5 ) / Real( width );
+    auto py = Real( 50 + 0.5 ) / Real( height );
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
+
+    EXPECT_EQ( ( Point3 { 2, 1, -1 } ), origin( ray ) );
+    EXPECT_EQ( ( Vector3 { 0, -numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ), direction( ray ) );
+}
+
+TEST( CameraTest, get_ray_for_camera_using_lookAt )
+{
+    const auto width = Int( 200 );
+    const auto height = Int( 100 );
+    const auto fov = numbers::PI_DIV_2;
+    const auto aspect = Real( width ) / Real( height );
+
+    auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
+
+    camera->setLocal(
+        lookAt(
+            Point3 { 0, -2, 5 },
+            Point3 { 1, -2, 5 },
+            Vector3 { 0, 1, 0 } ) );
+
+    auto px = Real( 100 ) / Real( width );
+    auto py = Real( 50 ) / Real( height );
+
+    Ray3 ray;
+
+    camera->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
+
+    EXPECT_EQ( ( Point3 { 0, -2, 5 } ), origin( ray ) );
+    EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
 }
 
 TEST( CameraTest, fetchCameras )
