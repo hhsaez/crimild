@@ -27,6 +27,9 @@
 
 #include "Visitors/UpdateWorldState.hpp"
 
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Utils/MockVisitor.hpp"
@@ -37,90 +40,79 @@ using namespace crimild;
 
 TEST( UpdateWorldStateTest, singleNode )
 {
-    /*
-	auto node = crimild::alloc< Node >();
+    auto node = crimild::alloc< Node >();
 
-	EXPECT_TRUE( node->getLocal().isIdentity() );
-	EXPECT_TRUE( node->getWorld().isIdentity() );
+    EXPECT_TRUE( isIdentity( node->getLocal() ) );
+    EXPECT_TRUE( isIdentity( node->getWorld() ) );
 
-	node->local().setTranslate( 0, 0, -5 );
+    node->setLocal( translation( 0, 0, -5 ) );
 
-	EXPECT_FALSE( node->getLocal().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getLocal().getTranslate() );
-	EXPECT_TRUE( node->getWorld().isIdentity() );
+    EXPECT_FALSE( isIdentity( node->getLocal() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getLocal() ) );
+    EXPECT_TRUE( isIdentity( node->getWorld() ) );
 
-	node->perform( UpdateWorldState() );
+    node->perform( UpdateWorldState() );
 
-	EXPECT_FALSE( node->getLocal().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getLocal().getTranslate() );
-	EXPECT_FALSE( node->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), node->getWorld().getTranslate() );
-    */
-    FAIL();
+    EXPECT_FALSE( isIdentity( node->getLocal() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getLocal() ) );
+    EXPECT_FALSE( isIdentity( node->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getWorld() ) );
 }
 
 TEST( UpdateWorldStateTest, hierarchy )
 {
-    /*
-	auto group1 = crimild::alloc< Group >();
-	auto group2 = crimild::alloc< Group >();
-	auto geometry1 = crimild::alloc< Geometry >();
-	auto geometry2 = crimild::alloc< Geometry >();
-	auto geometry3 = crimild::alloc< Geometry >();
+    auto group1 = crimild::alloc< Group >();
+    auto group2 = crimild::alloc< Group >();
+    auto geometry1 = crimild::alloc< Geometry >();
+    auto geometry2 = crimild::alloc< Geometry >();
+    auto geometry3 = crimild::alloc< Geometry >();
 
-	group1->attachNode( group2.get() );
-	group1->attachNode( geometry1.get() );
+    group1->attachNode( group2.get() );
+    group1->attachNode( geometry1.get() );
 
-	group2->attachNode( geometry2.get() );
-	group2->attachNode( geometry3.get() );
+    group2->attachNode( geometry2.get() );
+    group2->attachNode( geometry3.get() );
 
-	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
-	EXPECT_TRUE( geometry3->getWorld().isIdentity() );
+    EXPECT_TRUE( isIdentity( geometry3->getLocal() ) );
+    EXPECT_TRUE( isIdentity( geometry3->getWorld() ) );
 
-	group1->local().setTranslate( 0, 0, -5 );
-	group1->perform( UpdateWorldState() );
+    group1->setLocal( translation( 0, 0, -5 ) );
+    group1->perform( UpdateWorldState() );
 
-	EXPECT_FALSE( group1->getLocal().isIdentity() );
-	EXPECT_FALSE( group1->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), group1->getWorld().getTranslate() );
+    EXPECT_FALSE( isIdentity( group1->getLocal() ) );
+    EXPECT_FALSE( isIdentity( group1->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( group1->getWorld() ) );
 
-	EXPECT_TRUE( group2->getLocal().isIdentity() );
-	EXPECT_FALSE( group2->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), group2->getWorld().getTranslate() );
+    EXPECT_TRUE( isIdentity( group2->getLocal() ) );
+    EXPECT_FALSE( isIdentity( group2->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( group2->getWorld() ) );
 
-	EXPECT_TRUE( geometry1->getLocal().isIdentity() );
-	EXPECT_FALSE( geometry1->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry1->getWorld().getTranslate() );
+    EXPECT_TRUE( isIdentity( geometry1->getLocal() ) );
+    EXPECT_FALSE( isIdentity( geometry1->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry1->getWorld() ) );
 
-	EXPECT_TRUE( geometry2->getLocal().isIdentity() );
-	EXPECT_FALSE( geometry2->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry2->getWorld().getTranslate() );
+    EXPECT_TRUE( isIdentity( geometry2->getLocal() ) );
+    EXPECT_FALSE( isIdentity( geometry2->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry2->getWorld() ) );
 
-	EXPECT_TRUE( geometry3->getLocal().isIdentity() );
-	EXPECT_FALSE( geometry3->getWorld().isIdentity() );
-	EXPECT_EQ( Vector3f( 0, 0, -5 ), geometry3->getWorld().getTranslate() );
-    */
-
-    FAIL();
+    EXPECT_TRUE( isIdentity( geometry3->getLocal() ) );
+    EXPECT_FALSE( isIdentity( geometry3->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry3->getWorld() ) );
 }
 
 TEST( UpateWorldStateTest, scale )
 {
-    /*
-	auto n0 = crimild::alloc< Group >();
-	auto n1 = crimild::alloc< Group >();
+    auto n0 = crimild::alloc< Group >();
+    auto n1 = crimild::alloc< Group >();
 
-	n0->attachNode( n1 );
-	n0->local().setScale( 0.5f );
+    n0->attachNode( n1 );
+    n0->setLocal( scale( 0.5f ) );
 
-	EXPECT_FALSE( n0->getLocal().isIdentity() );
-	EXPECT_TRUE( n1->getLocal().isIdentity() );
+    EXPECT_FALSE( isIdentity( n0->getLocal() ) );
+    EXPECT_TRUE( isIdentity( n1->getLocal() ) );
 
-	n0->perform( UpdateWorldState() );
+    n0->perform( UpdateWorldState() );
 
-	EXPECT_EQ( 0.5f, n0->getWorld().getScale() );
-	EXPECT_EQ( 0.5f, n1->getWorld().getScale() );
-    */
-
-    FAIL();
+    EXPECT_EQ( ( Vector3 { 0.5, 0.5, 0.5 } ), n0->getWorld()( Vector3 { 1, 1, 1 } ) );
+    EXPECT_EQ( ( Vector3 { 0.5, 0.5, 0.5 } ), n1->getWorld()( Vector3 { 1, 1, 1 } ) );
 }
