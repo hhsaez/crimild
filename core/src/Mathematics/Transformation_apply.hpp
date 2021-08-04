@@ -33,6 +33,7 @@
 #include "Mathematics/Transformation_isIdentity.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/normalize.hpp"
 #include "Mathematics/swizzle.hpp"
 
 namespace crimild {
@@ -96,17 +97,17 @@ namespace crimild {
 
     [[nodiscard]] inline constexpr Vector3 right( const Transformation &t ) noexcept
     {
-        return t( Vector3::Constants::RIGHT );
+        return normalize( t( Vector3::Constants::RIGHT ) );
     }
 
     [[nodiscard]] inline constexpr Vector3 up( const Transformation &t ) noexcept
     {
-        return t( Vector3::Constants::UP );
+        return normalize( t( Vector3::Constants::UP ) );
     }
 
     [[nodiscard]] inline constexpr Vector3 forward( const Transformation &t ) noexcept
     {
-        return t( Vector3::Constants::FORWARD );
+        return normalize( t( Vector3::Constants::FORWARD ) );
     }
 
 }

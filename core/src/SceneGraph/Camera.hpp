@@ -69,8 +69,7 @@ namespace crimild {
         bool _isMainCamera = false;
 
     public:
-        //void setFrustum( const Frustum &f );
-        //const Frustum &getFrustum( void ) const { return _frustum; }
+        const Frustum &getFrustum( void ) const { return m_frustum; }
 
         void setProjectionMatrix( const Matrix4f &projection ) { _projectionMatrix = projection; }
         const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
@@ -93,7 +92,7 @@ namespace crimild {
         float computeAspect( void ) const;
 
     private:
-        //Frustumf _frustum;
+        Frustum m_frustum;
         Rectf _viewport;
         Matrix4f _projectionMatrix;
         Matrix4f _orthographicMatrix;

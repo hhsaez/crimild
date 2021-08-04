@@ -31,6 +31,7 @@
 #include "Mathematics/Normal3.hpp"
 #include "Mathematics/Normal_equality.hpp"
 #include "Mathematics/Ray_equality.hpp"
+#include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_constants.hpp"
 #include "Mathematics/Transformation_equality.hpp"
@@ -275,7 +276,81 @@ TEST( Transformation, rotationProperties )
     EXPECT_EQ( crimild::rotationZ( 1.234 ), crimild::rotation( crimild::Vector3::Constants::UNIT_Z, 1.234 ) );
 }
 
-TEST( Transformation, lookAt )
+TEST( Transformation, product )
+{
+    constexpr auto T0 = crimild::translation( 2, 2, 1 );
+    constexpr auto T1 = crimild::translation( 2, 2, 1 );
+
+    {
+        constexpr auto T = T0 * T1;
+        static_assert( !crimild::isIdentity( T ) );
+        static_assert( crimild::hasTranslation( T ) );
+        static_assert( !crimild::hasRotation( T ) );
+        static_assert( !crimild::hasScale( T ) );
+        static_assert( crimild::location( T ) == crimild::Point3 { 4, 4, 2 } );
+    }
+
+    {
+        constexpr auto T = T0 * crimild::Transformation::Constants::IDENTITY;
+        static_assert( !crimild::isIdentity( T ) );
+        static_assert( crimild::hasTranslation( T ) );
+        static_assert( !crimild::hasRotation( T ) );
+        static_assert( !crimild::hasScale( T ) );
+        static_assert( crimild::location( T ) == crimild::Point3 { 2, 2, 1 } );
+    }
+
+    {
+        constexpr auto T = crimild::Transformation::Constants::IDENTITY * T0;
+        static_assert( !crimild::isIdentity( T ) );
+        static_assert( crimild::hasTranslation( T ) );
+        static_assert( !crimild::hasRotation( T ) );
+        static_assert( !crimild::hasScale( T ) );
+        static_assert( crimild::location( T ) == crimild::Point3 { 2, 2, 1 } );
+    }
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transformation, lookAt_default_orientation )
+{
+    constexpr auto T = crimild::lookAt(
+        crimild::Point3 { 0, 0, 0 },
+        crimild::Point3 { 0, 0, -1 },
+        crimild::Vector3 { 0, 1, 0 } );
+
+    static_assert( !crimild::isIdentity( T ) );
+    static_assert( crimild::hasTranslation( T ) );
+    static_assert( crimild::hasRotation( T ) );
+    static_assert( !crimild::hasScale( T ) );
+
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, T.mat );
+}
+
+TEST( Transformation, lookAt_positive_z_direction )
+{
+    constexpr auto T = crimild::lookAt(
+        crimild::Point3 { 0, 0, 0 },
+        crimild::Point3 { 0, 0, 1 },
+        crimild::Vector3 { 0, 1, 0 } );
+
+    // like looking into a mirror...
+    EXPECT_EQ( crimild::scale( -1, 1, -1 ).mat, T.mat );
+}
+
+TEST( Transformation, lookAt_moves_the_world )
+{
+    constexpr auto T = crimild::lookAt(
+        crimild::Point3 { 0, 0, 8 },
+        crimild::Point3 { 0, 0, 0 },
+        crimild::Vector3 { 0, 1, 0 } );
+
+    EXPECT_EQ( crimild::translation( 0, 0, 8 ).mat, T.mat );
+    EXPECT_EQ( crimild::translation( 0, 0, 8 ).invMat, T.invMat );
+
+    EXPECT_EQ( ( crimild::Point3 { 0, 0, -8 } ), crimild::inverse( T )( crimild::Point3 { 0, 0, 0 } ) );
+}
+
+TEST( Transformation, lookAt_arbitrary )
 {
     constexpr auto I = crimild::Transformation {};
     constexpr auto T = crimild::lookAt(

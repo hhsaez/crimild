@@ -50,7 +50,12 @@ namespace crimild {
 
         // Compute the view vector. Keep in mind that Forward always point towards the -Z axis.
         const auto V = normalize( E - C );
-        const auto R = -normalize( cross( V, up ) );
+
+        // Make sure up vector is normalized. Also, negate the cross produce since we want the R vector
+        // The result is a normalized vector too.
+        const auto R = -( cross( V, normalize( up ) ) );
+
+        // The new up vector is normalized
         const auto U = cross( V, R );
 
         // This matrix is in camera space, so we need to invert it later
