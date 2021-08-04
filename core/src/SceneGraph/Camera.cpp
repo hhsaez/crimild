@@ -27,8 +27,14 @@
 
 #include "Camera.hpp"
 
+#include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Matrix4_transpose.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/io.hpp"
+#include "Mathematics/normalize.hpp"
 #include "Mathematics/perspective.hpp"
 #include "Mathematics/trigonometry.hpp"
 
@@ -42,7 +48,7 @@ Camera::Camera( void )
 }
 
 Camera::Camera( float fov, float aspect, float near, float far )
-    : //_frustum( fov, aspect, near, far ),
+    : m_frustum( fov, aspect, near, far ),
       _viewport { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
       _viewMatrixIsCurrent( false )
 {
@@ -82,25 +88,19 @@ const Matrix4f &Camera::getViewMatrix( void )
 
 bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
 {
-    assert( false );
+    const float x = 2.0f * portX - 1.0f;
+    const float y = 1.0f - 2.0f * portY;
 
-#if 0
-    float x = 2.0f * portX - 1.0f;
-    float y = 1.0f - 2.0f * portY;
+    const auto rayClip = Vector4 { x, y, -1.0f, 1.0f };
 
-    Vector4f rayClip( x, y, -1.0f, 1.0f );
+    auto rayEye = inverse( getProjectionMatrix() ) * rayClip;
+    const auto rayOrigin = location( getWorld() );
+    const auto rayDirection = getWorld()( xyz( rayEye ) );
 
-    Vector4f rayEye = getProjectionMatrix().getInverse().getTranspose() * rayClip;
-    rayEye = Vector4f( rayEye[ 0 ], rayEye[ 1 ], -1.0f, 0.0f );
-
-    Vector4f rayWorld = getWorld().computeModelMatrix().getTranspose() * rayEye;
-
-    Vector3f rayDirection( rayWorld[ 0 ], rayWorld[ 1 ], rayWorld[ 2 ] );
-    rayDirection.normalize();
-
-    result.setOrigin( getWorld().getTranslate() );
-    result.setDirection( rayDirection );
-#endif
+    result = Ray3 {
+        rayOrigin,
+        rayDirection,
+    };
 
     return true;
 }
