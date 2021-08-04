@@ -42,7 +42,7 @@ namespace crimild {
        \todo This should be part of the Light class. That way, we can have different
        uniforms for different types of lights (point, directional, PBR, etc.)
      */
-    class LightingUniform : public UniformBuffer {
+    class [[deprecated]] LightingUniform : public UniformBuffer {
     private:
         static constexpr const Size MAX_AMBIENT_LIGHTS = 1;
         static constexpr const Size MAX_DIRECTIONAL_LIGHTS = 2;
