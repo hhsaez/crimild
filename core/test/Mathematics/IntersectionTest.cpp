@@ -31,45 +31,6 @@
 
 using namespace crimild;
 
-TEST( IntersectionTest, testRayPlane )
-{
-#if 0
-	Vector< 3, double > rayOrigin;
-	rayOrigin[ 0 ] = 0.0;
-	rayOrigin[ 1 ] = 0.0;
-	rayOrigin[ 2 ] = 5.0;
-
-	Vector< 3, double > rayDirection;
-	rayDirection[ 0 ] = 0.0;
-	rayDirection[ 1 ] = 0.0;
-	rayDirection[ 2 ] = -1.0;
-
-	Ray< 3, double > ray( rayOrigin, rayDirection );
-
-	Vector< 3, double > planeNormal;
-	planeNormal[ 0 ] = 0.0;
-	planeNormal[ 1 ] = 0.0;
-	planeNormal[ 2 ] = 1.0;
-
-	Plane< 3, double > plane( planeNormal, 0.0 );
-
-	EXPECT_TRUE( Intersection::test( plane, ray ) == true );
-	//EXPECT_TRUE( Numeric< double >::equal( Intersection::find( plane, ray ), 5.0 ) );
-
-	rayDirection[ 0 ] = 0.0;
-	rayDirection[ 1 ] = 1.0;
-	rayDirection[ 2 ] = 0.0;
-
-	ray.setDirection( rayDirection );
-
-	EXPECT_TRUE( Intersection::test( plane, ray ) == false );
-	EXPECT_TRUE( Intersection::find( plane, ray ) < 0 );
-
-#endif
-
-    FAIL();
-}
-
 TEST( IntersectionTest, testRayTriangle )
 {
 #if 0

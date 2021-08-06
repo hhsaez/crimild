@@ -39,10 +39,12 @@ namespace crimild {
 		\brief Defines a plane in three-dimensional space
 
 		A plane is represented by a normal vector and a constant
+
+        The default plane is the XZ-plane
 	 */
     struct Plane3 {
-        Normal3 n;
-        Real d;
+        Normal3 n = Normal3 { 0, 1, 0 };
+        Real d = 0;
 
         [[nodiscard]] inline constexpr Bool operator==( const Plane3 &other ) const noexcept
         {

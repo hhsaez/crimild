@@ -25,55 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Visitors/IntersectWorld.hpp"
+#include "Mathematics/Plane3.hpp"
 
-#include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Sphere_normal.hpp"
-#include "Mathematics/intersect.hpp"
-#include "SceneGraph/Geometry.hpp"
+#include "gtest/gtest.h"
 
 using namespace crimild;
 
-void IntersectWorld::traverse( Node *node ) noexcept
+TEST( Plane3, construction )
 {
-    NodeVisitor::traverse( node );
+    constexpr auto P = Plane3 {};
 
-    m_results.sort( []( auto &a, auto &b ) { return a.t < b.t; } );
-}
+    static_assert( Normal3 { 0, 1, 0 } == normal( P ) );
+    static_assert( 0 == distance( P ) );
 
-void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
-{
-    // Use world bounds for intersection test, wihch is cheaper
-    if ( !geometry->getWorldBound()->testIntersection( m_ray ) ) {
-        return;
-    }
-
-    // TODO(hernan): Implement a function `intersect(ray, primitive, ...)`,  which
-    // does the intersection test based on the primitive type and returns a hit result
-
-    // If bounds test passes, check individual primitives using
-    // the inverse world transform to convert the ray
-    // from world to local space
-    const auto S = Sphere {};
-    Real t0, t1;
-    if ( intersect( m_ray, S, geometry->getWorld(), t0, t1 ) ) {
-        auto pushResult = [ & ]( auto t ) {
-            const auto P = m_ray( t );
-            auto result = Result {
-                .geometry = geometry,
-                .t = t,
-                .point = P,
-            };
-            result.setFaceNormal( m_ray, normal( S, geometry->getWorld(), P ) );
-            m_results.add( result );
-        };
-
-        if ( t0 >= numbers::EPSILON ) {
-            pushResult( t0 );
-        }
-
-        if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-            pushResult( t1 );
-        }
-    }
+    EXPECT_TRUE( true );
 }
