@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_INTERSECT_
 #define CRIMILD_MATHEMATICS_INTERSECT_
 
+#include "Mathematics/Plane3.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Sphere.hpp"
@@ -67,6 +68,23 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( sphereWorld )( R ), S, t0, t1 );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, Real &t ) noexcept
+    {
+        const auto nv = dot( normal( P ), direction( R ) );
+        if ( isZero( nv ) ) {
+            return false;
+        }
+
+        t = ( dot( -normal( P ), vector3( origin( R ) ) ) + distance( P ) ) / nv;
+        return true;
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, const Transformation &planeWorld, Real &t ) noexcept
+    {
+        // For better performance, use the inverse matrix
+        return intersect( inverse( planeWorld )( R ), P, t );
     }
 
 }

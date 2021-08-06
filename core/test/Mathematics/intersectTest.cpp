@@ -141,3 +141,41 @@ TEST( intersect, rayAndTransformedSphere )
     EXPECT_EQ( Real( 3 ), t0 );
     EXPECT_EQ( Real( 7 ), t1 );
 }
+
+TEST( intersect, ray_parallel_to_plane )
+{
+    constexpr auto P = Plane3 {};
+    constexpr auto R = Ray3 { { 0, 10, 0 }, { 0, 0, 1 } };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, P, t ) );
+}
+
+TEST( intersect, plane_and_coplanar_ray )
+{
+    constexpr auto P = Plane3 {};
+    constexpr auto R = Ray3 { { 0, 0, 0 }, { 0, 0, 1 } };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, P, t ) );
+}
+
+TEST( intersect, ray_intersecting_plane_from_above )
+{
+    constexpr auto P = Plane3 {};
+    constexpr auto R = Ray3 { { 0, 1, 0 }, { 0, -1, 0 } };
+
+    Real t;
+    EXPECT_TRUE( intersect( R, P, t ) );
+    EXPECT_EQ( 1, t );
+}
+
+TEST( intersect, ray_intersecting_plane_from_below )
+{
+    constexpr auto P = Plane3 {};
+    constexpr auto R = Ray3 { { 0, -1, 0 }, { 0, 1, 0 } };
+
+    Real t;
+    EXPECT_TRUE( intersect( R, P, t ) );
+    EXPECT_EQ( 1, t );
+}
