@@ -54,7 +54,10 @@ namespace crimild {
             LINE_STRIP,
             TRIANGLES,
             TRIANGLE_STRIP,
-            TRIANGLE_FAN
+            TRIANGLE_FAN,
+
+            SPHERE,
+            PLANE,
         };
 
     public:
