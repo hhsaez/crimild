@@ -30,6 +30,7 @@
 #include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/intersect.hpp"
+#include "Primitives/Primitive.hpp"
 #include "SceneGraph/Geometry.hpp"
 
 using namespace crimild;
@@ -43,37 +44,65 @@ void IntersectWorld::traverse( Node *node ) noexcept
 
 void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
 {
-    // Use world bounds for intersection test, wihch is cheaper
-    if ( !geometry->getWorldBound()->testIntersection( m_ray ) ) {
-        return;
+    if ( geometry->getCullMode() != Node::CullMode::NEVER ) {
+        // Use world bounds for intersection test, wihch is cheaper
+        if ( !geometry->getWorldBound()->testIntersection( m_ray ) ) {
+            return;
+        }
     }
 
-    // TODO(hernan): Implement a function `intersect(ray, primitive, ...)`,  which
-    // does the intersection test based on the primitive type and returns a hit result
+    geometry->forEachPrimitive(
+        [ & ]( auto primitive ) {
+            intersect( geometry, primitive );
+        } );
+}
 
-    // If bounds test passes, check individual primitives using
-    // the inverse world transform to convert the ray
-    // from world to local space
-    const auto S = Sphere {};
-    Real t0, t1;
-    if ( intersect( m_ray, S, geometry->getWorld(), t0, t1 ) ) {
-        auto pushResult = [ & ]( auto t ) {
-            const auto P = m_ray( t );
-            auto result = Result {
-                .geometry = geometry,
-                .t = t,
-                .point = P,
-            };
-            result.setFaceNormal( m_ray, normal( S, geometry->getWorld(), P ) );
-            m_results.add( result );
-        };
+void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexcept
+{
+    switch ( primitive->getType() ) {
+        case Primitive::Type::SPHERE: {
+            const auto S = Sphere {};
+            Real t0, t1;
+            if ( crimild::intersect( m_ray, S, geometry->getWorld(), t0, t1 ) ) {
+                auto pushResult = [ & ]( auto t ) {
+                    const auto P = m_ray( t );
+                    auto result = Result {
+                        .geometry = geometry,
+                        .t = t,
+                        .point = P,
+                    };
+                    result.setFaceNormal( m_ray, normal( S, geometry->getWorld(), P ) );
+                    m_results.add( result );
+                };
 
-        if ( t0 >= numbers::EPSILON ) {
-            pushResult( t0 );
+                if ( t0 >= numbers::EPSILON ) {
+                    pushResult( t0 );
+                }
+
+                if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
+                    pushResult( t1 );
+                }
+            }
+            break;
         }
 
-        if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-            pushResult( t1 );
+        case Primitive::Type::PLANE: {
+            const auto P = Plane3 {};
+            Real t;
+            if ( crimild::intersect( m_ray, P, geometry->getWorld(), t ) && t >= numbers::EPSILON ) {
+                const auto p = m_ray( t );
+                auto result = Result {
+                    .geometry = geometry,
+                    .t = t,
+                    .point = p,
+                };
+                result.setFaceNormal( m_ray, geometry->getWorld()( normal( P ) ) );
+                m_results.add( result );
+            }
+            break;
         }
+
+        default:
+            break;
     }
 }
