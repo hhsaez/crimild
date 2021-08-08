@@ -39,6 +39,7 @@
 namespace crimild {
 
     class Geometry;
+    class Primitive;
 
     /**
      * Collects geometries that intersect with a given ray
@@ -75,6 +76,9 @@ namespace crimild {
 
         virtual void traverse( Node *node ) noexcept override;
         virtual void visitGeometry( Geometry *geometry ) noexcept override;
+
+    private:
+        void intersect( Geometry *geometry, Primitive *primitive ) noexcept;
 
     private:
         Ray3 m_ray;
