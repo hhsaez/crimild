@@ -55,7 +55,7 @@ void PlaneBoundingVolume::computeFrom( const BoundingVolume *volume, const Trans
 {
 }
 
-void PlaneBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void PlaneBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
 }
 
@@ -63,7 +63,7 @@ void PlaneBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
 }
 
-void PlaneBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
+void PlaneBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
 }
 
@@ -71,7 +71,7 @@ void PlaneBoundingVolume::expandToContain( const Point3 &point )
 {
 }
 
-void PlaneBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void PlaneBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
 }
 
@@ -88,7 +88,7 @@ int PlaneBoundingVolume::whichSide( const Plane3 &plane ) const
     return 0;
 }
 
-bool PlaneBoundingVolume::contains( const Vector3f &point ) const
+bool PlaneBoundingVolume::contains( const Point3 &point ) const
 {
     return false;
 }

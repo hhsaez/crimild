@@ -75,6 +75,7 @@ namespace crimild {
         ~IntersectWorld( void ) = default;
 
         virtual void traverse( Node *node ) noexcept override;
+        virtual void visitGroup( Group *group ) noexcept override;
         virtual void visitGeometry( Geometry *geometry ) noexcept override;
 
     private:

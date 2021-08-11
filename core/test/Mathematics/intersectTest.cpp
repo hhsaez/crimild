@@ -179,3 +179,125 @@ TEST( intersect, ray_intersecting_plane_from_below )
     EXPECT_TRUE( intersect( R, P, t ) );
     EXPECT_EQ( 1, t );
 }
+
+TEST( intersect, ray_and_box_right_face )
+{
+    const auto B = Box {};
+    const auto R = Ray3 { { 5.0, 0.5, 0.0 }, { -1, 0, 0 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_left_face )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { -5.0, 0.5, 0.0 }, { 1, 0, 0 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_top_face )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { 0.5, 5.0, 0.0 }, { 0, -1, 0 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_bottom_face )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { 0.5, -5.0, 0.0 }, { 0, 1, 0 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_front_face )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { 0.5, 0, 5 }, { 0, 0, -1 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_back_face )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { 0.5, 0, -5 }, { 0, 0, 1 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 4, t0 );
+    EXPECT_EQ( 6, t1 );
+}
+
+TEST( intersect, ray_and_box_from_inside )
+{
+    const auto B = Box {};
+
+    const auto R = Ray3 { { 0, 0.5, 0 }, { 0, 0, 1 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( -1, t0 );
+    EXPECT_EQ( 1, t1 );
+}
+
+TEST( intersect, ray_misses_cube )
+{
+    const auto B = Box {};
+    Real t0, t1;
+
+    {
+        const auto R = Ray3 { { -2, 0, 0 }, { 0.2673, 0.5345, 0.8018 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+    }
+
+    {
+        const auto R = Ray3 { { 0, -2, 0 }, { 0.8018, 0.2673, 0.5345 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+    }
+
+    {
+        const auto R = Ray3 { { 0, 0, -2 }, { 0.5345, 0.8018, 0.2673 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+    }
+
+    {
+        const auto R = Ray3 { { 2, 0, 2 }, { 0, 0, -1 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+        std::cout << t0 << " " << t1 << std::endl;
+    }
+
+    {
+        const auto R = Ray3 { { 0, 2, 2 }, { 0, -1, 0 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+        std::cout << t0 << " " << t1 << std::endl;
+    }
+
+    {
+        const auto R = Ray3 { { 2, 2, 0 }, { -1, 0, 0 } };
+        EXPECT_FALSE( intersect( R, B, t0, t1 ) );
+        std::cout << t0 << " " << t1 << std::endl;
+    }
+}
