@@ -43,24 +43,28 @@
 using namespace crimild;
 
 AABBBoundingVolume::AABBBoundingVolume( void )
-    : _sphere { Point3::Constants::ZERO, Real( 1 ) }
+    : AABBBoundingVolume( Sphere {} )
 {
-    setMin( -getRadius() * Vector3::Constants::ONE );
-    setMax( +getRadius() * Vector3::Constants::ONE );
+    // no-op
 }
 
 AABBBoundingVolume::AABBBoundingVolume( const Point3 &center, float radius )
-    : _sphere { center, radius }
+    : AABBBoundingVolume( Sphere { center, radius } )
 {
-    setMin( -getRadius() * Vector3::Constants::ONE );
-    setMax( +getRadius() * Vector3::Constants::ONE );
+    // no-op
 }
 
 AABBBoundingVolume::AABBBoundingVolume( const Sphere &sphere )
     : _sphere( sphere )
 {
-    setMin( -getRadius() * Vector3::Constants::ONE );
-    setMax( +getRadius() * Vector3::Constants::ONE );
+    const auto v = Vector3 {
+        numbers::SQRT_3_DIV_3,
+        numbers::SQRT_3_DIV_3,
+        numbers::SQRT_3_DIV_3,
+    };
+
+    setMin( getCenter() - getRadius() * v );
+    setMax( getCenter() + getRadius() * v );
 }
 
 AABBBoundingVolume::~AABBBoundingVolume( void )
@@ -84,26 +88,26 @@ void AABBBoundingVolume::computeFrom( const BoundingVolume *volume )
 
 void AABBBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
-    const auto p0 = transformation( point3( volume->getMin() ) );
-    const auto p1 = transformation( point3( volume->getMax() ) );
+    const auto p0 = transformation( volume->getMin() );
+    const auto p1 = transformation( volume->getMax() );
 
-    const auto min = vector3( crimild::min( p0, p1 ) );
-    const auto max = vector3( crimild::max( p0, p1 ) );
+    const auto min = crimild::min( p0, p1 );
+    const auto max = crimild::max( p0, p1 );
 
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void AABBBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
     if ( positionCount == 0 || positions == NULL ) {
         return;
     }
 
-    Vector3f max = positions[ 0 ];
-    Vector3f min = positions[ 0 ];
+    Point3 max = positions[ 0 ];
+    Point3 min = positions[ 0 ];
 
     for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Vector3f &pos = positions[ i ];
+        const Point3 &pos = point3( positions[ i ] );
         min = crimild::min( min, pos );
         max = crimild::max( max, pos );
     }
@@ -122,10 +126,10 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
         return;
     }
 
-    Vector3f max;
-    Vector3f min;
+    Point3 max;
+    Point3 min;
 
-    positions->each< Vector3f >(
+    positions->each< Point3 >(
         [ & ]( auto &pos, auto i ) {
             if ( i == 0 ) {
                 max = pos;
@@ -139,10 +143,10 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
+void AABBBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
-    const auto center = point3( 0.5 * ( max + min ) );
-    const auto radius = crimild::max( Real( numbers::EPSILON ), 0.5f * distance( point3( max ), point3( min ) ) );
+    const auto center = 0.5 * ( max + min );
+    const auto radius = crimild::max( Real( numbers::EPSILON ), distance( point3( max ), point3( center ) ) );
     _sphere = Sphere { center, radius };
 
     setMin( min );
@@ -151,30 +155,30 @@ void AABBBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
 
 void AABBBoundingVolume::expandToContain( const Point3 &p )
 {
-    const auto min = crimild::min( getMin(), vector3( p ) );
-    const auto max = crimild::max( getMax(), vector3( p ) );
+    const auto min = crimild::min( getMin(), p );
+    const auto max = crimild::max( getMax(), p );
 
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void AABBBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
     if ( positionCount == 0 || positions == NULL ) {
         return;
     }
 
-    Vector3f max = positions[ 0 ];
-    Vector3f min = positions[ 0 ];
+    Point3 max = positions[ 0 ];
+    Point3 min = positions[ 0 ];
 
     for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Vector3f &pos = positions[ i ];
+        const Point3 &pos = positions[ i ];
 
         max = crimild::max( max, pos );
         min = crimild::min( min, pos );
     }
 
-    expandToContain( point3( max ) );
-    expandToContain( point3( min ) );
+    expandToContain( max );
+    expandToContain( min );
 }
 
 void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
@@ -209,8 +213,8 @@ void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
 
 void AABBBoundingVolume::expandToContain( const BoundingVolume *input )
 {
-    expandToContain( point3( input->getMin() ) );
-    expandToContain( point3( input->getMax() ) );
+    expandToContain( input->getMin() );
+    expandToContain( input->getMax() );
 }
 
 int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
@@ -218,9 +222,9 @@ int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
     return crimild::whichSide( plane, _sphere );
 }
 
-bool AABBBoundingVolume::contains( const Vector3f &point ) const
+bool AABBBoundingVolume::contains( const Point3 &point ) const
 {
-    const auto centerDiffSqr = distanceSquared( getCenter(), point3( point ) );
+    const auto centerDiffSqr = distanceSquared( getCenter(), point );
     float radiusSqr = radius( _sphere ) * radius( _sphere );
     return ( centerDiffSqr < radiusSqr );
 }

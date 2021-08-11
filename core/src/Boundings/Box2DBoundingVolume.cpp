@@ -98,7 +98,7 @@ void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume, const Trans
     */
 }
 
-void Box2DBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void Box2DBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
     // TODO
 }
@@ -108,7 +108,7 @@ void Box2DBoundingVolume::computeFrom( const VertexBuffer *vbo )
     // TODO
 }
 
-void Box2DBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
+void Box2DBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
     // TODO
 }
@@ -118,7 +118,7 @@ void Box2DBoundingVolume::expandToContain( const Point3 &p )
     // TODO
 }
 
-void Box2DBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void Box2DBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
     // TODO
 }
@@ -140,7 +140,7 @@ int Box2DBoundingVolume::whichSide( const Plane3 &plane ) const
     return 0;
 }
 
-bool Box2DBoundingVolume::contains( const Vector3f &point ) const
+bool Box2DBoundingVolume::contains( const Point3 &point ) const
 {
     /*
     float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();

@@ -54,16 +54,16 @@ namespace crimild {
 
         virtual SharedPointer< BoundingVolume > clone( void ) const { return nullptr; }
 
-        const Vector3f &getMin( void ) const { return _min; }
-        const Vector3f &getMax( void ) const { return _max; }
+        const Point3 &getMin( void ) const { return _min; }
+        const Point3 &getMax( void ) const { return _max; }
 
     protected:
-        void setMin( const Vector3f &min ) { _min = min; }
-        void setMax( const Vector3f &max ) { _max = max; }
+        void setMin( const Point3 &min ) { _min = min; }
+        void setMax( const Point3 &max ) { _max = max; }
 
     private:
-        Vector3f _min;
-        Vector3f _max;
+        Point3 _min;
+        Point3 _max;
 
     public:
         void setRAxis( const Vector3f &r ) { _r = r; }
@@ -83,19 +83,19 @@ namespace crimild {
     public:
         virtual void computeFrom( const BoundingVolume *volume ) = 0;
         virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) = 0;
-        virtual void computeFrom( const Vector3f *positions, unsigned int positionCount ) = 0;
+        virtual void computeFrom( const Point3 *positions, unsigned int positionCount ) = 0;
         virtual void computeFrom( const VertexBuffer *vbo ) = 0;
-        virtual void computeFrom( const Vector3f &min, const Vector3f &max ) = 0;
+        virtual void computeFrom( const Point3 &min, const Point3 &max ) = 0;
 
     public:
         virtual void expandToContain( const Point3 &point ) = 0;
-        virtual void expandToContain( const Vector3f *positions, unsigned int positionCount ) = 0;
+        virtual void expandToContain( const Point3 *positions, unsigned int positionCount ) = 0;
         virtual void expandToContain( const VertexBuffer *vbo ) = 0;
         virtual void expandToContain( const BoundingVolume *other ) = 0;
 
     public:
         virtual int whichSide( const Plane3 &plane ) const = 0;
-        virtual bool contains( const Vector3 &point ) const = 0;
+        virtual bool contains( const Point3 &point ) const = 0;
 
     public:
         virtual bool testIntersection( const Ray3 &ray ) const = 0;

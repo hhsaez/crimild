@@ -69,7 +69,7 @@ void SphereBoundingVolume::computeFrom( const BoundingVolume *volume, const Tran
     */
 }
 
-void SphereBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void SphereBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
     /*
     if ( positionCount == 0 || positions == NULL ) {
@@ -150,7 +150,7 @@ void SphereBoundingVolume::computeFrom( const VertexBuffer *vbo )
     */
 }
 
-void SphereBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
+void SphereBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
     // TODO
 }
@@ -159,11 +159,11 @@ void SphereBoundingVolume::expandToContain( const Point3 &point )
 {
     //    _sphere.expandToContain( Sphere( point, 0.0f ) );
 
-    setMin( -getRadius() * Vector3f { 1.0f, 1.0f, 1.0f } );
-    setMax( +getRadius() * Vector3f { 1.0f, 1.0f, 1.0f } );
+    setMin( -getRadius() * Point3 { 1.0f, 1.0f, 1.0f } );
+    setMax( +getRadius() * Point3 { 1.0f, 1.0f, 1.0f } );
 }
 
-void SphereBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void SphereBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
     /*
     if ( positionCount == 0 || positions == NULL ) {
@@ -244,7 +244,7 @@ int SphereBoundingVolume::whichSide( const Plane3 &plane ) const
     return false;
 }
 
-bool SphereBoundingVolume::contains( const Vector3f &point ) const
+bool SphereBoundingVolume::contains( const Point3 &point ) const
 {
     /*
     float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();

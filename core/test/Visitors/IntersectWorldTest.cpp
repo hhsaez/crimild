@@ -29,6 +29,7 @@
 
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Transformation_scale.hpp"
+#include "Primitives/Primitive.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -43,11 +44,13 @@ TEST( IntersectWorld, intersect_world_with_a_ray )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
         }() );
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             geometry->setLocal( scale( 0.5 ) );
             return geometry;
         }() );
@@ -71,6 +74,7 @@ TEST( IntersectWorld, precompute_intersection_results )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
         }() );
     world->perform( UpdateWorldState() );
@@ -93,6 +97,7 @@ TEST( IntersectWorld, intersection_occurs_on_the_outside )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
         }() );
     world->perform( UpdateWorldState() );
@@ -116,6 +121,7 @@ TEST( IntersectWorld, intersection_occurs_on_the_inside )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
         }() );
     world->perform( UpdateWorldState() );
@@ -139,6 +145,7 @@ TEST( IntersectWorld, no_intersection )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
         }() );
     world->perform( UpdateWorldState() );

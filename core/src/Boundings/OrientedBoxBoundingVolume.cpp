@@ -25,20 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "OrientedBoxBoundingVolume.hpp"
+#include "Boundings/OrientedBoxBoundingVolume.hpp"
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Mathematics/Intersection.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector3_constants.hpp"
 
 using namespace crimild;
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( void )
     : _sphere { Point3::Constants::ZERO, 1.0f }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const Vector3f &s, const Vector3f &t )
@@ -54,15 +54,15 @@ OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const V
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Point3 &center, float radius )
     : _sphere { center, radius }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Sphere &sphere )
     : _sphere( sphere )
 {
-    setMin( -Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Vector3::Constants::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::~OrientedBoxBoundingVolume( void )
@@ -112,7 +112,7 @@ void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const
 	*/
 }
 
-void OrientedBoxBoundingVolume::computeFrom( const Vector3f *positions, unsigned int positionCount )
+void OrientedBoxBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
     /*
 	if ( positionCount == 0 || positions == NULL ) {
@@ -163,7 +163,7 @@ void OrientedBoxBoundingVolume::computeFrom( const VertexBuffer *vbo )
 	*/
 }
 
-void OrientedBoxBoundingVolume::computeFrom( const Vector3f &min, const Vector3f &max )
+void OrientedBoxBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
     /*
 	_sphere.setCenter( 0.5f * ( max + min ) );
@@ -187,7 +187,7 @@ void OrientedBoxBoundingVolume::expandToContain( const Point3 &p )
 	*/
 }
 
-void OrientedBoxBoundingVolume::expandToContain( const Vector3f *positions, unsigned int positionCount )
+void OrientedBoxBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
     /*
 	if ( positionCount == 0 || positions == NULL ) {
@@ -255,7 +255,7 @@ int OrientedBoxBoundingVolume::whichSide( const Plane3 &plane ) const
     return 0;
 }
 
-bool OrientedBoxBoundingVolume::contains( const Vector3f &point ) const
+bool OrientedBoxBoundingVolume::contains( const Point3 &point ) const
 {
     /*
 	float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
