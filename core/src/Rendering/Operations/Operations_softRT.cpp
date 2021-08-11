@@ -42,6 +42,7 @@
 #include "Mathematics/min.hpp"
 #include "Mathematics/reflect.hpp"
 #include "Mathematics/refract.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/ScenePass.hpp"
@@ -58,6 +59,23 @@ using namespace crimild;
             Random::generate< Real >( -1, 1 ),
             Random::generate< Real >( -1, 1 ),
             Random::generate< Real >( -1, 1 ),
+        };
+
+        if ( lengthSquared( v ) >= 1 ) {
+            continue;
+        } else {
+            return v;
+        }
+    }
+}
+
+[[nodiscard]] Vector3 randomInUnitDisk( void ) noexcept
+{
+    while ( true ) {
+        const auto v = Vector3 {
+            Random::generate< Real >( -1, 1 ),
+            Random::generate< Real >( -1, 1 ),
+            Real( 0 ),
         };
 
         if ( lengthSquared( v ) >= 1 ) {
@@ -139,6 +157,7 @@ using namespace crimild;
             }
         } else {
             // Lambertian model
+            // TODO(hernan): use randomInHemisphere instead?
             auto scatterDirection = vector3( res.normal ) + randomUnitVector();
             if ( isZero( scatterDirection ) ) {
                 scatterDirection = vector3( res.normal );
@@ -163,7 +182,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
     const Int32 height = settings->get< Int32 >( "rt.height", 300 );
     const Int32 bpp = 4;
     const Real aspectRatio = Real( width ) / Real( height );
-    const Int32 samples = settings->get< Int32 >( "rt.samples", 5 );
+    const Int32 samples = settings->get< Int32 >( "rt.samples", 4 );
+    const Int32 depth = settings->get< Int32 >( "rt.depth", 50 );
+    const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 32 );
+    const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.tile_size", std::thread::hardware_concurrency() ) );
 
     auto image = crimild::alloc< Image >();
     image->extent = Extent3D {
@@ -174,7 +196,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
     image->format = Format::R8G8B8A8_UNORM;
     image->data = ByteArray( width * height * bpp );
 
-    rt->apply = [ width, height, image, samples, done = false ]( auto, auto ) mutable {
+    rt->apply = [ width, height, image, samples, tileSize, depth, workerCount, done = false ]( auto, auto ) mutable {
         auto scene = Simulation::getInstance()->getScene();
         if ( !scene ) {
             return true;
@@ -191,34 +213,97 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
 
         scene->perform( UpdateWorldState() );
 
-        std::cout << "Generating RT image...";
-
         Array< ColorRGBA > colors( width * height );
         const auto SKY_COLOR = ColorRGB { 0.5, 0.7, 1 };
         const auto HORIZONT_COLOR = ColorRGB { 1, 1, 1 };
 
-        auto progress = []( auto pc ) {
-            std::cout << "\33[2K\rGenerating RT Image... " << Int32( 100 * pc ) << "%";
+        auto reportProgress = [ mutex = std::mutex(),
+                                progress = 1l,
+                                max = size_t( width * height ),
+                                workerCount ]() mutable {
+            std::lock_guard< std::mutex > lock( mutex );
+            std::cout << "\rProcessing "
+                      << progress
+                      << "/"
+                      << max
+                      << " ("
+                      << std::setprecision( 3 )
+                      << std::setw( 5 )
+                      << std::fixed
+                      << 100.0f * float( progress ) / float( max )
+                      << "%) - "
+                      << workerCount << " workers"
+                      << std::flush;
+            progress++;
         };
 
-        for ( auto y = 0l; y < height; ++y ) {
-            for ( auto x = 0l; x < width; ++x ) {
-                const auto backgroundColor = lerp( SKY_COLOR, HORIZONT_COLOR, Real( y ) / Real( height ) );
-                auto color = ColorRGB::Constants::BLACK;
-                for ( auto s = 0l; s < samples; ++s ) {
-                    Ray3 ray;
-                    const auto u = ( x + Random::generate< Real >() ) / Real( width - 1 );
-                    const auto v = ( y + Random::generate< Real >() ) / Real( height - 1 );
-                    if ( camera->getPickRay( u, v, ray ) ) {
-                        color = color + rayColor( ray, scene, backgroundColor, 50 );
-                    }
-                }
-                colors[ y * width + x ] = rgba( color / samples );
-                progress( Real( y * width + x ) / Real( width * height ) );
+        using Job = std::function< void( void ) >;
+        std::vector< Job > jobs;
+
+        for ( auto y = 0; y < height; y += tileSize ) {
+            for ( auto x = 0; x < width; x += tileSize ) {
+                jobs.push_back(
+                    [ &, x, y ] {
+                        for ( auto dy = 0; dy < tileSize; ++dy ) {
+                            if ( y + dy >= height )
+                                break;
+                            for ( auto dx = 0; dx < tileSize; ++dx ) {
+                                if ( x + dx >= width )
+                                    break;
+                                reportProgress();
+                                const auto backgroundColor = lerp( SKY_COLOR, HORIZONT_COLOR, Real( y ) / Real( height ) );
+                                auto color = ColorRGB::Constants::BLACK;
+                                for ( auto s = 0l; s < samples; ++s ) {
+                                    Ray3 ray;
+                                    const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( width - 1 );
+                                    const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( height - 1 );
+                                    if ( camera->getPickRay( u, v, ray ) ) {
+                                        // TODO: defocus blur
+                                        // const auto aperture = 2.0f;
+                                        // const auto lensRadius = 0.5 * aperture;
+                                        // const auto rd = lensRadius * randomInUnitDisk();
+                                        // const auto offset = rd.x * R + rd.y * U;
+                                        // const auto R = Ray3 { origin( ray ) + offset, direction( ray ) - offset };
+                                        color = color + rayColor( ray, scene, backgroundColor, depth );
+                                    }
+                                }
+                                colors[ ( y + dy ) * width + ( x + dx ) ] = rgba( color / samples );
+
+                                std::this_thread::yield();
+                            }
+                        }
+                    } );
             }
         }
 
-        std::cout << "\n";
+        auto nextJob = [ mutex = std::mutex(),
+                         i = 0l,
+                         &jobs ]( auto &job ) mutable -> bool {
+            std::lock_guard< std::mutex > lock( mutex );
+            if ( i >= jobs.size() ) {
+                return false;
+            }
+            job = jobs[ i++ ];
+            return true;
+        };
+
+        // launch all threads
+        std::vector< std::thread > workers;
+        for ( auto i = 0; i < workerCount; ++i ) {
+            workers.push_back(
+                std::thread(
+                    [ & ] {
+                        Job job;
+                        while ( nextJob( job ) ) {
+                            job();
+                        }
+                    } ) );
+        }
+
+        for ( auto &worker : workers ) {
+            // wait for all threads to finish
+            worker.join();
+        }
 
         colors.each(
             [ image, i = 0 ]( const auto &c ) mutable {
