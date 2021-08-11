@@ -58,6 +58,7 @@ namespace crimild {
 
             SPHERE,
             PLANE,
+            BOX,
         };
 
     public:

@@ -1,5 +1,7 @@
 #include "SceneDebugDump.hpp"
 
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/io.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -57,7 +59,7 @@ void SceneDebugDump::visitGeometry( Geometry *geometry )
 
     std::stringstream indent;
     for ( int i = 0; i < _parentLevel + 1; i++ ) {
-        indent << " ";
+        indent << "    ";
     }
 
     geometry->forEachPrimitive( [ this, &indent ]( Primitive *primitive ) {
@@ -65,8 +67,9 @@ void SceneDebugDump::visitGeometry( Geometry *geometry )
         _output << indent.str()
                 << "(Primitive)"
                 << " [" << &primitive << "]"
-                << " Vertices: " << primitive->getVertexData()[ 0 ]->getVertexCount()
-                << " Indices: " << primitive->getIndices()->getIndexCount();
+            // << " Vertices: " << primitive->getVertexData()[ 0 ]->getVertexCount()
+            // << " Indices: " << primitive->getIndices()->getIndexCount();
+            ;
     } );
 }
 
@@ -91,16 +94,13 @@ void SceneDebugDump::visitLight( Light *light )
 
 void SceneDebugDump::dumpNode( Node *node, std::string type )
 {
-    assert( false );
-    /*
     _output << "\n";
     std::stringstream indent;
     for ( int i = 0; i < _parentLevel; i++ ) {
-        indent << " ";
+        indent << "    ";
     }
 
     _output << indent.str()
             << "(" + type + ") " << node->getName() << " [" << &node << "]"
-            << "\t" << node->getWorld().getTranslate();
-    */
+            << "\t" << node->getWorldBound()->getCenter() << " " << node->getWorldBound()->getRadius();
 }
