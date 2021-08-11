@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_INTERSECT_
 #define CRIMILD_MATHEMATICS_INTERSECT_
 
+#include "Mathematics/Box.hpp"
 #include "Mathematics/Plane3.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
@@ -36,6 +37,8 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/dot.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
 #include "Mathematics/pow.hpp"
 #include "Mathematics/sqrt.hpp"
 
@@ -85,6 +88,64 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( planeWorld )( R ), P, t );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, Real &t0, Real &t1 ) noexcept
+    {
+        Real tMin = 0;
+        Real tMax = 0;
+        Bool ret = false;
+
+        auto checkAxis = []( Real o, Real d, Real &tMin, Real &tMax ) -> Bool {
+            auto tMinNum = ( -1 - o );
+            auto tMaxNum = ( 1 - o );
+
+            if ( abs( d ) >= numbers::EPSILON ) {
+                tMin = tMinNum / d;
+                tMax = tMaxNum / d;
+            } else {
+                tMin = tMinNum * numbers::POSITIVE_INFINITY;
+                tMax = tMaxNum * numbers::POSITIVE_INFINITY;
+            }
+
+            if ( tMin > tMax ) {
+                auto t = tMin;
+                tMin = tMax;
+                tMax = t;
+            }
+
+            return true;
+        };
+
+        if ( checkAxis( origin( R ).x, direction( R ).x, tMin, tMax ) ) {
+            t0 = tMin;
+            t1 = tMax;
+            ret = true;
+        }
+
+        if ( checkAxis( origin( R ).y, direction( R ).y, tMin, tMax ) ) {
+            t0 = ret ? max( t0, tMin ) : tMin;
+            t1 = ret ? min( t1, tMax ) : tMax;
+            ret = true;
+        }
+
+        if ( checkAxis( origin( R ).z, direction( R ).z, tMin, tMax ) ) {
+            t0 = ret ? max( t0, tMin ) : tMin;
+            t1 = ret ? min( t1, tMax ) : tMax;
+            ret = true;
+        }
+
+        if ( !ret || t0 > t1 ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, const Transformation &world, Real &t0, Real &t1 ) noexcept
+    {
+        // For better performance, use the inverse matrix
+        return intersect( inverse( world )( R ), B, t0, t1 );
     }
 
 }
