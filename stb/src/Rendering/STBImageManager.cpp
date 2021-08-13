@@ -26,9 +26,10 @@
  */
 
 #include "Rendering/STBImageManager.hpp"
-#include "Rendering/Image.hpp"
+
 #include "Foundation/Log.hpp"
 #include "Foundation/Types.hpp"
+#include "Rendering/Image.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -52,8 +53,7 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
             &channels,
             STBI_rgb_alpha // Force loaded image to be RGBA
         );
-    }
-    else {
+    } else {
         pixels = stbi_load(
             descriptor.filePath.getAbsolutePath().c_str(),
             &width,
@@ -68,17 +68,24 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
         return nullptr;
     }
 
-	auto image = crimild::alloc< Image >();
-	image->format = descriptor.hdr ? Format::R32G32B32A32_SFLOAT : Format::R8G8B8A8_UNORM;
-	image->extent = {
-		.width = crimild::Real32( width ),
-		.height = crimild::Real32( height ),
-		.depth = 1.0f,
-	};
+    auto image = crimild::alloc< Image >();
+    image->format = descriptor.hdr ? Format::R32G32B32A32_SFLOAT : Format::R8G8B8A8_UNORM;
+    image->extent = {
+        .width = crimild::Real32( width ),
+        .height = crimild::Real32( height ),
+        .depth = 1.0f,
+    };
 
-	auto size = width * height * 4 * ( descriptor.hdr ? sizeof( Real32 ) : sizeof( UInt8 ) );
-	image->data.resize( size );
-	memcpy( image->data.getData(), pixels, size );
+    auto size = width * height * 4 * ( descriptor.hdr ? sizeof( Real32 ) : sizeof( UInt8 ) );
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                [ & ] {
+                    auto data = ByteArray( size );
+                    memcpy( data.getData(), pixels, data.size() );
+                    return data;
+                }() ) ) );
 
     stbi_image_free( pixels );
 

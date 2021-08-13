@@ -160,9 +160,16 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::renderUI( void 
                 .height = Real32( height ),
             };
             image->format = Format::R8G8B8A8_UNORM;
-            image->data.resize( width * height * 4 );
-            memset( image->data.getData(), 0, image->data.size() );
-            memcpy( image->data.getData(), pixels, image->data.size() );
+            image->setBufferView(
+                crimild::alloc< BufferView >(
+                    BufferView::Target::IMAGE,
+                    crimild::alloc< Buffer >(
+                        [ & ] {
+                            auto data = ByteArray( width * height * 4 );
+                            memset( data.getData(), 0, data.size() );
+                            memcpy( data.getData(), pixels, data.size() );
+                            return data;
+                        }() ) ) );
             return image;
         }();
 

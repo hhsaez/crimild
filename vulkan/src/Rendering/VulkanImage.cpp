@@ -60,7 +60,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
     // TODO: use frame graph to set usage?
     VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-    if ( image->data.size() > 0 ) {
+    if ( image->getBufferView() != nullptr ) {
         // If image has data, it will be used for transfer operations
         usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -92,12 +92,12 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
         bindInfo.imageHandler,
         bindInfo.imageMemoryHandler );
 
-    if ( image->data.size() > 0 ) {
+    if ( image->getBufferView() != nullptr ) {
         // Image has pixel data. Upload it
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        VkDeviceSize imageSize = image->data.size();
+        VkDeviceSize imageSize = image->getBufferView()->getLength();
 
         auto success = utils::createBuffer(
             renderDevice,
@@ -115,7 +115,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
         utils::copyToBuffer(
             renderDevice->handler,
             stagingBufferMemory,
-            image->data.getData(),
+            image->getBufferView()->getData(),
             imageSize );
 
         utils::transitionImageLayout(
@@ -227,7 +227,7 @@ void vulkan::ImageManager::updateImages( void ) noexcept
 
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingBufferMemory;
-                VkDeviceSize imageSize = image->data.size();
+                VkDeviceSize imageSize = image->getBufferView()->getLength();
 
                 // TODO: create staging buffer once upon image initialization
                 auto success = utils::createBuffer(
@@ -246,7 +246,7 @@ void vulkan::ImageManager::updateImages( void ) noexcept
                 utils::copyToBuffer(
                     renderDevice->handler,
                     stagingBufferMemory,
-                    image->data.getData(),
+                    image->getBufferView()->getData(),
                     imageSize );
 
                 utils::transitionImageLayout(

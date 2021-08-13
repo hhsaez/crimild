@@ -43,12 +43,16 @@ SharedPointer< Image > Image::ONE = [] {
         .depth = 1,
     };
     image->format = Format::R8G8B8A8_UNORM;
-    image->data = {
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF
-    };
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                ByteArray {
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                } ) ) );
     return image;
 }();
 
@@ -60,12 +64,16 @@ SharedPointer< Image > Image::ZERO = [] {
         .depth = 1,
     };
     image->format = Format::R8G8B8A8_UNORM;
-    image->data = {
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-    };
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                ByteArray {
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                } ) ) );
     return image;
 }();
 
@@ -77,12 +85,16 @@ SharedPointer< Image > Image::INVALID = [] {
         .depth = 1,
     };
     image->format = Format::R8G8B8A8_UNORM;
-    image->data = {
-        0xFF,
-        0x00,
-        0xFF,
-        0xFF
-    };
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                ByteArray {
+                    0xFF,
+                    0x00,
+                    0xFF,
+                    0xFF,
+                } ) ) );
     return image;
 }();
 
@@ -117,16 +129,6 @@ SharedPointer< Image > createCheckerBoardImage( crimild::Int32 size )
     crimild::Int32 height = size;
     crimild::Int32 bpp = 4;
 
-    auto data = ByteArray( width * height * bpp );
-    for ( int y = 0; y < width; y++ ) {
-        for ( int x = 0; x < width; x++ ) {
-            auto colorIdx = ( y % 2 + x % 2 ) % 2;
-            for ( int i = 0; i < bpp; i++ ) {
-                data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
-            }
-        }
-    }
-
     auto image = crimild::alloc< Image >();
     image->extent = {
         .width = crimild::Real32( width ),
@@ -134,7 +136,22 @@ SharedPointer< Image > createCheckerBoardImage( crimild::Int32 size )
         .depth = 1,
     };
     image->format = Format::R8G8B8A8_UNORM;
-    image->data = data;
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                [ & ] {
+                    auto data = ByteArray( width * height * bpp );
+                    for ( int y = 0; y < width; y++ ) {
+                        for ( int x = 0; x < width; x++ ) {
+                            auto colorIdx = ( y % 2 + x % 2 ) % 2;
+                            for ( int i = 0; i < bpp; i++ ) {
+                                data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
+                            }
+                        }
+                    }
+                    return data;
+                }() ) ) );
     return image;
 }
 
@@ -156,34 +173,39 @@ SharedPointer< Image > Image::fromRGBANoise( UInt32 size ) noexcept
         .height = Real32( size ),
         .depth = 1,
     };
+    // TODO: use float format?
     image->format = Format::R8G8B8A8_UNORM;
-    image->data = [ & ] {
-        auto data = ByteArray( size * size * 4 );
-        for ( int i = 0; i < size; ++i ) {
-            for ( int j = 0; j < size; ++j ) {
-                auto idx = ( i * size + j ) * 4;
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                [ & ] {
+                    auto data = ByteArray( size * size * 4 );
+                    for ( int i = 0; i < size; ++i ) {
+                        for ( int j = 0; j < size; ++j ) {
+                            auto idx = ( i * size + j ) * 4;
 
-                const auto V0 = Vector2f { Real( i ), Real( j ) };
-                constexpr auto V1 = Vector2f { 223.35734, 550.56781 };
-                const auto V2 = V0 + V1;
-                const auto V3 = V2 * V2;
-                const Real xy = V3.x * V3.y;
+                            const auto V0 = Vector2f { Real( i ), Real( j ) };
+                            constexpr auto V1 = Vector2f { 223.35734, 550.56781 };
+                            const auto V2 = V0 + V1;
+                            const auto V3 = V2 * V2;
+                            const Real xy = V3.x * V3.y;
 
-                Vector4f color {
-                    Numericf::fract( xy * 0.00000012 ),
-                    Numericf::fract( xy * 0.00000543 ),
-                    Numericf::fract( xy * 0.00000192 ),
-                    Numericf::fract( xy * 0.00000423 ),
-                };
+                            Vector4f color {
+                                Numericf::fract( xy * 0.00000012 ),
+                                Numericf::fract( xy * 0.00000543 ),
+                                Numericf::fract( xy * 0.00000192 ),
+                                Numericf::fract( xy * 0.00000423 ),
+                            };
 
-                data[ idx + 0 ] = UInt8( color[ 0 ] * 255 );
-                data[ idx + 1 ] = UInt8( color[ 1 ] * 255 );
-                data[ idx + 2 ] = UInt8( color[ 2 ] * 255 );
-                data[ idx + 3 ] = UInt8( color[ 3 ] * 255 );
-            }
-        }
-        return data;
-    }();
+                            data[ idx + 0 ] = UInt8( color[ 0 ] * 255 );
+                            data[ idx + 1 ] = UInt8( color[ 1 ] * 255 );
+                            data[ idx + 2 ] = UInt8( color[ 2 ] * 255 );
+                            data[ idx + 3 ] = UInt8( color[ 3 ] * 255 );
+                        }
+                    }
+                    return data;
+                }() ) ) );
     return image;
 }
 
