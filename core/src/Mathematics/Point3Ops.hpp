@@ -72,6 +72,16 @@ template< typename T >
 }
 
 template< typename T >
+[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator-( const crimild::impl::Point3< T > &p ) noexcept
+{
+    return crimild::impl::Point3< T > {
+        -p.x,
+        -p.y,
+        -p.z,
+    };
+}
+
+template< typename T >
 [[nodiscard]] inline constexpr crimild::impl::Point3< T > operator*( const crimild::impl::Point3< T > &u, crimild::Real s ) noexcept
 {
     return crimild::impl::Point3< T > {
