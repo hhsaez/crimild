@@ -42,40 +42,18 @@
 
 using namespace crimild;
 
-AABBBoundingVolume::AABBBoundingVolume( void )
-    : AABBBoundingVolume( Sphere {} )
+AABBBoundingVolume::AABBBoundingVolume( void ) noexcept
+    : m_box( Box {} ),
+      m_sphere( Sphere { { 0, 0, 0 }, numbers::SQRT_3 } )
 {
-    // no-op
-}
-
-AABBBoundingVolume::AABBBoundingVolume( const Point3 &center, float radius )
-    : AABBBoundingVolume( Sphere { center, radius } )
-{
-    // no-op
-}
-
-AABBBoundingVolume::AABBBoundingVolume( const Sphere &sphere )
-    : _sphere( sphere )
-{
-    const auto v = Vector3 {
-        numbers::SQRT_3_DIV_3,
-        numbers::SQRT_3_DIV_3,
-        numbers::SQRT_3_DIV_3,
-    };
-
-    setMin( getCenter() - getRadius() * v );
-    setMax( getCenter() + getRadius() * v );
-}
-
-AABBBoundingVolume::~AABBBoundingVolume( void )
-{
-    // no-op
+    computeFrom( -point3( size( m_box ) ), point3( size( m_box ) ) );
 }
 
 SharedPointer< BoundingVolume > AABBBoundingVolume::clone( void ) const
 {
     auto bb = crimild::alloc< AABBBoundingVolume >();
-    bb->_sphere = _sphere;
+    bb->m_sphere = m_sphere;
+    bb->m_box = m_box;
     bb->setMin( getMin() );
     bb->setMax( getMax() );
     return bb;
@@ -146,8 +124,12 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 void AABBBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
     const auto center = 0.5 * ( max + min );
-    const auto radius = crimild::max( Real( numbers::EPSILON ), distance( point3( max ), point3( center ) ) );
-    _sphere = Sphere { center, radius };
+    const auto size = max - center;
+
+    m_box = Box { center, size };
+
+    const auto radius = crimild::max( Real( numbers::EPSILON ), distance( max, center ) );
+    m_sphere = Sphere { center, radius };
 
     setMin( min );
     setMax( max );
@@ -219,25 +201,33 @@ void AABBBoundingVolume::expandToContain( const BoundingVolume *input )
 
 int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-    return crimild::whichSide( plane, _sphere );
+    return crimild::whichSide( plane, m_sphere );
 }
 
 bool AABBBoundingVolume::contains( const Point3 &point ) const
 {
     const auto centerDiffSqr = distanceSquared( getCenter(), point );
-    float radiusSqr = radius( _sphere ) * radius( _sphere );
+    float radiusSqr = radius( m_sphere ) * radius( m_sphere );
     return ( centerDiffSqr < radiusSqr );
 }
 
 bool AABBBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
     Real t0, t1;
-    return intersect( ray, _sphere, t0, t1 );
+    if ( !intersect( ray, m_sphere, t0, t1 ) ) {
+        return false;
+    }
+
+    if ( !intersect( ray, m_box, t0, t1 ) ) {
+        return false;
+    }
+
+    return true;
 }
 
 bool AABBBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-    return other->testIntersection( _sphere );
+    return other->testIntersection( m_sphere );
 }
 
 bool AABBBoundingVolume::testIntersection( const Sphere &sphere ) const
@@ -254,7 +244,7 @@ bool AABBBoundingVolume::testIntersection( const Plane3 &plane ) const
 
 void AABBBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-    other->resolveIntersection( _sphere, result );
+    other->resolveIntersection( m_sphere, result );
 }
 
 void AABBBoundingVolume::resolveIntersection( const Sphere &other, Transformation &result ) const

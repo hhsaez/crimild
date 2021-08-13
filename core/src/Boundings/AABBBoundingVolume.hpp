@@ -29,23 +29,30 @@
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_AABB_
 
 #include "BoundingVolume.hpp"
+#include "Mathematics/Box.hpp"
 
 namespace crimild {
 
+    /**
+     *  \brief A bounding volume represented by an axis-aligned box
+     * 
+     *  A sphere is used to speed up some intersections and collisions. The 
+     *  sphere is big enough to enclose the box, so it's radius is equals
+     *  to half of the box diagonal.
+     */
     class AABBBoundingVolume : public BoundingVolume {
     public:
-        AABBBoundingVolume( void );
-        AABBBoundingVolume( const Point3 &center, float radius );
-        explicit AABBBoundingVolume( const Sphere &sphere );
-        virtual ~AABBBoundingVolume( void );
+        AABBBoundingVolume( void ) noexcept;
+        virtual ~AABBBoundingVolume( void ) = default;
 
-        virtual const Point3 &getCenter( void ) const override { return center( _sphere ); }
-        virtual Real getRadius( void ) const override { return radius( _sphere ); }
+        virtual const Point3 &getCenter( void ) const override { return center( m_sphere ); }
+        virtual Real getRadius( void ) const override { return radius( m_sphere ); }
 
         virtual SharedPointer< BoundingVolume > clone( void ) const override;
 
     private:
-        Sphere _sphere;
+        Sphere m_sphere;
+        Box m_box;
 
     public:
         virtual void computeFrom( const BoundingVolume *volume ) override;
