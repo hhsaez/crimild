@@ -28,13 +28,21 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_SOFT_RT_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_SOFT_RT_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Foundation/Memory.hpp"
 
 namespace crimild {
 
     class FrameGraphOperation;
+    class Node;
 
     namespace framegraph {
+
+        namespace utils {
+
+            crimild::SharedPointer< Node > optimize( Array< SharedPointer< Node > > &nodes ) noexcept;
+
+        }
 
         SharedPointer< FrameGraphOperation > softRT( void ) noexcept;
 

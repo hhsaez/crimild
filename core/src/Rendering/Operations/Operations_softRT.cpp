@@ -52,6 +52,79 @@
 
 using namespace crimild;
 
+Bool boundCompare( SharedPointer< Node > &a, SharedPointer< Node > &b, Index axis )
+{
+    return a->getWorldBound()->getMin()[ axis ] < b->getWorldBound()->getMin()[ axis ];
+}
+
+Bool boundCompareX( SharedPointer< Node > &a, SharedPointer< Node > &b )
+{
+    return boundCompare( a, b, 0 );
+}
+
+Bool boundCompareY( SharedPointer< Node > &a, SharedPointer< Node > &b )
+{
+    return boundCompare( a, b, 1 );
+}
+
+Bool boundCompareZ( SharedPointer< Node > &a, SharedPointer< Node > &b )
+{
+    return boundCompare( a, b, 2 );
+}
+
+crimild::SharedPointer< Node > optimize( Array< SharedPointer< Node > > &nodes, Index start, Index end ) noexcept
+{
+    const auto span = end - start;
+    if ( span == 1 ) {
+        return nodes[ start ];
+    }
+
+    int axis = Random::generate< Int >( 0, 3 );
+    auto comparator = axis == 0 ? boundCompareX : ( axis == 1 ? boundCompareY : boundCompareZ );
+
+    auto group = crimild::alloc< Group >();
+
+    if ( span == 2 ) {
+        if ( comparator( nodes[ start ], nodes[ start + 1 ] ) ) {
+            group->attachNode( nodes[ start ] );
+            group->attachNode( nodes[ start + 1 ] );
+        } else {
+            group->attachNode( nodes[ start + 1 ] );
+            group->attachNode( nodes[ start ] );
+        }
+    } else {
+        const auto mid = start + span / 2;
+        nodes.sort( comparator );
+        Array< SharedPointer< Node > > left;
+        for ( auto i = start; i < mid; ++i ) {
+            left.add( nodes[ i ] );
+        }
+
+        Array< SharedPointer< Node > > right;
+        for ( auto i = mid; i < end; ++i ) {
+            right.add( nodes[ i ] );
+        }
+
+        left.sort( comparator );
+        right.sort( comparator );
+
+        group->attachNode( optimize( left, 0, left.size() ) );   //, start, mid ) );
+        group->attachNode( optimize( right, 0, right.size() ) ); //nodes, mid, end ) );
+    }
+
+    return group;
+}
+
+crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< SharedPointer< Node > > &nodes ) noexcept
+{
+    nodes.each(
+        []( auto n ) {
+            n->perform( UpdateWorldState() );
+        } );
+
+    return ::optimize( nodes, 0, nodes.size() );
+}
+
 [[nodiscard]] Vector3 randomInUnitSphere( void ) noexcept
 {
     while ( true ) {
@@ -178,12 +251,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
     rt->setName( "softRT" );
 
     auto settings = Simulation::getInstance()->getSettings();
-    const Int32 width = settings->get< Int32 >( "rt.width", 400 );
-    const Int32 height = settings->get< Int32 >( "rt.height", 300 );
+    const Int32 width = settings->get< Int32 >( "rt.width", 320 );
+    const Int32 height = settings->get< Int32 >( "rt.height", 240 );
     const Int32 bpp = 4;
     const Real aspectRatio = Real( width ) / Real( height );
-    const Int32 samples = settings->get< Int32 >( "rt.samples", 4 );
-    const Int32 depth = settings->get< Int32 >( "rt.depth", 50 );
+    const Int32 samples = settings->get< Int32 >( "rt.samples", 1 );
+    const Int32 depth = settings->get< Int32 >( "rt.depth", 10 );
     const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 32 );
     const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.tile_size", std::thread::hardware_concurrency() ) );
 
