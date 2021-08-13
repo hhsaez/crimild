@@ -280,11 +280,15 @@ vec3 color = vec3( occlusion );
                                 .depth = 1,
                             };
                             image->format = Format::R32G32B32A32_SFLOAT;
-                            image->data = [ & ] {
-                                auto bytes = ByteArray( data.size() * sizeof( Vector4f ) );
-                                memcpy( bytes.getData(), data.getData(), bytes.size() );
-                                return bytes;
-                            }();
+                            image->setBufferView(
+                                crimild::alloc< BufferView >(
+                                    BufferView::Target::IMAGE,
+                                    crimild::alloc< Buffer >(
+                                        [ & ] {
+                                            auto bytes = ByteArray( data.size() * sizeof( Vector4f ) );
+                                            memcpy( bytes.getData(), data.getData(), bytes.size() );
+                                            return bytes;
+                                        }() ) ) );
                             return image;
                         }();
                         return imageView;

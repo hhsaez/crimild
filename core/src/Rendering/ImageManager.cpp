@@ -26,8 +26,9 @@
 */
 
 #include "Rendering/ImageManager.hpp"
-#include "Foundation/StringUtils.hpp"
+
 #include "Foundation/Log.hpp"
+#include "Foundation/StringUtils.hpp"
 #include "Rendering/ImageTGA.hpp"
 
 using namespace crimild;
@@ -49,14 +50,12 @@ SharedPointer< Image > ImageManager::loadCubemap( CubemapDescriptor const &descr
     // this one in a better way
 
     auto images = descriptor.filePaths.map(
-        [&] ( auto &path ) {
+        [ & ]( auto &path ) {
             return loadImage(
                 ImageDescriptor {
                     .filePath = path,
-                }
-            );
-        }
-    );
+                } );
+        } );
 
     if ( images.empty() ) {
         return nullptr;
@@ -77,16 +76,20 @@ SharedPointer< Image > ImageManager::loadCubemap( CubemapDescriptor const &descr
         .height = h,
         .depth = 1,
     };
-    image->data.resize( layerCount * firstImage->data.size() );
-
-    Byte *data = image->data.getData();
-    Size offset = 0;
-    images.each(
-        [ &, i = 0 ] ( auto &img ) mutable {
-            memcpy( data + offset, img->data.getData(), img->data.size() );
-            offset += img->data.size();
-        }
-    );
+    image->setBufferView(
+        crimild::alloc< BufferView >(
+            BufferView::Target::IMAGE,
+            crimild::alloc< Buffer >(
+                [ & ] {
+                    auto data = ByteArray( layerCount * firstImage->getBufferView()->getLength() );
+                    Size offset = 0;
+                    images.each(
+                        [ &, i = 0 ]( auto &img ) mutable {
+                            memcpy( &data[ offset ], img->getBufferView()->getData(), img->getBufferView()->getLength() );
+                            offset += img->getBufferView()->getLength();
+                        } );
+                    return data;
+                }() ) ) );
 
     return image;
 }

@@ -88,16 +88,6 @@ namespace crimild {
         Extent3D extent;
 
         /**
-           \brief Image raw data
-
-           The size of this array is equal to multiplying extent by the format size by the
-           number of layers:
-
-           size = ( w * h * d ) * ( channels ) * layers
-         */
-        ByteArray data;
-
-        /**
          * \name Buffer View
          */
         //@{
