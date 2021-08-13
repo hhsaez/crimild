@@ -204,3 +204,100 @@ crimild::Bool vulkan::ImageManager::unbind( Image *image ) noexcept
 
     return ManagerImpl::unbind( image );
 }
+
+void vulkan::ImageManager::updateImages( void ) noexcept
+{
+    // TODO: This is a slow operation. Not only it needs to iterate over all
+    // available images to get the ones that actually need updating, but
+    // also it's copying data to the device in a synchronous way.
+    auto renderDevice = getRenderDevice();
+    each( [ this, renderDevice ]( Image *image, ImageBindInfo &bindInfo ) {
+        if ( auto bufferView = image->getBufferView() ) {
+            if ( bufferView->getUsage() == BufferView::Usage::DYNAMIC ) {
+                auto width = image->extent.width;
+                auto height = image->extent.height;
+                if ( image->extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+                    auto swapchain = renderDevice->getSwapchain();
+                    width *= swapchain->extent.width;
+                    height *= swapchain->extent.height;
+                }
+                auto mipLevels = image->getMipLevels();
+                auto arrayLayers = image->getLayerCount();
+                auto type = image->type;
+
+                VkBuffer stagingBuffer;
+                VkDeviceMemory stagingBufferMemory;
+                VkDeviceSize imageSize = image->data.size();
+
+                // TODO: create staging buffer once upon image initialization
+                auto success = utils::createBuffer(
+                    renderDevice,
+                    utils::BufferDescriptor {
+                        .size = imageSize,
+                        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                        .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT },
+                    stagingBuffer,
+                    stagingBufferMemory );
+                if ( !success ) {
+                    CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
+                    return;
+                }
+
+                utils::copyToBuffer(
+                    renderDevice->handler,
+                    stagingBufferMemory,
+                    image->data.getData(),
+                    imageSize );
+
+                utils::transitionImageLayout(
+                    renderDevice,
+                    bindInfo.imageHandler,
+                    utils::getFormat( renderDevice, image->format ),
+                    VK_IMAGE_LAYOUT_UNDEFINED,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    mipLevels,
+                    arrayLayers );
+
+                utils::copyBufferToImage(
+                    renderDevice,
+                    stagingBuffer,
+                    bindInfo.imageHandler,
+                    width,
+                    height,
+                    arrayLayers );
+
+                // TODO: Dynamic images should not support mipmapping?
+                if ( type == Image::Type::IMAGE_2D_CUBEMAP ) {
+                    // No mipmaps. Transition to SHADER_READ_OPTIMAL
+                    utils::transitionImageLayout(
+                        renderDevice,
+                        bindInfo.imageHandler,
+                        utils::getFormat( renderDevice, image->format ),
+                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        mipLevels,
+                        arrayLayers );
+                } else {
+                    // Automatically transitions to SHADER_READ_OPTIMAL layout
+                    utils::generateMipmaps(
+                        renderDevice,
+                        bindInfo.imageHandler,
+                        utils::getFormat( renderDevice, image->format ),
+                        width,
+                        height,
+                        mipLevels );
+                };
+
+                vkDestroyBuffer(
+                    renderDevice->handler,
+                    stagingBuffer,
+                    nullptr );
+
+                vkFreeMemory(
+                    renderDevice->handler,
+                    stagingBufferMemory,
+                    nullptr );
+            }
+        }
+    } );
+}

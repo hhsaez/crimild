@@ -48,6 +48,7 @@ namespace crimild {
             INDEX,
             UNIFORM,
             STORAGE,
+            IMAGE,
             USER_DEFINED, //< custom target
         };
 

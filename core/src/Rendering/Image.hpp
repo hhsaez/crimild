@@ -31,6 +31,7 @@
 #include "Coding/Codable.hpp"
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Rendering/BufferView.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"
@@ -95,6 +96,19 @@ namespace crimild {
            size = ( w * h * d ) * ( channels ) * layers
          */
         ByteArray data;
+
+        /**
+         * \name Buffer View
+         */
+        //@{
+    public:
+        inline void setBufferView( SharedPointer< BufferView > const &bufferView ) noexcept { m_bufferView = bufferView; }
+        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+
+    private:
+        SharedPointer< BufferView > m_bufferView;
+
+        //@}
 
         /**
            \name Layer count
