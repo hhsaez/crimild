@@ -90,53 +90,29 @@ namespace crimild {
         return intersect( inverse( planeWorld )( R ), P, t );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, Real &tMin, Real &tMax ) noexcept
     {
-        Real tMin = 0;
-        Real tMax = 0;
-        Bool ret = false;
+        const auto BMax = center( B ) + size( B );
+        const auto BMin = center( B ) - size( B );
 
-        auto checkAxis = []( Real o, Real d, Real &tMin, Real &tMax ) -> Bool {
-            auto tMinNum = ( -1 - o );
-            auto tMaxNum = ( 1 - o );
+        tMin = numbers::NEGATIVE_INFINITY;
+        tMax = numbers::POSITIVE_INFINITY;
 
-            if ( abs( d ) >= numbers::EPSILON ) {
-                tMin = tMinNum / d;
-                tMax = tMaxNum / d;
-            } else {
-                tMin = tMinNum * numbers::POSITIVE_INFINITY;
-                tMax = tMaxNum * numbers::POSITIVE_INFINITY;
+        for ( auto a = 0l; a < 3; a++ ) {
+            const auto invD = Real( 1 ) / direction( R )[ a ];
+            auto t0 = ( BMin[ a ] - origin( R )[ a ] ) * invD;
+            auto t1 = ( BMax[ a ] - origin( R )[ a ] ) * invD;
+            if ( invD < 0.0f ) {
+                const auto temp = t0;
+                t0 = t1;
+                t1 = temp;
             }
 
-            if ( tMin > tMax ) {
-                auto t = tMin;
-                tMin = tMax;
-                tMax = t;
+            tMin = t0 > tMin ? t0 : tMin;
+            tMax = t1 < tMax ? t1 : tMax;
+            if ( tMax <= tMin ) {
+                return false;
             }
-
-            return true;
-        };
-
-        if ( checkAxis( origin( R ).x, direction( R ).x, tMin, tMax ) ) {
-            t0 = tMin;
-            t1 = tMax;
-            ret = true;
-        }
-
-        if ( checkAxis( origin( R ).y, direction( R ).y, tMin, tMax ) ) {
-            t0 = ret ? max( t0, tMin ) : tMin;
-            t1 = ret ? min( t1, tMax ) : tMax;
-            ret = true;
-        }
-
-        if ( checkAxis( origin( R ).z, direction( R ).z, tMin, tMax ) ) {
-            t0 = ret ? max( t0, tMin ) : tMin;
-            t1 = ret ? min( t1, tMax ) : tMax;
-            ret = true;
-        }
-
-        if ( !ret || t0 > t1 ) {
-            return false;
         }
 
         return true;

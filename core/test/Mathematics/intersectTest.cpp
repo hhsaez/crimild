@@ -259,8 +259,20 @@ TEST( intersect, ray_and_box_from_inside )
 
     Real t0, t1;
     EXPECT_TRUE( intersect( R, B, t0, t1 ) );
-    EXPECT_EQ( -1, t0 );
+    EXPECT_TRUE( isZero( t0 ) );
     EXPECT_EQ( 1, t1 );
+}
+
+TEST( intersect, ray_and_custom_box )
+{
+    const auto B = Box { { 1, 0, 0 }, { 2, 2, 2 } };
+
+    const auto R = Ray3 { { 2.5, 1.5, 5 }, { 0, 0, -1 } };
+
+    Real t0, t1;
+    EXPECT_TRUE( intersect( R, B, t0, t1 ) );
+    EXPECT_EQ( 3, t0 );
+    EXPECT_EQ( 7, t1 );
 }
 
 TEST( intersect, ray_misses_cube )
