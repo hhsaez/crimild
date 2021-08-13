@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
         struct ImageBindInfo {
             VkImage imageHandler = VK_NULL_HANDLE;
@@ -48,11 +48,12 @@ namespace crimild {
 
             crimild::Bool bind( Image *image ) noexcept override;
             crimild::Bool unbind( Image *image ) noexcept override;
+
+            void updateImages( void ) noexcept;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

@@ -109,6 +109,7 @@ void VulkanSystem::onRender( void ) noexcept
     auto imageIndex = result.imageIndex;
 
     // TODO: This migth be a bit slow...
+    getRenderDevice()->updateImages();
     updateVertexBuffers();
     updateIndexBuffers();
     updateUniformBuffers();
@@ -196,7 +197,7 @@ crimild::Bool VulkanSystem::createDebugMessenger( void ) noexcept
             .instance = crimild::get_ptr( m_instance ) } );
 
     // Never fails (Debug messenger is disabled for Release builds)
-	return true;
+    return true;
 }
 
 crimild::Bool VulkanSystem::createSurface( void ) noexcept
