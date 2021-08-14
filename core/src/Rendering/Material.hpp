@@ -78,8 +78,8 @@ namespace crimild {
         virtual void setSpecular( const ColorRGBA &color ) { _specular = color; }
         virtual const ColorRGBA &getSpecular( void ) const { return _specular; }
 
-        virtual void setEmissive( float value ) { _emissive = value; }
-        virtual float getEmissive( void ) const { return _emissive; }
+        // virtual void setEmissive( float value ) { _emissive = value; }
+        // virtual float getEmissive( void ) const { return _emissive; }
 
         virtual void setShininess( float value ) { _shininess = value; }
         virtual float getShininess( void ) const { return _shininess; }

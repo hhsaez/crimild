@@ -53,7 +53,6 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
     ImageBindInfo bindInfo;
 
-    auto channels = crimild::UInt32( 4 ); //< TODO: Fetch channels from image format
     auto mipLevels = image->getMipLevels();
     auto arrayLayers = image->getLayerCount();
     auto type = image->type;

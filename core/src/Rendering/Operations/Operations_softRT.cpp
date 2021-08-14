@@ -200,6 +200,7 @@ crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< Shar
         const auto roughness = material->getRoughness();
         const auto transmission = material->getTransmission();
         const auto ior = material->getIndexOfRefraction();
+        const auto emissive = material->getEmissive();
 
         Ray3 scattered;
         ColorRGB attenuation;
@@ -228,6 +229,8 @@ crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< Shar
             if ( dot( direction( scattered ), res.normal ) <= 0 ) {
                 return ColorRGB::Constants::BLACK;
             }
+        } else if ( !isEqual( emissive, ColorRGB::Constants::BLACK ) ) {
+            return emissive;
         } else {
             // Lambertian model
             // TODO(hernan): use randomInHemisphere instead?
@@ -251,25 +254,43 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
     rt->setName( "softRT" );
 
     auto settings = Simulation::getInstance()->getSettings();
-    const Int32 width = settings->get< Int32 >( "rt.width", 320 );
-    const Int32 height = settings->get< Int32 >( "rt.height", 240 );
+    const Int32 width = settings->get< Int32 >( "video.width", 320 );
+    const Int32 height = settings->get< Int32 >( "video.height", 240 );
     const Int32 bpp = 4;
     const Real aspectRatio = Real( width ) / Real( height );
     const Int32 samples = settings->get< Int32 >( "rt.samples", 1 );
     const Int32 depth = settings->get< Int32 >( "rt.depth", 10 );
-    const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 32 );
+    const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
     const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.tile_size", std::thread::hardware_concurrency() ) );
+
+    const auto backgroundColor = ColorRGB {
+        settings->get< Real >( "rt.background_color.r", 0.5f ),
+        settings->get< Real >( "rt.background_color.g", 0.7f ),
+        settings->get< Real >( "rt.background_color.b", 1.0f ),
+    };
 
     auto image = crimild::alloc< Image >();
     image->extent = Extent3D {
         .width = Real32( width ),
         .height = Real32( height ),
     };
-    // TODO: image format should be float, so we can use HDR colors
-    image->format = Format::R8G8B8A8_UNORM;
-    image->data = ByteArray( width * height * bpp );
 
-    rt->apply = [ width, height, image, samples, tileSize, depth, workerCount, done = false ]( auto, auto ) mutable {
+    image->format = crimild::utils::getFormat< ColorRGBA >();
+
+    image->setBufferView(
+        [ & ] {
+            auto buffer = crimild::alloc< Buffer >( Array< ColorRGBA >( width * height ) );
+            auto bufferView = crimild::alloc< BufferView >( BufferView::Target::IMAGE, buffer, 0, sizeof( ColorRGBA ) );
+            bufferView->setUsage( BufferView::Usage::DYNAMIC );
+            return bufferView;
+        }() );
+
+    auto colors = crimild::alloc< BufferAccessor >( image->getBufferView(), 0, sizeof( ColorRGBA ) );
+    for ( auto i = 0l; i < width * height; ++i ) {
+        colors->set( i, ColorRGBA { 0, 0, 0, 1 } );
+    }
+
+    rt->apply = [ width, height, image, samples, tileSize, depth, workerCount, backgroundColor, colors, sampleCount = 0 ]( auto, auto ) mutable {
         auto scene = Simulation::getInstance()->getScene();
         if ( !scene ) {
             return true;
@@ -280,15 +301,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
             return true;
         }
 
-        if ( done ) {
-            return true;
-        }
-
         scene->perform( UpdateWorldState() );
 
-        Array< ColorRGBA > colors( width * height );
-        const auto SKY_COLOR = ColorRGB { 0.5, 0.7, 1 };
-        const auto HORIZONT_COLOR = ColorRGB { 1, 1, 1 };
+        // Array< ColorRGBA > colors( width * height );
 
         auto reportProgress = [ mutex = std::mutex(),
                                 progress = 1l,
@@ -323,8 +338,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
                             for ( auto dx = 0; dx < tileSize; ++dx ) {
                                 if ( x + dx >= width )
                                     break;
-                                reportProgress();
-                                const auto backgroundColor = lerp( SKY_COLOR, HORIZONT_COLOR, Real( y ) / Real( height ) );
+                                // reportProgress();
+
                                 auto color = ColorRGB::Constants::BLACK;
                                 for ( auto s = 0l; s < samples; ++s ) {
                                     Ray3 ray;
@@ -340,7 +355,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
                                         color = color + rayColor( ray, scene, backgroundColor, depth );
                                     }
                                 }
-                                colors[ ( y + dy ) * width + ( x + dx ) ] = rgba( color / samples );
+                                const Index idx = ( y + dy ) * width + ( x + dx );
+                                const auto prevColor = colors->get< ColorRGBA >( idx ) * sampleCount;
+                                colors->set( idx, ( prevColor + rgba( color ) ) / ( sampleCount + samples ) );
 
                                 std::this_thread::yield();
                             }
@@ -378,15 +395,25 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
             worker.join();
         }
 
-        colors.each(
-            [ image, i = 0 ]( const auto &c ) mutable {
-                for ( auto j = 0l; j < 4; j++ ) {
-                    image->data[ i * bpp + j ] = UInt8( 255.0f * c[ j ] );
-                }
-                i++;
-            } );
+        // const auto prevSamples = sampleCount;
+        sampleCount += samples;
 
-        done = true;
+        // colors.each(
+        //     [ output, prevSamples, sampleCount, i = 0 ]( const auto &c ) mutable {
+        //         // auto data = image->getBufferView()->getData();
+
+        //         // for ( auto j = 0l; j < 3; j++ ) {
+        //         // const auto prevColor = data[ i * bpp + j ] * prevSamples;
+        //         // const auto color = prevColor + c[ j ];
+        //         // data[ i * bpp + j ] = 255.0f; //c[ j ]; // / sampleCount;
+        //         // }
+
+        //         // data[ i * bpp + 3 ] = 1.0f; // alpha is always 1
+        //         output->set( i++, c );
+        //     } );
+
+        CRIMILD_LOG_INFO( "RT Samples: ", sampleCount );
+
         return true;
     };
 
