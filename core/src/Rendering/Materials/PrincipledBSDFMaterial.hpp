@@ -48,6 +48,7 @@ namespace crimild {
                 alignas( 4 ) Real32 roughness = 0;
                 alignas( 4 ) Real32 transmission = 0;
                 alignas( 4 ) Real32 indexOfRefraction = 0;
+                alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
             };
 
         public:
@@ -68,6 +69,9 @@ namespace crimild {
 
             inline void setIndexOfRefraction( const Real32 &indexOfRefraction ) noexcept { getProps().indexOfRefraction = indexOfRefraction; };
             inline Real32 getIndexOfRefraction( void ) const noexcept { return getProps().indexOfRefraction; }
+
+            inline void setEmissive( const ColorRGB &emissive ) noexcept { getProps().emissive = emissive; };
+            inline ColorRGB getEmissive( void ) const noexcept { return getProps().emissive; }
 
         private:
             Props &getProps( void ) noexcept;
