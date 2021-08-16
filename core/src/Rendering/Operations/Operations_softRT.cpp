@@ -261,7 +261,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcep
     const Int32 samples = settings->get< Int32 >( "rt.samples", 1 );
     const Int32 depth = settings->get< Int32 >( "rt.depth", 10 );
     const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
-    const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.tile_size", std::thread::hardware_concurrency() ) );
+    const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", std::thread::hardware_concurrency() ) );
 
     const auto backgroundColor = ColorRGB {
         settings->get< Real >( "rt.background_color.r", 0.5f ),
