@@ -175,6 +175,7 @@
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/Vector_equality.hpp"
+#include "Mathematics/easing.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/ortho.hpp"
 #include "Mathematics/perspective.hpp"
