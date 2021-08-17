@@ -29,38 +29,38 @@
 #define CRIMILD_VISITORS_SHALLOW_COPY_
 
 #include "NodeVisitor.hpp"
-
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 #include "SceneGraph/Text.hpp"
 
 namespace crimild {
 
-	class ShallowCopy : public NodeVisitor {
-	public:
-		explicit ShallowCopy( void );
-		virtual ~ShallowCopy( void );
+    class ShallowCopy : public NodeVisitor {
+    public:
+        explicit ShallowCopy( void );
+        virtual ~ShallowCopy( void );
 
-		template< class T >
+        template< class T >
         SharedPointer< T > getResult( void ) { return crimild::cast_ptr< T >( _result ); }
 
-		virtual void traverse( Node *node ) override;
+        virtual void traverse( Node *node ) override;
 
-		virtual void visitNode( Node *node ) override;
-		virtual void visitGroup( Group *node ) override;
-		virtual void visitGeometry( Geometry *geometry ) override;
+        virtual void visitNode( Node *node ) override;
+        virtual void visitGroup( Group *node ) override;
+        virtual void visitGeometry( Geometry *geometry ) override;
         virtual void visitText( Text *text ) override;
+        virtual void visitCamera( Camera *camera );
+        virtual void visitLight( Light *light );
 
-	private:
-		void copyNode( Node *source, Node *destination );
+    private:
+        void copyNode( Node *source, Node *destination );
 
-	private:
-		SharedPointer< Node > _result;
+    private:
+        SharedPointer< Node > _result;
         Group *_parent = nullptr;
-	};
+    };
 
 }
 
 #endif
-
