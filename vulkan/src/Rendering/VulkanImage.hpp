@@ -38,6 +38,16 @@ namespace crimild {
         struct ImageBindInfo {
             VkImage imageHandler = VK_NULL_HANDLE;
             VkDeviceMemory imageMemoryHandler = VK_NULL_HANDLE;
+
+            /**
+             * \brief Staging buffer for dynamic images
+             * 
+             * Dynamic images are updated using a staging buffer, which is created
+             * during image binding. Static images also use a staging buffer but they
+             * release it as soon as possible.
+             */
+            VkBuffer stagingBuffer = VK_NULL_HANDLE;
+            VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
         };
 
         class ImageManager : public BasicRenderResourceManagerImpl< Image, ImageBindInfo > {

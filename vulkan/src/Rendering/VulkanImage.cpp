@@ -33,6 +33,28 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+/*
+ImageManager::ImageManager( void ) noexcept
+{
+    registerMessageHandler< messaging::ImageCreated >(
+        [ & ]( messaging::ImageCreated const &msg ) {
+            // TODO: bind on demand?
+            // TODO: add to images to update set
+        } );
+
+    registerMessageHandler< messaging::ImageCreated >(
+        [ & ]( messaging::ImageCreated const &msg ) {
+            // TODO: add to images to update set (if bound?)
+        } );
+
+    registerMessageHandler< messaging::ImageCreated >(
+        [ & ]( messaging::ImageCreated const &msg ) {
+            // TODO: remove from images to update if needed
+            // TODO: unbind
+        } );
+}
+*/
+
 crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 {
     if ( validate( image ) ) {
@@ -94,8 +116,6 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
     if ( image->getBufferView() != nullptr ) {
         // Image has pixel data. Upload it
 
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
         VkDeviceSize imageSize = image->getBufferView()->getLength();
 
         auto success = utils::createBuffer(
@@ -104,8 +124,8 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
                 .size = imageSize,
                 .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                 .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT },
-            stagingBuffer,
-            stagingBufferMemory );
+            bindInfo.stagingBuffer,
+            bindInfo.stagingBufferMemory );
         if ( !success ) {
             CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
             return false;
@@ -113,7 +133,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
         utils::copyToBuffer(
             renderDevice->handler,
-            stagingBufferMemory,
+            bindInfo.stagingBufferMemory,
             image->getBufferView()->getData(),
             imageSize );
 
@@ -128,7 +148,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
 
         utils::copyBufferToImage(
             renderDevice,
-            stagingBuffer,
+            bindInfo.stagingBuffer,
             bindInfo.imageHandler,
             width,
             height,
@@ -155,15 +175,21 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
                 mipLevels );
         };
 
-        vkDestroyBuffer(
-            renderDevice->handler,
-            stagingBuffer,
-            nullptr );
+        if ( image->getBufferView() == nullptr || image->getBufferView()->getUsage() == BufferView::Usage::STATIC ) {
+            // We won't be using the staging buffers for static images anymore
+            vkDestroyBuffer(
+                renderDevice->handler,
+                bindInfo.stagingBuffer,
+                nullptr );
 
-        vkFreeMemory(
-            renderDevice->handler,
-            stagingBufferMemory,
-            nullptr );
+            vkFreeMemory(
+                renderDevice->handler,
+                bindInfo.stagingBufferMemory,
+                nullptr );
+
+            bindInfo.stagingBuffer = VK_NULL_HANDLE;
+            bindInfo.stagingBufferMemory = VK_NULL_HANDLE;
+        }
     }
 
     if ( !image->getName().empty() ) {
@@ -197,6 +223,21 @@ crimild::Bool vulkan::ImageManager::unbind( Image *image ) noexcept
         if ( handler.imageMemoryHandler != VK_NULL_HANDLE ) {
             vkFreeMemory( renderDevice->handler, handler.imageMemoryHandler, nullptr );
         }
+
+        if ( handler.stagingBuffer != VK_NULL_HANDLE ) {
+            vkDestroyBuffer(
+                renderDevice->handler,
+                handler.stagingBuffer,
+                nullptr );
+        }
+        if ( handler.imageMemoryHandler != VK_NULL_HANDLE ) {
+            vkFreeMemory( renderDevice->handler, handler.stagingBufferMemory, nullptr );
+        }
+
+        handler.imageHandler = VK_NULL_HANDLE;
+        handler.imageMemoryHandler = VK_NULL_HANDLE;
+        handler.stagingBuffer = VK_NULL_HANDLE;
+        handler.stagingBufferMemory = VK_NULL_HANDLE;
     }
 
     removeBindInfo( image );
@@ -224,27 +265,11 @@ void vulkan::ImageManager::updateImages( void ) noexcept
                 auto arrayLayers = image->getLayerCount();
                 auto type = image->type;
 
-                VkBuffer stagingBuffer;
-                VkDeviceMemory stagingBufferMemory;
                 VkDeviceSize imageSize = image->getBufferView()->getLength();
-
-                // TODO: create staging buffer once upon image initialization
-                auto success = utils::createBuffer(
-                    renderDevice,
-                    utils::BufferDescriptor {
-                        .size = imageSize,
-                        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                        .properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT },
-                    stagingBuffer,
-                    stagingBufferMemory );
-                if ( !success ) {
-                    CRIMILD_LOG_ERROR( "Failed to create image staging buffer" );
-                    return;
-                }
 
                 utils::copyToBuffer(
                     renderDevice->handler,
-                    stagingBufferMemory,
+                    bindInfo.stagingBufferMemory,
                     image->getBufferView()->getData(),
                     imageSize );
 
@@ -259,7 +284,7 @@ void vulkan::ImageManager::updateImages( void ) noexcept
 
                 utils::copyBufferToImage(
                     renderDevice,
-                    stagingBuffer,
+                    bindInfo.stagingBuffer,
                     bindInfo.imageHandler,
                     width,
                     height,
@@ -286,16 +311,6 @@ void vulkan::ImageManager::updateImages( void ) noexcept
                         height,
                         mipLevels );
                 };
-
-                vkDestroyBuffer(
-                    renderDevice->handler,
-                    stagingBuffer,
-                    nullptr );
-
-                vkFreeMemory(
-                    renderDevice->handler,
-                    stagingBufferMemory,
-                    nullptr );
             }
         }
     } );
