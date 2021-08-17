@@ -31,6 +31,7 @@
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Rendering/SkinnedMesh.hpp"
+#include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 
@@ -48,7 +49,7 @@ void ShallowCopy::traverse( Node *node )
 
     if ( _result != nullptr ) {
         // make sure the result is not transformed
-        _result->setLocal( Transformation {} );
+        // _result->setLocal( Transformation {} );
     }
 }
 
@@ -87,6 +88,23 @@ void ShallowCopy::visitText( Text *input )
 
     copy->setFont( input->getFont() );
     copy->setSize( input->getSize() );
+}
+
+void ShallowCopy::visitCamera( Camera *camera )
+{
+    auto copy = crimild::alloc< Camera >();
+    copy->setProjectionMatrix( camera->getProjectionMatrix() );
+    copyNode( camera, crimild::get_ptr( copy ) );
+
+    visitGroup( camera );
+}
+
+void ShallowCopy::visitLight( Light *light )
+{
+    auto copy = crimild::alloc< Text >();
+    copyNode( light, crimild::get_ptr( copy ) );
+
+    visitNode( light );
 }
 
 void ShallowCopy::copyNode( Node *src, Node *dst )

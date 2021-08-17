@@ -47,6 +47,7 @@
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/ScenePass.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Visitors/FetchCameras.hpp"
 #include "Visitors/IntersectWorld.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
@@ -294,7 +295,14 @@ namespace crimild {
                     return bufferView;
                 }() );
 
+            m_colors.resize( m_width * m_height );
+            for ( auto i = 0l; i < m_width * m_height; ++i ) {
+                m_colors[ i ] = ColorRGBA { 0, 0, 0, 1 };
+            }
+
             m_imageAaccessor = crimild::alloc< BufferAccessor >( m_image->getBufferView(), 0, sizeof( ColorRGBA ) );
+
+            m_progress = m_width * m_height;
 
             writes( { m_image } );
             produces( { m_image } );
@@ -302,51 +310,58 @@ namespace crimild {
 
         virtual ~SoftRT( void ) noexcept
         {
+            // clear all pending jobs
             m_jobs.clear();
+
+            // wait for workers
             reset();
+
+            m_workers.clear();
         }
 
     private:
         Bool execute( void ) noexcept
         {
-            if ( m_nextJobIdx < m_jobs.size() ) {
-                // Because scenes are not immutable, any rendering operation must be done here.
-                // Otherwise, we'll see some artifacts because nodes might change positions and
-                // boundings might be reset during scene traversals.
-                // TODO(hernan): In order to fully unlock the main thread, we need to make a copy
-                // of the scene to render
-                std::vector< std::thread > workers;
-                for ( auto i = 0l; i < m_workerCount; ++i ) {
-                    workers.push_back(
-                        std::move(
-                            std::thread(
-                                [ & ] {
-                                    Job job;
-                                    if ( getNextJob( job ) ) {
-                                        job();
-                                    }
-                                } ) ) );
-                }
-
-                for ( auto &worker : workers ) {
-                    worker.join();
-                }
-
+            if ( !isDone() ) {
                 return true;
             }
 
-            auto scene = Simulation::getInstance()->getScene();
+            auto scene = []() -> SharedPointer< Node > {
+                // We want to avoid blocking the main thread so we can get a progressive result,
+                // but scenes can be updated in between samples. During an update, a scene could
+                // reset its transform during the world update process, which might also affect
+                // the camera. So, the easiest way to avoid artifacts during rendering is to
+                // clone the entire scene. This is very much like collecting renderables and
+                // forwarding them to the GPU, just much slower
+                // TODO: should I build an acceleration structor (BVH?) as part of this process?
+                // TODO: maybe just collect geometries...
+                auto scene = Simulation::getInstance()->getScene();
+                if ( !scene ) {
+                    return nullptr;
+                }
+
+                ShallowCopy copy;
+                scene->perform( copy );
+                auto ret = copy.getResult< Node >();
+                ret->perform( UpdateWorldState() );
+                return ret;
+            }();
+
             if ( !scene ) {
+                std::cout << "no scene" << std::endl;
+                exit( -1 );
                 return true;
             }
 
-            auto camera = Camera::getMainCamera();
-            if ( !camera ) {
+            FetchCameras fetchCameras;
+            scene->perform( fetchCameras );
+            if ( !fetchCameras.hasCameras() ) {
+                std::cout << "no cameras" << std::endl;
+                exit( -1 );
                 return true;
             }
 
-            // TODO: Is this required?
-            scene->perform( UpdateWorldState() );
+            auto camera = crimild::retain( fetchCameras.anyCamera() );
 
             // Reset all jobs and wait for workers to finish
             reset();
@@ -376,9 +391,10 @@ namespace crimild {
                                             // const auto rd = lensRadius * randomInUnitDisk();
                                             // const auto offset = rd.x * R + rd.y * U;
                                             // const auto R = Ray3 { origin( ray ) + offset, direction( ray ) - offset };
-                                            color = color + rayColor( ray, scene, self->m_backgroundColor, self->m_depth );
+                                            color = color + rayColor( ray, get_ptr( scene ), self->m_backgroundColor, self->m_depth );
                                         }
                                     }
+
                                     const Index idx = ( y + dy ) * self->m_width + ( x + dx );
                                     const auto prevColor = self->m_imageAaccessor->get< ColorRGBA >( idx ) * self->m_sampleCount;
                                     self->m_imageAaccessor->set( idx, ( prevColor + rgba( color ) ) / ( self->m_sampleCount + self->m_samples ) );
@@ -390,6 +406,20 @@ namespace crimild {
                 }
             }
 
+            // launch all threads
+            for ( auto i = 0; i < m_workerCount; ++i ) {
+                m_workers.push_back(
+                    std::move(
+                        std::thread(
+                            [ & ] {
+                                Job job;
+                                while ( getNextJob( job ) ) {
+                                    job();
+                                }
+                                reportProgress();
+                            } ) ) );
+            }
+
             CRIMILD_LOG_INFO( "RT Samples: ", m_sampleCount );
 
             return true;
@@ -397,8 +427,16 @@ namespace crimild {
 
         void reset( void ) noexcept
         {
+            // wait for all threads to finish
+            for ( auto &worker : m_workers ) {
+                worker.join();
+            }
+
             m_nextJobIdx = 0;
             m_jobs.clear();
+            m_workers.clear();
+
+            m_progress = 0;
             m_sampleCount += m_samples;
         }
 
@@ -412,6 +450,18 @@ namespace crimild {
 
             nextJob = m_jobs[ m_nextJobIdx++ ];
             return true;
+        }
+
+        void reportProgress( void ) noexcept
+        {
+            std::lock_guard< std::mutex > lock( m_progressMutex );
+            m_progress++;
+        }
+
+        Bool isDone( void ) noexcept
+        {
+            std::lock_guard< std::mutex > lock( m_progressMutex );
+            return m_progress >= m_workerCount;
         }
 
     private:
@@ -428,172 +478,20 @@ namespace crimild {
 
         SharedPointer< Image > m_image;
         SharedPointer< BufferAccessor > m_imageAaccessor;
+        Array< ColorRGBA > m_colors;
 
         std::vector< Job > m_jobs;
         Index m_nextJobIdx = 0;
+
+        std::vector< std::thread > m_workers;
         std::mutex m_mutex;
+
+        Size m_progress = 0l;
+        std::mutex m_progressMutex;
     };
 }
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::softRT( void ) noexcept
 {
     return crimild::alloc< SoftRT >();
-
-    // auto rt = crimild::alloc< ScenePass >();
-    // rt->setName( "softRT" );
-
-    // auto settings = Simulation::getInstance()->getSettings();
-    // const Int32 width = settings->get< Int32 >( "video.width", 320 );
-    // const Int32 height = settings->get< Int32 >( "video.height", 240 );
-    // const Int32 bpp = 4;
-    // const Real aspectRatio = Real( width ) / Real( height );
-    // const Int32 samples = settings->get< Int32 >( "rt.samples", 1 );
-    // const Int32 depth = settings->get< Int32 >( "rt.depth", 10 );
-    // const Int32 tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
-    // const Int32 workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", std::thread::hardware_concurrency() ) );
-
-    // const auto backgroundColor = ColorRGB {
-    //     settings->get< Real >( "rt.background_color.r", 0.5f ),
-    //     settings->get< Real >( "rt.background_color.g", 0.7f ),
-    //     settings->get< Real >( "rt.background_color.b", 1.0f ),
-    // };
-
-    // auto image = crimild::alloc< Image >();
-    // image->extent = Extent3D {
-    //     .width = Real32( width ),
-    //     .height = Real32( height ),
-    // };
-
-    // image->format = crimild::utils::getFormat< ColorRGBA >();
-
-    // image->setBufferView(
-    //     [ & ] {
-    //         auto buffer = crimild::alloc< Buffer >( Array< ColorRGBA >( width * height ) );
-    //         auto bufferView = crimild::alloc< BufferView >( BufferView::Target::IMAGE, buffer, 0, sizeof( ColorRGBA ) );
-    //         bufferView->setUsage( BufferView::Usage::DYNAMIC );
-    //         return bufferView;
-    //     }() );
-
-    // auto colors = crimild::alloc< BufferAccessor >( image->getBufferView(), 0, sizeof( ColorRGBA ) );
-    // for ( auto i = 0l; i < width * height; ++i ) {
-    //     colors->set( i, ColorRGBA { 0, 0, 0, 1 } );
-    // }
-
-    // rt->apply = [ width, height, image, samples, tileSize, depth, workerCount, backgroundColor, colors, sampleCount = 0 ]( auto, auto ) mutable {
-    // auto scene = Simulation::getInstance()->getScene();
-    // if ( !scene ) {
-    //     return true;
-    // }
-
-    // auto camera = Camera::getMainCamera();
-    // if ( !camera ) {
-    //     return true;
-    // }
-
-    // scene->perform( UpdateWorldState() );
-
-    // Array< ColorRGBA > colors( width * height );
-
-    // auto reportProgress = [ mutex = std::mutex(),
-    //                         progress = 1l,
-    //                         max = size_t( width * height ),
-    //                         workerCount ]() mutable {
-    //     std::lock_guard< std::mutex > lock( mutex );
-    //     std::cout << "\rProcessing "
-    //               << progress
-    //               << "/"
-    //               << max
-    //               << " ("
-    //               << std::setprecision( 3 )
-    //               << std::setw( 5 )
-    //               << std::fixed
-    //               << 100.0f * float( progress ) / float( max )
-    //               << "%) - "
-    //               << workerCount << " workers"
-    //               << std::flush;
-    //     progress++;
-    // };
-
-    // using Job = std::function< void( void ) >;
-    // std::vector< Job > jobs;
-
-    // for ( auto y = 0; y < height; y += tileSize ) {
-    //     for ( auto x = 0; x < width; x += tileSize ) {
-    //         jobs.push_back(
-    //             [ &, x, y ] {
-    //                 for ( auto dy = 0; dy < tileSize; ++dy ) {
-    //                     if ( y + dy >= height )
-    //                         break;
-    //                     for ( auto dx = 0; dx < tileSize; ++dx ) {
-    //                         if ( x + dx >= width )
-    //                             break;
-    //                         // reportProgress();
-
-    //                         auto color = ColorRGB::Constants::BLACK;
-    //                         for ( auto s = 0l; s < samples; ++s ) {
-    //                             Ray3 ray;
-    //                             const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( width - 1 );
-    //                             const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( height - 1 );
-    //                             if ( camera->getPickRay( u, v, ray ) ) {
-    //                                 // TODO: defocus blur
-    //                                 // const auto aperture = 2.0f;
-    //                                 // const auto lensRadius = 0.5 * aperture;
-    //                                 // const auto rd = lensRadius * randomInUnitDisk();
-    //                                 // const auto offset = rd.x * R + rd.y * U;
-    //                                 // const auto R = Ray3 { origin( ray ) + offset, direction( ray ) - offset };
-    //                                 color = color + rayColor( ray, scene, backgroundColor, depth );
-    //                             }
-    //                         }
-    //                         const Index idx = ( y + dy ) * width + ( x + dx );
-    //                         const auto prevColor = colors->get< ColorRGBA >( idx ) * sampleCount;
-    //                         colors->set( idx, ( prevColor + rgba( color ) ) / ( sampleCount + samples ) );
-
-    //                         std::this_thread::yield();
-    //                     }
-    //                 }
-    //             } );
-    //     }
-    // }
-
-    // auto nextJob = [ mutex = std::mutex(),
-    //                  i = 0l,
-    //                  &jobs ]( auto &job ) mutable -> bool {
-    //     std::lock_guard< std::mutex > lock( mutex );
-    //     if ( i >= jobs.size() ) {
-    //         return false;
-    //     }
-    //     job = jobs[ i++ ];
-    //     return true;
-    // };
-
-    // // launch all threads
-    // std::vector< std::thread > workers;
-    // for ( auto i = 0; i < workerCount; ++i ) {
-    //     workers.push_back(
-    //         std::thread(
-    //             [ & ] {
-    //                 Job job;
-    //                 while ( nextJob( job ) ) {
-    //                     job();
-    //                 }
-    //             } ) );
-    // }
-
-    // for ( auto &worker : workers ) {
-    //     // wait for all threads to finish
-    //     worker.join();
-    // }
-
-    // // const auto prevSamples = sampleCount;
-    // sampleCount += samples;
-
-    // CRIMILD_LOG_INFO( "RT Samples: ", sampleCount );
-
-    // return true;
-    // };
-
-    // rt->writes( { image } );
-    // rt->produces( { image } );
-
-    // return rt;
 }
