@@ -37,7 +37,6 @@
 namespace crimild {
 
     class Group;
-    class LitMaterial;
     class SkinnedMesh;
 
     namespace animation {
@@ -45,6 +44,11 @@ namespace crimild {
         class Joint;
         class Skeleton;
 
+    }
+
+    namespace materials {
+
+        class PrincipledBSDF;
     }
 
     namespace import {
@@ -68,8 +72,8 @@ namespace crimild {
 
         private:
             void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-            void loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-            SharedPointer< LitMaterial > buildMaterial( const aiMaterial *mtl, std::string basePath );
+            void loadMaterialTexture( SharedPointer< materials::PrincipledBSDF > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
+            SharedPointer< materials::PrincipledBSDF > buildMaterial( const aiMaterial *mtl, std::string basePath );
             void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
             void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
         };

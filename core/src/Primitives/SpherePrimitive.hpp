@@ -38,6 +38,9 @@ namespace crimild {
 
     class SpherePrimitive : public Primitive {
     public:
+        static SharedPointer< Primitive > UNIT_SPHERE;
+
+    public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             Real32 radius = 1.0f;

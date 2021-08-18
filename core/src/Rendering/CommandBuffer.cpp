@@ -27,7 +27,9 @@
 
 #include "Rendering/CommandBuffer.hpp"
 
+#include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Framebuffer.hpp"
 #include "Rendering/IndexBuffer.hpp"
@@ -261,7 +263,27 @@ void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffse
 
 void CommandBuffer::drawPrimitive( Primitive *primitive ) noexcept
 {
+    switch ( primitive->getType() ) {
+        case Primitive::Type::SPHERE: {
+            primitive = crimild::get_ptr( SpherePrimitive::UNIT_SPHERE );
+            break;
+        }
+
+        case Primitive::Type::BOX: {
+            primitive = crimild::get_ptr( BoxPrimitive::UNIT_BOX );
+            break;
+        }
+
+        default:
+            break;
+    }
+
     auto vertices = primitive->getVertexData()[ 0 ];
+    if ( vertices == nullptr ) {
+        // nothing to render
+        return;
+    }
+
     bindVertexBuffer( get_ptr( vertices ) );
 
     auto indices = primitive->getIndices();

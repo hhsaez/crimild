@@ -40,6 +40,9 @@ namespace crimild {
      */
     class BoxPrimitive : public Primitive {
     public:
+        static SharedPointer< Primitive > UNIT_BOX;
+
+    public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             VertexLayout layout = VertexP3N3TC2::getLayout();

@@ -73,6 +73,8 @@ namespace crimild {
         Set< RenderResourceType * > m_resources;
     };
 
+    // TODO: deprecate this in favor of keeping track of renderables in managers and
+    // using messaging for bind/update/unbind
     template< typename T >
     class RenderResourceImpl {
     public:

@@ -40,7 +40,11 @@
 
 namespace crimild {
 
-    class LitMaterial;
+    namespace materials {
+
+        class PrincipledBSDF;
+
+    }
 
     class OBJLoader : public NonCopyable {
     private:
@@ -114,8 +118,8 @@ namespace crimild {
         std::list< SharedPointer< Group > > _objects;
         Group *_currentObject = nullptr;
 
-        std::map< std::string, SharedPointer< LitMaterial > > _materials;
-        LitMaterial *_currentMaterial = nullptr;
+        std::map< std::string, SharedPointer< materials::PrincipledBSDF > > _materials;
+        materials::PrincipledBSDF *_currentMaterial = nullptr;
 
         std::vector< Vector3f > _positions;
         std::vector< Vector2f > _textureCoords;

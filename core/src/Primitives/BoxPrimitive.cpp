@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+SharedPointer< Primitive > BoxPrimitive::UNIT_BOX = crimild::alloc< BoxPrimitive >( BoxPrimitive::Params {} );
+
 BoxPrimitive::BoxPrimitive( void ) noexcept
     : BoxPrimitive( Params {} )
 {

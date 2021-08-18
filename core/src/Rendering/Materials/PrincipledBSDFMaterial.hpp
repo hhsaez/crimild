@@ -36,16 +36,17 @@ namespace crimild {
     namespace materials {
 
         /**
-       \brief A PBR-based material
+            \brief A PBR-based material
 
-        Based on Disney/Unreal PBR system
-     */
+            Based on Disney/Unreal PBR system
+        */
         class PrincipledBSDF : public Material {
         private:
             struct Props {
                 alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
                 alignas( 4 ) Real32 metallic = 0;
                 alignas( 4 ) Real32 roughness = 0;
+                alignas( 4 ) Real32 ambientOcclusion = 1;
                 alignas( 4 ) Real32 transmission = 0;
                 alignas( 4 ) Real32 indexOfRefraction = 0;
                 alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
@@ -57,12 +58,35 @@ namespace crimild {
 
             inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo; };
             inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo; }
+            void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
+            const Texture *getAlbedoMap( void ) const noexcept;
+            Texture *getAlbedoMap( void ) noexcept;
 
             inline void setMetallic( const Real32 &metallic ) noexcept { getProps().metallic = metallic; };
             inline Real32 getMetallic( void ) const noexcept { return getProps().metallic; }
+            void setMetallicMap( SharedPointer< Texture > const &metallicMap ) noexcept;
+            const Texture *getMetallicMap( void ) const noexcept;
+            Texture *getMetallicMap( void ) noexcept;
 
             inline void setRoughness( const Real32 &roughness ) noexcept { getProps().roughness = roughness; };
             inline Real32 getRoughness( void ) const noexcept { return getProps().roughness; }
+            void setRoughnessMap( SharedPointer< Texture > const &roughnessMap ) noexcept;
+            const Texture *getRoughnessMap( void ) const noexcept;
+            Texture *getRoughnessMap( void ) noexcept;
+
+            inline void setAmbientOcclusion( const Real32 &ambientOcclusion ) noexcept { getProps().ambientOcclusion = ambientOcclusion; };
+            inline Real32 getAmbientOcclusion( void ) const noexcept { return getProps().ambientOcclusion; }
+            void setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept;
+            const Texture *getAmbientOcclusionMap( void ) const noexcept;
+            Texture *getAmbientOcclusionMap( void ) noexcept;
+
+            void setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &roughnessMetallicMap ) noexcept;
+            const Texture *getCombinedRoughnessMetallicMap( void ) const noexcept;
+            Texture *getCombinedRoughnessMetallicMap( void ) noexcept;
+
+            void setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept override;
+            const Texture *getNormalMap( void ) const noexcept;
+            Texture *getNormalMap( void ) noexcept override;
 
             inline void setTransmission( const Real32 &transmission ) noexcept { getProps().transmission = transmission; };
             inline Real32 getTransmission( void ) const noexcept { return getProps().transmission; }

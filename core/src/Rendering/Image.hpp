@@ -41,6 +41,24 @@
 
 namespace crimild {
 
+    class Image;
+
+    namespace messaging {
+
+        struct ImageCreated {
+            Image *image;
+        };
+
+        struct ImageContentsChanged {
+            Image *image;
+        };
+
+        struct ImageDestroyed {
+            Image *image;
+        };
+
+    }
+
     class Image
         : public coding::Codable,
           public NamedObject,

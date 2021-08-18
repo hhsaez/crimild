@@ -34,6 +34,8 @@
 
 using namespace crimild;
 
+SharedPointer< Primitive > SpherePrimitive::UNIT_SPHERE = crimild::alloc< SpherePrimitive >( SpherePrimitive::Params {} );
+
 SpherePrimitive::SpherePrimitive( void ) noexcept
     : SpherePrimitive( Params {} )
 {
