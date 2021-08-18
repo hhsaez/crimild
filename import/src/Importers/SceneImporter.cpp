@@ -37,7 +37,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
-#include "Rendering/Materials/LitMaterial.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/SkinnedMesh.hpp"
 #include "Rendering/Texture.hpp"
@@ -135,7 +135,7 @@ void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
     };
 }
 
-void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
+void SceneImporter::loadMaterialTexture( SharedPointer< materials::PrincipledBSDF > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
 {
     if ( !input->GetTextureCount( texType ) ) {
         return;
@@ -207,9 +207,9 @@ void SceneImporter::loadMaterialTexture( SharedPointer< LitMaterial > material, 
     }
 }
 
-SharedPointer< LitMaterial > SceneImporter::buildMaterial( const aiMaterial *mtl, std::string basePath )
+SharedPointer< materials::PrincipledBSDF > SceneImporter::buildMaterial( const aiMaterial *mtl, std::string basePath )
 {
-    auto material = crimild::alloc< LitMaterial >();
+    auto material = crimild::alloc< materials::PrincipledBSDF >();
 
     unsigned int max = 1;
 

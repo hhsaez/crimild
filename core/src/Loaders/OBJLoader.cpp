@@ -34,7 +34,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
-#include "Rendering/Materials/LitMaterial.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Simulation/FileSystem.hpp"
@@ -331,7 +331,7 @@ void OBJLoader::readMaterialName( std::stringstream &line )
     std::string name;
     line >> name;
 
-    auto tmp = crimild::alloc< LitMaterial >();
+    auto tmp = crimild::alloc< materials::PrincipledBSDF >();
     tmp->setMetallic( 0.0f );
     _materials[ name ] = tmp;
     _currentMaterial = crimild::get_ptr( tmp );

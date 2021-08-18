@@ -28,15 +28,23 @@
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Pipeline.hpp"
+#include "Rendering/Programs/LitShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Simulation/AssetManager.hpp"
 
 using namespace crimild;
 using namespace crimild::materials;
 
 PrincipledBSDF::PrincipledBSDF( void ) noexcept
 {
-    // TODO(hernan): This material cannot be used with shaders (yet)
-    setGraphicsPipeline( nullptr );
+    // Use a default pipeline
+    setGraphicsPipeline(
+        [] {
+            auto pipeline = crimild::alloc< GraphicsPipeline >();
+            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() ) );
+            return pipeline;
+        }() );
 
     setDescriptors(
         [ & ] {
@@ -45,6 +53,36 @@ PrincipledBSDF::PrincipledBSDF( void ) noexcept
                 Descriptor {
                     .descriptorType = DescriptorType::UNIFORM_BUFFER,
                     .obj = crimild::alloc< UniformBuffer >( Props {} ),
+                },
+                {
+                    // Albedo map
+                    .descriptorType = DescriptorType::ALBEDO_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Metallic map
+                    .descriptorType = DescriptorType::METALLIC_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Roughness map
+                    .descriptorType = DescriptorType::ROUGHNESS_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Ambient Occlusion map
+                    .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Ambient Roughness/Metallic map
+                    .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
+                    .obj = Texture::ONE,
+                },
+                {
+                    // Normal map
+                    .descriptorType = DescriptorType::NORMAL_MAP,
+                    .obj = Texture::ZERO,
                 },
             };
             return descriptors;
@@ -59,4 +97,94 @@ PrincipledBSDF::Props &PrincipledBSDF::getProps( void ) noexcept
 const PrincipledBSDF::Props &PrincipledBSDF::getProps( void ) const noexcept
 {
     return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< Props >();
+}
+
+void PrincipledBSDF::setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept
+{
+    getDescriptors()->descriptors[ 1 ].obj = albedoMap;
+}
+
+const Texture *PrincipledBSDF::getAlbedoMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getAlbedoMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+}
+
+void PrincipledBSDF::setMetallicMap( SharedPointer< Texture > const &metallicMap ) noexcept
+{
+    getDescriptors()->descriptors[ 2 ].obj = metallicMap;
+}
+
+const Texture *PrincipledBSDF::getMetallicMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 2 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getMetallicMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 2 ].get< Texture >();
+}
+
+void PrincipledBSDF::setRoughnessMap( SharedPointer< Texture > const &roughnessMap ) noexcept
+{
+    getDescriptors()->descriptors[ 3 ].obj = roughnessMap;
+}
+
+const Texture *PrincipledBSDF::getRoughnessMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 3 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getRoughnessMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 3 ].get< Texture >();
+}
+
+void PrincipledBSDF::setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept
+{
+    getDescriptors()->descriptors[ 4 ].obj = ambientOcclusionMap;
+}
+
+const Texture *PrincipledBSDF::getAmbientOcclusionMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 4 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getAmbientOcclusionMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 4 ].get< Texture >();
+}
+
+void PrincipledBSDF::setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &rm ) noexcept
+{
+    getDescriptors()->descriptors[ 5 ].obj = rm;
+}
+
+const Texture *PrincipledBSDF::getCombinedRoughnessMetallicMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getCombinedRoughnessMetallicMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 5 ].get< Texture >();
+}
+
+void PrincipledBSDF::setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept
+{
+    getDescriptors()->descriptors[ 6 ].obj = normalMap;
+}
+
+const Texture *PrincipledBSDF::getNormalMap( void ) const noexcept
+{
+    return getDescriptors()->descriptors[ 6 ].get< Texture >();
+}
+
+Texture *PrincipledBSDF::getNormalMap( void ) noexcept
+{
+    return getDescriptors()->descriptors[ 6 ].get< Texture >();
 }
