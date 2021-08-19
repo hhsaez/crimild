@@ -120,7 +120,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 
                                 layout( set = 1, binding = 0 ) uniform Material
                                 {
-                                    vec4 albedo;
+                                    vec3 albedo;
                                     float metallic;
                                     float roughness;
                                     float ambientOcclusion;

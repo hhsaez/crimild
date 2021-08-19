@@ -122,19 +122,18 @@ void RenderSystem::start( void ) noexcept
                 return present( normals );
             }
 
-            //            auto reflectionAtlasPass = computeReflectionMap( envRenderables );
-            //            auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
-            //            auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
-            //            auto brdfLutPass = computeBRDFLUT( nullptr );
+            auto reflectionAtlasPass = computeReflectionMap( envRenderables );
+            auto irradianceMapPass = computeIrradianceMap( useResource( reflectionAtlasPass ) );
+            auto prefilterMapPass = computePrefilterMap( useResource( reflectionAtlasPass ) );
+            auto brdfLutPass = computeBRDFLUT( nullptr );
 
             auto shadowAtlasPass = renderShadowAtlas( litRenderables );
 
-            // TODO
             auto shadowAtlas = useResource( shadowAtlasPass );
-            auto reflectionAtlas = Image::ZERO; //useResource( reflectionAtlasPass );
-            auto irradianceAtlas = Image::ZERO; //useResource( irradianceMapPass );
-            auto prefilterAtlas = Image::ZERO;  //useResource( prefilterMapPass );
-            auto brdfLUT = Image::ONE;          //useResource( brdfLutPass );
+            auto reflectionAtlas = useResource( reflectionAtlasPass );
+            auto irradianceAtlas = useResource( irradianceMapPass );
+            auto prefilterAtlas = useResource( prefilterMapPass );
+            auto brdfLUT = useResource( brdfLutPass );
 
             // todo: rename to "localLightingPass"
             auto lit = lightingPass(
@@ -172,7 +171,7 @@ void RenderSystem::start( void ) noexcept
                     useResource( env ),
                 } );
 
-            if ( settings->get< Bool >( "video.ssao.enabled", false ) ) {
+            if ( settings->get< Bool >( "video.ssao.enabled", true ) ) {
                 auto withBlur = [ & ]( auto op ) {
                     if ( settings->get< Bool >( "video.ssao.blur", true ) ) {
                         return blur( useResource( op ) );
