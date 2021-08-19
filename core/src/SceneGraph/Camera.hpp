@@ -113,6 +113,31 @@ namespace crimild {
     private:
         bool _cullingEnabled = true;
         Plane3 _cullingPlanes[ 6 ];
+
+        /**
+         * \name Physical properties
+         */
+        //@{
+
+    public:
+        inline Real getFocusDistance( void ) const noexcept { return m_focusDistance; }
+        inline void setFocusDistance( Real focusDistance ) noexcept { m_focusDistance = focusDistance; }
+
+        inline Real getAperture( void ) const noexcept { return m_aperture; }
+        inline void setAperture( Real aperture ) noexcept { m_aperture = aperture; }
+
+    private:
+        /**
+         *  \brief Distance from the camera lens to the focus plane
+         */
+        Real m_focusDistance = Real( 1 );
+
+        /**
+         * \brief Aperture of the camera lens (in mm).
+         */
+        Real m_aperture = Real( 0 );
+
+        //@}
     };
 
 }

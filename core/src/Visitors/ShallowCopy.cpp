@@ -94,6 +94,8 @@ void ShallowCopy::visitCamera( Camera *camera )
 {
     auto copy = crimild::alloc< Camera >();
     copy->setProjectionMatrix( camera->getProjectionMatrix() );
+    copy->setFocusDistance( camera->getFocusDistance() );
+    copy->setAperture( camera->getAperture() );
     copyNode( camera, crimild::get_ptr( copy ) );
 
     visitGroup( camera );

@@ -366,10 +366,16 @@ namespace crimild {
             // Reset all jobs and wait for workers to finish
             reset();
 
+            const auto cameraFocusDistance = camera->getFocusDistance();
+            const auto cameraAperture = camera->getAperture();
+            const auto cameraLensRadius = 0.5f * cameraAperture;
+            const auto cameraRight = right( camera->getWorld() );
+            const auto cameraUp = up( camera->getWorld() );
+
             for ( auto y = 0; y < m_height; y += m_tileSize ) {
                 for ( auto x = 0; x < m_width; x += m_tileSize ) {
                     m_jobs.push_back(
-                        [ self = this, scene, camera, x, y ] {
+                        [ self = this, scene, camera, x, y, cameraFocusDistance, cameraLensRadius, cameraUp, cameraRight ] {
                             for ( auto dy = 0; dy < self->m_tileSize; ++dy ) {
                                 if ( y + dy >= self->m_height ) {
                                     break;
@@ -381,16 +387,19 @@ namespace crimild {
 
                                     auto color = ColorRGB::Constants::BLACK;
                                     for ( auto s = 0l; s < self->m_samples; ++s ) {
-                                        Ray3 ray;
                                         const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( self->m_width - 1 );
                                         const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( self->m_height - 1 );
+
+                                        Ray3 ray;
                                         if ( camera->getPickRay( u, v, ray ) ) {
-                                            // TODO: defocus blur
-                                            // const auto aperture = 2.0f;
-                                            // const auto lensRadius = 0.5 * aperture;
-                                            // const auto rd = lensRadius * randomInUnitDisk();
-                                            // const auto offset = rd.x * R + rd.y * U;
-                                            // const auto R = Ray3 { origin( ray ) + offset, direction( ray ) - offset };
+                                            // Calculate depth-of-field based on camera properties
+                                            const auto rd = cameraLensRadius * randomInUnitDisk();
+                                            const auto offset = cameraRight * rd.x + cameraUp * rd.y;
+                                            ray = Ray3 {
+                                                origin( ray ) + offset,
+                                                cameraFocusDistance * direction( ray ) - offset,
+                                            };
+
                                             color = color + rayColor( ray, get_ptr( scene ), self->m_backgroundColor, self->m_depth );
                                         }
                                     }
