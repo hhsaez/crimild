@@ -326,13 +326,17 @@ namespace crimild {
                 return true;
             }
 
-            auto scene = []() -> SharedPointer< Node > {
+            auto scene = [ & ]() -> SharedPointer< Node > {
+                if ( m_scene != nullptr ) {
+                    return m_scene;
+                }
+
                 // We want to avoid blocking the main thread so we can get a progressive result,
                 // but scenes can be updated in between samples. During an update, a scene could
                 // reset its transform during the world update process, which might also affect
                 // the camera. So, the easiest way to avoid artifacts during rendering is to
                 // clone the entire scene. This is very much like collecting renderables and
-                // forwarding them to the GPU, just much slower
+                // forwarding them to the GPU, just much slower.
                 // TODO: should I build an acceleration structor (BVH?) as part of this process?
                 // TODO: maybe just collect geometries...
                 auto scene = Simulation::getInstance()->getScene();
@@ -340,11 +344,13 @@ namespace crimild {
                     return nullptr;
                 }
 
+                CRIMILD_LOG_DEBUG( "Cloning scene before rendering" );
+
                 ShallowCopy copy;
                 scene->perform( copy );
-                auto ret = copy.getResult< Node >();
-                ret->perform( UpdateWorldState() );
-                return ret;
+                m_scene = copy.getResult< Node >();
+                m_scene->perform( UpdateWorldState() );
+                return m_scene;
             }();
 
             if ( !scene ) {
@@ -353,18 +359,31 @@ namespace crimild {
                 return true;
             }
 
-            FetchCameras fetchCameras;
-            scene->perform( fetchCameras );
-            if ( !fetchCameras.hasCameras() ) {
+            // Reset all jobs and wait for workers to finish
+            reset();
+
+            auto camera = [ & ]() -> SharedPointer< Camera > {
+                if ( m_camera != nullptr ) {
+                    return m_camera;
+                }
+
+                CRIMILD_LOG_DEBUG( "Fetching cameras" );
+
+                FetchCameras fetchCameras;
+                scene->perform( fetchCameras );
+                if ( !fetchCameras.hasCameras() ) {
+                    return nullptr;
+                }
+
+                m_camera = crimild::retain( fetchCameras.anyCamera() );
+                return m_camera;
+            }();
+
+            if ( m_camera == nullptr ) {
                 std::cout << "no cameras" << std::endl;
                 exit( -1 );
                 return true;
             }
-
-            auto camera = crimild::retain( fetchCameras.anyCamera() );
-
-            // Reset all jobs and wait for workers to finish
-            reset();
 
             const auto cameraFocusDistance = camera->getFocusDistance();
             const auto cameraAperture = camera->getAperture();
@@ -447,6 +466,12 @@ namespace crimild {
 
             m_progress = 0;
             m_sampleCount += m_samples;
+
+            if ( Simulation::getInstance()->getSettings()->get< Bool >( "rt.dynamic_scene", false ) ) {
+                // Scene is dynamic, so reset cached scene and camera
+                m_scene = nullptr;
+                m_camera = nullptr;
+            }
         }
 
         Bool getNextJob( Job &nextJob ) noexcept
@@ -484,6 +509,9 @@ namespace crimild {
         Int32 m_workerCount;
         ColorRGB m_backgroundColor;
         Int32 m_sampleCount = 0;
+
+        SharedPointer< Node > m_scene;
+        SharedPointer< Camera > m_camera;
 
         SharedPointer< Image > m_image;
         SharedPointer< BufferAccessor > m_imageAaccessor;
