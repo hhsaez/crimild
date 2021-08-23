@@ -27,6 +27,7 @@
 
 #include "Simulation/Systems/ImGUISystem.hpp"
 
+#include "Coding/Encoder.hpp"
 #include "Foundation/Version.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Operations/ImGUIOperations.hpp"
@@ -36,7 +37,6 @@
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
-#include "Coding/Encoder.hpp"
 #include "imgui.h"
 
 using namespace crimild;
@@ -54,27 +54,7 @@ namespace crimild {
                 ImGui::Text( "Class: %s", codable->getClassName() );
                 ImGui::Text( "ID: %llu", codable->getUniqueID() );
 
-            //                ImGui::Text( "Name: %s", !node->getName().empty() ? node->getName().c_str() : "<No Name>" );
-//                ImGui::Text( "Class: %s", node->getClassName() );
-
-//                _ss << "{ ";
-//                _indentLevel++;
-//
-//                encodeKey( "type" );
-//                _ss << "'" << codable->getClassName() << "', ";
-//
-//                encodeKey( "id" );
-//                _ss << codable->getUniqueID() << ", ";
-//
                 codable->encode( *this );
-//
-//                _indentLevel--;
-//
-//                _ss << getIndentSpaces() << "}";
-//
-//                if ( _arrayKeys.size() == 0 ) {
-//                    _ss << "\n";
-//                }
 
                 return true;
             }
@@ -86,8 +66,6 @@ namespace crimild {
                 }
 
                 encodeKey( key );
-//                encode( codable );
-//                _ss << ", ";
 
                 return true;
             }
@@ -95,8 +73,6 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, std::string value ) override
             {
                 encodeKey( key );
-//                _ss << "'" << value << "', ";
-
                 return true;
             }
 
@@ -112,14 +88,11 @@ namespace crimild {
 
             virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override
             {
-            	ImGui::ColorEdit3( key.c_str(), const_cast< float * >( &value.r ) );
-//            	return encodeValues( key, 3, static_cast< const float * >( &value.r ) );
-
+                ImGui::ColorEdit3( key.c_str(), const_cast< float * >( &value.r ) );
             }
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override
             {
-				ImGui::ColorEdit4( key.c_str(), const_cast< float * >( &value.r ) );
-            	//return encodeValues( key, 4, static_cast< const float * >( &value.r ) );
+                ImGui::ColorEdit4( key.c_str(), const_cast< float * >( &value.r ) );
             }
             virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
@@ -130,20 +103,6 @@ namespace crimild {
 
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override
             {
-                /*
-                encodeKey( key );
-
-                _ss << "{ ";
-                _indentLevel++;
-
-                encode( "translate", value.getTranslate() );
-                encode( "rotate_q", value.getRotate() );
-                encode( "scale", value.getScale() );
-
-                _indentLevel--;
-                _ss << getIndentSpaces() << "}, ";
-                */
-
                 return true;
             }
 
@@ -158,11 +117,7 @@ namespace crimild {
         protected:
             virtual void encodeArrayBegin( std::string key, crimild::Size count ) override
             {
-//                _arrayKeys.push( key );
-//
-//                _ss << getIndentSpaces() << key << " = { ";
-//
-//                ++_indentLevel;
+                // TODO
             }
 
             virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override
@@ -172,15 +127,12 @@ namespace crimild {
 
             virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override
             {
-
+                // TODO
             }
 
             virtual void encodeArrayEnd( std::string key ) override
             {
-//                _arrayKeys.pop();
-//
-//                --_indentLevel;
-//                _ss << getIndentSpaces() << "},";
+                // TODO
             }
 
         private:
@@ -188,8 +140,6 @@ namespace crimild {
             crimild::Bool encodeValue( std::string key, const T &value )
             {
                 encodeKey( key );
-//                _ss << value << ", ";
-
                 return true;
             }
 
@@ -197,15 +147,6 @@ namespace crimild {
             crimild::Bool encodeValues( std::string key, crimild::Size count, const T *values )
             {
                 encodeKey( key );
-//                _ss << "{ ";
-//                for ( crimild::Size i = 0; i < count; i++ ) {
-//                    if ( i > 0 ) {
-//                        _ss << ", ";
-//                    }
-//                    _ss << values[ i ];
-//                }
-//                _ss << "}, ";
-
                 return true;
             }
 
@@ -257,12 +198,67 @@ namespace crimild {
 
             bool open = false;
             if ( ImGui::Begin( "Node Inspector", &open, ImGuiWindowFlags_NoCollapse ) ) {
-            	auto encoder = crimild::alloc< coding::ImGuiInspectorEncoder >();
+                auto encoder = crimild::alloc< coding::ImGuiInspectorEncoder >();
                 auto nodePtr = crimild::retain( node );
-             	encoder->encode( nodePtr );
-//                ImGui::Text( "Name: %s", !node->getName().empty() ? node->getName().c_str() : "<No Name>" );
-//                ImGui::Text( "Class: %s", node->getClassName() );
+                encoder->encode( nodePtr );
             }
+            ImGui::End();
+        }
+
+        void showToolsFramegraph( Settings *settings ) noexcept
+        {
+            static FrameGraphOperation *selected = nullptr;
+
+            if ( !settings->get< Bool >( "ui.tools.framegraph.show" ) ) {
+                return;
+            }
+
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 300, 300 ), ImGuiCond_FirstUseEver );
+
+            class FramegraphTraversal {
+            public:
+                void operator()( FrameGraphOperation *op ) noexcept
+                {
+                    traverse( op );
+                }
+
+            private:
+                void traverse( FrameGraphOperation *op ) noexcept
+                {
+                    if ( ImGui::TreeNodeEx( op->getName().c_str() ) ) {
+                        if ( ImGui::IsItemClicked() ) {
+                            selected = op;
+                        }
+
+                        op->eachBlockedBy(
+                            [ & ]( auto other ) {
+                                traverse( get_ptr( other ) );
+                            } );
+
+                        ImGui::TreePop();
+                    }
+                }
+            };
+
+            auto open = true;
+            if ( ImGui::Begin( "Framegraph", &open, ImGuiWindowFlags_NoCollapse ) ) {
+                auto framegraph = RenderSystem::getInstance()->getFrameGraph();
+                if ( framegraph != nullptr ) {
+                    auto traverse = FramegraphTraversal();
+                    traverse( get_ptr( framegraph ) );
+                } else {
+                    ImGui::Text( "No valid scene" );
+                }
+                ImGui::Text( "" ); // padding
+            }
+
+            if ( !open ) {
+                selected = nullptr;
+            }
+
+            settings->set( "ui.tools.framegraph.show", open );
+
             ImGui::End();
         }
 
@@ -302,7 +298,7 @@ namespace crimild {
                 }
 
             private:
-            	Size m_ptrId = 0;
+                Size m_ptrId = 0;
                 ImGuiTreeNodeFlags m_baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
             };
 
@@ -319,17 +315,17 @@ namespace crimild {
                 if ( scene ) {
                     scene->perform( SceneTreeBuilder() );
                     if ( selected ) {
-                    	showNodeInspector( selected );
+                        showNodeInspector( selected );
                     }
                 } else {
                     ImGui::Text( "No valid scene" );
-                	selected = nullptr;
+                    selected = nullptr;
                 }
                 ImGui::Text( "" ); // padding
             }
 
             if ( !open ) {
-	            selected = nullptr;
+                selected = nullptr;
             }
 
             settings->set( "ui.tools.scene_tree.show", open );
@@ -361,6 +357,28 @@ namespace crimild {
             settings->set( "ui.edit.rendering.show", open );
         }
 
+        void showEditSettings( Settings *settings ) noexcept
+        {
+            if ( !settings->get< Bool >( "ui.edit.settings.show" ) ) {
+                return;
+            }
+
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 400, 300 ), ImGuiCond_FirstUseEver );
+
+            auto open = true;
+            if ( ImGui::Begin( "Settings", &open, ImGuiWindowFlags_NoCollapse ) ) {
+                settings->each(
+                    [ & ]( auto key, auto ) {
+                        ImGui::Text( "%s: %s", key.c_str(), settings->get< std::string >( key ).c_str() );
+                    } );
+            }
+
+            ImGui::End();
+
+            settings->set( "ui.edit.settings.show", open );
+        }
+
         void showMainMenu( Settings *settings ) noexcept
         {
             auto showAbout = false;
@@ -373,12 +391,18 @@ namespace crimild {
                     if ( ImGui::MenuItem( "Rendering..." ) ) {
                         settings->set( "ui.edit.rendering.show", true );
                     }
+                    if ( ImGui::MenuItem( "Settings..." ) ) {
+                        settings->set( "ui.edit.settings.show", true );
+                    }
                     ImGui::EndMenu();
                 }
 
                 if ( ImGui::BeginMenu( "Tools" ) ) {
                     if ( ImGui::MenuItem( "Scene Tree..." ) ) {
                         settings->set( "ui.tools.scene_tree.show", true );
+                    }
+                    if ( ImGui::MenuItem( "Framegraph..." ) ) {
+                        settings->set( "ui.tools.framegraph.show", true );
                     }
                     ImGui::EndMenu();
                 }
@@ -401,8 +425,10 @@ namespace crimild {
             }
 
             showEditRendering( settings );
+            showEditSettings( settings );
 
             showToolsSceneTree( settings );
+            showToolsFramegraph( settings );
         }
 
     }
