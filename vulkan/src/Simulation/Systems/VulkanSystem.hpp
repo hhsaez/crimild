@@ -67,7 +67,8 @@ namespace crimild {
               public VulkanSurfaceManager,
               public PhysicalDeviceManager,
               public RenderDeviceManager,
-              public VulkanDebugMessengerManager {
+              public VulkanDebugMessengerManager,
+              public DynamicSingleton< VulkanSystem > {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanSystem )
 
         public:
@@ -83,9 +84,12 @@ namespace crimild {
             void onRender( void ) noexcept override;
             void stop( void ) noexcept override;
 
-            RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
-            Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
-            CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
+            inline PhysicalDevice *getPhysicalDevice( void ) noexcept { return crimild::get_ptr( m_physicalDevice ); }
+            inline RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+            inline Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+            inline CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
+
+            inline UInt32 getCurrentFrameId( void ) const noexcept { return m_currentFrame; }
 
         protected:
             virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
@@ -106,8 +110,6 @@ namespace crimild {
             void updateUniformBuffers( void ) noexcept;
 
             void cleanSwapchain( void ) noexcept;
-
-            void takeScreenshot( std::string filename ) noexcept;
 
         private:
             SharedPointer< VulkanInstance > m_instance;

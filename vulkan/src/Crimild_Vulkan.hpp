@@ -29,14 +29,15 @@
 #define CRIMILD_VULKAN_
 
 #include "Rendering/VulkanShaderCompiler.hpp"
+#include "Simulation/Systems/VulkanCaptureSystem.hpp"
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
-		void init( void );
+        void init( void );
 
-	}
+    }
 
 }
 
