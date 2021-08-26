@@ -57,6 +57,7 @@ int main( int argc, char **argv )
     sim->attachSystem< GLFWSystem >();
     sim->attachSystem< WindowSystem >();
     sim->attachSystem< GLFWVulkanSystem >();
+    sim->attachSystem< vulkan::CaptureSystem >();
     sim->attachSystem< EventSystem >();
     sim->attachSystem< InputSystem >();
     sim->attachSystem< UpdateSystem >();

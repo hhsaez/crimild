@@ -27,14 +27,33 @@
 
 #include "Simulation/Systems/CaptureSystem.hpp"
 
+#include "Simulation/Input.hpp"
+#include "Simulation/Simulation.hpp"
+
 using namespace crimild;
 
 void CaptureSystem::start( void ) noexcept
 {
     System::start();
+
+    registerMessageHandler< crimild::messaging::KeyReleased >(
+        [ & ]( crimild::messaging::KeyReleased const &msg ) {
+            switch ( msg.key ) {
+                case CRIMILD_INPUT_KEY_F8:
+                    takeScreenshot();
+                    break;
+
+                default:
+                    break;
+            }
+        } );
 }
 
 void CaptureSystem::onBeforeStop( void ) noexcept
 {
     System::onBeforeStop();
+
+    if ( Simulation::getInstance()->getSettings()->get< Bool >( "capture.on_terminate", false ) ) {
+        takeScreenshot();
+    }
 }

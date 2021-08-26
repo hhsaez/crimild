@@ -25,26 +25,26 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CRIMILD_SIMULATION_SYSTEMS_CAPTURE_
-#define CRIMILD_SIMULATION_SYSTEMS_CAPTURE_
+#ifndef CRIMILD_VULKAN_SIMULATION_SYSTEMS_CAPTURE_
+#define CRIMILD_VULKAN_SIMULATION_SYSTEMS_CAPTURE_
 
-#include "Foundation/Singleton.hpp"
-#include "System.hpp"
+#include "Simulation/Systems/CaptureSystem.hpp"
 
 namespace crimild {
 
-    class CaptureSystem : public System, public DynamicSingleton< CaptureSystem > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::CaptureSystem )
+    namespace vulkan {
 
-    public:
-        virtual void start( void ) noexcept override;
-        virtual void onBeforeStop( void ) noexcept override;
+        class CaptureSystem : public crimild::CaptureSystem {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CaptureSystem )
 
-        /**
-         * \brief Takes a screenshot of the image currently displayed on screen
-         */
-        virtual bool takeScreenshot( void ) noexcept { return false; }
-    };
+        public:
+            /**
+            * \brief Takes a screenshot of the image currently displayed on screen
+            */
+            virtual Bool takeScreenshot( void ) noexcept override;
+        };
+
+    }
 
 }
 
