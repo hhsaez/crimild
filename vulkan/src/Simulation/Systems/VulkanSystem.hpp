@@ -107,6 +107,8 @@ namespace crimild {
 
             void cleanSwapchain( void ) noexcept;
 
+            void takeScreenshot( std::string filename ) noexcept;
+
         private:
             SharedPointer< VulkanInstance > m_instance;
             SharedPointer< VulkanDebugMessenger > m_debugMessenger;

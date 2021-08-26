@@ -178,8 +178,8 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
     // Images created by the swapchain are usually used as color attachments
     // It might be possible to used the for other purposes, like sampling or
     // to copy to or from them to other surfaces.
-    // TODO: add VK_IMAGE_USAGE_TRANSFER_SRC_BIT maybe? That can be used for screenshots
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    // VK_IMAGE_USAGE_TRANSFER_SRC_BIT is requried for taking screenshots.
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
     auto indices = utils::findQueueFamilies( physicalDevice->handler, surface->handler );
     uint32_t queueFamilyIndices[] = {
