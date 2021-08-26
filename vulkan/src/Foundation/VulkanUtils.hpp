@@ -216,7 +216,7 @@ namespace crimild {
                 VkFormat format;
                 VkImageTiling tiling;
                 VkImageUsageFlags usage;
-                VkMemoryPropertyFlags properties;
+                VkMemoryPropertyFlags memoryProperties = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
                 crimild::UInt32 mipLevels = 1;
                 VkSampleCountFlagBits numSamples = VK_SAMPLE_COUNT_1_BIT;
                 crimild::UInt32 arrayLayers = 1;

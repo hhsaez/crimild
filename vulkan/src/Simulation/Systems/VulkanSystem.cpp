@@ -426,83 +426,30 @@ void VulkanSystem::takeScreenshot( std::string filename ) noexcept
     CRIMILD_LOG_DEBUG( "Creating destination image..." );
 
     // Create the linear tiled destination image to copy to and to read the memory from
-    auto imageCreateCI = VkImageCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .imageType = VK_IMAGE_TYPE_2D,
-        // Note that vkCmdBlitImage (if supported) will also do format conversions if the swapchain color format would differ
-        // https://community.khronos.org/t/vkqueuesubmit-frozen-when-the-commad-buffer-contains-vkcmdcopyimage/105412/4
-        .format = VK_FORMAT_B8G8R8A8_UNORM, //VK_FORMAT_R8G8B8A8_UNORM,
-        .extent = VkExtent3D {
-            .width = UInt32( width ),
-            .height = UInt32( height ),
-            .depth = 1,
-        },
-        .arrayLayers = 1,
-        .mipLevels = 1,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
-        .tiling = VK_IMAGE_TILING_LINEAR,
-        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-    };
-
-    // Create the image
     VkImage dstImage;
-    CRIMILD_VULKAN_CHECK(
-        vkCreateImage(
-            renderDevice->handler,
-            &imageCreateCI,
-            nullptr,
-            &dstImage ) );
-
-    // Create memory to back up the image
-    VkMemoryRequirements memRequirements;
-
-    auto memAllocInfo = VkMemoryAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    };
-
     VkDeviceMemory dstImageMemory;
-    vkGetImageMemoryRequirements( renderDevice->handler, dstImage, &memRequirements );
-    memAllocInfo.allocationSize = memRequirements.size;
-
-    // Memory must be host visible to copy from
-    memAllocInfo.memoryTypeIndex = utils::findMemoryType(
-        physicalDevice->handler,
-        memRequirements.memoryTypeBits,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
-
-    CRIMILD_VULKAN_CHECK( vkAllocateMemory( renderDevice->handler, &memAllocInfo, nullptr, &dstImageMemory ) );
-    CRIMILD_VULKAN_CHECK( vkBindImageMemory( renderDevice->handler, dstImage, dstImageMemory, 0 ) );
+    utils::createImage(
+        renderDevice,
+        {
+            .width = width,
+            .height = height,
+            // Note that vkCmdBlitImage (if supported) will also do format conversions if the swapchain color format would differ
+            // https://community.khronos.org/t/vkqueuesubmit-frozen-when-the-commad-buffer-contains-vkcmdcopyimage/105412/4
+            .format = VK_FORMAT_B8G8R8A8_UNORM, //VK_FORMAT_R8G8B8A8_UNORM,
+            .arrayLayers = 1,
+            .mipLevels = 1,
+            .numSamples = VK_SAMPLE_COUNT_1_BIT,
+            .tiling = VK_IMAGE_TILING_LINEAR,
+            .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+            .memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        },
+        dstImage,
+        dstImageMemory );
 
     CRIMILD_LOG_DEBUG( "Creating command buffers..." );
 
     // Do the actual blit from the swapchain image to our host visible destination image
-
-#if 0
-    auto copyCmd = [ & ] {
-        auto commandPool = renderDevice->getCommandPool();
-
-        auto commandBufferAllocateInfo = VkCommandBufferAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-            .commandPool = commandPool->handler,
-            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-            .commandBufferCount = 1,
-        };
-
-        VkCommandBuffer cmdBuffer;
-        CRIMILD_VULKAN_CHECK( vkAllocateCommandBuffers( renderDevice->handler, &commandBufferAllocateInfo, &cmdBuffer ) );
-
-        // If requested, also start recording for the new command buffer
-        VkCommandBufferBeginInfo cmdBufferBeginInfo {};
-        cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        CRIMILD_VULKAN_CHECK( vkBeginCommandBuffer( cmdBuffer, &cmdBufferBeginInfo ) );
-
-        return cmdBuffer;
-    }();
-
-#else
     auto copyCmd = utils::beginSingleTimeCommands( renderDevice );
-#endif
 
     auto insertImageMemoryBarrier = [](
                                         VkCommandBuffer cmdbuffer,
@@ -645,57 +592,7 @@ void VulkanSystem::takeScreenshot( std::string filename ) noexcept
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VkImageSubresourceRange { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 } );
 
-    /**
-		* Finish command buffer recording and submit it to a queue
-		*
-		* @param commandBuffer Command buffer to flush
-		* @param queue Queue to submit the command buffer to 
-		* @param free (Optional) Free the command buffer once it has been submitted (Defaults to true)
-		*
-		* @note The queue that the command buffer is submitted to must be from the same family index as the pool it was allocated from
-		* @note Uses a fence to ensure command buffer has finished executing
-		*/
-    auto flushCommandBuffer = [ & ]( VkCommandBuffer commandBuffer, VkQueue queue, bool free = true ) {
-        if ( commandBuffer == VK_NULL_HANDLE ) {
-            return;
-        }
-
-        CRIMILD_VULKAN_CHECK( vkEndCommandBuffer( commandBuffer ) );
-
-        VkSubmitInfo submitInfo {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        // Create fence to ensure that the command buffer has finished executing
-        VkFenceCreateInfo fenceInfo {};
-        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceInfo.flags = 0;
-        VkFence fence;
-        CRIMILD_VULKAN_CHECK( vkCreateFence( renderDevice->handler, &fenceInfo, nullptr, &fence ) );
-
-        // Submit to the queue
-        CRIMILD_VULKAN_CHECK( vkQueueSubmit( queue, 1, &submitInfo, fence ) );
-        // Wait for the fence to signal that command buffer has finished executing
-
-// Default fence timeout in nanoseconds
-#define DEFAULT_FENCE_TIMEOUT 100000000000
-
-        CRIMILD_VULKAN_CHECK( vkWaitForFences( renderDevice->handler, 1, &fence, VK_TRUE, DEFAULT_FENCE_TIMEOUT ) );
-
-        vkDestroyFence( renderDevice->handler, fence, nullptr );
-
-        if ( free ) {
-            vkFreeCommandBuffers( renderDevice->handler, renderDevice->getCommandPool()->handler, 1, &commandBuffer );
-        }
-    };
-
     CRIMILD_LOG_DEBUG( "Executing commands..." );
-
-    // flushCommandBuffer( copyCmd, renderDevice->graphicsQueue );
-
-    // vulkanDevice->flushCommandBuffer( copyCmd, queue );
-
     utils::endSingleTimeCommands( renderDevice, copyCmd );
 
     renderDevice->waitIdle();
@@ -713,8 +610,6 @@ void VulkanSystem::takeScreenshot( std::string filename ) noexcept
     const char *data;
     vkMapMemory( renderDevice->handler, dstImageMemory, 0, VK_WHOLE_SIZE, 0, ( void ** ) &data );
     data += subResourceLayout.offset;
-
-#if 1
 
     CRIMILD_LOG_DEBUG( "Saving image file..." );
 
@@ -751,8 +646,6 @@ void VulkanSystem::takeScreenshot( std::string filename ) noexcept
         data += subResourceLayout.rowPitch;
     }
     file.close();
-
-#endif
 
     CRIMILD_LOG_DEBUG( "Screenshot saved..." );
 

@@ -1011,7 +1011,7 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
         .memoryTypeIndex = utils::findMemoryType(
             renderDevice->physicalDevice->handler,
             memRequirements.memoryTypeBits,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ),
+            descriptor.memoryProperties ),
     };
 
     CRIMILD_VULKAN_CHECK(
