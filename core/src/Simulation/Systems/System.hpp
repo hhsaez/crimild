@@ -121,6 +121,15 @@ namespace crimild {
         virtual void onResume( void ) noexcept { }
 
         /**
+           \brief Executed when the simulation is about to stop
+
+           This function is called before all systems are stopped, giving you the opportunity to
+           do some extra process. For example, the capture system might take a screenshot at this
+           point, since the rendering system is still valid.
+         */
+        virtual void onBeforeStop( void ) noexcept { }
+
+        /**
            \brief Stops this system
          */
         virtual void stop( void ) noexcept { }

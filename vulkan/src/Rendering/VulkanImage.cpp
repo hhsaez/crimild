@@ -104,7 +104,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
             .format = utils::getFormat( renderDevice, image->format ),
             .tiling = VK_IMAGE_TILING_OPTIMAL,
             .usage = usage,
-            .properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            .memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             .mipLevels = mipLevels,
             //            .numSamples = descriptor.numSamples,
             .arrayLayers = arrayLayers,

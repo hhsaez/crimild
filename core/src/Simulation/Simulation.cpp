@@ -213,6 +213,8 @@ void Simulation::stop( void ) noexcept
     emscripten_cancel_main_loop();
 #endif
 
+    m_systems.each( []( auto system ) { system->onBeforeStop(); } );
+
     m_systems.each( []( auto system ) { system->stop(); } );
 }
 
