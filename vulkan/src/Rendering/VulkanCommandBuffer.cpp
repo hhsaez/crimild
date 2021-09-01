@@ -160,6 +160,62 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     auto renderPass = bindInfo.handler;
                     auto framebuffer = bindInfo.framebuffers[ commandBuffer->getFrameIndex() ];
 
+                    m_currentRenderPass->eachRead(
+                        [ & ]( auto resource ) {
+                            switch ( resource->getType() ) {
+                                case FrameGraphResource::Type::IMAGE_VIEW: {
+                                    break;
+                                }
+                                case FrameGraphResource::Type::IMAGE: {
+                                    break;
+                                }
+                                case FrameGraphResource::Type::ATTACHMENT: {
+                                    break;
+                                }
+                                case FrameGraphResource::Type::TEXTURE: {
+                                    auto texture = crimild::cast_ptr< Texture >( resource );
+                                    auto image = texture->imageView->image;
+                                    auto imageBindInfo = renderDevice->getBindInfo( crimild::get_ptr( image ) );
+
+                                    auto needsBarrier = false;
+
+                                    texture->eachWrittenBy( [ & ]( auto op ) {
+                                        if ( op->getType() == FrameGraphOperation::Type::COMPUTE_PASS ) {
+                                            needsBarrier = true;
+                                        }
+                                    } );
+
+                                    if ( needsBarrier ) {
+                                        auto imageMemoryBarrier = VkImageMemoryBarrier {
+                                            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                                            .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+                                            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+                                            .image = imageBindInfo.imageHandler,
+                                            .subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 },
+                                            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                                        };
+                                        vkCmdPipelineBarrier(
+                                            handler,
+                                            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                                            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                                            0,
+                                            0,
+                                            nullptr,
+                                            0,
+                                            nullptr,
+                                            1,
+                                            &imageMemoryBarrier );
+                                    }
+
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
+                            }
+                        } );
+
                     auto clearColor = m_currentRenderPass->clearValue.color;
                     auto clearDepth = m_currentRenderPass->clearValue.depthStencil;
                     auto clearValues = std::vector< VkClearValue > {};
