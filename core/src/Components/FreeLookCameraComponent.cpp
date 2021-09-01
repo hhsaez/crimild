@@ -27,14 +27,14 @@
 
 #include "FreeLookCameraComponent.hpp"
 
+#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
@@ -128,8 +128,8 @@ void FreeLookCameraComponent::start( void )
             _lastMousePos = currentPos;
 
             if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
-            	m_pitch -= mouseDelta[ 1 ];
-             	m_yaw -= mouseDelta[ 0 ];
+                m_pitch -= mouseDelta[ 1 ];
+                m_yaw -= mouseDelta[ 0 ];
             }
         } );
 
@@ -161,8 +161,8 @@ void FreeLookCameraComponent::update( const Clock &c )
     const auto F = forward( E );
     const auto R = right( E );
 
-	m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
-	const auto T = translation( vector3( m_position ) );
+    m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
+    const auto T = translation( vector3( m_position ) );
 
-	root->setLocal( T * E );
+    root->setLocal( T * E );
 }
