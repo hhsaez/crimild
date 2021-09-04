@@ -41,7 +41,7 @@ namespace crimild {
             Based on Disney/Unreal PBR system
         */
         class PrincipledBSDF : public Material {
-        private:
+        public:
             struct Props {
                 alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
                 alignas( 4 ) Real32 metallic = 0;
@@ -97,7 +97,6 @@ namespace crimild {
             inline void setEmissive( const ColorRGB &emissive ) noexcept { getProps().emissive = emissive; };
             inline ColorRGB getEmissive( void ) const noexcept { return getProps().emissive; }
 
-        private:
             Props &getProps( void ) noexcept;
             const Props &getProps( void ) const noexcept;
         };
