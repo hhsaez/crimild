@@ -31,6 +31,8 @@
 #include "Foundation/Memory.hpp"
 #include "Mathematics/Matrix3.hpp"
 #include "Rendering/DescriptorSet.hpp"
+#include "Rendering/Extent.hpp"
+#include "Rendering/Format.hpp"
 
 namespace crimild {
 
