@@ -162,6 +162,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                     m_currentRenderPass->eachRead(
                         [ & ]( auto resource ) {
+                        	if ( resource == nullptr ) {
+                            	return;
+                            }
+
                             switch ( resource->getType() ) {
                                 case FrameGraphResource::Type::IMAGE_VIEW: {
                                     break;
