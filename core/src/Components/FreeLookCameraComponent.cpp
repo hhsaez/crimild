@@ -29,6 +29,7 @@
 
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
@@ -134,6 +135,8 @@ void FreeLookCameraComponent::start( void )
         } );
 
     m_position = location( getNode()->getLocal() );
+
+    extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
@@ -152,11 +155,7 @@ void FreeLookCameraComponent::update( const Clock &c )
 
     auto root = getNode();
 
-    const auto pitch = rotationX( m_pitch );
-    const auto yaw = rotationY( m_yaw );
-    const auto roll = rotationZ( m_roll );
-
-    const auto E = yaw * pitch * roll;
+    const auto E = euler( m_yaw, m_pitch, m_roll );
 
     const auto F = forward( E );
     const auto R = right( E );
