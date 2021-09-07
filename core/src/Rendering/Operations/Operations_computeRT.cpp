@@ -418,7 +418,7 @@ const auto FRAG_SRC = R"(
         vec3 color = vec3( 1.0 );
 
         int depth = 0;
-        while ( depth <= bounces ) {
+        while ( depth < bounces ) {
             HitRecord hit = hitScene( ray, tMin, tMax );
             if ( !hit.hasResult ) {
                 // no hit. use background color
