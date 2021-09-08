@@ -161,6 +161,94 @@ namespace crimild {
 
     namespace imgui {
 
+        void showEditRT( Settings *settings ) noexcept
+        {
+            if ( !settings->get< Bool >( "ui.edit.rt.show" ) ) {
+                return;
+            }
+
+            auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
+            auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
+            auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
+            auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
+            auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_Always );
+            ImGui::SetNextWindowSize( ImVec2( 350, 300 ), ImGuiCond_Always );
+
+            auto open = true;
+            if ( ImGui::Begin( "RT Settings", &open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize ) ) {
+                ImGui::Text( "Samples %d", UInt32( sampleCount ) );
+
+                {
+                    // Use AlignTextToFramePadding() to align text baseline to the baseline of framed elements (otherwise a Text+SameLine+Button sequence will have the text a little too high by default)
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text( "Max Samples: " );
+                    ImGui::SameLine();
+
+                    // Arrow buttons with Repeater
+                    float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+                    ImGui::PushButtonRepeat( true );
+                    if ( ImGui::ArrowButton( "##left", ImGuiDir_Left ) ) {
+                        maxSamples--;
+                    }
+                    ImGui::SameLine( 0.0f, spacing );
+                    if ( ImGui::ArrowButton( "##right", ImGuiDir_Right ) ) {
+                        maxSamples++;
+                    }
+                    ImGui::PopButtonRepeat();
+                    ImGui::SameLine();
+                    ImGui::Text( "%d", UInt32( maxSamples ) );
+                }
+
+                {
+                    // Use AlignTextToFramePadding() to align text baseline to the baseline of framed elements (otherwise a Text+SameLine+Button sequence will have the text a little too high by default)
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text( "Bounces: " );
+                    ImGui::SameLine();
+
+                    // Arrow buttons with Repeater
+                    float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+                    ImGui::PushButtonRepeat( true );
+                    if ( ImGui::ArrowButton( "##left", ImGuiDir_Left ) ) {
+                        bounces--;
+                    }
+                    ImGui::SameLine( 0.0f, spacing );
+                    if ( ImGui::ArrowButton( "##right", ImGuiDir_Right ) ) {
+                        bounces++;
+                    }
+                    ImGui::PopButtonRepeat();
+                    ImGui::SameLine();
+                    ImGui::Text( "%d", UInt32( bounces ) );
+                }
+
+                {
+                    ImGui::SliderFloat( "f", &focusDist, 0.0f, 10.0f, "Focus Distance = %.3f" );
+                }
+
+                {
+                    ImGui::SliderFloat( "a", &aperture, 0.0f, 1.0f, "Aperture = %.3f" );
+                }
+
+                {
+                    if ( ImGui::Button( "Reset" ) ) {
+                        //settings->set( "rendering.samples", UInt32( 1 ) );
+                        sampleCount = 0;
+                    }
+                }
+
+                settings->set( "rt.samples.max", maxSamples );
+                settings->set( "rt.samples.count", sampleCount );
+                settings->set( "rt.bounces", bounces );
+                settings->set( "rt.focusDist", focusDist );
+                settings->set( "rt.aperture", aperture );
+            }
+
+            Simulation::getInstance()->getSettings()->set( "ui.edit.rt.show", open );
+
+            ImGui::End();
+        }
+
         void showHelpAboutDialog( void ) noexcept
         {
             ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_Always );
@@ -391,6 +479,9 @@ namespace crimild {
                     if ( ImGui::MenuItem( "Rendering..." ) ) {
                         settings->set( "ui.edit.rendering.show", true );
                     }
+                    if ( ImGui::MenuItem( "RT..." ) ) {
+                        settings->set( "ui.edit.rt.show", true );
+                    }
                     if ( ImGui::MenuItem( "Settings..." ) ) {
                         settings->set( "ui.edit.settings.show", true );
                     }
@@ -425,6 +516,7 @@ namespace crimild {
             }
 
             showEditRendering( settings );
+            showEditRT( settings );
             showEditSettings( settings );
 
             showToolsSceneTree( settings );
