@@ -49,7 +49,7 @@ const auto FRAG_SRC = R"(
     layout( local_size_x = 32, local_size_y = 32 ) in;
     layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
 
-    layout ( set = 0, binding = 1 ) uniform Uniforms {
+    layout( set = 0, binding = 1 ) uniform Uniforms {
         uint sampleCount;
         uint maxSamples;
         uint bounces;
@@ -65,7 +65,6 @@ const auto FRAG_SRC = R"(
 
     uint seed = 0;
     int flat_idx = 0;
-
 
     struct Sphere {
         mat4 invWorld;
@@ -90,7 +89,7 @@ const auto FRAG_SRC = R"(
 #define MAX_PRIMITIVE_COUNT 10000
 #define MAX_MATERIAL_COUNT 10000
 
-    layout ( set = 0, binding = 2 ) uniform SceneUniforms {
+    layout( set = 0, binding = 2 ) uniform SceneUniforms {
         Sphere spheres[ MAX_PRIMITIVE_COUNT ];
         int sphereCount;
         Box boxes[ MAX_PRIMITIVE_COUNT ];
@@ -113,55 +112,47 @@ const auto FRAG_SRC = R"(
         vec3 direction;
     };
 
-    void encrypt_tea(inout uvec2 arg)
-    {
-        uvec4 key = uvec4(0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e);
-        uint v0 = arg[0], v1 = arg[1];
+    void encrypt_tea( inout uvec2 arg ) {
+        uvec4 key = uvec4( 0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e );
+        uint v0 = arg[ 0 ], v1 = arg[ 1 ];
         uint sum = 0u;
         uint delta = 0x9e3779b9u;
 
-        for(int i = 0; i < 32; i++) {
+        for ( int i = 0; i < 32; i++ ) {
             sum += delta;
-            v0 += ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1]);
-            v1 += ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3]);
+            v0 += ( ( v1 << 4 ) + key[ 0 ] ) ^ ( v1 + sum ) ^ ( ( v1 >> 5 ) + key[ 1 ] );
+            v1 += ( ( v0 << 4 ) + key[ 2 ] ) ^ ( v0 + sum ) ^ ( ( v0 >> 5 ) + key[ 3 ] );
         }
-        arg[0] = v0;
-        arg[1] = v1;
+        arg[ 0 ] = v0;
+        arg[ 1 ] = v1;
     }
 
-    float getRandom()
-    {
-        uvec2 arg = uvec2( flat_idx, seed++);
-        encrypt_tea(arg);
-        vec2 r = fract(vec2(arg) / vec2(0xffffffffu));
+    float getRandom() {
+        uvec2 arg = uvec2( flat_idx, seed++ );
+        encrypt_tea( arg );
+        vec2 r = fract( vec2( arg ) / vec2( 0xffffffffu ) );
         return r.x;
     }
 
-    float getRandomRange( float min, float max )
-    {
+    float getRandomRange( float min, float max ) {
         return min + getRandom() * ( max - min );
     }
 
-    vec3 getRandomVec3()
-    {
+    vec3 getRandomVec3() {
         return vec3(
             getRandom(),
             getRandom(),
-            getRandom()
-        );
+            getRandom() );
     }
 
-    vec3 getRandomVec3Range( float min, float max )
-    {
+    vec3 getRandomVec3Range( float min, float max ) {
         return vec3(
             getRandomRange( min, max ),
             getRandomRange( min, max ),
-            getRandomRange( min, max )
-        );
+            getRandomRange( min, max ) );
     }
 
-    vec3 getRandomInUnitSphere()
-    {
+    vec3 getRandomInUnitSphere() {
         while ( true ) {
             vec3 p = getRandomVec3Range( -1.0, 1.0 );
             if ( dot( p, p ) < 1.0 ) {
@@ -171,14 +162,12 @@ const auto FRAG_SRC = R"(
         return vec3( 0 );
     }
 
-    vec3 getRandomInUnitDisc()
-    {
+    vec3 getRandomInUnitDisc() {
         while ( true ) {
             vec3 p = vec3(
                 getRandomRange( -1.0, 1.0 ),
                 getRandomRange( -1.0, 1.0 ),
-                0.0
-            );
+                0.0 );
             if ( dot( p, p ) >= 1.0 ) {
                 break;
             }
@@ -186,13 +175,11 @@ const auto FRAG_SRC = R"(
         }
     }
 
-    vec3 getRandomUnitVector()
-    {
+    vec3 getRandomUnitVector() {
         return normalize( getRandomInUnitSphere() );
     }
 
-    vec3 getRandomInHemisphere( vec3 N )
-    {
+    vec3 getRandomInHemisphere( vec3 N ) {
         vec3 inUnitSphere = getRandomInUnitSphere();
         if ( dot( inUnitSphere, N ) > 0.0 ) {
             return inUnitSphere;
@@ -201,8 +188,7 @@ const auto FRAG_SRC = R"(
         }
     }
 
-    HitRecord setFaceNormal( Ray ray, vec3 N, HitRecord rec )
-    {
+    HitRecord setFaceNormal( Ray ray, vec3 N, HitRecord rec ) {
         rec.frontFace = dot( ray.direction, N ) < 0;
         rec.normal = rec.frontFace ? N : -N;
         return rec;
@@ -219,21 +205,18 @@ const auto FRAG_SRC = R"(
         vec3 attenuation;
     };
 
-    bool isZero( vec3 v )
-    {
+    bool isZero( vec3 v ) {
         float s = 0.00001;
         return abs( v.x ) < s && abs( v.y ) < s && abs( v.z ) < s;
     }
 
-    float reflectance( float cosine, float refIdx )
-    {
+    float reflectance( float cosine, float refIdx ) {
         float r0 = ( 1.0 - refIdx ) / ( 1.0 + refIdx );
         r0 = r0 * r0;
         return r0 + ( 1.0 - r0 ) * pow( ( 1.0 - cosine ), 5.0 );
     }
 
-    Scattered scatter( Material material, Ray ray, HitRecord rec )
-    {
+    Scattered scatter( Material material, Ray ray, HitRecord rec ) {
         Scattered scattered;
         scattered.hasResult = false;
         scattered.isEmissive = false;
@@ -278,8 +261,8 @@ const auto FRAG_SRC = R"(
         return scattered;
     }
 
-    HitRecord hitSphere( Sphere sphere, Ray worldRay, float tMin, float tMax ) {
-        HitRecord rec;
+    float hitSphere( Sphere sphere, Ray worldRay, float tMin, float tMax )
+    {
         Ray ray;
         ray.origin = ( sphere.invWorld * vec4( worldRay.origin, 1.0 ) ).xyz;
         ray.direction = ( sphere.invWorld * vec4( worldRay.direction, 0.0 ) ).xyz;
@@ -291,8 +274,7 @@ const auto FRAG_SRC = R"(
 
         float d = b * b - 4.0 * a * c;
         if ( d < 0 ) {
-            rec.hasResult = false;
-            return rec;
+            return tMax;
         }
 
         float root = sqrt( d );
@@ -300,26 +282,14 @@ const auto FRAG_SRC = R"(
         if ( t < tMin || t > tMax ) {
             t = ( -b + root ) / ( 2.0 * a );
             if ( t < tMin || t > tMax ) {
-                rec.hasResult = false;
-                return rec;
+                return tMax;
             }
         }
 
-        rec.hasResult = true;
-        rec.t = t;
-        rec.materialID = sphere.materialID;
-        vec3 P = rayAt( ray, t );
-        mat4 world = inverse( sphere.invWorld );
-        rec.point = ( world * vec4( P, 1.0 ) ).xyz;
-        vec3 normal = normalize( transpose( mat3( sphere.invWorld ) ) * P );
-        return setFaceNormal( ray, normal, rec );
+        return t;
     }
 
-    HitRecord hitBox( Box box, Ray worldRay, float tMin, float tMax )
-    {
-        HitRecord rec;
-        rec.hasResult = false;
-
+    float hitBox( Box box, Ray worldRay, float tInMin, float tInMax ) {
         Ray ray;
         ray.origin = ( box.invWorld * vec4( worldRay.origin, 1.0 ) ).xyz;
         ray.direction = ( box.invWorld * vec4( worldRay.direction, 0.0 ) ).xyz;
@@ -327,8 +297,8 @@ const auto FRAG_SRC = R"(
         vec3 bMin = vec3( -1, -1, -1 );
         vec3 bMax = vec3( 1, 1, 1 );
 
-        //float tMin = -99999.99999;
-        //float tMax = 99999.99999;
+        float tMin = tInMin;
+        float tMax = tInMax;
 
         for ( int a = 0; a < 3; a++ ) {
             float invD = 1.0 / ray.direction[ a ];
@@ -343,55 +313,102 @@ const auto FRAG_SRC = R"(
             tMin = t0 > tMin ? t0 : tMin;
             tMax = t1 < tMax ? t1 : tMax;
             if ( tMax <= tMin ) {
-                rec.hasResult = false;
-                return rec;
+                return tInMax;
             }
         }
 
+        float t = 0.0;
+        bool hasResult = false;
+
         if ( tMin >= 0.00001 ) {
-            rec.hasResult = true;
-            rec.t = tMin;
+            t = tMin;
+            hasResult = true;
         }
 
         if ( abs( tMax - tMax ) > 0.00001 && tMax >= 0.00001 ) {
-            rec.hasResult = true;
-            rec.t = tMax;
+            t = tMax;
+            hasResult = true;
         }
 
-        if ( !rec.hasResult ) {
-            return rec;
-        }
-
-        rec.materialID = box.materialID;
-        vec3 P = rayAt( ray, rec.t );
-        mat4 world = inverse( box.invWorld );
-        rec.point = ( world * vec4( P, 1.0 ) ).xyz;
-        vec3 normal = normalize( transpose( mat3( box.invWorld ) ) * P );
-        return setFaceNormal( ray, normal, rec );
+        return hasResult ? t : tInMax;
     }
 
-    HitRecord hitScene( Ray ray, float tMin, float tMax )
+    HitRecord hitSpheres( Ray ray, float tMin, HitRecord hit )
     {
-        HitRecord hit;
-        hit.t = tMax;
-        hit.hasResult = false;
+        float t = hit.t;
+        int hitIdx = -1;
+
         for ( int i = 0; i < uScene.sphereCount; i++ ) {
-            HitRecord candidate = hitSphere( uScene.spheres[ i ], ray, tMin, hit.t );
-            if ( candidate.hasResult ) {
-                hit = candidate;
+            float candidate = hitSphere( uScene.spheres[ i ], ray, tMin, t );
+            if ( candidate < t ) {
+                t = candidate;
+                hitIdx = i;
             }
         }
-        for ( int i = 0; i < uScene.boxCount; i++ ) {
-            HitRecord candidate = hitBox( uScene.boxes[ i ], ray, tMin, hit.t );
-            if ( candidate.hasResult ) {
-                hit = candidate;
-            }
+
+        if ( hitIdx >= 0 ) {
+            Sphere sphere = uScene.spheres[ hitIdx ];
+
+            ray.origin = ( sphere.invWorld * vec4( ray.origin, 1.0 ) ).xyz;
+            ray.direction = ( sphere.invWorld * vec4( ray.direction, 0.0 ) ).xyz;
+
+            hit.hasResult = true;
+            hit.t = t;
+            hit.materialID = sphere.materialID;
+            vec3 P = rayAt( ray, t );
+            mat4 world = inverse( sphere.invWorld );
+            hit.point = ( world * vec4( P, 1.0 ) ).xyz;
+            vec3 normal = normalize( transpose( mat3( sphere.invWorld ) ) * P );
+            return setFaceNormal( ray, normal, hit );
         }
+
         return hit;
     }
 
-    Ray getCameraRay( float u, float v )
+    HitRecord hitBoxes( Ray ray, float tMin, HitRecord hit )
     {
+        float t = hit.t;
+        int hitIdx = -1;
+
+        for ( int i = 0; i < uScene.boxCount; i++ ) {
+            float candidate = hitBox( uScene.boxes[ i ], ray, tMin, t );
+            if ( candidate < t ) {
+                t = candidate;
+                hitIdx = i;
+            }
+        }
+
+        if ( hitIdx >= 0 ) {
+            Box box = uScene.boxes[ hitIdx ];
+
+            ray.origin = ( box.invWorld * vec4( ray.origin, 1.0 ) ).xyz;
+            ray.direction = ( box.invWorld * vec4( ray.direction, 0.0 ) ).xyz;
+
+            hit.hasResult = true;
+            hit.t = t;
+            hit.materialID = box.materialID;
+            vec3 P = rayAt( ray, t );
+            mat4 world = inverse( box.invWorld );
+            hit.point = ( world * vec4( P, 1.0 ) ).xyz;
+            vec3 normal = normalize( transpose( mat3( box.invWorld ) ) * P );
+            return setFaceNormal( ray, normal, hit );
+        }
+
+        return hit;
+    }
+
+    HitRecord hitScene( Ray ray, float tMin, float tMax ) {
+        HitRecord hit;
+        hit.t = tMax;
+        hit.hasResult = false;
+
+        hit = hitSpheres( ray, tMin, hit );
+        hit = hitBoxes( ray, tMin, hit );
+
+        return hit;
+    }
+
+    Ray getCameraRay( float u, float v ) {
         float x = 2.0 * u - 1.0;
         float y = 2.0 * v - 1.0;
         vec4 rayClip = vec4( x, y, -1, 1 );
@@ -418,7 +435,7 @@ const auto FRAG_SRC = R"(
         vec3 color = vec3( 1.0 );
 
         int depth = 0;
-        while ( depth < bounces ) {
+        while ( depth <= bounces ) {
             HitRecord hit = hitScene( ray, tMin, tMax );
             if ( !hit.hasResult ) {
                 // no hit. use background color
@@ -446,8 +463,7 @@ const auto FRAG_SRC = R"(
         return vec3( 0 );
     }
 
-    vec3 gammaCorrection( vec3 color, int samplesPerPixel )
-    {
+    vec3 gammaCorrection( vec3 color, int samplesPerPixel ) {
         float scale = 1.0 / float( samplesPerPixel );
         return sqrt( scale * color );
     }
@@ -459,7 +475,7 @@ const auto FRAG_SRC = R"(
             return;
         }
 
-        flat_idx = int(dot(gl_GlobalInvocationID.xy, vec2(1, 4096)));
+        flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
 
         vec2 size = imageSize( resultImage );
         float aspectRatio = size.x / size.y;
