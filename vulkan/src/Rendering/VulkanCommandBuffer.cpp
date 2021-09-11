@@ -162,8 +162,8 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
 
                     m_currentRenderPass->eachRead(
                         [ & ]( auto resource ) {
-                        	if ( resource == nullptr ) {
-                            	return;
+                            if ( resource == nullptr ) {
+                                return;
                             }
 
                             switch ( resource->getType() ) {
