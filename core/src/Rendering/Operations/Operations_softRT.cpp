@@ -53,6 +53,8 @@
 
 using namespace crimild;
 
+#define CRIMILD_RT_SAMPLES_PER_FRAME 1
+
 Bool boundCompare( SharedPointer< Node > &a, SharedPointer< Node > &b, Index axis )
 {
     return a->getWorldBound()->getMin()[ axis ] < b->getWorldBound()->getMin()[ axis ];
@@ -269,17 +271,8 @@ namespace crimild {
             m_height = settings->get< Int32 >( "video.height", 240 );
             m_bpp = 4;
             m_aspectRatio = Real( m_width ) / Real( m_height );
-            m_samples = settings->get< Int32 >( "rt.samples", 1 );
-            m_depth = settings->get< Int32 >( "rt.depth", 10 );
             m_tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
             m_workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", std::thread::hardware_concurrency() ) );
-            m_backgroundColor = ColorRGB {
-                settings->get< Real >( "rt.background_color.r", 0.5f ),
-                settings->get< Real >( "rt.background_color.g", 0.7f ),
-                settings->get< Real >( "rt.background_color.b", 1.0f ),
-            };
-
-            m_sampleCount = -m_samples;
 
             m_image = crimild::alloc< Image >();
             m_image->extent = Extent3D {
@@ -294,11 +287,6 @@ namespace crimild {
                     bufferView->setUsage( BufferView::Usage::DYNAMIC );
                     return bufferView;
                 }() );
-
-            m_colors.resize( m_width * m_height );
-            for ( auto i = 0l; i < m_width * m_height; ++i ) {
-                m_colors[ i ] = ColorRGBA { 0, 0, 0, 1 };
-            }
 
             m_imageAaccessor = crimild::alloc< BufferAccessor >( m_image->getBufferView(), 0, sizeof( ColorRGBA ) );
 
@@ -325,6 +313,8 @@ namespace crimild {
             if ( !isDone() ) {
                 return true;
             }
+
+            auto settings = Simulation::getInstance()->getSettings();
 
             auto scene = [ & ]() -> SharedPointer< Node > {
                 if ( m_scene != nullptr ) {
@@ -385,8 +375,19 @@ namespace crimild {
                 return true;
             }
 
-            const auto cameraFocusDistance = camera->getFocusDistance();
-            const auto cameraAperture = camera->getAperture();
+            auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
+            auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
+            auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
+            auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
+            auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+            auto backgroundColor = ColorRGB {
+                settings->get< Real >( "rt.background_color.r", 0.5f ),
+                settings->get< Real >( "rt.background_color.g", 0.7f ),
+                settings->get< Real >( "rt.background_color.b", 1.0f ),
+            };
+
+            const auto cameraFocusDistance = focusDist; //camera->getFocusDistance();
+            const auto cameraAperture = aperture;       //camera->getAperture();
             const auto cameraLensRadius = 0.5f * cameraAperture;
             const auto cameraRight = right( camera->getWorld() );
             const auto cameraUp = up( camera->getWorld() );
@@ -394,7 +395,7 @@ namespace crimild {
             for ( auto y = 0; y < m_height; y += m_tileSize ) {
                 for ( auto x = 0; x < m_width; x += m_tileSize ) {
                     m_jobs.push_back(
-                        [ self = this, scene, camera, x, y, cameraFocusDistance, cameraLensRadius, cameraUp, cameraRight ] {
+                        [ self = this, scene, camera, x, y, cameraFocusDistance, cameraLensRadius, cameraUp, cameraRight, sampleCount, bounces, backgroundColor ] {
                             for ( auto dy = 0; dy < self->m_tileSize; ++dy ) {
                                 if ( y + dy >= self->m_height ) {
                                     break;
@@ -405,7 +406,7 @@ namespace crimild {
                                     }
 
                                     auto color = ColorRGB::Constants::BLACK;
-                                    for ( auto s = 0l; s < self->m_samples; ++s ) {
+                                    for ( auto s = 0l; s < CRIMILD_RT_SAMPLES_PER_FRAME; ++s ) {
                                         const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( self->m_width - 1 );
                                         const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( self->m_height - 1 );
 
@@ -419,13 +420,13 @@ namespace crimild {
                                                 cameraFocusDistance * direction( ray ) - offset,
                                             };
 
-                                            color = color + rayColor( ray, get_ptr( scene ), self->m_backgroundColor, self->m_depth );
+                                            color = color + rayColor( ray, get_ptr( scene ), backgroundColor, bounces );
                                         }
                                     }
 
                                     const Index idx = ( y + dy ) * self->m_width + ( x + dx );
-                                    const auto prevColor = self->m_imageAaccessor->get< ColorRGBA >( idx ) * self->m_sampleCount;
-                                    self->m_imageAaccessor->set( idx, ( prevColor + rgba( color ) ) / ( self->m_sampleCount + self->m_samples ) );
+                                    const auto prevColor = self->m_imageAaccessor->get< ColorRGBA >( idx ) * sampleCount;
+                                    self->m_imageAaccessor->set( idx, ( prevColor + rgba( color ) ) / ( sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME ) );
 
                                     std::this_thread::yield();
                                 }
@@ -448,7 +449,7 @@ namespace crimild {
                             } ) ) );
             }
 
-            CRIMILD_LOG_INFO( "RT Samples: ", m_sampleCount );
+            CRIMILD_LOG_INFO( "RT Samples: ", sampleCount );
 
             return true;
         }
@@ -465,7 +466,18 @@ namespace crimild {
             m_workers.clear();
 
             m_progress = 0;
-            m_sampleCount += m_samples;
+
+            auto settings = Simulation::getInstance()->getSettings();
+            auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 0 );
+
+            if ( sampleCount == 0 ) {
+                // Reset colors
+                for ( auto i = 0l; i < m_width * m_height; ++i ) {
+                    m_imageAaccessor->set( i, ColorRGBA { 0, 0, 0, 1 } );
+                }
+            }
+
+            settings->set( "rt.samples.count", sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME );
 
             if ( Simulation::getInstance()->getSettings()->get< Bool >( "rt.dynamic_scene", false ) ) {
                 // Scene is dynamic, so reset cached scene and camera
@@ -503,19 +515,14 @@ namespace crimild {
         Int32 m_height;
         Int32 m_bpp;
         Real m_aspectRatio;
-        Int32 m_samples;
-        Int32 m_depth;
         Int32 m_tileSize;
         Int32 m_workerCount;
-        ColorRGB m_backgroundColor;
-        Int32 m_sampleCount = 0;
 
         SharedPointer< Node > m_scene;
         SharedPointer< Camera > m_camera;
 
         SharedPointer< Image > m_image;
         SharedPointer< BufferAccessor > m_imageAaccessor;
-        Array< ColorRGBA > m_colors;
 
         std::vector< Job > m_jobs;
         Index m_nextJobIdx = 0;

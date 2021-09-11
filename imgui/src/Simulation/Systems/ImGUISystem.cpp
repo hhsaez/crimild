@@ -172,6 +172,11 @@ namespace crimild {
             auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
             auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
             auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+            auto backgroundColor = ColorRGB {
+                settings->get< Real >( "rt.background_color.r", 0.5f ),
+                settings->get< Real >( "rt.background_color.g", 0.7f ),
+                settings->get< Real >( "rt.background_color.b", 1.0f ),
+            };
 
             ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_Always );
             ImGui::SetNextWindowSize( ImVec2( 350, 300 ), ImGuiCond_Always );
@@ -189,11 +194,11 @@ namespace crimild {
                     // Arrow buttons with Repeater
                     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
                     ImGui::PushButtonRepeat( true );
-                    if ( ImGui::ArrowButton( "##left", ImGuiDir_Left ) ) {
+                    if ( ImGui::ArrowButton( "##max_samples_left", ImGuiDir_Left ) ) {
                         maxSamples--;
                     }
                     ImGui::SameLine( 0.0f, spacing );
-                    if ( ImGui::ArrowButton( "##right", ImGuiDir_Right ) ) {
+                    if ( ImGui::ArrowButton( "##max_samples_right", ImGuiDir_Right ) ) {
                         maxSamples++;
                     }
                     ImGui::PopButtonRepeat();
@@ -210,11 +215,11 @@ namespace crimild {
                     // Arrow buttons with Repeater
                     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
                     ImGui::PushButtonRepeat( true );
-                    if ( ImGui::ArrowButton( "##left", ImGuiDir_Left ) ) {
+                    if ( ImGui::ArrowButton( "##bounces_left", ImGuiDir_Left ) ) {
                         bounces--;
                     }
                     ImGui::SameLine( 0.0f, spacing );
-                    if ( ImGui::ArrowButton( "##right", ImGuiDir_Right ) ) {
+                    if ( ImGui::ArrowButton( "##bounces_right", ImGuiDir_Right ) ) {
                         bounces++;
                     }
                     ImGui::PopButtonRepeat();
@@ -222,19 +227,13 @@ namespace crimild {
                     ImGui::Text( "%d", UInt32( bounces ) );
                 }
 
-                {
-                    ImGui::SliderFloat( "f", &focusDist, 0.0f, 10.0f, "Focus Distance = %.3f" );
-                }
+                ImGui::SliderFloat( "f", &focusDist, 0.0f, 100.0f, "Focus Distance = %.3f" );
+                ImGui::SliderFloat( "a", &aperture, 0.0f, 10.0f, "Aperture = %.3f" );
+                ImGui::ColorEdit3( "Background Color", ( float * ) &backgroundColor );
 
-                {
-                    ImGui::SliderFloat( "a", &aperture, 0.0f, 1.0f, "Aperture = %.3f" );
-                }
-
-                {
-                    if ( ImGui::Button( "Reset" ) ) {
-                        //settings->set( "rendering.samples", UInt32( 1 ) );
-                        sampleCount = 0;
-                    }
+                if ( ImGui::Button( "Reset" ) ) {
+                    //settings->set( "rendering.samples", UInt32( 1 ) );
+                    sampleCount = 0;
                 }
 
                 settings->set( "rt.samples.max", maxSamples );
@@ -242,6 +241,9 @@ namespace crimild {
                 settings->set( "rt.bounces", bounces );
                 settings->set( "rt.focusDist", focusDist );
                 settings->set( "rt.aperture", aperture );
+                settings->set( "rt.background_color.r", backgroundColor.r );
+                settings->set( "rt.background_color.g", backgroundColor.g );
+                settings->set( "rt.background_color.b", backgroundColor.b );
             }
 
             Simulation::getInstance()->getSettings()->set( "ui.edit.rt.show", open );

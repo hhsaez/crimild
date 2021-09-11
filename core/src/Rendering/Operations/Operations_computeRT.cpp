@@ -61,6 +61,7 @@ const auto FRAG_SRC = R"(
         vec3 cameraUp;
         float cameraLensRadius;
         float cameraFocusDistance;
+        vec3 backgroundColor;
     };
 
     uint seed = 0;
@@ -439,9 +440,6 @@ const auto FRAG_SRC = R"(
             HitRecord hit = hitScene( ray, tMin, tMax );
             if ( !hit.hasResult ) {
                 // no hit. use background color
-                vec3 D = normalize( ray.direction );
-                float t = 0.5 * ( D.y + 1.0 );
-                vec3 backgroundColor = ( 1.0 - t ) * vec3( 1.0, 1.0, 1.0 ) + t * vec3( 0.5, 0.7, 1.0 );
                 color *= backgroundColor;
                 return color;
             }
@@ -521,6 +519,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 16 ) Vector3 cameraUp;
                     alignas( 4 ) Real32 cameraLensRadius;
                     alignas( 4 ) Real32 cameraFocusDistance;
+                    alignas( 16 ) ColorRGB backgroundColor;
                 };
 
                 return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
@@ -532,6 +531,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
                         auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
                         auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+                        auto backgroundColor = ColorRGB {
+                            settings->get< Real >( "rt.background_color.r", 0.5f ),
+                            settings->get< Real >( "rt.background_color.g", 0.7f ),
+                            settings->get< Real >( "rt.background_color.b", 1.0f ),
+                        };
 
                         // Update sample count
                         if ( sampleCount < maxSamples ) {
@@ -583,7 +587,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             .cameraUp = cameraUp,
                             .cameraLensRadius = Real32( 0.5 ) * aperture,
                             .cameraFocusDistance = focusDist,
-
+                            .backgroundColor = backgroundColor,
                         };
                     } );
             }(),
