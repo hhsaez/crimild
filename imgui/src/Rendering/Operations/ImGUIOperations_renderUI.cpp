@@ -297,9 +297,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::imgui::renderUI( void 
                         }
                     } else {
                         commandBuffer->drawIndexed(
-                            cmd->ElemCount,
-                            cmd->IdxOffset + indexOffset,
-                            cmd->VtxOffset + vertexOffset );
+                            DrawIndexedInfo {
+                                .indexCount = cmd->ElemCount,
+                                .firstIndex = UInt32( cmd->IdxOffset + indexOffset ),
+                                .vertexOffset = Int32( cmd->VtxOffset + vertexOffset ),
+                            } );
                     }
                 }
                 indexOffset += cmds->IdxBuffer.Size;

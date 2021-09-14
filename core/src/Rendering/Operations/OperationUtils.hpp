@@ -54,8 +54,8 @@ namespace crimild {
         {
             auto swapchain = Swapchain::getInstance();
             if ( swapchain == nullptr ) {
-            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
-             	return renderPass;
+                CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+                return renderPass;
             }
 
             renderPass->getCommandBuffers()
@@ -83,8 +83,8 @@ namespace crimild {
         {
             auto swapchain = Swapchain::getInstance();
             if ( swapchain == nullptr ) {
-            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
-             	return renderPass;
+                CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+                return renderPass;
             }
 
             renderPass->getCommandBuffers()
@@ -126,8 +126,8 @@ namespace crimild {
         {
             auto swapchain = Swapchain::getInstance();
             if ( swapchain == nullptr ) {
-            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
-             	return renderPass;
+                CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+                return renderPass;
             }
 
             renderPass->getCommandBuffers()
@@ -174,8 +174,8 @@ namespace crimild {
         {
             auto swapchain = Swapchain::getInstance();
             if ( swapchain == nullptr ) {
-            	CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
-             	return computePass;
+                CRIMILD_LOG_ERROR( "Failed to obtain swapchain" );
+                return computePass;
             }
 
             computePass->getCommandBuffers()

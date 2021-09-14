@@ -201,23 +201,51 @@ GraphicsPipelineManager::ShaderStageArray GraphicsPipelineManager::createShaderS
 
 Array< VkVertexInputBindingDescription > GraphicsPipelineManager::getVertexInputBindingDescriptions( GraphicsPipeline *graphicsPipeline ) const noexcept
 {
-    return graphicsPipeline->getProgram()->vertexLayouts.map(
-        [ &, binding = 0 ]( const auto &layout ) mutable {
-            return VkVertexInputBindingDescription {
-                .binding = uint32_t( binding++ ),
+    Array< VkVertexInputBindingDescription > ret;
+    graphicsPipeline->getProgram()->vertexLayouts.each(
+        [ & ]( const auto &layout ) {
+            ret.add( VkVertexInputBindingDescription {
+                .binding = uint32_t( ret.size() ),
                 .stride = layout.getSize(),
                 .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-            };
+            } );
         } );
+    graphicsPipeline->getProgram()->instanceLayouts.each(
+        [ & ]( const auto &layout ) {
+            ret.add( VkVertexInputBindingDescription {
+                .binding = uint32_t( ret.size() ),
+                .stride = layout.getSize(),
+                .inputRate = VK_VERTEX_INPUT_RATE_INSTANCE,
+            } );
+        } );
+    return ret;
 }
 
 Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept
 {
     Array< VkVertexInputAttributeDescription > attributeDescriptions;
+
+    Index binding = 0;
+    Index location = 0;
+
     graphicsPipeline->getProgram()->vertexLayouts.each(
-        [ &, binding = 0 ]( const auto &layout ) mutable {
+        [ & ]( const auto &layout ) {
             layout.eachAttribute(
-                [ &, location = 0 ]( const auto &attrib ) mutable {
+                [ & ]( const auto &attrib ) {
+                    attributeDescriptions.add(
+                        VkVertexInputAttributeDescription {
+                            .binding = crimild::UInt32( binding ),
+                            .location = crimild::UInt32( location++ ),
+                            .format = utils::getFormat( renderDevice, attrib.format ),
+                            .offset = attrib.offset,
+                        } );
+                } );
+            binding++;
+        } );
+    graphicsPipeline->getProgram()->instanceLayouts.each(
+        [ & ]( const auto &layout ) {
+            layout.eachAttribute(
+                [ & ]( const auto &attrib ) {
                     attributeDescriptions.add(
                         VkVertexInputAttributeDescription {
                             .binding = crimild::UInt32( binding ),

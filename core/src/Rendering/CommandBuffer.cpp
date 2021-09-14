@@ -70,12 +70,16 @@ CommandBuffer::Command::Command( const Command &other ) noexcept
             commandBuffer = other.commandBuffer;
             break;
 
+        case Command::Type::BIND_VERTEX_BUFFER:
+            bindVertexBufferInfo = other.bindVertexBufferInfo;
+            break;
+
         case Command::Type::DRAW:
             count = other.count;
             break;
 
         case Command::Type::DRAW_INDEXED:
-            count = other.count;
+            drawIndexedInfo = other.drawIndexedInfo;
             break;
 
         case Command::Type::DISPATCH:
@@ -154,22 +158,6 @@ void CommandBuffer::setScissor( const ViewportDimensions &scissor ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::setIndexOffset( crimild::Size offset ) noexcept
-{
-    Command cmd;
-    cmd.type = Command::Type::SET_INDEX_OFFSET;
-    cmd.size = offset;
-    m_commands.push_back( cmd );
-}
-
-void CommandBuffer::setVertexOffset( crimild::Size offset ) noexcept
-{
-    Command cmd;
-    cmd.type = Command::Type::SET_VERTEX_OFFSET;
-    cmd.size = offset;
-    m_commands.push_back( cmd );
-}
-
 void CommandBuffer::bindGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept
 {
     Command cmd;
@@ -202,11 +190,14 @@ void CommandBuffer::bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept
+void CommandBuffer::bindVertexBuffer( VertexBuffer *vertexBuffer, UInt32 index ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::BIND_VERTEX_BUFFER;
-    cmd.obj = crimild::retain( vertexBuffer );
+    cmd.bindVertexBufferInfo = BindVertexBufferInfo {
+        .vertexBuffer = crimild::retain( vertexBuffer ),
+        .index = index,
+    };
     m_commands.push_back( cmd );
 }
 
@@ -242,26 +233,15 @@ void CommandBuffer::draw( crimild::UInt32 count ) noexcept
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::drawIndexed( crimild::UInt32 count ) noexcept
+void CommandBuffer::drawIndexed( const DrawIndexedInfo &info ) noexcept
 {
     Command cmd;
     cmd.type = Command::Type::DRAW_INDEXED;
-    cmd.count = count;
+    cmd.drawIndexedInfo = info;
     m_commands.push_back( cmd );
 }
 
-void CommandBuffer::drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept
-{
-    setIndexOffset( indexOffset );
-    setVertexOffset( vertexOffset );
-
-    Command cmd;
-    cmd.type = Command::Type::DRAW_INDEXED;
-    cmd.count = count;
-    m_commands.push_back( cmd );
-}
-
-void CommandBuffer::drawPrimitive( Primitive *primitive ) noexcept
+void CommandBuffer::drawPrimitive( Primitive *primitive, SharedPointer< VertexBuffer > const &instanceData ) noexcept
 {
     switch ( primitive->getType() ) {
         case Primitive::Type::SPHERE: {
@@ -278,20 +258,32 @@ void CommandBuffer::drawPrimitive( Primitive *primitive ) noexcept
             break;
     }
 
-    auto vertices = primitive->getVertexData()[ 0 ];
-    if ( vertices == nullptr ) {
-        // nothing to render
-        return;
-    }
+    Index vboIndex = 0;
+    primitive->getVertexData().each(
+        [ & ]( auto &vertices ) {
+            if ( vertices != nullptr ) {
+                bindVertexBuffer( get_ptr( vertices ), vboIndex++ );
+            }
+        } );
 
-    bindVertexBuffer( get_ptr( vertices ) );
+    UInt32 instanceCount = 0;
+    if ( instanceData != nullptr ) {
+        instanceCount = UInt32( instanceData->getVertexCount() );
+        bindVertexBuffer( get_ptr( instanceData ), vboIndex++ );
+    }
 
     auto indices = primitive->getIndices();
     if ( indices != nullptr ) {
         bindIndexBuffer( indices );
-        drawIndexed( indices->getIndexCount() );
-    } else {
-        draw( vertices->getVertexCount() );
+        drawIndexed(
+            DrawIndexedInfo {
+                .indexCount = UInt32( indices->getIndexCount() ),
+                .instanceCount = instanceCount } );
+    } else if ( primitive->getVertexData().size() > 0 ) {
+        auto vertices = primitive->getVertexData()[ 0 ];
+        if ( vertices != nullptr && vertices->getVertexCount() > 0 ) {
+            draw( vertices->getVertexCount() );
+        }
     }
 }
 

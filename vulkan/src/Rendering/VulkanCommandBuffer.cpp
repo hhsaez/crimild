@@ -314,16 +314,6 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     break;
                 }
 
-                case CommandBuffer::Command::Type::SET_INDEX_OFFSET: {
-                    m_indexOffset = cmd.size;
-                    break;
-                }
-
-                case CommandBuffer::Command::Type::SET_VERTEX_OFFSET: {
-                    m_vertexOffset = cmd.size;
-                    break;
-                }
-
                 case CommandBuffer::Command::Type::BIND_COMMAND_BUFFER: {
                     if ( auto child = cmd.commandBuffer ) {
                         recordCommands( renderDevice, parent != nullptr ? parent : commandBuffer, child );
@@ -362,11 +352,10 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::BIND_VERTEX_BUFFER: {
-                    auto vbo = crimild::cast_ptr< VertexBuffer >( cmd.obj );
+                    auto &info = cmd.bindVertexBufferInfo;
+                    auto vbo = info.vertexBuffer;
+                    auto index = info.index;
                     auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( vbo ) );
-
-                    // reset vertex offset
-                    m_vertexOffset = 0;
 
                     VkBuffer vertexBuffers[] = {
                         bindInfo.bufferHandler,
@@ -376,7 +365,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                     };
                     vkCmdBindVertexBuffers(
                         handler,
-                        0,
+                        index,
                         1,
                         vertexBuffers,
                         offsets );
@@ -386,9 +375,6 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 case CommandBuffer::Command::Type::BIND_INDEX_BUFFER: {
                     auto ibo = crimild::cast_ptr< IndexBuffer >( cmd.obj );
                     auto bindInfo = renderDevice->getBindInfo( crimild::get_ptr( ibo ) );
-
-                    // reset index offset
-                    m_indexOffset = 0;
 
                     vkCmdBindIndexBuffer(
                         handler,
@@ -441,8 +427,9 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 }
 
                 case CommandBuffer::Command::Type::DRAW_INDEXED: {
-                    auto count = cmd.count;
-                    vkCmdDrawIndexed( handler, count, 1, m_indexOffset, m_vertexOffset, 0 );
+                    // auto count = cmd.count;
+                    const auto &info = cmd.drawIndexedInfo;
+                    vkCmdDrawIndexed( handler, info.indexCount, info.instanceCount, info.firstIndex, info.vertexOffset, info.firstInstance );
                     break;
                 }
 

@@ -26,6 +26,8 @@
  */
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -79,13 +81,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                 layout( location = 1 ) in vec3 inNormal;
                                 layout( location = 2 ) in vec2 inTexCoord;
 
+                                // Instance data
+                                // Must be sent as 4xvec4 since mat4 is not supported
+                                layout( location = 3 ) in mat4 model;
+
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
                                     mat4 view;
                                     mat4 proj;
-                                };
-
-                                layout( set = 2, binding = 0 ) uniform GeometryUniforms {
-                                    mat4 model;
                                 };
 
                                 layout( location = 0 ) out vec3 outNormal;
@@ -194,6 +196,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                             )" ),
                     } );
                 program->vertexLayouts = { VertexP3N3TC2::getLayout() };
+                program->instanceLayouts = {
+                    VertexLayout {
+                        { VertexAttribute::Name::POSITION, utils::getFormat< Vector4 >() },
+                        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector4 >() },
+                        { VertexAttribute::Name::TANGENT, utils::getFormat< Vector4 >() },
+                        { VertexAttribute::Name::COLOR, utils::getFormat< Vector4 >() },
+                    },
+                };
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -279,17 +289,69 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
           renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
             commandBuffer->setViewport( viewport );
             commandBuffer->setScissor( viewport );
+
+            auto sorted = std::unordered_map< Material *, std::unordered_map< Primitive *, std::vector< Geometry * > > > {};
             renderables->eachGeometry(
                 [ & ]( Geometry *geometry ) {
                     if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
                         if ( auto material = ms->first() ) {
-                            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) ); // material->getGraphicsPipeline() );
-                            commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-                            commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                            commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
-                            commandBuffer->drawPrimitive( geometry->anyPrimitive() );
+                            auto primitive = geometry->anyPrimitive();
+
+                            sorted[ material ][ primitive ].push_back( geometry );
                         }
                     }
                 } );
+
+            struct InstanceData {
+                Material *material;
+                Primitive *primitive;
+                SharedPointer< VertexBuffer > data;
+                Size count;
+            };
+
+            static std::vector< InstanceData > instances;
+            // instances.clear();
+            if ( instances.size() == 0 ) {
+                for ( auto perMaterial : sorted ) {
+                    auto material = perMaterial.first;
+
+                    for ( auto perPrimitive : perMaterial.second ) {
+                        auto primitive = perPrimitive.first;
+
+                        auto data = Array< Vector4 >( 4 * perPrimitive.second.size() );
+                        auto instanceCount = Index( 0 );
+                        for ( auto geometry : perPrimitive.second ) {
+                            for ( auto i = 0; i < 4; ++i ) {
+                                data[ 4 * instanceCount + i ] = geometry->getWorld().mat[ i ];
+                            }
+
+                            instanceCount++;
+                        }
+
+                        auto instance = InstanceData {
+                            .material = material,
+                            .primitive = primitive,
+                            .data = crimild::alloc< VertexBuffer >(
+                                VertexLayout {
+                                    { VertexAttribute::Name::POSITION, utils::getFormat< Vector4 >() },
+                                    { VertexAttribute::Name::NORMAL, utils::getFormat< Vector4 >() },
+                                    { VertexAttribute::Name::TANGENT, utils::getFormat< Vector4 >() },
+                                    { VertexAttribute::Name::COLOR, utils::getFormat< Vector4 >() },
+                                },
+                                data ),
+                            .count = instanceCount,
+                        };
+
+                        instances.push_back( instance );
+                    }
+                }
+            }
+
+            for ( auto &instance : instances ) {
+                commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+                commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+                commandBuffer->bindDescriptorSet( instance.material->getDescriptors() );
+                commandBuffer->drawPrimitive( instance.primitive, instance.data );
+            }
         } );
 }

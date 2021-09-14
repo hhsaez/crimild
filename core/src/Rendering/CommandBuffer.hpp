@@ -46,6 +46,19 @@ namespace crimild {
     class UniformBuffer;
     class VertexBuffer;
 
+    struct DrawIndexedInfo {
+        UInt32 indexCount = 0;
+        UInt32 instanceCount = 1;
+        UInt32 firstIndex = 0;
+        Int32 vertexOffset = 0;
+        UInt32 firstInstance = 0;
+    };
+
+    struct BindVertexBufferInfo {
+        SharedPointer< VertexBuffer > vertexBuffer;
+        UInt32 index = 0;
+    };
+
     struct DispatchWorkgroup {
         static constexpr UInt32 DEFAULT_WORGROUP_SIZE = 32;
 
@@ -88,9 +101,7 @@ namespace crimild {
                 DRAW_INDEXED,
                 DISPATCH,
                 SET_FRAMEBUFFER,
-                SET_INDEX_OFFSET,
                 SET_SCISSOR,
-                SET_VERTEX_OFFSET,
                 SET_VIEWPORT,
                 END,
             };
@@ -107,6 +118,8 @@ namespace crimild {
                 crimild::UInt32 count;
                 crimild::Size size;
                 DispatchWorkgroup workgroup;
+                DrawIndexedInfo drawIndexedInfo;
+                BindVertexBufferInfo bindVertexBufferInfo;
             };
 
             template< typename T >
@@ -137,19 +150,16 @@ namespace crimild {
         void bindComputePipeline( ComputePipeline *pipeline ) noexcept;
         void bindPrimitive( Primitive *primitive ) noexcept;
         void bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept;
-        void bindVertexBuffer( VertexBuffer *vertexBuffer ) noexcept;
+        void bindVertexBuffer( VertexBuffer *vertexBuffer, UInt32 index = 0 ) noexcept;
         void bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept;
         void bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept;
 
-        void setIndexOffset( crimild::Size offset ) noexcept;
         void setScissor( const ViewportDimensions &scissor ) noexcept;
-        void setVertexOffset( crimild::Size offset ) noexcept;
         void setViewport( const ViewportDimensions &viewport ) noexcept;
 
         void draw( crimild::UInt32 count ) noexcept;
-        void drawIndexed( crimild::UInt32 count ) noexcept;
-        void drawIndexed( crimild::UInt32 count, crimild::Size indexOffset, crimild::Size vertexOffset ) noexcept;
-        void drawPrimitive( Primitive *primitive ) noexcept;
+        void drawIndexed( const DrawIndexedInfo &info ) noexcept;
+        void drawPrimitive( Primitive *primitive, SharedPointer< VertexBuffer > const &instanceData = nullptr ) noexcept;
 
         void dispatch( const DispatchWorkgroup &workgroup ) noexcept;
 
