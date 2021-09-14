@@ -72,6 +72,7 @@ namespace crimild {
         ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
         Array< VertexLayout > vertexLayouts;
+        Array< VertexLayout > instanceLayouts;
         Array< SharedPointer< DescriptorSetLayout > > descriptorSetLayouts;
 
     private:

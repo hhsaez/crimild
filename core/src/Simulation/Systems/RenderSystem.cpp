@@ -171,7 +171,7 @@ void RenderSystem::start( void ) noexcept
                     useResource( env ),
                 } );
 
-            if ( settings->get< Bool >( "video.ssao.enabled", true ) ) {
+            if ( settings->get< Bool >( "video.ssao.enabled", false ) ) {
                 auto withBlur = [ & ]( auto op ) {
                     if ( settings->get< Bool >( "video.ssao.blur", true ) ) {
                         return blur( useResource( op ) );

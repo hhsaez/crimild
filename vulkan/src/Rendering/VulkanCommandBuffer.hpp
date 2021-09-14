@@ -68,8 +68,6 @@ namespace crimild {
             SharedPointer< Framebuffer > m_currentFramebuffer;
             SharedPointer< RenderPass > m_currentRenderPass;
             crimild::UInt32 m_boundDescriptorSets = 0;
-            crimild::Size m_vertexOffset = 0;
-            crimild::Size m_indexOffset = 0;
         };
 
     }
