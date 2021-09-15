@@ -103,7 +103,7 @@ namespace crimild {
 
             renderPass->apply =
                 [ recorder,
-                  renderPass = crimild::get_ptr( renderPass ) ]( auto imageIndex, auto unused ) {
+                  renderPass = crimild::get_ptr( renderPass ) ]( auto imageIndex, auto unused ) mutable {
                     auto commandBuffer = renderPass->getCommandBuffers()[ imageIndex ];
 
                     commandBuffer->clear();
