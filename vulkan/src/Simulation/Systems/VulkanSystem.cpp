@@ -48,6 +48,10 @@ using namespace crimild::vulkan;
 
 void VulkanSystem::start( void ) noexcept
 {
+    registerMessageHandler< messaging::FrameGraphDidChange >( [ & ]( auto & ) {
+        m_recordWithNonConditionalPasses = true;
+    } );
+
     initShaders();
 
     createInstance()
@@ -71,9 +75,6 @@ void VulkanSystem::onRender( void ) noexcept
         CRIMILD_LOG_ERROR( "No valid render device instance" );
         return;
     }
-
-    // auto graphicsCommandBuffers = m_frameGraph->recordGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
-    // auto computeCommandBuffers = m_frameGraph->recordComputeCommands( m_currentFrame, m_recordWithNonConditionalPasses );
 
     auto renderSystem = RenderSystem::getInstance();
     auto &graphicsCommandBuffers = renderSystem->getGraphicsCommands( m_currentFrame, m_recordWithNonConditionalPasses );
