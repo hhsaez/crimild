@@ -28,6 +28,7 @@
 #include "Simulation/Systems/ImGUISystem.hpp"
 
 #include "Coding/Encoder.hpp"
+#include "Concurrency/Async.hpp"
 #include "Foundation/Version.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Operations/ImGUIOperations.hpp"
@@ -160,6 +161,21 @@ namespace crimild {
     }
 
     namespace imgui {
+
+        void applyUILayer( void ) noexcept
+        {
+            auto frameGraph = RenderSystem::getInstance()->getFrameGraph();
+
+            if ( frameGraph == nullptr ) {
+                // This should not happen, since we always have something to render
+                frameGraph = renderUI();
+            } else {
+                // We want to render the ImGUI layer on top of whatever we rendered before
+                frameGraph = overlayUI( renderUI(), frameGraph );
+            }
+
+            RenderSystem::getInstance()->setFrameGraph( frameGraph );
+        }
 
         void showEditRT( Settings *settings ) noexcept
         {
@@ -490,6 +506,47 @@ namespace crimild {
                     ImGui::EndMenu();
                 }
 
+                if ( ImGui::BeginMenu( "Rendering" ) ) {
+                    if ( ImGui::MenuItem( "Default" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [] {
+                                RenderSystem::getInstance()->useDefaultRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    ImGui::Separator();
+
+                    // call render passes conditationally again !!!
+
+                    if ( ImGui::MenuItem( "RT (Soft)" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [] {
+                                RenderSystem::getInstance()->useRTSoftRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    if ( ImGui::MenuItem( "RT (Compute)" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [] {
+                                RenderSystem::getInstance()->useRTComputeRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    ImGui::Separator();
+
+                    if ( ImGui::MenuItem( "Debug" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [] {
+                                RenderSystem::getInstance()->useDefaultRenderPath( true );
+                                applyUILayer();
+                            } );
+                    }
+                    ImGui::EndMenu();
+                }
+
                 if ( ImGui::BeginMenu( "Tools" ) ) {
                     if ( ImGui::MenuItem( "Scene Tree..." ) ) {
                         settings->set( "ui.tools.scene_tree.show", true );
@@ -612,17 +669,7 @@ void ImGUISystem::start( void ) noexcept
 
 void ImGUISystem::lateStart( void ) noexcept
 {
-    auto frameGraph = RenderSystem::getInstance()->getFrameGraph();
-
-    if ( frameGraph == nullptr ) {
-        // This should not happen, since we always have something to render
-        frameGraph = renderUI();
-    } else {
-        // We want to render the ImGUI layer on top of whatever we rendered before
-        frameGraph = overlayUI( renderUI(), frameGraph );
-    }
-
-    RenderSystem::getInstance()->setFrameGraph( frameGraph );
+    applyUILayer();
 }
 
 void ImGUISystem::onPreRender( void ) noexcept

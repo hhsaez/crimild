@@ -40,6 +40,14 @@ namespace crimild {
     class ComputePass;
     class ScenePass;
 
+    namespace messaging {
+
+        struct FrameGraphDidChange {
+            // no data
+        };
+
+    }
+
     class RenderSystem
         : public System,
           public DynamicSingleton< RenderSystem > {
@@ -57,6 +65,10 @@ namespace crimild {
 
         CommandBufferArray &getGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
         CommandBufferArray &getComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
+
+        void useDefaultRenderPath( Bool debug = false ) noexcept;
+        void useRTSoftRenderPath( Bool debug = false ) noexcept;
+        void useRTComputeRenderPath( Bool debug = false ) noexcept;
 
     private:
         void sort( SharedPointer< FrameGraphOperation > const &root ) noexcept;
