@@ -292,6 +292,8 @@ namespace crimild {
 
             m_progress = m_width * m_height;
 
+            settings->set( "rt.samples.count", 0 );
+
             writes( { m_image } );
             produces( { m_image } );
         }

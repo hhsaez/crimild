@@ -135,20 +135,4 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
                 .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
                 .z = 1 } );
         } );
-
-    /*
-    auto commands = cmp.create< CommandBuffer >();
-    commands->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
-    commands->bindComputePipeline( pipeline );
-    commands->bindDescriptorSet( descriptors );
-    commands->dispatch( DispatchWorkgroup {
-        .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-        .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-        .z = 1 } );
-    commands->end();
-    computePass->setCommandRecorder( [ commands ]( Size ) { return commands; } );
-    computePass->setConditional( props.isConditional );
-    */
-
-    //computePass->reads( { } );
 }

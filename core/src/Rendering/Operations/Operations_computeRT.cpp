@@ -31,10 +31,12 @@
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
+#include "Mathematics/Random.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Vector3_constants.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Operations/Operations.hpp"
+#include "Rendering/StorageBuffer.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
@@ -49,7 +51,20 @@ const auto FRAG_SRC = R"(
     layout( local_size_x = 32, local_size_y = 32 ) in;
     layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
 
-    layout( set = 0, binding = 1 ) uniform Uniforms {
+    struct RayData {
+        vec3 origin;
+        vec3 direction;
+        vec3 sampleColor;
+        vec3 accumColor;
+        int bounces;
+        int samples;
+    };
+
+    layout( set = 0, binding = 1 ) buffer RayBounceState {
+        RayData rays[];
+    };
+
+    layout( set = 0, binding = 2 ) uniform Uniforms {
         uint sampleCount;
         uint maxSamples;
         uint bounces;
@@ -90,7 +105,7 @@ const auto FRAG_SRC = R"(
 #define MAX_PRIMITIVE_COUNT 10000
 #define MAX_MATERIAL_COUNT 10000
 
-    layout( set = 0, binding = 2 ) uniform SceneUniforms {
+    layout( set = 0, binding = 3 ) uniform SceneUniforms {
         Sphere spheres[ MAX_PRIMITIVE_COUNT ];
         int sphereCount;
         Box boxes[ MAX_PRIMITIVE_COUNT ];
@@ -436,7 +451,7 @@ const auto FRAG_SRC = R"(
         vec3 color = vec3( 1.0 );
 
         int depth = 0;
-        while ( depth <= bounces ) {
+        while ( depth < bounces ) {
             HitRecord hit = hitScene( ray, tMin, tMax );
             if ( !hit.hasResult ) {
                 // no hit. use background color
@@ -461,9 +476,103 @@ const auto FRAG_SRC = R"(
         return vec3( 0 );
     }
 
-    vec3 gammaCorrection( vec3 color, int samplesPerPixel ) {
-        float scale = 1.0 / float( samplesPerPixel );
-        return sqrt( scale * color );
+    uint getNextRayIndex()
+    {
+        // vec2 size = imageSize( resultImage );
+        // return int( gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x );
+        // return gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationIndex;
+
+        const uint clusterSize = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
+        const uvec3 linearizeInvocation = uvec3( 1.0, clusterSize, clusterSize * clusterSize );
+        return uint( dot( gl_GlobalInvocationID, linearizeInvocation ) );
+    }
+
+    void resetSample()
+    {
+        uint idx = getNextRayIndex();
+
+        rays[ idx ].sampleColor = vec3( 1 );
+        rays[ idx ].accumColor = vec3( 0 );
+        rays[ idx ].bounces = 0;
+        rays[ idx ].samples = 0;
+
+        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( vec3( 0 ), 1.0 ) );
+    }
+
+    Ray getNextRay()
+    {
+        uint idx = getNextRayIndex();
+        Ray ret;
+        if ( rays[ idx ].bounces == 0 ) {
+            vec2 size = imageSize( resultImage );
+            vec2 uv = gl_GlobalInvocationID.xy;
+            uv += vec2( getRandom(), getRandom() );
+            uv /= ( size.xy - vec2( 1 ) );
+            uv.y = 1.0 - uv.y;
+            ret = getCameraRay( uv.x, uv.y );
+        } else {
+            ret.origin = rays[ idx ].origin;
+            ret.direction = rays[ idx ].direction;
+        }
+        return ret;
+    }
+
+    void onSampleCompleted()
+    {
+        uint idx = getNextRayIndex();
+
+        rays[ idx ].accumColor += rays[ idx ].sampleColor;
+
+        // vec3 color = rays[ idx ].accumColor / float( 1 + rays[ idx ].samples );
+
+        vec3 color = rays[ idx ].sampleColor;
+
+        vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
+        color = ( destinationColor * float( rays[ idx ].samples ) + color ) / float( rays[ idx ].samples + 1 );
+        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
+
+        // reset
+        rays[ idx ].sampleColor = vec3( 1 );
+        rays[ idx ].bounces = 0;
+        rays[ idx ].samples = rays[ idx ].samples + 1;
+    }
+
+    void doSampleBounce( Ray ray )
+    {
+        uint idx = getNextRayIndex();
+
+        float tMin = 0.001;
+        float tMax = 9999.9;
+
+        HitRecord hit = hitScene( ray, tMin, tMax );
+        if ( !hit.hasResult ) {
+            // no hit. use background color
+            rays[ idx ].sampleColor *= backgroundColor;
+            onSampleCompleted();
+            return;
+        }
+
+        Scattered scattered = scatter( uScene.materials[ hit.materialID ], ray, hit );
+
+        if ( scattered.hasResult ) {
+            if ( scattered.isEmissive ) {
+                // emissive material 
+                rays[ idx ].sampleColor = scattered.attenuation;
+                onSampleCompleted();
+            } else {
+                rays[ idx ].sampleColor *= scattered.attenuation;
+                if ( rays[ idx ].bounces >= 20 ) {
+                    onSampleCompleted();
+                } else {
+                    rays[ idx ].origin = scattered.ray.origin;
+                    rays[ idx ].direction = scattered.ray.direction;
+                    rays[ idx ].bounces = rays[ idx ].bounces + 1;
+                }
+            }
+        } else {
+            rays[ idx ].sampleColor = vec3( 0 );
+            onSampleCompleted();
+        }
     }
 
     void main() {
@@ -482,28 +591,62 @@ const auto FRAG_SRC = R"(
             return;
         }
 
-        vec2 uv = gl_GlobalInvocationID.xy;
-        uv += vec2( getRandom(), getRandom() );
-        uv /= ( size.xy - vec2( 1 ) );
-        uv.y = 1.0 - uv.y;
-        Ray ray = getCameraRay( uv.x, uv.y );
-        vec3 color = rayColor( ray );
-
-        vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
-        color = ( destinationColor * float( sampleCount - 1 ) + color ) / float( sampleCount );
-
         if ( sampleCount == 0 ) {
-            color = vec3( 0 );
+            // reset all samples
+            resetSample();
+            return;
         }
 
-        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
+        Ray ray = getNextRay();
+        doSampleBounce( ray );
+
+        // vec2 uv = gl_GlobalInvocationID.xy;
+        // uv += vec2( getRandom(), getRandom() );
+        // uv /= ( size.xy - vec2( 1 ) );
+        // uv.y = 1.0 - uv.y;
+        // Ray ray = getCameraRay( uv.x, uv.y );
+        // vec3 color = rayColor( ray );
+
+        // vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
+        // color = ( destinationColor * float( sampleCount - 1 ) + color ) / float( sampleCount );
+
+        // if ( sampleCount == 0 ) {
+        //     color = vec3( 0 );
+        // }
+
+        // vec3 color = vec3( 1, 0, 1 );
+
+        // imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
     }
 
 )";
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noexcept
 {
+    const float resolutionScale = 1.0f;
+    const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
+    const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
+
+    // Reset samples
+    Simulation::getInstance()->getSettings()->set( "rt.samples.count", 0 );
+
     auto descriptors = Array< Descriptor > {
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = [ & ] {
+                struct BufferData {
+                    Point3 origin = Point3 { 0, 0, 0 };
+                    Vector3 direction = Vector3 { 0, 0, 0 };
+                    ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
+                    ColorRGB accumColor = ColorRGB { 0, 0, 0 };
+                    Int32 bounces = 0;
+                    Int32 samples = 0;
+                };
+
+                auto data = Array< BufferData >( 4 * width * height );
+                return crimild::alloc< StorageBuffer >( data );
+            }(),
+        },
         Descriptor {
             .descriptorType = DescriptorType::UNIFORM_BUFFER,
             .obj = [] {
@@ -528,7 +671,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
                         auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
                         auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
-                        auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
+                        auto bounces = UInt32( 1 );                                           //settings->get< UInt32 >( "rt.bounces", 10 );
                         auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
                         auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
                         auto backgroundColor = ColorRGB {
@@ -579,7 +722,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             .sampleCount = sampleCount,
                             .maxSamples = maxSamples,
                             .bounces = bounces,
-                            .seed = sampleCount,
+                            .seed = Random::generate< UInt32 >( 0, 1000 ),
                             .cameraInvProj = cameraInvProj,
                             .cameraWorld = cameraWorld,
                             .cameraOrigin = cameraOrigin,
@@ -655,10 +798,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             }(),
         },
     };
-
-    const float resolutionScale = 1.0f;
-    const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
-    const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
 
     return computeImage(
         Extent2D {

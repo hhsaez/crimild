@@ -27,6 +27,8 @@
 
 #include "SceneGraph/Camera.hpp"
 
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
@@ -44,12 +46,12 @@
 
 using namespace crimild;
 
-TEST( CameraTest, construction )
+TEST( Camera, construction )
 {
     auto camera = crimild::alloc< Camera >();
 }
 
-TEST( CameraTest, view_matrix )
+TEST( Camera, view_matrix )
 {
     auto camera = crimild::alloc< Camera >();
 
@@ -73,7 +75,7 @@ TEST( CameraTest, view_matrix )
     EXPECT_EQ( M, view );
 }
 
-TEST( CameraTest, get_ray_through_the_center_of_the_canvas )
+TEST( Camera, get_ray_through_the_center_of_the_canvas )
 {
     const auto width = Int( 202 );
     const auto height = Int( 102 );
@@ -94,7 +96,7 @@ TEST( CameraTest, get_ray_through_the_center_of_the_canvas )
     EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
 }
 
-TEST( CameraTest, get_ray_through_the_corner_of_the_canvas )
+TEST( Camera, get_ray_through_the_corner_of_the_canvas )
 {
     const auto width = Int( 201 );
     const auto height = Int( 101 );
@@ -115,7 +117,7 @@ TEST( CameraTest, get_ray_through_the_corner_of_the_canvas )
     EXPECT_EQ( ( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
 }
 
-TEST( CameraTest, get_ray_for_translated_camera )
+TEST( Camera, get_ray_for_translated_camera )
 {
     const auto width = Int( 201 );
     const auto height = Int( 101 );
@@ -138,7 +140,7 @@ TEST( CameraTest, get_ray_for_translated_camera )
     EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
 }
 
-TEST( CameraTest, get_ray_for_rotated_camera )
+TEST( Camera, get_ray_for_rotated_camera )
 {
     const auto width = Int( 201 );
     const auto height = Int( 101 );
@@ -161,7 +163,7 @@ TEST( CameraTest, get_ray_for_rotated_camera )
     EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
 }
 
-TEST( CameraTest, get_ray_for_transformed_camera )
+TEST( Camera, get_ray_for_transformed_camera )
 {
     const auto width = Int( 201 );
     const auto height = Int( 101 );
@@ -184,7 +186,7 @@ TEST( CameraTest, get_ray_for_transformed_camera )
     EXPECT_EQ( ( Vector3 { 0, -numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ), direction( ray ) );
 }
 
-TEST( CameraTest, get_ray_for_camera_using_lookAt )
+TEST( Camera, get_ray_for_camera_using_lookAt )
 {
     const auto width = Int( 200 );
     const auto height = Int( 100 );
@@ -212,7 +214,7 @@ TEST( CameraTest, get_ray_for_camera_using_lookAt )
     EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
 }
 
-TEST( CameraTest, fetchCameras )
+TEST( Camera, fetchCameras )
 {
     auto scene = crimild::alloc< Group >();
     auto camera = crimild::alloc< Camera >();
@@ -226,4 +228,27 @@ TEST( CameraTest, fetchCameras )
         i++;
     } );
     EXPECT_EQ( 1, i );
+}
+
+TEST( Camera, coding )
+{
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+
+    {
+        auto camera = crimild::alloc< Camera >();
+        camera->setFocusDistance( 20 );
+        camera->setAperture( 2 );
+
+        encoder->encode( camera );
+    }
+
+    {
+        decoder->fromBytes( encoder->getBytes() );
+
+        auto camera = decoder->getObjectAt< Camera >( 0 );
+        EXPECT_TRUE( camera != nullptr );
+        EXPECT_EQ( 20, camera->getFocusDistance() );
+        EXPECT_EQ( 2, camera->getAperture() );
+    }
 }
