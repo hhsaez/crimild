@@ -27,6 +27,8 @@
 
 #include "Camera.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Point3Ops.hpp"
@@ -170,4 +172,20 @@ bool Camera::culled( const BoundingVolume *volume ) const
     }
 
     return false;
+}
+
+void Camera::encode( coding::Encoder &encoder )
+{
+    Node::encode( encoder );
+
+    encoder.encode( "focus_distance", m_focusDistance );
+    encoder.encode( "aperture", m_aperture );
+}
+
+void Camera::decode( coding::Decoder &decoder )
+{
+    Group::decode( decoder );
+
+    decoder.decode( "focus_distance", m_focusDistance );
+    decoder.decode( "aperture", m_aperture );
 }

@@ -134,3 +134,137 @@ TEST( CodableTest, codingArray )
     EXPECT_EQ( n->getChildren()[ 1 ]->getName(), n2->getChildren()[ 1 ]->getName() );
     EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );
 }
+
+namespace crimild {
+
+    namespace coding {
+
+        class MutableMemoryCoder : public coding::Encoder {
+        public:
+            virtual crimild::Bool encode( SharedPointer< coding::Codable > const &codable ) override
+            {
+                // TODO
+
+                codable->encode( *this );
+
+                return true;
+            }
+
+            virtual crimild::Bool encode( std::string key, SharedPointer< coding::Codable > const &codable ) override
+            {
+                if ( codable == nullptr ) {
+                    return false;
+                }
+
+                encodeKey( key );
+
+                return true;
+            }
+
+            virtual crimild::Bool encode( std::string key, std::string value ) override
+            {
+                encodeKey( key );
+                return true;
+            }
+
+            virtual crimild::Bool encode( std::string key, crimild::Size value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::UInt8 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::UInt16 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::Int16 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::Int32 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::UInt32 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::Real32 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, crimild::Real64 value ) override { return encodeValue( key, value ); }
+
+            virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override
+            {
+                // TODO
+            }
+            virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override
+            {
+                // TODO
+            }
+            virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Matrix3f &value ) override { return encodeValues( key, 9, static_cast< const float * >( &value.c0.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, static_cast< const float * >( &value[ 0 ].x ) ); }
+            virtual crimild::Bool encode( std::string key, const Quaternion &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.getRawData().x ) ); }
+
+            virtual crimild::Bool encode( std::string key, const Transformation &value ) override
+            {
+                return true;
+            }
+
+            virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, Array< Quaternion > &value ) override { return false; }
+
+        protected:
+            virtual void encodeArrayBegin( std::string key, crimild::Size count ) override
+            {
+                // TODO
+            }
+
+            virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) override
+            {
+                return key;
+            }
+
+            virtual void endEncodingArrayElement( std::string key, crimild::Size index ) override
+            {
+                // TODO
+            }
+
+            virtual void encodeArrayEnd( std::string key ) override
+            {
+                // TODO
+            }
+
+        private:
+            template< typename T >
+            crimild::Bool encodeValue( std::string key, const T &value )
+            {
+                encodeKey( key );
+                return true;
+            }
+
+            template< typename T >
+            crimild::Bool encodeValues( std::string key, crimild::Size count, const T *values )
+            {
+                encodeKey( key );
+                return true;
+            }
+
+            crimild::Bool encodeKey( std::string key )
+            {
+                // TODO
+                return true;
+            }
+        };
+
+    }
+
+}
+
+TEST( Codable, mutable_coding )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
+
+    auto n = crimild::alloc< crimild::CodableNode >( "a scene" );
+
+    auto coder = crimild::alloc< coding::MutableMemoryCoder >();
+
+    // TODO
+
+    // coder->encode( n );
+    // coder->set( n->getUniqueID(), "name", "some other name" );
+    // coder->apply();
+
+    EXPECT_EQ( "some other name", n->getName() );
+}

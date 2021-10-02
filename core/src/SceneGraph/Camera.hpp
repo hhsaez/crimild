@@ -138,6 +138,16 @@ namespace crimild {
         Real m_aperture = Real( 0 );
 
         //@}
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }
