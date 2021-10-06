@@ -77,6 +77,7 @@ namespace crimild {
         virtual void traverse( Node *node ) noexcept override;
         virtual void visitGroup( Group *group ) noexcept override;
         virtual void visitGeometry( Geometry *geometry ) noexcept override;
+        virtual void visitCSGNode( CSGNode *csg ) noexcept override;
 
     private:
         void intersect( Geometry *geometry, Primitive *primitive ) noexcept;

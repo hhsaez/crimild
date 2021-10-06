@@ -26,51 +26,50 @@
  */
 
 #include "NodeVisitor.hpp"
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Geometry.hpp"
+
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Light.hpp"
+#include "SceneGraph/Node.hpp"
 #include "SceneGraph/Text.hpp"
 
 using namespace crimild;
 
 NodeVisitor::NodeVisitor( void )
 {
-
 }
 
 NodeVisitor::~NodeVisitor( void )
 {
-
 }
 
 void NodeVisitor::reset( void )
 {
-
 }
 
 void NodeVisitor::traverse( Node *node )
 {
-	reset();
-	node->accept( *this );
+    reset();
+    node->accept( *this );
 }
 
 void NodeVisitor::visitNode( Node *node )
 {
-	// do nothing
+    // do nothing
 }
 
 void NodeVisitor::visitGroup( Group *group )
 {
-	// by default, just traverse to child nodes
-	group->forEachNode( [&]( Node *node ) { node->accept( *this ); } );
+    // by default, just traverse to child nodes
+    group->forEachNode( [ & ]( Node *node ) { node->accept( *this ); } );
 }
 
 void NodeVisitor::visitGeometry( Geometry *geometry )
 {
-	// by default, do the same as with any other node
-	visitNode( geometry );
+    // by default, do the same as with any other node
+    visitNode( geometry );
 }
 
 void NodeVisitor::visitText( Text *text )
@@ -81,11 +80,21 @@ void NodeVisitor::visitText( Text *text )
 
 void NodeVisitor::visitCamera( Camera *camera )
 {
-	visitGroup( camera );
+    visitGroup( camera );
 }
 
 void NodeVisitor::visitLight( Light *light )
 {
-	visitNode( light );
+    visitNode( light );
 }
 
+void NodeVisitor::visitCSGNode( CSGNode *csgNode )
+{
+    if ( csgNode->getLeft() ) {
+        csgNode->getLeft()->accept( *this );
+    }
+
+    if ( csgNode->getRight() ) {
+        csgNode->getRight()->accept( *this );
+    }
+}

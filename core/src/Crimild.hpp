@@ -277,6 +277,7 @@
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 #include "Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"

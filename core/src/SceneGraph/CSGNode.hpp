@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,45 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VISITORS_NODE_VISITOR_
-#define CRIMILD_VISITORS_NODE_VISITOR_
+#ifndef CRIMILD_CORE_SCENEGRAPH_CSG_NODE_
+#define CRIMILD_CORE_SCENEGRAPH_CSG_NODE_
 
-#include "Foundation/Memory.hpp"
+#include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
-    class Node;
-    class Group;
-    class Geometry;
-    class Camera;
-    class Light;
-    class Text;
-    class CSGNode;
-
-    class NodeVisitor {
-    protected:
-        NodeVisitor( void );
+    class CSGNode : public Node {
+        CRIMILD_IMPLEMENT_RTTI( crimild::CSGNode )
 
     public:
-        virtual ~NodeVisitor( void );
+        enum class Operator {
+            UNION,
+            INTERSECTION,
+            DIFFERENCE,
+        };
 
-        virtual void reset( void );
+    public:
+        CSGNode( void ) = default;
+        explicit CSGNode( Operator op ) noexcept;
+        CSGNode( Operator op, SharedPointer< Node > const &left, SharedPointer< Node > const &right ) noexcept;
+        virtual ~CSGNode( void ) = default;
 
-        virtual void traverse( Node *node );
+        inline Operator getOperator( void ) const noexcept { return m_operator; }
 
-        virtual void visitNode( Node *node );
-        virtual void visitGroup( Group *group );
-        virtual void visitGeometry( Geometry *geometry );
-        virtual void visitText( Text *text );
-        virtual void visitCamera( Camera *camera );
-        virtual void visitLight( Light *light );
-        virtual void visitCSGNode( CSGNode *csgNode );
+        inline Node *getLeft( void ) noexcept { return get_ptr( m_left ); }
+        inline void setLeft( SharedPointer< Node > const &left ) noexcept { m_left = left; }
+
+        inline Node *getRight( void ) noexcept { return get_ptr( m_right ); }
+        inline void setRight( SharedPointer< Node > const &right ) noexcept { m_right = right; }
 
     private:
-        NodeVisitor( const NodeVisitor & ) { }
-        NodeVisitor &operator=( const NodeVisitor & ) { return *this; }
+        Operator m_operator;
+        SharedPointer< Node > m_left;
+        SharedPointer< Node > m_right;
+
+    public:
+        virtual void accept( NodeVisitor &visitor ) override;
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }
-
 #endif

@@ -381,7 +381,7 @@ namespace crimild {
             auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
             auto bounces = settings->get< UInt32 >( "rt.bounces", 10 );
             auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
-            auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+            auto aperture = settings->get< Real >( "rt.aperture", Real( 0 ) );    // move to camera
             auto backgroundColor = ColorRGB {
                 settings->get< Real >( "rt.background_color.r", 0.5f ),
                 settings->get< Real >( "rt.background_color.g", 0.7f ),
