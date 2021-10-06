@@ -32,8 +32,11 @@
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Primitives/Primitive.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+
+#include <unordered_set>
 
 using namespace crimild;
 
@@ -66,6 +69,102 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
         [ & ]( auto primitive ) {
             intersect( geometry, primitive );
         } );
+}
+
+void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
+{
+    // TODO: test intersection (needs worldstateupdate)
+
+    auto beforeLeftSize = m_results.size();
+    if ( auto left = csg->getLeft() ) {
+        left->accept( *this );
+    }
+    auto afterLeftSize = m_results.size();
+
+    auto beforeRightSize = m_results.size();
+    if ( auto right = csg->getRight() ) {
+        right->accept( *this );
+    }
+    auto afterRightSize = m_results.size();
+
+    auto leftIntersections = [ & ] {
+        std::vector< Result > res( afterLeftSize - beforeLeftSize );
+        for ( auto i = 0l; i < res.size(); ++i ) {
+            res[ i ] = m_results[ beforeLeftSize + i ];
+        }
+        return res;
+    }();
+
+    auto rightIntersections = [ & ] {
+        std::vector< Result > res( afterRightSize - beforeRightSize );
+        for ( auto i = 0l; i < res.size(); ++i ) {
+            res[ i ] = m_results[ beforeRightSize + i ];
+        }
+        return res;
+    }();
+
+    auto allIntersections = [ & ] {
+        std::vector< Result > res( leftIntersections.size() + rightIntersections.size() );
+        auto i = Index( 0 );
+        for ( auto &x : leftIntersections ) {
+            res[ i++ ] = x;
+        }
+        for ( auto &x : rightIntersections ) {
+            res[ i++ ] = x;
+        }
+        std::sort(
+            std::begin( res ),
+            std::end( res ),
+            []( auto &a, auto &b ) { return a.t < b.t; } );
+        return res;
+    }();
+
+    auto intersectionAllowed = []( auto op, auto lHit, auto inL, auto inR ) {
+        switch ( op ) {
+            case CSGNode::Operator::UNION:
+                return ( lHit && !inR ) || ( !lHit && !inL );
+            case CSGNode::Operator::INTERSECTION:
+                return ( lHit && inR ) || ( !lHit && inL );
+            case CSGNode::Operator::DIFFERENCE:
+                return ( lHit && !inR ) || ( !lHit && inL );
+            default:
+                return false;
+        }
+    };
+
+    auto filteredIntersections = [ & ] {
+        std::vector< Result > res;
+
+        auto inR = false;
+        auto inL = false;
+
+        for ( auto &i : allIntersections ) {
+            auto lHit = std::find_if(
+                            std::begin( leftIntersections ),
+                            std::end( leftIntersections ),
+                            [ & ]( auto &other ) {
+                                return i.geometry == other.geometry;
+                            } )
+                        != std::end( leftIntersections );
+            if ( intersectionAllowed( csg->getOperator(), lHit, inL, inR ) ) {
+                res.push_back( i );
+            }
+
+            if ( lHit ) {
+                inL = !inL;
+            } else {
+                inR = !inR;
+            }
+        }
+
+        return res;
+    }();
+
+    m_results.resize( beforeLeftSize + filteredIntersections.size() );
+    auto i = Index( 0 );
+    for ( auto &x : filteredIntersections ) {
+        m_results[ beforeLeftSize + ( i++ ) ] = x;
+    }
 }
 
 void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexcept

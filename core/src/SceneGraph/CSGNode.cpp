@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,45 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VISITORS_NODE_VISITOR_
-#define CRIMILD_VISITORS_NODE_VISITOR_
+#include "SceneGraph/CSGNode.hpp"
 
-#include "Foundation/Memory.hpp"
+using namespace crimild;
 
-namespace crimild {
-
-    class Node;
-    class Group;
-    class Geometry;
-    class Camera;
-    class Light;
-    class Text;
-    class CSGNode;
-
-    class NodeVisitor {
-    protected:
-        NodeVisitor( void );
-
-    public:
-        virtual ~NodeVisitor( void );
-
-        virtual void reset( void );
-
-        virtual void traverse( Node *node );
-
-        virtual void visitNode( Node *node );
-        virtual void visitGroup( Group *group );
-        virtual void visitGeometry( Geometry *geometry );
-        virtual void visitText( Text *text );
-        virtual void visitCamera( Camera *camera );
-        virtual void visitLight( Light *light );
-        virtual void visitCSGNode( CSGNode *csgNode );
-
-    private:
-        NodeVisitor( const NodeVisitor & ) { }
-        NodeVisitor &operator=( const NodeVisitor & ) { return *this; }
-    };
-
+CSGNode::CSGNode( Operator op ) noexcept
+    : m_operator( op )
+{
 }
 
-#endif
+CSGNode::CSGNode( Operator op, SharedPointer< Node > const &left, SharedPointer< Node > const &right ) noexcept
+    : m_operator( op ),
+      m_left( left ),
+      m_right( right )
+{
+}
+
+void CSGNode::accept( NodeVisitor &visitor )
+{
+    visitor.visitCSGNode( this );
+}
+
+void CSGNode::encode( coding::Encoder &encoder )
+{
+    Node::encode( encoder );
+}
+
+void CSGNode::decode( coding::Decoder &decoder )
+{
+    Node::decode( decoder );
+}

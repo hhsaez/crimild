@@ -31,6 +31,7 @@
 #include "Components/RenderStateComponent.hpp"
 #include "Components/SkinnedMeshComponent.hpp"
 #include "Rendering/SkinnedMesh.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
@@ -109,13 +110,32 @@ void ShallowCopy::visitLight( Light *light )
     visitNode( light );
 }
 
+void ShallowCopy::visitCSGNode( CSGNode *csg )
+{
+    auto copy = crimild::alloc< CSGNode >( csg->getOperator() );
+    copyNode( csg, crimild::get_ptr( copy ) );
+
+    auto tempCSGParent = m_csgParent;
+    m_csgParent = crimild::get_ptr( copy );
+
+    NodeVisitor::visitCSGNode( csg );
+
+    m_csgParent = tempCSGParent;
+}
+
 void ShallowCopy::copyNode( Node *src, Node *dst )
 {
     if ( _result == nullptr ) {
         _result = crimild::retain( dst );
     }
 
-    if ( _parent != nullptr ) {
+    if ( m_csgParent != nullptr ) {
+        if ( m_csgParent->getLeft() == nullptr ) {
+            m_csgParent->setLeft( retain( dst ) );
+        } else {
+            m_csgParent->setRight( retain( dst ) );
+        }
+    } else if ( _parent != nullptr ) {
         _parent->attachNode( dst );
     }
 

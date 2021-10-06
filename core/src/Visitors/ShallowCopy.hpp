@@ -50,8 +50,9 @@ namespace crimild {
         virtual void visitGroup( Group *node ) override;
         virtual void visitGeometry( Geometry *geometry ) override;
         virtual void visitText( Text *text ) override;
-        virtual void visitCamera( Camera *camera );
-        virtual void visitLight( Light *light );
+        virtual void visitCamera( Camera *camera ) override;
+        virtual void visitLight( Light *light ) override;
+        virtual void visitCSGNode( CSGNode *csg ) override;
 
     private:
         void copyNode( Node *source, Node *destination );
@@ -59,6 +60,7 @@ namespace crimild {
     private:
         SharedPointer< Node > _result;
         Group *_parent = nullptr;
+        CSGNode *m_csgParent = nullptr;
     };
 
 }
