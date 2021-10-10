@@ -25,29 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CylinderPrimitive.hpp"
+#ifndef CRIMILD_MATHEMATICS_CYLINDER_
+#define CRIMILD_MATHEMATICS_CYLINDER_
 
-using namespace crimild;
+#include "Point3.hpp"
 
-SharedPointer< Primitive > CylinderPrimitive::UNIT_CYLINDER = crimild::alloc< CylinderPrimitive >( CylinderPrimitive::Params {} );
+namespace crimild {
 
-CylinderPrimitive::CylinderPrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
-{
-    _height = params.height;
-    _radius = params.radius;
+    struct Cylinder {
+        Real radius = Real( 1 );
+        Real height = Real( 1 );
+    };
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, 1.0f }, Vector2f { 30, 20 } };
-    setInterval( interval );
-    generate();
+    [[nodiscard]] inline constexpr Real radius( const Cylinder &c ) noexcept { return c.radius; }
+    [[nodiscard]] inline constexpr Real height( const Cylinder &c ) noexcept { return c.height; }
+
 }
 
-Vector3f CylinderPrimitive::evaluate( const Vector2f &domain ) const
-{
-    float u = domain[ 0 ];
-    float v = domain[ 1 ];
-    float x = _radius * std::cos( u );
-    float y = _height * v;
-    float z = _radius * -std::sin( u );
-    return Vector3f { x, y, z };
-}
+#endif

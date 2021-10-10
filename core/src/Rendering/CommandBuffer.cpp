@@ -28,6 +28,7 @@
 #include "Rendering/CommandBuffer.hpp"
 
 #include "Primitives/BoxPrimitive.hpp"
+#include "Primitives/CylinderPrimitive.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
@@ -251,6 +252,11 @@ void CommandBuffer::drawPrimitive( Primitive *primitive, SharedPointer< VertexBu
 
         case Primitive::Type::BOX: {
             primitive = crimild::get_ptr( BoxPrimitive::UNIT_BOX );
+            break;
+        }
+
+        case Primitive::Type::CYLINDER: {
+            primitive = crimild::get_ptr( CylinderPrimitive::UNIT_CYLINDER );
             break;
         }
 

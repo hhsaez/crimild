@@ -387,6 +387,7 @@ namespace crimild {
                 settings->get< Real >( "rt.background_color.g", 0.7f ),
                 settings->get< Real >( "rt.background_color.b", 1.0f ),
             };
+            auto useScanline = settings->get< Bool >( "rt.use_scanline", false );
 
             const auto cameraFocusDistance = focusDist; //camera->getFocusDistance();
             const auto cameraAperture = aperture;       //camera->getAperture();
@@ -394,46 +395,86 @@ namespace crimild {
             const auto cameraRight = right( camera->getWorld() );
             const auto cameraUp = up( camera->getWorld() );
 
-            for ( auto y = 0; y < m_height; y += m_tileSize ) {
-                for ( auto x = 0; x < m_width; x += m_tileSize ) {
-                    m_jobs.push_back(
-                        [ self = this, scene, camera, x, y, cameraFocusDistance, cameraLensRadius, cameraUp, cameraRight, sampleCount, bounces, backgroundColor ] {
-                            for ( auto dy = 0; dy < self->m_tileSize; ++dy ) {
-                                if ( y + dy >= self->m_height ) {
-                                    break;
-                                }
-                                for ( auto dx = 0; dx < self->m_tileSize; ++dx ) {
-                                    if ( x + dx >= self->m_width ) {
-                                        break;
-                                    }
+            auto job = [ & ]( UInt32 x, UInt32 y ) {
+                return [ self = this,
+                         scene,
+                         camera,
+                         cameraFocusDistance,
+                         cameraLensRadius,
+                         cameraUp,
+                         cameraRight,
+                         sampleCount,
+                         bounces,
+                         backgroundColor,
+                         x,
+                         y ]() {
+                    for ( auto dy = 0; dy < self->m_tileSize; ++dy ) {
+                        if ( y + dy >= self->m_height ) {
+                            break;
+                        }
+                        for ( auto dx = 0; dx < self->m_tileSize; ++dx ) {
+                            if ( x + dx >= self->m_width ) {
+                                break;
+                            }
 
-                                    auto color = ColorRGB::Constants::BLACK;
-                                    for ( auto s = 0l; s < CRIMILD_RT_SAMPLES_PER_FRAME; ++s ) {
-                                        const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( self->m_width - 1 );
-                                        const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( self->m_height - 1 );
+                            auto color = ColorRGB::Constants::BLACK;
+                            for ( auto s = 0l; s < CRIMILD_RT_SAMPLES_PER_FRAME; ++s ) {
+                                const auto u = ( ( x + dx ) + Random::generate< Real >() ) / Real( self->m_width - 1 );
+                                const auto v = ( ( y + dy ) + Random::generate< Real >() ) / Real( self->m_height - 1 );
 
-                                        Ray3 ray;
-                                        if ( camera->getPickRay( u, v, ray ) ) {
-                                            // Calculate depth-of-field based on camera properties
-                                            const auto rd = cameraLensRadius * randomInUnitDisk();
-                                            const auto offset = cameraRight * rd.x + cameraUp * rd.y;
-                                            ray = Ray3 {
-                                                origin( ray ) + offset,
-                                                cameraFocusDistance * direction( ray ) - offset,
-                                            };
+                                Ray3 ray;
+                                if ( camera->getPickRay( u, v, ray ) ) {
+                                    // Calculate depth-of-field based on camera properties
+                                    const auto rd = cameraLensRadius * randomInUnitDisk();
+                                    const auto offset = cameraRight * rd.x + cameraUp * rd.y;
+                                    ray = Ray3 {
+                                        origin( ray ) + offset,
+                                        cameraFocusDistance * direction( ray ) - offset,
+                                    };
 
-                                            color = color + rayColor( ray, get_ptr( scene ), backgroundColor, bounces );
-                                        }
-                                    }
-
-                                    const Index idx = ( y + dy ) * self->m_width + ( x + dx );
-                                    const auto prevColor = self->m_imageAaccessor->get< ColorRGBA >( idx ) * sampleCount;
-                                    self->m_imageAaccessor->set( idx, ( prevColor + rgba( color ) ) / ( sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME ) );
-
-                                    std::this_thread::yield();
+                                    color = color + rayColor( ray, get_ptr( scene ), backgroundColor, bounces );
                                 }
                             }
-                        } );
+
+                            const Index idx = ( y + dy ) * self->m_width + ( x + dx );
+                            const auto prevColor = self->m_imageAaccessor->get< ColorRGBA >( idx ) * sampleCount;
+                            self->m_imageAaccessor->set( idx, ( prevColor + rgba( color ) ) / ( sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME ) );
+
+                            std::this_thread::yield();
+                        }
+                    }
+                };
+            };
+
+            if ( useScanline ) {
+                for ( auto y = 0; y < m_height; y += m_tileSize ) {
+                    for ( auto x = 0; x < m_width; x += m_tileSize ) {
+                        m_jobs.push_back( job( x, y ) );
+                    }
+                }
+            } else {
+                // Render tiles in a spiral, so center ones show up first
+                const Int32 MAX_X = ( m_width / m_tileSize ) / 2;
+                const Int32 MAX_Y = ( m_height / m_tileSize ) / 2;
+                Int32 x = 0;
+                Int32 y = 0;
+                Int32 dx = 0;
+                Int32 dy = -1;
+                Int32 t = max( 2 * MAX_X, 2 * MAX_Y );
+                const Int32 N = t * t;
+                for ( auto i = 0l; i < N; i++ ) {
+                    if ( -MAX_X <= x && x <= MAX_X && -MAX_Y <= y && y <= MAX_Y ) {
+                        const auto jx = x * m_tileSize + m_width / 2 - m_tileSize;
+                        const auto jy = y * m_tileSize + m_height / 2;
+                        m_jobs.push_back( job( jx, jy ) );
+                    }
+                    if ( ( x == y ) || ( ( x < 0 ) && ( x == -y ) ) || ( ( x > 0 ) && ( x == 1 - y ) ) ) {
+                        t = dx;
+                        dx = -dy;
+                        dy = t;
+                    }
+                    x += dx;
+                    y += dy;
                 }
             }
 
