@@ -313,3 +313,47 @@ TEST( intersect, ray_misses_cube )
         std::cout << t0 << " " << t1 << std::endl;
     }
 }
+
+TEST( intersect, ray_misses_cylinder )
+{
+    auto test = []( const Ray3 &R ) {
+        const auto C = Cylinder {};
+        Real t0, t1;
+        EXPECT_FALSE( intersect( R, C, t0, t1 ) );
+    };
+
+    test( Ray3 { Point3 { 1, 0, 0 }, Vector3 { 0, 1, 0 } } );
+    test( Ray3 { Point3 { 0, 0, 0 }, Vector3 { 0, 1, 0 } } );
+    test( Ray3 { Point3 { 0, 0, -5 }, Vector3 { 1, 1, 1 } } );
+}
+
+TEST( intersect, ray_hits_cylinder )
+{
+    auto test = []( const Ray3 &R, Real x0, Real x1 ) {
+        const auto C = Cylinder {};
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_TRUE( isEqual( t0, x0 ) );
+        EXPECT_TRUE( isEqual( t1, x1 ) );
+    };
+
+    test( Ray3 { Point3 { 1, 0, -5 }, Vector3 { 0, 0, 1 } }, 5, 5 );
+    test( Ray3 { Point3 { 0, 0, -5 }, Vector3 { 0, 0, 1 } }, 4, 6 );
+    test( Ray3 { Point3 { 0.5, 0, -5 }, normalize( Vector3 { 0.1, 1, 1 } ) }, 6.80798, 7.08872 );
+}
+
+TEST( intersect, ray_hits_cylinder_with_different_height )
+{
+    auto test = []( const Ray3 &R ) {
+        const auto C = Cylinder { .height = 2 };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+    };
+
+    test( Ray3 { Point3 { 0, 0.15, 0 }, normalize( Vector3 { 0.1, 1, 0 } ) } );
+    test( Ray3 { Point3 { 0, 3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    test( Ray3 { Point3 { 0, 0, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    test( Ray3 { Point3 { 0, 2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    test( Ray3 { Point3 { 0, 1, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    test( Ray3 { Point3 { 0, 1.5, -2 }, normalize( Vector3 { 0, 0, 1 } ) } );
+}

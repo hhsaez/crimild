@@ -25,29 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CylinderPrimitive.hpp"
+#ifndef CRIMILD_MATHEMATICS_CYLINDER_NORMAL_
+#define CRIMILD_MATHEMATICS_CYLINDER_NORMAL_
 
-using namespace crimild;
+#include "Mathematics/Cylinder.hpp"
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Transformation.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/normalize.hpp"
+#include "Mathematics/swizzle.hpp"
 
-SharedPointer< Primitive > CylinderPrimitive::UNIT_CYLINDER = crimild::alloc< CylinderPrimitive >( CylinderPrimitive::Params {} );
+namespace crimild {
 
-CylinderPrimitive::CylinderPrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
-{
-    _height = params.height;
-    _radius = params.radius;
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Point3 &P ) noexcept
+    {
+        // Project the point in the XZ plane and normalize
+        // TODO(hernan): Take into account the cylinder's center
+        return normalize( Normal3 { P.x, 0, P.z } );
+    }
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, 1.0f }, Vector2f { 30, 20 } };
-    setInterval( interval );
-    generate();
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Transformation &T, const Point3 &P ) noexcept
+    {
+        const auto localP = inverse( T )( P );
+        return normalize( T( normal( C, localP ) ) );
+    }
+
 }
 
-Vector3f CylinderPrimitive::evaluate( const Vector2f &domain ) const
-{
-    float u = domain[ 0 ];
-    float v = domain[ 1 ];
-    float x = _radius * std::cos( u );
-    float y = _height * v;
-    float z = _radius * -std::sin( u );
-    return Vector3f { x, y, z };
-}
+#endif

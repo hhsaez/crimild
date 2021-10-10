@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_INTERSECT_
 
 #include "Mathematics/Box.hpp"
+#include "Mathematics/Cylinder.hpp"
 #include "Mathematics/Plane3.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
@@ -122,6 +123,76 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), B, t0, t1 );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, Real &tMin, Real &tMax ) noexcept
+    {
+        const auto D = direction( R );
+
+        const Real rdx = D.x;
+        const Real rdx2 = rdx * rdx;
+        const Real rdz = D.z;
+        const Real rdz2 = rdz * rdz;
+
+        const Real a = rdx2 + rdz2;
+        if ( isZero( a ) ) {
+            return false;
+        }
+
+        const Real rox = origin( R ).x;
+        const Real rox2 = rox * rox;
+        const Real roz = origin( R ).z;
+        const Real roz2 = roz * roz;
+
+        const Real r = radius( C );
+        const Real r2 = r * r;
+
+        const Real b = Real( 2 ) * ( rox * rdx + roz * rdz );
+        const Real c = rox2 + roz2 - r;
+
+        const Real disc = b * b - Real( 4 ) * a * c;
+        if ( disc < 0 ) {
+            return false;
+        }
+
+        const Real sqrt_disc = sqrt( disc );
+        auto t0 = ( -b - sqrt_disc ) / ( Real( 2 ) * a );
+        auto t1 = ( -b + sqrt_disc ) / ( Real( 2 ) * a );
+
+        if ( t0 > t1 ) {
+            std::swap( t0, t1 );
+        }
+
+        tMin = t0;
+        tMax = t1;
+
+        return true;
+
+        auto hasResult = false;
+
+        const auto y0 = origin( R ).y + t0 * D.y;
+        if ( y0 <= height( C ) && y0 >= -height( C ) ) {
+            tMin = t0;
+            tMax = t0;
+            hasResult = true;
+        }
+
+        const auto y1 = origin( R ).y + t1 * D.y;
+        if ( y1 <= height( C ) && y1 >= -height( C ) ) {
+            if ( !hasResult ) {
+                tMin = t1;
+            }
+            tMax = t1;
+            hasResult = true;
+        }
+
+        return hasResult;
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, const Transformation &world, Real &t0, Real &t1 ) noexcept
+    {
+        // For better performance, use the inverse matrix
+        return intersect( inverse( world )( R ), C, t0, t1 );
     }
 
 }

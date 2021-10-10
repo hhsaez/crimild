@@ -86,7 +86,7 @@ namespace crimild {
 
         return Ray3 {
             ( *this )( origin( R ) ),
-            ( *this )( direction( R ) ),
+            normalize( ( *this )( direction( R ) ) ),
         };
     }
 

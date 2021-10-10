@@ -42,11 +42,14 @@ namespace crimild {
      */
     class CylinderPrimitive : public ParametricPrimitive {
     public:
+        static SharedPointer< Primitive > UNIT_CYLINDER;
+
+    public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
-            VertexLayout layout = VertexP3N3::getLayout();
+            VertexLayout layout = VertexP3N3TC2::getLayout();
             Real32 height = 1.0f;
-            Real32 radius = 0.5f;
+            Real32 radius = 1.0f;
             Vector2i divisions = Vector2i { 20, 20 };
             ParametricPrimitive::ColorMode colorMode;
         };
