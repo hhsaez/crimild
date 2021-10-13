@@ -97,7 +97,7 @@ bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
 
     auto rayEye = inverse( getProjectionMatrix() ) * rayClip;
     const auto rayOrigin = location( getWorld() );
-    const auto rayDirection = getWorld()( xyz( rayEye ) );
+    const auto rayDirection = normalize( getWorld()( xyz( rayEye ) ) );
 
     result = Ray3 {
         rayOrigin,
