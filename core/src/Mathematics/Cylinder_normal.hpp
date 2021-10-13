@@ -39,11 +39,24 @@
 
 namespace crimild {
 
+    // Project the point in the XZ plane and normalize
+    // TODO(hernan): Take into account the cylinder's center
     [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Point3 &P ) noexcept
     {
-        // Project the point in the XZ plane and normalize
-        // TODO(hernan): Take into account the cylinder's center
-        return normalize( Normal3 { P.x, 0, P.z } );
+        const Real dist = P.x * P.x + P.z * P.z;
+        const Real r = radius( C );
+        const Real r2 = r * r;
+        const Real h = height( C );
+
+        if ( dist < r2 && P.y >= -h - numbers::EPSILON ) {
+            return Normal3 { 0, 1, 0 };
+        }
+
+        if ( dist < r2 && P.y <= h + numbers::EPSILON ) {
+            return Normal3 { 0, -1, 0 };
+        }
+
+        return Normal3 { P.x, 0, P.z };
     }
 
     [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Transformation &T, const Point3 &P ) noexcept
