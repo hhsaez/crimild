@@ -111,10 +111,8 @@ TEST( Camera, get_ray_through_the_corner_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( 0, 0, ray ) );
 
-    std::cout << origin( ray ) << " " << direction( ray ) << std::endl;
-
     EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
-    EXPECT_EQ( ( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
+    EXPECT_EQ( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
 }
 
 TEST( Camera, get_ray_for_translated_camera )

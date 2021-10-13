@@ -35,10 +35,12 @@ namespace crimild {
     struct Cylinder {
         Real radius = Real( 1 );
         Real height = Real( 1 );
+        Bool closed = true;
     };
 
     [[nodiscard]] inline constexpr Real radius( const Cylinder &c ) noexcept { return c.radius; }
     [[nodiscard]] inline constexpr Real height( const Cylinder &c ) noexcept { return c.height; }
+    [[nodiscard]] inline constexpr Bool isClosed( const Cylinder &c ) noexcept { return c.closed; }
 
 }
 

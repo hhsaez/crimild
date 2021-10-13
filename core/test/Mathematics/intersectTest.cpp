@@ -317,7 +317,7 @@ TEST( intersect, ray_misses_cube )
 TEST( intersect, ray_misses_cylinder )
 {
     auto test = []( const Ray3 &R ) {
-        const auto C = Cylinder {};
+        const auto C = Cylinder { .closed = false };
         Real t0, t1;
         EXPECT_FALSE( intersect( R, C, t0, t1 ) );
     };
@@ -329,31 +329,109 @@ TEST( intersect, ray_misses_cylinder )
 
 TEST( intersect, ray_hits_cylinder )
 {
-    auto test = []( const Ray3 &R, Real x0, Real x1 ) {
-        const auto C = Cylinder {};
+    {
+        const auto R = Ray3 { Point3 { 1, 0, -5 }, Vector3 { 0, 0, 1 } };
+        const Real x0 = 5;
+        const Real x1 = 5;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
         Real t0, t1;
         EXPECT_TRUE( intersect( R, C, t0, t1 ) );
-        EXPECT_TRUE( isEqual( t0, x0 ) );
-        EXPECT_TRUE( isEqual( t1, x1 ) );
+        EXPECT_EQ( t0, x0 );
+        EXPECT_EQ( t1, x1 );
     };
 
-    test( Ray3 { Point3 { 1, 0, -5 }, Vector3 { 0, 0, 1 } }, 5, 5 );
-    test( Ray3 { Point3 { 0, 0, -5 }, Vector3 { 0, 0, 1 } }, 4, 6 );
-    test( Ray3 { Point3 { 0.5, 0, -5 }, normalize( Vector3 { 0.1, 1, 1 } ) }, 6.80798, 7.08872 );
+    {
+        const auto R = Ray3 { Point3 { 1, 10, -5 }, Vector3 { 0, 0, 1 } };
+        const Real x0 = 5;
+        const Real x1 = 5;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( t0, x0 );
+        EXPECT_EQ( t1, x1 );
+    };
+
+    {
+        const auto R = Ray3 { Point3 { 1, -100, -5 }, Vector3 { 0, 0, 1 } };
+        const Real x0 = 5;
+        const Real x1 = 5;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( t0, x0 );
+        EXPECT_EQ( t1, x1 );
+    };
+
+    {
+        const auto R = Ray3 { Point3 { 1, 1000, -5 }, Vector3 { 0, 0, 1 } };
+        const Real x0 = 5;
+        const Real x1 = 5;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( t0, x0 );
+        EXPECT_EQ( t1, x1 );
+    };
+
+    {
+        const auto R = Ray3 { Point3 { 0, 0, -5 }, Vector3 { 0, 0, 1 } };
+        const Real x0 = 4;
+        const Real x1 = 6;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( t0, x0 );
+        EXPECT_EQ( t1, x1 );
+    };
+
+    {
+        const auto R = Ray3 { Point3 { 0.5, 0, -5 }, normalize( Vector3 { 0.1, 1, 1 } ) };
+        const Real x0 = 680;
+        const Real x1 = 708;
+        const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( x0, floor( 100 * t0 ) );
+        EXPECT_EQ( x1, floor( 100 * t1 ) );
+    };
 }
 
 TEST( intersect, ray_hits_cylinder_with_different_height )
 {
-    auto test = []( const Ray3 &R ) {
-        const auto C = Cylinder { .height = 2 };
+    auto pass = []( const Ray3 &R ) {
+        const auto C = Cylinder { .height = 2, .closed = false };
         Real t0, t1;
         EXPECT_TRUE( intersect( R, C, t0, t1 ) );
     };
 
-    test( Ray3 { Point3 { 0, 0.15, 0 }, normalize( Vector3 { 0.1, 1, 0 } ) } );
-    test( Ray3 { Point3 { 0, 3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    test( Ray3 { Point3 { 0, 0, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    test( Ray3 { Point3 { 0, 2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    test( Ray3 { Point3 { 0, 1, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    test( Ray3 { Point3 { 0, 1.5, -2 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    auto fail = []( const Ray3 &R ) {
+        const auto C = Cylinder { .height = 2, .closed = false };
+        Real t0, t1;
+        EXPECT_FALSE( intersect( R, C, t0, t1 ) );
+    };
+
+    fail( Ray3 { Point3 { 0, 0.15, 0 }, normalize( Vector3 { 0.1, 1, 0 } ) } );
+    fail( Ray3 { Point3 { 0, 3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3 { 0, -3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3 { 0, 2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3 { 0, -2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    pass( Ray3 { Point3 { 0, 1.5, -2 }, normalize( Vector3 { 0, 0, 1 } ) } );
+}
+
+TEST( intersect, ray_hits_cylinder_end_caps )
+{
+    auto test = []( const Ray3 &R, Real x0, Real x1 ) {
+        const auto C = Cylinder { .height = 2 };
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, C, t0, t1 ) );
+        EXPECT_EQ( floor( x0 * 1000 ), floor( t0 * 1000 ) );
+        EXPECT_EQ( floor( x1 * 1000 ), floor( t1 * 1000 ) );
+    };
+
+    test( Ray3 { Point3 { 0, 3, 0 }, normalize( Vector3 { 0, -1, 0 } ) }, 1, 5 );
+    test( Ray3 { Point3 { 0, -3, 0 }, normalize( Vector3 { 0, 1, 0 } ) }, 1, 5 );
+    test( Ray3 { Point3 { 0, 3, -2 }, normalize( Vector3 { 0, -1, 2 } ) }, 2.23607, 3.3541 );
+    test( Ray3 { Point3 { 0, 4, -2 }, normalize( Vector3 { 0, -1, 1 } ) }, 2.828, 4.242 );
+    test( Ray3 { Point3 { 0, 0, -2 }, normalize( Vector3 { 0, 1, 2 } ) }, 1.118, 3.354 );
+    test( Ray3 { Point3 { 0, -2, -2 }, normalize( Vector3 { 0, 1, 1 } ) }, 1.414, 4.242 );
 }
