@@ -326,55 +326,49 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                     .obj = crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
                         [ light = this, face ] {
                             // TODO (hernan): use probe's position
-                        	const auto lightPos = location( light->getWorld() );
+                            const auto lightPos = location( light->getWorld() );
                             const auto t = [ lightPos ]( auto face ) {
                                 switch ( face ) {
                                     case 0: // negative x
-										return lookAt(
-          									lightPos,
-          									lightPos - Vector3::Constants::UNIT_X,
-                                            Vector3::Constants::UP
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos - Vector3::Constants::UNIT_X,
+                                            Vector3::Constants::UP );
 
                                     case 1: // positive x
-										return lookAt(
-          									lightPos,
-          									lightPos + Vector3::Constants::UNIT_X,
-                                            Vector3::Constants::UP
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos + Vector3::Constants::UNIT_X,
+                                            Vector3::Constants::UP );
 
                                     case 2: // positive y
-										return lookAt(
-          									lightPos,
-          									lightPos + Vector3::Constants::UNIT_Y,
-                                            Vector3::Constants::UNIT_Z
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos + Vector3::Constants::UNIT_Y,
+                                            Vector3::Constants::UNIT_Z );
 
                                     case 3: // negative y
-										return lookAt(
-          									lightPos,
-          									lightPos - Vector3::Constants::UNIT_Y,
-                                            -Vector3::Constants::UNIT_Z
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos - Vector3::Constants::UNIT_Y,
+                                            -Vector3::Constants::UNIT_Z );
 
                                     case 4: // positive z
-										return lookAt(
-          									lightPos,
-          									lightPos + Vector3::Constants::UNIT_Z,
-                                            Vector3::Constants::UP
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos + Vector3::Constants::UNIT_Z,
+                                            Vector3::Constants::UP );
 
                                     case 5: // negative z
                                     default:
-										return lookAt(
-          									lightPos,
-          									lightPos - Vector3::Constants::UNIT_Z,
-                                            Vector3::Constants::UP
-                                        );
+                                        return lookAt(
+                                            lightPos,
+                                            lightPos - Vector3::Constants::UNIT_Z,
+                                            Vector3::Constants::UP );
                                 }
                             }( face );
 
-							const auto vMatrix = t.invMat;
+                            const auto vMatrix = t.invMat;
 
                             auto pMatrix = light->computeLightSpaceMatrix();
                             return ShadowAtlasLightUniform {
