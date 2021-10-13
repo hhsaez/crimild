@@ -125,65 +125,108 @@ namespace crimild {
         return intersect( inverse( world )( R ), B, t0, t1 );
     }
 
+    namespace internal {
+
+        [[nodiscard]] static constexpr Bool checkCylinderCap( const Ray3 &R, Real t ) noexcept
+        {
+            const auto x = R.o.x + t * R.d.x;
+            const auto z = R.o.z + t * R.d.z;
+            return ( x * x + z * z ) <= 1;
+        };
+
+        [[nodiscard]] static constexpr Bool intersectCylinderCaps( const Ray3 &R, const Cylinder &C, Real &tMin, Real &tMax ) noexcept
+        {
+            if ( !isClosed( C ) || isZero( R.d.y ) ) {
+                return false;
+            }
+
+            auto hasResult = false;
+            auto t = ( -C.height - R.o.y ) / R.d.y;
+            if ( checkCylinderCap( R, t ) ) {
+                if ( t < tMin ) {
+                    tMax = tMin;
+                    tMin = t;
+                } else if ( t < tMax ) {
+                    tMax = t;
+                }
+                hasResult = true;
+            }
+
+            t = ( C.height - R.o.y ) / R.d.y;
+            if ( checkCylinderCap( R, t ) ) {
+                if ( t < tMin ) {
+                    tMax = tMin;
+                    tMin = t;
+                } else if ( t < tMax ) {
+                    tMax = t;
+                }
+                hasResult = true;
+            }
+
+            return hasResult;
+        };
+
+    }
+
     [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, Real &tMin, Real &tMax ) noexcept
     {
-        const auto D = direction( R );
+        tMin = numbers::POSITIVE_INFINITY;
+        tMax = numbers::POSITIVE_INFINITY;
 
-        const Real rdx = D.x;
-        const Real rdx2 = rdx * rdx;
-        const Real rdz = D.z;
-        const Real rdz2 = rdz * rdz;
-
-        const Real a = rdx2 + rdz2;
+        const Real a = ( R.d.x * R.d.x ) + ( R.d.z * R.d.z );
         if ( isZero( a ) ) {
-            return false;
+            return internal::intersectCylinderCaps( R, C, tMin, tMax );
         }
 
-        const Real rox = origin( R ).x;
-        const Real rox2 = rox * rox;
-        const Real roz = origin( R ).z;
-        const Real roz2 = roz * roz;
-
-        const Real r = radius( C );
-        const Real r2 = r * r;
-
-        const Real b = Real( 2 ) * ( rox * rdx + roz * rdz );
-        const Real c = rox2 + roz2 - r;
+        const Real b = ( Real( 2 ) * R.o.x * R.d.x ) + ( Real( 2 ) * R.o.z * R.d.z );
+        const Real c = ( R.o.x * R.o.x ) + ( R.o.z * R.o.z ) - Real( 1 );
 
         const Real disc = b * b - Real( 4 ) * a * c;
         if ( disc < 0 ) {
             return false;
         }
+        const Real disc_root = sqrt( disc );
 
-        const Real sqrt_disc = sqrt( disc );
-        auto t0 = ( -b - sqrt_disc ) / ( Real( 2 ) * a );
-        auto t1 = ( -b + sqrt_disc ) / ( Real( 2 ) * a );
-
-        if ( t0 > t1 ) {
+        Real t0 = ( -b - disc_root ) / ( Real( 2 ) * a );
+        Real t1 = ( -b + disc_root ) / ( Real( 2 ) * a );
+        if ( t0 < t1 ) {
             std::swap( t0, t1 );
         }
 
-        tMin = t0;
-        tMax = t1;
-
-        return true;
-
         auto hasResult = false;
 
-        const auto y0 = origin( R ).y + t0 * D.y;
-        if ( y0 <= height( C ) && y0 >= -height( C ) ) {
+        const auto y0 = R.o.y + t0 * R.d.y;
+        if ( y0 < height( C ) && y0 > -height( C ) ) {
             tMin = t0;
             tMax = t0;
             hasResult = true;
         }
 
-        const auto y1 = origin( R ).y + t1 * D.y;
-        if ( y1 <= height( C ) && y1 >= -height( C ) ) {
+        const auto y1 = R.o.y + t1 * R.d.y;
+        if ( y1 < height( C ) && y1 > -height( C ) ) {
             if ( !hasResult ) {
                 tMin = t1;
             }
             tMax = t1;
             hasResult = true;
+        }
+
+        if ( internal::intersectCylinderCaps( R, C, tMin, tMax ) ) {
+            hasResult = true;
+        }
+
+        if ( tMin > tMax ) {
+            std::swap( tMin, tMax );
+        }
+
+        return hasResult;
+
+        if ( internal::intersectCylinderCaps( R, C, tMin, tMax ) ) {
+            hasResult = true;
+        }
+
+        if ( tMin > tMax ) {
+            std::swap( tMin, tMax );
         }
 
         return hasResult;

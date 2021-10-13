@@ -244,6 +244,9 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexc
             Real t0, t1;
             if ( crimild::intersect( m_ray, C, geometry->getWorld(), t0, t1 ) ) {
                 auto pushResult = [ & ]( auto t ) {
+                    if ( isEqual( t, numbers::POSITIVE_INFINITY ) ) {
+                        return;
+                    }
                     const auto P = m_ray( t );
                     auto result = Result {
                         .geometry = geometry,
