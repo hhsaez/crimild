@@ -27,38 +27,42 @@
 
 #include "ParallelApply.hpp"
 
-#include "SceneGraph/Node.hpp"
-#include "SceneGraph/Group.hpp"
 #include "Concurrency/Async.hpp"
+#include "SceneGraph/CSGNode.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 ParallelApply::ParallelApply( ParallelApply::CallbackType callback )
-	: _callback( callback )
+    : _callback( callback )
 {
-   
 }
 
 ParallelApply::~ParallelApply( void )
 {
-
 }
 
 void ParallelApply::visitNode( Node *node )
 {
-	_callback( node );
+    _callback( node );
 }
 
 void ParallelApply::visitGroup( Group *group )
 {
-	_callback( group );
+    _callback( group );
 
-	auto job = crimild::concurrency::async();
-	group->forEachNode( [ this, job ]( Node *node ) { 
-		crimild::concurrency::async( job, [ this, node ] {
-			node->accept( *this ); 
-		});
-	});
-	crimild::concurrency::wait( job );
+    auto job = crimild::concurrency::async();
+    group->forEachNode( [ this, job ]( Node *node ) {
+        crimild::concurrency::async( job, [ this, node ] {
+            node->accept( *this );
+        } );
+    } );
+    crimild::concurrency::wait( job );
 }
 
+void ParallelApply::visitCSGNode( CSGNode *csg )
+{
+    // TODO
+    NodeVisitor::visitCSGNode( csg );
+}

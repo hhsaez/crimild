@@ -30,6 +30,7 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Utils/MockVisitor.hpp"
@@ -115,4 +116,23 @@ TEST( UpateWorldStateTest, scale )
 
     EXPECT_EQ( ( Vector3 { 0.5, 0.5, 0.5 } ), n0->getWorld()( Vector3 { 1, 1, 1 } ) );
     EXPECT_EQ( ( Vector3 { 0.5, 0.5, 0.5 } ), n1->getWorld()( Vector3 { 1, 1, 1 } ) );
+}
+
+TEST( UpateWorldStateTest, with_csg )
+{
+    auto n0 = crimild::alloc< Group >();
+    auto n1 = crimild::alloc< Group >();
+    auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION, n0, n1 );
+
+    csg->setLocal( translation( 1, 0, 0 ) );
+
+    EXPECT_FALSE( isIdentity( csg->getLocal() ) );
+    EXPECT_TRUE( isIdentity( n1->getLocal() ) );
+    EXPECT_TRUE( isIdentity( n0->getLocal() ) );
+
+    csg->perform( UpdateWorldState() );
+
+    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( n0->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( n1->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( csg->getWorld() ) );
 }

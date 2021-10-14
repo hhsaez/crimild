@@ -27,30 +27,34 @@
 
 #include "Apply.hpp"
 
-#include "SceneGraph/Node.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 Apply::Apply( Apply::CallbackType callback )
-	: _callback( callback )
+    : _callback( callback )
 {
-   
 }
 
 Apply::~Apply( void )
 {
-
 }
 
 void Apply::visitNode( Node *node )
 {
-	_callback( node );
+    _callback( node );
 }
 
 void Apply::visitGroup( Group *group )
 {
-	_callback( group );
-	NodeVisitor::visitGroup( group );
+    _callback( group );
+    NodeVisitor::visitGroup( group );
 }
 
+void Apply::visitCSGNode( CSGNode *csg )
+{
+    _callback( csg );
+    NodeVisitor::visitCSGNode( csg );
+}

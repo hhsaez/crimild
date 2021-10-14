@@ -26,15 +26,17 @@
  */
 
 #include "UpdateRenderState.hpp"
+
+#include "Animation/Skeleton.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Components/RenderStateComponent.hpp"
+#include "Components/SkinnedMeshComponent.hpp"
 #include "FetchLights.hpp"
-#include "SceneGraph/Light.hpp"
+#include "Rendering/Material.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
-#include "Rendering/Material.hpp"
-#include "Animation/Skeleton.hpp"
-#include "Components/RenderStateComponent.hpp"
-#include "Components/MaterialComponent.hpp"
-#include "Components/SkinnedMeshComponent.hpp"
+#include "SceneGraph/Light.hpp"
 
 using namespace crimild;
 using namespace crimild::animation;
@@ -46,67 +48,67 @@ UpdateRenderState::UpdateRenderState( void )
 
 UpdateRenderState::~UpdateRenderState( void )
 {
-
 }
 
 void UpdateRenderState::traverse( Node *node )
 {
-	_lights.clear();
-	
-	FetchLights fetchLights;
-	if ( node->hasParent() ) {
-		node->getRootParent()->perform( fetchLights );
-	}
-	else {
-		node->perform( fetchLights );
-	}
+    _lights.clear();
+
+    FetchLights fetchLights;
+    if ( node->hasParent() ) {
+        node->getRootParent()->perform( fetchLights );
+    } else {
+        node->perform( fetchLights );
+    }
 
     auto self = this;
-	fetchLights.forEachLight( [self]( Light *light ) mutable {
-		self->_lights.push_back( light );
-	});
+    fetchLights.forEachLight( [ self ]( Light *light ) mutable {
+        self->_lights.push_back( light );
+    } );
 
-	NodeVisitor::traverse( node );
+    NodeVisitor::traverse( node );
 }
 
 void UpdateRenderState::visitGroup( Group *group )
 {
-	auto tempSkeleton = _skeleton;
+    auto tempSkeleton = _skeleton;
 
-	if ( auto skeleton = group->getComponent< Skeleton >() ) {
-		_skeleton = skeleton;
-	}
+    if ( auto skeleton = group->getComponent< Skeleton >() ) {
+        _skeleton = skeleton;
+    }
 
-	NodeVisitor::visitGroup( group );
+    NodeVisitor::visitGroup( group );
 
-	_skeleton = tempSkeleton;
+    _skeleton = tempSkeleton;
 }
 
 void UpdateRenderState::visitGeometry( Geometry *geometry )
 {
-	auto rs = geometry->getComponent< RenderStateComponent >();
+    auto rs = geometry->getComponent< RenderStateComponent >();
 
-	rs->detachAllMaterials();
-	auto materials = geometry->getComponent< MaterialComponent >();
-	if ( materials->hasMaterials() ) {
-		materials->forEachMaterial( [rs]( Material *material ) mutable {
-			rs->attachMaterial( material );
-		});
-	}
-	else {
-		rs->attachMaterial( _defaultMaterial );
-	}
+    rs->detachAllMaterials();
+    auto materials = geometry->getComponent< MaterialComponent >();
+    if ( materials->hasMaterials() ) {
+        materials->forEachMaterial( [ rs ]( Material *material ) mutable {
+            rs->attachMaterial( material );
+        } );
+    } else {
+        rs->attachMaterial( _defaultMaterial );
+    }
 
-	rs->detachAllLights();
-	for ( auto light : _lights ) {
-		rs->attachLight( light );
-	}
+    rs->detachAllLights();
+    for ( auto light : _lights ) {
+        rs->attachLight( light );
+    }
 
-	if ( auto skeleton = geometry->getComponent< Skeleton >() ) {
-		rs->setSkeleton( crimild::retain( skeleton ) );
-	}
-	else if ( _skeleton != nullptr ) {
-		rs->setSkeleton( crimild::retain( _skeleton ) );
-	}
+    if ( auto skeleton = geometry->getComponent< Skeleton >() ) {
+        rs->setSkeleton( crimild::retain( skeleton ) );
+    } else if ( _skeleton != nullptr ) {
+        rs->setSkeleton( crimild::retain( _skeleton ) );
+    }
 }
 
+void UpdateRenderState::visitCSGNode( CSGNode *csg )
+{
+    NodeVisitor::visitCSGNode( csg );
+}

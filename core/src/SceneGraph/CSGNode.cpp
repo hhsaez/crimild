@@ -35,10 +35,31 @@ CSGNode::CSGNode( Operator op ) noexcept
 }
 
 CSGNode::CSGNode( Operator op, SharedPointer< Node > const &left, SharedPointer< Node > const &right ) noexcept
-    : m_operator( op ),
-      m_left( left ),
-      m_right( right )
+    : m_operator( op )
 {
+    setLeft( left );
+    setRight( right );
+}
+
+void CSGNode::setLeft( SharedPointer< Node > const &left ) noexcept
+{
+    if ( m_left ) {
+        m_left->setParent( nullptr );
+    }
+    m_left = left;
+    if ( m_left ) {
+        m_left->setParent( this );
+    }
+}
+void CSGNode::setRight( SharedPointer< Node > const &right ) noexcept
+{
+    if ( m_right ) {
+        m_right->setParent( nullptr );
+    }
+    m_right = right;
+    if ( m_right ) {
+        m_right->setParent( this );
+    }
 }
 
 void CSGNode::accept( NodeVisitor &visitor )

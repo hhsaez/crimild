@@ -28,6 +28,7 @@
 #include "UpdateWorldState.hpp"
 
 #include "Mathematics/Transformation_operators.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -71,5 +72,30 @@ void UpdateWorldState::visitGroup( Group *group )
                 group->worldBound()->expandToContain( node->getWorldBound() );
             }
         } );
+    }
+}
+
+void UpdateWorldState::visitCSGNode( CSGNode *csg )
+{
+    visitNode( csg );
+    NodeVisitor::visitCSGNode( csg );
+
+    bool firstChild = true;
+    if ( auto left = csg->getLeft() ) {
+        if ( firstChild ) {
+            firstChild = false;
+            csg->worldBound()->computeFrom( left->getWorldBound() );
+        } else {
+            csg->worldBound()->expandToContain( left->getWorldBound() );
+        }
+    }
+
+    if ( auto right = csg->getRight() ) {
+        if ( firstChild ) {
+            firstChild = false;
+            csg->worldBound()->computeFrom( right->getWorldBound() );
+        } else {
+            csg->worldBound()->expandToContain( right->getWorldBound() );
+        }
     }
 }
