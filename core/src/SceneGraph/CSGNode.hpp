@@ -51,10 +51,10 @@ namespace crimild {
         inline Operator getOperator( void ) const noexcept { return m_operator; }
 
         inline Node *getLeft( void ) noexcept { return get_ptr( m_left ); }
-        inline void setLeft( SharedPointer< Node > const &left ) noexcept { m_left = left; }
+        void setLeft( SharedPointer< Node > const &right ) noexcept;
 
         inline Node *getRight( void ) noexcept { return get_ptr( m_right ); }
-        inline void setRight( SharedPointer< Node > const &right ) noexcept { m_right = right; }
+        void setRight( SharedPointer< Node > const &right ) noexcept;
 
     private:
         Operator m_operator;

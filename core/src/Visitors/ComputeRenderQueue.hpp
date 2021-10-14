@@ -31,27 +31,26 @@
 #include "Visitors/NodeVisitor.hpp"
 
 namespace crimild {
-    
+
     class Camera;
     class RenderQueue;
-    
-    class ComputeRenderQueue : public NodeVisitor {
+
+    class [[deprecated]] ComputeRenderQueue : public NodeVisitor {
     public:
         ComputeRenderQueue( Camera *camera, RenderQueue *result );
         virtual ~ComputeRenderQueue( void );
-        
+
         virtual void traverse( Node *scene ) override;
-        
+
         virtual void visitGroup( Group *group ) override;
         virtual void visitGeometry( Geometry *geometry ) override;
         virtual void visitLight( Light *light ) override;
-        
+
     private:
         Camera *_camera = nullptr;
         RenderQueue *_result = nullptr;
     };
-    
+
 }
 
 #endif
-

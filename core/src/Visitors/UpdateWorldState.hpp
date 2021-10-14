@@ -32,16 +32,16 @@
 
 namespace crimild {
 
-	class UpdateWorldState : public NodeVisitor {
-	public:
-		UpdateWorldState( void );
-		virtual ~UpdateWorldState( void );
+    class UpdateWorldState : public NodeVisitor {
+    public:
+        UpdateWorldState( void );
+        virtual ~UpdateWorldState( void );
 
         virtual void visitNode( Node *node ) override;
         virtual void visitGroup( Group *node ) override;
-	};
+        virtual void visitCSGNode( CSGNode *csg ) override;
+    };
 
 }
 
 #endif
-
