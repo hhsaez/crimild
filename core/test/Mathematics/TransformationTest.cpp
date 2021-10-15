@@ -190,6 +190,39 @@ TEST( Transformation, scaleVector )
     EXPECT_TRUE( true );
 }
 
+TEST( Transformation, negative_scale_to_reflect_vector )
+{
+    constexpr auto V = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto S = crimild::scale( -5, -10, -2 );
+
+    static_assert( crimild::isEqual( crimild::Vector3 { -50, -200, -60 }, S( V ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transformation, negative_scale_to_reflect_normal )
+{
+    constexpr auto V = crimild::Normal3 { 10, 20, 30 };
+    constexpr auto S = crimild::scale( -5, -10, -2 );
+
+    static_assert( crimild::swapsHandedness( S ) );
+
+    static_assert( crimild::isEqual( crimild::Normal3 { 2, 2, 15 }, S( V ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Transformation, swaps_handedness )
+{
+    constexpr auto S1 = crimild::scale( 5, 10, 2 );
+    constexpr auto S2 = crimild::scale( -5, -10, -2 );
+
+    static_assert( !crimild::swapsHandedness( S1 ) );
+    static_assert( crimild::swapsHandedness( S2 ) );
+
+    EXPECT_TRUE( true );
+}
+
 TEST( Transformation, scaleRay3 )
 {
     constexpr auto R = crimild::Ray3 {

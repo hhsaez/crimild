@@ -69,3 +69,10 @@ TEST( Sphere, normal )
 
     EXPECT_TRUE( true );
 }
+
+TEST( Sphere, negate_normal )
+{
+    constexpr auto S = Sphere {};
+
+    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( S, scale( -1 ), Point3 { 1, 0, 0 } ) );
+}
