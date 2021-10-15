@@ -38,6 +38,23 @@
 
 namespace crimild {
 
+    /**
+     *  \brief Checks if a given Transformation swaps the coordinate system handedness.
+     * 
+     *  Certain transformations change the handedness of the coordinate system. For example, using negative
+     *  scale values. Some operations need to know this in order to compute the right values for normals, for example.
+     */
+    [[nodiscard]] inline constexpr Bool swapsHandedness( const Transformation &T ) noexcept
+    {
+        // Compute the determinant of the upper 3x3 matrix
+        Real det = T.mat[ 0 ][ 0 ] * ( T.mat[ 1 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 1 ][ 2 ] )
+                   - T.mat[ 1 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 0 ][ 2 ] )
+                   + T.mat[ 2 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 1 ][ 2 ] - T.mat[ 1 ][ 1 ] * T.mat[ 0 ][ 2 ] );
+
+        // If the determinant is negative, then the transformation swaps handedness
+        return det < 0;
+    }
+
     [[nodiscard]] constexpr Point3 Transformation::operator()( const Point3 &p ) const noexcept
     {
         if ( isIdentity( *this ) ) {
@@ -71,11 +88,14 @@ namespace crimild {
 
         const auto V = vector4( N, Real( 0 ) );
         const auto R = transpose( invMat ) * V;
-        return Normal3 {
+        const auto ret = Normal3 {
             R.x,
             R.y,
             R.z,
         };
+
+        // If handedness is swapped by this transformation, then we need to flip the normal.
+        return swapsHandedness( *this ) ? -ret : ret;
     }
 
     [[nodiscard]] constexpr Ray3 Transformation::operator()( const Ray3 &R ) const noexcept
