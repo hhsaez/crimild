@@ -445,6 +445,9 @@ namespace crimild {
                 return;
             }
 
+            ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 200, 300 ), ImGuiCond_FirstUseEver );
+
             auto open = true;
             if ( ImGui::Begin( "Rendering Options", &open, ImGuiWindowFlags_NoCollapse ) ) {
                 if ( ImGui::CollapsingHeader( "SSAO" ) ) {
@@ -455,6 +458,12 @@ namespace crimild {
                     auto bias = settings->get< Real32 >( "video.ssao.bias", 0.05f );
                     ImGui::InputFloat( "bias", &bias, 0.01f, 100.0f, "%.3f" );
                     settings->set( "video.ssao.bias", bias );
+                }
+
+                if ( ImGui::CollapsingHeader( "Tonemapping" ) ) {
+                    auto exposure = settings->get< Real32 >( "video.exposure", 1.0f );
+                    ImGui::InputFloat( "Exposure", &exposure, 0.01f, 1.0f, "%.3f" );
+                    settings->set( "video.exposure", exposure );
                 }
             }
 
