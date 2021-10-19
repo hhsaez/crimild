@@ -239,8 +239,9 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexc
             break;
         }
 
+        case Primitive::Type::OPEN_CYLINDER:
         case Primitive::Type::CYLINDER: {
-            const auto C = Cylinder {};
+            const auto C = Cylinder { .closed = primitive->getType() != Primitive::Type::OPEN_CYLINDER };
             Real t0, t1;
             if ( crimild::intersect( m_ray, C, geometry->getWorld(), t0, t1 ) ) {
                 auto pushResult = [ & ]( auto t ) {

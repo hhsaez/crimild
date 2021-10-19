@@ -255,6 +255,7 @@ void CommandBuffer::drawPrimitive( Primitive *primitive, SharedPointer< VertexBu
             break;
         }
 
+        case Primitive::Type::OPEN_CYLINDER:
         case Primitive::Type::CYLINDER: {
             primitive = crimild::get_ptr( CylinderPrimitive::UNIT_CYLINDER );
             break;
