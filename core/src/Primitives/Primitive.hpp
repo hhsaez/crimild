@@ -60,6 +60,7 @@ namespace crimild {
             PLANE,
             BOX,
             CYLINDER,
+            OPEN_CYLINDER,
         };
 
     public:
