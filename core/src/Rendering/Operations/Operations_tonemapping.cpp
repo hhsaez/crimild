@@ -32,6 +32,7 @@
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
@@ -128,14 +129,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::tonemapping( SharedPoi
         return pipeline;
     }();
 
-    Real32 exposure = Simulation::getInstance()->getSettings()->get< Real32 >( "video.exposure", 1.0 );
-
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
         descriptorSet->descriptors = {
             Descriptor {
                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = crimild::alloc< UniformBuffer >( exposure ),
+                .obj = crimild::alloc< CallbackUniformBuffer< Real > >(
+                    [] {
+                        Real32 exposure = Simulation::getInstance()->getSettings()->get< Real32 >( "video.exposure", 1.0 );
+                        return exposure;
+                    } ),
+
             },
             Descriptor {
                 .descriptorType = DescriptorType::TEXTURE,
