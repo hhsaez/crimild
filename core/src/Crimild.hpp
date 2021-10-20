@@ -283,6 +283,7 @@
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/Node_withTransformation.hpp"
 #include "SceneGraph/Skybox.hpp"
 #include "SceneGraph/Switch.hpp"
 #include "SceneGraph/Text.hpp"
