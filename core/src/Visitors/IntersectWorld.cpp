@@ -50,6 +50,7 @@ void IntersectWorld::traverse( Node *node ) noexcept
 
 void IntersectWorld::visitGroup( Group *group ) noexcept
 {
+    const auto R = inverse( group->getWorld() )( m_ray );
     if ( !group->getWorldBound()->testIntersection( m_ray ) ) {
         return;
     }
@@ -61,7 +62,12 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
 {
     if ( geometry->getCullMode() != Node::CullMode::NEVER ) {
         // Use world bounds for intersection test, wihch is cheaper
-        if ( !geometry->getWorldBound()->testIntersection( m_ray ) ) {
+        // The ray must be transformed since we're using the local bound.
+        // I think there is a bug here. We should be using worldBound
+        // instead, but that results in a wrong intersection test
+        // TODO(hernan): Seems like a bug. Fix it.
+        const auto R = inverse( geometry->getWorld() )( m_ray );
+        if ( !geometry->getLocalBound()->testIntersection( R ) ) {
             return;
         }
     }
@@ -75,6 +81,8 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
 void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
 {
     // TODO: test intersection (needs worldstateupdate)
+    // TODO: not sure if intersection test should use local or world coordinate system
+    // TODO: if the former, remember to transform the ray!!
 
     auto beforeLeftSize = m_results.size();
     if ( auto left = csg->getLeft() ) {
