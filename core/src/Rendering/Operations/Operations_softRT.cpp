@@ -267,8 +267,9 @@ namespace crimild {
             };
 
             auto settings = Simulation::getInstance()->getSettings();
-            m_width = settings->get< Int32 >( "video.width", 320 );
-            m_height = settings->get< Int32 >( "video.height", 240 );
+            Real scale = settings->get< Real >( "rt.scale", 1 );
+            m_width = scale * settings->get< Int32 >( "video.width", 320 );
+            m_height = scale * settings->get< Int32 >( "video.height", 240 );
             m_bpp = 4;
             m_aspectRatio = Real( m_width ) / Real( m_height );
             m_tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
