@@ -94,29 +94,37 @@ void Geometry::updateModelBounds( void )
     forEachPrimitive(
         [ first = true,
           bound = localBound() ]( Primitive *primitive ) mutable {
-            primitive->getVertexData().each(
-                [ & ]( auto vbo ) {
-                    auto positions = vbo->get( VertexAttribute::Name::POSITION );
-                    if ( positions != nullptr ) {
-                        if ( first ) {
-                            bound->computeFrom( crimild::get_ptr( vbo ) );
-                            first = false;
-                        } else {
-                            bound->expandToContain( crimild::get_ptr( vbo ) );
-                        }
+            switch ( primitive->getType() ) {
+                case Primitive::Type::SPHERE:
+                case Primitive::Type::BOX:
+                case Primitive::Type::OPEN_CYLINDER:
+                case Primitive::Type::CYLINDER: {
+                    if ( first ) {
+                        bound->computeFrom( Point3 { -1, -1, -1 }, Point3 { 1, 1, 1 } );
+                        first = false;
+                    } else {
+                        bound->expandToContain( Point3 { -1, -1, -1 } );
+                        bound->expandToContain( Point3 { 1, 1, 1 } );
                     }
-                } );
-            /*
-            auto vbo = primitive->getVertexBuffer();
-            if ( vbo != nullptr ) {
-                if ( firstChild ) {
-                    bound->computeFrom( vbo );
-                    firstChild = false;
-                } else {
-                    bound->expandToContain( vbo );
+                    break;
+                }
+
+                default: {
+                    primitive->getVertexData().each(
+                        [ & ]( auto vbo ) {
+                            auto positions = vbo->get( VertexAttribute::Name::POSITION );
+                            if ( positions != nullptr ) {
+                                if ( first ) {
+                                    bound->computeFrom( crimild::get_ptr( vbo ) );
+                                    first = false;
+                                } else {
+                                    bound->expandToContain( crimild::get_ptr( vbo ) );
+                                }
+                            }
+                        } );
+                    break;
                 }
             }
-            */
         } );
 }
 
