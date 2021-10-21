@@ -40,6 +40,7 @@
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
@@ -451,7 +452,7 @@ const auto FRAG_SRC = R"(
         vec3 color = vec3( 1.0 );
 
         int depth = 0;
-        while ( depth < bounces ) {
+        while ( depth < 10 ) {
             HitRecord hit = hitScene( ray, tMin, tMax );
             if ( !hit.hasResult ) {
                 // no hit. use background color
@@ -461,8 +462,10 @@ const auto FRAG_SRC = R"(
 
             Scattered scattered = scatter( uScene.materials[ hit.materialID ], ray, hit );
             if ( scattered.hasResult ) {
+                color *= scattered.attenuation;
                 if ( scattered.isEmissive ) {
-                    return scattered.attenuation;
+                    // no need to continue, just return the color
+                    return color;
                 }
                 color *= scattered.attenuation;
                 ray = scattered.ray;
@@ -478,13 +481,12 @@ const auto FRAG_SRC = R"(
 
     uint getNextRayIndex()
     {
-        // vec2 size = imageSize( resultImage );
-        // return int( gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x );
-        // return gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationIndex;
+        vec2 size = imageSize( resultImage );
+        return int( gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x );
 
-        const uint clusterSize = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
-        const uvec3 linearizeInvocation = uvec3( 1.0, clusterSize, clusterSize * clusterSize );
-        return uint( dot( gl_GlobalInvocationID, linearizeInvocation ) );
+        // const uint clusterSize = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
+        // const uvec3 linearizeInvocation = uvec3( 1.0, clusterSize, clusterSize * clusterSize );
+        // return uint( dot( gl_GlobalInvocationID, linearizeInvocation ) );
     }
 
     void resetSample()
@@ -522,19 +524,17 @@ const auto FRAG_SRC = R"(
         uint idx = getNextRayIndex();
 
         rays[ idx ].accumColor += rays[ idx ].sampleColor;
+        rays[ idx ].samples++;
 
-        // vec3 color = rays[ idx ].accumColor / float( 1 + rays[ idx ].samples );
+        vec3 color = rays[ idx ].accumColor / float( rays[ idx ].samples );
 
-        vec3 color = rays[ idx ].sampleColor;
+        color = rays[ idx ].sampleColor;
 
-        vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
-        color = ( destinationColor * float( rays[ idx ].samples ) + color ) / float( rays[ idx ].samples + 1 );
         imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
 
         // reset
         rays[ idx ].sampleColor = vec3( 1 );
         rays[ idx ].bounces = 0;
-        rays[ idx ].samples = rays[ idx ].samples + 1;
     }
 
     void doSampleBounce( Ray ray )
@@ -555,19 +555,14 @@ const auto FRAG_SRC = R"(
         Scattered scattered = scatter( uScene.materials[ hit.materialID ], ray, hit );
 
         if ( scattered.hasResult ) {
-            if ( scattered.isEmissive ) {
+            rays[ idx ].sampleColor *= scattered.attenuation;
+            if ( scattered.isEmissive || rays[ idx ].bounces >= 4 ) {
                 // emissive material 
-                rays[ idx ].sampleColor = scattered.attenuation;
                 onSampleCompleted();
             } else {
-                rays[ idx ].sampleColor *= scattered.attenuation;
-                if ( rays[ idx ].bounces >= 20 ) {
-                    onSampleCompleted();
-                } else {
-                    rays[ idx ].origin = scattered.ray.origin;
-                    rays[ idx ].direction = scattered.ray.direction;
-                    rays[ idx ].bounces = rays[ idx ].bounces + 1;
-                }
+                rays[ idx ].origin = scattered.ray.origin;
+                rays[ idx ].direction = scattered.ray.direction;
+                rays[ idx ].bounces = rays[ idx ].bounces + 1;
             }
         } else {
             rays[ idx ].sampleColor = vec3( 0 );
@@ -578,9 +573,9 @@ const auto FRAG_SRC = R"(
     void main() {
         seed = seedStart;
 
-        if ( sampleCount >= maxSamples ) {
-            return;
-        }
+        // if ( sampleCount >= maxSamples ) {
+        //     return;
+        // }
 
         flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
 
@@ -597,33 +592,33 @@ const auto FRAG_SRC = R"(
             return;
         }
 
+#if 0
         Ray ray = getNextRay();
         doSampleBounce( ray );
+#else
+        vec2 uv = gl_GlobalInvocationID.xy;
+        uv += vec2( getRandom(), getRandom() );
+        uv /= ( size.xy - vec2( 1 ) );
+        uv.y = 1.0 - uv.y;
+        Ray ray = getCameraRay( uv.x, uv.y );
+        vec3 color = rayColor( ray );
 
-        // vec2 uv = gl_GlobalInvocationID.xy;
-        // uv += vec2( getRandom(), getRandom() );
-        // uv /= ( size.xy - vec2( 1 ) );
-        // uv.y = 1.0 - uv.y;
-        // Ray ray = getCameraRay( uv.x, uv.y );
-        // vec3 color = rayColor( ray );
+        vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
+        color = ( destinationColor * float( sampleCount - 1 ) + color ) / float( sampleCount );
 
-        // vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
-        // color = ( destinationColor * float( sampleCount - 1 ) + color ) / float( sampleCount );
+        if ( sampleCount == 0 ) {
+            color = vec3( 0 );
+        }
 
-        // if ( sampleCount == 0 ) {
-        //     color = vec3( 0 );
-        // }
-
-        // vec3 color = vec3( 1, 0, 1 );
-
-        // imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
+        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
+#endif
     }
 
 )";
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noexcept
 {
-    const float resolutionScale = 1.0f;
+    const Real resolutionScale = Simulation::getInstance()->getSettings()->get< Real >( "rt.scale", 1 );
     const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
     const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
 
@@ -763,6 +758,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
                 auto scene = Simulation::getInstance()->getScene();
                 if ( scene != nullptr ) {
+                    scene->perform( UpdateWorldState() );
                     scene->perform(
                         ApplyToGeometries(
                             [ & ]( Geometry *geometry ) {
