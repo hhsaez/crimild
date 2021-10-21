@@ -43,7 +43,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
     Extent2D extent,
     SharedPointer< Shader > shader,
     Format format,
-    Array< Descriptor > descriptors ) noexcept
+    Array< SharedPointer< DescriptorSet > > descriptorSets ) noexcept
 {
     if ( extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         // convert to fixed extent
@@ -79,32 +79,40 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
                 Array< SharedPointer< Shader > > {
                     shader,
                 } );
-            program->descriptorSetLayouts = {
-                [ & ] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {
-                        {
-                            .descriptorType = DescriptorType::STORAGE_IMAGE,
-                            .stage = Shader::Stage::COMPUTE,
-                        },
-                    };
-                    descriptors.each(
-                        [ & ]( auto descriptor ) {
-                            layout->bindings.add(
-                                {
-                                    .descriptorType = descriptor.descriptorType,
-                                    .stage = Shader::Stage::COMPUTE,
-                                } );
-                        } );
-                    return layout;
-                }(),
-            };
+            program->descriptorSetLayouts = [ & ] {
+                auto layouts = Array< SharedPointer< DescriptorSetLayout > > {};
+                layouts.add(
+                    [] {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        layout->bindings = {
+                            {
+                                .descriptorType = DescriptorType::STORAGE_IMAGE,
+                                .stage = Shader::Stage::COMPUTE,
+                            },
+                        };
+                        return layout;
+                    }() );
+                descriptorSets.each(
+                    [ & ]( auto &ds ) {
+                        auto layout = crimild::alloc< DescriptorSetLayout >();
+                        ds->descriptors.each(
+                            [ & ]( auto descriptor ) {
+                                layout->bindings.add(
+                                    {
+                                        .descriptorType = descriptor.descriptorType,
+                                        .stage = Shader::Stage::COMPUTE,
+                                    } );
+                            } );
+                        layouts.add( layout );
+                    } );
+                return layouts;
+            }();
             return program;
         }() );
         return pipeline;
     }();
 
-    auto descriptorSet = [ & ] {
+    auto imageDescriptors = [ & ] {
         auto ds = crimild::alloc< DescriptorSet >();
         ds->descriptors = {
             Descriptor {
@@ -112,11 +120,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
                 .obj = crimild::retain( texture ),
             },
         };
-        descriptors.each(
-            [ & ]( auto descriptor ) {
-                ds->descriptors.add( descriptor );
-            } );
-
         return ds;
     }();
 
@@ -127,9 +130,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
 
     return withComputeCommands(
         computePass,
-        [ pipeline, descriptorSet, extent ]( auto commands ) {
+        [ pipeline, imageDescriptors, descriptorSets, extent ]( auto commands ) {
             commands->bindComputePipeline( crimild::get_ptr( pipeline ) );
-            commands->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
+            commands->bindDescriptorSet( crimild::get_ptr( imageDescriptors ) );
+            descriptorSets.each(
+                [ & ]( auto descriptors ) {
+                    commands->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+                } );
             commands->dispatch( DispatchWorkgroup {
                 .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
                 .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),

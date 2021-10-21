@@ -61,11 +61,11 @@ const auto FRAG_SRC = R"(
         int samples;
     };
 
-    layout( set = 0, binding = 1 ) buffer RayBounceState {
+    layout( set = 1, binding = 0 ) buffer RayBounceState {
         RayData rays[];
     };
 
-    layout( set = 0, binding = 2 ) uniform Uniforms {
+    layout( set = 1, binding = 1 ) uniform Uniforms {
         uint sampleCount;
         uint maxSamples;
         uint bounces;
@@ -106,7 +106,7 @@ const auto FRAG_SRC = R"(
 #define MAX_PRIMITIVE_COUNT 10000
 #define MAX_MATERIAL_COUNT 10000
 
-    layout( set = 0, binding = 3 ) uniform SceneUniforms {
+    layout( set = 1, binding = 2 ) uniform SceneUniforms {
         Sphere spheres[ MAX_PRIMITIVE_COUNT ];
         int sphereCount;
         Box boxes[ MAX_PRIMITIVE_COUNT ];
@@ -625,7 +625,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
     // Reset samples
     Simulation::getInstance()->getSettings()->set( "rt.samples.count", 0 );
 
-    auto descriptors = Array< Descriptor > {
+    auto ds = crimild::alloc< DescriptorSet >();
+    ds->descriptors = Array< Descriptor > {
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,
             .obj = [ & ] {
@@ -804,5 +805,5 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             Shader::Stage::COMPUTE,
             FRAG_SRC ),
         Format::R32G32B32A32_SFLOAT,
-        descriptors );
+        { ds } );
 }
