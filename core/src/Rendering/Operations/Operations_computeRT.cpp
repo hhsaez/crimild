@@ -44,9 +44,6 @@
 
 using namespace crimild;
 
-#define MAX_PRIMITIVE_COUNT 10000
-#define MAX_MATERIAL_COUNT 10000
-
 const auto FRAG_SRC = R"(
 
     layout( local_size_x = 32, local_size_y = 32 ) in;
@@ -83,6 +80,12 @@ const auto FRAG_SRC = R"(
     uint seed = 0;
     int flat_idx = 0;
 
+    layout( set = 1, binding = 2 ) uniform SceneUniforms {
+        int sphereCount;
+        int boxCount;
+        int materialCount;
+    } uScene;
+
     struct Sphere {
         mat4 invWorld;
         uint materialID;
@@ -103,17 +106,17 @@ const auto FRAG_SRC = R"(
         vec3 emissive;
     };
 
-#define MAX_PRIMITIVE_COUNT 10000
-#define MAX_MATERIAL_COUNT 10000
+    layout( set = 2, binding = 0 ) buffer Spheres {
+        Sphere allSpheres[];
+    };
 
-    layout( set = 1, binding = 2 ) uniform SceneUniforms {
-        Sphere spheres[ MAX_PRIMITIVE_COUNT ];
-        int sphereCount;
-        Box boxes[ MAX_PRIMITIVE_COUNT ];
-        int boxCount;
-        Material materials[ MAX_MATERIAL_COUNT ];
-        int materialCount;
-    } uScene;
+    layout( set = 2, binding = 1 ) buffer Boxes {
+        Box allBoxes[];
+    };
+
+    layout( set = 2, binding = 2 ) buffer Materials {
+        Material allMaterials[];
+    };
 
     struct HitRecord {
         bool hasResult;
@@ -356,7 +359,7 @@ const auto FRAG_SRC = R"(
         int hitIdx = -1;
 
         for ( int i = 0; i < uScene.sphereCount; i++ ) {
-            float candidate = hitSphere( uScene.spheres[ i ], ray, tMin, t );
+            float candidate = hitSphere( allSpheres[ i ], ray, tMin, t );
             if ( candidate < t ) {
                 t = candidate;
                 hitIdx = i;
@@ -364,7 +367,7 @@ const auto FRAG_SRC = R"(
         }
 
         if ( hitIdx >= 0 ) {
-            Sphere sphere = uScene.spheres[ hitIdx ];
+            Sphere sphere = allSpheres[ hitIdx ];
 
             ray.origin = ( sphere.invWorld * vec4( ray.origin, 1.0 ) ).xyz;
             ray.direction = ( sphere.invWorld * vec4( ray.direction, 0.0 ) ).xyz;
@@ -388,7 +391,7 @@ const auto FRAG_SRC = R"(
         int hitIdx = -1;
 
         for ( int i = 0; i < uScene.boxCount; i++ ) {
-            float candidate = hitBox( uScene.boxes[ i ], ray, tMin, t );
+            float candidate = hitBox( allBoxes[ i ], ray, tMin, t );
             if ( candidate < t ) {
                 t = candidate;
                 hitIdx = i;
@@ -396,7 +399,7 @@ const auto FRAG_SRC = R"(
         }
 
         if ( hitIdx >= 0 ) {
-            Box box = uScene.boxes[ hitIdx ];
+            Box box = allBoxes[ hitIdx ];
 
             ray.origin = ( box.invWorld * vec4( ray.origin, 1.0 ) ).xyz;
             ray.direction = ( box.invWorld * vec4( ray.direction, 0.0 ) ).xyz;
@@ -460,7 +463,7 @@ const auto FRAG_SRC = R"(
                 return color;
             }
 
-            Scattered scattered = scatter( uScene.materials[ hit.materialID ], ray, hit );
+            Scattered scattered = scatter( allMaterials[ hit.materialID ], ray, hit );
             if ( scattered.hasResult ) {
                 color *= scattered.attenuation;
                 if ( scattered.isEmissive ) {
@@ -552,7 +555,7 @@ const auto FRAG_SRC = R"(
             return;
         }
 
-        Scattered scattered = scatter( uScene.materials[ hit.materialID ], ray, hit );
+        Scattered scattered = scatter( allMaterials[ hit.materialID ], ray, hit );
 
         if ( scattered.hasResult ) {
             rays[ idx ].sampleColor *= scattered.attenuation;
@@ -624,6 +627,53 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
     // Reset samples
     Simulation::getInstance()->getSettings()->set( "rt.samples.count", 0 );
+
+    struct SphereDesc {
+        alignas( 16 ) Matrix4 invWorld;
+        alignas( 4 ) UInt32 materialID;
+    };
+
+    struct BoxDesc {
+        alignas( 16 ) Matrix4 invWorld;
+        alignas( 4 ) UInt32 materialID;
+    };
+
+    Array< SphereDesc > spheres;
+    Array< BoxDesc > boxes;
+    Array< materials::PrincipledBSDF::Props > materials;
+    Map< Material *, UInt32 > materialIds;
+
+    auto scene = Simulation::getInstance()->getScene();
+    if ( scene != nullptr ) {
+        scene->perform( UpdateWorldState() );
+        scene->perform(
+            ApplyToGeometries(
+                [ & ]( Geometry *geometry ) {
+                    const auto material = static_cast< materials::PrincipledBSDF * >( geometry->getComponent< MaterialComponent >()->first() );
+                    if ( !materialIds.contains( material ) ) {
+                        const UInt32 materialId = materials.size();
+                        materials.add( material->getProps() );
+                        materialIds.insert( material, materialId );
+                    }
+
+                    geometry->forEachPrimitive(
+                        [ & ]( auto primitive ) {
+                            if ( primitive->getType() == Primitive::Type::SPHERE ) {
+                                spheres.add(
+                                    {
+                                        .invWorld = geometry->getWorld().invMat,
+                                        .materialID = materialIds[ material ],
+                                    } );
+                            } else if ( primitive->getType() == Primitive::Type::BOX ) {
+                                boxes.add(
+                                    {
+                                        .invWorld = geometry->getWorld().invMat,
+                                        .materialID = materialIds[ material ],
+                                    } );
+                            }
+                        } );
+                } ) );
+    }
 
     auto ds = crimild::alloc< DescriptorSet >();
     ds->descriptors = Array< Descriptor > {
@@ -733,66 +783,35 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
         Descriptor {
             .descriptorType = DescriptorType::UNIFORM_BUFFER,
-            .obj = [] {
-                struct SphereDesc {
-                    alignas( 16 ) Matrix4 invWorld;
-                    alignas( 4 ) UInt32 materialID;
-                };
-
-                struct BoxDesc {
-                    alignas( 16 ) Matrix4 invWorld;
-                    alignas( 4 ) UInt32 materialID;
-                };
-
+            .obj = [ & ] {
                 struct SceneUniforms {
-                    alignas( 16 ) SphereDesc spheres[ MAX_PRIMITIVE_COUNT ];
                     alignas( 4 ) UInt32 sphereCount = 0;
-                    alignas( 16 ) BoxDesc boxes[ MAX_PRIMITIVE_COUNT ];
                     alignas( 4 ) UInt32 boxCount = 0;
-                    alignas( 16 ) materials::PrincipledBSDF::Props materials[ MAX_MATERIAL_COUNT ];
                     alignas( 4 ) UInt32 materialCount = 0;
                 };
 
-                SceneUniforms uniforms;
-
-                Map< Material *, UInt32 > materialIds;
-
-                auto scene = Simulation::getInstance()->getScene();
-                if ( scene != nullptr ) {
-                    scene->perform( UpdateWorldState() );
-                    scene->perform(
-                        ApplyToGeometries(
-                            [ & ]( Geometry *geometry ) {
-                                const auto material = static_cast< materials::PrincipledBSDF * >( geometry->getComponent< MaterialComponent >()->first() );
-                                if ( !materialIds.contains( material ) ) {
-                                    const auto materialId = uniforms.materialCount++;
-                                    uniforms.materials[ materialId ] = material->getProps();
-                                    materialIds.insert( material, materialId );
-                                }
-
-                                geometry->forEachPrimitive(
-                                    [ & ]( auto primitive ) {
-                                        if ( primitive->getType() == Primitive::Type::SPHERE ) {
-                                            if ( uniforms.sphereCount < MAX_PRIMITIVE_COUNT ) {
-                                                uniforms.spheres[ uniforms.sphereCount++ ] = {
-                                                    .invWorld = geometry->getWorld().invMat,
-                                                    .materialID = materialIds[ material ],
-                                                };
-                                            }
-                                        } else if ( primitive->getType() == Primitive::Type::BOX ) {
-                                            if ( uniforms.boxCount < MAX_PRIMITIVE_COUNT ) {
-                                                uniforms.boxes[ uniforms.boxCount++ ] = {
-                                                    .invWorld = geometry->getWorld().invMat,
-                                                    .materialID = materialIds[ material ],
-                                                };
-                                            }
-                                        }
-                                    } );
-                            } ) );
-                }
-
-                return crimild::alloc< UniformBuffer >( uniforms );
+                return crimild::alloc< UniformBuffer >( SceneUniforms {
+                    .sphereCount = UInt32( spheres.size() ),
+                    .boxCount = UInt32( boxes.size() ),
+                    .materialCount = UInt32( materials.size() ),
+                } );
             }(),
+        },
+    };
+
+    auto sceneDescriptors = crimild::alloc< DescriptorSet >();
+    sceneDescriptors->descriptors = Array< Descriptor > {
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = crimild::alloc< StorageBuffer >( spheres.size() > 0 ? spheres : Array< SphereDesc > { SphereDesc {} } ),
+        },
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = crimild::alloc< StorageBuffer >( boxes.size() > 0 ? boxes : Array< BoxDesc > { BoxDesc {} } ),
+        },
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = crimild::alloc< StorageBuffer >( materials.size() > 0 ? materials : Array< materials::PrincipledBSDF::Props > { materials::PrincipledBSDF::Props {} } ),
         },
     };
 
@@ -805,5 +824,5 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             Shader::Stage::COMPUTE,
             FRAG_SRC ),
         Format::R32G32B32A32_SFLOAT,
-        { ds } );
+        { ds, sceneDescriptors } );
 }
