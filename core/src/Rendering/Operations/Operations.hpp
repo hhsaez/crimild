@@ -31,8 +31,6 @@
 #include "Foundation/Memory.hpp"
 #include "Mathematics/Matrix3.hpp"
 #include "Rendering/DescriptorSet.hpp"
-#include "Rendering/Extent.hpp"
-#include "Rendering/Format.hpp"
 
 namespace crimild {
 
@@ -81,13 +79,6 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &renderables,
             SharedPointer< FrameGraphResource > const &colorAttachment = nullptr,
             SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
-
-        SharedPointer< FrameGraphOperation > computeImage(
-            Extent2D extent,
-            SharedPointer< Shader > shader,
-            Format format = Format::R8G8B8A8_UNORM,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {},
-            UInt32 workgroupSize = 0 ) noexcept;
 
         SharedPointer< FrameGraphOperation > brightPassFilter( SharedPointer< FrameGraphResource > const &image, const Vector3f &filter ) noexcept;
 
