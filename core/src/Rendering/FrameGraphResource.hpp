@@ -47,6 +47,7 @@ namespace crimild {
             TEXTURE,
             ATTACHMENT,
             RENDERABLE_SET,
+            STORAGE_BUFFER,
         };
 
     public:

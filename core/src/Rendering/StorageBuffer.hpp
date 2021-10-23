@@ -31,12 +31,14 @@
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 
 namespace crimild {
 
     class StorageBuffer
         : public coding::Codable,
-          public RenderResourceImpl< StorageBuffer > {
+          public RenderResourceImpl< StorageBuffer >,
+          public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::StorageBuffer )
 
     public:
@@ -79,6 +81,19 @@ namespace crimild {
     private:
         SharedPointer< BufferView > m_bufferView;
         SharedPointer< BufferAccessor > m_accessor;
+
+        /**
+         * \name FrameGraphResource impl
+         */
+        //@{
+
+    public:
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::STORAGE_BUFFER; }
+
+        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override;
+        virtual void setReadBy( FrameGraphOperation *op ) noexcept override;
+
+        //@}
     };
 
 }

@@ -30,6 +30,7 @@
 
 #include "Mathematics/Numeric.hpp"
 #include "Rendering/Buffer.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 
 namespace crimild {
 
@@ -38,7 +39,8 @@ namespace crimild {
      */
     class BufferView
         : public coding::Codable,
-          public RenderResourceImpl< BufferView > {
+          public RenderResourceImpl< BufferView >,
+          public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::BufferView )
 
     public:
@@ -134,6 +136,32 @@ namespace crimild {
         crimild::Size m_stride;
         crimild::Size m_length;
         Usage m_usage = Usage::STATIC;
+
+        /**
+         * \name FrameGraphResource impl
+         */
+        //@{
+
+    public:
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER_VIEW; }
+
+        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override
+        {
+            FrameGraphResource::setWrittenBy( op );
+            if ( m_buffer != nullptr ) {
+                m_buffer->setWrittenBy( op );
+            }
+        }
+
+        virtual void setReadBy( FrameGraphOperation *op ) noexcept override
+        {
+            FrameGraphResource::setReadBy( op );
+            if ( m_buffer != nullptr ) {
+                m_buffer->setReadBy( op );
+            }
+        }
+
+        //@}
     };
 
 }
