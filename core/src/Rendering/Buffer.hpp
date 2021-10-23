@@ -33,6 +33,7 @@
 #include "Foundation/RTTI.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Types.hpp"
+#include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
@@ -42,7 +43,8 @@ namespace crimild {
      */
     class Buffer
         : public coding::Codable,
-          public RenderResourceImpl< Buffer > {
+          public RenderResourceImpl< Buffer >,
+          public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
 
     public:
@@ -89,6 +91,16 @@ namespace crimild {
 
     private:
         ByteArray m_data;
+
+        /**
+         * \name FrameGraphResource impl
+         */
+        //@{
+
+    public:
+        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER; }
+
+        //@}
     };
 
 }
