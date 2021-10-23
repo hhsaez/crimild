@@ -86,7 +86,8 @@ namespace crimild {
             Extent2D extent,
             SharedPointer< Shader > shader,
             Format format = Format::R8G8B8A8_UNORM,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {} ) noexcept;
+            Array< SharedPointer< DescriptorSet > > descriptorSets = {},
+            UInt32 workgroupSize = 0 ) noexcept;
 
         SharedPointer< FrameGraphOperation > brightPassFilter( SharedPointer< FrameGraphResource > const &image, const Vector3f &filter ) noexcept;
 
