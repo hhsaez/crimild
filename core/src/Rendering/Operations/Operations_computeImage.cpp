@@ -43,8 +43,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
     Extent2D extent,
     SharedPointer< Shader > shader,
     Format format,
-    Array< SharedPointer< DescriptorSet > > descriptorSets ) noexcept
+    Array< SharedPointer< DescriptorSet > > descriptorSets,
+    UInt32 workgroupSize ) noexcept
 {
+    auto computePass = crimild::alloc< ComputePass >();
+    computePass->setName( "computeImage" );
+
     if ( extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
         // convert to fixed extent
         auto settings = Simulation::getInstance()->getSettings();
@@ -64,7 +68,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
                 .height = Real32( extent.height ),
             };
             image->setMipLevels( 1 );
-            image->setName( "Compute Image" );
+            image->setName( computePass->getName() + "/image" );
             return image;
         }();
         return imageView;
@@ -73,7 +77,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
 
     auto pipeline = [ & ] {
         auto pipeline = crimild::alloc< ComputePipeline >();
-        pipeline->setName( "Compute Pipeline" );
+        pipeline->setName( computePass->getName() + "/pipeline" );
         pipeline->setProgram( [ & ] {
             auto program = crimild::alloc< ShaderProgram >(
                 Array< SharedPointer< Shader > > {
@@ -123,14 +127,16 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
         return ds;
     }();
 
-    auto computePass = crimild::alloc< ComputePass >();
-    computePass->setName( "computeImage" );
     computePass->writes( { texture } );
     computePass->produces( { texture } );
 
+    if ( workgroupSize == 0 ) {
+        workgroupSize = DispatchWorkgroup::DEFAULT_WORGROUP_SIZE;
+    }
+
     return withComputeCommands(
         computePass,
-        [ pipeline, imageDescriptors, descriptorSets, extent ]( auto commands ) {
+        [ pipeline, imageDescriptors, descriptorSets, extent, workgroupSize ]( auto commands ) {
             commands->bindComputePipeline( crimild::get_ptr( pipeline ) );
             commands->bindDescriptorSet( crimild::get_ptr( imageDescriptors ) );
             descriptorSets.each(
@@ -138,8 +144,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
                     commands->bindDescriptorSet( crimild::get_ptr( descriptors ) );
                 } );
             commands->dispatch( DispatchWorkgroup {
-                .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-                .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+                .x = UInt32( extent.width / workgroupSize ),
+                .y = UInt32( extent.height / workgroupSize ),
                 .z = 1 } );
         } );
 }
