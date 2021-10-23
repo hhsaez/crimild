@@ -25,12 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Rendering/Operations/Operations_computeImage.hpp"
+
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/ComputePass.hpp"
+#include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
-#include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
@@ -43,8 +45,25 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
     Extent2D extent,
     SharedPointer< Shader > shader,
     Format format,
-    Array< SharedPointer< DescriptorSet > > descriptorSets,
-    UInt32 workgroupSize ) noexcept
+    Array< SharedPointer< DescriptorSet > > descriptorSets ) noexcept
+{
+    return computeImage(
+        extent,
+        shader,
+        format,
+        DispatchWorkgroup {
+            .x = UInt32( extent.width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+            .y = UInt32( extent.height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+            .z = 1 },
+        descriptorSets );
+}
+
+SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
+    Extent2D extent,
+    SharedPointer< Shader > shader,
+    Format format,
+    const DispatchWorkgroup &workgroup,
+    Array< SharedPointer< DescriptorSet > > descriptorSets ) noexcept
 {
     auto computePass = crimild::alloc< ComputePass >();
     computePass->setName( "computeImage" );
@@ -130,22 +149,15 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeImage(
     computePass->writes( { texture } );
     computePass->produces( { texture } );
 
-    if ( workgroupSize == 0 ) {
-        workgroupSize = DispatchWorkgroup::DEFAULT_WORGROUP_SIZE;
-    }
-
     return withComputeCommands(
         computePass,
-        [ pipeline, imageDescriptors, descriptorSets, extent, workgroupSize ]( auto commands ) {
+        [ pipeline, imageDescriptors, descriptorSets, workgroup ]( auto commands ) {
             commands->bindComputePipeline( crimild::get_ptr( pipeline ) );
             commands->bindDescriptorSet( crimild::get_ptr( imageDescriptors ) );
             descriptorSets.each(
                 [ & ]( auto descriptors ) {
                     commands->bindDescriptorSet( crimild::get_ptr( descriptors ) );
                 } );
-            commands->dispatch( DispatchWorkgroup {
-                .x = UInt32( extent.width / workgroupSize ),
-                .y = UInt32( extent.height / workgroupSize ),
-                .z = 1 } );
+            commands->dispatch( workgroup );
         } );
 }
