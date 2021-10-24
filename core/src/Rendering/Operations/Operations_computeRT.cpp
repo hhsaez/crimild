@@ -47,6 +47,12 @@
 
 using namespace crimild;
 
+// - Ray intersector: each frame, computes one ray per job
+// - New rays are created either from the camera or from a bounce
+// - When bounces end, color is accumulated and the image is updated
+
+// TILE BASED COMPUTE RT
+
 #if 1
 
 const auto FRAG_SRC = R"(
@@ -59,6 +65,7 @@ const auto FRAG_SRC = R"(
         vec3 direction;
         vec3 sampleColor;
         vec3 accumColor;
+        vec2 uv;
         int bounces;
         int samples;
     };
@@ -487,38 +494,48 @@ const auto FRAG_SRC = R"(
         return vec3( 0 );
     }
 
-    uint getNextRayIndex()
+    uint getNextRayIndexInTile()
     {
         vec2 size = imageSize( resultImage );
-        return int( gl_GlobalInvocationID.y * size.x + gl_GlobalInvocationID.x );
-
-        // const uint clusterSize = gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z;
-        // const uvec3 linearizeInvocation = uvec3( 1.0, clusterSize, clusterSize * clusterSize );
-        // return uint( dot( gl_GlobalInvocationID, linearizeInvocation ) );
+        vec2 tileSize = size / ( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
+        vec2 uv = gl_GlobalInvocationID.xy * tileSize;
+        uv += vec2( getRandom(), getRandom() ) * tileSize;
+        uv = min( uv, size );
+        return uint( uv.y * size.x + uv.x );
     }
 
-    void resetSample()
+    // Reset all samples for all rays in this tile        
+    void resetSample( uint idx )
     {
-        uint idx = getNextRayIndex();
+        vec2 size = imageSize( resultImage );
+        vec2 tileSize = size / ( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
+        vec2 uv = gl_GlobalInvocationID.xy * tileSize;
+        uv = min( uv, size );
+        uint firstIdx = uint( uv.y * size.x + uv.x );
 
-        rays[ idx ].sampleColor = vec3( 1 );
-        rays[ idx ].accumColor = vec3( 0 );
-        rays[ idx ].bounces = 0;
-        rays[ idx ].samples = 0;
-
-        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( vec3( 0 ), 1.0 ) );
+        for ( float y = 0; y < tileSize.y; y++ ) {
+            for ( float x = 0; x < tileSize.x; x++ ) {
+                vec2 st = uv + vec2( x, y );
+                st = min( st, size );
+                uint idx = uint( st.y * size.x + st.x );;
+                rays[ idx ].sampleColor = vec3( 1 );
+                rays[ idx ].accumColor = vec3( 0 );
+                rays[ idx ].bounces = 0;
+                rays[ idx ].samples = 0;
+            }
+        }
     }
 
-    Ray getNextRay()
+    Ray getNextRay( uint idx )
     {
-        uint idx = getNextRayIndex();
         Ray ret;
         if ( rays[ idx ].bounces == 0 ) {
             vec2 size = imageSize( resultImage );
-            vec2 uv = gl_GlobalInvocationID.xy;
+            vec2 uv = rays[ idx ].uv;
             uv += vec2( getRandom(), getRandom() );
             uv /= ( size.xy - vec2( 1 ) );
             uv.y = 1.0 - uv.y;
+            uv = clamp( uv, 0, 1 );
             ret = getCameraRay( uv.x, uv.y );
         } else {
             ret.origin = rays[ idx ].origin;
@@ -527,28 +544,22 @@ const auto FRAG_SRC = R"(
         return ret;
     }
 
-    void onSampleCompleted()
+    void onSampleCompleted( uint idx )
     {
-        uint idx = getNextRayIndex();
-
         rays[ idx ].accumColor += rays[ idx ].sampleColor;
         rays[ idx ].samples++;
 
         vec3 color = rays[ idx ].accumColor / float( rays[ idx ].samples );
 
-        // color = rays[ idx ].sampleColor;
-
-        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
+        imageStore( resultImage, ivec2( rays[ idx ].uv ), vec4( color, 1.0 ) );
 
         // reset
         rays[ idx ].sampleColor = vec3( 1 );
         rays[ idx ].bounces = 0;
     }
 
-    void doSampleBounce( Ray ray )
+    void doSampleBounce( uint idx, Ray ray )
     {
-        uint idx = getNextRayIndex();
-
         float tMin = 0.001;
         float tMax = 9999.9;
 
@@ -556,7 +567,7 @@ const auto FRAG_SRC = R"(
         if ( !hit.hasResult ) {
             // no hit. use background color
             rays[ idx ].sampleColor *= backgroundColor;
-            onSampleCompleted();
+            onSampleCompleted( idx );
             return;
         }
 
@@ -565,8 +576,7 @@ const auto FRAG_SRC = R"(
         if ( scattered.hasResult ) {
             rays[ idx ].sampleColor *= scattered.attenuation;
             if ( scattered.isEmissive || rays[ idx ].bounces >= 4 ) {
-                // emissive material 
-                onSampleCompleted();
+                onSampleCompleted( idx );
             } else {
                 rays[ idx ].origin = scattered.ray.origin;
                 rays[ idx ].direction = scattered.ray.direction;
@@ -574,7 +584,7 @@ const auto FRAG_SRC = R"(
             }
         } else {
             rays[ idx ].sampleColor = vec3( 0 );
-            onSampleCompleted();
+            onSampleCompleted( idx );
         }
     }
 
@@ -594,16 +604,24 @@ const auto FRAG_SRC = R"(
             return;
         }
 
+#if 1
+        uint rayIdx = getNextRayIndexInTile();
+        
         if ( sampleCount == 0 ) {
             // reset all samples
-            resetSample();
+            resetSample( rayIdx );
             return;
         }
 
-#if 1
-        Ray ray = getNextRay();
-        doSampleBounce( ray );
+        Ray ray = getNextRay( rayIdx );
+        doSampleBounce( rayIdx, ray );
 #else
+        if ( sampleCount == 0 ) {
+            // reset all samples
+            imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( vec3( 0 ), 1.0 ) );
+            return;
+        }
+
         vec2 uv = gl_GlobalInvocationID.xy;
         uv += vec2( getRandom(), getRandom() );
         uv /= ( size.xy - vec2( 1 ) );
@@ -690,11 +708,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
                     alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
                     alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
+                    alignas( 16 ) Vector2 uv = Vector2 { 0, 0 };
                     alignas( 4 ) Int32 bounces = 0;
                     alignas( 4 ) Int32 samples = 0;
                 };
 
                 auto data = Array< BufferData >( width * height );
+                for ( auto y = 0; y < height; y++ ) {
+                    for ( auto x = 0; x < width; x++ ) {
+                        data[ y * width + x ].uv = Vector2 { Real( x ), Real( y ) };
+                    }
+                }
                 return crimild::alloc< StorageBuffer >( data );
             }(),
         },
@@ -820,6 +844,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
     };
 
+    UInt32 workers = Simulation::getInstance()->getSettings()->get< UInt32 >( "rt.workers", 4 );
+
     return computeImage(
         Extent2D {
             .width = Real32( width ),
@@ -830,8 +856,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             FRAG_SRC ),
         Format::R32G32B32A32_SFLOAT,
         DispatchWorkgroup {
-            .x = UInt32( width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-            .y = UInt32( height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
+            .x = workers,
+            .y = workers,
             .z = 1 },
         { ds, sceneDescriptors } );
 }
