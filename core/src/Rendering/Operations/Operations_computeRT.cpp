@@ -95,6 +95,7 @@ const auto FRAG_SRC = R"(
     layout( set = 1, binding = 2 ) uniform SceneUniforms {
         int sphereCount;
         int boxCount;
+        int cylinderCount;
         int materialCount;
     } uScene;
 
@@ -104,6 +105,11 @@ const auto FRAG_SRC = R"(
     };
 
     struct Box {
+        mat4 invWorld;
+        uint materialID;
+    };
+
+    struct Cylinder {
         mat4 invWorld;
         uint materialID;
     };
@@ -126,7 +132,11 @@ const auto FRAG_SRC = R"(
         Box allBoxes[];
     };
 
-    layout( set = 2, binding = 2 ) buffer Materials {
+    layout( set = 2, binding = 2 ) buffer Cylinders {
+        Cylinder allCylinders[];
+    };
+
+    layout( set = 2, binding = 3 ) buffer Materials {
         Material allMaterials[];
     };
 
@@ -365,6 +375,115 @@ const auto FRAG_SRC = R"(
         return hasResult ? t : tInMax;
     }
 
+    bool isZero( float x ) 
+    {
+        float EPSILON = 0.000001;
+        return abs( x ) < EPSILON;
+    }
+
+    bool checkCylinderCap( Ray R, float t )
+    {
+        float x = R.origin.x + t * R.direction.x;
+        float z = R.origin.z + t * R.direction.z;
+        return ( x * x + z * z ) <= 1;
+    }
+
+    bool intersectCylinderCaps( Cylinder C, Ray R, inout float tMin, inout float tMax )
+    {
+        if ( isZero( R.direction.y ) ) {
+            return false;
+        }
+
+        float cylinderHeight = 1;
+
+        bool hasResult = false;
+        float t = ( -cylinderHeight - R.origin.y ) / R.direction.y;
+        if ( checkCylinderCap( R, t ) ) {
+            if ( t < tMin ) {
+                tMax = tMin;
+                tMin = t;
+            } else if ( t < tMax ) {
+                tMax = t;
+            }
+            hasResult = true;
+        }
+
+        t = ( cylinderHeight - R.origin.y ) / R.direction.y;
+        if ( checkCylinderCap( R, t ) ) {
+            if ( t < tMin ) {
+                tMax = tMin;
+                tMin = t;                
+            } else if ( t < tMax ) {
+                tMax = t;
+            }
+            hasResult = true;
+        }
+
+        return hasResult;
+    }
+
+    bool hitCylinder( Cylinder cylinder, Ray worldRay, inout float tMin, inout float tMax ) 
+    {
+        Ray ray;
+        ray.origin = ( cylinder.invWorld * vec4( worldRay.origin, 1 ) ).xyz;
+        ray.direction = ( cylinder.invWorld * vec4( worldRay.direction, 0 ) ).xyz;
+
+        float cylinderHeight = 1;
+
+        float a = ( ray.direction.x * ray.direction.x ) + ( ray.direction.z * ray.direction.z );
+        if ( isZero( a ) ) {
+            return intersectCylinderCaps( cylinder, ray, tMin, tMax );
+        }
+
+        float b = ( 2 * ray.origin.x * ray.direction.x ) + ( 2 * ray.origin.z * ray.direction.z );
+        float c = ( ray.origin.x * ray.origin.x ) + ( ray.origin.z * ray.origin.z ) - 1;
+
+        float disc = b * b - 4 * a * c;
+        if ( disc < 0 ) {
+            return false;
+        }
+
+        float disc_root = sqrt( disc );
+
+        float t0 = ( -b - disc_root ) / ( 2.0 * a );
+        float t1 = ( -b + disc_root ) / ( 2.0 * a );
+        if ( t0 < t1 ) {
+            float t = t0;
+            t0 = t1;
+            t1 = t;
+        }
+
+        bool hasResult = false;
+
+        float y0 = ray.origin.y + t0 * ray.direction.y;
+        if ( y0 < cylinderHeight && y0 > -cylinderHeight ) {
+            tMin = t0;
+            tMax = t1;
+            hasResult = true;
+        }
+
+        float y1 = ray.origin.y + t1 * ray.direction.y;
+        if ( y1 < cylinderHeight && y1 > -cylinderHeight ) {
+            if ( !hasResult ) {
+                tMin = t1;
+            }
+            tMax = t1;
+            hasResult = true;
+        }
+
+        if ( intersectCylinderCaps( cylinder, ray, tMin, tMax ) ) {
+            hasResult = true;
+        }
+
+        if ( tMin > tMax ) {
+            float t = tMin;
+            tMin = tMax;
+            tMax = t;
+        }
+
+        return hasResult;
+    }
+
     HitRecord hitSpheres( Ray ray, float tMin, HitRecord hit )
     {
         float t = hit.t;
@@ -429,6 +548,46 @@ const auto FRAG_SRC = R"(
         return hit;
     }
 
+    HitRecord hitCylinders( Ray ray, float tMin, HitRecord hit )
+    {
+        float t = hit.t;
+        int hitIdx = -1;
+
+        for ( int i = 0; i < uScene.cylinderCount; i++ ) {
+            float t0 = 999999.9;
+            float t1 = 999999.9;
+            if ( hitCylinder( allCylinders[ i ], ray, t0, t1 ) ) {
+                if ( t0 < t ) {
+                    t = t0;
+                    hitIdx = i;
+                }
+
+                if ( t1 < t ) {
+                    t = t1;
+                    hitIdx = i;
+                }
+            }
+        }
+
+        if ( hitIdx >= 0 ) {
+            Cylinder cylinder = allCylinders[ hitIdx ];
+
+            ray.origin = ( cylinder.invWorld * vec4( ray.origin, 1.0 ) ).xyz;
+            ray.direction = ( cylinder.invWorld * vec4( ray.direction, 0.0 ) ).xyz;
+
+            hit.hasResult = true;
+            hit.t = t;
+            hit.materialID = cylinder.materialID;
+            vec3 P = rayAt( ray, t );
+            mat4 world = inverse( cylinder.invWorld );
+            hit.point = ( world * vec4( P, 1.0 ) ).xyz;
+            vec3 normal = normalize( transpose( mat3( cylinder.invWorld ) ) * P );
+            return setFaceNormal( ray, normal, hit );
+        }
+
+        return hit;
+    }
+
     HitRecord hitScene( Ray ray, float tMin, float tMax ) {
         HitRecord hit;
         hit.t = tMax;
@@ -436,6 +595,7 @@ const auto FRAG_SRC = R"(
 
         hit = hitSpheres( ray, tMin, hit );
         hit = hitBoxes( ray, tMin, hit );
+        hit = hitCylinders( ray, tMin, hit );
 
         return hit;
     }
@@ -661,8 +821,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         alignas( 4 ) UInt32 materialID;
     };
 
+    struct CylinderDesc {
+        alignas( 16 ) Matrix4 invWorld;
+        alignas( 4 ) UInt32 materialID;
+    };
+
     Array< SphereDesc > spheres;
     Array< BoxDesc > boxes;
+    Array< CylinderDesc > cylinders;
     Array< materials::PrincipledBSDF::Props > materials;
     Map< Material *, UInt32 > materialIds;
 
@@ -689,6 +855,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     } );
                             } else if ( primitive->getType() == Primitive::Type::BOX ) {
                                 boxes.add(
+                                    {
+                                        .invWorld = geometry->getWorld().invMat,
+                                        .materialID = materialIds[ material ],
+                                    } );
+                            } else if ( primitive->getType() == Primitive::Type::CYLINDER ) {
+                                cylinders.add(
                                     {
                                         .invWorld = geometry->getWorld().invMat,
                                         .materialID = materialIds[ material ],
@@ -819,12 +991,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                 struct SceneUniforms {
                     alignas( 4 ) UInt32 sphereCount = 0;
                     alignas( 4 ) UInt32 boxCount = 0;
+                    alignas( 4 ) UInt32 cylinderCount = 0;
                     alignas( 4 ) UInt32 materialCount = 0;
                 };
 
                 return crimild::alloc< UniformBuffer >( SceneUniforms {
                     .sphereCount = UInt32( spheres.size() ),
                     .boxCount = UInt32( boxes.size() ),
+                    .cylinderCount = UInt32( cylinders.size() ),
                     .materialCount = UInt32( materials.size() ),
                 } );
             }(),
@@ -840,6 +1014,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,
             .obj = crimild::alloc< StorageBuffer >( boxes.size() > 0 ? boxes : Array< BoxDesc > { BoxDesc {} } ),
+        },
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = crimild::alloc< StorageBuffer >( cylinders.size() > 0 ? cylinders : Array< CylinderDesc > { CylinderDesc {} } ),
         },
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,

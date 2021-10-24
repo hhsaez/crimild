@@ -220,16 +220,6 @@ namespace crimild {
         }
 
         return hasResult;
-
-        if ( internal::intersectCylinderCaps( R, C, tMin, tMax ) ) {
-            hasResult = true;
-        }
-
-        if ( tMin > tMax ) {
-            std::swap( tMin, tMax );
-        }
-
-        return hasResult;
     }
 
     [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, const Transformation &world, Real &t0, Real &t1 ) noexcept
