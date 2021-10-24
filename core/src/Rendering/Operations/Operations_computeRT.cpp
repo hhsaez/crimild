@@ -784,6 +784,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             cameraOrigin = location( camera->getWorld() );
                             cameraRight = right( camera->getWorld() );
                             cameraUp = up( camera->getWorld() );
+
+                            aperture = camera->getAperture();
+                            focusDist = camera->getFocusDistance();
                         }
 
                         if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
