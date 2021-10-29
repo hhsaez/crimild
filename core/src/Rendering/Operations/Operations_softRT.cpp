@@ -29,6 +29,7 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/ColorRGBOps.hpp"
+#include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Normal3Ops.hpp"
 #include "Mathematics/Random.hpp"
 #include "Mathematics/Ray_apply.hpp"
@@ -47,9 +48,11 @@
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "Rendering/ScenePass.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/IntersectWorld.hpp"
+#include "Visitors/RTAcceleration.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
@@ -186,13 +189,90 @@ crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< Shar
     return rr + ( 1 - rr ) * pow( ( 1 - cosTheta ), 5 );
 }
 
-[[nodiscard]] ColorRGB rayColor( const Ray3 &R, Node *scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
+struct IntersectionResult {
+    Int32 materialId = -1;
+    Real t = numbers::POSITIVE_INFINITY;
+    Point3 point;
+    Normal3 normal;
+    Bool frontFace;
+
+    inline void setFaceNormal( const Ray3 &R, const Normal3 &N ) noexcept
+    {
+        frontFace = dot( direction( R ), N ) < 0;
+        normal = frontFace ? N : -N;
+    }
+};
+
+[[nodiscard]] Bool intersect( const Ray3 &R, const RTAcceleration::Result &scene, UInt32 nodeId, IntersectionResult &result ) noexcept
+{
+    const auto &node = scene.nodes[ nodeId ];
+
+    switch ( node.type ) {
+        case RTAcceleratedNode::Type::GROUP: {
+            auto ret = false;
+            for ( auto i = 0; i < node.childCount; ++i ) {
+                ret = intersect( R, scene, node.firstChildIndex + i, result ) || ret;
+            }
+            return ret;
+        }
+
+        case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
+            const auto S = Sphere {};
+            const auto R1 = Ray3 {
+                .o = point3( xyz( node.invWorld * vector4( R.o, 1 ) ) ),
+                .d = xyz( node.invWorld * vector4( R.d, 0 ) ),
+            };
+
+            Real t0 = numbers::POSITIVE_INFINITY;
+            Real t1 = numbers::POSITIVE_INFINITY;
+            auto hasResult = false;
+            if ( intersect( R1, S, t0, t1 ) ) {
+                if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
+                    result.t = t0;
+                    result.materialId = node.index;
+                    hasResult = true;
+                }
+
+                if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
+                    result.t = t1;
+                    result.materialId = node.index;
+                    hasResult = true;
+                }
+            }
+            return hasResult;
+        }
+
+        default: {
+            return false;
+        }
+    }
+}
+
+[[nodiscard]] Bool intersect( const Ray3 &R, const RTAcceleration::Result &scene, IntersectionResult &result ) noexcept
+{
+    if ( scene.nodes.empty() ) {
+        return false;
+    }
+
+    return intersect( R, scene, 0, result );
+}
+
+[[nodiscard]] ColorRGB rayColor( const Ray3 &R, const RTAcceleration::Result &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
 {
     auto ret = backgroundColor;
 
     if ( depth <= 0 ) {
         return ColorRGB::Constants::BLACK;
     }
+
+    IntersectionResult result;
+    if ( intersect( R, scene, result ) ) {
+        if ( result.materialId >= 0 ) {
+            return scene.materials[ result.materialId ].albedo;
+        }
+    }
+
+#if 0
 
     auto results = IntersectWorld::Results {};
     scene->perform( IntersectWorld( R, results ) );
@@ -256,6 +336,8 @@ crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< Shar
 
         return attenuation * rayColor( scattered, scene, backgroundColor, depth - 1 );
     }
+
+#endif
 
     return ret;
 }
@@ -352,6 +434,11 @@ namespace crimild {
                 scene->perform( copy );
                 m_scene = copy.getResult< Node >();
                 m_scene->perform( UpdateWorldState() );
+
+                RTAcceleration accelerate;
+                m_scene->perform( accelerate );
+                m_acceleratedScene = accelerate.getResult();
+
                 return m_scene;
             }();
 
@@ -442,7 +529,7 @@ namespace crimild {
                                         cameraFocusDistance * direction( ray ) - offset,
                                     };
 
-                                    color = color + rayColor( ray, get_ptr( scene ), backgroundColor, bounces );
+                                    color = color + rayColor( ray, self->m_acceleratedScene, backgroundColor, bounces );
                                 }
                             }
 
@@ -570,6 +657,8 @@ namespace crimild {
         Real m_aspectRatio;
         Int32 m_tileSize;
         Int32 m_workerCount;
+
+        RTAcceleration::Result m_acceleratedScene;
 
         SharedPointer< Node > m_scene;
         SharedPointer< Camera > m_camera;

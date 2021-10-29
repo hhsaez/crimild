@@ -102,6 +102,15 @@ void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
     // TODO: not sure if intersection test should use local or world coordinate system
     // TODO: if the former, remember to transform the ray!!
 
+    if ( csg->getLeft() == nullptr || csg->getRight() == nullptr ) {
+        if ( auto left = csg->getLeft() ) {
+            left->accept( *this );
+        } else if ( auto right = csg->getRight() ) {
+            right->accept( *this );
+        }
+        return;
+    }
+
     auto beforeLeftSize = m_results.size();
     if ( auto left = csg->getLeft() ) {
         left->accept( *this );
