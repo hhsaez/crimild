@@ -42,7 +42,13 @@ PrincipledBSDF::PrincipledBSDF( void ) noexcept
     setGraphicsPipeline(
         [] {
             auto pipeline = crimild::alloc< GraphicsPipeline >();
-            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() ) );
+            pipeline->setProgram(
+                []() -> SharedPointer< ShaderProgram > {
+                    if ( auto assets = AssetManager::getInstance() ) {
+                        return crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() );
+                    }
+                    return nullptr;
+                }() );
             return pipeline;
         }() );
 
