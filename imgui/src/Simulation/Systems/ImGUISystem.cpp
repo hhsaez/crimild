@@ -35,6 +35,7 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
+#include "SceneGraph/CSGNode.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
@@ -391,6 +392,17 @@ namespace crimild {
                             selected = group;
                         }
                         NodeVisitor::visitGroup( group );
+                        ImGui::TreePop();
+                    }
+                }
+
+                void visitCSGNode( CSGNode *csg ) override
+                {
+                    if ( ImGui::TreeNode( getNodeName( csg ).c_str() ) ) {
+                        if ( ImGui::IsItemClicked() ) {
+                            selected = csg;
+                        }
+                        NodeVisitor::visitCSGNode( csg );
                         ImGui::TreePop();
                     }
                 }
