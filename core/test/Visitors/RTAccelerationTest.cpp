@@ -1,4 +1,4 @@
-> /*
+/*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
@@ -53,7 +53,7 @@
 
 #include "gtest/gtest.h"
 
-    using namespace crimild;
+using namespace crimild;
 
 TEST( RTAcceleration, it_optimizes_scene_with_one_geometry )
 {
@@ -512,4 +512,105 @@ TEST( RTAcceleration, it_optimizes_scene_with_mixed_hierarchy )
     ASSERT_EQ( -1, optimized.nodes[ 7 ].childCount );
     ASSERT_EQ( 4, optimized.nodes[ 7 ].parentIndex );
     ASSERT_EQ( 1, optimized.nodes[ 7 ].index );
+}
+
+TEST( RTAcceleration, it_traverses_optimized_scene )
+{
+    auto geometry = []( auto name ) {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        geometry->setName( name );
+        return geometry;
+    };
+
+    auto group = []( auto name, Array< SharedPointer< Node > > const &nodes ) {
+        auto group = crimild::alloc< Group >();
+        nodes.each(
+            [ & ]( auto &node ) {
+                group->attachNode( node );
+            } );
+        group->setName( name );
+        return group;
+    };
+
+    auto scene = group(
+        "A",
+        {
+            group( "B", {} ),
+            group(
+                "C",
+                {
+                    group(
+                        "D",
+                        {
+                            geometry( "E" ),
+                            geometry( "F" ),
+                        } ),
+                    geometry( "G" ),
+                } ),
+            geometry( "H" ),
+        } );
+
+    RTAcceleration optimize;
+    scene->perform( optimize );
+    auto optimized = optimize.getResult();
+
+    std::stringstream ss;
+    utils::traverseNonRecursive( optimized, [ & ]( const auto &, Index i ) { ss << i << ", "; return true; } );
+
+    ASSERT_EQ( "0, 1, 2, 4, 6, 7, 5, 3, ", ss.str() );
+}
+
+TEST( RTAcceleration, it_traverses_optimized_scene_with_early_termination )
+{
+    auto geometry = []( auto name ) {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        geometry->setName( name );
+        return geometry;
+    };
+
+    auto group = []( auto name, Array< SharedPointer< Node > > const &nodes ) {
+        auto group = crimild::alloc< Group >();
+        nodes.each(
+            [ & ]( auto &node ) {
+                group->attachNode( node );
+            } );
+        group->setName( name );
+        return group;
+    };
+
+    auto scene = group(
+        "A",
+        {
+            group( "B", {} ),
+            group(
+                "C",
+                {
+                    group(
+                        "D",
+                        {
+                            geometry( "E" ),
+                            geometry( "F" ),
+                        } ),
+                    geometry( "G" ),
+                } ),
+            geometry( "H" ),
+        } );
+
+    RTAcceleration optimize;
+    scene->perform( optimize );
+    auto optimized = optimize.getResult();
+
+    std::stringstream ss;
+    utils::traverseNonRecursive(
+        optimized,
+        [ & ]( const auto &, Index i ) {
+            ss << i << ", ";
+            return i != 2;
+        } );
+
+    ASSERT_EQ( "0, 1, 2, 3, ", ss.str() );
 }

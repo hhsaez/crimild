@@ -257,6 +257,143 @@ struct IntersectionResult {
     return intersect( R, scene, 0, result );
 }
 
+[[nodiscard]] Bool intersectNR( const Ray3 &R, const RTAcceleration::Result &scene, IntersectionResult &result ) noexcept
+{
+    if ( scene.nodes.empty() ) {
+        return false;
+    }
+
+    Bool hasResult = false;
+
+    utils::traverseNonRecursive(
+        scene,
+        [ & ]( const auto &node, auto index ) -> Bool {
+            const auto R1 = Ray3 {
+                .o = point3( xyz( node.invWorld * vector4( R.o, 1 ) ) ),
+                .d = xyz( node.invWorld * vector4( R.d, 0 ) ),
+            };
+
+            auto resolveCSG = [ & ]( auto t0, auto t1 ) {
+                if ( node.parentIndex < 0 ) {
+                    return false;
+                }
+
+                auto parentIndex = node.parentIndex;
+                while ( parentIndex >= 0 ) {
+                    const auto &parent = scene.nodes[ node.parentIndex ];
+                    if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
+                        break;
+                    } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
+                        break;
+                    } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
+                        break;
+                    } else {
+                        parentIndex = scene.nodes[ parentIndex ].parentIndex;
+                    }
+                }
+
+                if ( parentIndex < 0 ) {
+                    return false;
+                }
+
+                const auto &parent = scene.nodes[ parentIndex ];
+                if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
+                    const auto t = min( t0, t1 );
+                    if ( t < result.t ) {
+                        result.t = t0;
+                        result.materialId = node.index;
+                        hasResult = true;
+                    }
+                    return true;
+                } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
+                    const auto t = min( t0, t1 );
+                    if ( t > result.t ) {
+                        result.t = t0;
+                        result.materialId = node.index;
+                        hasResult = true;
+                    }
+                    return true;
+                } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
+                    const auto t = min( t0, t1 );
+                    if ( t > result.t ) {
+                        result.t = t0;
+                        result.materialId = node.index;
+                        hasResult = true;
+                    }
+                    return true;
+                }
+
+                return false;
+            };
+
+            switch ( node.type ) {
+                case RTAcceleratedNode::Type::GROUP: {
+                    const auto S = Sphere {};
+                    Real t0, t1;
+                    return intersect( R1, S, t0, t1 );
+                }
+                case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
+                    const auto S = Sphere {};
+                    Real t0 = numbers::POSITIVE_INFINITY;
+                    Real t1 = numbers::POSITIVE_INFINITY;
+                    if ( intersect( R1, S, t0, t1 ) ) {
+                        if ( resolveCSG( t0, t1 ) ) {
+                            return true;
+                        }
+
+                        if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
+                            result.t = t0;
+                            result.materialId = node.index;
+                            hasResult = true;
+                        }
+
+                        if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
+                            result.t = t1;
+                            result.materialId = node.index;
+                            hasResult = true;
+                        }
+                    }
+                    return true;
+                }
+                case RTAcceleratedNode::Type::PRIMITIVE_BOX: {
+                    const auto B = Box {};
+                    Real t0, t1;
+                    if ( intersect( R1, B, t0, t1 ) ) {
+                        if ( resolveCSG( t0, t1 ) ) {
+                            return true;
+                        }
+
+                        if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
+                            result.t = t0;
+                            result.materialId = node.index;
+                            hasResult = true;
+                        }
+
+                        if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
+                            result.t = t1;
+                            result.materialId = node.index;
+                            hasResult = true;
+                        }
+                    }
+                    return true;
+                }
+                case RTAcceleratedNode::Type::CSG_UNION:
+                case RTAcceleratedNode::Type::CSG_INTERSECTION:
+                case RTAcceleratedNode::Type::CSG_DIFFERENCE: {
+                    const auto S = Sphere {};
+                    Real t0, t1;
+                    return intersect( R1, S, t0, t1 );
+                }
+
+                default: {
+                    return false;
+                }
+            }
+        } );
+
+    return hasResult;
+}
+
 [[nodiscard]] ColorRGB rayColor( const Ray3 &R, const RTAcceleration::Result &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
 {
     auto ret = backgroundColor;
@@ -266,7 +403,7 @@ struct IntersectionResult {
     }
 
     IntersectionResult result;
-    if ( intersect( R, scene, result ) ) {
+    if ( intersectNR( R, scene, result ) ) {
         if ( result.materialId >= 0 ) {
             return scene.materials[ result.materialId ].albedo;
         }

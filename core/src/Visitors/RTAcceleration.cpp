@@ -28,6 +28,10 @@
 #include "Visitors/RTAcceleration.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -49,7 +53,10 @@ void RTAcceleration::traverse( Node *node ) noexcept
 void RTAcceleration::visitGroup( Group *group ) noexcept
 {
     m_result.nodes[ m_level ].type = RTAcceleratedNode::Type::GROUP;
-    m_result.nodes[ m_level ].invWorld = group->getWorld().invMat;
+
+    // Compute a transformation for representing bounding volumes
+    auto boundingTransform = translation( vector3( group->getWorldBound()->getCenter() ) ) * scale( group->getWorldBound()->getRadius() );
+    m_result.nodes[ m_level ].invWorld = boundingTransform.invMat;
 
     const auto childCount = group->getNodeCount();
     m_result.nodes[ m_level ].childCount = childCount;
@@ -156,7 +163,51 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
     }
 
     m_result.nodes[ m_level ].type = nodeType;
-    m_result.nodes[ m_level ].invWorld = csg->getWorld().invMat;
 
-    NodeVisitor::visitCSGNode( csg );
+    // Compute a transformation for representing bounding volumes
+    auto boundingTransform = translation( vector3( csg->getWorldBound()->getCenter() ) ) * scale( csg->getWorldBound()->getRadius() );
+    m_result.nodes[ m_level ].invWorld = boundingTransform.invMat;
+
+    UInt32 childCount = 0;
+    if ( csg->getLeft() ) {
+        childCount++;
+    }
+    if ( csg->getRight() ) {
+        childCount++;
+    }
+
+    m_result.nodes[ m_level ].childCount = childCount;
+
+    if ( childCount > 0 ) {
+        const auto firstChildIndex = m_result.nodes.size();
+
+        m_result.nodes[ m_level ].firstChildIndex = firstChildIndex;
+
+        m_result.nodes.resize( m_result.nodes.size() + childCount );
+
+        Int32 parentIndex = m_level;
+        Int32 i = 0;
+
+        if ( auto left = csg->getLeft() ) {
+            m_level = firstChildIndex + i++;
+            m_result.nodes[ m_level ] = {
+                .type = crimild::RTAcceleratedNode::Type::INVALID,
+                .parentIndex = parentIndex,
+            };
+
+            left->accept( *this );
+        }
+
+        if ( auto right = csg->getRight() ) {
+            m_level = firstChildIndex + i++;
+            m_result.nodes[ m_level ] = {
+                .type = crimild::RTAcceleratedNode::Type::INVALID,
+                .parentIndex = parentIndex,
+            };
+
+            right->accept( *this );
+        }
+
+        m_level = parentIndex;
+    }
 }

@@ -118,6 +118,56 @@ namespace crimild {
         Map< Material *, UInt32 > m_materialIDs;
     };
 
+    namespace utils {
+
+        template< typename Fn >
+        void traverseNonRecursive( const RTAcceleration::Result &scene, Fn fn ) noexcept
+        {
+            if ( scene.nodes.empty() ) {
+                return;
+            }
+
+            Int32 current = 0;
+            Int32 lastVisited = -1;
+
+            while ( current >= 0 ) {
+                const auto &node = scene.nodes[ current ];
+                if ( node.childCount > 0 ) {
+                    if ( lastVisited < current ) {
+                        // begin traversal
+                        if ( !fn( node, current ) ) {
+                            // callback failed. don't traverse children
+                            lastVisited = current;
+                            current = node.parentIndex;
+                        } else {
+                            // traverse first child
+                            lastVisited = current;
+                            current = node.firstChildIndex;
+                        }
+                    } else {
+                        auto next = lastVisited + 1;
+                        if ( next < node.firstChildIndex + node.childCount ) {
+                            // next child
+                            lastVisited = current;
+                            current = next;
+                        } else {
+                            // done traversing. return to parent
+                            lastVisited = current;
+                            current = node.parentIndex;
+                        }
+                    }
+                } else {
+                    // Don't care for result. Just go back to parent anyway
+                    fn( node, current );
+                    // no children. return to parent
+                    lastVisited = current;
+                    current = node.parentIndex;
+                }
+            }
+        }
+
+    }
+
 }
 
 #endif
