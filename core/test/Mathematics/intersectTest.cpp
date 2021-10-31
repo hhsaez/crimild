@@ -435,3 +435,90 @@ TEST( intersect, ray_hits_cylinder_end_caps )
     test( Ray3 { Point3 { 0, 0, -2 }, normalize( Vector3 { 0, 1, 2 } ) }, 1.118, 3.354 );
     test( Ray3 { Point3 { 0, -2, -2 }, normalize( Vector3 { 0, 1, 1 } ) }, 1.414, 4.242 );
 }
+
+TEST( intersect, it_fails_if_ray_is_parallel_to_triangle )
+{
+    const auto T = Triangle {
+        { 0, 1, 0 },
+        { -1, 0, 0 },
+        { 1, 0, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 0, -1, -2 },
+        { 0, 1, 0 },
+    };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, T, t ) );
+}
+
+TEST( intersect, it_fails_if_ray_is_beyond_edge1 )
+{
+    const auto T = Triangle {
+        { 0, 1, 0 },
+        { -1, 0, 0 },
+        { 1, 0, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 1, 1, -2 },
+        { 0, 0, 1 },
+    };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, T, t ) );
+}
+
+TEST( intersect, it_fails_if_ray_is_beyond_edge0 )
+{
+    const auto T = Triangle {
+        { 0, 1, 0 },
+        { -1, 0, 0 },
+        { 1, 0, 0 },
+    };
+
+    const auto R = Ray3 {
+        { -1, 1, -2 },
+        { 0, 0, 1 },
+    };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, T, t ) );
+}
+
+TEST( intersect, it_fails_if_ray_is_beyond_edge2 )
+{
+    const auto T = Triangle {
+        { 0, 1, 0 },
+        { -1, 0, 0 },
+        { 1, 0, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 0, -1, -2 },
+        { 0, 0, 1 },
+    };
+
+    Real t;
+    EXPECT_FALSE( intersect( R, T, t ) );
+}
+
+TEST( intersect, it_intersects_a_triangle_with_a_ray )
+{
+    const auto T = Triangle {
+        { 0, 1, 0 },
+        { -1, 0, 0 },
+        { 1, 0, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 0, 0.5, -2 },
+        { 0, 0, 1 },
+    };
+
+    Real t;
+
+    EXPECT_TRUE( intersect( R, T, t ) );
+    EXPECT_FLOAT_EQ( Real( 2 ), t );
+}

@@ -37,6 +37,9 @@
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/Triangle.hpp"
+#include "Mathematics/Triangle_edges.hpp"
+#include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/max.hpp"
 #include "Mathematics/min.hpp"
@@ -226,6 +229,47 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), C, t0, t1 );
+    }
+
+    /**
+       \brief Ray-Triangle intersection
+
+       Implements Möller-Trumbore intersection algorithm
+     */
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, Real &t ) noexcept
+    {
+        const auto E0 = edge0( T );
+        const auto E1 = edge1( T );
+
+        const auto dirCrossE1 = cross( direction( R ), E1 );
+        const Real det = dot( edge0( T ), dirCrossE1 );
+        if ( isZero( det ) ) {
+            return false;
+        }
+
+        const Real f = 1 / det;
+
+        const auto p0ToOrigin = origin( R ) - T.p0;
+        const Real u = f * dot( p0ToOrigin, dirCrossE1 );
+        if ( u < 0 || u > 1 ) {
+            return false;
+        }
+
+        const auto originCrossE0 = cross( p0ToOrigin, E0 );
+        const Real v = f * dot( direction( R ), originCrossE0 );
+        if ( v < 0 || ( u + v ) > 1 ) {
+            return false;
+        }
+
+        t = f * dot( E1, originCrossE0 );
+
+        return true;
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, const Transformation &world, Real &t ) noexcept
+    {
+        // For better performance, use the inverse matrix
+        return intersect( inverse( world )( R ), T, t );
     }
 
 }
