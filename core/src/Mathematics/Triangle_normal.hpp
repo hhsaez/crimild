@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,48 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Mathematics/Intersection.hpp"
+#ifndef CRIMILD_MATHEMATICS_TRIANGLE_NORMAL_
+#define CRIMILD_MATHEMATICS_TRIANGLE_NORMAL_
 
-#include "gtest/gtest.h"
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Triangle_edges.hpp"
+#include "Mathematics/cross.hpp"
+#include "Mathematics/normalize.hpp"
+#include "Mathematics/swizzle.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-TEST( IntersectionTest, testRayTriangle )
-{
-#if 0
-	// TODO
-	Vector< 3, double > p0, p1, p2;
-	Vector< 3, double > rOrigin, rDirection;
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Point3 & ) noexcept
+    {
+        const auto E0 = edge0( T );
+        const auto E1 = edge1( T );
+        return normalize( normal3( cross( E0, E1 ) ) );
+    }
 
-	p0[ 0 ] = -1.0;
-	p0[ 1 ] = -1.0;
-	p0[ 2 ] = 0.0;
-
-	p1[ 0 ] = 1.0;
-	p1[ 1 ] = -1.0;
-	p1[ 2 ] = 0.0;
-
-	p2[ 0 ] = 0.0;
-	p2[ 1 ] = 2.0;
-	p2[ 2 ] = 0.0;
-
-	rOrigin[ 0 ] = 0.0;
-	rOrigin[ 1 ] = 1.0;
-	rOrigin[ 2 ] = 5.0;
-	rDirection[ 0 ] = 0.0;
-	rDirection[ 1 ] = 0.0;
-	rDirection[ 2 ] = -1.0;
-	Ray< 3, double > ray( rOrigin, rDirection );
-
-	//EXPECT_TRUE( Intersection::test( ray, p0, p1, p2 ) == true );
-
-	ray.getOrigin()[ 0 ] = 5.0;
-	ray.getOrigin()[ 1 ] = 1.0;
-	ray.getOrigin()[ 2 ] = 5.0;
-
-	//EXPECT_TRUE( Intersection::test( ray, p0, p1, p2 ) == false );
+}
 
 #endif
-
-    FAIL();
-}
