@@ -86,7 +86,15 @@ using namespace crimild;
 
 void RenderSystem::start( void ) noexcept
 {
-    useDefaultRenderPath();
+    auto settings = Simulation::getInstance()->getSettings();
+    auto renderPath = settings->get< std::string >( "video.render_path", "default" );
+    if ( renderPath == "softRT" ) {
+        useRTSoftRenderPath();
+    } else if ( renderPath == "computeRT" ) {
+        useRTComputeRenderPath();
+    } else {
+        useDefaultRenderPath();
+    }
 }
 
 #include <queue>
