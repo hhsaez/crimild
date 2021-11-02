@@ -31,7 +31,9 @@
 #include "Mathematics/Cylinder_normal.hpp"
 #include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/Sphere_normal.hpp"
+#include "Mathematics/Triangle_normal.hpp"
 #include "Mathematics/intersect.hpp"
+#include "Mathematics/isNaN.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -50,6 +52,10 @@ void IntersectWorld::traverse( Node *node ) noexcept
 
 void IntersectWorld::visitGroup( Group *group ) noexcept
 {
+    if ( group->getLayer() == Node::Layer::SKYBOX ) {
+        return;
+    }
+
     const auto R = inverse( group->getWorld() )( m_ray );
     if ( !group->getWorldBound()->testIntersection( m_ray ) ) {
         return;
@@ -60,6 +66,10 @@ void IntersectWorld::visitGroup( Group *group ) noexcept
 
 void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
 {
+    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+        return;
+    }
+
     if ( geometry->getCullMode() != Node::CullMode::NEVER ) {
         // Use world bounds for intersection test, wihch is cheaper
         // The ray must be transformed since we're using the local bound.
@@ -274,6 +284,51 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexc
                     pushResult( t1 );
                 }
             }
+            break;
+        }
+
+        case Primitive::Type::TRIANGLES: {
+            auto positions = [ & ] {
+                BufferAccessor *positions = nullptr;
+                primitive->getVertexData().each(
+                    [ & ]( auto vertices ) {
+                        if ( positions == nullptr ) {
+                            positions = vertices->get( VertexAttribute::Name::POSITION );
+                        }
+                    } );
+                return positions;
+            }();
+
+            if ( positions == nullptr ) {
+                return;
+            }
+
+            if ( auto indices = primitive->getIndices() ) {
+                //const auto N = indices->getIndexCount() / 3;
+                const auto N = indices->getIndexCount();
+                for ( auto i = 0; i < N; i += 3 ) {
+                    const auto T = Triangle {
+                        positions->get< Point3 >( indices->getIndex( i + 0 ) ),
+                        positions->get< Point3 >( indices->getIndex( i + 1 ) ),
+                        positions->get< Point3 >( indices->getIndex( i + 2 ) ),
+                    };
+
+                    Real t;
+                    if ( crimild::intersect( m_ray, T, geometry->getWorld(), t ) ) {
+                        if ( !isZero( t ) && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) ) {
+                            const auto P = m_ray( t );
+                            auto result = Result {
+                                .geometry = geometry,
+                                .t = t,
+                                .point = P,
+                            };
+                            result.setFaceNormal( m_ray, normal( T, geometry->getWorld(), P ) );
+                            m_results.add( result );
+                        }
+                    }
+                }
+            }
+
             break;
         }
 

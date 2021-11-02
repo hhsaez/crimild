@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_TRIANGLE_NORMAL_
 
 #include "Mathematics/Normal3.hpp"
+#include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Triangle_edges.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/normalize.hpp"
@@ -41,6 +42,12 @@ namespace crimild {
         const auto E0 = edge0( T );
         const auto E1 = edge1( T );
         return normalize( normal3( cross( E0, E1 ) ) );
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Transformation &X, const Point3 &P ) noexcept
+    {
+        const auto N = normal( T, P );
+        return normalize( X( N ) );
     }
 
 }

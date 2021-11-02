@@ -33,6 +33,9 @@
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Random.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Triangle.hpp"
+#include "Mathematics/Triangle_edges.hpp"
+#include "Mathematics/Triangle_normal.hpp"
 #include "Mathematics/Vector3_constants.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -41,6 +44,7 @@
 #include "Rendering/Operations/Operations_computeImage.hpp"
 #include "Rendering/StorageBuffer.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -96,6 +100,7 @@ const auto FRAG_SRC = R"(
         int sphereCount;
         int boxCount;
         int cylinderCount;
+        int triangleCount;
         int materialCount;
     } uScene;
 
@@ -111,6 +116,16 @@ const auto FRAG_SRC = R"(
 
     struct Cylinder {
         mat4 invWorld;
+        uint materialID;
+    };
+
+    struct Triangle {
+        vec3 p0;
+        vec3 p1;
+        vec3 p2;
+        vec3 e0;
+        vec3 e1;
+        vec3 n;
         uint materialID;
     };
 
@@ -136,7 +151,11 @@ const auto FRAG_SRC = R"(
         Cylinder allCylinders[];
     };
 
-    layout( set = 2, binding = 3 ) buffer Materials {
+    layout( set = 2, binding = 3 ) buffer Triangles {
+        Triangle allTriangles[];
+    };
+
+    layout( set = 2, binding = 4 ) buffer Materials {
         Material allMaterials[];
     };
 
@@ -588,6 +607,51 @@ const auto FRAG_SRC = R"(
         return hit;
     }
 
+    HitRecord hitTriangles( Ray ray, float tMin, HitRecord hit )
+    {
+        float t = hit.t;
+        int hitIdx = -1;
+
+        for ( int i = 0; i < uScene.triangleCount; i++ ) {
+vec3 e0 = allTriangles[ i ].e0;
+vec3 e1 = allTriangles[ i ].e1;
+vec3 p0 = allTriangles[ i ].p0;
+
+vec3 dirCrossE1 = cross( ray.direction, e1 );
+float det = dot( e0, dirCrossE1 );
+if ( det > 0 ) {
+   float f = 1.0 / det;
+
+   vec3 p0ToOrigin = ray.origin - p0;
+   float u = f * dot( p0ToOrigin, dirCrossE1 );
+   if ( u >= 0 && u <= 1 ) {
+      vec3 originCrossE0 = cross( p0ToOrigin, e0 );
+      float v = f * dot( ray.direction, originCrossE0 );
+      if ( v >= 0 && ( u + v ) <= 1 ) {
+         float ct = f * dot( e1, originCrossE0 );
+         if ( !isnan( ct ) && ct > 0 && ct < t ) {
+             t = ct;
+             hitIdx = i;
+         }
+      }
+   }
+}
+        }
+
+        if ( hitIdx >= 0 ) {
+            Triangle triangle = allTriangles[ hitIdx ];
+            hit.hasResult = true;
+            hit.t = t;
+            hit.materialID = triangle.materialID;
+            vec3 P = rayAt( ray, t );
+            hit.point = P;
+            vec3 normal = triangle.n;
+            return setFaceNormal( ray, normal, hit );
+        }
+
+        return hit;
+    }
+
     HitRecord hitScene( Ray ray, float tMin, float tMax ) {
         HitRecord hit;
         hit.t = tMax;
@@ -596,6 +660,7 @@ const auto FRAG_SRC = R"(
         hit = hitSpheres( ray, tMin, hit );
         hit = hitBoxes( ray, tMin, hit );
         hit = hitCylinders( ray, tMin, hit );
+        hit = hitTriangles( ray, tMin, hit );
 
         return hit;
     }
@@ -826,9 +891,21 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         alignas( 4 ) UInt32 materialID;
     };
 
+    // Triangles are always in world space
+    struct TriangleDesc {
+        alignas( 16 ) Point3 p0;
+        alignas( 16 ) Point3 p1;
+        alignas( 16 ) Point3 p2;
+        alignas( 16 ) Vector3 e0;
+        alignas( 16 ) Vector3 e1;
+        alignas( 16 ) Normal3 n;
+        alignas( 4 ) UInt32 materialID;
+    };
+
     Array< SphereDesc > spheres;
     Array< BoxDesc > boxes;
     Array< CylinderDesc > cylinders;
+    Array< TriangleDesc > triangles;
     Array< materials::PrincipledBSDF::Props > materials;
     Map< Material *, UInt32 > materialIds;
 
@@ -838,6 +915,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         scene->perform(
             ApplyToGeometries(
                 [ & ]( Geometry *geometry ) {
+                    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                        return;
+                    }
+
                     const auto material = static_cast< materials::PrincipledBSDF * >( geometry->getComponent< MaterialComponent >()->first() );
                     if ( !materialIds.contains( material ) ) {
                         const UInt32 materialId = materials.size();
@@ -865,6 +946,42 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                         .invWorld = geometry->getWorld().invMat,
                                         .materialID = materialIds[ material ],
                                     } );
+                            } else if ( primitive->getType() == Primitive::Type::TRIANGLES ) {
+                                auto positions = [ & ] {
+                                    BufferAccessor *positions = nullptr;
+                                    primitive->getVertexData().each(
+                                        [ & ]( auto vertices ) {
+                                            if ( positions == nullptr ) {
+                                                positions = vertices->get( VertexAttribute::Name::POSITION );
+                                            }
+                                        } );
+                                    return positions;
+                                }();
+
+                                if ( positions == nullptr ) {
+                                    return;
+                                }
+
+                                if ( auto indices = primitive->getIndices() ) {
+                                    const auto N = indices->getIndexCount();
+                                    for ( auto i = 0; i < N; i += 3 ) {
+                                        const auto T = Triangle {
+                                            .p0 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 0 ) ) ),
+                                            .p1 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 1 ) ) ),
+                                            .p2 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 2 ) ) ),
+                                        };
+
+                                        triangles.add( {
+                                            .p0 = T.p0,
+                                            .p1 = T.p1,
+                                            .p2 = T.p2,
+                                            .e0 = edge0( T ),
+                                            .e1 = edge1( T ),
+                                            .n = normal( T, T.p0 ),
+                                            .materialID = materialIds[ material ],
+                                        } );
+                                    }
+                                }
                             }
                         } );
                 } ) );
@@ -992,6 +1109,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 4 ) UInt32 sphereCount = 0;
                     alignas( 4 ) UInt32 boxCount = 0;
                     alignas( 4 ) UInt32 cylinderCount = 0;
+                    alignas( 4 ) UInt32 triangleCount = 0;
                     alignas( 4 ) UInt32 materialCount = 0;
                 };
 
@@ -999,6 +1117,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     .sphereCount = UInt32( spheres.size() ),
                     .boxCount = UInt32( boxes.size() ),
                     .cylinderCount = UInt32( cylinders.size() ),
+                    .triangleCount = UInt32( triangles.size() ),
                     .materialCount = UInt32( materials.size() ),
                 } );
             }(),
@@ -1018,6 +1137,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,
             .obj = crimild::alloc< StorageBuffer >( cylinders.size() > 0 ? cylinders : Array< CylinderDesc > { CylinderDesc {} } ),
+        },
+        Descriptor {
+            .descriptorType = DescriptorType::STORAGE_BUFFER,
+            .obj = crimild::alloc< StorageBuffer >( triangles.size() > 0 ? triangles : Array< TriangleDesc > { TriangleDesc {} } ),
         },
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,
