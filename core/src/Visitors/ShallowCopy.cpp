@@ -141,6 +141,7 @@ void ShallowCopy::copyNode( Node *src, Node *dst )
 
     dst->setName( src->getName() );
     dst->setLocal( src->getLocal() );
+    dst->setLayer( src->getLayer() );
 
     src->forEachComponent( [ dst ]( NodeComponent *srcCmp ) {
         if ( srcCmp != nullptr ) {

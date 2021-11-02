@@ -522,3 +522,41 @@ TEST( intersect, it_intersects_a_triangle_with_a_ray )
     EXPECT_TRUE( intersect( R, T, t ) );
     EXPECT_FLOAT_EQ( Real( 2 ), t );
 }
+
+TEST( intersect, it_intersects_another_triangle_with_a_ray )
+{
+    const auto T = Triangle {
+        { -0.5, -0.5, 0 },
+        { 0.5, -0.5, 0 },
+        { 0, 0.5, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 0, 0, 5 },
+        { 0, 0, -1 },
+    };
+
+    Real t;
+
+    EXPECT_TRUE( intersect( R, T, t ) );
+    EXPECT_FLOAT_EQ( Real( 5 ), t );
+}
+
+TEST( intersect, it_intersects_a_triangle_with_a_ray_in_different_order )
+{
+    const auto T = Triangle {
+        { -1, 1, 0 },
+        { 1, -1, 0 },
+        { 1, 1, 0 },
+    };
+
+    const auto R = Ray3 {
+        { 1, 0, 5 },
+        { 0, 0, -1 },
+    };
+
+    Real t;
+
+    EXPECT_TRUE( intersect( R, T, t ) );
+    EXPECT_FLOAT_EQ( Real( 5 ), t );
+}

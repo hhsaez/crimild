@@ -30,6 +30,7 @@
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/Vertex.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -156,4 +157,91 @@ TEST( IntersectWorld, no_intersection )
     world->perform( IntersectWorld( R, results ) );
 
     EXPECT_EQ( 0, results.size() );
+}
+
+TEST( IntersectWorld, ray_triangle_intersection )
+{
+    auto world = crimild::alloc< Group >();
+    world->attachNode(
+        [] {
+            auto geometry = crimild::alloc< Geometry >();
+
+            geometry->attachPrimitive(
+                [] {
+                    auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                    primitive->setVertexData(
+                        {
+                            [ & ] {
+                                return crimild::alloc< VertexBuffer >(
+                                    VertexP3N3TC2::getLayout(),
+                                    Array< VertexP3N3TC2 > {
+                                        {
+                                            .position = Vector3f { -0.5f, -0.5f, 0.0f },
+                                            .normal = Normal3 { 0, 0, 1 },
+
+                                        },
+                                        {
+                                            .position = Vector3f { 0.5f, -0.5f, 0.0f },
+                                            .normal = Normal3 { 0, 0, 1 },
+
+                                        },
+                                        {
+                                            .position = Vector3f { 0.0f, 0.5f, 0.0f },
+                                            .normal = Normal3 { 0, 0, 1 },
+
+                                        },
+                                    } );
+                            }(),
+                        } );
+                    primitive->setIndices(
+                        crimild::alloc< IndexBuffer >(
+                            Format::INDEX_32_UINT,
+                            Array< crimild::UInt32 > {
+                                0,
+                                1,
+                                2,
+                            } ) );
+                    return primitive;
+                }() );
+            return geometry;
+        }() );
+
+    world->perform( UpdateWorldState() );
+
+    {
+        const auto R = Ray3 { { 0, 0, 5 }, { 0, 0, -1 } };
+
+        auto results = IntersectWorld::Results {};
+        world->perform( IntersectWorld( R, results ) );
+
+        EXPECT_EQ( 1, results.size() );
+        EXPECT_EQ( 5, results[ 0 ].t );
+        EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
+        EXPECT_EQ( ( Point3 { 0, 0, 0 } ), results[ 0 ].point );
+        EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), results[ 0 ].normal );
+        EXPECT_EQ( true, results[ 0 ].frontFace );
+    }
+
+    {
+        const auto R = Ray3 { { 0.5, -0.5, 5 }, { 0, 0, -1 } };
+
+        auto results = IntersectWorld::Results {};
+        world->perform( IntersectWorld( R, results ) );
+
+        EXPECT_EQ( 1, results.size() );
+        EXPECT_EQ( 5, results[ 0 ].t );
+        EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
+        EXPECT_EQ( ( Point3 { 0.5, -0.5, 0 } ), results[ 0 ].point );
+        EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), results[ 0 ].normal );
+        EXPECT_EQ( true, results[ 0 ].frontFace );
+    }
+
+    {
+        const auto R = Ray3 { { 0.5 + numbers::EPSILON, -0.5, 5 }, { 0, 0, -1 } };
+
+        auto results = IntersectWorld::Results {};
+        world->perform( IntersectWorld( R, results ) );
+
+        EXPECT_EQ( 0, results.size() );
+    }
 }
