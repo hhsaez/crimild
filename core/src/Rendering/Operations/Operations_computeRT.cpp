@@ -528,8 +528,13 @@ const auto FRAG_SRC = R"(
             vec3 P = rayAt( ray, t );
             mat4 world = inverse( sphere.invWorld );
             hit.point = ( world * vec4( P, 1.0 ) ).xyz;
-            vec3 normal = normalize( transpose( mat3( sphere.invWorld ) ) * P );
-            return setFaceNormal( ray, normal, hit );
+            vec3 normal = normalize( ( transpose( sphere.invWorld ) * vec4( normalize( P ), 0 ) ).xyz );
+hit = setFaceNormal( ray, normal, hit );
+if ( determinant( mat3( sphere.invWorld ) ) < 0 ) {
+hit.normal = -hit.normal;
+}
+            
+return hit;
         }
 
         return hit;
@@ -747,6 +752,7 @@ if ( det > 0 ) {
                 rays[ idx ].accumColor = vec3( 0 );
                 rays[ idx ].bounces = 0;
                 rays[ idx ].samples = 0;
+                imageStore( resultImage, ivec2( rays[ idx ].uv ), vec4( 0, 0, 0, 1 ) );
             }
         }
     }
@@ -788,6 +794,12 @@ if ( det > 0 ) {
         float tMin = 0.001;
         float tMax = 9999.9;
 
+        if ( rays[ idx ].bounces > 50 ) {
+            rays[ idx ].sampleColor = vec3( 0 );
+            onSampleCompleted( idx );
+            return;
+        }
+
         HitRecord hit = hitScene( ray, tMin, tMax );
         if ( !hit.hasResult ) {
             // no hit. use background color
@@ -797,15 +809,14 @@ if ( det > 0 ) {
         }
 
         Scattered scattered = scatter( allMaterials[ hit.materialID ], ray, hit );
-
         if ( scattered.hasResult ) {
             rays[ idx ].sampleColor *= scattered.attenuation;
-            if ( scattered.isEmissive || rays[ idx ].bounces >= 4 ) {
+            if ( scattered.isEmissive ) {
                 onSampleCompleted( idx );
             } else {
                 rays[ idx ].origin = scattered.ray.origin;
                 rays[ idx ].direction = scattered.ray.direction;
-                rays[ idx ].bounces = rays[ idx ].bounces + 1;
+                rays[ idx ].bounces++;
             }
         } else {
             rays[ idx ].sampleColor = vec3( 0 );
@@ -832,7 +843,7 @@ if ( det > 0 ) {
 #if 1
         uint rayIdx = getNextRayIndexInTile();
         
-        if ( sampleCount == 0 ) {
+        if ( sampleCount == 1 ) {
             // reset all samples
             resetSample( rayIdx );
             return;
