@@ -29,6 +29,7 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "ColorMaskState.hpp"
+#include "Foundation/NamedObject.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "ShaderProgram.hpp"
 #include "Texture.hpp"
@@ -40,7 +41,7 @@ namespace crimild {
 
     class Light;
 
-    class Material : public coding::Codable {
+    class Material : public NamedObject, public coding::Codable {
         CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
     public:

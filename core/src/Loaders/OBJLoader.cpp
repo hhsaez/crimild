@@ -333,6 +333,7 @@ void OBJLoader::readMaterialName( std::stringstream &line )
 
     auto tmp = crimild::alloc< materials::PrincipledBSDF >();
     tmp->setMetallic( 0.0f );
+    tmp->setName( name );
     _materials[ name ] = tmp;
     _currentMaterial = crimild::get_ptr( tmp );
 }
