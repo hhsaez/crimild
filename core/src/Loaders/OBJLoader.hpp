@@ -74,6 +74,8 @@ namespace crimild {
         inline void setVerbose( Bool verbose ) noexcept { _verbose = verbose; }
         Bool isVerbose( void ) const noexcept { return _verbose; }
 
+        void setMaterialOverride( std::string name, SharedPointer< materials::PrincipledBSDF > const &material ) noexcept;
+
     private:
         const std::string &getFileName( void ) const { return _fileName; }
 

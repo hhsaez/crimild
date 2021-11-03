@@ -170,7 +170,6 @@ void OBJLoader::reset( void )
     _objects.clear();
 
     _currentMaterial = nullptr;
-    _materials.clear();
 
     _positions.clear();
     _normals.clear();
@@ -331,11 +330,17 @@ void OBJLoader::readMaterialName( std::stringstream &line )
     std::string name;
     line >> name;
 
-    auto tmp = crimild::alloc< materials::PrincipledBSDF >();
-    tmp->setMetallic( 0.0f );
-    tmp->setName( name );
-    _materials[ name ] = tmp;
-    _currentMaterial = crimild::get_ptr( tmp );
+    if ( _materials.count( name ) == 0 ) {
+        auto tmp = crimild::alloc< materials::PrincipledBSDF >();
+        tmp->setMetallic( 0.0f );
+        tmp->setName( name );
+        _materials[ name ] = tmp;
+        std::cout << "new material " << name << std::endl;
+    } else {
+        std::cout << "override " << name << std::endl;
+    }
+
+    _currentMaterial = get_ptr( _materials[ name ] );
 }
 
 void OBJLoader::readMaterialAmbient( std::stringstream &line )
@@ -463,4 +468,9 @@ void OBJLoader::printProgress( std::string text, bool endLine ) noexcept
     } else {
         std::cout << std::flush;
     }
+}
+
+void OBJLoader::setMaterialOverride( std::string name, SharedPointer< materials::PrincipledBSDF > const &material ) noexcept
+{
+    _materials[ name ] = material;
 }
