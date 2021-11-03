@@ -249,9 +249,13 @@ const auto FRAG_SRC = R"(
         }
     }
 
-    HitRecord setFaceNormal( Ray ray, vec3 N, HitRecord rec ) {
+    HitRecord setFaceNormal( Ray ray, vec3 N, mat4 invWorld, HitRecord rec ) {
         rec.frontFace = dot( ray.direction, N ) < 0;
         rec.normal = rec.frontFace ? N : -N;
+        if ( determinant( mat3( invWorld ) ) < 0 ) {
+            // transformation swaps handedness
+            rec.normal = -rec.normal;
+        }
         return rec;
     }
 
@@ -529,12 +533,7 @@ const auto FRAG_SRC = R"(
             mat4 world = inverse( sphere.invWorld );
             hit.point = ( world * vec4( P, 1.0 ) ).xyz;
             vec3 normal = normalize( ( transpose( sphere.invWorld ) * vec4( normalize( P ), 0 ) ).xyz );
-hit = setFaceNormal( ray, normal, hit );
-if ( determinant( mat3( sphere.invWorld ) ) < 0 ) {
-hit.normal = -hit.normal;
-}
-            
-return hit;
+            return setFaceNormal( ray, normal, sphere.invWorld, hit );
         }
 
         return hit;
@@ -566,7 +565,7 @@ return hit;
             mat4 world = inverse( box.invWorld );
             hit.point = ( world * vec4( P, 1.0 ) ).xyz;
             vec3 normal = normalize( transpose( mat3( box.invWorld ) ) * P );
-            return setFaceNormal( ray, normal, hit );
+            return setFaceNormal( ray, normal, box.invWorld, hit );
         }
 
         return hit;
@@ -606,7 +605,7 @@ return hit;
             mat4 world = inverse( cylinder.invWorld );
             hit.point = ( world * vec4( P, 1.0 ) ).xyz;
             vec3 normal = normalize( transpose( mat3( cylinder.invWorld ) ) * P );
-            return setFaceNormal( ray, normal, hit );
+            return setFaceNormal( ray, normal, cylinder.invWorld, hit );
         }
 
         return hit;
@@ -651,7 +650,7 @@ if ( det > 0 ) {
             vec3 P = rayAt( ray, t );
             hit.point = P;
             vec3 normal = triangle.n;
-            return setFaceNormal( ray, normal, hit );
+            return setFaceNormal( ray, normal, mat4( 1 ), hit );
         }
 
         return hit;
