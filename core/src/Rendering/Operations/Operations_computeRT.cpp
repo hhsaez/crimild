@@ -539,6 +539,18 @@ const auto FRAG_SRC = R"(
         return hit;
     }
 
+    int maxDimension( vec3 u )
+    {
+        int ret = 0;
+        if ( u[ 1 ] > u[ ret ] ) {
+            ret = 1;
+        }
+        if ( u[ 2 ] > u[ ret ] ) {
+            ret = 2;
+        }
+        return ret;
+    }
+
     HitRecord hitBoxes( Ray ray, float tMin, HitRecord hit )
     {
         float t = hit.t;
@@ -564,7 +576,12 @@ const auto FRAG_SRC = R"(
             vec3 P = rayAt( ray, t );
             mat4 world = inverse( box.invWorld );
             hit.point = ( world * vec4( P, 1.0 ) ).xyz;
-            vec3 normal = normalize( transpose( mat3( box.invWorld ) ) * P );
+
+            int i = maxDimension( abs( P ) );
+            vec3 normal = vec3( 0 );
+            normal[ i ] = P[ i ] > 0 ? 1 : -1;
+            normal = normalize( ( transpose( box.invWorld ) * vec4( normal, 0 ) ).xyz );
+
             return setFaceNormal( ray, normal, box.invWorld, hit );
         }
 
