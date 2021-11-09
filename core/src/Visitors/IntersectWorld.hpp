@@ -80,7 +80,7 @@ namespace crimild {
         virtual void visitCSGNode( CSGNode *csg ) noexcept override;
 
     private:
-        void intersect( Geometry *geometry, Primitive *primitive ) noexcept;
+        void intersect( Geometry *geometry, Primitive *primitive, Bool isInVolume ) noexcept;
 
     private:
         Ray3 m_ray;

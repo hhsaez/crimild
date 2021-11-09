@@ -246,6 +246,7 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"

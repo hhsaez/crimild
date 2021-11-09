@@ -39,6 +39,7 @@
 #include "Mathematics/Vector3_constants.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations_computeBuffer.hpp"
 #include "Rendering/Operations/Operations_computeImage.hpp"
@@ -57,12 +58,27 @@ using namespace crimild;
 
 // TILE BASED COMPUTE RT
 
-#if 1
-
 const auto FRAG_SRC = R"(
 
     layout( local_size_x = 32, local_size_y = 32 ) in;
     layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
+
+//------------------------------------------------------------------
+// oldschool rand() from Visual Studio
+//------------------------------------------------------------------
+int  seed = 1;
+void srand(int s ) { seed = s; }
+int  rand(void) { seed = seed*0x343fd+0x269ec3; return (seed>>16)&32767; }
+float frand(void) { return float(rand())/32767.0; }
+//------------------------------------------------------------------
+// hash to initialize the random sequence (copied from Hugo Elias)
+//------------------------------------------------------------------
+int hash( int n )
+{
+	n = (n << 13) ^ n;
+    return n * (n * n * 15731 + 789221) + 1376312589;
+}
+//-----
 
     struct RayData {
         vec3 origin;
@@ -92,9 +108,6 @@ const auto FRAG_SRC = R"(
         float cameraFocusDistance;
         vec3 backgroundColor;
     };
-
-    uint seed = 0;
-    int flat_idx = 0;
 
     layout( set = 1, binding = 2 ) uniform SceneUniforms {
         int sphereCount;
@@ -130,13 +143,14 @@ const auto FRAG_SRC = R"(
     };
 
     struct Material {
+        int type;
         vec3 albedo;
         float metallic;
         float roughness;
-        float ambientOcclusion;
         float transmission;
         float indexOfRefraction;
         vec3 emissive;
+        float density;
     };
 
     layout( set = 2, binding = 0 ) buffer Spheres {
@@ -173,26 +187,8 @@ const auto FRAG_SRC = R"(
         vec3 direction;
     };
 
-    void encrypt_tea( inout uvec2 arg ) {
-        uvec4 key = uvec4( 0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e );
-        uint v0 = arg[ 0 ], v1 = arg[ 1 ];
-        uint sum = 0u;
-        uint delta = 0x9e3779b9u;
-
-        for ( int i = 0; i < 32; i++ ) {
-            sum += delta;
-            v0 += ( ( v1 << 4 ) + key[ 0 ] ) ^ ( v1 + sum ) ^ ( ( v1 >> 5 ) + key[ 1 ] );
-            v1 += ( ( v0 << 4 ) + key[ 2 ] ) ^ ( v0 + sum ) ^ ( ( v0 >> 5 ) + key[ 3 ] );
-        }
-        arg[ 0 ] = v0;
-        arg[ 1 ] = v1;
-    }
-
     float getRandom() {
-        uvec2 arg = uvec2( flat_idx, seed++ );
-        encrypt_tea( arg );
-        vec2 r = fract( vec2( arg ) / vec2( 0xffffffffu ) );
-        return r.x;
+return frand();
     }
 
     float getRandomRange( float min, float max ) {
@@ -286,7 +282,12 @@ const auto FRAG_SRC = R"(
         scattered.hasResult = false;
         scattered.isEmissive = false;
 
-        if ( material.transmission > 0 ) {
+        if ( material.type == 1 ) {
+scattered.ray.origin = rec.point;
+scattered.ray.direction = getRandomInUnitSphere();
+scattered.attenuation = material.albedo;
+scattered.hasResult = true;
+        } else if ( material.transmission > 0 ) {
             float ratio = rec.frontFace ? ( 1.0 / material.indexOfRefraction ) : material.indexOfRefraction;
             vec3 D = normalize( ray.direction );
             vec3 N = rec.normal;
@@ -393,6 +394,19 @@ const auto FRAG_SRC = R"(
         if ( abs( tMax - tMax ) > 0.00001 && tMax >= 0.00001 ) {
             t = tMax;
             hasResult = true;
+        }
+
+        if ( hasResult && tMin > 0 && tMax > tMin && allMaterials[ box.materialID ].type == 1 ) {
+            hasResult = false;
+                        float d = length( ray.direction );
+                        float distanceInsideBoundary = ( tMax - tMin ) * d;
+                        float density = allMaterials[ box.materialID ].density;
+                        float negInvDensity = -1.0 / density;
+                        float hitDistance = negInvDensity * log( getRandom() );
+                        if ( hitDistance <= distanceInsideBoundary ) {
+                            t = tMin + hitDistance / d;
+                            hasResult = true;
+                        }
         }
 
         return hasResult ? t : tInMax;
@@ -740,21 +754,27 @@ if ( det > 0 ) {
         return vec3( 0 );
     }
 
-    uint getNextRayIndexInTile()
+    int getNextRayIndexInTile()
     {
-        vec2 size = imageSize( resultImage );
-        vec2 tileSize = size / ( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
-        vec2 uv = gl_GlobalInvocationID.xy * tileSize;
-        uv += vec2( getRandom(), getRandom() ) * tileSize;
-        uv = min( uv, size );
-        return uint( uv.y * size.x + uv.x );
+        ivec2 size = imageSize( resultImage );
+        ivec2 tileSize = ivec2( size / ivec2( gl_NumWorkGroups * gl_WorkGroupSize ) );
+        tileSize = max( ivec2( 1 ), tileSize );
+        ivec2 uv = ivec2( gl_GlobalInvocationID.xy ) * tileSize;
+        if ( uv.x > size.x || uv.y > size.y ) {
+            return -1;
+        }
+        uv += ivec2( int( getRandom() * tileSize.x ), int( getRandom() * tileSize.y ) );
+        if ( uv.x > size.x || uv.y > size.y ) {
+            return -1;
+        }
+        return int( uv.y ) * int( size.x ) + int( uv.x );
     }
 
-    // Reset all samples for all rays in this tile        
+    // Reset all samples for all rays in this tile
     void resetSample( uint idx )
     {
         vec2 size = imageSize( resultImage );
-        vec2 tileSize = size / ( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
+        ivec2 tileSize = ivec2( size / ivec2( gl_NumWorkGroups * gl_WorkGroupSize ) );
         vec2 uv = gl_GlobalInvocationID.xy * tileSize;
         uv = min( uv, size );
         uint firstIdx = uint( uv.y * size.x + uv.x );
@@ -798,6 +818,8 @@ if ( det > 0 ) {
 
         vec3 color = rays[ idx ].accumColor / float( rays[ idx ].samples );
 
+        vec2 size = imageSize( resultImage );
+
         imageStore( resultImage, ivec2( rays[ idx ].uv ), vec4( color, 1.0 ) );
 
         // reset
@@ -809,6 +831,7 @@ if ( det > 0 ) {
     {
         float tMin = 0.001;
         float tMax = 9999.9;
+
 
         if ( rays[ idx ].bounces > 50 ) {
             rays[ idx ].sampleColor = vec3( 0 );
@@ -841,28 +864,33 @@ if ( det > 0 ) {
     }
 
     void main() {
-        seed = seedStart;
+
+// init randoms
+    ivec2 q = ivec2( gl_GlobalInvocationID.xy );
+    srand( hash( q.x + hash( q.y + hash( int( seedStart ) ) ) ) );
 
         // if ( sampleCount >= maxSamples ) {
         //     return;
         // }
 
-        flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
+        //flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
 
         vec2 size = imageSize( resultImage );
         float aspectRatio = size.x / size.y;
 
         if ( gl_GlobalInvocationID.x >= size.x || gl_GlobalInvocationID.y >= size.y ) {
-            return;
+            //return;
         }
 
 #if 1
-        uint rayIdx = getNextRayIndexInTile();
-        
+        int rayIdx = getNextRayIndexInTile();
+        if ( rayIdx < 0 ) {
+           return;
+        }
+
         if ( sampleCount == 1 ) {
             // reset all samples
             resetSample( rayIdx );
-            return;
         }
 
         Ray ray = getNextRay( rayIdx );
@@ -929,11 +957,22 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         alignas( 4 ) UInt32 materialID;
     };
 
+    struct MaterialProps {
+        alignas( 4 ) Int32 type = 0; // 0: BSDF, 1: Volume
+        alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
+        alignas( 4 ) Real32 metallic = 0;
+        alignas( 4 ) Real32 roughness = 0;
+        alignas( 4 ) Real32 transmission = 0;
+        alignas( 4 ) Real32 indexOfRefraction = 0;
+        alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
+        alignas( 4 ) Real32 density = 1;
+    };
+
     Array< SphereDesc > spheres;
     Array< BoxDesc > boxes;
     Array< CylinderDesc > cylinders;
     Array< TriangleDesc > triangles;
-    Array< materials::PrincipledBSDF::Props > materials;
+    Array< MaterialProps > materials;
     Map< Material *, UInt32 > materialIds;
 
     auto scene = Simulation::getInstance()->getScene();
@@ -946,10 +985,36 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         return;
                     }
 
-                    const auto material = static_cast< materials::PrincipledBSDF * >( geometry->getComponent< MaterialComponent >()->first() );
+                    auto material = geometry->getComponent< MaterialComponent >()->first();
+                    if ( material == nullptr ) {
+                        return;
+                    }
+
+                    Bool isVolume = material->getClassName() == materials::PrincipledVolume::__CLASS_NAME;
+
                     if ( !materialIds.contains( material ) ) {
                         const UInt32 materialId = materials.size();
-                        materials.add( material->getProps() );
+                        if ( isVolume ) {
+                            const auto &props = static_cast< materials::PrincipledVolume * >( material )->getProps();
+                            materials.add(
+                                MaterialProps {
+                                    .type = 1,
+                                    .albedo = props.albedo,
+                                    .density = props.density,
+                                } );
+                        } else {
+                            const auto &props = static_cast< materials::PrincipledBSDF * >( material )->getProps();
+                            materials.add(
+                                MaterialProps {
+                                    .type = 0,
+                                    .albedo = props.albedo,
+                                    .metallic = props.metallic,
+                                    .roughness = props.roughness,
+                                    .transmission = props.transmission,
+                                    .indexOfRefraction = props.indexOfRefraction,
+                                    .emissive = props.emissive,
+                                } );
+                        }
                         materialIds.insert( material, materialId );
                     }
 
@@ -1112,11 +1177,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
                         settings->set( "rt.samples.count", sampleCount );
 
+                        static UInt32 seed = 0;
+
                         return Uniforms {
                             .sampleCount = sampleCount,
                             .maxSamples = maxSamples,
                             .bounces = bounces,
-                            .seed = Random::generate< UInt32 >( 0, 1000 ),
+                            .seed = seed++, //Random::generate< UInt32 >( 0, 1000 ),
                             .cameraInvProj = cameraInvProj,
                             .cameraWorld = cameraWorld,
                             .cameraOrigin = cameraOrigin,
@@ -1171,7 +1238,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
         Descriptor {
             .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( materials.size() > 0 ? materials : Array< materials::PrincipledBSDF::Props > { materials::PrincipledBSDF::Props {} } ),
+            .obj = crimild::alloc< StorageBuffer >( materials.size() > 0 ? materials : Array< MaterialProps > { MaterialProps {} } ),
         },
     };
 
@@ -1192,160 +1259,3 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             .z = 1 },
         { ds, sceneDescriptors } );
 }
-
-#else
-
-const auto RAY_INTERSECTOR_SRC = R"(
-    layout( local_size_x = 32, local_size_y = 32 ) in;
-
-    struct RayData {
-        vec3 origin;
-        vec3 direction;
-        vec3 sampleColor;
-        vec3 accumColor;
-        int bounces;
-        int samples;
-    };
-
-    layout( set = 0, binding = 0 ) buffer RayBounceState {
-        RayData rays[];
-    };
-
-    layout( set = 1, binding = 0 ) uniform Uniforms {
-        int width;
-        int height;
-    } uniforms;
-
-    void main() 
-    {
-        if ( gl_GlobalInvocationID.x >= uniforms.width || gl_GlobalInvocationID.y >= uniforms.height ) {
-            return;
-        }
-
-        vec3 color = vec3( gl_GlobalInvocationID.xy / vec2( uniforms.width, uniforms.height ), 1 );
-
-        rays[ gl_GlobalInvocationID.y * uniforms.width + gl_GlobalInvocationID.x ].accumColor = color;
-    }
-)";
-
-SharedPointer< FrameGraphOperation > rayIntersector( void ) noexcept
-{
-    const Real resolutionScale = Simulation::getInstance()->getSettings()->get< Real >( "rt.scale", 1 );
-    const Int32 width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
-    const Int32 height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
-
-    struct BufferData {
-        alignas( 16 ) Point3 origin = Point3 { 0, 0, 0 };
-        alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
-        alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
-        alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
-        alignas( 4 ) Int32 bounces = 0;
-        alignas( 4 ) Int32 samples = 0;
-    };
-
-    auto data = Array< BufferData >( width * height );
-    auto buffer = crimild::alloc< StorageBuffer >( data );
-
-    auto ds = crimild::alloc< DescriptorSet >();
-    ds->descriptors = Array< Descriptor > {
-        Descriptor {
-            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-            .obj = [ & ] {
-                struct Uniforms {
-                    alignas( 4 ) Int32 width;
-                    alignas( 4 ) Int32 height;
-                };
-
-                return crimild::alloc< UniformBuffer >( Uniforms {
-                    .width = width,
-                    .height = height,
-                } );
-            }(),
-        },
-    };
-
-    return framegraph::computeBuffer(
-        buffer,
-        crimild::alloc< Shader >(
-            Shader::Stage::COMPUTE,
-            RAY_INTERSECTOR_SRC ),
-        DispatchWorkgroup {
-            .x = UInt32( width / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-            .y = UInt32( height / DispatchWorkgroup::DEFAULT_WORGROUP_SIZE ),
-            .z = 1 },
-        { ds } );
-}
-
-const auto ACCUMULATOR_SRC = R"(
-    layout( local_size_x = 32, local_size_y = 32 ) in;
-    layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
-
-    struct RayData {
-        vec3 origin;
-        vec3 direction;
-        vec3 sampleColor;
-        vec3 accumColor;
-        int bounces;
-        int samples;
-    };
-
-    layout( set = 1, binding = 0 ) buffer RayBounceState {
-        RayData rays[];
-    };
-
-    void main() 
-    {
-        vec2 size = imageSize( resultImage );
-        if ( gl_GlobalInvocationID.x >= size.x || gl_GlobalInvocationID.y >= size.y ) {
-            return;
-        }
-
-        vec2 uv = gl_GlobalInvocationID.xy;
-        
-        uint rayId = uint( uv.y * size.x + uv.x );
-        RayData ray = rays[ rayId ];
-        vec3 color = ray.accumColor;
-
-        // uv /= size;
-        // uv.y = 1 - uv.y;
-        // vec3 color = vec3( uv, 0 );
-
-        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
-    }
-)";
-
-SharedPointer< FrameGraphOperation > accumulator( SharedPointer< FrameGraphResource > const &input ) noexcept
-{
-    const Real resolutionScale = Simulation::getInstance()->getSettings()->get< Real >( "rt.scale", 1 );
-    const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
-    const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
-
-    auto ds = crimild::alloc< DescriptorSet >();
-    ds->descriptors = Array< Descriptor > {
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::cast_ptr< StorageBuffer >( input ),
-        },
-    };
-
-    auto ret = framegraph::computeImage(
-        Extent2D {
-            .width = Real32( width ),
-            .height = Real32( height ),
-        },
-        crimild::alloc< Shader >(
-            Shader::Stage::COMPUTE,
-            ACCUMULATOR_SRC ),
-        Format::R32G32B32A32_SFLOAT,
-        { ds } );
-
-    ret->reads( { input } );
-    return ret;
-}
-
-SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noexcept
-{
-    return accumulator( useResource( rayIntersector() ) );
-}
-
-#endif
