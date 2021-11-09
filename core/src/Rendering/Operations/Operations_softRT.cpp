@@ -45,6 +45,7 @@
 #include "Mathematics/swizzle.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "Rendering/ScenePass.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/FetchCameras.hpp"
@@ -197,52 +198,60 @@ crimild::SharedPointer< Node > crimild::framegraph::utils::optimize( Array< Shar
     scene->perform( IntersectWorld( R, results ) );
     if ( !results.empty() ) {
         auto res = results.first();
-        const auto material = static_cast< materials::PrincipledBSDF * >( res.geometry->getComponent< MaterialComponent >()->first() );
-        const auto albedo = material->getAlbedo();
-        const auto metallic = material->getMetallic();
-        const auto roughness = material->getRoughness();
-        const auto transmission = material->getTransmission();
-        const auto ior = material->getIndexOfRefraction();
-        const auto emissive = material->getEmissive();
-
         Ray3 scattered;
         ColorRGB attenuation;
 
-        if ( !isZero( transmission ) ) {
-            // Transmissive
-            attenuation = ColorRGB::Constants::WHITE;
-            const auto refractionRatio = res.frontFace ? ( Real( 1 ) / ior ) : ior;
-            const auto dir = normalize( direction( R ) );
-            double cosTheta = min( dot( -dir, res.normal ), Real( 1 ) );
-            double sinTheta = sqrt( Real( 1 ) - cosTheta * cosTheta );
-            const auto cannotRefract = refractionRatio * sinTheta > 1;
-            const auto scatteredDirection = [ & ] {
-                if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > Random::generate< Real >() ) {
-                    return reflect( dir, res.normal );
-                } else {
-                    return refract( dir, res.normal, refractionRatio );
-                }
-            }();
-            scattered = Ray3 { res.point, scatteredDirection };
-        } else if ( !isZero( metallic ) ) {
-            // Metallic model
-            const auto reflected = reflect( normalize( direction( R ) ), res.normal );
-            scattered = Ray3 { res.point, reflected + roughness * randomInUnitSphere() };
+        const auto firstMaterial = res.geometry->getComponent< MaterialComponent >()->first();
+        if ( firstMaterial->getClassName() == materials::PrincipledVolume::__CLASS_NAME ) {
+            const auto material = static_cast< materials::PrincipledVolume * >( firstMaterial );
+            const auto &albedo = material->getAlbedo();
+            scattered = Ray3 { res.point, randomInUnitSphere() };
             attenuation = albedo;
-            if ( dot( direction( scattered ), res.normal ) <= 0 ) {
-                return ColorRGB::Constants::BLACK;
-            }
-        } else if ( !isEqual( emissive, ColorRGB::Constants::BLACK ) ) {
-            return emissive;
         } else {
-            // Lambertian model
-            // TODO(hernan): use randomInHemisphere instead?
-            auto scatterDirection = vector3( res.normal ) + randomUnitVector();
-            if ( isZero( scatterDirection ) ) {
-                scatterDirection = vector3( res.normal );
+            const auto material = static_cast< materials::PrincipledBSDF * >( firstMaterial );
+            const auto albedo = material->getAlbedo();
+            const auto metallic = material->getMetallic();
+            const auto roughness = material->getRoughness();
+            const auto transmission = material->getTransmission();
+            const auto ior = material->getIndexOfRefraction();
+            const auto emissive = material->getEmissive();
+
+            if ( !isZero( transmission ) ) {
+                // Transmissive
+                attenuation = ColorRGB::Constants::WHITE;
+                const auto refractionRatio = res.frontFace ? ( Real( 1 ) / ior ) : ior;
+                const auto dir = normalize( direction( R ) );
+                double cosTheta = min( dot( -dir, res.normal ), Real( 1 ) );
+                double sinTheta = sqrt( Real( 1 ) - cosTheta * cosTheta );
+                const auto cannotRefract = refractionRatio * sinTheta > 1;
+                const auto scatteredDirection = [ & ] {
+                    if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > Random::generate< Real >() ) {
+                        return reflect( dir, res.normal );
+                    } else {
+                        return refract( dir, res.normal, refractionRatio );
+                    }
+                }();
+                scattered = Ray3 { res.point, scatteredDirection };
+            } else if ( !isZero( metallic ) ) {
+                // Metallic model
+                const auto reflected = reflect( normalize( direction( R ) ), res.normal );
+                scattered = Ray3 { res.point, reflected + roughness * randomInUnitSphere() };
+                attenuation = albedo;
+                if ( dot( direction( scattered ), res.normal ) <= 0 ) {
+                    return ColorRGB::Constants::BLACK;
+                }
+            } else if ( !isEqual( emissive, ColorRGB::Constants::BLACK ) ) {
+                return emissive;
+            } else {
+                // Lambertian model
+                // TODO(hernan): use randomInHemisphere instead?
+                auto scatterDirection = vector3( res.normal ) + randomUnitVector();
+                if ( isZero( scatterDirection ) ) {
+                    scatterDirection = vector3( res.normal );
+                }
+                scattered = Ray3 { res.point, scatterDirection };
+                attenuation = albedo;
             }
-            scattered = Ray3 { res.point, scatterDirection };
-            attenuation = albedo;
         }
 
         return attenuation * rayColor( scattered, scene, backgroundColor, depth - 1 );

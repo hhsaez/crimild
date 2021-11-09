@@ -27,14 +27,17 @@
 
 #include "Visitors/IntersectWorld.hpp"
 
+#include "Components/MaterialComponent.hpp"
 #include "Mathematics/Box_normal.hpp"
 #include "Mathematics/Cylinder_normal.hpp"
+#include "Mathematics/Random.hpp"
 #include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/Triangle_normal.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/isNaN.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -82,9 +85,14 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
         }
     }
 
+    const auto isInVolume = [ & ] {
+        const auto firstMaterial = geometry->getComponent< MaterialComponent >()->first();
+        return firstMaterial != nullptr && ( firstMaterial->getClassName() == materials::PrincipledVolume::__CLASS_NAME );
+    }();
+
     geometry->forEachPrimitive(
         [ & ]( auto primitive ) {
-            intersect( geometry, primitive );
+            intersect( geometry, primitive, isInVolume );
         } );
 }
 
@@ -186,7 +194,7 @@ void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
     }
 }
 
-void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexcept
+void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive, Bool isInVolume ) noexcept
 {
     switch ( primitive->getType() ) {
         case Primitive::Type::SPHERE: {
@@ -246,12 +254,55 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive ) noexc
                     m_results.add( result );
                 };
 
-                if ( t0 >= numbers::EPSILON ) {
-                    pushResult( t0 );
-                }
+                if ( isInVolume ) {
+                    const bool enableDebug = true;
+                    const bool debugging = enableDebug && Random::generate< Real >() < 0.00001;
+                    if ( debugging )
+                        std::cerr << "\nt_min=" << t0 << ", t_max=" << t1 << '\n';
 
-                if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-                    pushResult( t1 );
+                    if ( t0 < 0 ) {
+                        t0 = 0;
+                    }
+
+                    if ( t1 > t0 ) {
+                        Real d = length( direction( m_ray ) );
+                        Real distanceInsideBoundary = ( t1 - t0 ) * d;
+                        Real density = [ & ] {
+                            if ( auto firstMaterial = geometry->getComponent< MaterialComponent >()->first() ) {
+                                return static_cast< materials::PrincipledVolume * >( firstMaterial )->getDensity();
+                            } else {
+                                return Real( numbers::EPSILON );
+                            }
+                        }();
+                        Real negInvDensity = Real( -1 ) / density;
+                        Real hitDistance = negInvDensity * std::log( Random::generate< Real >() );
+                        if ( hitDistance <= distanceInsideBoundary ) {
+                            Real t = t0 + hitDistance / d;
+                            const auto P = m_ray( t );
+
+                            if ( debugging ) {
+                                std::cerr << "hit_distance = " << hitDistance << '\n'
+                                          << "rec.t = " << t << '\n'
+                                          << "rec.p = " << P.x << ", " << P.y << ", " << P.z << '\n';
+                            }
+                            auto result = Result {
+                                .geometry = geometry,
+                                .t = t,
+                                .point = P,
+                                .normal = Normal3 { 1, 0, 0 }, // arbitrary
+                                .frontFace = true,             // arbitrary
+                            };
+                            m_results.add( result );
+                        }
+                    }
+                } else {
+                    if ( t0 >= numbers::EPSILON ) {
+                        pushResult( t0 );
+                    }
+
+                    if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
+                        pushResult( t1 );
+                    }
                 }
             }
             break;
