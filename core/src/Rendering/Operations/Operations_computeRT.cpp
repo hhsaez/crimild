@@ -37,6 +37,7 @@
 #include "Mathematics/Triangle_edges.hpp"
 #include "Mathematics/Triangle_normal.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
@@ -1170,7 +1171,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             focusDist = camera->getFocusDistance();
                         }
 
-                        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
+                        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) ) {
                             sampleCount = 1; // reset sampling
                             bounces = 1;     // only one bounce during interaction
                         }
