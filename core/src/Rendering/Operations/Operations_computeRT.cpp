@@ -755,41 +755,55 @@ if ( det > 0 ) {
         return vec3( 0 );
     }
 
+    ivec2 getTileSize()
+    {
+        ivec2 M = ivec2( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
+        ivec2 N = imageSize( resultImage );
+        N = ivec2( ceil( vec2( N ) / vec2( M ) ) * vec2( M ) );
+        ivec2 T = N / M;
+        return T;
+    }
+
     int getNextRayIndexInTile()
     {
-        ivec2 size = imageSize( resultImage );
-        ivec2 tileSize = ivec2( size / ivec2( gl_NumWorkGroups * gl_WorkGroupSize ) );
-        tileSize = max( ivec2( 1 ), tileSize );
-        ivec2 uv = ivec2( gl_GlobalInvocationID.xy ) * tileSize;
-        if ( uv.x > size.x || uv.y > size.y ) {
+        ivec2 S = imageSize( resultImage );
+        ivec2 T = getTileSize();
+        ivec2 uv = ivec2( gl_GlobalInvocationID.xy ) * T;
+        if ( uv.x >= S.x || uv.y >= S.y ) {
             return -1;
         }
-        uv += ivec2( int( getRandom() * tileSize.x ), int( getRandom() * tileSize.y ) );
-        if ( uv.x > size.x || uv.y > size.y ) {
+        uv += ivec2( int( getRandom() * T.x ), int( getRandom() * T.y ) );
+        if ( uv.x >= S.x || uv.y >= S.y ) {
             return -1;
         }
-        return int( uv.y ) * int( size.x ) + int( uv.x );
+        return uv.y * S.x + uv.x;
     }
 
     // Reset all samples for all rays in this tile
     void resetSample( uint idx )
     {
-        vec2 size = imageSize( resultImage );
-        ivec2 tileSize = ivec2( size / ivec2( gl_NumWorkGroups * gl_WorkGroupSize ) );
-        vec2 uv = gl_GlobalInvocationID.xy * tileSize;
-        uv = min( uv, size );
-        uint firstIdx = uint( uv.y * size.x + uv.x );
+        ivec2 S = imageSize( resultImage );
+        ivec2 T = getTileSize();
 
-        for ( float y = 0; y < tileSize.y; y++ ) {
-            for ( float x = 0; x < tileSize.x; x++ ) {
-                vec2 st = uv + vec2( x, y );
-                st = min( st, size );
-                uint idx = uint( st.y * size.x + st.x );;
-                rays[ idx ].sampleColor = vec3( 1 );
-                rays[ idx ].accumColor = vec3( 0 );
-                rays[ idx ].bounces = 0;
-                rays[ idx ].samples = 0;
-                imageStore( resultImage, ivec2( rays[ idx ].uv ), vec4( 0, 0, 0, 1 ) );
+        ivec2 uv = ivec2( gl_GlobalInvocationID.xy * T );
+        if ( uv.x >= S.x || uv.y >= S.y ) {
+            return;
+        }
+
+        uint firstIdx = uv.y * S.x + uv.x;
+        for ( float y = 0; y < T.y; y++ ) {
+            for ( float x = 0; x < T.x; x++ ) {
+                ivec2 st = uv + ivec2( x, y );
+                if ( st.x >= S.x || st.y >= S.y ) {
+                    continue;
+                } else {
+                    uint idx = st.y * S.x + st.x;
+                    rays[ idx ].sampleColor = vec3( 1 );
+                    rays[ idx ].accumColor = vec3( 0 );
+                    rays[ idx ].bounces = 0;
+                    rays[ idx ].samples = 0;
+                    imageStore( resultImage, ivec2( rays[ idx ].uv ), vec4( 0, 0, 0, 1 ) );
+                }
             }
         }
     }
@@ -1243,7 +1257,24 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
     };
 
-    UInt32 workers = Simulation::getInstance()->getSettings()->get< UInt32 >( "rt.workers", 4 );
+    auto workgroup = [ width, height ] {
+        auto settings = Simulation::getInstance()->getSettings();
+        auto workers = settings->get< UInt32 >( "rt.workers", 4 );
+
+        const UInt32 WORKGROUP_SIZE = 32;
+        const UInt32 MAX_X = ceil( width / WORKGROUP_SIZE );
+        const UInt32 MAX_Y = ceil( height / WORKGROUP_SIZE );
+
+        return DispatchWorkgroup {
+            .x = std::min( workers, MAX_X ),
+            .y = std::min( workers, MAX_Y ),
+            .z = 1,
+        };
+    }();
+
+    Simulation::getInstance()->getSettings()->set( "rt.workgroup.x", workgroup.x );
+    Simulation::getInstance()->getSettings()->set( "rt.workgroup.y", workgroup.y );
+    Simulation::getInstance()->getSettings()->set( "rt.workgroup.z", workgroup.z );
 
     return computeImage(
         Extent2D {
@@ -1254,9 +1285,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             Shader::Stage::COMPUTE,
             FRAG_SRC ),
         Format::R32G32B32A32_SFLOAT,
-        DispatchWorkgroup {
-            .x = workers,
-            .y = workers,
-            .z = 1 },
+        workgroup,
         { ds, sceneDescriptors } );
 }
