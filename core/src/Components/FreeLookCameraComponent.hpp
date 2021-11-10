@@ -28,10 +28,11 @@
 #ifndef CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 #define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
-#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Point3.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "NodeComponent.hpp"
+#include "Simulation/Input.hpp"
 
 namespace crimild {
 
@@ -47,6 +48,9 @@ namespace crimild {
         virtual void start( void ) override;
         virtual void update( const Clock &c ) override;
 
+        inline void setMouseLookButton( Int32 button ) noexcept { m_mouseLookButton = button; }
+        inline Int32 getMouseLookButton( void ) const noexcept { return m_mouseLookButton; }
+
     private:
         Vector2 _lastMousePos;
         crimild::Bool _initialized = false;
@@ -56,6 +60,8 @@ namespace crimild {
         Real m_pitch = 0;
         Real m_yaw = 0;
         Real m_roll = 0;
+
+        Int32 m_mouseLookButton = CRIMILD_INPUT_MOUSE_BUTTON_RIGHT;
     };
 
 }

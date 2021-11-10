@@ -128,7 +128,7 @@ void FreeLookCameraComponent::start( void )
             _initialized = true;
             _lastMousePos = currentPos;
 
-            if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
+            if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
                 m_pitch -= mouseDelta[ 1 ];
                 m_yaw -= mouseDelta[ 0 ];
             }
@@ -141,7 +141,7 @@ void FreeLookCameraComponent::start( void )
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
-    if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) ) {
+    if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
     } else {
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
