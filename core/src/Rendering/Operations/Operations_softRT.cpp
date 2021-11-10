@@ -397,7 +397,7 @@ namespace crimild {
                 settings->get< Real >( "rt.background_color.g", 0.7f ),
                 settings->get< Real >( "rt.background_color.b", 1.0f ),
             };
-            auto useScanline = settings->get< Bool >( "rt.use_scanline", false );
+            auto useScanline = settings->get< Bool >( "rt.use_scanline", true );
 
             const auto cameraFocusDistance = focusDist; //camera->getFocusDistance();
             const auto cameraAperture = aperture;       //camera->getAperture();
