@@ -32,6 +32,8 @@
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
 
+#include <iomanip>
+
 using namespace crimild;
 using namespace crimild::glfw;
 
@@ -161,7 +163,17 @@ void WindowSystem::update( void ) noexcept
         auto name = sim->getName();
         auto clock = sim->getSimulationClock();
         std::stringstream ss;
-        ss << name << " (" << clock.getDeltaTime() << "ms)";
+        auto accum = clock.getAccumTime();
+        auto h = Int32( accum / 3600 );
+        auto m = Int32( ( accum - h * 3600 ) / 60 );
+        auto s = Int32( ( accum - h * 3600 - m * 60 ) );
+        ss << name << " ("
+           << std::fixed
+           << std::setprecision( 3 )
+           << clock.getDeltaTime() << "ms - "
+           << ( h < 10 ? "0" : "" ) << h << ":"
+           << ( m < 10 ? "0" : "" ) << m << ":"
+           << ( s < 10 ? "0" : "" ) << s << ")";
         glfwSetWindowTitle( m_window, ss.str().c_str() );
     }
 }
@@ -179,10 +191,36 @@ bool WindowSystem::createWindow( void )
     auto height = settings->get< crimild::Int32 >( "video.height", 768 );
     auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
 
+    if ( settings->hasKey( "video.resolution" ) ) {
+        auto resolution = settings->get< std::string >( "video.resolution", "hd" );
+        if ( resolution == "480p" ) {
+            width = 640;
+            height = 480;
+        } else if ( resolution == "sd" ) {
+            width = 720;
+            height = 576;
+        } else if ( resolution == "hd" || resolution == "720p" ) {
+            width = 1280;
+            height = 720;
+        } else if ( resolution == "fullHD" || resolution == "2k" || resolution == "1080p" ) {
+            width = 1920;
+            height = 1080;
+        } else if ( resolution == "uhd" ) {
+            width = 3840;
+            height = 2160;
+        } else if ( resolution == "4k" ) {
+            width = 4096;
+            height = 2160;
+        } else if ( resolution == "8k" ) {
+            width = 7680;
+            height = 4230;
+        }
+    }
+
     // disable Retina by default
     const auto enableHDPI = settings->get< crimild::Bool >( "video.hdpi", false );
 
-	// use discrete GPU by default, by disabling automatic graphics switching
+    // use discrete GPU by default, by disabling automatic graphics switching
     const auto enableGraphicsSwitching = settings->get< crimild::Bool >( "video.graphicsSwitching", false );
 
     auto simName = Simulation::getInstance()->getName();
@@ -245,14 +283,13 @@ bool WindowSystem::createWindow( void )
     glfwSwapInterval( vsync ? 1 : 0 );
 #endif
 
-	Real framebufferScale = 1.0f;
+    Real framebufferScale = 1.0f;
     Int32 framebufferWidth = 0;
     Int32 framebufferHeight = 0;
-	glfwGetFramebufferSize( m_window, &framebufferWidth, &framebufferHeight);
-	if ( enableHDPI && framebufferWidth > 0 ) {
-		framebufferScale = Real( framebufferWidth ) / Real( width );
+    glfwGetFramebufferSize( m_window, &framebufferWidth, &framebufferHeight );
+    if ( enableHDPI && framebufferWidth > 0 ) {
+        framebufferScale = Real( framebufferWidth ) / Real( width );
     }
-
 
     // Make sure we have proper windows settings defined
     settings->set( "video.width", width );
