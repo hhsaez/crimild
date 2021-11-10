@@ -524,35 +524,73 @@ namespace crimild {
                             } );
                     }
 
-                    ImGui::Separator();
-
-                    // call render passes conditationally again !!!
-
-                    if ( ImGui::MenuItem( "RT (Soft)" ) ) {
-                        crimild::concurrency::sync_frame(
-                            [] {
-                                RenderSystem::getInstance()->useRTSoftRenderPath();
-                                applyUILayer();
-                            } );
-                    }
-
-                    if ( ImGui::MenuItem( "RT (Compute)" ) ) {
-                        crimild::concurrency::sync_frame(
-                            [] {
-                                RenderSystem::getInstance()->useRTComputeRenderPath();
-                                applyUILayer();
-                            } );
-                    }
-
-                    ImGui::Separator();
-
-                    if ( ImGui::MenuItem( "Debug" ) ) {
+                    if ( ImGui::MenuItem( "Default (Debug Mode)" ) ) {
                         crimild::concurrency::sync_frame(
                             [] {
                                 RenderSystem::getInstance()->useDefaultRenderPath( true );
                                 applyUILayer();
                             } );
                     }
+
+                    ImGui::Separator();
+
+                    // call render passes conditationally again !!!
+
+                    if ( ImGui::MenuItem( "RT Soft" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.use_scanline", true );
+                                settings->set( "rt.workers", std::thread::hardware_concurrency() );
+
+                                RenderSystem::getInstance()->useRTSoftRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    if ( ImGui::MenuItem( "RT Soft: Safe Mode" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.use_scanline", true );
+                                settings->set( "rt.workers", 1 );
+
+                                RenderSystem::getInstance()->useRTSoftRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    if ( ImGui::MenuItem( "RT Soft: Spiral" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.use_scanline", false );
+                                settings->set( "rt.workers", std::thread::hardware_concurrency() );
+
+                                RenderSystem::getInstance()->useRTSoftRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    ImGui::Separator();
+
+                    if ( ImGui::MenuItem( "RT Compute" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.workers", 8 );
+
+                                RenderSystem::getInstance()->useRTComputeRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
+                    if ( ImGui::MenuItem( "RT Compute: Safe Mode" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.workers", 1 );
+
+                                RenderSystem::getInstance()->useRTComputeRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
                     ImGui::EndMenu();
                 }
 
