@@ -273,10 +273,15 @@ void CommandBuffer::drawPrimitive( Primitive *primitive, SharedPointer< VertexBu
             }
         } );
 
-    UInt32 instanceCount = 0;
+    UInt32 instanceCount = 1;
     if ( instanceData != nullptr ) {
         instanceCount = UInt32( instanceData->getVertexCount() );
         bindVertexBuffer( get_ptr( instanceData ), vboIndex++ );
+    }
+
+    if ( instanceCount == 0 ) {
+        CRIMILD_LOG_WARNING( "Instance count must be greater than zero. Primitive will not be rendered" );
+        return;
     }
 
     auto indices = primitive->getIndices();

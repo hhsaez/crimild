@@ -62,7 +62,7 @@ namespace crimild {
                 .resize( swapchain->getImages().size() )
                 .fill(
                     [ recorder,
-                      renderPass = crimild::get_ptr( renderPass ) ]( auto frameIndex ) {
+                      renderPass = crimild::get_ptr( renderPass ) ]( auto frameIndex ) mutable {
                         auto commandBuffer = crimild::alloc< CommandBuffer >();
                         commandBuffer->setFrameIndex( frameIndex );
                         commandBuffer->begin( CommandBuffer::Usage::SIMULTANEOUS_USE );
