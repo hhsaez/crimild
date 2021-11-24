@@ -89,6 +89,14 @@ namespace crimild {
         void perform( NodeVisitor &visitor );
         void perform( const NodeVisitor &visitor );
 
+        template< typename VisitorType, typename... Args >
+        typename VisitorType::Result perform( Args &&...args ) noexcept
+        {
+            VisitorType visitor( std::forward< Args >( args )... );
+            perform( visitor );
+            return visitor.getResult();
+        }
+
         virtual void accept( NodeVisitor &visitor );
 
     public:
