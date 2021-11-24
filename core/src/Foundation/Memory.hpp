@@ -28,8 +28,8 @@
 #ifndef CRIMILD_CORE_FOUNDATION_MEMORY_
 #define CRIMILD_CORE_FOUNDATION_MEMORY_
 
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 namespace crimild {
 
@@ -38,9 +38,9 @@ namespace crimild {
 
     template< typename T >
     using UniquePointer = std::unique_ptr< T >;
-    
+
     template< typename T, typename... Args >
-    SharedPointer< T > alloc( Args &&... args )
+    SharedPointer< T > alloc( Args &&...args )
     {
         // use 'new' instead of 'make_shared' to force the use of
         // the custom allocator.
@@ -49,21 +49,21 @@ namespace crimild {
     }
 
     template< typename T, typename... Args >
-    UniquePointer< T > alloc_unique( Args &&... args )
+    UniquePointer< T > alloc_unique( Args &&...args )
     {
-        return std::unique_ptr< T >( new T( std::forward< Args >( args )... ) );        
+        return std::unique_ptr< T >( new T( std::forward< Args >( args )... ) );
     }
-    
+
     template< typename T >
     SharedPointer< T > retain( T *ptr )
     {
         if ( ptr == nullptr ) {
             return nullptr;
         }
-        
+
         return std::static_pointer_cast< T >( ptr->shared_from_this() );
     }
-    
+
     template< typename T >
     inline SharedPointer< T > &retain( SharedPointer< T > &ptr ) noexcept
     {
@@ -85,20 +85,25 @@ namespace crimild {
         // This is a helper function that comes in handy for templates and generic code
         return ptr;
     }
-    
+
     template< class T, class U >
     SharedPointer< T > cast_ptr( SharedPointer< U > const &ptr )
     {
         return std::static_pointer_cast< T >( ptr );
     }
-    
+
+    template< class T, class U >
+    T *cast_ptr( U *ptr )
+    {
+        return static_cast< T * >( ptr );
+    }
+
     template< class T, class U >
     SharedPointer< T > dynamic_cast_ptr( SharedPointer< U > const &ptr )
     {
         return std::dynamic_pointer_cast< T >( ptr );
     }
-    
+
 }
 
 #endif
-
