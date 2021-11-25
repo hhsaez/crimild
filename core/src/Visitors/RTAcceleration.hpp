@@ -43,6 +43,9 @@ namespace crimild {
 
        \todo Support more than one primitive per geometry
        \todo Support more than one material per geometry
+       
+       \todo Optimize for better cache usage while traversing. Consider
+       moving materialIndex to a different structure.
      */
     struct RTAcceleratedNode {
         enum struct Type : UInt32 {
@@ -58,41 +61,51 @@ namespace crimild {
             PRIMITIVE_SPHERE,
             PRIMITIVE_BOX,
             PRIMITIVE_CYLINDER,
+            PRIMITIVE_TRIANGLES,
         };
 
         Type type = Type::INVALID;
 
-        /**
-           \brief Offset to the first child
+        union {
 
-           \remarks This is only valid on nodes that can have children
+            /**
+             * \brief Offset to the second child
+             * 
+             * The first child in a group is stored immediatelly after the current node. The
+             * second child can be store much later, though. 
+             * 
+             * We don't need to keep track of the number of children since a node has either one
+             * or two child nodes. Empty nodes are not allowed.
+             * 
+             * \remarks This is only valid on nodes that can have children
+            */
+            Int32 secondChildIndex = -1;
 
-           \todo This might be used to represent the offset to the first triangle in a primitive
-           \todo This might be used to represent the offset to the first triangle in a primitive
-         */
-        Int32 firstChildIndex = -1;
-
-        /**
-           \brief Number of children
-           \remarks This is only valid on nodes that can have children
-           \todo This might be used to represent the number of triangles in a primitive
-         */
-        Int32 childCount = -1;
+            /**
+             * \brief Offset to the primitive
+             * \remarks This offset is only valid for geometry nodes using triangulated primitives
+             */
+            Int32 primitiveIndex;
+        };
 
         /**
            \brief Index to the parent node
          */
         Int32 parentIndex = -1;
 
-        /**
-           \brief Index to an external array
-
-           For Type::GEOMETRY, this represents the index to the first material
+        /** 
+         * \brief Index to a  array
+         * \remarks Only valid for geometries
          */
-        Int32 index = -1;
+        Int32 materialIndex;
 
         /**
-           \brief Inverse world transformation
+         * \brief World transformation
+         */
+        Matrix4 world;
+
+        /**
+         * \brief Inverse world transformation
          */
         Matrix4 invWorld;
     };
@@ -114,8 +127,8 @@ namespace crimild {
 
     private:
         Result m_result;
-        UInt32 m_level = 0;
-        Map< Material *, UInt32 > m_materialIDs;
+        Int32 m_parentIndex = -1;
+        Map< Material *, Int32 > m_materialIDs;
     };
 
     namespace utils {
@@ -132,40 +145,41 @@ namespace crimild {
 
             while ( current >= 0 ) {
                 const auto &node = scene.nodes[ current ];
-                if ( node.childCount > 0 ) {
-                    if ( lastVisited < current ) {
-                        // begin traversal
-                        if ( !fn( node, current ) ) {
-                            // callback failed. don't traverse children
-                            lastVisited = current;
-                            current = node.parentIndex;
-                        } else {
-                            // traverse first child
-                            lastVisited = current;
-                            current = node.firstChildIndex;
-                        }
-                    } else {
-                        auto next = lastVisited + 1;
-                        if ( next < node.firstChildIndex + node.childCount ) {
+                switch ( node.type ) {
+                    case RTAcceleratedNode::Type::GROUP: {
+                        if ( lastVisited < current ) {
+                            // begin traversal
+                            if ( !fn( node, current ) ) {
+                                // callback failed. don't traverse children
+                                lastVisited = current;
+                                current = node.parentIndex;
+                            } else {
+                                // traverse first child
+                                lastVisited = current;
+                                current = current + 1;
+                            }
+                        } else if ( lastVisited != node.secondChildIndex ) {
                             // next child
                             lastVisited = current;
-                            current = next;
+                            current = node.secondChildIndex;
                         } else {
-                            // done traversing. return to parent
+                            // done traversing
                             lastVisited = current;
                             current = node.parentIndex;
                         }
+                        break;
                     }
-                } else {
-                    // Don't care for result. Just go back to parent anyway
-                    fn( node, current );
-                    // no children. return to parent
-                    lastVisited = current;
-                    current = node.parentIndex;
+                    default: {
+                        // Don't care for result. Just go back to parent anyway
+                        fn( node, current );
+                        // no children. return to parent
+                        lastVisited = current;
+                        current = node.parentIndex;
+                        break;
+                    }
                 }
             }
         }
-
     }
 
 }
