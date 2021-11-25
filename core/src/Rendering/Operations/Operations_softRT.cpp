@@ -50,6 +50,7 @@
 #include "Rendering/ScenePass.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Visitors/BinTreeScene.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/IntersectWorld.hpp"
 #include "Visitors/RTAcceleration.hpp"
@@ -210,8 +211,10 @@ struct IntersectionResult {
     switch ( node.type ) {
         case RTAcceleratedNode::Type::GROUP: {
             auto ret = false;
-            for ( auto i = 0; i < node.childCount; ++i ) {
-                ret = intersect( R, scene, node.firstChildIndex + i, result ) || ret;
+
+            ret = intersect( R, scene, nodeId + 1, result ) || ret;
+            if ( node.secondChildIndex >= 0 ) {
+                ret = intersect( R, scene, node.secondChildIndex, result ) || ret;
             }
             return ret;
         }
@@ -229,13 +232,13 @@ struct IntersectionResult {
             if ( intersect( R1, S, t0, t1 ) ) {
                 if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
                     result.t = t0;
-                    result.materialId = node.index;
+                    result.materialId = node.materialIndex;
                     hasResult = true;
                 }
 
                 if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
                     result.t = t1;
-                    result.materialId = node.index;
+                    result.materialId = node.materialIndex;
                     hasResult = true;
                 }
             }
@@ -301,7 +304,7 @@ struct IntersectionResult {
                     const auto t = min( t0, t1 );
                     if ( t < result.t ) {
                         result.t = t0;
-                        result.materialId = node.index;
+                        result.materialId = node.materialIndex;
                         hasResult = true;
                     }
                     return true;
@@ -309,7 +312,7 @@ struct IntersectionResult {
                     const auto t = min( t0, t1 );
                     if ( t > result.t ) {
                         result.t = t0;
-                        result.materialId = node.index;
+                        result.materialId = node.materialIndex;
                         hasResult = true;
                     }
                     return true;
@@ -317,7 +320,7 @@ struct IntersectionResult {
                     const auto t = min( t0, t1 );
                     if ( t > result.t ) {
                         result.t = t0;
-                        result.materialId = node.index;
+                        result.materialId = node.materialIndex;
                         hasResult = true;
                     }
                     return true;
@@ -328,62 +331,72 @@ struct IntersectionResult {
 
             switch ( node.type ) {
                 case RTAcceleratedNode::Type::GROUP: {
-                    const auto S = Sphere {};
+                    const auto B = Box {};
                     Real t0, t1;
-                    return intersect( R1, S, t0, t1 );
+                    if ( !intersect( R1, B, t0, t1 ) ) {
+                        return false;
+                    }
+
+                    return !hasResult || ( t0 >= numbers::EPSILON && t0 <= result.t ) || ( t1 >= numbers::EPSILON && t1 <= result.t );
                 }
+
                 case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
                     const auto S = Sphere {};
                     Real t0 = numbers::POSITIVE_INFINITY;
                     Real t1 = numbers::POSITIVE_INFINITY;
-                    if ( intersect( R1, S, t0, t1 ) ) {
-                        if ( resolveCSG( t0, t1 ) ) {
-                            return true;
-                        }
-
-                        if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
-                            result.t = t0;
-                            result.materialId = node.index;
-                            hasResult = true;
-                        }
-
-                        if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
-                            result.t = t1;
-                            result.materialId = node.index;
-                            hasResult = true;
-                        }
+                    if ( !intersect( R1, S, t0, t1 ) ) {
+                        return false;
                     }
+
+                    if ( resolveCSG( t0, t1 ) ) {
+                        return true;
+                    }
+
+                    if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
+                        result.t = t0;
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+
+                    if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
+                        result.t = t1;
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+
                     return true;
                 }
+
                 case RTAcceleratedNode::Type::PRIMITIVE_BOX: {
                     const auto B = Box {};
                     Real t0, t1;
                     if ( intersect( R1, B, t0, t1 ) ) {
-                        if ( resolveCSG( t0, t1 ) ) {
-                            return true;
-                        }
+                        // if ( resolveCSG( t0, t1 ) ) {
+                        //     return true;
+                        // }
 
                         if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
                             result.t = t0;
-                            result.materialId = node.index;
+                            result.materialId = node.materialIndex;
                             hasResult = true;
                         }
 
                         if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
                             result.t = t1;
-                            result.materialId = node.index;
+                            result.materialId = node.materialIndex;
                             hasResult = true;
                         }
                     }
                     return true;
                 }
-                case RTAcceleratedNode::Type::CSG_UNION:
-                case RTAcceleratedNode::Type::CSG_INTERSECTION:
-                case RTAcceleratedNode::Type::CSG_DIFFERENCE: {
-                    const auto S = Sphere {};
-                    Real t0, t1;
-                    return intersect( R1, S, t0, t1 );
-                }
+
+                    // case RTAcceleratedNode::Type::CSG_UNION:
+                    // case RTAcceleratedNode::Type::CSG_INTERSECTION:
+                    // case RTAcceleratedNode::Type::CSG_DIFFERENCE: {
+                    //     const auto S = Sphere {};
+                    //     Real t0, t1;
+                    //     return intersect( R1, S, t0, t1 );
+                    // }
 
                 default: {
                     return false;
@@ -409,7 +422,33 @@ struct IntersectionResult {
         }
     }
 
-#if 0
+    return ret;
+}
+
+[[nodiscard]] ColorRGB rayColor( const Ray3 &R, SharedPointer< Node > &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
+{
+    auto ret = backgroundColor;
+
+    if ( depth <= 0 ) {
+        return ColorRGB::Constants::BLACK;
+    }
+
+#if 1
+    auto results = IntersectWorld::Results {};
+    scene->perform( IntersectWorld( R, results ) );
+    if ( !results.empty() ) {
+        auto res = results.first();
+
+        const auto firstMaterial = res.geometry->getComponent< MaterialComponent >()->first();
+        if ( firstMaterial->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+            const auto material = static_cast< materials::PrincipledBSDF * >( firstMaterial );
+            return material->getAlbedo();
+        } else {
+            return ColorRGB { 1, 0, 1 };
+        }
+    }
+
+#else
 
     auto results = IntersectWorld::Results {};
     scene->perform( IntersectWorld( R, results ) );
@@ -572,9 +611,7 @@ namespace crimild {
                 m_scene = copy.getResult< Node >();
                 m_scene->perform( UpdateWorldState() );
 
-                RTAcceleration accelerate;
-                m_scene->perform( accelerate );
-                m_acceleratedScene = accelerate.getResult();
+                m_acceleratedScene = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::RANDOM_AXIS )->perform< RTAcceleration >();
 
                 return m_scene;
             }();
@@ -666,7 +703,11 @@ namespace crimild {
                                         cameraFocusDistance * direction( ray ) - offset,
                                     };
 
+#if 1
                                     color = color + rayColor( ray, self->m_acceleratedScene, backgroundColor, bounces );
+#else
+                                    color = color + rayColor( ray, self->m_scene, backgroundColor, bounces );
+#endif
                                 }
                             }
 

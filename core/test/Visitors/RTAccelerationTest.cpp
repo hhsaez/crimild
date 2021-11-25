@@ -50,8 +50,18 @@
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "Visitors/BinTreeScene.hpp"
 
 #include "gtest/gtest.h"
+
+/**
+ * 1. Generate balanced scene tree with only geometries (skip CSG)
+ * 2. Generate linear scene
+ * 
+ * 
+ * TLAccelNode (geometries + simple primitives)
+ * BLAccelNode (triangles)
+ */
 
 using namespace crimild;
 
@@ -70,17 +80,14 @@ TEST( RTAcceleration, it_optimizes_scene_with_one_geometry )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( ( Vector4 { 1, 2, 3, 1 } ), optimized.nodes[ 0 ].world.c3 );
     ASSERT_EQ( ( Vector4 { -1, -2, -3, 1 } ), optimized.nodes[ 0 ].invWorld.c3 );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 0 ].index );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
     ASSERT_EQ( 1, optimized.materials.size() );
     ASSERT_EQ( ( ColorRGB { 1, 0, 0 } ), optimized.materials[ 0 ].albedo );
 }
@@ -94,16 +101,12 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_sphere )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 1, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 0 ].index );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
     ASSERT_EQ( 1, optimized.materials.size() );
 }
 
@@ -116,16 +119,12 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_box )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 1, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_BOX, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 0 ].index );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
     ASSERT_EQ( 1, optimized.materials.size() );
 }
 
@@ -138,16 +137,12 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_cylinder )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 1, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_CYLINDER, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 0 ].index );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
     ASSERT_EQ( 1, optimized.materials.size() );
 }
 
@@ -160,12 +155,12 @@ TEST( RTAcceleration, it_ignores_unsupported_geometry )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    RTAcceleration accelerate;
+    scene->perform( accelerate );
+    auto optimized = accelerate.getResult();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
-    ASSERT_EQ( RTAcceleratedNode::Type::INVALID, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( 0, optimized.nodes.size() );
+    ASSERT_EQ( 0, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_ignores_geometries_without_primitives )
@@ -175,12 +170,10 @@ TEST( RTAcceleration, it_ignores_geometries_without_primitives )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
-    ASSERT_EQ( RTAcceleratedNode::Type::INVALID, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( 0, optimized.nodes.size() );
+    ASSERT_EQ( 0, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_ignores_geometries_without_materials )
@@ -191,15 +184,13 @@ TEST( RTAcceleration, it_ignores_geometries_without_materials )
         return geometry;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
-    ASSERT_EQ( RTAcceleratedNode::Type::INVALID, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( 0, optimized.nodes.size() );
+    ASSERT_EQ( 0, optimized.materials.size() );
 }
 
-TEST( RTAcceleration, it_optimizes_scene_with_a_group )
+TEST( RTAcceleration, it_discards_empty_groups )
 {
     auto scene = [] {
         auto group = crimild::alloc< Group >();
@@ -207,227 +198,365 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_group )
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 0 ].childCount );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
-    ASSERT_EQ( ( Vector4 { -1, -2, -3, 1 } ), optimized.nodes[ 0 ].invWorld.c3 );
+    ASSERT_EQ( 0, optimized.nodes.size() );
+    ASSERT_EQ( 0, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_a_csg_union )
 {
     auto scene = [] {
         auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION );
+        csg->setLeft(
+            [] {
+                auto geometry = crimild::alloc< Geometry >();
+                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+                return geometry;
+            }() );
         csg->setLocal( translation( 1, 2, 3 ) );
         return csg;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( 2, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_UNION, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
-    ASSERT_EQ( ( Vector4 { -1, -2, -3, 1 } ), optimized.nodes[ 0 ].invWorld.c3 );
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
+    ASSERT_EQ( ( Vector4 { 1, 2, 3, 1 } ), optimized.nodes[ 0 ].world.c3 );
+
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
+    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
+
+    ASSERT_EQ( 1, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_a_csg_intersection )
 {
     auto scene = [] {
         auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::INTERSECTION );
+        csg->setLeft(
+            [] {
+                auto geometry = crimild::alloc< Geometry >();
+                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+                return geometry;
+            }() );
         csg->setLocal( translation( 1, 2, 3 ) );
         return csg;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( 2, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_INTERSECTION, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
-    ASSERT_EQ( ( Vector4 { -1, -2, -3, 1 } ), optimized.nodes[ 0 ].invWorld.c3 );
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
+    ASSERT_EQ( ( Vector4 { 1, 2, 3, 1 } ), optimized.nodes[ 0 ].world.c3 );
+
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
+    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
+
+    ASSERT_EQ( 1, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_a_csg_difference )
 {
     auto scene = [] {
         auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::DIFFERENCE );
+        csg->setLeft(
+            [] {
+                auto geometry = crimild::alloc< Geometry >();
+                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+                return geometry;
+            }() );
         csg->setLocal( translation( 1, 2, 3 ) );
         return csg;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( 2, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_DIFFERENCE, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].childCount );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
-    ASSERT_EQ( ( Vector4 { -1, -2, -3, 1 } ), optimized.nodes[ 0 ].invWorld.c3 );
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
+    ASSERT_EQ( ( Vector4 { 1, 2, 3, 1 } ), optimized.nodes[ 0 ].world.c3 );
+
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
+    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
+
+    ASSERT_EQ( 1, optimized.materials.size() );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_a_child )
 {
-    auto scene = [] {
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    auto scene = [ & ] {
         auto group = crimild::alloc< Group >();
-        group->attachNode( crimild::alloc< Group >() );
+        group->attachNode( geometry() );
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 2, optimized.nodes.size() );
+    ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( 1, optimized.materials.size() );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].childCount );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].primitiveIndex );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
-
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].index );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_two_children )
 {
-    auto scene = [] {
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    auto scene = [ & ] {
         auto group = crimild::alloc< Group >();
-        group->attachNode( crimild::alloc< Group >() );
-        group->attachNode( crimild::alloc< Group >() );
+        group->attachNode( geometry() );
+        group->attachNode( geometry() );
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 3, optimized.nodes.size() );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 2, optimized.nodes[ 0 ].childCount );
+    ASSERT_EQ( 2, optimized.nodes[ 0 ].secondChildIndex );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].childCount );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].index );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 2 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 2 ].childCount );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 2 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 2 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].index );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_three_children )
 {
-    auto scene = [] {
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    /**
+     * Original scene:
+     *       A
+     *    /  |  \
+     *    B  C  D
+     */
+    auto scene = [ & ] {
         auto group = crimild::alloc< Group >();
-        group->attachNode( crimild::alloc< Group >() );
-        group->attachNode( crimild::alloc< Group >() );
-        group->attachNode( crimild::alloc< Group >() );
+        group->attachNode( geometry() );
+        group->attachNode( geometry() );
+        group->attachNode( geometry() );
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    /**
+     * Optimized scene:
+     *      A
+     *    /   \
+     *   X     D
+     * /   \  
+     * B    C 
+     */
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 4, optimized.nodes.size() );
+    ASSERT_EQ( 5, optimized.nodes.size() );
 
+    // A
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 3, optimized.nodes[ 0 ].childCount );
+    ASSERT_EQ( 4, optimized.nodes[ 0 ].secondChildIndex );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
 
+    // X
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].childCount );
+    ASSERT_EQ( 3, optimized.nodes[ 1 ].secondChildIndex );
     ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].index );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 2 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 2 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 2 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].index );
+    // B
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 2 ].type );
+    ASSERT_EQ( 1, optimized.nodes[ 2 ].parentIndex );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 3 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 3 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 3 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].index );
+    // C
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 3 ].type );
+    ASSERT_EQ( 1, optimized.nodes[ 3 ].parentIndex );
+
+    // D
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 4 ].type );
+    ASSERT_EQ( 0, optimized.nodes[ 4 ].parentIndex );
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_basic_hierarchy )
 {
-    auto scene = [] {
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    /**
+     * Original scene:
+     *      A
+     *    /   \
+     *    B   C
+     *        |
+     *        D
+     */
+    auto scene = [ & ] {
         auto group = crimild::alloc< Group >();
-        group->attachNode( crimild::alloc< Group >() );
+        group->attachNode( geometry() );
         group->attachNode(
-            [] {
+            [ & ] {
                 auto group = crimild::alloc< Group >();
-                group->attachNode( crimild::alloc< Group >() );
+                group->attachNode( geometry() );
                 return group;
             }() );
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    /**
+     * Optimized scene:
+     *      A
+     *    /   \
+     *    B   D
+     */
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 4, optimized.nodes.size() );
+    ASSERT_EQ( 3, optimized.nodes.size() );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 2, optimized.nodes[ 0 ].childCount );
+    ASSERT_EQ( 2, optimized.nodes[ 0 ].secondChildIndex );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].childCount );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].index );
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 2 ].type );
-    ASSERT_EQ( 3, optimized.nodes[ 2 ].firstChildIndex );
-    ASSERT_EQ( 1, optimized.nodes[ 2 ].childCount );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 2 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 2 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].index );
+}
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 3 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 3 ].childCount );
-    ASSERT_EQ( 2, optimized.nodes[ 3 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].index );
+TEST( RTAcceleration, it_handles_a_parent_with_many_children )
+{
+    auto geometry = []( std::string name ) {
+        auto geometry = crimild::alloc< Geometry >( name );
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    /**
+     * Original scene:
+     *       A 
+     *   ____|____ 
+     *  /| | | | |\
+     * B C D E F G H
+     */
+    auto scene = crimild::alloc< Group >( "A" );
+    scene->attachNode( geometry( "B" ) );
+    scene->attachNode( geometry( "C" ) );
+    scene->attachNode( geometry( "D" ) );
+    scene->attachNode( geometry( "E" ) );
+    scene->attachNode( geometry( "F" ) );
+    scene->attachNode( geometry( "G" ) );
+    scene->attachNode( geometry( "H" ) );
+    scene->attachNode( geometry( "I" ) );
+
+    /**
+     * Optimized scene:
+     *        A
+     *    z       w 
+     *  y   X   v   u 
+     * B C D E F G H I
+     */
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    // A
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( 8, optimized.nodes[ 0 ].secondChildIndex ); // w
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );     // N/A (root node)
+
+    // z
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
+    ASSERT_EQ( 5, optimized.nodes[ 1 ].secondChildIndex ); // X
+    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );      // A
+
+    // y
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 2 ].type );
+    ASSERT_EQ( 4, optimized.nodes[ 2 ].secondChildIndex ); // C
+    ASSERT_EQ( 1, optimized.nodes[ 2 ].parentIndex );      // z
+
+    // B
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 3 ].type );
+    ASSERT_EQ( 2, optimized.nodes[ 3 ].parentIndex ); // y
+
+    // C
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 4 ].type );
+    ASSERT_EQ( 2, optimized.nodes[ 4 ].parentIndex ); // y
+
+    // X
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 5 ].type );
+    ASSERT_EQ( 7, optimized.nodes[ 5 ].secondChildIndex ); // E
+    ASSERT_EQ( 1, optimized.nodes[ 5 ].parentIndex );      // z
+
+    // D
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 6 ].type );
+    ASSERT_EQ( 5, optimized.nodes[ 6 ].parentIndex ); // X
+
+    // E
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 7 ].type );
+    ASSERT_EQ( 5, optimized.nodes[ 7 ].parentIndex ); // X
+
+    // w
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 8 ].type );
+    ASSERT_EQ( 12, optimized.nodes[ 8 ].secondChildIndex ); // u
+    ASSERT_EQ( 0, optimized.nodes[ 8 ].parentIndex );       // A
+
+    // v
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 9 ].type );
+    ASSERT_EQ( 11, optimized.nodes[ 9 ].secondChildIndex ); // G
+    ASSERT_EQ( 8, optimized.nodes[ 9 ].parentIndex );       // w
+
+    // F
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 10 ].type );
+    ASSERT_EQ( 9, optimized.nodes[ 10 ].parentIndex ); // v
+
+    // G
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 11 ].type );
+    ASSERT_EQ( 9, optimized.nodes[ 11 ].parentIndex ); // v
+
+    // u
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 12 ].type );
+    ASSERT_EQ( 14, optimized.nodes[ 12 ].secondChildIndex ); // I
+    ASSERT_EQ( 8, optimized.nodes[ 12 ].parentIndex );       // w
+
+    // H
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 13 ].type );
+    ASSERT_EQ( 12, optimized.nodes[ 13 ].parentIndex ); // u
+
+    // I
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 14 ].type );
+    ASSERT_EQ( 12, optimized.nodes[ 14 ].parentIndex ); // u
 }
 
 TEST( RTAcceleration, it_optimizes_scene_with_mixed_hierarchy )
@@ -439,15 +568,26 @@ TEST( RTAcceleration, it_optimizes_scene_with_mixed_hierarchy )
         return geometry;
     };
 
+    /**
+     * Original scene:
+     *       A
+     *    /  |  \
+     *   B   C   D
+     *      / \
+     *     E   F
+     *   / | \
+     *  G  H  I
+     */
     auto scene = [ & ] {
         auto group = crimild::alloc< Group >();
-        group->attachNode( crimild::alloc< Group >() );
+        group->attachNode( geometry() );
         group->attachNode(
             [ & ] {
                 auto group = crimild::alloc< Group >();
                 group->attachNode(
                     [ & ] {
                         auto group = crimild::alloc< Group >();
+                        group->attachNode( geometry() );
                         group->attachNode( geometry() );
                         group->attachNode( geometry() );
                         return group;
@@ -459,59 +599,72 @@ TEST( RTAcceleration, it_optimizes_scene_with_mixed_hierarchy )
         return group;
     }();
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    /**
+     * Original scene:
+     *        A
+     *      /   \
+     *     X     D
+     *   /   \
+     *  B     C
+     *      /   \
+     *     E     F
+     *   /  \
+     *  Y    I  
+     * / \
+     * G  H
+     */
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
-    ASSERT_EQ( 8, optimized.nodes.size() );
+    ASSERT_EQ( 11, optimized.nodes.size() );
 
+    // A
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 0 ].type );
-    ASSERT_EQ( 1, optimized.nodes[ 0 ].firstChildIndex );
-    ASSERT_EQ( 3, optimized.nodes[ 0 ].childCount );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 0 ].index );
+    ASSERT_EQ( 10, optimized.nodes[ 0 ].secondChildIndex ); // D
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );      // N/A (root node)
 
+    // X
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 1 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].firstChildIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 1 ].index );
+    ASSERT_EQ( 3, optimized.nodes[ 1 ].secondChildIndex ); // C
+    ASSERT_EQ( 0, optimized.nodes[ 1 ].parentIndex );      // A
 
-    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 2 ].type );
-    ASSERT_EQ( 4, optimized.nodes[ 2 ].firstChildIndex );
-    ASSERT_EQ( 2, optimized.nodes[ 2 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 2 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 2 ].index );
+    // B
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 2 ].type );
+    ASSERT_EQ( 1, optimized.nodes[ 2 ].parentIndex ); // X
 
-    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 3 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 3 ].childCount );
-    ASSERT_EQ( 0, optimized.nodes[ 3 ].parentIndex );
-    ASSERT_EQ( 3, optimized.nodes[ 3 ].index );
+    // C
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 3 ].type );
+    ASSERT_EQ( 9, optimized.nodes[ 3 ].secondChildIndex ); // F
+    ASSERT_EQ( 1, optimized.nodes[ 3 ].parentIndex );      // X
 
+    // E
     ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 4 ].type );
-    ASSERT_EQ( 6, optimized.nodes[ 4 ].firstChildIndex );
-    ASSERT_EQ( 2, optimized.nodes[ 4 ].childCount );
-    ASSERT_EQ( 2, optimized.nodes[ 4 ].parentIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 4 ].index );
+    ASSERT_EQ( 8, optimized.nodes[ 4 ].secondChildIndex ); // I
+    ASSERT_EQ( 3, optimized.nodes[ 4 ].parentIndex );      // C
 
-    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 5 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 5 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 5 ].childCount );
-    ASSERT_EQ( 2, optimized.nodes[ 5 ].parentIndex );
-    ASSERT_EQ( 2, optimized.nodes[ 5 ].index );
+    // Y
+    ASSERT_EQ( RTAcceleratedNode::Type::GROUP, optimized.nodes[ 5 ].type );
+    ASSERT_EQ( 7, optimized.nodes[ 5 ].secondChildIndex ); // H
+    ASSERT_EQ( 4, optimized.nodes[ 5 ].parentIndex );      // E
 
+    // G
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 6 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 6 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 6 ].childCount );
-    ASSERT_EQ( 4, optimized.nodes[ 6 ].parentIndex );
-    ASSERT_EQ( 0, optimized.nodes[ 6 ].index );
+    ASSERT_EQ( 5, optimized.nodes[ 6 ].parentIndex ); // Y
 
+    // H
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 7 ].type );
-    ASSERT_EQ( -1, optimized.nodes[ 7 ].firstChildIndex );
-    ASSERT_EQ( -1, optimized.nodes[ 7 ].childCount );
-    ASSERT_EQ( 4, optimized.nodes[ 7 ].parentIndex );
-    ASSERT_EQ( 1, optimized.nodes[ 7 ].index );
+    ASSERT_EQ( 5, optimized.nodes[ 7 ].parentIndex ); // Y
+
+    // I
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 8 ].type );
+    ASSERT_EQ( 4, optimized.nodes[ 8 ].parentIndex ); // E
+
+    // F
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 9 ].type );
+    ASSERT_EQ( 3, optimized.nodes[ 9 ].parentIndex ); // C
+
+    // D
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 10 ].type );
+    ASSERT_EQ( 0, optimized.nodes[ 10 ].parentIndex ); // A
 }
 
 TEST( RTAcceleration, it_traverses_optimized_scene )
@@ -537,7 +690,7 @@ TEST( RTAcceleration, it_traverses_optimized_scene )
     auto scene = group(
         "A",
         {
-            group( "B", {} ),
+            group( "B", {} ), // ignored (empty)
             group(
                 "C",
                 {
@@ -552,14 +705,12 @@ TEST( RTAcceleration, it_traverses_optimized_scene )
             geometry( "H" ),
         } );
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     std::stringstream ss;
     utils::traverseNonRecursive( optimized, [ & ]( const auto &, Index i ) { ss << i << ", "; return true; } );
 
-    ASSERT_EQ( "0, 1, 2, 4, 6, 7, 5, 3, ", ss.str() );
+    ASSERT_EQ( "0, 1, 2, 3, 4, 5, 6, ", ss.str() );
 }
 
 TEST( RTAcceleration, it_traverses_optimized_scene_with_early_termination )
@@ -600,9 +751,7 @@ TEST( RTAcceleration, it_traverses_optimized_scene_with_early_termination )
             geometry( "H" ),
         } );
 
-    RTAcceleration optimize;
-    scene->perform( optimize );
-    auto optimized = optimize.getResult();
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     std::stringstream ss;
     utils::traverseNonRecursive(
@@ -612,5 +761,5 @@ TEST( RTAcceleration, it_traverses_optimized_scene_with_early_termination )
             return i != 2;
         } );
 
-    ASSERT_EQ( "0, 1, 2, 3, ", ss.str() );
+    ASSERT_EQ( "0, 1, 2, 5, 6, ", ss.str() );
 }

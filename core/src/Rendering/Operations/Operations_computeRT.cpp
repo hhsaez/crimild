@@ -53,11 +53,26 @@
 
 using namespace crimild;
 
-// - Ray intersector: each frame, computes one ray per job
-// - New rays are created either from the camera or from a bounce
-// - When bounces end, color is accumulated and the image is updated
-
-// TILE BASED COMPUTE RT
+/**
+ * TODO: 
+ * There's a problem now based on how threads are grouped. Since they're tiled, 
+ * some threads might do less jobs than others. If one tile is too complex, it's still
+ * handled by the same thread. 
+ * 
+ * Instead, each thread (gl_GlobalInvocationID.x) processes pixels using the following formula:
+ * thread_id = mod( gl_GlobalInvocationID.x + R * N, M ), where:
+ * R = random value
+ * N = thread pool size (gl_WorkGroupSize * gl_WorkGroupCount )
+ * M = Buffer size
+ * (this formula might not be correct. I'll verify it when implementing it).
+ * 
+ * Also, make the buffer linear instead of two-dimensional. That reduces the number of 
+ * computation needed to calculate the thread_id.
+ * 
+ * This should make all threads to process both complex and simpler parts of the scene.
+ * 
+ * I'm not sure if this is cache efficient, though.
+ */
 
 const auto FRAG_SRC = R"(
 
