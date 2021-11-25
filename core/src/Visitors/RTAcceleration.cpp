@@ -28,6 +28,7 @@
 #include "Visitors/RTAcceleration.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
@@ -42,90 +43,60 @@ using namespace crimild;
 
 void RTAcceleration::traverse( Node *node ) noexcept
 {
-    m_result.nodes.resize( 1 );
-    m_level = 0;
-
     node->perform( UpdateWorldState() );
-
-    NodeVisitor::traverse( node );
+    NodeVisitor::traverse( get_ptr( node ) );
 }
 
 void RTAcceleration::visitGroup( Group *group ) noexcept
 {
-    m_result.nodes[ m_level ].type = RTAcceleratedNode::Type::GROUP;
+    assert( group->getNodeCount() <= 2 && "Invalid group node" );
 
     // Compute a transformation for representing bounding volumes
-    auto boundingTransform = translation( vector3( group->getWorldBound()->getCenter() ) ) * scale( group->getWorldBound()->getRadius() );
-    m_result.nodes[ m_level ].invWorld = boundingTransform.invMat;
+    const auto size = group->getWorldBound()->getMax() - group->getWorldBound()->getMin();
+    auto boundingTransform = translation( vector3( group->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
 
-    const auto childCount = group->getNodeCount();
-    m_result.nodes[ m_level ].childCount = childCount;
+    const auto groupIndex = m_result.nodes.size();
 
-    if ( childCount > 0 ) {
-        const auto firstChildIndex = m_result.nodes.size();
+    m_result.nodes.add(
+        RTAcceleratedNode {
+            .type = RTAcceleratedNode::Type::GROUP,
+            .parentIndex = m_parentIndex,
+            .world = boundingTransform.mat,
+            .invWorld = boundingTransform.invMat,
+        } );
 
-        m_result.nodes[ m_level ].firstChildIndex = firstChildIndex;
+    auto tempParent = m_parentIndex;
+    m_parentIndex = groupIndex;
 
-        m_result.nodes.resize( m_result.nodes.size() + childCount );
-
-        Int32 parentIndex = m_level;
-
-        for ( auto i = 0; i < childCount; ++i ) {
-            m_level = firstChildIndex + i;
-
-            m_result.nodes[ firstChildIndex + i ] = {
-                .type = RTAcceleratedNode::Type::INVALID,
-                .parentIndex = parentIndex,
-            };
-
-            if ( auto node = group->getNodeAt( i ) ) {
-                node->accept( *this );
-            }
-        }
-
-        m_level = parentIndex;
+    if ( auto left = group->getNodeAt( 0 ) ) {
+        left->accept( *this );
     }
+
+    if ( group->getNodeCount() == 2 ) {
+        auto right = group->getNodeAt( 1 );
+        m_result.nodes[ groupIndex ].secondChildIndex = m_result.nodes.size();
+        right->accept( *this );
+    }
+
+    m_parentIndex = tempParent;
 }
 
 void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
 {
-    const auto material = [ & ]() -> materials::PrincipledBSDF * {
-        if ( auto materials = geometry->getComponent< MaterialComponent >() ) {
-            if ( auto material = materials->first() ) {
-                return static_cast< materials::PrincipledBSDF * >( material );
-            }
-        }
-        return nullptr;
-    }();
-
-    if ( material == nullptr ) {
-        return;
-    }
-
-    if ( !m_materialIDs.contains( material ) ) {
-        const UInt32 materialID = m_result.materials.size();
-        m_result.materials.add( material->getProps() );
-        m_materialIDs.insert( material, materialID );
-    }
-
     auto nodeType = RTAcceleratedNode::Type::INVALID;
-    Int32 index = -1;
     geometry->forEachPrimitive(
         [ & ]( auto primitive ) {
             switch ( primitive->getType() ) {
                 case Primitive::Type::SPHERE: {
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
-                    index = m_materialIDs[ material ];
                     break;
                 }
                 case Primitive::Type::BOX: {
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_BOX;
-                    index = m_materialIDs[ material ];
                     break;
                 }
                 case Primitive::Type::CYLINDER: {
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
-                    index = m_materialIDs[ material ];
                     break;
                 }
                 default: {
@@ -138,9 +109,41 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
         return;
     }
 
-    m_result.nodes[ m_level ].type = nodeType;
-    m_result.nodes[ m_level ].index = index;
-    m_result.nodes[ m_level ].invWorld = geometry->getWorld().invMat;
+    const Int32 materialIndex = [ & ] {
+        const auto material = [ & ]() -> materials::PrincipledBSDF * {
+            if ( auto materials = geometry->getComponent< MaterialComponent >() ) {
+                if ( auto material = materials->first() ) {
+                    return static_cast< materials::PrincipledBSDF * >( material );
+                }
+            }
+            return nullptr;
+        }();
+
+        if ( material == nullptr ) {
+            return -1;
+        }
+
+        if ( !m_materialIDs.contains( material ) ) {
+            const UInt32 materialID = m_result.materials.size();
+            m_result.materials.add( material->getProps() );
+            m_materialIDs.insert( material, materialID );
+        }
+
+        return m_materialIDs[ material ];
+    }();
+
+    if ( materialIndex < 0 ) {
+        return;
+    }
+
+    m_result.nodes.add(
+        RTAcceleratedNode {
+            .type = nodeType,
+            .parentIndex = m_parentIndex,
+            .materialIndex = materialIndex,
+            .world = geometry->getWorld().mat,
+            .invWorld = geometry->getWorld().invMat,
+        } );
 }
 
 void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
@@ -162,52 +165,30 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
         return;
     }
 
-    m_result.nodes[ m_level ].type = nodeType;
-
     // Compute a transformation for representing bounding volumes
     auto boundingTransform = translation( vector3( csg->getWorldBound()->getCenter() ) ) * scale( csg->getWorldBound()->getRadius() );
-    m_result.nodes[ m_level ].invWorld = boundingTransform.invMat;
 
-    UInt32 childCount = 0;
-    if ( csg->getLeft() ) {
-        childCount++;
+    const auto csgIndex = m_result.nodes.size();
+
+    m_result.nodes.add(
+        RTAcceleratedNode {
+            .type = nodeType,
+            .parentIndex = m_parentIndex,
+            .world = boundingTransform.mat,
+            .invWorld = boundingTransform.invMat,
+        } );
+
+    auto tempParent = m_parentIndex;
+    m_parentIndex = csgIndex;
+
+    if ( auto left = csg->getLeft() ) {
+        left->accept( *this );
     }
-    if ( csg->getRight() ) {
-        childCount++;
+
+    if ( auto right = csg->getRight() ) {
+        m_result.nodes[ csgIndex ].secondChildIndex = m_result.nodes.size();
+        right->accept( *this );
     }
 
-    m_result.nodes[ m_level ].childCount = childCount;
-
-    if ( childCount > 0 ) {
-        const auto firstChildIndex = m_result.nodes.size();
-
-        m_result.nodes[ m_level ].firstChildIndex = firstChildIndex;
-
-        m_result.nodes.resize( m_result.nodes.size() + childCount );
-
-        Int32 parentIndex = m_level;
-        Int32 i = 0;
-
-        if ( auto left = csg->getLeft() ) {
-            m_level = firstChildIndex + i++;
-            m_result.nodes[ m_level ] = {
-                .type = crimild::RTAcceleratedNode::Type::INVALID,
-                .parentIndex = parentIndex,
-            };
-
-            left->accept( *this );
-        }
-
-        if ( auto right = csg->getRight() ) {
-            m_level = firstChildIndex + i++;
-            m_result.nodes[ m_level ] = {
-                .type = crimild::RTAcceleratedNode::Type::INVALID,
-                .parentIndex = parentIndex,
-            };
-
-            right->accept( *this );
-        }
-
-        m_level = parentIndex;
-    }
+    m_parentIndex = tempParent;
 }
