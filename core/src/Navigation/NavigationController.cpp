@@ -100,6 +100,7 @@ Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
     return r.getPointAt( t );
     */
     assert( true );
+    return Vector3 {};
 }
 
 bool NavigationController::snap( void )
@@ -111,15 +112,13 @@ bool NavigationController::snap( void )
 
 bool NavigationController::teleport( const Vector3f &target )
 {
-    /*
     auto cell = findCellForPoint( target );
 
     setCurrentCell( cell );
-    getNode()->local().setTranslate( target );
+    assert( false );
+    //getNode()->local().setTranslate( target );
 
     return cell != nullptr;
-    */
-    assert( true );
 }
 
 bool NavigationController::move( const Vector3f &target )
@@ -205,14 +204,13 @@ bool NavigationController::move( const Vector3f &target )
 
 bool NavigationController::findCurrentCell( void )
 {
-#if 0
-    auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
-    if ( cell != nullptr ) {
-        setCurrentCell( cell );
-    }
+    assert( false );
+    //auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
+    //if ( cell != nullptr ) {
+        //setCurrentCell( cell );
+    //}
 
     return getCurrentCell();
-#endif
 }
 
 NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
@@ -229,9 +227,9 @@ NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
 
 std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3f &target )
 {
-#if 0
     std::vector< Vector3f > result;
 
+#if 0
     auto start = getCurrentCell();
     auto end = findCellForPoint( target );
     if ( end == nullptr ) {
@@ -307,7 +305,7 @@ std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3
     for ( auto p : path ) {
         result.push_back( p );
     }
+#endif
 
     return result;
-#endif
 }

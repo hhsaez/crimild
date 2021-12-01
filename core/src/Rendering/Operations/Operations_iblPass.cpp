@@ -101,6 +101,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::iblPass(
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
+                                #include <textureCube>
+
                                 layout ( location = 0 ) in vec2 inTexCoord;
 
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
@@ -121,117 +123,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::iblPass(
                                 layout ( location = 0 ) out vec4 outColor;
 
                                 const float PI = 3.14159265359;
-
-                                const float FACE_INVALID = -1.0;
-                                const float FACE_LEFT = 0.0;
-                                const float FACE_RIGHT = 1.0;
-                                const float FACE_FRONT = 2.0;
-                                const float FACE_BACK = 3.0;
-                                const float FACE_UP = 4.0;
-                                const float FACE_DOWN = 5.0;
-
-                                // Return the face in cubemap based on the principle component of the direction
-                                float getFace( vec3 direction )
-                                {
-                                    vec3 absDirection = abs( direction );
-                                    float face = -1.0;
-                                    if ( absDirection.x > absDirection.z ) {
-                                        if ( absDirection.x > absDirection.y ) {
-                                            return direction.x > 0.0 ? FACE_RIGHT : FACE_LEFT;
-                                        } else {
-                                            return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
-                                        }
-                                    } else {
-                                        if ( absDirection.z > absDirection.y ) {
-                                            return direction.z > 0.0 ? FACE_FRONT : FACE_BACK;
-                                        } else {
-                                            return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
-                                        }
-                                    }
-                                    return FACE_INVALID;
-                                }
-
-                                vec2 getUV( vec3 direction, float face )
-                                {
-                                    vec2 uv;
-                                    if ( face == FACE_LEFT ) {
-                                        uv = vec2( -direction.z, direction.y ) / abs( direction.x );
-                                    } else if ( face == FACE_RIGHT ) {
-                                        uv = vec2( direction.z, direction.y ) / abs( direction.x );
-                                    } else if ( face == FACE_FRONT ) {
-                                        uv = vec2( -direction.x, direction.y ) / abs( direction.z );
-                                    } else if ( face == FACE_BACK ) {
-                                        uv = vec2( direction.x, direction.y ) / abs( direction.z );
-                                    } else if ( face == FACE_UP ) {
-                                        uv = vec2( direction.x, direction.z ) / abs( direction.y );
-                                    } else if ( face == FACE_DOWN ) {
-                                        uv = vec2( direction.x, -direction.z ) / abs( direction.y );
-                                    }
-                                    return 0.5 + 0.5 * uv;
-                                }
-
-                                vec2 getFaceOffsets( float face )
-                                {
-                                    if ( face == FACE_LEFT ) {
-                                        return vec2( 0.0, 0.5 );
-                                    } else if ( face == FACE_RIGHT ) {
-                                        return vec2( 0.5, 0.5 );
-                                    } else if ( face == FACE_FRONT ) {
-                                        return vec2( 0.25, 0.5 );
-                                    } else if ( face == FACE_BACK ) {
-                                        return vec2( 0.75, 0.5 );
-                                    } else if ( face == FACE_UP ) {
-                                        return vec2( 0.5, 0.25 );
-                                    } else if ( face == FACE_DOWN ) {
-                                        return vec2( 0.5, 0.75 );
-                                    }
-                                }
-
-                                // Performs bilinear filtering
-                                vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
-                                {
-                                    const float faceSize = 0.25;
-                                    const vec2 texelSize = 1.0 / textureSize( envMap, 0 );
-
-                                    float face = getFace( direction );
-                                    vec2 faceOffsets = getFaceOffsets( face );
-
-                                    vec2 uv = getUV( direction, face );
-                                    uv.y = 1.0 - uv.y;
-                                    uv = faceOffsets + faceSize * uv;
-                                    uv = viewport.xy + uv * viewport.zw;
-
-                                    // make sure UV values are within the face to avoid most artifacts in the borders
-                                    // of the cube map. Some visual artifacts migth still appear, though, but they
-                                    // should be rare.
-                                    vec2 fBL = viewport.xy + ( faceOffsets ) * viewport.zw;
-                                    vec2 fTR = viewport.xy + ( faceOffsets + vec2( faceSize ) ) * viewport.zw;
-                                    uv = clamp( uv, fBL + texelSize, fTR - 2.0 * texelSize );
-
-                                    vec4 color = texture( envMap, uv );
-                                    return color;
-                                }
-
-                                vec4 textureCubeLOD( sampler2D envMap, vec3 D, int lod )
-                                {
-                                    vec4 viewport = vec4( 0, 0, 1, 1 );
-                                    if ( lod == 0 ) {
-                                        viewport = vec4( 0, 0, 0.6666666667, 1.0 );
-                                    } else if ( lod == 1 ) {
-                                        viewport = vec4( 0.6666666667, 0, 0.3333333333, 0.3333333333 );
-                                    } else if ( lod == 2 ) {
-                                        viewport = vec4( 0.6666666667, 0.3333333333, 0.1666666667, 0.1666666667 );
-                                    } else if ( lod == 3 ) {
-                                        viewport = vec4( 0.6666666667, 0.5, 0.08333333333, 0.08333333333 );
-                                    } else {
-                                        viewport = vec4( 0.6666666667, 0.5833333333, 0.04166666667, 0.04166666667 );
-                                    }
-                                    return textureCubeUV(
-                                        envMap,
-                                        D,
-                                        viewport
-                                    );
-                                }
 
                                 float distributionGGX( vec3 N, vec3 H, float roughness )
                                 {

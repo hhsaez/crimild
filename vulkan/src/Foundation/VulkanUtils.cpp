@@ -68,8 +68,10 @@ const char *utils::errorToString( VkResult result ) noexcept
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_INCOMPATIBLE_DISPLAY_KHR );
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_VALIDATION_FAILED_EXT );
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_INVALID_SHADER_NV );
+#if defined( CRIMILD_PLATFORM_OSX )
         CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_BEGIN_RANGE );
         CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_RANGE_SIZE );
+#endif
         default:
             return "UNKNOWN";
     };
@@ -591,7 +593,11 @@ crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 const utils::ValidationLayerArray &utils::getValidationLayers( void ) noexcept
 {
     static ValidationLayerArray validationLayers = {
+#if defined( CRIMILD_PLATFORM_OSX )
         "VK_LAYER_LUNARG_standard_validation",
+#else
+        "VK_LAYER_KHRONOS_validation",
+#endif
     };
     return validationLayers;
 }
@@ -653,6 +659,8 @@ utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 #if defined( CRIMILD_PLATFORM_OSX )
     // TODO: no macro for platform extensions?
     extensions.push_back( "VK_MVK_macos_surface" );
+#else if defined( CRIMILD_PLATFORM_WIN32 )
+    extensions.push_back( "VK_KHR_win32_surface" );
 #endif
 
     if ( validationLayersEnabled ) {
@@ -689,6 +697,7 @@ void utils::populateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT
 
 void utils::setObjectName( VkDevice device, UInt64 object, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept
 {
+#if defined( CRIMILD_PLATFORM_OSX )
     static auto vkDebugMarkerSetObjectName = ( PFN_vkDebugMarkerSetObjectNameEXT ) vkGetDeviceProcAddr( device, "vkDebugMarkerSetObjectNameEXT" );
     if ( vkDebugMarkerSetObjectName == VK_NULL_HANDLE ) {
         CRIMILD_LOG_WARNING( "Cannot get procedure address for vkDebugMarkerSetObjectName" );
@@ -703,6 +712,7 @@ void utils::setObjectName( VkDevice device, UInt64 object, VkDebugReportObjectTy
     };
 
     vkDebugMarkerSetObjectName( device, &nameInfo );
+#endif
 }
 
 const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
@@ -713,8 +723,10 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
         // This is required to flip the viewport (see getViewport() above)
         VK_KHR_MAINTENANCE1_EXTENSION_NAME,
 
+#if defined( CRIMILD_PLATFORM_OSX )
         // Require to name objects for debug
         VK_EXT_DEBUG_MARKER_EXTENSION_NAME,
+#endif
     };
     return deviceExtensions;
 }
@@ -978,7 +990,9 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
 {
     auto createInfo = VkImageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .flags = descriptor.flags,
         .imageType = VK_IMAGE_TYPE_2D,
+        .format = descriptor.format,
         .extent = {
             .width = descriptor.width,
             .height = descriptor.height,
@@ -986,13 +1000,10 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
         },
         .mipLevels = descriptor.mipLevels,
         .arrayLayers = descriptor.arrayLayers,
-        .format = descriptor.format,
+        .samples = descriptor.numSamples,
         .tiling = descriptor.tiling,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .usage = descriptor.usage,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .samples = descriptor.numSamples,
-        .flags = descriptor.flags,
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -1037,18 +1048,20 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
 
     auto barrier = VkImageMemoryBarrier {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .srcAccessMask = 0, // See below
+        .dstAccessMask = 0, // See below
         .oldLayout = oldLayout,
         .newLayout = newLayout,
         .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .image = image,
-        .subresourceRange.aspectMask = 0, // Defined below
-        .subresourceRange.baseMipLevel = 0,
-        .subresourceRange.levelCount = mipLevels,
-        .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = layerCount,
-        .srcAccessMask = 0, // See below
-        .dstAccessMask = 0, // See below
+        .subresourceRange = VkImageSubresourceRange {
+            .aspectMask = 0, // Defined below
+            .baseMipLevel = 0,
+            .levelCount = mipLevels,
+            .baseArrayLayer = 0,
+            .layerCount = layerCount,
+        },
     };
 
     VkPipelineStageFlags sourceStage = 0;
@@ -1106,10 +1119,12 @@ void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkIm
         .bufferOffset = 0,
         .bufferRowLength = 0,
         .bufferImageHeight = 0,
-        .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-        .imageSubresource.mipLevel = 0,
-        .imageSubresource.baseArrayLayer = 0,
-        .imageSubresource.layerCount = layerCount,
+        .imageSubresource = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevel = 0,
+            .baseArrayLayer = 0,
+            .layerCount = layerCount,
+        },
         .imageOffset = { 0, 0 },
         .imageExtent = {
             .width = width,
@@ -1139,10 +1154,12 @@ void utils::copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffe
             .bufferOffset = i * layerSize,
             .bufferRowLength = 0,
             .bufferImageHeight = 0,
-            .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .imageSubresource.mipLevel = 0,
-            .imageSubresource.baseArrayLayer = static_cast< crimild::UInt32 >( i ),
-            .imageSubresource.layerCount = 1,
+            .imageSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = 0,
+                .baseArrayLayer = static_cast< crimild::UInt32 >( i ),
+                .layerCount = 1,
+            },
             .imageOffset = { 0, 0 },
             .imageExtent = {
                 .width = layerWidth,
@@ -1178,13 +1195,15 @@ void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat
 
     auto barrier = VkImageMemoryBarrier {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .image = image,
         .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-        .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = 1,
-        .subresourceRange.levelCount = 1,
+        .image = image,
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
     };
 
     auto mipWidth = width;
@@ -1210,21 +1229,30 @@ void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat
             &barrier );
 
         auto blit = VkImageBlit {
-            .srcOffsets[ 0 ] = { 0, 0, 0 },
-            .srcOffsets[ 1 ] = { mipWidth, mipHeight, 1 },
-            .srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .srcSubresource.mipLevel = i - 1,
-            .srcSubresource.baseArrayLayer = 0,
-            .srcSubresource.layerCount = 1,
-            .dstOffsets[ 0 ] = { 0, 0, 0 },
-            .dstOffsets[ 1 ] = {
-                mipWidth > 1 ? mipWidth / 2 : 1,
-                mipHeight > 1 ? mipHeight / 2 : 1,
-                1 },
-            .dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .dstSubresource.mipLevel = i,
-            .dstSubresource.baseArrayLayer = 0,
-            .dstSubresource.layerCount = 1,
+            .srcSubresource  = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = i - 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+            .srcOffsets = {
+                { 0, 0, 0 },
+                { mipWidth, mipHeight, 1 },
+            },
+            .dstSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = i,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+            .dstOffsets = {
+                { 0, 0, 0 },
+                {
+                    mipWidth > 1 ? mipWidth / 2 : 1,
+                    mipHeight > 1 ? mipHeight / 2 : 1,
+                    1, 
+                },
+            },
         };
 
         vkCmdBlitImage(
@@ -1430,8 +1458,8 @@ VkCommandBuffer utils::beginSingleTimeCommands( RenderDevice *renderDevice ) noe
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandPool = commandPool->handler,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = 1,
     };
 

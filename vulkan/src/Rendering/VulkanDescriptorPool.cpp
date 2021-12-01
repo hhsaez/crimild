@@ -57,10 +57,10 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
 
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .flags = 0,
+        .maxSets = static_cast< crimild::UInt32 >( swapchain->getImages().size() ),
         .poolSizeCount = static_cast< crimild::UInt32 >( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = static_cast< crimild::UInt32 >( swapchain->getImages().size() ),
-        .flags = 0,
     };
 
     VkDescriptorPool handler;

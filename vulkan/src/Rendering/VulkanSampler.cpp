@@ -52,19 +52,19 @@ crimild::Bool SamplerManager::bind( Sampler *sampler ) noexcept
 		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .magFilter = utils::getSamplerFilter( sampler->getMagFilter() ),
         .minFilter = utils::getSamplerFilter( sampler->getMinFilter() ),
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
         .addressModeU = addressMode,
         .addressModeV = addressMode,
         .addressModeW = addressMode,
+        .mipLodBias = 0,
         .anisotropyEnable = VK_TRUE,
         .maxAnisotropy = 16,
-        .borderColor = borderColor,
-        .unnormalizedCoordinates = VK_FALSE,
         .compareEnable = VK_FALSE,
         .compareOp = compareOp,
-        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-        .mipLodBias = 0,
         .minLod = minLod,
         .maxLod = maxLod,
+        .borderColor = borderColor,
+        .unnormalizedCoordinates = VK_FALSE,
     };
 
 	SamplerBindInfo bindInfo;
