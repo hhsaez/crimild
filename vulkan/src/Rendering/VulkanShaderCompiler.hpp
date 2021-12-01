@@ -32,6 +32,7 @@
 #include "Rendering/Shader.hpp"
 
 #include <string>
+#include <unordered_map>
 
 namespace crimild {
 
@@ -44,7 +45,7 @@ namespace crimild {
             class ShaderPreprocessor {
             public:
                 Bool isInitialized( void ) const noexcept { return !m_chunks.empty(); }
-                
+
                 void addChunk( std::string key, std::string src ) noexcept
                 {
                     const auto expandedKey = std::string( "#include <" ) + key + ">";

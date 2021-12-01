@@ -659,7 +659,7 @@ utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 #if defined( CRIMILD_PLATFORM_OSX )
     // TODO: no macro for platform extensions?
     extensions.push_back( "VK_MVK_macos_surface" );
-#else if defined( CRIMILD_PLATFORM_WIN32 )
+#elif defined( CRIMILD_PLATFORM_WIN32 )
     extensions.push_back( "VK_KHR_win32_surface" );
 #endif
 
@@ -1229,7 +1229,7 @@ void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat
             &barrier );
 
         auto blit = VkImageBlit {
-            .srcSubresource  = {
+            .srcSubresource = {
                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
                 .mipLevel = i - 1,
                 .baseArrayLayer = 0,
@@ -1250,7 +1250,7 @@ void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat
                 {
                     mipWidth > 1 ? mipWidth / 2 : 1,
                     mipHeight > 1 ? mipHeight / 2 : 1,
-                    1, 
+                    1,
                 },
             },
         };
