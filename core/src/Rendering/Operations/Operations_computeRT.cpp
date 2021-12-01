@@ -74,27 +74,13 @@ using namespace crimild;
  * I'm not sure if this is cache efficient, though.
  */
 
-const auto FRAG_SRC = R"(
-
+const std::string PRELUDE_SRC = R"(
     layout( local_size_x = 32, local_size_y = 32 ) in;
     layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
 
-//------------------------------------------------------------------
-// oldschool rand() from Visual Studio
-//------------------------------------------------------------------
-int  seed = 1;
-void srand(int s ) { seed = s; }
-int  rand(void) { seed = seed*0x343fd+0x269ec3; return (seed>>16)&32767; }
-float frand(void) { return float(rand())/32767.0; }
-//------------------------------------------------------------------
-// hash to initialize the random sequence (copied from Hugo Elias)
-//------------------------------------------------------------------
-int hash( int n )
-{
-	n = (n << 13) ^ n;
-    return n * (n * n * 15731 + 789221) + 1376312589;
-}
-//-----
+    #include <random>
+    #include <isZero>
+    #include <reflectance>
 
     struct RayData {
         vec3 origin;
@@ -109,7 +95,6 @@ int hash( int n )
     layout( set = 1, binding = 0 ) buffer RayBounceState {
         RayData rays[];
     };
-
     layout( set = 1, binding = 1 ) uniform Uniforms {
         uint sampleCount;
         uint maxSamples;
@@ -124,7 +109,6 @@ int hash( int n )
         float cameraFocusDistance;
         vec3 backgroundColor;
     };
-
     layout( set = 1, binding = 2 ) uniform SceneUniforms {
         int sphereCount;
         int boxCount;
@@ -137,17 +121,14 @@ int hash( int n )
         mat4 invWorld;
         uint materialID;
     };
-
     struct Box {
         mat4 invWorld;
         uint materialID;
     };
-
     struct Cylinder {
         mat4 invWorld;
         uint materialID;
     };
-
     struct Triangle {
         vec3 p0;
         vec3 p1;
@@ -172,19 +153,15 @@ int hash( int n )
     layout( set = 2, binding = 0 ) buffer Spheres {
         Sphere allSpheres[];
     };
-
     layout( set = 2, binding = 1 ) buffer Boxes {
         Box allBoxes[];
     };
-
     layout( set = 2, binding = 2 ) buffer Cylinders {
         Cylinder allCylinders[];
     };
-
     layout( set = 2, binding = 3 ) buffer Triangles {
         Triangle allTriangles[];
     };
-
     layout( set = 2, binding = 4 ) buffer Materials {
         Material allMaterials[];
     };
@@ -203,69 +180,12 @@ int hash( int n )
         vec3 direction;
     };
 
-    float getRandom() {
-return frand();
-    }
-
-    float getRandomRange( float min, float max ) {
-        return min + getRandom() * ( max - min );
-    }
-
-    vec3 getRandomVec3() {
-        return vec3(
-            getRandom(),
-            getRandom(),
-            getRandom() );
-    }
-
-    vec3 getRandomVec3Range( float min, float max ) {
-        return vec3(
-            getRandomRange( min, max ),
-            getRandomRange( min, max ),
-            getRandomRange( min, max ) );
-    }
-
-    vec3 getRandomInUnitSphere() {
-        while ( true ) {
-            vec3 p = getRandomVec3Range( -1.0, 1.0 );
-            if ( dot( p, p ) < 1.0 ) {
-                return p;
-            }
-        }
-        return vec3( 0 );
-    }
-
-    vec3 getRandomInUnitDisc() {
-        while ( true ) {
-            vec3 p = vec3(
-                getRandomRange( -1.0, 1.0 ),
-                getRandomRange( -1.0, 1.0 ),
-                0.0 );
-            if ( dot( p, p ) >= 1.0 ) {
-                break;
-            }
-            return p;
-        }
-    }
-
-    vec3 getRandomUnitVector() {
-        return normalize( getRandomInUnitSphere() );
-    }
-
-    vec3 getRandomInHemisphere( vec3 N ) {
-        vec3 inUnitSphere = getRandomInUnitSphere();
-        if ( dot( inUnitSphere, N ) > 0.0 ) {
-            return inUnitSphere;
-        } else {
-            return -inUnitSphere;
-        }
-    }
+    #include <swapsHandedness>
 
     HitRecord setFaceNormal( Ray ray, vec3 N, mat4 invWorld, HitRecord rec ) {
         rec.frontFace = dot( ray.direction, N ) < 0;
         rec.normal = rec.frontFace ? N : -N;
-        if ( determinant( mat3( invWorld ) ) < 0 ) {
-            // transformation swaps handedness
+        if ( swapsHandedness( invWorld ) ) {
             rec.normal = -rec.normal;
         }
         return rec;
@@ -274,24 +194,15 @@ return frand();
     vec3 rayAt( Ray ray, float t ) {
         return ray.origin + t * ray.direction;
     }
+)";
 
+const auto SCATTER_SRC = R"(
     struct Scattered {
         bool hasResult;
         bool isEmissive;
         Ray ray;
         vec3 attenuation;
     };
-
-    bool isZero( vec3 v ) {
-        float s = 0.00001;
-        return abs( v.x ) < s && abs( v.y ) < s && abs( v.z ) < s;
-    }
-
-    float reflectance( float cosine, float refIdx ) {
-        float r0 = ( 1.0 - refIdx ) / ( 1.0 + refIdx );
-        r0 = r0 * r0;
-        return r0 + ( 1.0 - r0 ) * pow( ( 1.0 - cosine ), 5.0 );
-    }
 
     Scattered scatter( Material material, Ray ray, HitRecord rec ) {
         Scattered scattered;
@@ -342,7 +253,9 @@ scattered.hasResult = true;
 
         return scattered;
     }
+)";
 
+const auto HIT_SCENE_SRC = R"(
     float hitSphere( Sphere sphere, Ray worldRay, float tMin, float tMax )
     {
         Ray ray;
@@ -426,12 +339,6 @@ scattered.hasResult = true;
         }
 
         return hasResult ? t : tInMax;
-    }
-
-    bool isZero( float x ) 
-    {
-        float EPSILON = 0.000001;
-        return abs( x ) < EPSILON;
     }
 
     bool checkCylinderCap( Ray R, float t )
@@ -569,17 +476,7 @@ scattered.hasResult = true;
         return hit;
     }
 
-    int maxDimension( vec3 u )
-    {
-        int ret = 0;
-        if ( u[ 1 ] > u[ ret ] ) {
-            ret = 1;
-        }
-        if ( u[ 2 ] > u[ ret ] ) {
-            ret = 2;
-        }
-        return ret;
-    }
+    #include <max>
 
     HitRecord hitBoxes( Ray ray, float tMin, HitRecord hit )
     {
@@ -733,43 +630,9 @@ if ( det > 0 ) {
 
         return ray;
     }
+)";
 
-    vec3 rayColor( Ray ray ) {
-        float multiplier = 1.0;
-        float tMin = 0.001;
-        float tMax = 9999.9;
-        vec3 attenuation = vec3( 1.0 );
-
-        vec3 color = vec3( 1.0 );
-
-        int depth = 0;
-        while ( depth < 10 ) {
-            HitRecord hit = hitScene( ray, tMin, tMax );
-            if ( !hit.hasResult ) {
-                // no hit. use background color
-                color *= backgroundColor;
-                return color;
-            }
-
-            Scattered scattered = scatter( allMaterials[ hit.materialID ], ray, hit );
-            if ( scattered.hasResult ) {
-                color *= scattered.attenuation;
-                if ( scattered.isEmissive ) {
-                    // no need to continue, just return the color
-                    return color;
-                }
-                color *= scattered.attenuation;
-                ray = scattered.ray;
-                ++depth;
-            } else {
-                return vec3( 0 );
-            }
-        }
-
-        // never happens
-        return vec3( 0 );
-    }
-
+const auto BOUNCE_SRC = R"(
     ivec2 getTileSize()
     {
         ivec2 M = ivec2( gl_NumWorkGroups.xy * gl_WorkGroupSize.xy );
@@ -894,25 +757,11 @@ if ( det > 0 ) {
     }
 
     void main() {
-
-// init randoms
-    ivec2 q = ivec2( gl_GlobalInvocationID.xy );
-    srand( hash( q.x + hash( q.y + hash( int( seedStart ) ) ) ) );
-
-        // if ( sampleCount >= maxSamples ) {
-        //     return;
-        // }
-
-        //flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
+        initRandom( int( seedStart ) );
 
         vec2 size = imageSize( resultImage );
         float aspectRatio = size.x / size.y;
 
-        if ( gl_GlobalInvocationID.x >= size.x || gl_GlobalInvocationID.y >= size.y ) {
-            //return;
-        }
-
-#if 1
         int rayIdx = getNextRayIndexInTile();
         if ( rayIdx < 0 ) {
            return;
@@ -925,31 +774,7 @@ if ( det > 0 ) {
 
         Ray ray = getNextRay( rayIdx );
         doSampleBounce( rayIdx, ray );
-#else
-        if ( sampleCount == 0 ) {
-            // reset all samples
-            imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( vec3( 0 ), 1.0 ) );
-            return;
-        }
-
-        vec2 uv = gl_GlobalInvocationID.xy;
-        uv += vec2( getRandom(), getRandom() );
-        uv /= ( size.xy - vec2( 1 ) );
-        uv.y = 1.0 - uv.y;
-        Ray ray = getCameraRay( uv.x, uv.y );
-        vec3 color = rayColor( ray );
-
-        vec3 destinationColor = imageLoad( resultImage, ivec2( gl_GlobalInvocationID.xy ) ).rgb;
-        color = ( destinationColor * float( sampleCount - 1 ) + color ) / float( sampleCount );
-
-        if ( sampleCount == 0 ) {
-            color = vec3( 0 );
-        }
-
-        imageStore( resultImage, ivec2( gl_GlobalInvocationID.xy ), vec4( color, 1.0 ) );
-#endif
     }
-
 )";
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noexcept
@@ -1298,7 +1123,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
         crimild::alloc< Shader >(
             Shader::Stage::COMPUTE,
-            FRAG_SRC ),
+            PRELUDE_SRC + SCATTER_SRC + HIT_SCENE_SRC + BOUNCE_SRC ),
         Format::R32G32B32A32_SFLOAT,
         workgroup,
         { ds, sceneDescriptors } );
