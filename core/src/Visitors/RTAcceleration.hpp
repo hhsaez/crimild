@@ -31,6 +31,7 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
 #include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Transformation.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
@@ -102,12 +103,7 @@ namespace crimild {
         /**
          * \brief World transformation
          */
-        Matrix4 world;
-
-        /**
-         * \brief Inverse world transformation
-         */
-        Matrix4 invWorld;
+        Transformation world;
     };
 
     class RTAcceleration : public NodeVisitor {

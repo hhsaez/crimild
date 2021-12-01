@@ -83,6 +83,15 @@ template< typename T >
 }
 
 template< typename T >
+[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator/( const crimild::impl::Vector2< T > &u, const crimild::impl::Vector2< T > &v ) noexcept
+{
+    return crimild::impl::Vector2< T > {
+        u.x / v.x,
+        u.y / v.y,
+    };
+}
+
+template< typename T >
 [[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator-( const crimild::impl::Vector2< T > &u ) noexcept
 {
     return crimild::impl::Vector2< T > {

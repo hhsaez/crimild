@@ -28,7 +28,9 @@
 #include "Rendering/Operations/Operations_softRT.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Box_normal.hpp"
 #include "Mathematics/ColorRGBOps.hpp"
+#include "Mathematics/ColorRGB_isZero.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Normal3Ops.hpp"
 #include "Mathematics/Random.hpp"
@@ -36,6 +38,7 @@
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
+#include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/Vector3_isZero.hpp"
 #include "Mathematics/easing.hpp"
 #include "Mathematics/intersect.hpp"
@@ -204,62 +207,6 @@ struct IntersectionResult {
     }
 };
 
-[[nodiscard]] Bool intersect( const Ray3 &R, const RTAcceleration::Result &scene, UInt32 nodeId, IntersectionResult &result ) noexcept
-{
-    const auto &node = scene.nodes[ nodeId ];
-
-    switch ( node.type ) {
-        case RTAcceleratedNode::Type::GROUP: {
-            auto ret = false;
-
-            ret = intersect( R, scene, nodeId + 1, result ) || ret;
-            if ( node.secondChildIndex >= 0 ) {
-                ret = intersect( R, scene, node.secondChildIndex, result ) || ret;
-            }
-            return ret;
-        }
-
-        case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
-            const auto S = Sphere {};
-            const auto R1 = Ray3 {
-                .o = point3( xyz( node.invWorld * vector4( R.o, 1 ) ) ),
-                .d = xyz( node.invWorld * vector4( R.d, 0 ) ),
-            };
-
-            Real t0 = numbers::POSITIVE_INFINITY;
-            Real t1 = numbers::POSITIVE_INFINITY;
-            auto hasResult = false;
-            if ( intersect( R1, S, t0, t1 ) ) {
-                if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
-                    result.t = t0;
-                    result.materialId = node.materialIndex;
-                    hasResult = true;
-                }
-
-                if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
-                    result.t = t1;
-                    result.materialId = node.materialIndex;
-                    hasResult = true;
-                }
-            }
-            return hasResult;
-        }
-
-        default: {
-            return false;
-        }
-    }
-}
-
-[[nodiscard]] Bool intersect( const Ray3 &R, const RTAcceleration::Result &scene, IntersectionResult &result ) noexcept
-{
-    if ( scene.nodes.empty() ) {
-        return false;
-    }
-
-    return intersect( R, scene, 0, result );
-}
-
 [[nodiscard]] Bool intersectNR( const Ray3 &R, const RTAcceleration::Result &scene, IntersectionResult &result ) noexcept
 {
     if ( scene.nodes.empty() ) {
@@ -271,69 +218,64 @@ struct IntersectionResult {
     utils::traverseNonRecursive(
         scene,
         [ & ]( const auto &node, auto index ) -> Bool {
-            const auto R1 = Ray3 {
-                .o = point3( xyz( node.invWorld * vector4( R.o, 1 ) ) ),
-                .d = xyz( node.invWorld * vector4( R.d, 0 ) ),
-            };
+            // auto resolveCSG = [ & ]( auto t0, auto t1 ) {
+            //     if ( node.parentIndex < 0 ) {
+            //         return false;
+            //     }
 
-            auto resolveCSG = [ & ]( auto t0, auto t1 ) {
-                if ( node.parentIndex < 0 ) {
-                    return false;
-                }
+            //     auto parentIndex = node.parentIndex;
+            //     while ( parentIndex >= 0 ) {
+            //         const auto &parent = scene.nodes[ node.parentIndex ];
+            //         if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
+            //             break;
+            //         } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
+            //             break;
+            //         } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
+            //             break;
+            //         } else {
+            //             parentIndex = scene.nodes[ parentIndex ].parentIndex;
+            //         }
+            //     }
 
-                auto parentIndex = node.parentIndex;
-                while ( parentIndex >= 0 ) {
-                    const auto &parent = scene.nodes[ node.parentIndex ];
-                    if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
-                        break;
-                    } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
-                        break;
-                    } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
-                        break;
-                    } else {
-                        parentIndex = scene.nodes[ parentIndex ].parentIndex;
-                    }
-                }
+            //     if ( parentIndex < 0 ) {
+            //         return false;
+            //     }
 
-                if ( parentIndex < 0 ) {
-                    return false;
-                }
+            //     const auto &parent = scene.nodes[ parentIndex ];
+            //     if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
+            //         const auto t = min( t0, t1 );
+            //         if ( t < result.t ) {
+            //             result.t = t0;
+            //             result.materialId = node.materialIndex;
+            //             hasResult = true;
+            //         }
+            //         return true;
+            //     } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
+            //         const auto t = min( t0, t1 );
+            //         if ( t > result.t ) {
+            //             result.t = t0;
+            //             result.materialId = node.materialIndex;
+            //             hasResult = true;
+            //         }
+            //         return true;
+            //     } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
+            //         const auto t = min( t0, t1 );
+            //         if ( t > result.t ) {
+            //             result.t = t0;
+            //             result.materialId = node.materialIndex;
+            //             hasResult = true;
+            //         }
+            //         return true;
+            //     }
 
-                const auto &parent = scene.nodes[ parentIndex ];
-                if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
-                    const auto t = min( t0, t1 );
-                    if ( t < result.t ) {
-                        result.t = t0;
-                        result.materialId = node.materialIndex;
-                        hasResult = true;
-                    }
-                    return true;
-                } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
-                    const auto t = min( t0, t1 );
-                    if ( t > result.t ) {
-                        result.t = t0;
-                        result.materialId = node.materialIndex;
-                        hasResult = true;
-                    }
-                    return true;
-                } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
-                    const auto t = min( t0, t1 );
-                    if ( t > result.t ) {
-                        result.t = t0;
-                        result.materialId = node.materialIndex;
-                        hasResult = true;
-                    }
-                    return true;
-                }
-
-                return false;
-            };
+            //     return false;
+            // };
 
             switch ( node.type ) {
                 case RTAcceleratedNode::Type::GROUP: {
                     const auto B = Box {};
                     Real t0, t1;
-                    if ( !intersect( R1, B, t0, t1 ) ) {
+                    if ( !intersect( R, B, node.world, t0, t1 ) ) {
                         return false;
                     }
 
@@ -342,24 +284,27 @@ struct IntersectionResult {
 
                 case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
                     const auto S = Sphere {};
-                    Real t0 = numbers::POSITIVE_INFINITY;
-                    Real t1 = numbers::POSITIVE_INFINITY;
-                    if ( !intersect( R1, S, t0, t1 ) ) {
+                    Real t0, t1;
+                    if ( !intersect( R, S, node.world, t0, t1 ) ) {
                         return false;
                     }
 
-                    if ( resolveCSG( t0, t1 ) ) {
-                        return true;
-                    }
+                    // if ( resolveCSG( t0, t1 ) ) {
+                    //     return true;
+                    // }
 
                     if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
                         result.t = t0;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( S, node.world, result.point ) );
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
 
                     if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
                         result.t = t1;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( S, node.world, result.point ) );
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
@@ -370,19 +315,23 @@ struct IntersectionResult {
                 case RTAcceleratedNode::Type::PRIMITIVE_BOX: {
                     const auto B = Box {};
                     Real t0, t1;
-                    if ( intersect( R1, B, t0, t1 ) ) {
+                    if ( intersect( R, B, node.world, t0, t1 ) ) {
                         // if ( resolveCSG( t0, t1 ) ) {
                         //     return true;
                         // }
 
                         if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
                             result.t = t0;
+                            result.point = R( result.t );
+                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
                             result.materialId = node.materialIndex;
                             hasResult = true;
                         }
 
                         if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
                             result.t = t1;
+                            result.point = R( result.t );
+                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
                             result.materialId = node.materialIndex;
                             hasResult = true;
                         }
@@ -568,21 +517,208 @@ namespace crimild {
 
         virtual ~SoftRT( void ) noexcept
         {
+            m_running = false;
+
             // clear all pending jobs
-            m_jobs.clear();
+            // m_jobs.clear();
 
             // wait for workers
-            reset();
+            // reset();
 
             m_workers.clear();
         }
 
     private:
-        Bool execute( void ) noexcept
+        // Maybe rename to SampleInfo?
+        struct RayInfo {
+            Ray3 ray;
+            ColorRGB sampleColor;
+            ColorRGB accumColor;
+            Vector2 uv;
+            Int32 bounces;
+            Int32 samples;
+        };
+
+        std::vector< RayInfo > m_rays;
+
+        void initializeRays( void ) noexcept
         {
-            if ( !isDone() ) {
+            // Assumes images are 2D
+            for ( Real y = 0; y < m_height; ++y ) {
+                for ( Real x = 0; x < m_width; ++x ) {
+                    m_rays.push_back(
+                        RayInfo {
+                            .ray = Ray3 {},
+                            .sampleColor = ColorRGB { 1, 1, 1 },
+                            .accumColor = ColorRGB { 0, 0, 0 },
+                            .uv = Vector2 { x, y },
+                            .bounces = 0,
+                            .samples = 0,
+                        } );
+                }
+            }
+
+            Random::shuffle( m_rays );
+        }
+
+        [[nodiscard]] inline Settings *getSettings( void ) noexcept
+        {
+            return Simulation::getInstance()->getSettings();
+        }
+
+        void onSampleCompleted( RayInfo &rayInfo ) noexcept
+        {
+            rayInfo.accumColor = rayInfo.accumColor + rayInfo.sampleColor;
+            rayInfo.samples++;
+
+            ColorRGB color = rayInfo.accumColor / Real( rayInfo.samples );
+            m_imageAaccessor->set( rayInfo.uv.y * m_width + rayInfo.uv.x, rgba( color ) );
+
+            rayInfo.sampleColor = ColorRGB { 1, 1, 1 };
+            rayInfo.bounces = 0;
+        }
+
+        [[nodiscard]] Ray3 getRay( RayInfo &rayInfo ) noexcept
+        {
+            if ( rayInfo.bounces > 0 ) {
+                // Not the first bounce, so info already contains a valid ray
+                return rayInfo.ray;
+            }
+
+            // First bounce. Generate a new ray from the camera
+
+            // Basic antialliasing by offseting the UV coordinates
+            auto uv = rayInfo.uv;
+            uv = uv + Vector2 { Random::generate< Real >(), Random::generate< Real >() };
+            uv = uv / Vector2 { m_width - 1.0f, m_height - 1.0f };
+
+            Ray3 ray;
+            m_camera->getPickRay( uv.x, uv.y, ray );
+
+            // Calculate depth-of-field based on camera properties
+            // TODO(hernan): avoid doing these calculations every time
+            auto focusDist = m_camera->getFocusDistance();
+            auto aperture = m_camera->getAperture();
+            const auto cameraFocusDistance = focusDist;
+            const auto cameraAperture = aperture;
+            const auto cameraLensRadius = 0.5f * cameraAperture;
+            const auto cameraRight = right( m_camera->getWorld() );
+            const auto cameraUp = up( m_camera->getWorld() );
+
+            const auto rd = cameraLensRadius * randomInUnitDisk();
+            const auto offset = cameraRight * rd.x + cameraUp * rd.y;
+
+            rayInfo.ray = Ray3 {
+                origin( ray ) + offset,
+                cameraFocusDistance * direction( ray ) - offset,
+            };
+
+            return rayInfo.ray;
+        }
+
+        bool scatter( const RTAcceleration::Result &scene, const Ray3 &R, const IntersectionResult &result, Ray3 &scattered, ColorRGB &attenuation, Bool &shouldBounce ) noexcept
+        {
+            shouldBounce = true;
+
+            const auto &material = scene.materials[ result.materialId ];
+
+            if ( material.transmission > 0 ) {
+                // Transmissive
+                attenuation = ColorRGB::Constants::WHITE;
+
+                const auto ior = material.indexOfRefraction;
+
+                const auto refractionRatio = result.frontFace ? ( Real( 1 ) / ior ) : ior;
+                const auto dir = normalize( direction( R ) );
+                double cosTheta = min( dot( -dir, result.normal ), Real( 1 ) );
+                double sinTheta = sqrt( Real( 1 ) - cosTheta * cosTheta );
+                const auto cannotRefract = refractionRatio * sinTheta > 1;
+                const auto scatteredDirection = [ & ] {
+                    if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > Random::generate< Real >() ) {
+                        return reflect( dir, result.normal );
+                    } else {
+                        return refract( dir, result.normal, refractionRatio );
+                    }
+                }();
+                scattered = Ray3 { result.point, scatteredDirection };
                 return true;
             }
+
+            if ( material.metallic > 0 ) {
+                auto reflected = reflect( direction( R ), result.normal );
+                scattered = Ray3 {
+                    result.point,
+                    reflected + material.roughness * randomInUnitSphere(),
+                };
+                attenuation = material.albedo;
+                return dot( direction( scattered ), result.normal ) > 0;
+            }
+
+            if ( !isZero( material.emissive ) ) {
+                shouldBounce = false;
+                attenuation = material.emissive;
+                return true;
+            }
+
+            auto scatteredDirection = vector3( result.normal ) + randomUnitVector();
+            if ( isZero( scatteredDirection ) ) {
+                scatteredDirection = vector3( result.normal );
+            }
+            scattered = Ray3 { result.point, scatteredDirection };
+            attenuation = material.albedo;
+            return true;
+        }
+
+        void doSampleBounce( RayInfo &rayInfo, const RTAcceleration::Result &scene ) noexcept
+        {
+            if ( rayInfo.bounces > 10 ) {
+                // rayInfo.sampleColor = ColorRGB { 0, 0, 0 };
+                onSampleCompleted( rayInfo );
+                return;
+            }
+
+            IntersectionResult result;
+            const auto R = getRay( rayInfo );
+            if ( !intersectNR( R, scene, result ) ) {
+                // no intersection. Use background color
+                // TODO(hernan): Avoid getting settings every time
+                auto settings = getSettings();
+                auto backgroundColor = ColorRGB {
+                    settings->get< Real >( "rt.background_color.r", 0.5f ),
+                    settings->get< Real >( "rt.background_color.g", 0.7f ),
+                    settings->get< Real >( "rt.background_color.b", 1.0f ),
+                };
+                rayInfo.sampleColor = rayInfo.sampleColor * backgroundColor;
+                onSampleCompleted( rayInfo );
+                return;
+            }
+
+            Ray3 scattered;
+            ColorRGB attenuation;
+            Bool shouldBounce;
+            if ( scatter( scene, R, result, scattered, attenuation, shouldBounce ) ) {
+                rayInfo.sampleColor = rayInfo.sampleColor * attenuation;
+                if ( shouldBounce ) {
+                    rayInfo.ray = scattered;
+                    rayInfo.bounces++;
+                } else {
+                    onSampleCompleted( rayInfo );
+                }
+            } else {
+                rayInfo.sampleColor = ColorRGB { 0, 0, 0 };
+                onSampleCompleted( rayInfo );
+            }
+        }
+
+        Bool execute( void ) noexcept
+        {
+            if ( !m_workers.empty() ) {
+                return true;
+            }
+
+            // if ( !isDone() ) {
+            //     return true;
+            // }
 
             auto settings = Simulation::getInstance()->getSettings();
 
@@ -623,7 +759,7 @@ namespace crimild {
             }
 
             // Reset all jobs and wait for workers to finish
-            reset();
+            // reset();
 
             auto camera = [ & ]() -> SharedPointer< Camera > {
                 if ( m_camera != nullptr ) {
@@ -647,6 +783,35 @@ namespace crimild {
                 exit( -1 );
                 return true;
             }
+
+            initializeRays();
+
+            m_workers.clear();
+            Size workerStride = ceil( Real( m_rays.size() ) / Real( m_workerCount ) );
+            for ( auto i = 0; i < m_workerCount; ++i ) {
+                m_workers.push_back(
+                    std::move(
+                        std::thread(
+                            [ self = this, i, workerStride ] {
+                                Size next = i;
+                                while ( self->m_running ) {
+                                    // It is possible that id clashing happens for two or more
+                                    // workers, but I guess that's ok for now since only one of
+                                    // them will actually write the final color in the image
+                                    Size rayID = next;
+                                    next += self->m_workerCount;
+                                    if ( next >= self->m_rays.size() ) {
+                                        next = i;
+                                    }
+                                    if ( rayID < self->m_rays.size() ) {
+                                        auto &ray = self->m_rays[ rayID ];
+                                        self->doSampleBounce( ray, self->m_acceleratedScene );
+                                    }
+                                }
+                            } ) ) );
+            }
+
+#if 0
 
             auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
             auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
@@ -703,11 +868,11 @@ namespace crimild {
                                         cameraFocusDistance * direction( ray ) - offset,
                                     };
 
-#if 1
+    #if 1
                                     color = color + rayColor( ray, self->m_acceleratedScene, backgroundColor, bounces );
-#else
+    #else
                                     color = color + rayColor( ray, self->m_scene, backgroundColor, bounces );
-#endif
+    #endif
                                 }
                             }
 
@@ -769,6 +934,8 @@ namespace crimild {
 
             CRIMILD_LOG_INFO( "RT Samples: ", sampleCount );
 
+#endif
+
             return true;
         }
 
@@ -795,7 +962,7 @@ namespace crimild {
                 }
             }
 
-            settings->set( "rt.samples.count", sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME );
+            // settings->set( "rt.samples.count", sampleCount + CRIMILD_RT_SAMPLES_PER_FRAME );
 
             if ( Simulation::getInstance()->getSettings()->get< Bool >( "rt.dynamic_scene", false ) ) {
                 // Scene is dynamic, so reset cached scene and camera
@@ -835,6 +1002,7 @@ namespace crimild {
         Real m_aspectRatio;
         Int32 m_tileSize;
         Int32 m_workerCount;
+        Bool m_running = true;
 
         RTAcceleration::Result m_acceleratedScene;
 
