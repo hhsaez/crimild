@@ -98,6 +98,7 @@ namespace crimild {
         template< typename PRECISION >
         inline static void generateImpl( PRECISION &result, const PRECISION &min, const PRECISION &max )
         {
+            // TODO(hernan): This is not thread safe!!
             static Random::Generator defaultGenerator;
 
             crimild::Real64 r = defaultGenerator.generate();

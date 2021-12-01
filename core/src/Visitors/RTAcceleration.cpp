@@ -61,8 +61,7 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
         RTAcceleratedNode {
             .type = RTAcceleratedNode::Type::GROUP,
             .parentIndex = m_parentIndex,
-            .world = boundingTransform.mat,
-            .invWorld = boundingTransform.invMat,
+            .world = boundingTransform,
         } );
 
     auto tempParent = m_parentIndex;
@@ -141,8 +140,7 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
             .type = nodeType,
             .parentIndex = m_parentIndex,
             .materialIndex = materialIndex,
-            .world = geometry->getWorld().mat,
-            .invWorld = geometry->getWorld().invMat,
+            .world = geometry->getWorld(),
         } );
 }
 
@@ -174,8 +172,7 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
         RTAcceleratedNode {
             .type = nodeType,
             .parentIndex = m_parentIndex,
-            .world = boundingTransform.mat,
-            .invWorld = boundingTransform.invMat,
+            .world = boundingTransform,
         } );
 
     auto tempParent = m_parentIndex;
