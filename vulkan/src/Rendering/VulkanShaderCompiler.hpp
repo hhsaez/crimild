@@ -40,13 +40,54 @@ namespace crimild {
     namespace vulkan {
 
         class ShaderCompiler {
+        private:
+            class ShaderPreprocessor {
+            public:
+                Bool isInitialized( void ) const noexcept { return !m_chunks.empty(); }
+                
+                void addChunk( std::string key, std::string src ) noexcept
+                {
+                    const auto expandedKey = std::string( "#include <" ) + key + ">";
+                    m_chunks[ expandedKey ] = expand( src );
+                }
+
+                std::string expand( std::string src ) noexcept
+                {
+                    for ( auto &it : m_chunks ) {
+                        auto begin = src.find( it.first );
+                        if ( begin != std::string::npos ) {
+                            src.replace( begin, it.first.length(), it.second );
+                        }
+                    }
+
+                    // Sanity check
+                    const auto begin = src.find( "#include <" );
+                    if ( begin != std::string::npos ) {
+                        const auto end = src.find_first_of( ">", begin );
+                        if ( end != std::string::npos ) {
+                            std::cerr << "ERROR: Cannot expand " << src.substr( begin, ( end - begin + 1 ) ) << "\n";
+                        }
+                        exit( -1 );
+                    }
+
+                    return src;
+                }
+
+            private:
+                std::unordered_map< std::string, std::string > m_chunks;
+            };
+
         public:
             Bool init( void ) noexcept;
 
             Bool compile( Shader::Stage stage, const std::string &source, Shader::Data &out ) noexcept;
 
         private:
+            void initPreprocessor( void ) noexcept;
+
+        private:
             Bool m_initialized = false;
+            ShaderPreprocessor m_preprocessor;
         };
 
     }

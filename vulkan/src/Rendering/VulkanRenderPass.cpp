@@ -138,14 +138,14 @@ crimild::Bool RenderPassManager::bind( RenderPass *renderPass ) noexcept
 
     auto subpass = VkSubpassDescription {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-        .pColorAttachments = colorReferences.getData(),
-        .pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
         .inputAttachmentCount = 0,
         .pInputAttachments = nullptr,
+        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+        .pColorAttachments = colorReferences.getData(),
+        .pResolveAttachments = nullptr,
+        .pDepthStencilAttachment = !depthStencilReferences.empty() ? depthStencilReferences.getData() : nullptr,
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr,
-        .pResolveAttachments = nullptr,
     };
 
     auto dependencies = std::vector< VkSubpassDependency > {

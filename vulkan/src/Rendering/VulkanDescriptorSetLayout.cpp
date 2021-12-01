@@ -51,7 +51,7 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
         	.binding = static_cast< crimild::UInt32 >( i ),
         	.descriptorType = utils::getVulkanDescriptorType( binding.descriptorType ),
             .descriptorCount = 1,
-            .stageFlags = utils::getVulkanShaderStageFlag( binding.stage ),
+            .stageFlags = static_cast< VkShaderStageFlags >( utils::getVulkanShaderStageFlag( binding.stage ) ),
             .pImmutableSamplers = nullptr // optional
         };
     }

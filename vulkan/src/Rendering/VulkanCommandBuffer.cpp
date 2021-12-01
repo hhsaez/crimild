@@ -57,8 +57,8 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandPool = commandPool->handler,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = 1,
     };
 
@@ -132,7 +132,7 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                 case CommandBuffer::Command::Type::BEGIN: {
                     auto beginInfo = VkCommandBufferBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-                        .flags = vulkan::utils::VULKAN_COMMAND_BUFFER_USAGE[ static_cast< uint32_t >( cmd.usage ) ],
+                        .flags = static_cast< VkCommandBufferUsageFlags >( vulkan::utils::VULKAN_COMMAND_BUFFER_USAGE[ static_cast< uint32_t >( cmd.usage ) ] ),
                         .pInheritanceInfo = nullptr, // optional
                     };
 
@@ -192,12 +192,12 @@ void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBu
                                     if ( needsBarrier ) {
                                         auto imageMemoryBarrier = VkImageMemoryBarrier {
                                             .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                                            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
                                             .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
                                             .newLayout = VK_IMAGE_LAYOUT_GENERAL,
                                             .image = imageBindInfo.imageHandler,
                                             .subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 },
-                                            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-                                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
                                         };
                                         vkCmdPipelineBarrier(
                                             handler,

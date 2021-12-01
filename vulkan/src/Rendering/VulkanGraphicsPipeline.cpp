@@ -234,8 +234,8 @@ Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInp
                 [ & ]( const auto &attrib ) {
                     attributeDescriptions.add(
                         VkVertexInputAttributeDescription {
-                            .binding = crimild::UInt32( binding ),
                             .location = crimild::UInt32( location++ ),
+                            .binding = crimild::UInt32( binding ),
                             .format = utils::getFormat( renderDevice, attrib.format ),
                             .offset = attrib.offset,
                         } );
@@ -248,8 +248,8 @@ Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInp
                 [ & ]( const auto &attrib ) {
                     attributeDescriptions.add(
                         VkVertexInputAttributeDescription {
-                            .binding = crimild::UInt32( binding ),
                             .location = crimild::UInt32( location++ ),
+                            .binding = crimild::UInt32( binding ),
                             .format = utils::getFormat( renderDevice, attrib.format ),
                             .offset = attrib.offset,
                         } );
@@ -324,11 +324,11 @@ VkPipelineViewportStateCreateInfo GraphicsPipelineManager::createViewportState( 
 {
     return VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        .flags = 0,
         .viewportCount = 1,
         .pViewports = &viewport,
         .scissorCount = 1,
         .pScissors = &scissor,
-        .flags = 0,
     };
 }
 
@@ -336,11 +336,11 @@ VkPipelineViewportStateCreateInfo GraphicsPipelineManager::createDynamicViewport
 {
     return VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        .flags = 0,
         .viewportCount = hasViewport ? 1u : 0,
         .pViewports = nullptr,
         .scissorCount = hasScissor ? 1u : 0,
         .pScissors = nullptr,
-        .flags = 0,
     };
 }
 
@@ -392,13 +392,13 @@ VkPipelineRasterizationStateCreateInfo GraphicsPipelineManager::createRasterizer
         .depthClampEnable = rasterizationState.depthClampEnable,
         .rasterizerDiscardEnable = rasterizationState.rasterizerDiscardEnable,
         .polygonMode = getVkPolygonMode( rasterizationState.polygonMode ),
-        .lineWidth = rasterizationState.lineWidth,
-        .cullMode = getVkCullModeFlag( rasterizationState.cullMode ),
+        .cullMode = static_cast< VkCullModeFlags >( getVkCullModeFlag( rasterizationState.cullMode ) ),
         .frontFace = getVkFrontFace( rasterizationState.frontFace ),
         .depthBiasEnable = rasterizationState.depthBiasEnable,
         .depthBiasConstantFactor = rasterizationState.depthBiasConstantFactor,
         .depthBiasClamp = rasterizationState.depthBiasClamp,
         .depthBiasSlopeFactor = rasterizationState.depthBiasSlopeFactor,
+        .lineWidth = rasterizationState.lineWidth,
     };
 }
 
@@ -410,8 +410,8 @@ VkPipelineMultisampleStateCreateInfo GraphicsPipelineManager::createMultiplesamp
 
     return VkPipelineMultisampleStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-        .sampleShadingEnable = VK_FALSE,
         .rasterizationSamples = msaaSamples,
+        .sampleShadingEnable = VK_FALSE,
         .minSampleShading = 1.0f,
         .pSampleMask = nullptr,
         .alphaToCoverageEnable = VK_FALSE,
@@ -465,11 +465,11 @@ VkPipelineDepthStencilStateCreateInfo GraphicsPipelineManager::createDepthStenci
         .depthWriteEnable = state.depthWriteEnable,
         .depthCompareOp = utils::getCompareOp( state.depthCompareOp ),
         .depthBoundsTestEnable = state.depthBoundsTestEnable,
-        .minDepthBounds = state.minDepthBounds,
-        .maxDepthBounds = state.maxDepthBounds,
         .stencilTestEnable = state.stencilTestEnable,
         .front = getStencilOpState( state.front ),
         .back = getStencilOpState( state.back ),
+        .minDepthBounds = state.minDepthBounds,
+        .maxDepthBounds = state.maxDepthBounds,
     };
 }
 
@@ -541,7 +541,6 @@ VkPipelineColorBlendAttachmentState GraphicsPipelineManager::createColorBlendAtt
 
     return VkPipelineColorBlendAttachmentState {
         // TODO: Support color write mask in ColorBlendState
-        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
         .blendEnable = state.enable,
         .srcColorBlendFactor = getVkBlendFactor( state.srcColorBlendFactor ),
         .dstColorBlendFactor = getVkBlendFactor( state.dstColorBlendFactor ),
@@ -549,6 +548,7 @@ VkPipelineColorBlendAttachmentState GraphicsPipelineManager::createColorBlendAtt
         .srcAlphaBlendFactor = getVkBlendFactor( state.srcAlphaBlendFactor ),
         .dstAlphaBlendFactor = getVkBlendFactor( state.dstAlphaBlendFactor ),
         .alphaBlendOp = getVkBlendOp( state.alphaBlendOp ),
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
     };
 }
 
@@ -560,10 +560,7 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipelineManager::createColorBlending
         .logicOp = VK_LOGIC_OP_COPY,
         .attachmentCount = UInt32( colorBlendAttachments.size() ),
         .pAttachments = colorBlendAttachments.getData(),
-        .blendConstants[ 0 ] = 0.0f,
-        .blendConstants[ 1 ] = 0.0f,
-        .blendConstants[ 2 ] = 0.0f,
-        .blendConstants[ 3 ] = 0.0f,
+        .blendConstants = { 0, 0, 0, 0},
     };
 }
 
@@ -586,8 +583,8 @@ VkPipelineDynamicStateCreateInfo GraphicsPipelineManager::createDynamicState( Dy
 {
     return VkPipelineDynamicStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-        .pDynamicStates = dynamicStates.data(),
-        .dynamicStateCount = static_cast< crimild::UInt32 >( dynamicStates.size() ),
         .flags = 0,
+        .dynamicStateCount = static_cast< crimild::UInt32 >( dynamicStates.size() ),
+        .pDynamicStates = dynamicStates.data(),
     };
 }

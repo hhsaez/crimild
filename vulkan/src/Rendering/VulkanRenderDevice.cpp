@@ -200,8 +200,8 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
 
     // Set the requried device features
     auto deviceFeatures = VkPhysicalDeviceFeatures {
-        .samplerAnisotropy = VK_TRUE,
         .fillModeNonSolid = VK_TRUE,
+        .samplerAnisotropy = VK_TRUE,
     };
 
     const auto &deviceExtensions = utils::getDeviceExtensions();
@@ -210,10 +210,10 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .queueCreateInfoCount = static_cast< crimild::UInt32 >( queueCreateInfos.size() ),
         .pQueueCreateInfos = queueCreateInfos.data(),
-        .pEnabledFeatures = &deviceFeatures,
         .enabledLayerCount = 0,
         .enabledExtensionCount = static_cast< crimild::UInt32 >( deviceExtensions.size() ),
         .ppEnabledExtensionNames = deviceExtensions.data(),
+        .pEnabledFeatures = &deviceFeatures,
     };
 
     if ( utils::checkValidationLayersEnabled() ) {

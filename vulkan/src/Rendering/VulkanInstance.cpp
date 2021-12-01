@@ -84,9 +84,9 @@ SharedPointer< VulkanInstance > VulkanInstanceManager::create( VulkanInstance::D
     auto createInfo = VkInstanceCreateInfo {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pApplicationInfo = &appInfo,
+        .enabledLayerCount = 0,
         .enabledExtensionCount = static_cast< crimild::UInt32 >( extensions.size() ),
         .ppEnabledExtensionNames = extensions.data(),
-        .enabledLayerCount = 0,
     };
 
     // Keep reference outside block to it is not automatically destroyed before calling VkCreateInstance
