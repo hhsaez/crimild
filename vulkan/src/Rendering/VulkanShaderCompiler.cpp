@@ -196,7 +196,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
             #extension GL_ARB_separate_shader_objects : enable
         )" );
 
-    auto src = prefix + source;
+    auto src = prefix + m_preprocessor.expand( source );
     auto data = src.c_str();
 
     auto tShader = glslang::TShader( stage );
@@ -518,6 +518,80 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             {
                 float z = depth * 2.0 - 1.0; // Back to NDC
                 return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
+            }
+
+            #endif
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "isZero",
+        R"(
+            #ifndef CRIMILD_GLSL_IS_ZERO
+            #define CRIMILD_GLSL_IS_ZERO
+
+            bool isZero( float x ) 
+            {
+                float EPSILON = 0.000001;
+                return abs( x ) < EPSILON;
+            }
+
+            bool isZero( vec3 v ) {
+                float s = 0.00001;
+                return abs( v.x ) < s && abs( v.y ) < s && abs( v.z ) < s;
+            }
+
+            #endif
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "reflectance",
+        R"(
+            #ifndef CRIMILD_GLSL_IS_REFLECTANCE
+            #define CRIMILD_GLSL_IS_REFLECTANCE
+
+            float reflectance( float cosine, float refIdx ) {
+                float r0 = ( 1.0 - refIdx ) / ( 1.0 + refIdx );
+                r0 = r0 * r0;
+                return r0 + ( 1.0 - r0 ) * pow( ( 1.0 - cosine ), 5.0 );
+            }
+
+            #endif
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "max",
+        R"(
+            #ifndef CRIMILD_GLSL_MAX
+            #define CRIMILD_GLSL_MAX
+
+            int maxDimension( vec3 u )
+            {
+                int ret = 0;
+                if ( u[ 1 ] > u[ ret ] ) {
+                    ret = 1;
+                }
+                if ( u[ 2 ] > u[ ret ] ) {
+                    ret = 2;
+                }
+                return ret;
+            }
+
+            #endif
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "swapsHandedness",
+        R"(
+            #ifndef CRIMILD_GLSL_SWAPS_HANDEDNESS
+            #define CRIMILD_GLSL_SWAPS_HANDEDNESS
+
+            bool swapsHandedness( mat4 M )
+            {
+                return determinant( mat3( M ) ) < 0;
             }
 
             #endif
