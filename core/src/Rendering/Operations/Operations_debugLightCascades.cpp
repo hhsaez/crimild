@@ -225,8 +225,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debugLightCascades(
     auto lightVolume = crimild::alloc< SpherePrimitive >(
         SpherePrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
-            .layout = VertexP3::getLayout(),
             .radius = 1.0,
+            .layout = VertexP3::getLayout(),
         } );
 
     auto descriptors = [ & ] {

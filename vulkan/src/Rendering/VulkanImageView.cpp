@@ -56,21 +56,23 @@ crimild::Bool vulkan::ImageViewManager::bind( ImageView *imageView ) noexcept
 
     auto viewInfo = VkImageViewCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .flags = 0,
         .image = image,
         .viewType = utils::getImageViewType( imageView ),
         .format = utils::getImageViewFormat( renderDevice, imageView ),
-        .components.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-        .components.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-        .components.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-        .components.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-        .subresourceRange.aspectMask = utils::getImageViewAspectFlags( imageView ),
-        .subresourceRange.baseMipLevel = 0,
-        .subresourceRange.levelCount = mipLevels,
-        .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = layerCount,
-
-        // optional
-        .flags = 0
+        .components = {
+            .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+            .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+        },
+        .subresourceRange = {
+            .aspectMask = utils::getImageViewAspectFlags( imageView ),
+            .baseMipLevel = 0,
+            .levelCount = mipLevels,
+            .baseArrayLayer = 0,
+            .layerCount = layerCount,
+        },
     };
 
     VkImageView handler;

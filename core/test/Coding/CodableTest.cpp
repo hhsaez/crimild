@@ -180,11 +180,15 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override
             {
                 // TODO
+                return false;
             }
+
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override
             {
                 // TODO
+                return false;
             }
+            
             virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }

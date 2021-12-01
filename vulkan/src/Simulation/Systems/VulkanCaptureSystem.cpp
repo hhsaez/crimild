@@ -95,12 +95,12 @@ Bool vulkan::CaptureSystem::takeScreenshot( void ) noexcept
             // Note that vkCmdBlitImage (if supported) will also do format conversions if the swapchain color format would differ
             // https://community.khronos.org/t/vkqueuesubmit-frozen-when-the-commad-buffer-contains-vkcmdcopyimage/105412/4
             .format = VK_FORMAT_B8G8R8A8_UNORM, //VK_FORMAT_R8G8B8A8_UNORM,
-            .arrayLayers = 1,
-            .mipLevels = 1,
-            .numSamples = VK_SAMPLE_COUNT_1_BIT,
             .tiling = VK_IMAGE_TILING_LINEAR,
             .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
             .memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            .mipLevels = 1,
+            .numSamples = VK_SAMPLE_COUNT_1_BIT,
+            .arrayLayers = 1,
         },
         dstImage,
         dstImageMemory );

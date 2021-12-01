@@ -52,8 +52,8 @@ SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor
 
     auto createInfo = VkCommandPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .queueFamilyIndex = descriptor.queueFamilyIndex,
         .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .queueFamilyIndex = descriptor.queueFamilyIndex,
     };
 
     VkCommandPool commandPoolHandler;

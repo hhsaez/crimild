@@ -56,8 +56,8 @@ vulkan::Swapchain::AcquireImageResult vulkan::Swapchain::acquireNextImage( const
         &imageIndex );
 
     return AcquireImageResult {
-        .success = ( ret == VK_SUCCESS ),
         .imageIndex = imageIndex,
+        .success = ( ret == VK_SUCCESS ),
         .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR ),
     };
 }

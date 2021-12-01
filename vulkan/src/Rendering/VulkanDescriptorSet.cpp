@@ -85,8 +85,8 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
             .dstSet = handler,
             .dstBinding = static_cast< crimild::UInt32 >( j ),
             .dstArrayElement = 0,
-            .descriptorType = utils::getVulkanDescriptorType( descriptor.descriptorType ),
             .descriptorCount = 1,
+            .descriptorType = utils::getVulkanDescriptorType( descriptor.descriptorType ),
         };
 
         switch ( descriptor.descriptorType ) {

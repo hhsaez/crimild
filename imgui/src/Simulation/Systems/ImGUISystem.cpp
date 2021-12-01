@@ -91,11 +91,15 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override
             {
                 ImGui::ColorEdit3( key.c_str(), const_cast< float * >( &value.r ) );
+                return true;
             }
+            
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override
             {
                 ImGui::ColorEdit4( key.c_str(), const_cast< float * >( &value.r ) );
+                return true;
             }
+
             virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }

@@ -174,6 +174,7 @@ bool vulkan::ShaderCompiler::init( void ) noexcept
 
     if ( !m_initialized ) {
         glslang::InitializeProcess();
+        initPreprocessor();
         m_initialized = true;
     }
     return m_initialized;
@@ -284,4 +285,243 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     memcpy( out.data(), spirv.data(), out.size() );
 
     return true;
+}
+
+void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
+{
+    if ( m_preprocessor.isInitialized() ) {
+        return;
+    }
+
+    m_preprocessor.addChunk(
+        "random",
+        R"(
+            #ifndef CRIMILD_GLSL_RANDOM
+            #define CRIMILD_GLSL_RANDOM
+
+            uint seed = 0;
+            int flat_idx = 0;
+
+            void encrypt_tea( inout uvec2 arg ) {
+                uvec4 key = uvec4( 0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e );
+                uint v0 = arg[ 0 ], v1 = arg[ 1 ];
+                uint sum = 0u;
+                uint delta = 0x9e3779b9u;
+
+                for ( int i = 0; i < 32; i++ ) {
+                    sum += delta;
+                    v0 += ( ( v1 << 4 ) + key[ 0 ] ) ^ ( v1 + sum ) ^ ( ( v1 >> 5 ) + key[ 1 ] );
+                    v1 += ( ( v0 << 4 ) + key[ 2 ] ) ^ ( v0 + sum ) ^ ( ( v0 >> 5 ) + key[ 3 ] );
+                }
+                arg[ 0 ] = v0;
+                arg[ 1 ] = v1;
+            }
+            float getRandom() {
+                uvec2 arg = uvec2( flat_idx, seed++ );
+                encrypt_tea( arg );
+                vec2 r = fract( vec2( arg ) / vec2( 0xffffffffu ) );
+                return r.x;
+            }
+
+            float getRandomRange( float min, float max ) {
+                return min + getRandom() * ( max - min );
+            }
+
+            vec3 getRandomVec3() {
+                return vec3(
+                    getRandom(),
+                    getRandom(),
+                    getRandom() );
+            }
+
+            vec3 getRandomVec3Range( float min, float max ) {
+                return vec3(
+                    getRandomRange( min, max ),
+                    getRandomRange( min, max ),
+                    getRandomRange( min, max ) );
+            }
+
+            vec3 getRandomInUnitSphere() {
+                while ( true ) {
+                    vec3 p = getRandomVec3Range( -1.0, 1.0 );
+                    if ( dot( p, p ) < 1.0 ) {
+                        return p;
+                    }
+                }
+                return vec3( 0 );
+            }
+
+            vec3 getRandomInUnitDisc() {
+                while ( true ) {
+                    vec3 p = vec3(
+                        getRandomRange( -1.0, 1.0 ),
+                        getRandomRange( -1.0, 1.0 ),
+                        0.0 );
+                    if ( dot( p, p ) >= 1.0 ) {
+                        break;
+                    }
+                    return p;
+                }
+            }
+
+            vec3 getRandomUnitVector() {
+                return normalize( getRandomInUnitSphere() );
+            }
+
+            vec3 getRandomInHemisphere( vec3 N ) {
+                vec3 inUnitSphere = getRandomInUnitSphere();
+                if ( dot( inUnitSphere, N ) > 0.0 ) {
+                    return inUnitSphere;
+                } else {
+                    return -inUnitSphere;
+                }
+            }
+
+            void initRandom( int seedValue ) 
+            {
+                seed = seedValue;
+                 flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
+            }
+
+            #endif
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "textureCube",
+        R"(
+            #ifndef CRIMILD_GLSL_TEXTURE_CUBE
+            #define CRIMILD_GLSL_TEXTURE_CUBE
+
+            const float FACE_INVALID = -1.0;
+            const float FACE_LEFT = 0.0;
+            const float FACE_RIGHT = 1.0;
+            const float FACE_FRONT = 2.0;
+            const float FACE_BACK = 3.0;
+            const float FACE_UP = 4.0;
+            const float FACE_DOWN = 5.0;
+
+            // Return the face in cubemap based on the principle component of the direction
+            float getFace( vec3 direction )
+            {
+                vec3 absDirection = abs( direction );
+                float face = -1.0;
+                if ( absDirection.x > absDirection.z ) {
+                    if ( absDirection.x > absDirection.y ) {
+                        return direction.x > 0.0 ? FACE_RIGHT : FACE_LEFT;
+                    } else {
+                        return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
+                    }
+                } else {
+                    if ( absDirection.z > absDirection.y ) {
+                        return direction.z > 0.0 ? FACE_FRONT : FACE_BACK;
+                    } else {
+                        return direction.y > 0.0 ? FACE_UP : FACE_DOWN;
+                    }
+                }
+                return FACE_INVALID;
+            }
+
+            vec2 getUV( vec3 direction, float face )
+            {
+                vec2 uv;
+                if ( face == FACE_LEFT ) {
+                    uv = vec2( -direction.z, direction.y ) / abs( direction.x );
+                } else if ( face == FACE_RIGHT ) {
+                    uv = vec2( direction.z, direction.y ) / abs( direction.x );
+                } else if ( face == FACE_FRONT ) {
+                    uv = vec2( -direction.x, direction.y ) / abs( direction.z );
+                } else if ( face == FACE_BACK ) {
+                    uv = vec2( direction.x, direction.y ) / abs( direction.z );
+                } else if ( face == FACE_UP ) {
+                    uv = vec2( direction.x, direction.z ) / abs( direction.y );
+                } else if ( face == FACE_DOWN ) {
+                    uv = vec2( direction.x, -direction.z ) / abs( direction.y );
+                }
+                return 0.5 + 0.5 * uv;
+            }
+
+            vec2 getFaceOffsets( float face )
+            {
+                if ( face == FACE_LEFT ) {
+                    return vec2( 0.0, 0.5 );
+                } else if ( face == FACE_RIGHT ) {
+                    return vec2( 0.5, 0.5 );
+                } else if ( face == FACE_FRONT ) {
+                    return vec2( 0.25, 0.5 );
+                } else if ( face == FACE_BACK ) {
+                    return vec2( 0.75, 0.5 );
+                } else if ( face == FACE_UP ) {
+                    return vec2( 0.5, 0.25 );
+                } else if ( face == FACE_DOWN ) {
+                    return vec2( 0.5, 0.75 );
+                }
+            }
+
+            // Performs bilinear filtering
+            vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
+            {
+                const float faceSize = 0.25;
+                const vec2 texelSize = 1.0 / textureSize( envMap, 0 );
+
+                float face = getFace( direction );
+                vec2 faceOffsets = getFaceOffsets( face );
+
+                vec2 uv = getUV( direction, face );
+                uv.y = 1.0 - uv.y;
+                uv = faceOffsets + faceSize * uv;
+                uv = viewport.xy + uv * viewport.zw;
+
+                // make sure UV values are within the face to avoid most artifacts in the borders
+                // of the cube map. Some visual artifacts migth still appear, though, but they
+                // should be rare.
+                vec2 fBL = viewport.xy + ( faceOffsets ) * viewport.zw;
+                vec2 fTR = viewport.xy + ( faceOffsets + vec2( faceSize ) ) * viewport.zw;
+                uv = clamp( uv, fBL + texelSize, fTR - 2.0 * texelSize );
+
+                vec4 color = texture( envMap, uv );
+                return color;
+            }
+
+            vec4 textureCubeLOD( sampler2D envMap, vec3 D, int lod )
+            {
+                vec4 viewport = vec4( 0, 0, 1, 1 );
+                if ( lod == 0 ) {
+                    viewport = vec4( 0, 0, 0.6666666667, 1.0 );
+                } else if ( lod == 1 ) {
+                    viewport = vec4( 0.6666666667, 0, 0.3333333333, 0.3333333333 );
+                } else if ( lod == 2 ) {
+                    viewport = vec4( 0.6666666667, 0.3333333333, 0.1666666667, 0.1666666667 );
+                } else if ( lod == 3 ) {
+                    viewport = vec4( 0.6666666667, 0.5, 0.08333333333, 0.08333333333 );
+                } else {
+                    viewport = vec4( 0.6666666667, 0.5833333333, 0.04166666667, 0.04166666667 );
+                }
+                return textureCubeUV(
+                    envMap,
+                    D,
+                    viewport
+                );
+            }
+
+            #endif            
+        )"
+    );
+
+    m_preprocessor.addChunk(
+        "linearizeDepth",
+        R"(
+            #ifndef CRIMILD_GLSL_LINEARIZE_DEPTH
+            #define CRIMILD_GLSL_LINEARIZE_DEPTH
+
+            float linearizeDepth( float depth, float nearPlane, float farPlane )
+            {
+                float z = depth * 2.0 - 1.0; // Back to NDC
+                return ( 2.0 * nearPlane * farPlane ) / ( farPlane + nearPlane - z * ( farPlane - nearPlane ) ) / farPlane;
+            }
+
+            #endif
+        )"
+    );
+
 }

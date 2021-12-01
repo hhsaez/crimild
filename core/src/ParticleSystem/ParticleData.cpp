@@ -94,7 +94,11 @@ void ParticleData::swap( ParticleId a, ParticleId b )
 			attr->swap( a, b );
         });
 
-		std::swap( _alive[ a ], _alive[ b ] );
+		// Swap alive flag.
+		// std::swap does not work correctly with std::vector< bool >, so swap them manually.
+		const auto temp = _alive[ a ];
+		_alive[ a ] = _alive[ b ];
+		_alive[ b ] = temp;
     }
 }
 
