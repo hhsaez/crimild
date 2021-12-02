@@ -1,0 +1,158 @@
+# 
+# Wavefront material file
+# Converted by the DEEP Exploration  Deep Exploration 6.5 x64 6.5.0.9182
+# Right Hemisphere, LTD
+# http://www.righthemisphere.com/
+# 
+
+newmtl MG_MovieCycle_Body_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 32
+map_Kd MG_MovieCycle_Body_EMSS.tga
+map_bump MG_MovieCycle_Body_NORM.tga
+map_Ke MG_MovieCycle_Body_EMSS.tga
+bump MG_MovieCycle_Body_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS MG_MovieCycle_Body_SPEC.tga
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_Glass_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+d 0.5
+illum 2
+Ns 33.6359
+map_Kd Glass.tga
+map_bump 
+bump 
+map_opacity Glass.tga
+map_d Glass.tga
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_Tire_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 10
+map_Kd MG_MovieCycle_Tire_EMSS.tga
+map_Ke MG_MovieCycle_Tire_EMSS.tga
+map_bump MG_MovieCycle_Tire_NORM.tga
+bump MG_MovieCycle_Tire_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_Engine_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 10
+map_Kd MG_MovieCycle_Engine_EMSS.tga
+map_Ke MG_MovieCycle_Engine_EMSS.tga
+map_bump MG_MovieCycle_Engine_NORM.tga
+bump MG_MovieCycle_Engine_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_PlayerBody_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 10
+map_Kd MG_Player_Body_EMSS.tga
+map_Ke MG_Player_Body_EMSS.tga
+map_bump MG_Player_Body_NORM.tga
+bump MG_Player_Body_NORM.tga
+map_opacity 
+map_d 
+refl 
+#map_kS MG_Player_Body_SPEC.tga
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_PlayerHelmet_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 6.27667
+map_Kd MG_Player_Helmet_EMSS.tga
+map_Ke MG_Player_Helmet_EMSS.tga
+map_bump MG_Player_Helmet_NORM.tga
+bump MG_Player_Helmet_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS MG_Player_Helmet_SPEC.tga
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_PlayerDisc_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 10
+map_Kd MG_Player_Disc_EMSS.tga
+map_Ke MG_Player_Disc_EMSS.tga
+map_bump MG_Player_Disc_NORM.tga
+bump MG_Player_Disc_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS MG_Player_Disc_SPEC.tga
+map_kA 
+map_Ns 
+
+newmtl MG_MovieCycle_PlayerBaton_MI
+Ka 0.0 0.16 0.15
+Kd 1.0 1.0 1.0
+Ks 0.9 1.0 0.9
+illum 2
+Ns 10
+map_Kd MG_Player_Baton_EMSS.tga
+map_Ke MG_Player_Baton_EMSS.tga
+map_bump MG_Player_Baton_NORM.tga
+bump MG_Player_Baton_NORM.tga
+map_opacity 
+map_d 
+refl 
+map_kS MG_Player_Baton_SPEC.tga
+map_kA 
+map_Ns 
+
+newmtl Explorer_Default
+Ka 0.117647 0.117647 0.117647
+Kd 0.752941 0.752941 0.752941
+Ks 0.752941 0.752941 0.752941
+illum 2
+Ns 8
+map_Kd 
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 

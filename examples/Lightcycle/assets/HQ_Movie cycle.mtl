@@ -1,0 +1,90 @@
+# Blender MTL File: 'None'
+# Material Count: 8
+
+newmtl MG_MovieCycle_Body_MI
+Ns 27.450980
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_MovieCycle_Body_EMSS.tga
+map_Bump MG_MovieCycle_Body_NORM.tga
+
+newmtl MG_MovieCycle_Engine_MI
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_MovieCycle_Engine_EMSS.tga
+map_Bump MG_MovieCycle_Engine_NORM.tga
+
+newmtl MG_MovieCycle_Glass_MI
+Ns 27.450980
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 0.500000
+illum 2
+map_Kd Glass.tga
+map_d Glass.tga
+
+newmtl MG_MovieCycle_PlayerBaton_MI
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_Player_Baton_EMSS.tga
+map_Bump MG_Player_Baton_NORM.tga
+
+newmtl MG_MovieCycle_PlayerBody_MI
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_Player_Body_EMSS.tga
+map_Bump MG_Player_Body_NORM.tga
+
+newmtl MG_MovieCycle_PlayerDisc_MI
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_Player_Disc_EMSS.tga
+map_Bump MG_Player_Disc_NORM.tga
+
+newmtl MG_MovieCycle_PlayerHelmet_MI
+Ns 1.960784
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_Player_Helmet_EMSS.tga
+map_Bump MG_Player_Helmet_NORM.tga
+
+newmtl MG_MovieCycle_Tire_MI
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.640000 0.400000
+Ks 0.900000 1.000000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd MG_MovieCycle_Tire_EMSS.tga
+map_Bump MG_MovieCycle_Tire_NORM.tga
