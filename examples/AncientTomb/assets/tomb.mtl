@@ -1,0 +1,89 @@
+# Blender MTL File: 'tomb.blend'
+# Material Count: 8
+
+newmtl Dungeon_Ceiling
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.047311 0.047311 0.047311
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd grey_bricks_diff.tga
+map_Bump grey_bricks_norm.tga
+
+newmtl Dungeon_Floor
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.075881 0.075881 0.075881
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd dungeon_floor_tile_diff.tga
+map_Bump dungeon_floor_tile_norm.tga
+
+newmtl Dungeon_Skirting
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.016705 0.016705 0.016705
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd stone_diff.tga
+map_Bump stone_norm.tga
+
+newmtl Dungeon_Wall
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.012743 0.012743 0.012743
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd dungeon_wall_diff.tga
+map_Bump dungeon_wall_norm.tga
+
+newmtl Rune
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.200000 0.200000 0.200000
+Ni 1.000000
+d 0.000000
+illum 2
+map_Kd teleporter_rune_diff.tga
+
+newmtl TeleporterMat
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.005442 0.005442 0.005442
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd teleporter_diff.tga
+map_Bump teleporter_norm.tga
+
+newmtl armor
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.410930 0.410930 0.410930
+Ks 0.406061 0.406061 0.406061
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd granite_diff.tga
+map_Bump dirt_diff.tga
+
+newmtl armor_NONE
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.410930 0.410930 0.410930
+Ks 0.406061 0.406061 0.406061
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump dirt_diff.tga
+map_Kd granite_diff.tga

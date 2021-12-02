@@ -1,0 +1,13 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Bunny_Material.001
+Ns 96.078443
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000	1.000000 1.000000
+Ke 0.0 0.0 0.0
+Ni 1.000000
+d 1.000000
+map_Kd bunny.tga
+illum 2

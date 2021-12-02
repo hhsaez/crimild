@@ -1,0 +1,12 @@
+# Blender MTL File: 'Rock1.blend'
+# Material Count: 1
+
+newmtl Material
+Ns 13.725490
+Ka 1.000000 1.000000 1.000000
+Kd 1 1 1
+Ks 0.007937 0.007937 0.007937
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd rock.tga
