@@ -28,58 +28,57 @@
 #ifndef CRIMILD_CORE_VERSION_
 #define CRIMILD_CORE_VERSION_
 
-#include <string>
 #include <sstream>
+#include <string>
 
 #ifndef CRIMILD_VERSION_MAJOR
-#define CRIMILD_VERSION_MAJOR 4
+    #define CRIMILD_VERSION_MAJOR 5
 #endif
 
 #ifndef CRIMILD_VERSION_MINOR
-#define CRIMILD_VERSION_MINOR 10
+    #define CRIMILD_VERSION_MINOR 0
 #endif
 
 #ifndef CRIMILD_VERSION_PATCH
-#define CRIMILD_VERSION_PATCH 0
+    #define CRIMILD_VERSION_PATCH 0
 #endif
 
 namespace crimild {
 
-	class Version {
-	public:
-		Version( void );
-		Version( const Version &other );
-		explicit Version( int major, int minor, int patch );
-		explicit Version( std::string versionStr );
-		~Version( void );
+    class Version {
+    public:
+        Version( void );
+        Version( const Version &other );
+        explicit Version( int major, int minor, int patch );
+        explicit Version( std::string versionStr );
+        ~Version( void );
 
-		Version &operator=( const Version &other );
+        Version &operator=( const Version &other );
 
-		inline int getMajor( void ) const { return _major; }
-		inline int getMinor( void ) const { return _minor; }
-		inline int getPatch( void ) const { return _patch; }
+        inline int getMajor( void ) const { return _major; }
+        inline int getMinor( void ) const { return _minor; }
+        inline int getPatch( void ) const { return _patch; }
 
-		bool operator<( const Version &other ) const { return toInt() < other.toInt(); }
-		bool operator<=( const Version &other ) const { return toInt() <= other.toInt(); }
-		bool operator>( const Version &other ) const { return toInt() > other.toInt(); }
-		bool operator>=( const Version &other ) const { return toInt() >= other.toInt(); }
-		bool operator==( const Version &other ) const { return toInt() == other.toInt(); }
-		bool operator!=( const Version &other ) const { return toInt() != other.toInt(); }
+        bool operator<( const Version &other ) const { return toInt() < other.toInt(); }
+        bool operator<=( const Version &other ) const { return toInt() <= other.toInt(); }
+        bool operator>( const Version &other ) const { return toInt() > other.toInt(); }
+        bool operator>=( const Version &other ) const { return toInt() >= other.toInt(); }
+        bool operator==( const Version &other ) const { return toInt() == other.toInt(); }
+        bool operator!=( const Version &other ) const { return toInt() != other.toInt(); }
 
-	private:
-		int _major;
-		int _minor;
-		int _patch;
+    private:
+        int _major;
+        int _minor;
+        int _patch;
 
-	public:
-		std::string getDescription( void ) const;
+    public:
+        std::string getDescription( void ) const;
 
-		void fromString( std::string str );
+        void fromString( std::string str );
 
-		inline int toInt( void ) const { return _major * 1000000 + _minor * 1000 + _patch; }
-	};
+        inline int toInt( void ) const { return _major * 1000000 + _minor * 1000 + _patch; }
+    };
 
 }
 
 #endif
-
