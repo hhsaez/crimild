@@ -24,7 +24,6 @@ OPTION( CRIMILD_ENABLE_IMGUI "Would you like to build the crimild-imgui extensio
 
 # DEPRECATED
 OPTION( CRIMILD_ENABLE_PHYSICS "(DEPRECATED) Would you like to build the crimild-physics extension?" OFF )
-OPTION( CRIMILD_ENABLE_SDL "(DEPRECATED) Would you like to build the crimild-sdl extension?" OFF )
 
 IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" )
    SET( CRIMILD_ENABLE_EMSCRIPTEN ON )
@@ -126,11 +125,6 @@ IF ( CRIMILD_ENABLE_GLFW )
 	ADD_SUBDIRECTORY( glfw )
 
 ENDIF ( CRIMILD_ENABLE_GLFW )
-
-IF ( CRIMILD_ENABLE_SDL )
-   ADD_DEFINITIONS( -DCRIMILD_ENABLE_SDL=1 )
-   ADD_SUBDIRECTORY( sdl )
-ENDIF ()
 
 OPTION( CRIMILD_BUILD_TOOLS "Build tools?" ON )
 IF ( CRIMILD_BUILD_TOOLS )

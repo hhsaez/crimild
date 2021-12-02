@@ -63,7 +63,6 @@ cd build-web
 cmake .. -DCMAKE_TOOLCHAIN_FILE=#{EMSCRIPTEN_HOME}/cmake/Modules/Platform/Emscripten.cmake
 make clean all -j8
 ```
-It's safe to ignore SDL_Mixer2 warnings, if any.
 
 ## Examples
 See [examples](examples/README.md) for details
