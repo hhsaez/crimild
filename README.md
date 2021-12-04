@@ -1,7 +1,7 @@
 # Crimild
 A scene graph based framework for interactive 3D applications
 
-![cmake workflow](https://github.com/hhsaez/crimild/actions/workflows/cmake.yml/badge.svg)
+![cmake workflow](https://github.com/hhsaez/crimild/actions/workflows/build.yml/badge.svg)
 
 ## Development Diaries
 Check out Crimild's blog at http://crimild.hhsaez.com
