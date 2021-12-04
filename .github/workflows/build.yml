@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_ENABLE_VULKAN=OFF -DCRIMILD_BUILD_EXAMPLES=OFF
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Test
