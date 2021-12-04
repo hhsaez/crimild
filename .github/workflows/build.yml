@@ -16,9 +16,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: ['Windows', 'Linux', 'Mac OSX']
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        cmake_args: ['-G "Visual Studio 16 2019" -A x64', '', '']
+        include:
+          - name: "Windows"
+            os: windows-latest
+            cmake_args: '-G "Visual Studio 16 2019" -A x64'
+          - name: "Ubuntu"
+            os: ubuntu-latest
+            cmake_args: ''
+          - name: "Mac OSX"
+            os: macos-latest
+            cmake_args: ''
 
     steps:
       - uses: actions/checkout@v2
