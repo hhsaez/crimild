@@ -190,8 +190,7 @@ bool Simulation::update( void ) noexcept
     auto delta = frameEndTime - frameStartTime;
     auto t = std::max(
         Int64( 1 ),
-        Int64( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() ) 
-    );
+        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() ) ); 
     std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
 #endif
 
