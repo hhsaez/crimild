@@ -55,7 +55,7 @@ namespace crimild {
         }
 
         inline void setParticleAttribType( const ParticleAttribType &type ) { _attribType = type; }
-        inline const ParticleAttribType &ParticleAttribType( void ) const { return _attribType; }
+        inline ParticleAttribType getParticleAttribType( void ) const { return _attribType; }
 
         inline void setMinValue( const T &value ) { _minValue = value; }
         inline const T &getMinValue( void ) const { return _minValue; }

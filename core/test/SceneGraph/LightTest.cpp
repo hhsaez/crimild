@@ -30,6 +30,8 @@
 #include "Mathematics/ColorRGBA.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
+#include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 

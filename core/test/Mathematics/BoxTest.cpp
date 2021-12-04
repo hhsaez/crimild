@@ -29,9 +29,8 @@
 
 #include "Mathematics/Box_normal.hpp"
 #include "Mathematics/Normal_equality.hpp"
-// #include "Mathematics/Transformation_operators.hpp"
-// #include "Mathematics/Transformation_rotation.hpp"
-// #include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
