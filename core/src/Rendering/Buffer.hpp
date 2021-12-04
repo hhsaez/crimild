@@ -36,6 +36,8 @@
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <cstring>
+
 namespace crimild {
 
     /**
