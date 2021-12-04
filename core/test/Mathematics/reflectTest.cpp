@@ -28,6 +28,7 @@
 #include "Mathematics/reflect.hpp"
 
 #include "Mathematics/Numbers.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 

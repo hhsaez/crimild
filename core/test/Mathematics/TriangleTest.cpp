@@ -29,6 +29,7 @@
 
 #include "Mathematics/Normal_equality.hpp"
 #include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/Triangle_normal.hpp"
 
 #include "gtest/gtest.h"

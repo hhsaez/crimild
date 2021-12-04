@@ -28,6 +28,7 @@
 #include "Primitives/QuadPrimitive.hpp"
 
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 
