@@ -21,6 +21,10 @@ OPTION( CRIMILD_ENABLE_OPENAL "Would you like to build the crimild-openal extens
 OPTION( CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" ON )
 OPTION( CRIMILD_ENABLE_VULKAN "Would you like to build the crimild-vulkan extension?" ON )
 OPTION( CRIMILD_ENABLE_IMGUI "Would you like to build the crimild-imgui extension?" ON )
+OPTION( CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF )
+OPTION( CRIMILD_BUILD_TOOLS "Build tools?" ON )
+OPTION( CRIMILD_BUNDLE_APPS "Enable bundles for apps" OFF )
+OPTION( CRIMILD_BUILD_EXAMPLES "Would you like to build examples?" ON )
 
 # DEPRECATED
 OPTION( CRIMILD_ENABLE_PHYSICS "(DEPRECATED) Would you like to build the crimild-physics extension?" OFF )
@@ -79,7 +83,6 @@ iF ( CRIMILD_ENABLE_SCRIPTING )
 	# Extract lua sources if needed
 	EXTRACT_ARCHIVE( lua-5.3.4.tar.gz lua ${CRIMILD_SOURCE_DIR}/third-party )
 
-	OPTION( CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF )
 	IF ( CRIMILD_SCRIPTING_LOG_VERBOSE )
 		ADD_DEFINITIONS( -DCRIMILD_SCRIPTING_LOG_VERBOSE=1 )
 	ENDIF ()
@@ -126,7 +129,6 @@ IF ( CRIMILD_ENABLE_GLFW )
 
 ENDIF ( CRIMILD_ENABLE_GLFW )
 
-OPTION( CRIMILD_BUILD_TOOLS "Build tools?" ON )
 IF ( CRIMILD_BUILD_TOOLS )
 	IF ( APPLE )
 		ADD_SUBDIRECTORY( tools )
@@ -135,10 +137,6 @@ IF ( CRIMILD_BUILD_TOOLS )
 	ENDIF()
 ENDIF ( CRIMILD_BUILD_TOOLS )
 
-# Options for app bundles
-OPTION( CRIMILD_BUNDLE_APPS "Enable bundles for apps" OFF )
-
-OPTION( CRIMILD_BUILD_EXAMPLES "Would you like to build examples?" ON )
 IF ( CRIMILD_BUILD_EXAMPLES ) 
 	ADD_SUBDIRECTORY( examples )
 ENDIF()
