@@ -31,6 +31,8 @@
 #include "Codable.hpp"
 #include "Foundation/Containers/Array.hpp"
 
+#include <cstring>
+
 namespace crimild {
 
 	namespace coding {
