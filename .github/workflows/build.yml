@@ -12,8 +12,8 @@ env:
 
 jobs:
   build:
-    name: Build {{ matrix.name }}
-    runs-on: {{ matrix.os }}
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         name: ['Windows', 'Linux', 'Mac OSX']
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake {{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Test
