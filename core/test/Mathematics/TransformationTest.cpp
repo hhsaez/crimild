@@ -351,11 +351,10 @@ TEST( Transformation, lookAt_default_orientation )
         crimild::Point3 { 0, 0, -1 },
         crimild::Vector3 { 0, 1, 0 } );
 
-    static_assert( !crimild::isIdentity( T ) );
-    static_assert( crimild::hasTranslation( T ) );
-    static_assert( crimild::hasRotation( T ) );
-    static_assert( !crimild::hasScale( T ) );
-
+    EXPECT_FALSE( crimild::isIdentity( T ) );
+    EXPECT_TRUE( crimild::hasTranslation( T ) );
+    EXPECT_TRUE( crimild::hasRotation( T ) );
+    EXPECT_FALSE( crimild::hasScale( T ) );
     EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, T.mat );
 }
 
@@ -394,9 +393,9 @@ TEST( Transformation, lookAt_arbitrary )
     EXPECT_EQ( crimild::location( T ), ( crimild::Point3 { 5, 5, 5 } ) );
     EXPECT_EQ( crimild::forward( T ), crimild::normalize( crimild::Vector3 { 0, 1, 0 } - crimild::Vector3 { 5, 5, 5 } ) );
 
-    static_assert( crimild::hasTranslation( T ) );
-    static_assert( crimild::hasRotation( T ) );
-    static_assert( !crimild::hasScale( T ) );
+    EXPECT_TRUE( crimild::hasTranslation( T ) );
+    EXPECT_TRUE( crimild::hasRotation( T ) );
+    EXPECT_TRUE( !crimild::hasScale( T ) );
 
     EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, T.mat * T.invMat );
 
