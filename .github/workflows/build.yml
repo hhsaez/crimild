@@ -11,8 +11,14 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build_ubuntu:
-    runs-on: ubuntu-latest
+  build:
+    name: Build {{ matrix.name }}
+    runs-on: {{ matrix.os }}
+    strategy:
+      matrix:
+        name: ['Windows', 'Linux', 'Mac OSX']
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        cmake_args: ['-G "Visual Studio 16 2019" -A x64', '', '']
 
     steps:
       - uses: actions/checkout@v2
@@ -21,44 +27,9 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cmake {{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Test
         working-directory: ${{github.workspace}}/build
         run: ctest -C ${{env.BUILD_TYPE}}
-
-  build_windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Build
-        run: |
-          cmake -G "Visual Studio 16 2019" -A x64 -B ${{github.workspace}}/build
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-      - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}}
-        
-  build_macos:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Build
-        run: |
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-      - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}}
-
