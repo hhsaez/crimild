@@ -15,6 +15,7 @@ jobs:
     name: Build ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: "Windows"
@@ -34,9 +35,9 @@ jobs:
 
       - name: Build
         run: |
-          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_ENABLE_TESTS=OFF -DCRIMILD_ENABLE_IMPORT=OFF -DCRIMILD_ENABLE_STB=ON -DCRIMILD_ENABLE_SCRIPTING=ON -DCRIMILD_ENABLE_OPENAL=OFF -DCRIMILD_ENABLE_GLFW=OFF -DCRIMILD_ENABLE_VULKAN=OFF -DCRIMILD_ENABLE_IMGUI=OFF -DCRIMILD_BUILD_TOOLS=OFF -DCRIMILD_BUILD_EXAMPLES=OFF 
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_ENABLE_TESTS=ON -DCRIMILD_ENABLE_IMPORT=OFF -DCRIMILD_ENABLE_STB=ON -DCRIMILD_ENABLE_SCRIPTING=ON -DCRIMILD_ENABLE_OPENAL=OFF -DCRIMILD_ENABLE_GLFW=OFF -DCRIMILD_ENABLE_VULKAN=OFF -DCRIMILD_ENABLE_IMGUI=OFF -DCRIMILD_BUILD_TOOLS=OFF -DCRIMILD_BUILD_EXAMPLES=OFF 
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 2
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}}
+        run: ctest -C ${{env.BUILD_TYPE}} --stop-on-failure  -V --parallel 2
