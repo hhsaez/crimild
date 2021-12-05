@@ -32,48 +32,44 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Tuple3Impl {
+        T x;
+        T y;
+        T z;
 
-        template< typename T >
-        struct Tuple3 {
-            T x;
-            T y;
-            T z;
-
-            [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return x;
-                    case 1:
-                        return y;
-                    case 2:
-                    default:
-                        return z;
-                }
+        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return x;
+                case 1:
+                    return y;
+                case 2:
+                default:
+                    return z;
             }
+        }
 
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return x;
-                    case 1:
-                        return y;
-                    case 2:
-                        return z;
-                    default:
-                        return 0;
-                }
+        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return x;
+                case 1:
+                    return y;
+                case 2:
+                    return z;
+                default:
+                    return 0;
             }
-        };
+        }
+    };
 
-    }
-
-    using Tuple3 = impl::Tuple3< Real >;
-    using Tuple3f = impl::Tuple3< Real32 >;
-    using Tuple3d = impl::Tuple3< Real64 >;
-    using Tuple3i = impl::Tuple3< Int32 >;
+    using Tuple3 = Tuple3Impl< Real >;
+    using Tuple3f = Tuple3Impl< Real32 >;
+    using Tuple3d = Tuple3Impl< Real64 >;
+    using Tuple3i = Tuple3Impl< Int32 >;
 
 }
 

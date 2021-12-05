@@ -35,55 +35,51 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct ColorRGBImpl {
+        struct Constants;
 
-        template< typename T >
-        struct ColorRGB {
-            struct Constants;
+        T r;
+        T g;
+        T b;
 
-            T r;
-            T g;
-            T b;
-
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return r;
-                    case 1:
-                        return g;
-                    case 2:
-                        return b;
-                    default:
-                        return NAN;
-                }
+        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return r;
+                case 1:
+                    return g;
+                case 2:
+                    return b;
+                default:
+                    return NAN;
             }
+        }
 
-            [[nodiscard]] inline constexpr Bool operator==( const ColorRGB &other ) const noexcept
-            {
-                return isEqual( this->r, other.r ) && isEqual( this->g, other.g ) && isEqual( this->b, other.b );
-            }
+        [[nodiscard]] inline constexpr Bool operator==( const ColorRGBImpl &other ) const noexcept
+        {
+            return isEqual( this->r, other.r ) && isEqual( this->g, other.g ) && isEqual( this->b, other.b );
+        }
 
-            [[nodiscard]] inline constexpr Bool operator!=( const ColorRGB &other ) const noexcept
-            {
-                return !isEqual( this->r, other.r ) || !isEqual( this->g, other.g ) || !isEqual( this->b, other.b );
-            }
-        };
+        [[nodiscard]] inline constexpr Bool operator!=( const ColorRGBImpl &other ) const noexcept
+        {
+            return !isEqual( this->r, other.r ) || !isEqual( this->g, other.g ) || !isEqual( this->b, other.b );
+        }
+    };
 
-        template< typename T >
-        struct ColorRGB< T >::Constants {
-            static constexpr auto BLACK = ColorRGB< T > { 0, 0, 0 };
-            static constexpr auto WHITE = ColorRGB< T > { 1, 1, 1 };
-            static constexpr auto RED = ColorRGB< T > { 1, 0, 0 };
-            static constexpr auto GREEN = ColorRGB< T > { 0, 1, 0 };
-            static constexpr auto BLUE = ColorRGB< T > { 0, 0, 1 };
-        };
+    template< typename T >
+    struct ColorRGBImpl< T >::Constants {
+        static constexpr auto BLACK = ColorRGBImpl< T > { 0, 0, 0 };
+        static constexpr auto WHITE = ColorRGBImpl< T > { 1, 1, 1 };
+        static constexpr auto RED = ColorRGBImpl< T > { 1, 0, 0 };
+        static constexpr auto GREEN = ColorRGBImpl< T > { 0, 1, 0 };
+        static constexpr auto BLUE = ColorRGBImpl< T > { 0, 0, 1 };
+    };
 
-    }
-
-    using ColorRGB = impl::ColorRGB< Real >;
-    using ColorRGBf = impl::ColorRGB< Real32 >;
-    using ColorRGBd = impl::ColorRGB< Real64 >;
+    using ColorRGB = ColorRGBImpl< Real >;
+    using ColorRGBf = ColorRGBImpl< Real32 >;
+    using ColorRGBd = ColorRGBImpl< Real64 >;
 
 }
 

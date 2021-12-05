@@ -30,74 +30,78 @@
 
 #include "Mathematics/Vector2.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator+( const crimild::impl::Vector2< T > &u, const crimild::impl::Vector2< T > &v ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x + v.x,
-        u.y + v.y,
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator-( const crimild::impl::Vector2< T > &u, const crimild::impl::Vector2< T > &v ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x - v.x,
-        u.y - v.y,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator+( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x + v.x,
+            u.y + v.y,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator*( const crimild::impl::Vector2< T > &u, crimild::Real s ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x * s,
-        u.y * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator-( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x - v.x,
+            u.y - v.y,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator*( crimild::Real s, const crimild::impl::Vector2< T > &u ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x * s,
-        u.y * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( const Vector2Impl< T > &u, crimild::Real s ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x * s,
+            u.y * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator*( const crimild::impl::Vector2< T > &u, const crimild::impl::Vector2< T > &v ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x * v.x,
-        u.y * v.y,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( crimild::Real s, const Vector2Impl< T > &u ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x * s,
+            u.y * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator/( const crimild::impl::Vector2< T > &u, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return u * invS;
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator*( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x * v.x,
+            u.y * v.y,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator/( const crimild::impl::Vector2< T > &u, const crimild::impl::Vector2< T > &v ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        u.x / v.x,
-        u.y / v.y,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator/( const Vector2Impl< T > &u, crimild::Real s ) noexcept
+    {
+        const auto invS = crimild::Real( 1 ) / s;
+        return u * invS;
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector2< T > operator-( const crimild::impl::Vector2< T > &u ) noexcept
-{
-    return crimild::impl::Vector2< T > {
-        -u.x,
-        -u.y,
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator/( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
+    {
+        return Vector2Impl< T > {
+            u.x / v.x,
+            u.y / v.y,
+        };
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector2Impl< T > operator-( const Vector2Impl< T > &u ) noexcept
+    {
+        return Vector2Impl< T > {
+            -u.x,
+            -u.y,
+        };
+    }
+
 }
 
 #endif

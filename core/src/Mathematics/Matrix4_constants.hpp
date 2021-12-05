@@ -32,32 +32,29 @@
 
 namespace crimild {
 
-    namespace impl {
-
-        template< typename T >
-        struct Matrix4< T >::Constants {
-            static constexpr auto IDENTITY = Matrix4 {
-                { 1, 0, 0, 0 },
-                { 0, 1, 0, 0 },
-                { 0, 0, 1, 0 },
-                { 0, 0, 0, 1 },
-            };
-
-            static constexpr auto ZERO = Matrix4 {
-                { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
-                { 0, 0, 0, 0 },
-            };
-
-            static constexpr auto ONE = Matrix4 {
-                { 1, 1, 1, 1 },
-                { 1, 1, 1, 1 },
-                { 1, 1, 1, 1 },
-                { 1, 1, 1, 1 },
-            };
+    template< typename T >
+    struct Matrix4Impl< T >::Constants {
+        static constexpr auto IDENTITY = Matrix4Impl {
+            { 1, 0, 0, 0 },
+            { 0, 1, 0, 0 },
+            { 0, 0, 1, 0 },
+            { 0, 0, 0, 1 },
         };
-    }
+
+        static constexpr auto ZERO = Matrix4Impl {
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+            { 0, 0, 0, 0 },
+        };
+
+        static constexpr auto ONE = Matrix4Impl {
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+            { 1, 1, 1, 1 },
+        };
+    };
 
 }
 

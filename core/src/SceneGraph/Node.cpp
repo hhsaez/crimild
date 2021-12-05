@@ -31,11 +31,14 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Group.hpp"
+#include "Mathematics/Transformation_constants.hpp"
 
 using namespace crimild;
 
 Node::Node( std::string name )
     : NamedObject( name ),
+      _local( Transformation::Constants::IDENTITY ),
+      _world( Transformation::Constants::IDENTITY ),
       _worldIsCurrent( false ),
       _localBound( crimild::alloc< AABBBoundingVolume >() ),
       _worldBound( crimild::alloc< AABBBoundingVolume >() )

@@ -39,13 +39,13 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distanceSquared( const impl::Point3< T > &u, const impl::Point3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr Real distanceSquared( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
     {
         return lengthSquared( v - u );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distance( const impl::Point3< T > &u, const impl::Point3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr Real distance( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
     {
         return sqrt( lengthSquared( v - u ) );
     }

@@ -32,23 +32,19 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Vector3Impl : public Tuple3Impl< T > {
+        struct Constants;
 
-        template< typename T >
-        struct Vector3 : public Tuple3< T > {
-            struct Constants;
+        [[nodiscard]] inline constexpr Bool operator==( const Vector3Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Vector3Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Vector3 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector3 &other ) const noexcept;
-        };
-
-    }
-
-    using Vector3 = impl::Vector3< Real >;
-    using Vector3f = impl::Vector3< Real32 >;
-    using Vector3d = impl::Vector3< Real64 >;
-    using Vector3i = impl::Vector3< Int32 >;
-    using Vector3ui = impl::Vector3< UInt32 >;
+    using Vector3 = Vector3Impl< Real >;
+    using Vector3f = Vector3Impl< Real32 >;
+    using Vector3d = Vector3Impl< Real64 >;
+    using Vector3i = Vector3Impl< Int32 >;
+    using Vector3ui = Vector3Impl< UInt32 >;
 
 }
 

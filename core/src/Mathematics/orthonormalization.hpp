@@ -39,13 +39,13 @@ namespace crimild {
        \remarks The input vector v1 is assumed to be already normalized.
      */
     template< typename T >
-    static void orthonormalBasis( const impl::Vector3< T > &v1, impl::Vector3< T > &v2, impl::Vector3< T > &v3 ) noexcept
+    static void orthonormalBasis( const Vector3Impl< T > &v1, Vector3Impl< T > &v2, Vector3Impl< T > &v3 ) noexcept
     {
         // TODO: not sure about handedness...
         if ( abs( v1.x ) > abs( v1.y ) ) {
-            v2 = normalize( impl::Vector3< T > { -v1.z, 0, v1.x } );
+            v2 = normalize( Vector3Impl< T > { -v1.z, 0, v1.x } );
         } else {
-            v2 = normalize( impl::Vector3< T > { 0, v1.z, -v1.y } );
+            v2 = normalize( Vector3Impl< T > { 0, v1.z, -v1.y } );
         }
         v3 = cross( v1, v2 );
     }

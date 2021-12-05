@@ -35,45 +35,45 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Point2< T > point2( const impl::Tuple2< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Point2Impl< T > point2( const Tuple2Impl< T > &t ) noexcept
     {
-        return impl::Point2< T > { t.x, t.y };
+        return Point2Impl< T > { t.x, t.y };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Point3< T > point3( const impl::Tuple3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Point3Impl< T > point3( const Tuple3Impl< T > &t ) noexcept
     {
-        return impl::Point3< T > { t.x, t.y, t.z };
+        return Point3Impl< T > { t.x, t.y, t.z };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector2< T > vector2( const impl::Tuple2< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Vector2Impl< T > vector2( const Tuple2Impl< T > &t ) noexcept
     {
-        return impl::Vector2< T > { t.x, t.y };
+        return Vector2Impl< T > { t.x, t.y };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > vector3( const impl::Tuple3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple3Impl< T > &t ) noexcept
     {
-        return impl::Vector3< T > { t.x, t.y, t.z };
+        return Vector3Impl< T > { t.x, t.y, t.z };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > vector3( const impl::Tuple4< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple4Impl< T > &t ) noexcept
     {
-        return impl::Vector3< T > { t.x, t.y, t.z };
+        return Vector3Impl< T > { t.x, t.y, t.z };
     }
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr impl::Vector4< T > vector4( const impl::Tuple3< T > &t, U w ) noexcept
+    [[nodiscard]] inline constexpr Vector4Impl< T > vector4( const Tuple3Impl< T > &t, U w ) noexcept
     {
-        return impl::Vector4< T > { t.x, t.y, t.z, T( w ) };
+        return Vector4Impl< T > { t.x, t.y, t.z, T( w ) };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Normal3< T > normal3( const impl::Tuple3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Normal3Impl< T > normal3( const Tuple3Impl< T > &t ) noexcept
     {
-        return impl::Normal3< T > { t.x, t.y, t.z };
+        return Normal3Impl< T > { t.x, t.y, t.z };
     }
 
     template< template< typename > class TupleImpl, typename T >
@@ -111,8 +111,8 @@ namespace crimild {
         return ColorRGB { c.r, c.g, c.b };
     }
 
-	template< typename T >
-    [[nodiscard]] inline constexpr auto rgb( const impl::Tuple3< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto rgb( const Tuple3Impl< T > &t ) noexcept
     {
         return ColorRGB { t.x, t.y, t.z };
     }
@@ -122,14 +122,14 @@ namespace crimild {
         return ColorRGBA { c.r, c.g, c.b, 1.0 };
     }
 
-	template< typename T >
-    [[nodiscard]] inline constexpr auto rgba( const impl::Tuple4< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto rgba( const Tuple4Impl< T > &t ) noexcept
     {
         return ColorRGB { t.x, t.y, t.z, t.w };
     }
 
-	template< typename T >
-    [[nodiscard]] inline constexpr auto rgba( const impl::Tuple3< T > &t, Real a ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto rgba( const Tuple3Impl< T > &t, Real a ) noexcept
     {
         return ColorRGBA { t.x, t.y, t.z, a };
     }

@@ -33,39 +33,35 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct RectImpl {
+        Point2Impl< T > origin;
+        Size2DImpl< T > size;
 
-        template< typename T >
-        struct Rect {
-            Point2< T > origin;
-            Size2D< T > size;
+        [[nodiscard]] inline constexpr Bool operator==( const RectImpl &other ) const noexcept
+        {
+            return isEqual( this->origin, other.origin ) && isEqual( this->size, other.size );
+        }
 
-            [[nodiscard]] inline constexpr Bool operator==( const Rect &other ) const noexcept
-            {
-                return isEqual( this->origin, other.origin ) && isEqual( this->size, other.size );
-            }
-
-            [[nodiscard]] inline constexpr Bool operator!=( const Rect &other ) const noexcept
-            {
-                return !isEqual( this->origin, other.origin ) || !isEqual( this->size, other.size );
-            }
-        };
-
-    }
+        [[nodiscard]] inline constexpr Bool operator!=( const RectImpl &other ) const noexcept
+        {
+            return !isEqual( this->origin, other.origin ) || !isEqual( this->size, other.size );
+        }
+    };
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Point2< T > center( const impl::Rect< T > &rect ) noexcept
+    [[nodiscard]] inline constexpr Point2Impl< T > center( const RectImpl< T > &rect ) noexcept
     {
-        return impl::Point2< T > {
+        return Point2Impl< T > {
             rect.origin.x + rect.size.width / T( 2 ),
             rect.origin.y + rect.size.height / T( 2 ),
         };
     }
 
-    using Rect = impl::Rect< Real >;
-    using Rectf = impl::Rect< Real32 >;
-    using Rectd = impl::Rect< Real64 >;
-    using Recti = impl::Rect< Int >;
+    using Rect = RectImpl< Real >;
+    using Rectf = RectImpl< Real32 >;
+    using Rectd = RectImpl< Real64 >;
+    using Recti = RectImpl< Int >;
 
 }
 

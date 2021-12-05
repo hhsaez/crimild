@@ -34,35 +34,31 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Vector4Impl : public Tuple4Impl< T > {
+        struct Constants;
 
-        template< typename T >
-        struct Vector4 : public Tuple4< T > {
-            struct Constants;
+        [[nodiscard]] inline constexpr Bool operator==( const Vector4Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Vector4Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Vector4 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector4 &other ) const noexcept;
-        };
+    template< typename T >
+    struct Vector4Impl< T >::Constants {
+        static constexpr auto ZERO = Vector4Impl< T > { 0, 0, 0, 0 };
+        static constexpr auto ONE = Vector4Impl< T > { 1, 1, 1, 1 };
+        static constexpr auto POSITIVE_INFINITY = Vector4Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+        static constexpr auto NEGATIVE_INFINITY = Vector4Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+        static constexpr auto UNIT_X = Vector4Impl< T > { 1, 0, 0, 0 };
+        static constexpr auto UNIT_Y = Vector4Impl< T > { 0, 1, 0, 0 };
+        static constexpr auto UNIT_Z = Vector4Impl< T > { 0, 0, 1, 0 };
+        static constexpr auto UNIT_W = Vector4Impl< T > { 0, 0, 0, 1 };
+    };
 
-        template< typename T >
-        struct Vector4< T >::Constants {
-            static constexpr auto ZERO = Vector4< T > { 0, 0, 0, 0 };
-            static constexpr auto ONE = Vector4< T > { 1, 1, 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Vector4< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-            static constexpr auto UNIT_X = Vector4< T > { 1, 0, 0, 0 };
-            static constexpr auto UNIT_Y = Vector4< T > { 0, 1, 0, 0 };
-            static constexpr auto UNIT_Z = Vector4< T > { 0, 0, 1, 0 };
-            static constexpr auto UNIT_W = Vector4< T > { 0, 0, 0, 1 };
-        };
-
-    }
-
-    using Vector4 = impl::Vector4< Real >;
-    using Vector4f = impl::Vector4< Real32 >;
-    using Vector4d = impl::Vector4< Real64 >;
-    using Vector4i = impl::Vector4< Int32 >;
-    using Vector4ui = impl::Vector4< UInt32 >;
+    using Vector4 = Vector4Impl< Real >;
+    using Vector4f = Vector4Impl< Real32 >;
+    using Vector4d = Vector4Impl< Real64 >;
+    using Vector4i = Vector4Impl< Int32 >;
+    using Vector4ui = Vector4Impl< UInt32 >;
 
 }
 

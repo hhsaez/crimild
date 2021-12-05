@@ -35,6 +35,8 @@
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node_io.hpp"
+#include "SceneGraph/NullNode.hpp"
 
 #include "gtest/gtest.h"
 
@@ -51,7 +53,8 @@ TEST( BinTreeScene, it_discards_an_empty_group )
 
     auto res = binTreeScene.getResult();
 
-    EXPECT_EQ( nullptr, res );
+    EXPECT_NE( nullptr, res );
+    EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_discards_all_empty_groups )
@@ -71,7 +74,8 @@ TEST( BinTreeScene, it_discards_all_empty_groups )
 
     auto res = binTreeScene.getResult();
 
-    EXPECT_EQ( nullptr, res );
+    EXPECT_NE( nullptr, res );
+    EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_discards_all_groups_with_one_child )

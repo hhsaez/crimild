@@ -31,74 +31,78 @@
 #include "Mathematics/Point3.hpp"
 #include "Mathematics/Vector3.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator+( const crimild::impl::Point3< T > &u, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        u.x + v.x,
-        u.y + v.y,
-        u.z + v.z,
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator+( const crimild::impl::Point3< T > &u, const crimild::impl::Point3< T > &v ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        u.x + v.x,
-        u.y + v.y,
-        u.z + v.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator+( const Point3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
+    {
+        return Point3Impl< T > {
+            u.x + v.x,
+            u.y + v.y,
+            u.z + v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator-( const crimild::impl::Point3< T > &u, const crimild::impl::Point3< T > &v ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x - v.x,
-        u.y - v.y,
-        u.z - v.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator+( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
+    {
+        return Point3Impl< T > {
+            u.x + v.x,
+            u.y + v.y,
+            u.z + v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator-( const crimild::impl::Point3< T > &u, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        u.x - v.x,
-        u.y - v.y,
-        u.z - v.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator-( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x - v.x,
+            u.y - v.y,
+            u.z - v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator-( const crimild::impl::Point3< T > &p ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        -p.x,
-        -p.y,
-        -p.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator-( const Point3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
+    {
+        return Point3Impl< T > {
+            u.x - v.x,
+            u.y - v.y,
+            u.z - v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator*( const crimild::impl::Point3< T > &u, crimild::Real s ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator-( const Point3Impl< T > &p ) noexcept
+    {
+        return Point3Impl< T > {
+            -p.x,
+            -p.y,
+            -p.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Point3< T > operator*( crimild::Real s, const crimild::impl::Point3< T > &u ) noexcept
-{
-    return crimild::impl::Point3< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator*( const Point3Impl< T > &u, crimild::Real s ) noexcept
+    {
+        return Point3Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+        };
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Point3Impl< T > operator*( crimild::Real s, const Point3Impl< T > &u ) noexcept
+    {
+        return Point3Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+        };
+    }
+
 }
 
 #endif

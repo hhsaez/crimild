@@ -28,37 +28,35 @@
 #ifndef CRIMILD_MATHEMATICS_POINT_EQUALITY_
 #define CRIMILD_MATHEMATICS_POINT_EQUALITY_
 
+#include "Mathematics/Point2.hpp"
 #include "Mathematics/Point3.hpp"
 #include "Mathematics/isEqual.hpp"
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Point2Impl< T >::operator==( const Point2Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Point2< T >::operator==( const Point2< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Point2Impl< T >::operator!=( const Point2Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Point2< T >::operator!=( const Point2< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Point3Impl< T >::operator==( const Point3Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Point3< T >::operator==( const Point3< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
-        }
-
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Point3< T >::operator!=( const Point3< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
-        }
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Point3Impl< T >::operator!=( const Point3Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
+    }
 
 }
 

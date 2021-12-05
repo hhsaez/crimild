@@ -32,58 +32,54 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Matrix4Impl {
+        struct Constants;
 
-        template< typename T >
-        struct Matrix4 {
-            struct Constants;
+        Vector4Impl< T > c0;
+        Vector4Impl< T > c1;
+        Vector4Impl< T > c2;
+        Vector4Impl< T > c3;
 
-            Vector4< T > c0;
-            Vector4< T > c1;
-            Vector4< T > c2;
-            Vector4< T > c3;
+        [[nodiscard]] inline constexpr const Vector4Impl< T > &operator[]( Index index ) const noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return c0;
+                case 1:
+                    return c1;
+                case 2:
+                    return c2;
+                case 3:
+                default:
+                    return c3;
+            };
+        }
 
-            [[nodiscard]] inline constexpr const Vector4< T > &operator[]( Index index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                        return c2;
-                    case 3:
-                    default:
-                        return c3;
-                };
-            }
+        [[nodiscard]] inline Vector4Impl< T > &operator[]( Index index ) noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return c0;
+                case 1:
+                    return c1;
+                case 2:
+                    return c2;
+                case 3:
+                default:
+                    return c3;
+            };
+        }
 
-            [[nodiscard]] inline Vector4< T > &operator[]( Index index ) noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                        return c2;
-                    case 3:
-                    default:
-                        return c3;
-                };
-            }
+        [[nodiscard]] inline constexpr Bool operator==( const Matrix4Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Matrix4Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Matrix4 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Matrix4 &other ) const noexcept;
-        };
-
-    }
-
-    using Matrix4 = impl::Matrix4< Real >;
-    using Matrix4f = impl::Matrix4< Real32 >;
-    using Matrix4d = impl::Matrix4< Real64 >;
-    using Matrix4i = impl::Matrix4< Int32 >;
-    using Matrix4ui = impl::Matrix4< UInt32 >;
+    using Matrix4 = Matrix4Impl< Real >;
+    using Matrix4f = Matrix4Impl< Real32 >;
+    using Matrix4d = Matrix4Impl< Real64 >;
+    using Matrix4i = Matrix4Impl< Int32 >;
+    using Matrix4ui = Matrix4Impl< UInt32 >;
 
 }
 

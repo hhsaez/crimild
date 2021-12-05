@@ -28,49 +28,48 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_EQUALITY_
 #define CRIMILD_MATHEMATICS_VECTOR_EQUALITY_
 
+#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "Mathematics/isEqual.hpp"
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector2Impl< T >::operator==( const Vector2Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector2< T >::operator==( const Vector2< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector2Impl< T >::operator!=( const Vector2Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector2< T >::operator!=( const Vector2< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector3Impl< T >::operator==( const Vector3Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector3< T >::operator==( const Vector3< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector3Impl< T >::operator!=( const Vector3Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector3< T >::operator!=( const Vector3< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
-        }
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector4Impl< T >::operator==( const Vector4Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z ) && isEqual( this->w, other.w );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector4< T >::operator==( const Vector4< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z ) && isEqual( this->w, other.w );
-        }
-
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Vector4< T >::operator!=( const Vector4< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z ) || !isEqual( this->w, other.w );
-        }
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Vector4Impl< T >::operator!=( const Vector4Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z ) || !isEqual( this->w, other.w );
+    }
 
 }
 

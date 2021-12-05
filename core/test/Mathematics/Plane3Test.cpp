@@ -27,7 +27,10 @@
 
 #include "Mathematics/Plane3.hpp"
 
+#include "Mathematics/io.hpp"
+
 #include "gtest/gtest.h"
+#include <sstream>
 
 using namespace crimild;
 
@@ -39,4 +42,25 @@ TEST( Plane3, construction )
     static_assert( 0 == distance( P ) );
 
     EXPECT_TRUE( true );
+}
+
+TEST( Plane3, io )
+{
+    {
+        constexpr auto P = Plane3 {};
+
+        std::stringstream ss;
+        ss << P;
+
+        EXPECT_EQ( ss.str(), "[(0.000000, 1.000000, 0.000000), 0.000000]" );
+    }
+
+    {
+        constexpr auto P = Plane3 { Normal3 { 1, 2, 3 }, 4 };
+
+        std::stringstream ss;
+        ss << P;
+
+        EXPECT_EQ( ss.str(), "[(1.000000, 2.000000, 3.000000), 4.000000]" );
+    }
 }

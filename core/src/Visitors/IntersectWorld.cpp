@@ -59,9 +59,9 @@ void IntersectWorld::visitGroup( Group *group ) noexcept
         return;
     }
 
-    const auto R = inverse( group->getWorld() )( m_ray );
     if ( !group->getWorldBound()->testIntersection( m_ray ) ) {
-        return;
+        // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
+        // return;
     }
 
     NodeVisitor::visitGroup( group );
@@ -81,7 +81,8 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
         // TODO(hernan): Seems like a bug. Fix it.
         const auto R = inverse( geometry->getWorld() )( m_ray );
         if ( !geometry->getLocalBound()->testIntersection( R ) ) {
-            return;
+            // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
+            // return;
         }
     }
 

@@ -36,37 +36,37 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const Vector3Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const impl::Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const Vector3Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const impl::Vector4< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const Vector4Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z + u.w * u.w;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const impl::Vector4< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const Vector4Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const impl::Normal3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const Normal3Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const impl::Normal3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const Normal3Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }

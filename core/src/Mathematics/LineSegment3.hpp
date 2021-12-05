@@ -32,36 +32,32 @@
 
 namespace crimild {
 
-    namespace impl {
-
-        /**
+    /**
            \brief A segment between two points
         */
-        template< typename T >
-        struct LineSegment3 {
-            Point3< T > p0;
-            Point3< T > p1;
+    template< typename T >
+    struct LineSegment3Impl {
+        Point3Impl< T > p0;
+        Point3Impl< T > p1;
 
-            [[nodiscard]] constexpr Bool operator==( const LineSegment3 &other ) const noexcept
-            {
-                return p0 == other.p0 && p1 == other.p1;
-            }
+        [[nodiscard]] constexpr Bool operator==( const LineSegment3Impl &other ) const noexcept
+        {
+            return p0 == other.p0 && p1 == other.p1;
+        }
 
-            [[nodiscard]] constexpr Bool operator!=( const LineSegment3 &other ) const noexcept
-            {
-                return p0 != other.p1 || p0 != other.p1;
-            }
-        };
-
+        [[nodiscard]] constexpr Bool operator!=( const LineSegment3Impl &other ) const noexcept
+        {
+            return p0 != other.p1 || p0 != other.p1;
+        }
     };
 
     template< typename T >
-    [[nodiscard]] inline constexpr const impl::Point3< T > &origin( const impl::LineSegment3< T > &l ) noexcept { return l.p0; }
+    [[nodiscard]] inline constexpr const Point3Impl< T > &origin( const LineSegment3Impl< T > &l ) noexcept { return l.p0; }
 
     template< typename T >
-    [[nodiscard]] inline constexpr const impl::Point3< T > &destination( const impl::LineSegment3< T > &l ) noexcept { return l.p1; }
+    [[nodiscard]] inline constexpr const Point3Impl< T > &destination( const LineSegment3Impl< T > &l ) noexcept { return l.p1; }
 
-    using LineSegment3 = impl::LineSegment3< Real >;
+    using LineSegment3 = LineSegment3Impl< Real >;
 
 }
 

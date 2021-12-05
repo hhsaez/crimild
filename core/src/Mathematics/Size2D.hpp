@@ -32,15 +32,11 @@
 
 namespace crimild {
 
-    namespace impl {
-
-        template< typename T >
-        struct Size2D {
-            T width;
-            T height;
-        };
-
-    }
+    template< typename T >
+    struct Size2DImpl {
+        T width;
+        T height;
+    };
 
 }
 

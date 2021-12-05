@@ -34,16 +34,16 @@ using namespace crimild;
 TEST( VersionTest, defaultConstruction )
 {
     auto v = Version();
-    
-    EXPECT_GE( v.getMajor(), 4 );
-    EXPECT_GE( v.getMinor(), 5 );
+
+    EXPECT_GE( v.getMajor(), 5 );
+    EXPECT_GE( v.getMinor(), 0 );
     EXPECT_GE( v.getPatch(), 0 );
 }
 
 TEST( VersionTest, construction )
 {
     auto v = Version( 1, 2, 3 );
-    
+
     EXPECT_EQ( 1, v.getMajor() );
     EXPECT_EQ( 2, v.getMinor() );
     EXPECT_EQ( 3, v.getPatch() );
@@ -53,7 +53,7 @@ TEST( VersionTest, copy )
 {
     auto v1 = Version( 1, 2, 3 );
     auto v2 = v1;
-    
+
     EXPECT_EQ( v1.getMajor(), v2.getMajor() );
     EXPECT_EQ( v1.getMinor(), v2.getMinor() );
     EXPECT_EQ( v1.getPatch(), v2.getPatch() );
@@ -61,24 +61,24 @@ TEST( VersionTest, copy )
 
 TEST( VersionTest, toInt )
 {
-	auto v1 = Version( 1, 2, 3 );
+    auto v1 = Version( 1, 2, 3 );
 
-	auto i = v1.toInt();
+    auto i = v1.toInt();
 
-	EXPECT_EQ( 1002003, i );
+    EXPECT_EQ( 1002003, i );
 }
 
 TEST( VersionTest, getDescription )
 {
     auto v = Version( 1, 2, 3 );
-    
+
     EXPECT_EQ( "CRIMILD v1.2.3", v.getDescription() );
 }
 
 TEST( VersionTest, fromString )
 {
-	Version v;
-	v.fromString( "CRIMILD v1.2.3" );
+    Version v;
+    v.fromString( "CRIMILD v1.2.3" );
 
     EXPECT_EQ( 1, v.getMajor() );
     EXPECT_EQ( 2, v.getMinor() );
@@ -87,13 +87,12 @@ TEST( VersionTest, fromString )
 
 TEST( VersionTest, compareGE )
 {
-	auto v1 = Version( 1, 2, 3 );
-	auto v2 = Version( 1, 2, 4 );
-	auto v3 = v2;
-	auto v4 = Version( 4, 5, 6 );
+    auto v1 = Version( 1, 2, 3 );
+    auto v2 = Version( 1, 2, 4 );
+    auto v3 = v2;
+    auto v4 = Version( 4, 5, 6 );
 
-	EXPECT_TRUE( v1 < v2 );
-	EXPECT_TRUE( v2 == v3 );
-	EXPECT_TRUE( v4 > v1 );
+    EXPECT_TRUE( v1 < v2 );
+    EXPECT_TRUE( v2 == v3 );
+    EXPECT_TRUE( v4 > v1 );
 }
-

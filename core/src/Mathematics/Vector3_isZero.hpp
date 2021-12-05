@@ -34,7 +34,7 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isZero( const impl::Vector3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isZero( const Vector3Impl< T > &t ) noexcept
     {
         return isZero( t.x ) || isZero( t.y ) || isZero( t.z );
     }

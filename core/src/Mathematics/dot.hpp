@@ -38,49 +38,49 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::Vector2< T > &u, const impl::Vector2< T > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::Vector3< T > &u, const impl::Vector3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Vector3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::Vector4< T > &u, const impl::Vector4< T > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Vector4Impl< T > &u, const Vector4Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
     }
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Normal3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Normal3Impl< T > &u, const Normal3Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::Normal3< T > &u, const impl::Vector3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Normal3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::Vector3< T > &u, const impl::Normal3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr T dot( const Vector3Impl< T > &u, const Normal3Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::ColorRGB< T > &a, const impl::ColorRGB< T > &b ) noexcept
+    [[nodiscard]] inline constexpr T dot( const ColorRGBImpl< T > &a, const ColorRGBImpl< T > &b ) noexcept
     {
         return a.r * b.r + a.g * b.g + a.b * b.b;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T dot( const impl::ColorRGBA< T > &a, const impl::ColorRGBA< T > &b ) noexcept
+    [[nodiscard]] inline constexpr T dot( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< T > &b ) noexcept
     {
         return a.r * b.r + a.g * b.g + a.b * b.b + a.a * b.a;
     }

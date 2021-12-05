@@ -32,6 +32,7 @@
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Rendering/BufferView.hpp"
 
 #include "gtest/gtest.h"

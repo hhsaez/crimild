@@ -39,6 +39,8 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
+using namespace crimild;
+
 TEST( ColorRGB, construction )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };

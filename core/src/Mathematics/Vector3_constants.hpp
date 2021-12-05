@@ -34,23 +34,19 @@
 
 namespace crimild {
 
-    namespace impl {
-
-        template< typename T >
-        struct Vector3< T >::Constants {
-            static constexpr auto ZERO = Vector3< T > { 0, 0, 0 };
-            static constexpr auto ONE = Vector3< T > { 1, 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Vector3< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-            static constexpr auto UNIT_X = Vector3< T > { 1, 0, 0 };
-            static constexpr auto UNIT_Y = Vector3< T > { 0, 1, 0 };
-            static constexpr auto UNIT_Z = Vector3< T > { 0, 0, 1 };
-            static constexpr auto RIGHT = Vector3< T > { 1, 0, 0 };
-            static constexpr auto UP = Vector3< T > { 0, 1, 0 };
-            static constexpr auto FORWARD = Vector3< T > { 0, 0, -1 };
-        };
-
-    }
+    template< typename T >
+    struct Vector3Impl< T >::Constants {
+        static constexpr auto ZERO = Vector3Impl< T > { 0, 0, 0 };
+        static constexpr auto ONE = Vector3Impl< T > { 1, 1, 1 };
+        static constexpr auto POSITIVE_INFINITY = Vector3Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+        static constexpr auto NEGATIVE_INFINITY = Vector3Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+        static constexpr auto UNIT_X = Vector3Impl< T > { 1, 0, 0 };
+        static constexpr auto UNIT_Y = Vector3Impl< T > { 0, 1, 0 };
+        static constexpr auto UNIT_Z = Vector3Impl< T > { 0, 0, 1 };
+        static constexpr auto RIGHT = Vector3Impl< T > { 1, 0, 0 };
+        static constexpr auto UP = Vector3Impl< T > { 0, 1, 0 };
+        static constexpr auto FORWARD = Vector3Impl< T > { 0, 0, -1 };
+    };
 
 }
 

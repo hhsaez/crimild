@@ -33,20 +33,17 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Normal3Impl< T >::operator==( const Normal3Impl< T > &other ) const noexcept
+    {
+        return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
+    }
 
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Normal3< T >::operator==( const Normal3< T > &other ) const noexcept
-        {
-            return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
-        }
-
-        template< typename T >
-        [[nodiscard]] inline constexpr Bool Normal3< T >::operator!=( const Normal3< T > &other ) const noexcept
-        {
-            return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
-        }
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Bool Normal3Impl< T >::operator!=( const Normal3Impl< T > &other ) const noexcept
+    {
+        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
+    }
 
 }
 

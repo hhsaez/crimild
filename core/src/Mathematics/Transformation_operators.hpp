@@ -32,23 +32,27 @@
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_isIdentity.hpp"
 
-[[nodiscard]] constexpr crimild::Transformation operator*( const crimild::Transformation &t0, const crimild::Transformation &t1 ) noexcept
-{
-    if ( isIdentity( t1 ) ) {
-        return t0;
+namespace crimild {
+
+    [[nodiscard]] constexpr Transformation operator*( const Transformation &t0, const Transformation &t1 ) noexcept
+    {
+        if ( isIdentity( t1 ) ) {
+            return t0;
+        }
+
+        if ( isIdentity( t0 ) ) {
+            return t1;
+        }
+
+        return crimild::Transformation {
+            // Matrices are multiplied as usual...
+            .mat = t0.mat * t1.mat,
+            // ... but inverses must be multiplied in reverse order since `inv(A * B) = inv(B) * inv(A)`
+            .invMat = t1.invMat * t0.invMat,
+            .contents = t0.contents | t1.contents,
+        };
     }
 
-    if ( isIdentity( t0 ) ) {
-        return t1;
-    }
-
-    return crimild::Transformation {
-    	// Matrices are multiplied as usual...
-        .mat = t0.mat * t1.mat,
-        // ... but inverses must be multiplied in reverse order since `inv(A * B) = inv(B) * inv(A)`
-        .invMat = t1.invMat * t0.invMat,
-        .contents = t0.contents | t1.contents,
-    };
 }
 
 #endif

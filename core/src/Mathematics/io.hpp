@@ -41,82 +41,86 @@
 #include <iomanip>
 #include <iostream>
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::Tuple2< T > &u ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "(" << u.x << ", " << u.y << ")";
-    return out;
-}
+namespace crimild {
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::Tuple3< T > &u ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "(" << u.x << ", " << u.y << ", " << u.z << ")";
-    return out;
-}
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple2Impl< T > &u ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << u.x << ", " << u.y << ")";
+        return out;
+    }
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::Tuple4< T > &u ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "(" << u.x << ", " << u.y << ", " << u.z << ", " << u.w << ")";
-    return out;
-}
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple3Impl< T > &u ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << u.x << ", " << u.y << ", " << u.z << ")";
+        return out;
+    }
 
-static std::ostream &operator<<( std::ostream &out, const crimild::Ray3 &R ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "[" << crimild::origin( R ) << ", " << crimild::direction( R ) << "]";
-    return out;
-}
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple4Impl< T > &u ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << u.x << ", " << u.y << ", " << u.z << ", " << u.w << ")";
+        return out;
+    }
 
-static std::ostream &operator<<( std::ostream &out, const crimild::LineSegment3 &l ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 10 );
-    out << "[" << crimild::origin( l ) << ", " << crimild::destination( l ) << "]";
-    return out;
-}
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Ray3 &R ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "[" << origin( R ) << ", " << direction( R ) << "]";
+        return out;
+    }
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::ColorRGB< T > &c ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "(" << c.r << ", " << c.g << ", " << c.b << ")";
-    return out;
-}
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const LineSegment3 &l ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 10 );
+        out << "[" << origin( l ) << ", " << destination( l ) << "]";
+        return out;
+    }
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::ColorRGBA< T > &c ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
-    return out;
-}
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const ColorRGBImpl< T > &c ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << c.r << ", " << c.g << ", " << c.b << ")";
+        return out;
+    }
 
-static std::ostream &operator<<( std::ostream &out, const crimild::Plane3 &p ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 10 )
-        << "[" << crimild::normal( p ) << ", " << crimild::distance( p ) << "]";
-    return out;
-}
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const ColorRGBAImpl< T > &c ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
+        return out;
+    }
 
-template< typename T >
-static std::ostream &operator<<( std::ostream &out, const crimild::impl::Matrix4< T > &a ) noexcept
-{
-    out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-        << std::setprecision( 6 );
-    out << "[" << a[ 0 ] << ", " << a[ 1 ] << ", " << a[ 2 ] << ", " << a[ 3 ] << "]";
-    return out;
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Plane3 &p ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 10 )
+            << "[" << normal( p ) << ", " << distance( p ) << "]";
+        return out;
+    }
+
+    template< typename T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Matrix4Impl< T > &a ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "[" << a[ 0 ] << ", " << a[ 1 ] << ", " << a[ 2 ] << ", " << a[ 3 ] << "]";
+        return out;
+    }
+
 }
 
 #endif

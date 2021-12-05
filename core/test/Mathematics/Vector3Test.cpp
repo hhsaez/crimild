@@ -44,6 +44,8 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
+using namespace crimild;
+
 TEST( Vector3, construction )
 {
     constexpr auto u = crimild::Vector3 { 10, 20, 30 };
