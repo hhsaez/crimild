@@ -34,19 +34,18 @@
 
 namespace crimild {
 
-	class MockComponent : public NodeComponent {
-		CRIMILD_IMPLEMENT_RTTI( crimild::MockComponent )
+    class MockComponent : public NodeComponent {
+        CRIMILD_IMPLEMENT_RTTI( crimild::MockComponent )
 
-	public:
-		MockComponent( void ) { }
-		virtual ~MockComponent( void ) { }
+    public:
+        MockComponent( void ) { }
+        virtual ~MockComponent( void ) { }
 
-		MOCK_METHOD0( onDetach, void( void ) );
-		MOCK_METHOD0( onAttach, void( void ) );
-		MOCK_METHOD1( update, void( const Clock & ) );
-	};
+        MOCK_METHOD0( onDetach, void( void ) );
+        MOCK_METHOD0( onAttach, void( void ) );
+        MOCK_METHOD1( update, void( const Clock & ) );
+    };
 
 }
 
 #endif
-
