@@ -6,14 +6,19 @@
 	path = third-party/assimp
 	url = https://github.com/assimp/assimp.git
 	ignore = dirty
-
 [submodule "third-party/stb"]
 	path = third-party/stb
 	url = https://github.com/nothings/stb.git
+	ignore = dirty
 [submodule "third-party/imgui"]
 	path = third-party/imgui
 	url = https://github.com/ocornut/imgui.git
+	ignore = dirty
 [submodule "third-party/glslang"]
 	path = third-party/glslang
 	url = git@github.com:KhronosGroup/glslang.git
     ignore = dirty
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://github.com/google/googletest.git
+	ignore = dirty
