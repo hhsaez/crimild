@@ -89,15 +89,15 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T min( const impl::ColorRGB< T > &c ) noexcept
+    [[nodiscard]] inline constexpr T min( const ColorRGBImpl< T > &c ) noexcept
     {
         return min( c.r, min( c.g, c.b ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::ColorRGB< T > min( const impl::ColorRGB< T > &a, const impl::ColorRGB< T > &b ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > min( const ColorRGBImpl< T > &a, const ColorRGBImpl< T > &b ) noexcept
     {
-        return impl::ColorRGB< T > {
+        return ColorRGBImpl< T > {
             min( a.r, b.r ),
             min( a.g, b.g ),
             min( a.b, b.b ),
@@ -105,7 +105,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Size minDimension( const impl::ColorRGB< T > &c ) noexcept
+    [[nodiscard]] inline constexpr Size minDimension( const ColorRGBImpl< T > &c ) noexcept
     {
         auto ret = Size( 0 );
         for ( auto i = 1l; i < 3; ++i ) {
@@ -117,15 +117,15 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr T min( const impl::ColorRGBA< T > &c ) noexcept
+    [[nodiscard]] inline constexpr T min( const ColorRGBAImpl< T > &c ) noexcept
     {
         return min( c.r, min( c.g, min( c.b, c.a ) ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::ColorRGBA< T > min( const impl::ColorRGBA< T > &a, const impl::ColorRGBA< T > &b ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBAImpl< T > min( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< T > &b ) noexcept
     {
-        return impl::ColorRGBA< T > {
+        return ColorRGBAImpl< T > {
             min( a.r, b.r ),
             min( a.g, b.g ),
             min( a.b, b.b ),
@@ -134,7 +134,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Size minDimension( const impl::ColorRGBA< T > &c ) noexcept
+    [[nodiscard]] inline constexpr Size minDimension( const ColorRGBAImpl< T > &c ) noexcept
     {
         auto ret = Size( 0 );
         for ( auto i = 1l; i < 4; ++i ) {

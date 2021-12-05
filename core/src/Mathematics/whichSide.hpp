@@ -34,7 +34,7 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr Char whichSide( const impl::LineSegment3< T > &l, const impl::Point3< T > &p, const Normal3 &normal ) noexcept
+    [[nodiscard]] constexpr Char whichSide( const LineSegment3Impl< T > &l, const Point3Impl< T > &p, const Normal3 &normal ) noexcept
     {
         assert( false && "TODO" );
 

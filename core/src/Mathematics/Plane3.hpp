@@ -58,7 +58,7 @@ namespace crimild {
     };
 
     [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept { return p.n; }
-    [[nodiscard]] inline constexpr const Real distance( const Plane3 &p ) noexcept { return p.d; }
+    [[nodiscard]] inline constexpr Real distance( const Plane3 &p ) noexcept { return p.d; }
 
 }
 

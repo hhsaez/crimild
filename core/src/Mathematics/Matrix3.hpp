@@ -32,53 +32,49 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Matrix3Impl {
+        struct Constants;
 
-        template< typename T >
-        struct Matrix3 {
-            struct Constants;
+        Vector3Impl< T > c0;
+        Vector3Impl< T > c1;
+        Vector3Impl< T > c2;
 
-            Vector3< T > c0;
-            Vector3< T > c1;
-            Vector3< T > c2;
+        [[nodiscard]] inline constexpr const Vector3Impl< T > &operator[]( Index index ) const noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return c0;
+                case 1:
+                    return c1;
+                case 2:
+                default:
+                    return c2;
+            };
+        }
 
-            [[nodiscard]] inline constexpr const Vector3< T > &operator[]( Index index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                    default:
-                        return c2;
-                };
-            }
+        [[nodiscard]] inline Vector3Impl< T > &operator[]( Index index ) noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return c0;
+                case 1:
+                    return c1;
+                case 2:
+                default:
+                    return c2;
+            };
+        }
 
-            [[nodiscard]] inline Vector3< T > &operator[]( Index index ) noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return c0;
-                    case 1:
-                        return c1;
-                    case 2:
-                    default:
-                        return c2;
-                };
-            }
+        [[nodiscard]] inline constexpr Bool operator==( const Matrix3Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Matrix3Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Matrix3 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Matrix3 &other ) const noexcept;
-        };
-
-    }
-
-    using Matrix3 = impl::Matrix3< Real >;
-    using Matrix3f = impl::Matrix3< Real32 >;
-    using Matrix3d = impl::Matrix3< Real64 >;
-    using Matrix3i = impl::Matrix3< Int32 >;
-    using Matrix3ui = impl::Matrix3< UInt32 >;
+    using Matrix3 = Matrix3Impl< Real >;
+    using Matrix3f = Matrix3Impl< Real32 >;
+    using Matrix3d = Matrix3Impl< Real64 >;
+    using Matrix3i = Matrix3Impl< Int32 >;
+    using Matrix3ui = Matrix3Impl< UInt32 >;
 
 }
 

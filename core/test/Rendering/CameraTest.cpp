@@ -29,6 +29,7 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
+#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"

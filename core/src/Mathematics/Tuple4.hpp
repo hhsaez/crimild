@@ -34,38 +34,34 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Tuple4Impl {
+        T x;
+        T y;
+        T z;
+        T w;
 
-        template< typename T >
-        struct Tuple4 {
-            T x;
-            T y;
-            T z;
-            T w;
-
-            [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-            {
-                switch ( index ) {
-                    case 0:
-                        return x;
-                    case 1:
-                        return y;
-                    case 2:
-                        return z;
-                    case 3:
-                        return w;
-                    default:
-                        return NAN;
-                }
+        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return x;
+                case 1:
+                    return y;
+                case 2:
+                    return z;
+                case 3:
+                    return w;
+                default:
+                    return NAN;
             }
-        };
+        }
+    };
 
-    }
-
-    using Tuple4 = impl::Tuple4< Real >;
-    using Tuple4f = impl::Tuple4< Real32 >;
-    using Tuple4d = impl::Tuple4< Real64 >;
-    using Tuple4i = impl::Tuple4< Int32 >;
+    using Tuple4 = Tuple4Impl< Real >;
+    using Tuple4f = Tuple4Impl< Real32 >;
+    using Tuple4d = Tuple4Impl< Real64 >;
+    using Tuple4i = Tuple4Impl< Int32 >;
 
 }
 

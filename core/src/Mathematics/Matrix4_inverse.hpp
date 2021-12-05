@@ -35,7 +35,7 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr impl::Matrix4< T > inverse( const impl::Matrix4< T > &a ) noexcept
+    [[nodiscard]] constexpr Matrix4Impl< T > inverse( const Matrix4Impl< T > &a ) noexcept
     {
         const T a00 = a[ 0 ][ 0 ], a01 = a[ 1 ][ 0 ], a02 = a[ 2 ][ 0 ], a03 = a[ 3 ][ 0 ],
                 a10 = a[ 0 ][ 1 ], a11 = a[ 1 ][ 1 ], a12 = a[ 2 ][ 1 ], a13 = a[ 3 ][ 1 ],
@@ -59,7 +59,7 @@ namespace crimild {
         assert( det != 0 );
         const Real invDet = Real( 1 ) / det;
 
-        return impl::Matrix4< T > {
+        return Matrix4Impl< T > {
             {
                 ( a11 * b11 - a12 * b10 + a13 * b09 ) * invDet,
                 ( a12 * b08 - a10 * b11 - a13 * b07 ) * invDet,

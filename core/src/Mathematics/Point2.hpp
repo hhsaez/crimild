@@ -34,31 +34,27 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Point2Impl : public Tuple2Impl< T > {
+        struct Constants;
 
-        template< typename T >
-        struct Point2 : public Tuple2< T > {
-            struct Constants;
+        [[nodiscard]] inline constexpr Bool operator==( const Point2Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Point2Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Point2 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Point2 &other ) const noexcept;
-        };
+    template< typename T >
+    struct Point2Impl< T >::Constants {
+        static constexpr auto ZERO = Point2Impl< T > { 0, 0 };
+        static constexpr auto ONE = Point2Impl< T > { 1, 1 };
+        static constexpr auto POSITIVE_INFINITY = Point2Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+        static constexpr auto NEGATIVE_INFINITY = Point2Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+    };
 
-        template< typename T >
-        struct Point2< T >::Constants {
-            static constexpr auto ZERO = Point2< T > { 0, 0 };
-            static constexpr auto ONE = Point2< T > { 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Point2< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Point2< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-        };
-
-    }
-
-    using Point2 = impl::Point2< Real >;
-    using Point2f = impl::Point2< Real32 >;
-    using Point2d = impl::Point2< Real64 >;
-    using Point2i = impl::Point2< Int32 >;
-    using Point2ui = impl::Point2< UInt32 >;
+    using Point2 = Point2Impl< Real >;
+    using Point2f = Point2Impl< Real32 >;
+    using Point2d = Point2Impl< Real64 >;
+    using Point2i = Point2Impl< Int32 >;
+    using Point2ui = Point2Impl< UInt32 >;
 
 }
 

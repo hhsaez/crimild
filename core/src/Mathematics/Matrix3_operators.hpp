@@ -30,101 +30,105 @@
 
 #include "Mathematics/Matrix3.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator+( const crimild::impl::Matrix3< T > &a, const crimild::impl::Matrix3< T > &b ) noexcept
-{
-    return impl::Matrix3< T > {
-        a[ 0 ] + b[ 0 ],
-        a[ 1 ] + b[ 1 ],
-        a[ 2 ] + b[ 2 ],
-        a[ 3 ] + b[ 3 ],
-        a[ 4 ] + b[ 4 ],
-        a[ 5 ] + b[ 5 ],
-        a[ 6 ] + b[ 6 ],
-        a[ 7 ] + b[ 7 ],
-        a[ 8 ] + b[ 8 ],
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator-( const crimild::impl::Matrix3< T > &a, const crimild::impl::Matrix3< T > &b ) noexcept
-{
-    return impl::Matrix3< T > {
-        a[ 0 ] - b[ 0 ],
-        a[ 1 ] - b[ 1 ],
-        a[ 2 ] - b[ 2 ],
-        a[ 3 ] - b[ 3 ],
-        a[ 4 ] - b[ 4 ],
-        a[ 5 ] - b[ 5 ],
-        a[ 6 ] - b[ 6 ],
-        a[ 7 ] - b[ 7 ],
-        a[ 8 ] - b[ 8 ],
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator+( const Matrix3Impl< T > &a, const Matrix3Impl< T > &b ) noexcept
+    {
+        return impl::Matrix3< T > {
+            a[ 0 ] + b[ 0 ],
+            a[ 1 ] + b[ 1 ],
+            a[ 2 ] + b[ 2 ],
+            a[ 3 ] + b[ 3 ],
+            a[ 4 ] + b[ 4 ],
+            a[ 5 ] + b[ 5 ],
+            a[ 6 ] + b[ 6 ],
+            a[ 7 ] + b[ 7 ],
+            a[ 8 ] + b[ 8 ],
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator*( const crimild::impl::Matrix3< T > &a, const crimild::impl::Matrix3< T > &b ) noexcept
-{
-    return impl::Matrix3< T > {
-        a[ 0 ] * b[ 0 ] + a[ 1 ] * b[ 3 ] + a[ 2 ] * b[ 6 ],
-        a[ 0 ] * b[ 1 ] + a[ 1 ] * b[ 4 ] + a[ 2 ] * b[ 7 ],
-        a[ 0 ] * b[ 2 ] + a[ 1 ] * b[ 5 ] + a[ 2 ] * b[ 8 ],
-        a[ 3 ] * b[ 0 ] + a[ 4 ] * b[ 3 ] + a[ 5 ] * b[ 6 ],
-        a[ 3 ] * b[ 1 ] + a[ 4 ] * b[ 4 ] + a[ 5 ] * b[ 7 ],
-        a[ 3 ] * b[ 2 ] + a[ 4 ] * b[ 5 ] + a[ 5 ] * b[ 8 ],
-        a[ 6 ] * b[ 0 ] + a[ 7 ] * b[ 3 ] + a[ 8 ] * b[ 6 ],
-        a[ 6 ] * b[ 1 ] + a[ 7 ] * b[ 4 ] + a[ 8 ] * b[ 7 ],
-        a[ 6 ] * b[ 2 ] + a[ 7 ] * b[ 5 ] + a[ 8 ] * b[ 8 ],
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator-( const Matrix3Impl< T > &a, const Matrix3Impl< T > &b ) noexcept
+    {
+        return impl::Matrix3< T > {
+            a[ 0 ] - b[ 0 ],
+            a[ 1 ] - b[ 1 ],
+            a[ 2 ] - b[ 2 ],
+            a[ 3 ] - b[ 3 ],
+            a[ 4 ] - b[ 4 ],
+            a[ 5 ] - b[ 5 ],
+            a[ 6 ] - b[ 6 ],
+            a[ 7 ] - b[ 7 ],
+            a[ 8 ] - b[ 8 ],
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator*( const crimild::impl::Matrix3< T > &a, crimild::Real s ) noexcept
-{
-    return impl::Matrix3< T > {
-        a[ 0 ] * s,
-        a[ 1 ] * s,
-        a[ 2 ] * s,
-        a[ 3 ] * s,
-        a[ 4 ] * s,
-        a[ 5 ] * s,
-        a[ 6 ] * s,
-        a[ 7 ] * s,
-        a[ 8 ] * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator*( const Matrix3Impl< T > &a, const Matrix3Impl< T > &b ) noexcept
+    {
+        return impl::Matrix3< T > {
+            a[ 0 ] * b[ 0 ] + a[ 1 ] * b[ 3 ] + a[ 2 ] * b[ 6 ],
+            a[ 0 ] * b[ 1 ] + a[ 1 ] * b[ 4 ] + a[ 2 ] * b[ 7 ],
+            a[ 0 ] * b[ 2 ] + a[ 1 ] * b[ 5 ] + a[ 2 ] * b[ 8 ],
+            a[ 3 ] * b[ 0 ] + a[ 4 ] * b[ 3 ] + a[ 5 ] * b[ 6 ],
+            a[ 3 ] * b[ 1 ] + a[ 4 ] * b[ 4 ] + a[ 5 ] * b[ 7 ],
+            a[ 3 ] * b[ 2 ] + a[ 4 ] * b[ 5 ] + a[ 5 ] * b[ 8 ],
+            a[ 6 ] * b[ 0 ] + a[ 7 ] * b[ 3 ] + a[ 8 ] * b[ 6 ],
+            a[ 6 ] * b[ 1 ] + a[ 7 ] * b[ 4 ] + a[ 8 ] * b[ 7 ],
+            a[ 6 ] * b[ 2 ] + a[ 7 ] * b[ 5 ] + a[ 8 ] * b[ 8 ],
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator*( crimild::Real s, const crimild::impl::Matrix3< T > &a ) noexcept
-{
-    return impl::Matrix3< T > {
-        a[ 0 ] * s,
-        a[ 1 ] * s,
-        a[ 2 ] * s,
-        a[ 3 ] * s,
-        a[ 4 ] * s,
-        a[ 5 ] * s,
-        a[ 6 ] * s,
-        a[ 7 ] * s,
-        a[ 8 ] * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator*( const Matrix3Impl< T > &a, crimild::Real s ) noexcept
+    {
+        return impl::Matrix3< T > {
+            a[ 0 ] * s,
+            a[ 1 ] * s,
+            a[ 2 ] * s,
+            a[ 3 ] * s,
+            a[ 4 ] * s,
+            a[ 5 ] * s,
+            a[ 6 ] * s,
+            a[ 7 ] * s,
+            a[ 8 ] * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix3< T > operator/( const crimild::impl::Matrix3< T > &a, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return a * invS;
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator*( crimild::Real s, const Matrix3Impl< T > &a ) noexcept
+    {
+        return impl::Matrix3< T > {
+            a[ 0 ] * s,
+            a[ 1 ] * s,
+            a[ 2 ] * s,
+            a[ 3 ] * s,
+            a[ 4 ] * s,
+            a[ 5 ] * s,
+            a[ 6 ] * s,
+            a[ 7 ] * s,
+            a[ 8 ] * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator*( const crimild::impl::Matrix3< T > &a, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        a[ 0 ] * u[ 0 ] + a[ 1 ] * u[ 1 ] + a[ 2 ] * u[ 2 ],
-        a[ 3 ] * u[ 0 ] + a[ 4 ] * u[ 1 ] + a[ 5 ] * u[ 2 ],
-        a[ 6 ] * u[ 0 ] + a[ 7 ] * u[ 1 ] + a[ 8 ] * u[ 2 ],
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix3Impl< T > operator/( const Matrix3Impl< T > &a, crimild::Real s ) noexcept
+    {
+        const auto invS = crimild::Real( 1 ) / s;
+        return a * invS;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator*( const Matrix3Impl< T > &a, const Vector3Impl< T > &v ) noexcept
+    {
+        return Vector3Impl< T > {
+            a[ 0 ] * u[ 0 ] + a[ 1 ] * u[ 1 ] + a[ 2 ] * u[ 2 ],
+            a[ 3 ] * u[ 0 ] + a[ 4 ] * u[ 1 ] + a[ 5 ] * u[ 2 ],
+            a[ 6 ] * u[ 0 ] + a[ 7 ] * u[ 1 ] + a[ 8 ] * u[ 2 ],
+        };
+    }
+
 }
 
 #endif

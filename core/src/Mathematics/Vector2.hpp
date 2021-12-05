@@ -34,33 +34,29 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Vector2Impl : public Tuple2Impl< T > {
+        struct Constants;
 
-        template< typename T >
-        struct Vector2 : public Tuple2< T > {
-            struct Constants;
+        [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Vector2 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Vector2 &other ) const noexcept;
-        };
+    template< typename T >
+    struct Vector2Impl< T >::Constants {
+        static constexpr auto ZERO = Vector2Impl< T > { 0, 0 };
+        static constexpr auto ONE = Vector2Impl< T > { 1, 1 };
+        static constexpr auto POSITIVE_INFINITY = Vector2Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
+        static constexpr auto NEGATIVE_INFINITY = Vector2Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
+        static constexpr auto UNIT_X = Vector2Impl< T > { 1, 0 };
+        static constexpr auto UNIT_Y = Vector2Impl< T > { 0, 1 };
+    };
 
-        template< typename T >
-        struct Vector2< T >::Constants {
-            static constexpr auto ZERO = Vector2< T > { 0, 0 };
-            static constexpr auto ONE = Vector2< T > { 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-            static constexpr auto NEGATIVE_INFINITY = Vector2< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-            static constexpr auto UNIT_X = Vector2< T > { 1, 0 };
-            static constexpr auto UNIT_Y = Vector2< T > { 0, 1 };
-        };
-
-    }
-
-    using Vector2 = impl::Vector2< Real >;
-    using Vector2f = impl::Vector2< Real32 >;
-    using Vector2d = impl::Vector2< Real64 >;
-    using Vector2i = impl::Vector2< Int32 >;
-    using Vector2ui = impl::Vector2< UInt32 >;
+    using Vector2 = Vector2Impl< Real >;
+    using Vector2f = Vector2Impl< Real32 >;
+    using Vector2d = Vector2Impl< Real64 >;
+    using Vector2i = Vector2Impl< Int32 >;
+    using Vector2ui = Vector2Impl< UInt32 >;
 
 }
 

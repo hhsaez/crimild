@@ -30,77 +30,81 @@
 
 #include "Mathematics/Vector4.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator+( const crimild::impl::Vector4< T > &u, const crimild::impl::Vector4< T > &v ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        u.x + v.x,
-        u.y + v.y,
-        u.z + v.z,
-        u.w + v.w,
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator-( const crimild::impl::Vector4< T > &u, const crimild::impl::Vector4< T > &v ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        u.x - v.x,
-        u.y - v.y,
-        u.z - v.z,
-        u.w - v.w,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator+( const Vector4Impl< T > &u, const Vector4Impl< T > &v ) noexcept
+    {
+        return Vector4Impl< T > {
+            u.x + v.x,
+            u.y + v.y,
+            u.z + v.z,
+            u.w + v.w,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator*( const crimild::impl::Vector4< T > &u, crimild::Real s ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-        u.w * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator-( const Vector4Impl< T > &u, const Vector4Impl< T > &v ) noexcept
+    {
+        return Vector4Impl< T > {
+            u.x - v.x,
+            u.y - v.y,
+            u.z - v.z,
+            u.w - v.w,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator*( crimild::Real s, const crimild::impl::Vector4< T > &u ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-        u.w * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator*( const Vector4Impl< T > &u, crimild::Real s ) noexcept
+    {
+        return Vector4Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+            u.w * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator*( const crimild::impl::Vector4< T > &u, const crimild::impl::Vector4< T > &v ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        u.x * v.x,
-        u.y * v.y,
-        u.z * v.z,
-        u.w * v.w,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator*( crimild::Real s, const Vector4Impl< T > &u ) noexcept
+    {
+        return Vector4Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+            u.w * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator/( const crimild::impl::Vector4< T > &u, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return u * invS;
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator*( const Vector4Impl< T > &u, const Vector4Impl< T > &v ) noexcept
+    {
+        return Vector4Impl< T > {
+            u.x * v.x,
+            u.y * v.y,
+            u.z * v.z,
+            u.w * v.w,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector4< T > operator-( const crimild::impl::Vector4< T > &u ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        -u.x,
-        -u.y,
-        -u.z,
-        -u.w,
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator/( const Vector4Impl< T > &u, crimild::Real s ) noexcept
+    {
+        const auto invS = crimild::Real( 1 ) / s;
+        return u * invS;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector4Impl< T > operator-( const Vector4Impl< T > &u ) noexcept
+    {
+        return Vector4Impl< T > {
+            -u.x,
+            -u.y,
+            -u.z,
+            -u.w,
+        };
+    }
+
 }
 
 #endif

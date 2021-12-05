@@ -33,145 +33,149 @@
 
 #include <cassert>
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix4< T > operator+( const crimild::impl::Matrix4< T > &a, const crimild::impl::Matrix4< T > &b ) noexcept
-{
-    return crimild::impl::Matrix4< T > {
-        a[ 0 ] + b[ 0 ],
-        a[ 1 ] + b[ 1 ],
-        a[ 2 ] + b[ 2 ],
-        a[ 3 ] + b[ 3 ],
-        a[ 4 ] + b[ 4 ],
-        a[ 5 ] + b[ 5 ],
-        a[ 6 ] + b[ 6 ],
-        a[ 7 ] + b[ 7 ],
-        a[ 8 ] + b[ 8 ],
-        a[ 9 ] + b[ 9 ],
-        a[ 10 ] + b[ 10 ],
-        a[ 11 ] + b[ 11 ],
-        a[ 12 ] + b[ 12 ],
-        a[ 13 ] + b[ 13 ],
-        a[ 14 ] + b[ 14 ],
-        a[ 15 ] + b[ 15 ],
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix4< T > operator-( const crimild::impl::Matrix4< T > &a, const crimild::impl::Matrix4< T > &b ) noexcept
-{
-    return crimild::impl::Matrix4< T > {
-        a[ 0 ] - b[ 0 ],
-        a[ 1 ] - b[ 1 ],
-        a[ 2 ] - b[ 2 ],
-        a[ 3 ] - b[ 3 ],
-        a[ 4 ] - b[ 4 ],
-        a[ 5 ] - b[ 5 ],
-        a[ 6 ] - b[ 6 ],
-        a[ 7 ] - b[ 7 ],
-        a[ 8 ] - b[ 8 ],
-        a[ 9 ] - b[ 9 ],
-        a[ 10 ] - b[ 10 ],
-        a[ 11 ] - b[ 11 ],
-        a[ 12 ] - b[ 12 ],
-        a[ 13 ] - b[ 13 ],
-        a[ 14 ] - b[ 14 ],
-        a[ 15 ] - b[ 15 ],
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator+( const Matrix4Impl< T > &a, const Matrix4Impl< T > &b ) noexcept
+    {
+        return Matrix4Impl< T > {
+            a[ 0 ] + b[ 0 ],
+            a[ 1 ] + b[ 1 ],
+            a[ 2 ] + b[ 2 ],
+            a[ 3 ] + b[ 3 ],
+            a[ 4 ] + b[ 4 ],
+            a[ 5 ] + b[ 5 ],
+            a[ 6 ] + b[ 6 ],
+            a[ 7 ] + b[ 7 ],
+            a[ 8 ] + b[ 8 ],
+            a[ 9 ] + b[ 9 ],
+            a[ 10 ] + b[ 10 ],
+            a[ 11 ] + b[ 11 ],
+            a[ 12 ] + b[ 12 ],
+            a[ 13 ] + b[ 13 ],
+            a[ 14 ] + b[ 14 ],
+            a[ 15 ] + b[ 15 ],
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix4< T > operator*( const crimild::impl::Matrix4< T > &a, crimild::Real s ) noexcept
-{
-    return crimild::impl::Matrix4< T > {
-        a[ 0 ] * s,
-        a[ 1 ] * s,
-        a[ 2 ] * s,
-        a[ 3 ] * s,
-        a[ 4 ] * s,
-        a[ 5 ] * s,
-        a[ 6 ] * s,
-        a[ 7 ] * s,
-        a[ 8 ] * s,
-        a[ 9 ] * s,
-        a[ 10 ] * s,
-        a[ 11 ] * s,
-        a[ 12 ] * s,
-        a[ 13 ] * s,
-        a[ 14 ] * s,
-        a[ 15 ] * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator-( const Matrix4Impl< T > &a, const Matrix4Impl< T > &b ) noexcept
+    {
+        return Matrix4Impl< T > {
+            a[ 0 ] - b[ 0 ],
+            a[ 1 ] - b[ 1 ],
+            a[ 2 ] - b[ 2 ],
+            a[ 3 ] - b[ 3 ],
+            a[ 4 ] - b[ 4 ],
+            a[ 5 ] - b[ 5 ],
+            a[ 6 ] - b[ 6 ],
+            a[ 7 ] - b[ 7 ],
+            a[ 8 ] - b[ 8 ],
+            a[ 9 ] - b[ 9 ],
+            a[ 10 ] - b[ 10 ],
+            a[ 11 ] - b[ 11 ],
+            a[ 12 ] - b[ 12 ],
+            a[ 13 ] - b[ 13 ],
+            a[ 14 ] - b[ 14 ],
+            a[ 15 ] - b[ 15 ],
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix4< T > operator*( crimild::Real s, const crimild::impl::Matrix4< T > &a ) noexcept
-{
-    return crimild::impl::Matrix4< T > {
-        a[ 0 ] * s,
-        a[ 1 ] * s,
-        a[ 2 ] * s,
-        a[ 3 ] * s,
-        a[ 4 ] * s,
-        a[ 5 ] * s,
-        a[ 6 ] * s,
-        a[ 7 ] * s,
-        a[ 8 ] * s,
-        a[ 9 ] * s,
-        a[ 10 ] * s,
-        a[ 11 ] * s,
-        a[ 12 ] * s,
-        a[ 13 ] * s,
-        a[ 14 ] * s,
-        a[ 15 ] * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( const Matrix4Impl< T > &a, Real s ) noexcept
+    {
+        return Matrix4Impl< T > {
+            a[ 0 ] * s,
+            a[ 1 ] * s,
+            a[ 2 ] * s,
+            a[ 3 ] * s,
+            a[ 4 ] * s,
+            a[ 5 ] * s,
+            a[ 6 ] * s,
+            a[ 7 ] * s,
+            a[ 8 ] * s,
+            a[ 9 ] * s,
+            a[ 10 ] * s,
+            a[ 11 ] * s,
+            a[ 12 ] * s,
+            a[ 13 ] * s,
+            a[ 14 ] * s,
+            a[ 15 ] * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Matrix4< T > operator/( const crimild::impl::Matrix4< T > &a, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return a * invS;
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( Real s, const Matrix4Impl< T > &a ) noexcept
+    {
+        return Matrix4Impl< T > {
+            a[ 0 ] * s,
+            a[ 1 ] * s,
+            a[ 2 ] * s,
+            a[ 3 ] * s,
+            a[ 4 ] * s,
+            a[ 5 ] * s,
+            a[ 6 ] * s,
+            a[ 7 ] * s,
+            a[ 8 ] * s,
+            a[ 9 ] * s,
+            a[ 10 ] * s,
+            a[ 11 ] * s,
+            a[ 12 ] * s,
+            a[ 13 ] * s,
+            a[ 14 ] * s,
+            a[ 15 ] * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] static constexpr crimild::impl::Matrix4< T > operator*( const crimild::impl::Matrix4< T > &A, const crimild::impl::Matrix4< T > &B ) noexcept
-{
-    return crimild::impl::Matrix4< T > {
-        {
-            A[ 0 ][ 0 ] * B[ 0 ][ 0 ] + A[ 1 ][ 0 ] * B[ 0 ][ 1 ] + A[ 2 ][ 0 ] * B[ 0 ][ 2 ] + A[ 3 ][ 0 ] * B[ 0 ][ 3 ],
-            A[ 0 ][ 1 ] * B[ 0 ][ 0 ] + A[ 1 ][ 1 ] * B[ 0 ][ 1 ] + A[ 2 ][ 1 ] * B[ 0 ][ 2 ] + A[ 3 ][ 1 ] * B[ 0 ][ 3 ],
-            A[ 0 ][ 2 ] * B[ 0 ][ 0 ] + A[ 1 ][ 2 ] * B[ 0 ][ 1 ] + A[ 2 ][ 2 ] * B[ 0 ][ 2 ] + A[ 3 ][ 2 ] * B[ 0 ][ 3 ],
-            A[ 0 ][ 3 ] * B[ 0 ][ 0 ] + A[ 1 ][ 3 ] * B[ 0 ][ 1 ] + A[ 2 ][ 3 ] * B[ 0 ][ 2 ] + A[ 3 ][ 3 ] * B[ 0 ][ 3 ],
-        },
-        {
-            A[ 0 ][ 0 ] * B[ 1 ][ 0 ] + A[ 1 ][ 0 ] * B[ 1 ][ 1 ] + A[ 2 ][ 0 ] * B[ 1 ][ 2 ] + A[ 3 ][ 0 ] * B[ 1 ][ 3 ],
-            A[ 0 ][ 1 ] * B[ 1 ][ 0 ] + A[ 1 ][ 1 ] * B[ 1 ][ 1 ] + A[ 2 ][ 1 ] * B[ 1 ][ 2 ] + A[ 3 ][ 1 ] * B[ 1 ][ 3 ],
-            A[ 0 ][ 2 ] * B[ 1 ][ 0 ] + A[ 1 ][ 2 ] * B[ 1 ][ 1 ] + A[ 2 ][ 2 ] * B[ 1 ][ 2 ] + A[ 3 ][ 2 ] * B[ 1 ][ 3 ],
-            A[ 0 ][ 3 ] * B[ 1 ][ 0 ] + A[ 1 ][ 3 ] * B[ 1 ][ 1 ] + A[ 2 ][ 3 ] * B[ 1 ][ 2 ] + A[ 3 ][ 3 ] * B[ 1 ][ 3 ],
-        },
-        {
-            A[ 0 ][ 0 ] * B[ 2 ][ 0 ] + A[ 1 ][ 0 ] * B[ 2 ][ 1 ] + A[ 2 ][ 0 ] * B[ 2 ][ 2 ] + A[ 3 ][ 0 ] * B[ 2 ][ 3 ],
-            A[ 0 ][ 1 ] * B[ 2 ][ 0 ] + A[ 1 ][ 1 ] * B[ 2 ][ 1 ] + A[ 2 ][ 1 ] * B[ 2 ][ 2 ] + A[ 3 ][ 1 ] * B[ 2 ][ 3 ],
-            A[ 0 ][ 2 ] * B[ 2 ][ 0 ] + A[ 1 ][ 2 ] * B[ 2 ][ 1 ] + A[ 2 ][ 2 ] * B[ 2 ][ 2 ] + A[ 3 ][ 2 ] * B[ 2 ][ 3 ],
-            A[ 0 ][ 3 ] * B[ 2 ][ 0 ] + A[ 1 ][ 3 ] * B[ 2 ][ 1 ] + A[ 2 ][ 3 ] * B[ 2 ][ 2 ] + A[ 3 ][ 3 ] * B[ 2 ][ 3 ],
-        },
-        {
-            A[ 0 ][ 0 ] * B[ 3 ][ 0 ] + A[ 1 ][ 0 ] * B[ 3 ][ 1 ] + A[ 2 ][ 0 ] * B[ 3 ][ 2 ] + A[ 3 ][ 0 ] * B[ 3 ][ 3 ],
-            A[ 0 ][ 1 ] * B[ 3 ][ 0 ] + A[ 1 ][ 1 ] * B[ 3 ][ 1 ] + A[ 2 ][ 1 ] * B[ 3 ][ 2 ] + A[ 3 ][ 1 ] * B[ 3 ][ 3 ],
-            A[ 0 ][ 2 ] * B[ 3 ][ 0 ] + A[ 1 ][ 2 ] * B[ 3 ][ 1 ] + A[ 2 ][ 2 ] * B[ 3 ][ 2 ] + A[ 3 ][ 2 ] * B[ 3 ][ 3 ],
-            A[ 0 ][ 3 ] * B[ 3 ][ 0 ] + A[ 1 ][ 3 ] * B[ 3 ][ 1 ] + A[ 2 ][ 3 ] * B[ 3 ][ 2 ] + A[ 3 ][ 3 ] * B[ 3 ][ 3 ],
-        },
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator/( const Matrix4Impl< T > &a, Real s ) noexcept
+    {
+        const auto invS = Real( 1 ) / s;
+        return a * invS;
+    }
 
-template< typename T >
-[[nodiscard]] static constexpr crimild::impl::Vector4< T > operator*( const crimild::impl::Matrix4< T > &A, const crimild::impl::Vector4< T > &B ) noexcept
-{
-    return crimild::impl::Vector4< T > {
-        A[ 0 ][ 0 ] * B[ 0 ] + A[ 1 ][ 0 ] * B[ 1 ] + A[ 2 ][ 0 ] * B[ 2 ] + A[ 3 ][ 0 ] * B[ 3 ],
-        A[ 0 ][ 1 ] * B[ 0 ] + A[ 1 ][ 1 ] * B[ 1 ] + A[ 2 ][ 1 ] * B[ 2 ] + A[ 3 ][ 1 ] * B[ 3 ],
-        A[ 0 ][ 2 ] * B[ 0 ] + A[ 1 ][ 2 ] * B[ 1 ] + A[ 2 ][ 2 ] * B[ 2 ] + A[ 3 ][ 2 ] * B[ 3 ],
-        A[ 0 ][ 3 ] * B[ 0 ] + A[ 1 ][ 3 ] * B[ 1 ] + A[ 2 ][ 3 ] * B[ 2 ] + A[ 3 ][ 3 ] * B[ 3 ],
-    };
+    template< typename T >
+    [[nodiscard]] static constexpr Matrix4Impl< T > operator*( const Matrix4Impl< T > &A, const Matrix4Impl< T > &B ) noexcept
+    {
+        return Matrix4Impl< T > {
+            {
+                A[ 0 ][ 0 ] * B[ 0 ][ 0 ] + A[ 1 ][ 0 ] * B[ 0 ][ 1 ] + A[ 2 ][ 0 ] * B[ 0 ][ 2 ] + A[ 3 ][ 0 ] * B[ 0 ][ 3 ],
+                A[ 0 ][ 1 ] * B[ 0 ][ 0 ] + A[ 1 ][ 1 ] * B[ 0 ][ 1 ] + A[ 2 ][ 1 ] * B[ 0 ][ 2 ] + A[ 3 ][ 1 ] * B[ 0 ][ 3 ],
+                A[ 0 ][ 2 ] * B[ 0 ][ 0 ] + A[ 1 ][ 2 ] * B[ 0 ][ 1 ] + A[ 2 ][ 2 ] * B[ 0 ][ 2 ] + A[ 3 ][ 2 ] * B[ 0 ][ 3 ],
+                A[ 0 ][ 3 ] * B[ 0 ][ 0 ] + A[ 1 ][ 3 ] * B[ 0 ][ 1 ] + A[ 2 ][ 3 ] * B[ 0 ][ 2 ] + A[ 3 ][ 3 ] * B[ 0 ][ 3 ],
+            },
+            {
+                A[ 0 ][ 0 ] * B[ 1 ][ 0 ] + A[ 1 ][ 0 ] * B[ 1 ][ 1 ] + A[ 2 ][ 0 ] * B[ 1 ][ 2 ] + A[ 3 ][ 0 ] * B[ 1 ][ 3 ],
+                A[ 0 ][ 1 ] * B[ 1 ][ 0 ] + A[ 1 ][ 1 ] * B[ 1 ][ 1 ] + A[ 2 ][ 1 ] * B[ 1 ][ 2 ] + A[ 3 ][ 1 ] * B[ 1 ][ 3 ],
+                A[ 0 ][ 2 ] * B[ 1 ][ 0 ] + A[ 1 ][ 2 ] * B[ 1 ][ 1 ] + A[ 2 ][ 2 ] * B[ 1 ][ 2 ] + A[ 3 ][ 2 ] * B[ 1 ][ 3 ],
+                A[ 0 ][ 3 ] * B[ 1 ][ 0 ] + A[ 1 ][ 3 ] * B[ 1 ][ 1 ] + A[ 2 ][ 3 ] * B[ 1 ][ 2 ] + A[ 3 ][ 3 ] * B[ 1 ][ 3 ],
+            },
+            {
+                A[ 0 ][ 0 ] * B[ 2 ][ 0 ] + A[ 1 ][ 0 ] * B[ 2 ][ 1 ] + A[ 2 ][ 0 ] * B[ 2 ][ 2 ] + A[ 3 ][ 0 ] * B[ 2 ][ 3 ],
+                A[ 0 ][ 1 ] * B[ 2 ][ 0 ] + A[ 1 ][ 1 ] * B[ 2 ][ 1 ] + A[ 2 ][ 1 ] * B[ 2 ][ 2 ] + A[ 3 ][ 1 ] * B[ 2 ][ 3 ],
+                A[ 0 ][ 2 ] * B[ 2 ][ 0 ] + A[ 1 ][ 2 ] * B[ 2 ][ 1 ] + A[ 2 ][ 2 ] * B[ 2 ][ 2 ] + A[ 3 ][ 2 ] * B[ 2 ][ 3 ],
+                A[ 0 ][ 3 ] * B[ 2 ][ 0 ] + A[ 1 ][ 3 ] * B[ 2 ][ 1 ] + A[ 2 ][ 3 ] * B[ 2 ][ 2 ] + A[ 3 ][ 3 ] * B[ 2 ][ 3 ],
+            },
+            {
+                A[ 0 ][ 0 ] * B[ 3 ][ 0 ] + A[ 1 ][ 0 ] * B[ 3 ][ 1 ] + A[ 2 ][ 0 ] * B[ 3 ][ 2 ] + A[ 3 ][ 0 ] * B[ 3 ][ 3 ],
+                A[ 0 ][ 1 ] * B[ 3 ][ 0 ] + A[ 1 ][ 1 ] * B[ 3 ][ 1 ] + A[ 2 ][ 1 ] * B[ 3 ][ 2 ] + A[ 3 ][ 1 ] * B[ 3 ][ 3 ],
+                A[ 0 ][ 2 ] * B[ 3 ][ 0 ] + A[ 1 ][ 2 ] * B[ 3 ][ 1 ] + A[ 2 ][ 2 ] * B[ 3 ][ 2 ] + A[ 3 ][ 2 ] * B[ 3 ][ 3 ],
+                A[ 0 ][ 3 ] * B[ 3 ][ 0 ] + A[ 1 ][ 3 ] * B[ 3 ][ 1 ] + A[ 2 ][ 3 ] * B[ 3 ][ 2 ] + A[ 3 ][ 3 ] * B[ 3 ][ 3 ],
+            },
+        };
+    }
+
+    template< typename T >
+    [[nodiscard]] static constexpr Vector4Impl< T > operator*( const Matrix4Impl< T > &A, const Vector4Impl< T > &B ) noexcept
+    {
+        return Vector4Impl< T > {
+            A[ 0 ][ 0 ] * B[ 0 ] + A[ 1 ][ 0 ] * B[ 1 ] + A[ 2 ][ 0 ] * B[ 2 ] + A[ 3 ][ 0 ] * B[ 3 ],
+            A[ 0 ][ 1 ] * B[ 0 ] + A[ 1 ][ 1 ] * B[ 1 ] + A[ 2 ][ 1 ] * B[ 2 ] + A[ 3 ][ 1 ] * B[ 3 ],
+            A[ 0 ][ 2 ] * B[ 0 ] + A[ 1 ][ 2 ] * B[ 1 ] + A[ 2 ][ 2 ] * B[ 2 ] + A[ 3 ][ 2 ] * B[ 3 ],
+            A[ 0 ][ 3 ] * B[ 0 ] + A[ 1 ][ 3 ] * B[ 1 ] + A[ 2 ][ 3 ] * B[ 2 ] + A[ 3 ][ 3 ] * B[ 3 ],
+        };
+    }
+
 }
 
 #endif

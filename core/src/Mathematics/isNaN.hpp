@@ -49,43 +49,43 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Vector2< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const Vector2Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Vector3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const Vector3Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Vector4< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const Vector4Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z ) || isNaN( t.w );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Normal3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const Normal3Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::Point3< T > &t ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const Point3Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::ColorRGB< T > &c ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const ColorRGBImpl< T > &c ) noexcept
     {
         return isNaN( c.r ) || isNaN( c.g ) || isNaN( c.b );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const impl::ColorRGBA< T > &c ) noexcept
+    [[nodiscard]] inline constexpr Bool isNaN( const ColorRGBAImpl< T > &c ) noexcept
     {
         return isNaN( c.r ) || isNaN( c.g ) || isNaN( c.b ) || isNaN( c.a );
     }

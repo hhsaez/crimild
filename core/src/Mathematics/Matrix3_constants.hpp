@@ -32,29 +32,26 @@
 
 namespace crimild {
 
-    namespace impl {
-
-        template< typename T >
-        struct Matrix3< T >::Constants {
-            static constexpr auto IDENTITY = Matrix3 {
-                { 1, 0, 0 },
-                { 0, 1, 0 },
-                { 0, 0, 1 },
-            };
-
-            static constexpr auto ZERO = Matrix3 {
-                { 0, 0, 0 },
-                { 0, 0, 0 },
-                { 0, 0, 0 },
-            };
-
-            static constexpr auto ONE = Matrix3 {
-                { 1, 1, 1 },
-                { 1, 1, 1 },
-                { 1, 1, 1 },
-            };
+    template< typename T >
+    struct Matrix3Impl< T >::Constants {
+        static constexpr auto IDENTITY = Matrix3Impl {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 },
         };
-    }
+
+        static constexpr auto ZERO = Matrix3Impl {
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+        };
+
+        static constexpr auto ONE = Matrix3Impl {
+            { 1, 1, 1 },
+            { 1, 1, 1 },
+            { 1, 1, 1 },
+        };
+    };
 
 }
 

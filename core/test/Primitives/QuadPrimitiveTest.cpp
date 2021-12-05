@@ -74,24 +74,24 @@ TEST( QuadPrimitive, construction )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     ASSERT_NE( nullptr, positions );
-    ASSERT_TRUE( isEqual( expected[ 0 ].position, positions->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].position, positions->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].position, positions->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].position, positions->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].position, positions->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].position, positions->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].position, positions->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].position, positions->get< Vector3f >( 3 ) );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     ASSERT_NE( nullptr, normals );
-    ASSERT_TRUE( isEqual( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
     ASSERT_NE( nullptr, texCoords );
-    ASSERT_TRUE( isEqual( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) );
 
     auto indices = p->getIndices();
     ASSERT_NE( nullptr, indices );
@@ -141,17 +141,17 @@ TEST( QuadPrimitive, withCustomLayout )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     ASSERT_NE( nullptr, positions );
-    ASSERT_TRUE( isEqual( expected[ 0 ].position, positions->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].position, positions->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].position, positions->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].position, positions->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].position, positions->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].position, positions->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].position, positions->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].position, positions->get< Vector3f >( 3 ) );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
     ASSERT_NE( nullptr, texCoords );
-    ASSERT_TRUE( isEqual( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) );
 
     auto indices = p->getIndices();
     ASSERT_NE( nullptr, indices );
@@ -204,24 +204,24 @@ TEST( QuadPrimitive, customSize )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     ASSERT_NE( nullptr, positions );
-    ASSERT_TRUE( isEqual( expected[ 0 ].position, positions->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].position, positions->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].position, positions->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].position, positions->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].position, positions->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].position, positions->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].position, positions->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].position, positions->get< Vector3f >( 3 ) );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     ASSERT_NE( nullptr, normals );
-    ASSERT_TRUE( isEqual( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
     ASSERT_NE( nullptr, texCoords );
-    ASSERT_TRUE( isEqual( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) );
 
     auto indices = p->getIndices();
     ASSERT_NE( nullptr, indices );
@@ -274,24 +274,24 @@ TEST( QuadPrimitive, withTriangleStrip )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     ASSERT_NE( nullptr, positions );
-    ASSERT_TRUE( isEqual( expected[ 0 ].position, positions->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].position, positions->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].position, positions->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].position, positions->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].position, positions->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].position, positions->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].position, positions->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].position, positions->get< Vector3f >( 3 ) );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     ASSERT_NE( nullptr, normals );
-    ASSERT_TRUE( isEqual( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
     ASSERT_NE( nullptr, texCoords );
-    ASSERT_TRUE( isEqual( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) );
 
     auto indices = p->getIndices();
     ASSERT_NE( nullptr, indices );
@@ -342,24 +342,24 @@ TEST( QuadPrimitive, withLines )
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
     ASSERT_NE( nullptr, positions );
-    ASSERT_TRUE( isEqual( expected[ 0 ].position, positions->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].position, positions->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].position, positions->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].position, positions->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].position, positions->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].position, positions->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].position, positions->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].position, positions->get< Vector3f >( 3 ) );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     ASSERT_NE( nullptr, normals );
-    ASSERT_TRUE( isEqual( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].normal, normals->get< Vector3f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].normal, normals->get< Vector3f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].normal, normals->get< Vector3f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].normal, normals->get< Vector3f >( 3 ) );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
     ASSERT_NE( nullptr, texCoords );
-    ASSERT_TRUE( isEqual( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) ) );
-    ASSERT_TRUE( isEqual( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) ) );
+    EXPECT_EQ( expected[ 0 ].texCoord, texCoords->get< Vector2f >( 0 ) );
+    EXPECT_EQ( expected[ 1 ].texCoord, texCoords->get< Vector2f >( 1 ) );
+    EXPECT_EQ( expected[ 2 ].texCoord, texCoords->get< Vector2f >( 2 ) );
+    EXPECT_EQ( expected[ 3 ].texCoord, texCoords->get< Vector2f >( 3 ) );
 
     auto indices = p->getIndices();
     ASSERT_NE( nullptr, indices );

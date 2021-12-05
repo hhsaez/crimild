@@ -33,9 +33,9 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr impl::Matrix3< T > transpose( const impl::Matrix3< T > &a ) noexcept
+    [[nodiscard]] constexpr Matrix3Impl< T > transpose( const Matrix3Impl< T > &a ) noexcept
     {
-        return impl::Matrix3< T > {
+        return Matrix3Impl< T > {
             { a[ 0 ], a[ 3 ], a[ 6 ] },
             { a[ 1 ], a[ 4 ], a[ 7 ] },
             { a[ 2 ], a[ 5 ], a[ 8 ] },

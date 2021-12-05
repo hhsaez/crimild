@@ -30,71 +30,75 @@
 
 #include "Mathematics/Vector3.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator+( const crimild::impl::Vector3< T > &u, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x + v.x,
-        u.y + v.y,
-        u.z + v.z,
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator-( const crimild::impl::Vector3< T > &u, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x - v.x,
-        u.y - v.y,
-        u.z - v.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator+( const Vector3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x + v.x,
+            u.y + v.y,
+            u.z + v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator*( const crimild::impl::Vector3< T > &u, crimild::Real s ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator-( const Vector3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x - v.x,
+            u.y - v.y,
+            u.z - v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator*( crimild::Real s, const crimild::impl::Vector3< T > &u ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x * s,
-        u.y * s,
-        u.z * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator*( const Vector3Impl< T > &u, crimild::Real s ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator*( const crimild::impl::Vector3< T > &u, const crimild::impl::Vector3< T > &v ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        u.x * v.x,
-        u.y * v.y,
-        u.z * v.z,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator*( crimild::Real s, const Vector3Impl< T > &u ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x * s,
+            u.y * s,
+            u.z * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator/( const crimild::impl::Vector3< T > &u, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return u * invS;
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator*( const Vector3Impl< T > &u, const Vector3Impl< T > &v ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x * v.x,
+            u.y * v.y,
+            u.z * v.z,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::Vector3< T > operator-( const crimild::impl::Vector3< T > &u ) noexcept
-{
-    return crimild::impl::Vector3< T > {
-        -u.x,
-        -u.y,
-        -u.z,
-    };
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator/( const Vector3Impl< T > &u, crimild::Real s ) noexcept
+    {
+        const auto invS = crimild::Real( 1 ) / s;
+        return u * invS;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > operator-( const Vector3Impl< T > &u ) noexcept
+    {
+        return Vector3Impl< T > {
+            -u.x,
+            -u.y,
+            -u.z,
+        };
+    }
+
 }
 
 #endif

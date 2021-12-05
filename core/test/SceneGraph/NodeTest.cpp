@@ -30,6 +30,9 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Components/RotationComponent.hpp"
+#include "Mathematics/Transformation_equality.hpp"
+#include "Mathematics/Transformation_isIdentity.hpp"
+#include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Utils/MockComponent.hpp"
 
@@ -44,6 +47,8 @@ TEST( NodeTest, construction )
     EXPECT_EQ( node->getName(), "a Node" );
     EXPECT_FALSE( node->hasParent() );
     EXPECT_EQ( node->getParent(), nullptr );
+    EXPECT_TRUE( isIdentity( node->getLocal() ) );
+    EXPECT_TRUE( isIdentity( node->getWorld() ) );
 }
 
 TEST( NodeTest, destruction )
@@ -269,52 +274,6 @@ TEST( NodeTest, getRootParent )
     EXPECT_EQ( crimild::get_ptr( g1 ), g3->getRootParent() );
 }
 
-//TEST( NodeTest, streamNode )
-//{
-//	auto n = crimild::alloc< Node >( "Some Node" );
-//
-//	{
-//		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
-//		os.addObject( n );
-//		EXPECT_TRUE( os.flush() );
-//	}
-//
-//	{
-//		FileStream is( "node.crimild", FileStream::OpenMode::READ );
-//		EXPECT_TRUE( is.load() );
-//		EXPECT_EQ( 1, is.getObjectCount() );
-//		auto n1 = is.getObjectAt< Node >( 0 );
-//		EXPECT_TRUE( n1 != nullptr );
-//		EXPECT_EQ( "Some Node", n1->getName() );
-//	}
-//}
-
-//TEST( NodeTest, streamNodeTransform )
-//{
-//	auto n = crimild::alloc< Node >( "Some Node" );
-//	n->local().setTranslate( Vector3f( 0.0f, 0.0f, -5.0f ) );
-//	n->local().setRotate( Vector3f( 0.0f, 1.0f, 0.0f ), Numericf::PI );
-//	n->local().setScale( 0.5f );
-//
-//	{
-//		FileStream os( "node.crimild", FileStream::OpenMode::WRITE );
-//		os.addObject( n );
-//		EXPECT_TRUE( os.flush() );
-//	}
-//
-//	{
-//		FileStream is( "node.crimild", FileStream::OpenMode::READ );
-//		EXPECT_TRUE( is.load() );
-//		EXPECT_EQ( 1, is.getObjectCount() );
-//		auto n1 = is.getObjectAt< Node >( 0 );
-//		EXPECT_TRUE( n1 != nullptr );
-//		EXPECT_EQ( "Some Node", n1->getName() );
-//		EXPECT_EQ( n->getLocal().getTranslate(), n1->getLocal().getTranslate() );
-//		EXPECT_EQ( n->getLocal().getRotate(), n1->getLocal().getRotate() );
-//		EXPECT_EQ( n->getLocal().getScale(), n1->getLocal().getScale() );
-//	}
-//}
-
 TEST( NodeTest, coding )
 {
     auto n1 = crimild::alloc< Node >( "Some node" );
@@ -334,11 +293,9 @@ TEST( NodeTest, coding )
 
 TEST( NodeTest, codingTransformation )
 {
-    /*
     auto n1 = crimild::alloc< Node >( "Some Node" );
-    n1->local().setTranslate( Vector3f( 0.0f, 0.0f, -5.0f ) );
-    n1->local().setRotate( Vector3f( 0.0f, 1.0f, 0.0f ), Numericf::PI );
-    n1->local().setScale( 0.5f );
+    n1->setLocal( translation( 0.0f, 0.0f, -5.0f ) );
+    n1->setWorld( translation( 1.0f, 0.0f, -5.0f ) );
 
     auto encoder = crimild::alloc< coding::MemoryEncoder >();
     encoder->encode( n1 );
@@ -349,11 +306,8 @@ TEST( NodeTest, codingTransformation )
     auto n2 = decoder->getObjectAt< Node >( 0 );
     EXPECT_TRUE( n2 != nullptr );
     EXPECT_EQ( n1->getName(), n2->getName() );
-    EXPECT_EQ( n1->getLocal().getTranslate(), n2->getLocal().getTranslate() );
-    EXPECT_EQ( n1->getLocal().getRotate(), n2->getLocal().getRotate() );
-    EXPECT_EQ( n1->getLocal().getScale(), n2->getLocal().getScale() );
-    */
-    FAIL();
+    EXPECT_EQ( n1->getLocal(), n2->getLocal() );
+    EXPECT_EQ( n1->getWorld(), n2->getWorld() );
 }
 
 TEST( NodeTest, codingComponents )

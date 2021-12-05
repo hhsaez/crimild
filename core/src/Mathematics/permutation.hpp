@@ -41,18 +41,18 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Tuple2< T > permute( const impl::Tuple2< T > &u, Int x, Int y ) noexcept
+    [[nodiscard]] inline constexpr Tuple2Impl< T > permute( const Tuple2Impl< T > &u, Int x, Int y ) noexcept
     {
-        return impl::Tuple2< T > {
+        return Tuple2Impl< T > {
             u[ x ],
             u[ y ],
         };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Tuple3< T > permute( const impl::Tuple3< T > &u, Int x, Int y, Int z ) noexcept
+    [[nodiscard]] inline constexpr Tuple3Impl< T > permute( const Tuple3Impl< T > &u, Int x, Int y, Int z ) noexcept
     {
-        return impl::Tuple3< T > {
+        return Tuple3Impl< T > {
             u[ x ],
             u[ y ],
             u[ z ],
@@ -60,9 +60,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Tuple4< T > permute( const impl::Tuple4< T > &u, Int x, Int y, Int z, Int w ) noexcept
+    [[nodiscard]] inline constexpr Tuple4Impl< T > permute( const Tuple4Impl< T > &u, Int x, Int y, Int z, Int w ) noexcept
     {
-        return impl::Tuple4< T > {
+        return Tuple4Impl< T > {
             u[ x ],
             u[ y ],
             u[ z ],
@@ -71,18 +71,18 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector2< T > permute( const impl::Vector2< T > &u, Int x, Int y ) noexcept
+    [[nodiscard]] inline constexpr Vector2Impl< T > permute( const Vector2Impl< T > &u, Int x, Int y ) noexcept
     {
-        return impl::Vector2< T > {
+        return Vector2Impl< T > {
             u[ x ],
             u[ y ],
         };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector3< T > permute( const impl::Vector3< T > &u, Int x, Int y, Int z ) noexcept
+    [[nodiscard]] inline constexpr Vector3Impl< T > permute( const Vector3Impl< T > &u, Int x, Int y, Int z ) noexcept
     {
-        return impl::Vector3< T > {
+        return Vector3Impl< T > {
             u[ x ],
             u[ y ],
             u[ z ],
@@ -90,9 +90,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Vector4< T > permute( const impl::Vector4< T > &u, Int x, Int y, Int z, Int w ) noexcept
+    [[nodiscard]] inline constexpr Vector4Impl< T > permute( const Vector4Impl< T > &u, Int x, Int y, Int z, Int w ) noexcept
     {
-        return impl::Vector4< T > {
+        return Vector4Impl< T > {
             u[ x ],
             u[ y ],
             u[ z ],
@@ -101,9 +101,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::Point3< T > permute( const impl::Point3< T > &u, Int x, Int y, Int z ) noexcept
+    [[nodiscard]] inline constexpr Point3Impl< T > permute( const Point3Impl< T > &u, Int x, Int y, Int z ) noexcept
     {
-        return impl::Point3< T > {
+        return Point3Impl< T > {
             u[ x ],
             u[ y ],
             u[ z ],
@@ -111,9 +111,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::ColorRGB< T > permute( const impl::ColorRGB< T > &c, Int r, Int g, Int b ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > permute( const ColorRGBImpl< T > &c, Int r, Int g, Int b ) noexcept
     {
-        return impl::ColorRGB< T > {
+        return ColorRGBImpl< T > {
             c[ r ],
             c[ g ],
             c[ b ],
@@ -121,9 +121,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr impl::ColorRGBA< T > permute( const impl::ColorRGBA< T > &c, Int r, Int g, Int b, Int a ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBAImpl< T > permute( const ColorRGBAImpl< T > &c, Int r, Int g, Int b, Int a ) noexcept
     {
-        return impl::ColorRGBA< T > {
+        return ColorRGBAImpl< T > {
             c[ r ],
             c[ g ],
             c[ b ],

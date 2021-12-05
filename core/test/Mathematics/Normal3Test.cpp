@@ -45,6 +45,8 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
+using namespace crimild;
+
 TEST( Normal3, construction )
 {
     constexpr auto u = crimild::Normal3 {
@@ -143,9 +145,9 @@ TEST( Normal3, isNaN )
     constexpr auto v = crimild::Normal3 { NAN, NAN, NAN };
     constexpr auto w = crimild::Normal3 { NAN, NAN, 0 };
 
-    static_assert( crimild::isNaN( v ) );
-    static_assert( !crimild::isNaN( u ) );
-    static_assert( crimild::isNaN( w ) );
+    EXPECT_FALSE( crimild::isNaN( u ) );
+    EXPECT_TRUE( crimild::isNaN( v ) );
+    EXPECT_TRUE( crimild::isNaN( w ) );
 
     EXPECT_TRUE( true );
 }
@@ -247,7 +249,7 @@ TEST( Normal3, ostream )
 TEST( Normal3, conversion )
 {
     constexpr auto N = crimild::Normal3 { 1, 2, 3 };
-    constexpr auto V = crimild::vector3( N );
+    [[maybe_unused]] constexpr auto V = crimild::vector3( N );
     constexpr auto V4 = crimild::vector4( N, crimild::Real( 0 ) );
 
     static_assert( crimild::isEqual( V4, crimild::Vector4 { 1, 2, 3, 0 } ) );
@@ -260,9 +262,9 @@ TEST( Normal3, conversion )
 TEST( Normal3, constexpr )
 {
     constexpr auto u = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto v = crimild::Normal3 { 30, 40, 50 };
-    constexpr auto w = crimild::Normal3 { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 5 );
+    [[maybe_unused]] constexpr auto v = crimild::Normal3 { 30, 40, 50 };
+    [[maybe_unused]] constexpr auto w = crimild::Normal3 { 10, 20, 30 };
+    [[maybe_unused]] constexpr auto s = crimild::Real( 5 );
 
     static_assert( 10 == u[ 0 ], "index" );
     static_assert( 20 == u[ 1 ], "index" );

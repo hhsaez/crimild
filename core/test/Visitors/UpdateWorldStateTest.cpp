@@ -30,6 +30,9 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector_equality.hpp"
+#include "Primitives/Primitive.hpp"
+#include "Rendering/Vertex.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -58,6 +61,61 @@ TEST( UpdateWorldStateTest, singleNode )
     EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getLocal() ) );
     EXPECT_FALSE( isIdentity( node->getWorld() ) );
     EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getWorld() ) );
+}
+
+TEST( UpdateWorldStateTest, geometry )
+{
+    auto geometry = crimild::alloc< Geometry >();
+    geometry->attachPrimitive(
+        [] {
+            auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+            primitive->setVertexData(
+                {
+                    [ & ] {
+                        return crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                VertexP3N3TC2 {
+                                    .position = Vector3f { -1.5f, -1.5f, 0.0f },
+                                    .normal = Vector3f { 0, 0, 1 },
+                                },
+                                VertexP3N3TC2 {
+                                    .position = Vector3f { 1.5f, -1.5f, 0.0f },
+                                    .normal = Vector3f { 0, 0, 1 },
+                                },
+                                VertexP3N3TC2 {
+                                    .position = Vector3f { 1.0f, 1.5f, 0.0f },
+                                    .normal = Vector3f { 0, 0, 1 },
+                                },
+                            } );
+                    }(),
+                } );
+            primitive->setIndices(
+                crimild::alloc< IndexBuffer >(
+                    Format::INDEX_32_UINT,
+                    Array< crimild::UInt32 > {
+                        0,
+                        1,
+                        2,
+                    } ) );
+            return primitive;
+        }() );
+
+    geometry->perform( UpdateWorldState() );
+
+    EXPECT_TRUE( isIdentity( geometry->getLocal() ) );
+    EXPECT_TRUE( isIdentity( geometry->getWorld() ) );
+
+    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), geometry->getWorldBound()->getCenter() );
+    EXPECT_TRUE( isEqual( Real( 2.12132 ), geometry->getWorldBound()->getRadius() ) );
+
+    geometry->setLocal( translation( 0, 0, -5 ) );
+    geometry->perform( UpdateWorldState() );
+
+    EXPECT_FALSE( isIdentity( geometry->getLocal() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry->getLocal() ) );
+    EXPECT_FALSE( isIdentity( geometry->getWorld() ) );
+    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry->getWorld() ) );
 }
 
 TEST( UpdateWorldStateTest, hierarchy )

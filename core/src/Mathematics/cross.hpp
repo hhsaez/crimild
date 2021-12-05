@@ -33,9 +33,9 @@
 namespace crimild {
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr impl::Vector3< T > cross( const impl::Vector3< T > &u, const impl::Vector3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr Vector3Impl< T > cross( const Vector3Impl< T > &u, const Vector3Impl< U > &v ) noexcept
     {
-        return impl::Vector3< T > {
+        return Vector3Impl< T > {
             u.y * v.z - u.z * v.y,
             u.z * v.x - u.x * v.z,
             u.x * v.y - u.y * v.x,

@@ -33,7 +33,7 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr Real determinant( const impl::Matrix3< T > &a ) noexcept
+    [[nodiscard]] constexpr Real determinant( const Matrix3Impl< T > &a ) noexcept
     {
         return a[ 0 ] * ( a[ 4 ] * a[ 8 ] - a[ 5 ] * a[ 7 ] )
                - a[ 1 ] * ( a[ 3 ] * a[ 8 ] - a[ 5 ] * a[ 6 ] )

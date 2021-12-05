@@ -30,61 +30,65 @@
 
 #include "Mathematics/ColorRGB.hpp"
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator+( const crimild::impl::ColorRGB< T > &u, const crimild::impl::ColorRGB< T > &v ) noexcept
-{
-    return crimild::impl::ColorRGB< T > {
-        u.r + v.r,
-        u.g + v.g,
-        u.b + v.b,
-    };
-}
+namespace crimild {
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator-( const crimild::impl::ColorRGB< T > &u, const crimild::impl::ColorRGB< T > &v ) noexcept
-{
-    return crimild::impl::ColorRGB< T > {
-        u.r - v.r,
-        u.g - v.g,
-        u.b - v.b,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator+( const ColorRGBImpl< T > &u, const ColorRGBImpl< T > &v ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            u.r + v.r,
+            u.g + v.g,
+            u.b + v.b,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator*( const crimild::impl::ColorRGB< T > &u, crimild::Real s ) noexcept
-{
-    return crimild::impl::ColorRGB< T > {
-        u.r * s,
-        u.g * s,
-        u.b * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator-( const ColorRGBImpl< T > &u, const ColorRGBImpl< T > &v ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            u.r - v.r,
+            u.g - v.g,
+            u.b - v.b,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator*( crimild::Real s, const crimild::impl::ColorRGB< T > &u ) noexcept
-{
-    return crimild::impl::ColorRGB< T > {
-        u.r * s,
-        u.g * s,
-        u.b * s,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator*( const ColorRGBImpl< T > &u, crimild::Real s ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            u.r * s,
+            u.g * s,
+            u.b * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator*( const crimild::impl::ColorRGB< T > &u, const crimild::impl::ColorRGB< T > &v ) noexcept
-{
-    return crimild::impl::ColorRGB< T > {
-        u.r * v.r,
-        u.g * v.g,
-        u.b * v.b,
-    };
-}
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator*( crimild::Real s, const ColorRGBImpl< T > &u ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            u.r * s,
+            u.g * s,
+            u.b * s,
+        };
+    }
 
-template< typename T >
-[[nodiscard]] inline constexpr crimild::impl::ColorRGB< T > operator/( const crimild::impl::ColorRGB< T > &u, crimild::Real s ) noexcept
-{
-    const auto invS = crimild::Real( 1 ) / s;
-    return u * invS;
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator*( const ColorRGBImpl< T > &u, const ColorRGBImpl< T > &v ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            u.r * v.r,
+            u.g * v.g,
+            u.b * v.b,
+        };
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr ColorRGBImpl< T > operator/( const ColorRGBImpl< T > &u, crimild::Real s ) noexcept
+    {
+        const auto invS = crimild::Real( 1 ) / s;
+        return u * invS;
+    }
+
 }
 
 #endif

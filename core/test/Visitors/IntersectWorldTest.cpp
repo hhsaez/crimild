@@ -165,7 +165,6 @@ TEST( IntersectWorld, ray_triangle_intersection )
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
-
             geometry->attachPrimitive(
                 [] {
                     auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
@@ -175,20 +174,17 @@ TEST( IntersectWorld, ray_triangle_intersection )
                                 return crimild::alloc< VertexBuffer >(
                                     VertexP3N3TC2::getLayout(),
                                     Array< VertexP3N3TC2 > {
-                                        {
+                                        VertexP3N3TC2 {
                                             .position = Vector3f { -0.5f, -0.5f, 0.0f },
-                                            .normal = Normal3 { 0, 0, 1 },
-
+                                            .normal = Vector3f { 0, 0, 1 },
                                         },
-                                        {
+                                        VertexP3N3TC2 {
                                             .position = Vector3f { 0.5f, -0.5f, 0.0f },
-                                            .normal = Normal3 { 0, 0, 1 },
-
+                                            .normal = Vector3f { 0, 0, 1 },
                                         },
-                                        {
+                                        VertexP3N3TC2 {
                                             .position = Vector3f { 0.0f, 0.5f, 0.0f },
-                                            .normal = Normal3 { 0, 0, 1 },
-
+                                            .normal = Vector3f { 0, 0, 1 },
                                         },
                                     } );
                             }(),

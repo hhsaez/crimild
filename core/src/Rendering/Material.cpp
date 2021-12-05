@@ -49,7 +49,6 @@ void Material::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    /*
     encoder.encode( "ambient", _ambient );
     encoder.encode( "diffuse", _diffuse );
     encoder.encode( "specular", _specular );
@@ -59,14 +58,12 @@ void Material::encode( coding::Encoder &encoder )
     encoder.encode( "normalMap", _normalMap );
     encoder.encode( "specularMap", _specularMap );
     encoder.encode( "emissiveMap", _emissiveMap );
-    */
 }
 
 void Material::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    /*
     decoder.decode( "ambient", _ambient );
     decoder.decode( "diffuse", _diffuse );
     decoder.decode( "specular", _specular );
@@ -76,5 +73,4 @@ void Material::decode( coding::Decoder &decoder )
     decoder.decode( "normalMap", _normalMap );
     decoder.decode( "specularMap", _specularMap );
     decoder.decode( "emissiveMap", _emissiveMap );
-    */
 }

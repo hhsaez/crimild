@@ -43,6 +43,8 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
+using namespace crimild;
+
 TEST( Matrix4, construction )
 {
     constexpr auto M = crimild::Matrix4 {
@@ -284,4 +286,19 @@ TEST( Matrix4, inverseProduct )
     constexpr auto C = A * B;
 
     EXPECT_EQ( A, C * crimild::inverse( B ) );
+}
+
+TEST( Matrix4, io )
+{
+    constexpr auto A = crimild::Matrix4 {
+        { 3, 3, -4, -6 },
+        { -9, -8, 4, 5 },
+        { 7, 2, 4, -1 },
+        { 3, -9, 1, 1 },
+    };
+
+    std::stringstream ss;
+    ss << A;
+
+    EXPECT_EQ( "[(3.000000, 3.000000, -4.000000, -6.000000), (-9.000000, -8.000000, 4.000000, 5.000000), (7.000000, 2.000000, 4.000000, -1.000000), (3.000000, -9.000000, 1.000000, 1.000000)]", ss.str() );
 }

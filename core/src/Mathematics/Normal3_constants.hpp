@@ -25,54 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TUPLE_COMPONENTS_
-#define CRIMILD_MATHEMATICS_TUPLE_COMPONENTS_
+#ifndef CRIMILD_MATHEMATICS_NORMAL_3_CONSTANTS_
+#define CRIMILD_MATHEMATICS_NORMAL_3_CONSTANTS_
 
 #include "Mathematics/Normal3.hpp"
-#include "Mathematics/Point2.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Tuple2.hpp"
-#include "Mathematics/Tuple3.hpp"
-#include "Mathematics/Tuple4.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector4.hpp"
 
 namespace crimild {
 
-    namespace traits {
-
-        template< template< typename > class TupleImpl >
-        [[nodiscard]] constexpr Size tupleComponents( void ) noexcept { return 0; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple2Impl >( void ) noexcept { return 2; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple3Impl >( void ) noexcept { return 3; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple4Impl >( void ) noexcept { return 4; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Point2Impl >( void ) noexcept { return 2; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Point3Impl >( void ) noexcept { return 3; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector2Impl >( void ) noexcept { return 2; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector3Impl >( void ) noexcept { return 3; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector4Impl >( void ) noexcept { return 4; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Normal3Impl >( void ) noexcept { return 3; }
-
-    }
+    template< typename T >
+    struct Normal3Impl< T >::Constants {
+        static constexpr auto UNIT_X = Normal3Impl< T > { 1, 0, 0 };
+        static constexpr auto UNIT_Y = Normal3Impl< T > { 0, 1, 0 };
+        static constexpr auto UNIT_Z = Normal3Impl< T > { 0, 0, 1 };
+    };
 
 }
 

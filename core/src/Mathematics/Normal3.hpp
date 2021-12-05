@@ -32,28 +32,17 @@
 
 namespace crimild {
 
-    namespace impl {
+    template< typename T >
+    struct Normal3Impl : public Tuple3Impl< T > {
+        struct Constants;
 
-        template< typename T >
-        struct Normal3 : public Tuple3< T > {
-            struct Constants;
+        [[nodiscard]] inline constexpr Bool operator==( const Normal3Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator!=( const Normal3Impl &other ) const noexcept;
+    };
 
-            [[nodiscard]] inline constexpr Bool operator==( const Normal3 &other ) const noexcept;
-            [[nodiscard]] inline constexpr Bool operator!=( const Normal3 &other ) const noexcept;
-        };
-
-        template< typename T >
-        struct Normal3< T >::Constants {
-            static constexpr auto UNIT_X = Normal3< T > { 1, 0, 0 };
-            static constexpr auto UNIT_Y = Normal3< T > { 0, 1, 0 };
-            static constexpr auto UNIT_Z = Normal3< T > { 0, 0, 1 };
-        };
-
-    }
-
-    using Normal3 = impl::Normal3< Real >;
-    using Normal3f = impl::Normal3< Real32 >;
-    using Normal3d = impl::Normal3< Real64 >;
+    using Normal3 = Normal3Impl< Real >;
+    using Normal3f = Normal3Impl< Real32 >;
+    using Normal3d = Normal3Impl< Real64 >;
 
 }
 

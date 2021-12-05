@@ -33,7 +33,7 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr Real determinant( const impl::Matrix4< T > &a ) noexcept
+    [[nodiscard]] constexpr Real determinant( const Matrix4Impl< T > &a ) noexcept
     {
         const auto m11 = a[ 0 ][ 0 ];
         const auto m12 = a[ 1 ][ 0 ];

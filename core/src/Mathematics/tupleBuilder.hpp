@@ -43,10 +43,10 @@ namespace crimild {
         [[nodiscard]] constexpr Bool isPoint( void ) noexcept { return false; }
 
         template<>
-        [[nodiscard]] constexpr Bool isPoint< impl::Point2 >( void ) noexcept { return true; }
+        [[nodiscard]] constexpr Bool isPoint< Point2Impl >( void ) noexcept { return true; }
 
         template<>
-        [[nodiscard]] constexpr Bool isPoint< impl::Point3 >( void ) noexcept { return true; }
+        [[nodiscard]] constexpr Bool isPoint< Point3Impl >( void ) noexcept { return true; }
 
     }
 
@@ -56,13 +56,13 @@ namespace crimild {
         [[nodiscard]] inline constexpr Bool isVector( void ) noexcept { return false; }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isVector< impl::Vector2 >( void ) noexcept { return true; }
+        [[nodiscard]] inline constexpr Bool isVector< Vector2Impl >( void ) noexcept { return true; }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isVector< impl::Vector3 >( void ) noexcept { return true; }
+        [[nodiscard]] inline constexpr Bool isVector< Vector3Impl >( void ) noexcept { return true; }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isVector< impl::Vector4 >( void ) noexcept { return true; }
+        [[nodiscard]] inline constexpr Bool isVector< Vector4Impl >( void ) noexcept { return true; }
     }
 
     namespace traits {
@@ -71,18 +71,18 @@ namespace crimild {
         [[nodiscard]] inline constexpr Bool isNormal( void ) noexcept { return false; }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isNormal< impl::Normal3 >( void ) noexcept { return true; }
+        [[nodiscard]] inline constexpr Bool isNormal< Normal3Impl >( void ) noexcept { return true; }
     }
 
     template< template< typename > class TupleImpl, typename T >
     [[nodiscard]] inline constexpr auto tuple2Builder( T x, T y ) noexcept
     {
         if constexpr ( traits::isPoint< TupleImpl >() ) {
-            return impl::Point2< T > { x, y };
+            return Point2Impl< T > { x, y };
         } else if constexpr ( traits::isVector< TupleImpl >() ) {
-            return impl::Vector2< T > { x, y };
+            return Vector2Impl< T > { x, y };
         } else {
-            return impl::Tuple2< T > { x, y };
+            return Tuple2Impl< T > { x, y };
         }
     }
 
@@ -90,13 +90,13 @@ namespace crimild {
     [[nodiscard]] inline constexpr auto tuple3Builder( T x, T y, T z ) noexcept
     {
         if constexpr ( traits::isPoint< TupleImpl >() ) {
-            return impl::Point3< T > { x, y, z };
+            return Point3Impl< T > { x, y, z };
         } else if constexpr ( traits::isVector< TupleImpl >() ) {
-            return impl::Vector3< T > { x, y, z };
+            return Vector3Impl< T > { x, y, z };
         } else if constexpr ( traits::isNormal< TupleImpl >() ) {
-            return impl::Normal3< T > { x, y, z };
+            return Normal3Impl< T > { x, y, z };
         } else {
-            return impl::Tuple3< T > { x, y, z };
+            return Tuple3Impl< T > { x, y, z };
         }
     }
 
@@ -104,9 +104,9 @@ namespace crimild {
     [[nodiscard]] inline constexpr auto tuple4Builder( T x, T y, T z, T w ) noexcept
     {
         if constexpr ( traits::isVector< TupleImpl >() ) {
-            return impl::Vector4< T > { x, y, z, w };
+            return Vector4Impl< T > { x, y, z, w };
         } else {
-            return impl::Tuple4< T > { x, y, z, w };
+            return Tuple4Impl< T > { x, y, z, w };
         }
     }
 
