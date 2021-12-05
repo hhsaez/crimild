@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
 #include "Crimild.hpp"
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using namespace crimild;
 
@@ -41,9 +41,8 @@ crimild::RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
 int main( int argc, char **argv )
 {
     crimild::init();
-    
-	::testing::InitGoogleTest( &argc, argv );
-	::testing::FLAGS_gmock_verbose = "error";
-  	return RUN_ALL_TESTS();
-}
 
+    ::testing::InitGoogleTest( &argc, argv );
+    ::testing::FLAGS_gmock_verbose = "error";
+    return RUN_ALL_TESTS();
+}

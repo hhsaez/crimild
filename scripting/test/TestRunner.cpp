@@ -25,9 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
+#include "gtest/gtest.h"
 #include <Crimild.hpp>
 #include <Crimild_Scripting.hpp>
 
@@ -38,10 +37,9 @@ int main( int argc, char **argv )
     crimild::init();
     crimild::scripting::init();
 
-	FileSystem::getInstance().init( argc, argv );
+    FileSystem::getInstance().init( argc, argv );
 
-	::testing::InitGoogleTest( &argc, argv );
-	::testing::FLAGS_gmock_verbose = "error";
-  	return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest( &argc, argv );
+    ::testing::FLAGS_gmock_verbose = "error";
+    return RUN_ALL_TESTS();
 }
-

@@ -30,43 +30,41 @@
 
 #include "Messaging/MessageQueue.hpp"
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace crimild {
 
-	struct MockMessage {
+    struct MockMessage {
+    };
 
-	};
+    class MockMessenger : public Messenger {
+    public:
+        MockMessenger( void )
+        {
+            CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( MockMessage, MockMessenger, onMockMessage );
 
-	class MockMessenger : public Messenger {
-	public:
-		MockMessenger( void )
-		{
-			CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( MockMessage, MockMessenger, onMockMessage );
+            _callCount = 0;
+        }
 
-			_callCount = 0;
-		}
+        virtual ~MockMessenger( void )
+        {
+        }
 
-		virtual ~MockMessenger( void )
-		{
+        void incCallCount( void ) { _callCount++; }
 
-		}
+        int getCallCount( void ) { return _callCount; }
 
-		void incCallCount( void ) { _callCount++; }
+    private:
+        void onMockMessage( MockMessage const &message )
+        {
+            incCallCount();
+        }
 
-		int getCallCount( void ) { return _callCount; }
+    private:
+        int _callCount = 0;
+    };
 
-	private:
-		void onMockMessage( MockMessage const &message )
-		{
-			incCallCount();
-		}
-
-	private:
-		int _callCount = 0;
-	};	
-
-	/*
+    /*
 	class MockMessage : public Message {
 	public:
 		int value;
@@ -95,4 +93,3 @@ namespace crimild {
 }
 
 #endif
-

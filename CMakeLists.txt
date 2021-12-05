@@ -38,12 +38,10 @@ ENDIF ()
 IF ( CRIMILD_ENABLE_TESTS )
 	ENABLE_TESTING()
 
-	ADD_DEFINITIONS( -DGTEST_LANG_CXX11=1 )
-	ADD_DEFINITIONS( -DGTEST_USE_OWN_TR1_TUPLE=1 )
+	# For Windows: Prevent overriding the parent project's compiler/linker settings
+	SET( gtest_force_shared_crt ON CACHE BOOL "" FORCE )
 
-	EXTRACT_ARCHIVE( gmock-1.6.0.zip gmock-1.6.0 ${CRIMILD_SOURCE_DIR}/third-party )
-
-	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/gmock-1.6.0 "${CMAKE_CURRENT_BINARY_DIR}/third-party/gmock-1.6.0" )
+	ADD_SUBDIRECTORY( ${CRIMILD_SOURCE_DIR}/third-party/googletest )
 ENDIF ( CRIMILD_ENABLE_TESTS )
 
 # Add core sources
