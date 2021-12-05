@@ -77,6 +77,6 @@ namespace crimild {
         [[nodiscard]] constexpr Ray3 operator()( const Ray3 &R ) const noexcept;
     };
 
-};
+}
 
 #endif
