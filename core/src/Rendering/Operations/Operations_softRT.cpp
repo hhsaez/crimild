@@ -483,13 +483,21 @@ namespace crimild {
             };
 
             auto settings = Simulation::getInstance()->getSettings();
-            Real scale = settings->get< Real >( "rt.scale", 1 );
-            m_width = scale * settings->get< Int32 >( "video.width", 320 );
-            m_height = scale * settings->get< Int32 >( "video.height", 240 );
-            m_bpp = 4;
+            auto quality = settings->get( "rt.quality", "240p" );
+            if ( quality == "240p" ) {
+                m_width = 320;
+                m_height = 240;
+                m_workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", 2 ) );
+            } else {
+                m_width = settings->get< Int32 >( "video.width", 320 );
+                m_height = settings->get< Int32 >( "video.height", 240 );
+                m_workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", std::thread::hardware_concurrency() ) );
+            }
+
             m_aspectRatio = Real( m_width ) / Real( m_height );
+            m_bpp = 4;
+
             m_tileSize = settings->get< Int32 >( "rt.tile_size", 64 );
-            m_workerCount = std::max( 1, settings->get< Int32 >( "rt.workers", std::thread::hardware_concurrency() ) );
 
             m_image = crimild::alloc< Image >();
             m_image->extent = Extent3D {
