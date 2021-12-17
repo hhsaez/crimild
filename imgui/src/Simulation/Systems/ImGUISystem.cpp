@@ -93,7 +93,7 @@ namespace crimild {
                 ImGui::ColorEdit3( key.c_str(), const_cast< float * >( &value.r ) );
                 return true;
             }
-            
+
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override
             {
                 ImGui::ColorEdit4( key.c_str(), const_cast< float * >( &value.r ) );
@@ -555,9 +555,8 @@ namespace crimild {
                     if ( ImGui::MenuItem( "RT Soft" ) ) {
                         crimild::concurrency::sync_frame(
                             [ settings ] {
-                                settings->set( "rt.use_scanline", true );
+                                settings->set( "rt.quality", "native" );
                                 settings->set( "rt.workers", std::thread::hardware_concurrency() );
-
                                 RenderSystem::getInstance()->useRTSoftRenderPath();
                                 applyUILayer();
                             } );
@@ -566,20 +565,8 @@ namespace crimild {
                     if ( ImGui::MenuItem( "RT Soft: Safe Mode" ) ) {
                         crimild::concurrency::sync_frame(
                             [ settings ] {
-                                settings->set( "rt.use_scanline", true );
+                                settings->set( "rt.quality", "480p" );
                                 settings->set( "rt.workers", 1 );
-
-                                RenderSystem::getInstance()->useRTSoftRenderPath();
-                                applyUILayer();
-                            } );
-                    }
-
-                    if ( ImGui::MenuItem( "RT Soft: Spiral" ) ) {
-                        crimild::concurrency::sync_frame(
-                            [ settings ] {
-                                settings->set( "rt.use_scanline", false );
-                                settings->set( "rt.workers", std::thread::hardware_concurrency() );
-
                                 RenderSystem::getInstance()->useRTSoftRenderPath();
                                 applyUILayer();
                             } );
