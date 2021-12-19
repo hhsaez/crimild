@@ -37,9 +37,9 @@ public:
             [ & ] {
                 auto scene = crimild::alloc< Group >();
 
-                auto sphere = [ & ]( const auto &center, Real radius, auto material ) -> SharedPointer< Node > {
+                auto sphere = [ &, primitive = crimild::alloc< Primitive >( Primitive::Type::SPHERE ) ]( const auto &center, Real radius, auto material ) -> SharedPointer< Node > {
                     auto geometry = crimild::alloc< Geometry >();
-                    geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+                    geometry->attachPrimitive( primitive );
                     geometry->setLocal( translation( vector3( center ) ) * scale( radius ) );
                     geometry->attachComponent< MaterialComponent >( material );
                     return geometry;
@@ -72,10 +72,8 @@ public:
                     return material;
                 };
 
-                Array< SharedPointer< Node > > spheres;
-
                 // Ground
-                spheres.add(
+                scene->attachNode(
                     sphere(
                         Point3 { 0, -1000, 0 },
                         1000,
@@ -101,14 +99,7 @@ public:
                                     Real( rnd.generate( 0.0f, 1.0f ) ) * Real( rnd.generate( 0.0f, 1.0f ) ),
                                 };
                                 auto s = sphere( center, 0.2, lambertian( albedo ) );
-                                spheres.add( s );
-                                if ( mat < 0.3f ) {
-                                    s->attachComponent< LambdaComponent >(
-                                        [ center, start = Random::generate< Real >( 0, numbers::TWO_PI ) ]( auto node, auto c ) {
-                                            node->setLocal(
-                                                translation( vector3( center + Vector3 { 0, 0.2f * Numericf::remapSin( 0, 1, start + c.getCurrentTime() ), 0 } ) ) * scale( 0.2 ) );
-                                        } );
-                                }
+                                scene->attachNode( s );
                             } else if ( mat < 0.8f ) {
                                 // emissive
                                 const auto albedo = ColorRGB {
@@ -116,7 +107,7 @@ public:
                                     1.0f + 4.0f * Real( rnd.generate( 0.0f, 1.0f ) ),
                                     1.0f + 4.0f * Real( rnd.generate( 0.0f, 1.0f ) ),
                                 };
-                                spheres.add( sphere( center, 0.2, emissive( albedo ) ) );
+                                scene->attachNode( sphere( center, 0.2, emissive( albedo ) ) );
                             } else if ( mat < 0.95f ) {
                                 // metal
                                 const auto albedo = ColorRGB {
@@ -125,20 +116,18 @@ public:
                                     Random::generate< Real >( 0.5f, 1.0f ),
                                 };
                                 const auto roughness = Random::generate( 0.0f, 0.5f );
-                                spheres.add( sphere( center, 0.2, metallic( albedo, roughness ) ) );
+                                scene->attachNode( sphere( center, 0.2, metallic( albedo, roughness ) ) );
                             } else {
                                 // glass
-                                spheres.add( sphere( center, 0.2, dielectric( 1.5f ) ) );
+                                scene->attachNode( sphere( center, 0.2, dielectric( 1.5f ) ) );
                             }
                         }
                     }
                 }
 
-                spheres.add( sphere( Point3 { 0, 1, 0 }, 1.0, dielectric( 1.5f ) ) );
-                spheres.add( sphere( Point3 { -4, 1, 0 }, 1.0, lambertian( ColorRGB { 0.4, 0.2, 0.1 } ) ) );
-                spheres.add( sphere( Point3 { 4, 1, 0 }, 1.0f, metallic( ColorRGB { 0.7, 0.6, 0.5 }, 0.0 ) ) );
-
-                scene->attachNode( framegraph::utils::optimize( spheres ) );
+                scene->attachNode( sphere( Point3 { 0, 1, 0 }, 1.0, dielectric( 1.5f ) ) );
+                scene->attachNode( sphere( Point3 { -4, 1, 0 }, 1.0, lambertian( ColorRGB { 0.4, 0.2, 0.1 } ) ) );
+                scene->attachNode( sphere( Point3 { 4, 1, 0 }, 1.0f, metallic( ColorRGB { 0.7, 0.6, 0.5 }, 0.0 ) ) );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
