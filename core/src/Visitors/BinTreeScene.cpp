@@ -57,9 +57,11 @@ static Bool boundCompareZ( SharedPointer< Node > &a, SharedPointer< Node > &b )
     return boundCompare( a, b, 2 );
 }
 
-void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, SharedPointer< Group > const &parent ) noexcept
+using AxisSplitter = std::function< int( void ) >;
+
+void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, SharedPointer< Group > const &parent, AxisSplitter const &axisSplitter ) noexcept
 {
-    int axis = Random::generate< Int >( 0, 3 );
+    int axis = axisSplitter();
     auto comparator = axis == 0 ? boundCompareX : ( axis == 1 ? boundCompareY : boundCompareZ );
 
     const auto span = end - start;
@@ -80,6 +82,7 @@ void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, S
         parent->attachNode( nodes[ start + 2 ] );
         return;
     } else if ( span == 2 ) {
+        // if ( span == 2 ) {
         if ( comparator( nodes[ start ], nodes[ start + 1 ] ) ) {
             parent->attachNode( nodes[ start + 0 ] );
             parent->attachNode( nodes[ start + 1 ] );
@@ -107,17 +110,21 @@ void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, S
         right.add( nodes[ i ] );
     }
 
+    // TODO(hernan): Is this necessary?
+    left.sort( comparator );
+    right.sort( comparator );
+
     parent->attachNode(
         [ & ] {
             auto group = crimild::alloc< Group >();
-            splitByAxis( left, 0, left.size(), group );
+            splitByAxis( left, 0, left.size(), group, axisSplitter );
             return group;
         }() );
 
     parent->attachNode(
         [ & ] {
             auto group = crimild::alloc< Group >();
-            splitByAxis( right, 0, right.size(), group );
+            splitByAxis( right, 0, right.size(), group, axisSplitter );
             return group;
         }() );
 }
@@ -241,10 +248,28 @@ void BinTreeScene::visitGroup( Group *other ) noexcept
         } );
     group->detachAllNodes();
 
-    if ( getSplitStrategy() == SplitStrategy::RANDOM_AXIS ) {
-        splitByAxis( children, 0, children.size(), group );
-    } else {
+    auto splitStrategy = getSplitStrategy();
+    if ( splitStrategy == SplitStrategy::NONE ) {
         split( children, 0, children.size(), group );
+    } else {
+        splitByAxis(
+            children,
+            0,
+            children.size(),
+            group,
+            [ splitStrategy ]( void ) {
+                switch ( splitStrategy ) {
+                    case SplitStrategy::X_AXIS:
+                        return 0;
+                    case SplitStrategy::Y_AXIS:
+                        return 1;
+                    case SplitStrategy::Z_AXIS:
+                        return 2;
+                    case SplitStrategy::RANDOM_AXIS:
+                    default:
+                        return Random::generate< Int >( 0, 3 );
+                }
+            } );
     }
 }
 

@@ -36,6 +36,12 @@ namespace crimild {
      * \brief Clones and converts a scene into a binary tree
      * 
      * Most of the nodes are cloned as is, but groups are split based on different strategies.
+     * 
+     * \todo Rename to RTBinTree because this is only relevant for ray tracing
+     * \todo In order to optimize this a bit more, fetch all geometries first and then split them
+     * and generate the binary tree
+     * \todo If CSG is to be supported, treat it as a single geometry (since a CSGNode is already
+     * organized as a binary tree).
      */
     class BinTreeScene : public NodeVisitor {
     public:
@@ -60,6 +66,24 @@ namespace crimild {
              * according to the picked axis.
              */
             RANDOM_AXIS,
+
+            /**
+             * \brief Split by using the mid point of bounding volume
+             */
+            MIDDLE,
+
+            /**
+             * \brief Split based on the maximum axis
+             * 
+             * Split children using the axis with the maximum extension in the bounding volume.
+             * If splitting failes to produce two sets of nodes (maybe they overlap too much),
+             * split using Middle technique.
+             */
+            MAX_AXIS,
+
+            X_AXIS,
+            Y_AXIS,
+            Z_AXIS,
         };
 
     public:
