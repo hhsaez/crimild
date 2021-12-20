@@ -565,7 +565,7 @@ namespace crimild {
                     if ( ImGui::MenuItem( "RT Soft: Safe Mode" ) ) {
                         crimild::concurrency::sync_frame(
                             [ settings ] {
-                                settings->set( "rt.quality", "480p" );
+                                settings->set( "rt.quality", "240p" );
                                 settings->set( "rt.workers", 1 );
                                 RenderSystem::getInstance()->useRTSoftRenderPath();
                                 applyUILayer();
