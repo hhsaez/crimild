@@ -80,8 +80,6 @@ public:
                 auto rnd = Random::Generator( 1982 );
 
                 const auto boxesPerSide = 10.0f;
-                Array< SharedPointer< Node > > boxes( ( 2 * boxesPerSide + 1 ) * ( 2 * boxesPerSide + 1 ) * ( 2 * boxesPerSide + 1 ) );
-                Size boxId = 0;
                 for ( auto x = -boxesPerSide; x <= boxesPerSide; ++x ) {
                     for ( auto y = -boxesPerSide; y <= boxesPerSide; ++y ) {
                         for ( auto z = -boxesPerSide; z <= boxesPerSide; ++z ) {
@@ -95,10 +93,11 @@ public:
                                 Real( rnd.generate( 0.5 * y, 5.0 * y ) ),
                                 Real( rnd.generate( 0.5 * z, 5.0 * z ) ),
                             };
-                            boxes[ boxId++ ] = box(
-                                Point3 { x, y, z } + offset,
-                                size,
-                                materials[ Int32( rnd.generate( 0, materials.size() ) ) ] );
+                            scene->attachNode(
+                                box(
+                                    Point3 { x, y, z } + offset,
+                                    size,
+                                    materials[ Int32( rnd.generate( 0, materials.size() ) ) ] ) );
                         }
                     }
                 }
@@ -108,8 +107,6 @@ public:
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.r", 0.5f );
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.g", 0.6f );
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.b", 0.7f );
-
-                scene->attachNode( framegraph::utils::optimize( boxes ) );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20.0f, 4.0f / 3.0f, 0.1f, 1024.0f );

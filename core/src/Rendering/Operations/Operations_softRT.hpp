@@ -38,12 +38,6 @@ namespace crimild {
 
     namespace framegraph {
 
-        namespace utils {
-
-            crimild::SharedPointer< Node > optimize( Array< SharedPointer< Node > > &nodes ) noexcept;
-
-        }
-
         SharedPointer< FrameGraphOperation > softRT( void ) noexcept;
 
     }
