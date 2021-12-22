@@ -45,50 +45,24 @@ public:
                     return geometry;
                 };
 
-                auto light = [ primitive = crimild::alloc< Primitive >( Primitive::Type::SPHERE ) ]( auto center, auto material ) -> SharedPointer< Node > {
-                    auto geometry = crimild::alloc< Geometry >();
-                    geometry->attachPrimitive( primitive );
-                    geometry->setLocal( translation( center.x, center.y, center.z ) );
-                    geometry->attachComponent< MaterialComponent >( material );
-                    return geometry;
-                };
-
                 auto lambertian = []( const auto &albedo ) -> SharedPointer< Material > {
                     auto material = crimild::alloc< materials::PrincipledBSDF >();
                     material->setAlbedo( albedo );
                     return material;
                 };
 
-                auto emissive = []( const auto &color ) -> SharedPointer< Material > {
-                    auto material = crimild::alloc< materials::PrincipledBSDF >();
-                    material->setEmissive( color );
-                    return material;
-                };
-
-                // scene->attachNode(
-                //     [ & ] {
-                //         auto geometry = crimild::alloc< Geometry >();
-                //         geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::PLANE ) );
-                //         geometry->setLocal( scale( 3 ) );
-                //         geometry->attachComponent< MaterialComponent >( lambertian( ColorRGB { 0, 1, 0 } ) );
-                //         return geometry;
-                //     }() );
+                scene->attachNode(
+                    [ & ] {
+                        auto c = cylinder( lambertian( ColorRGB { 1, 1, 0 } ) );
+                        c->setLocal( scale( 1, 0.25, 1 ) );
+                        return c;
+                    }() );
 
                 scene->attachNode(
                     [ & ] {
-                        auto csg = crimild::alloc< CSGNode >(
-                            CSGNode::Operator::DIFFERENCE,
-                            [ & ] {
-                                auto c = cylinder( lambertian( ColorRGB { 1, 1, 0 } ) );
-                                c->setLocal( scale( 1, 0.25, 1 ) );
-                                return c;
-                            }(),
-                            [ & ] {
-                                auto c = cylinder( lambertian( ColorRGB { 1, 0, 0 } ) );
-                                c->setLocal( scale( 0.5, 0.5, 0.5 ) );
-                                return c;
-                            }() );
-                        return csg;
+                        auto c = cylinder( lambertian( ColorRGB { 1, 0, 0 } ) );
+                        c->setLocal( scale( 0.5, 0.5, 0.5 ) );
+                        return c;
                     }() );
                 scene->attachNode(
                     [ & ] {
@@ -102,8 +76,6 @@ public:
                         c->setLocal( scale( 0.125, 1, 0.125 ) );
                         return c;
                     }() );
-
-                scene->attachNode( light( Point3 { 5, 5, 5 }, emissive( ColorRGB { 10, 10, 10 } ) ) );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
@@ -123,17 +95,13 @@ public:
                     return group;
                 }() );
 
-                //const auto BACKGROUND_COLOR = ColorRGB { 0, 0, 0 };
                 const auto BACKGROUND_COLOR = ColorRGB { 0.5, 0.6, 0.7 };
-                //const auto BACKGROUND_COLOR = ColorRGB { 0.001, 0.001, 0.0015 };
 
                 scene->attachNode( crimild::alloc< Skybox >( BACKGROUND_COLOR ) );
 
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.r", BACKGROUND_COLOR.r );
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.g", BACKGROUND_COLOR.g );
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.b", BACKGROUND_COLOR.b );
-
-                //Simulation::getInstance()->getSettings()->set( "rt.workers", 1 );
 
                 scene->perform( UpdateWorldState() );
                 scene->perform( StartComponents() );
@@ -142,7 +110,9 @@ public:
             }() );
 
         // Use soft RT by default
-        RenderSystem::getInstance()->useRTComputeRenderPath();
+        if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {
+            RenderSystem::getInstance()->useRTSoftRenderPath();
+        }
     }
 };
 
