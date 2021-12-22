@@ -98,7 +98,6 @@ public:
                     return camera;
                 }() );
 
-                // const auto BACKGROUND_COLOR = ColorRGB { 0.5, 0.5, 0.5 };
                 const auto BACKGROUND_COLOR = ColorRGB { 0, 0, 0 };
                 scene->attachNode( crimild::alloc< Skybox >( BACKGROUND_COLOR ) );
 
@@ -106,15 +105,11 @@ public:
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.g", BACKGROUND_COLOR.g );
                 Simulation::getInstance()->getSettings()->set( "rt.background_color.b", BACKGROUND_COLOR.b );
 
+                scene->perform( UpdateWorldState() );
                 scene->perform( StartComponents() );
 
                 return scene;
             }() );
-
-        // Use soft RT by default
-        RenderSystem::getInstance()->useRTSoftRenderPath();
-
-        // RenderSystem::getInstance()->useRTComputeRenderPath();
     }
 };
 
