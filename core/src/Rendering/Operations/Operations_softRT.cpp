@@ -31,6 +31,7 @@
 #include "Mathematics/Box_normal.hpp"
 #include "Mathematics/ColorRGBOps.hpp"
 #include "Mathematics/ColorRGB_isZero.hpp"
+#include "Mathematics/Cylinder_normal.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Normal3Ops.hpp"
 #include "Mathematics/Random.hpp"
@@ -142,85 +143,38 @@ struct IntersectionResult {
 
     Bool hasResult = false;
 
-    utils::traverseNonRecursive(
-        scene,
-        [ & ]( const auto &node, auto index ) -> Bool {
-            // auto resolveCSG = [ & ]( auto t0, auto t1 ) {
-            //     if ( node.parentIndex < 0 ) {
-            //         return false;
-            //     }
+    Index frontier[ 64 ] = { 0 };
+    Int32 currentIndex = 0;
 
-            //     auto parentIndex = node.parentIndex;
-            //     while ( parentIndex >= 0 ) {
-            //         const auto &parent = scene.nodes[ node.parentIndex ];
-            //         if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
-            //             break;
-            //         } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
-            //             break;
-            //         } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
-            //             break;
-            //         } else {
-            //             parentIndex = scene.nodes[ parentIndex ].parentIndex;
-            //         }
-            //     }
+    while ( currentIndex >= 0 ) {
+        const auto nodeIdx = frontier[ currentIndex ];
+        --currentIndex;
 
-            //     if ( parentIndex < 0 ) {
-            //         return false;
-            //     }
+        const auto &node = scene.nodes[ nodeIdx ];
 
-            //     const auto &parent = scene.nodes[ parentIndex ];
-            //     if ( parent.type == RTAcceleratedNode::Type::CSG_UNION ) {
-            //         const auto t = min( t0, t1 );
-            //         if ( t < result.t ) {
-            //             result.t = t0;
-            //             result.materialId = node.materialIndex;
-            //             hasResult = true;
-            //         }
-            //         return true;
-            //     } else if ( parent.type == RTAcceleratedNode::Type::CSG_INTERSECTION ) {
-            //         const auto t = min( t0, t1 );
-            //         if ( t > result.t ) {
-            //             result.t = t0;
-            //             result.materialId = node.materialIndex;
-            //             hasResult = true;
-            //         }
-            //         return true;
-            //     } else if ( parent.type == RTAcceleratedNode::Type::CSG_DIFFERENCE ) {
-            //         const auto t = min( t0, t1 );
-            //         if ( t > result.t ) {
-            //             result.t = t0;
-            //             result.materialId = node.materialIndex;
-            //             hasResult = true;
-            //         }
-            //         return true;
-            //     }
-
-            //     return false;
-            // };
-
-            switch ( node.type ) {
-                case RTAcceleratedNode::Type::GROUP: {
-                    const auto B = Box {};
-                    Real t0, t1;
-                    if ( !intersect( R, B, node.world, t0, t1 ) ) {
-                        return false;
+        switch ( node.type ) {
+            case RTAcceleratedNode::Type::GROUP: {
+                const auto B = Box {};
+                Real t0, t1;
+                if ( intersect( R, B, node.world, t0, t1 ) ) {
+                    // A very simple test: only expand child nodes if the intersection point
+                    // is less than the current result. Otherwise, the entire group is occluded
+                    // by the current hit and can be safely discarded.
+                    if ( !hasResult || t0 <= result.t ) {
+                        if ( node.secondChildIndex > 0 ) {
+                            frontier[ ++currentIndex ] = node.secondChildIndex;
+                        }
+                        frontier[ ++currentIndex ] = nodeIdx + 1;
                     }
-
-                    return !hasResult || ( t0 >= numbers::EPSILON && t0 <= result.t ) || ( t1 >= numbers::EPSILON && t1 <= result.t );
                 }
+                break;
+            }
 
-                case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
-                    const auto S = Sphere {};
-                    Real t0, t1;
-                    if ( !intersect( R, S, node.world, t0, t1 ) ) {
-                        return false;
-                    }
-
-                    // if ( resolveCSG( t0, t1 ) ) {
-                    //     return true;
-                    // }
-
-                    if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
+            case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
+                const auto S = Sphere {};
+                Real t0, t1;
+                if ( intersect( R, S, node.world, t0, t1 ) ) {
+                    if ( t0 >= numbers::EPSILON && !isEqual( t0, numbers::POSITIVE_INFINITY ) && ( !hasResult || t0 < result.t ) ) {
                         result.t = t0;
                         result.point = R( result.t );
                         result.setFaceNormal( R, normal( S, node.world, result.point ) );
@@ -228,78 +182,90 @@ struct IntersectionResult {
                         hasResult = true;
                     }
 
-                    if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
+                    if ( t1 >= numbers::EPSILON && !isEqual( t1, numbers::POSITIVE_INFINITY ) && ( !hasResult || t1 < result.t ) ) {
                         result.t = t1;
                         result.point = R( result.t );
                         result.setFaceNormal( R, normal( S, node.world, result.point ) );
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
-
-                    return true;
                 }
-
-                case RTAcceleratedNode::Type::PRIMITIVE_BOX: {
-                    const auto B = Box {};
-                    Real t0, t1;
-                    if ( intersect( R, B, node.world, t0, t1 ) ) {
-                        // if ( resolveCSG( t0, t1 ) ) {
-                        //     return true;
-                        // }
-
-                        if ( t0 >= numbers::EPSILON && t0 <= result.t ) {
-                            result.t = t0;
-                            result.point = R( result.t );
-                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
-                            result.materialId = node.materialIndex;
-                            hasResult = true;
-                        }
-
-                        if ( t1 >= numbers::EPSILON && t1 <= result.t ) {
-                            result.t = t1;
-                            result.point = R( result.t );
-                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
-                            result.materialId = node.materialIndex;
-                            hasResult = true;
-                        }
-                    }
-                    return true;
-                }
-
-                    // case RTAcceleratedNode::Type::CSG_UNION:
-                    // case RTAcceleratedNode::Type::CSG_INTERSECTION:
-                    // case RTAcceleratedNode::Type::CSG_DIFFERENCE: {
-                    //     const auto S = Sphere {};
-                    //     Real t0, t1;
-                    //     return intersect( R1, S, t0, t1 );
-                    // }
-
-                default: {
-                    return false;
-                }
+                break;
             }
-        } );
+
+            case RTAcceleratedNode::Type::PRIMITIVE_BOX: {
+                const auto B = Box {};
+                Real t0, t1;
+                if ( intersect( R, B, node.world, t0, t1 ) ) {
+                    if ( t0 >= numbers::EPSILON && !isEqual( t0, numbers::POSITIVE_INFINITY ) && ( !hasResult || t0 < result.t ) ) {
+                        result.t = t0;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( B, node.world, result.point ) );
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+
+                    if ( t1 >= numbers::EPSILON && !isEqual( t1, numbers::POSITIVE_INFINITY ) && ( !hasResult || t1 < result.t ) ) {
+                        result.t = t1;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( B, node.world, result.point ) );
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+                }
+                break;
+            }
+
+            // case Primitive::Type::OPEN_CYLINDER:
+            case RTAcceleratedNode::Type::PRIMITIVE_CYLINDER: {
+                const auto C = Cylinder { .closed = true };
+                Real t0, t1;
+                if ( intersect( R, C, node.world, t0, t1 ) ) {
+                    if ( t0 >= numbers::EPSILON && !isEqual( t0, numbers::POSITIVE_INFINITY ) && ( !hasResult || t0 < result.t ) ) {
+                        result.t = t0;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( C, node.world, result.point ) );
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+
+                    if ( t1 >= numbers::EPSILON && !isEqual( t1, numbers::POSITIVE_INFINITY ) && ( !hasResult || t1 < result.t ) ) {
+                        result.t = t1;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal( C, node.world, result.point ) );
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+                }
+                break;
+            }
+
+            default: {
+                break;
+            }
+        }
+    }
 
     return hasResult;
 }
 
-[[nodiscard]] ColorRGB rayColor( const Ray3 &R, const RTAcceleration::Result &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
-{
-    auto ret = backgroundColor;
+// [[nodiscard]] ColorRGB rayColor( const Ray3 &R, const RTAcceleration::Result &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
+// {
+//     auto ret = backgroundColor;
 
-    if ( depth <= 0 ) {
-        return ColorRGB::Constants::BLACK;
-    }
+//     if ( depth <= 0 ) {
+//         return ColorRGB::Constants::BLACK;
+//     }
 
-    IntersectionResult result;
-    if ( intersectNR( R, scene, result ) ) {
-        if ( result.materialId >= 0 ) {
-            return scene.materials[ result.materialId ].albedo;
-        }
-    }
+//     IntersectionResult result;
+//     if ( intersectR( R, scene, result ) ) {
+//         if ( result.materialId >= 0 ) {
+//             return scene.materials[ result.materialId ].albedo;
+//         }
+//     }
 
-    return ret;
-}
+//     return ret;
+// }
 
 [[nodiscard]] ColorRGB rayColor( const Ray3 &R, SharedPointer< Node > &scene, const ColorRGB &backgroundColor, Int32 depth ) noexcept
 {
@@ -396,6 +362,14 @@ struct IntersectionResult {
 
 namespace crimild {
 
+    /**
+     * \brief Renders a scene using ray tracing in CPU
+     * 
+     * How does it works:
+     * - Convert the scene to a binary tree
+     * - Accelerate the binary tree and transform it into a linear tree
+     * - Traverse the tree non-recursively
+     */
     class SoftRT : public ScenePass {
     private:
         using Job = std::function< void( void ) >;
@@ -459,6 +433,10 @@ namespace crimild {
 
             // wait for workers
             // reset();
+
+            for ( auto &w : m_workers ) {
+                w.join();
+            }
 
             m_workers.clear();
         }
@@ -677,12 +655,28 @@ namespace crimild {
 
                 CRIMILD_LOG_DEBUG( "Cloning scene before rendering" );
 
+                scene->perform( UpdateWorldState() );
+
                 ShallowCopy copy;
                 scene->perform( copy );
                 m_scene = copy.getResult< Node >();
                 m_scene->perform( UpdateWorldState() );
 
-                m_acceleratedScene = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::RANDOM_AXIS )->perform< RTAcceleration >();
+                auto splitStrategy = [ & ] {
+                    auto splitStrategyStr = settings->get< std::string >( "rt.split_axis", "random" );
+                    if ( splitStrategyStr == "random" ) {
+                        return BinTreeScene::SplitStrategy::RANDOM_AXIS;
+                    } else if ( splitStrategyStr == "x" ) {
+                        return BinTreeScene::SplitStrategy::X_AXIS;
+                    } else if ( splitStrategyStr == "y" ) {
+                        return BinTreeScene::SplitStrategy::Y_AXIS;
+                    } else if ( splitStrategyStr == "z" ) {
+                        return BinTreeScene::SplitStrategy::Z_AXIS;
+                    } else {
+                        return BinTreeScene::SplitStrategy::NONE;
+                    }
+                }();
+                m_acceleratedScene = scene->perform< BinTreeScene >( splitStrategy )->perform< RTAcceleration >();
 
                 return m_scene;
             }();
@@ -719,34 +713,33 @@ namespace crimild {
                 return true;
             }
 
+#if 1
             initializeRays();
 
             m_workers.clear();
-            Size workerStride = ceil( Real( m_rays.size() ) / Real( m_workerCount ) );
             for ( auto i = 0; i < m_workerCount; ++i ) {
                 m_workers.push_back(
-                    std::move(
-                        std::thread(
-                            [ self = this, i, workerStride ] {
-                                Size next = i;
-                                while ( self->m_running ) {
-                                    // It is possible that id clashing happens for two or more
-                                    // workers, but I guess that's ok for now since only one of
-                                    // them will actually write the final color in the image
-                                    Size rayID = next;
-                                    next += self->m_workerCount;
-                                    if ( next >= self->m_rays.size() ) {
-                                        next = i;
-                                    }
-                                    if ( rayID < self->m_rays.size() ) {
-                                        auto &ray = self->m_rays[ rayID ];
-                                        self->doSampleBounce( ray, self->m_acceleratedScene );
-                                    }
+                    std::thread(
+                        [ self = this, i ] {
+                            Size next = i;
+                            while ( self->m_running ) {
+                                // It is possible that id clashing happens for two or more
+                                // workers, but I guess that's ok for now since only one of
+                                // them will actually write the final color in the image
+                                Size rayID = next;
+                                next += self->m_workerCount;
+                                if ( next >= self->m_rays.size() ) {
+                                    next = i;
                                 }
-                            } ) ) );
+                                if ( rayID < self->m_rays.size() ) {
+                                    auto &ray = self->m_rays[ rayID ];
+                                    self->doSampleBounce( ray, self->m_acceleratedScene );
+                                }
+                            }
+                        } ) );
             }
 
-#if 0
+#else
 
             auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
             auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
@@ -803,7 +796,7 @@ namespace crimild {
                                         cameraFocusDistance * direction( ray ) - offset,
                                     };
 
-    #if 1
+    #if 0
                                     color = color + rayColor( ray, self->m_acceleratedScene, backgroundColor, bounces );
     #else
                                     color = color + rayColor( ray, self->m_scene, backgroundColor, bounces );
