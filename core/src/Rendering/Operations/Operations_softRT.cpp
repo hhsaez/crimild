@@ -146,6 +146,50 @@ struct IntersectionResult {
     Index frontier[ 64 ] = { 0 };
     Int32 currentIndex = 0;
 
+    auto computeVolume = [ & ]( const auto &node, auto t0, auto t1 ) {
+        const auto &material = scene.materials[ node.materialIndex ];
+        const auto isVolume = material.density >= 0;
+        if ( !isVolume ) {
+            return false;
+        }
+
+        const bool enableDebug = true;
+        const bool debugging = enableDebug && Random::generate< Real >() < 0.00001;
+        if ( debugging )
+            std::cerr << "\nt_min=" << t0 << ", t_max=" << t1 << '\n';
+
+        if ( t0 < 0 ) {
+            t0 = 0;
+        }
+
+        if ( t1 > t0 ) {
+            Real d = length( direction( R ) );
+            Real distanceInsideBoundary = ( t1 - t0 ) * d;
+            Real density = material.density;
+            Real negInvDensity = Real( -1 ) / density;
+            Real hitDistance = negInvDensity * std::log( Random::generate< Real >() );
+            if ( hitDistance <= distanceInsideBoundary ) {
+                Real t = t0 + hitDistance / d;
+                const auto P = R( t );
+
+                if ( debugging ) {
+                    std::cerr << "hit_distance = " << hitDistance << '\n'
+                              << "rec.t = " << t << '\n'
+                              << "rec.p = " << P.x << ", " << P.y << ", " << P.z << '\n';
+                }
+
+                result.t = t;
+                result.point = P;
+                result.normal = Normal3 { 1, 0, 0 }; // arbitrary value
+                result.frontFace = true;             // arbitrary value
+                result.materialId = node.materialIndex;
+                hasResult = true;
+            }
+        }
+
+        return true;
+    };
+
     while ( currentIndex >= 0 ) {
         const auto nodeIdx = frontier[ currentIndex ];
         --currentIndex;
@@ -197,20 +241,22 @@ struct IntersectionResult {
                 const auto B = Box {};
                 Real t0, t1;
                 if ( intersect( R, B, node.world, t0, t1 ) ) {
-                    if ( t0 >= numbers::EPSILON && !isEqual( t0, numbers::POSITIVE_INFINITY ) && ( !hasResult || t0 < result.t ) ) {
-                        result.t = t0;
-                        result.point = R( result.t );
-                        result.setFaceNormal( R, normal( B, node.world, result.point ) );
-                        result.materialId = node.materialIndex;
-                        hasResult = true;
-                    }
+                    if ( !computeVolume( node, t0, t1 ) ) {
+                        if ( t0 >= numbers::EPSILON && !isEqual( t0, numbers::POSITIVE_INFINITY ) && ( !hasResult || t0 < result.t ) ) {
+                            result.t = t0;
+                            result.point = R( result.t );
+                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
+                            result.materialId = node.materialIndex;
+                            hasResult = true;
+                        }
 
-                    if ( t1 >= numbers::EPSILON && !isEqual( t1, numbers::POSITIVE_INFINITY ) && ( !hasResult || t1 < result.t ) ) {
-                        result.t = t1;
-                        result.point = R( result.t );
-                        result.setFaceNormal( R, normal( B, node.world, result.point ) );
-                        result.materialId = node.materialIndex;
-                        hasResult = true;
+                        if ( t1 >= numbers::EPSILON && !isEqual( t1, numbers::POSITIVE_INFINITY ) && ( !hasResult || t1 < result.t ) ) {
+                            result.t = t1;
+                            result.point = R( result.t );
+                            result.setFaceNormal( R, normal( B, node.world, result.point ) );
+                            result.materialId = node.materialIndex;
+                            hasResult = true;
+                        }
                     }
                 }
                 break;

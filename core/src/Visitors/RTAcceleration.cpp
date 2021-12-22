@@ -34,6 +34,8 @@
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -110,10 +112,10 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
     }
 
     const Int32 materialIndex = [ & ] {
-        const auto material = [ & ]() -> materials::PrincipledBSDF * {
+        const auto material = [ & ]() -> Material * {
             if ( auto materials = geometry->getComponent< MaterialComponent >() ) {
                 if ( auto material = materials->first() ) {
-                    return static_cast< materials::PrincipledBSDF * >( material );
+                    return material;
                 }
             }
             return nullptr;
@@ -125,7 +127,30 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
 
         if ( !m_materialIDs.contains( material ) ) {
             const UInt32 materialID = m_result.materials.size();
-            m_result.materials.add( material->getProps() );
+            if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+                const auto pbr = static_cast< const materials::PrincipledBSDF * >( material );
+                const auto &props = pbr->getProps();
+                m_result.materials.add(
+                    RTAcceleratedMaterial {
+                        .albedo = props.albedo,
+                        .metallic = props.metallic,
+                        .roughness = props.roughness,
+                        .ambientOcclusion = props.ambientOcclusion,
+                        .transmission = props.transmission,
+                        .indexOfRefraction = props.indexOfRefraction,
+                        .emissive = props.emissive,
+                    } );
+            } else if ( material->getClassName() == materials::PrincipledVolume::__CLASS_NAME ) {
+                const auto volume = static_cast< const materials::PrincipledVolume * >( material );
+                const auto &props = volume->getProps();
+                m_result.materials.add(
+                    RTAcceleratedMaterial {
+                        .albedo = props.albedo,
+                        .density = props.density,
+                    } );
+            } else {
+                return -1;
+            }
             m_materialIDs.insert( material, materialID );
         }
 

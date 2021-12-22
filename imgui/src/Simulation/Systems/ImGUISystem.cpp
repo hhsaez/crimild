@@ -562,11 +562,21 @@ namespace crimild {
                             } );
                     }
 
+                    if ( ImGui::MenuItem( "RT Soft: 240p" ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ settings ] {
+                                settings->set( "rt.quality", "240p" );
+                                settings->set( "rt.workers", std::thread::hardware_concurrency() );
+                                RenderSystem::getInstance()->useRTSoftRenderPath();
+                                applyUILayer();
+                            } );
+                    }
+
                     if ( ImGui::MenuItem( "RT Soft: Safe Mode" ) ) {
                         crimild::concurrency::sync_frame(
                             [ settings ] {
                                 settings->set( "rt.quality", "240p" );
-                                settings->set( "rt.workers", 1 );
+                                settings->set( "rt.workers", 2 );
                                 RenderSystem::getInstance()->useRTSoftRenderPath();
                                 applyUILayer();
                             } );

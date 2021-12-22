@@ -30,9 +30,9 @@
 
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Transformation.hpp"
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 namespace crimild {
@@ -106,6 +106,24 @@ namespace crimild {
         Transformation world;
     };
 
+    struct RTAcceleratedMaterial {
+        alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
+        alignas( 4 ) Real32 metallic = 0;
+        alignas( 4 ) Real32 roughness = 0;
+        alignas( 4 ) Real32 ambientOcclusion = 1;
+        alignas( 4 ) Real32 transmission = 0;
+        alignas( 4 ) Real32 indexOfRefraction = 0;
+        alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
+
+        /**
+         * \brief Volume density
+         * 
+         * A non-negative value is used to indicate that this is a volumetric
+         * material
+         */
+        alignas( 4 ) Real32 density = Real( -1 );
+    };
+
     /**
      * \todo Add camera parameters (projection, view, fov, etc...)
      */
@@ -113,7 +131,7 @@ namespace crimild {
     public:
         struct Result {
             Array< RTAcceleratedNode > nodes;
-            Array< materials::PrincipledBSDF::Props > materials;
+            Array< RTAcceleratedMaterial > materials;
         };
 
         virtual void traverse( Node *node ) noexcept override;
