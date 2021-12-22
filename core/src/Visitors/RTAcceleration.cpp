@@ -94,6 +94,7 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_BOX;
                     break;
                 }
+                case Primitive::Type::OPEN_CYLINDER:
                 case Primitive::Type::CYLINDER: {
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
                     break;

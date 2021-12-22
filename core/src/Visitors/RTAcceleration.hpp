@@ -106,6 +106,9 @@ namespace crimild {
         Transformation world;
     };
 
+    /**
+     * \todo Add camera parameters (projection, view, fov, etc...)
+     */
     class RTAcceleration : public NodeVisitor {
     public:
         struct Result {

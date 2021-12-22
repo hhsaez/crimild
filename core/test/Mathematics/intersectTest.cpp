@@ -142,6 +142,39 @@ TEST( intersect, rayAndTransformedSphere )
     EXPECT_EQ( Real( 7 ), t1 );
 }
 
+TEST( intersect, it_intersects_a_scaled_sphere )
+{
+    constexpr auto S = Sphere {
+        Point3::Constants::ZERO,
+        Real( 1 ),
+    };
+
+    constexpr auto R = Ray3 {
+        Point3 { 0, 0, -5 },
+        Vector3 { 0, 0, 1 },
+    };
+
+    {
+        // Represents a world transforms for the sphere (as if it where a node)
+        constexpr auto sphereWorld = scale( 2, 2, 2 );
+
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, S, sphereWorld, t0, t1 ) );
+        EXPECT_EQ( Real( 3 ), t0 );
+        EXPECT_EQ( Real( 7 ), t1 );
+    }
+
+    {
+        // Represents a world transforms for the sphere (as if it where a node)
+        constexpr auto sphereWorld = scale( 0.5, 0.5, 0.5 );
+
+        Real t0, t1;
+        EXPECT_TRUE( intersect( R, S, sphereWorld, t0, t1 ) );
+        EXPECT_EQ( Real( 4.5 ), t0 );
+        EXPECT_EQ( Real( 5.5 ), t1 );
+    }
+}
+
 TEST( intersect, ray_parallel_to_plane )
 {
     constexpr auto P = Plane3 {};
