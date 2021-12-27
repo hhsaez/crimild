@@ -29,11 +29,24 @@
 #define CRIMILD_MATHEMATICS_LENGTH_
 
 #include "Mathematics/Normal3.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/sqrt.hpp"
 
 namespace crimild {
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Real lengthSquared( const Vector2Impl< T > &u ) noexcept
+    {
+        return u.x * u.x + u.y * u.y;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr Real length( const Vector2Impl< T > &u ) noexcept
+    {
+        return sqrt( lengthSquared( u ) );
+    }
 
     template< typename T >
     [[nodiscard]] inline constexpr Real lengthSquared( const Vector3Impl< T > &u ) noexcept
