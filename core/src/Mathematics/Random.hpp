@@ -32,6 +32,10 @@
 #include "Foundation/Types.hpp"
 #include "Mathematics/ColorRGBAOps.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/dot.hpp"
+#include "Mathematics/length.hpp"
+#include "Mathematics/sign.hpp"
 
 #include <algorithm>
 #include <cfloat>
@@ -46,7 +50,7 @@
 
 namespace crimild {
 
-    class Random {
+    class [[deprecated]] Random {
     public:
         class Generator {
         public:
@@ -99,7 +103,7 @@ namespace crimild {
         inline static void generateImpl( PRECISION &result, const PRECISION &min, const PRECISION &max )
         {
             // TODO(hernan): This is not thread safe!!
-            static Random::Generator defaultGenerator;
+            thread_local static Random::Generator defaultGenerator;
 
             crimild::Real64 r = defaultGenerator.generate();
             result = min + r * ( max - min );
@@ -125,6 +129,111 @@ namespace crimild {
             std::copy( temp.begin(), temp.end(), std::back_inserter( input ) );
         }
     };
+
+    namespace random {
+
+        [[nodiscard]] static auto &defaultGenerator( void ) noexcept
+        {
+            static thread_local auto gen = [] {
+                auto gen = [] {
+                    if constexpr ( traits::isHighPrecision< Real >() ) {
+                        return std::mt19937_64 {};
+                    } else {
+                        return std::mt19937 {};
+                    }
+                }();
+                uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+                std::seed_seq ss { uint32_t( timeSeed & 0xffffffff ), uint32_t( timeSeed >> 32 ) };
+                gen.seed( ss );
+                return gen;
+            }();
+            return gen;
+        }
+
+        inline void seed( UInt32 s ) noexcept
+        {
+            defaultGenerator().seed( s );
+        }
+
+        [[nodiscard]] inline Real next( void ) noexcept
+        {
+            // TODO(Hernan): Should this be static?
+            std::uniform_real_distribution< Real > dist;
+            return dist( defaultGenerator() );
+        }
+
+        [[nodiscard]] inline Real next( Real lo, Real hi ) noexcept
+        {
+            // TODO(Hernan): Should this be static?
+            std::uniform_real_distribution< Real > dist( lo, hi );
+            return dist( defaultGenerator() );
+        }
+
+        [[nodiscard]] inline Vector2 nextVector2( void ) noexcept
+        {
+            return Vector2 {
+                next(),
+                next(),
+            };
+        }
+
+        [[nodiscard]] inline Vector2 nextVector2( Real lo, Real hi ) noexcept
+        {
+            return Vector2 {
+                next( lo, hi ),
+                next( lo, hi ),
+            };
+        }
+
+        [[nodiscard]] inline Vector3 nextVector3( void ) noexcept
+        {
+            return Vector3 {
+                next(),
+                next(),
+                next(),
+            };
+        }
+
+        [[nodiscard]] inline Vector3 nextVector3( Real lo, Real hi ) noexcept
+        {
+            return Vector3 {
+                next( lo, hi ),
+                next( lo, hi ),
+                next( lo, hi ),
+            };
+        }
+
+        [[nodiscard]] inline Vector3 nextInUnitSphere( void ) noexcept
+        {
+            while ( true ) {
+                const auto v = nextVector3( -1, 1 );
+                if ( lengthSquared( v ) >= 1 ) {
+                    continue;
+                } else {
+                    return v;
+                }
+            }
+        }
+
+        [[nodiscard]] inline Vector3 nextInHemisphere( const Normal3 &N ) noexcept
+        {
+            const auto v = nextInUnitSphere();
+            return sign( dot( v, N ) ) * v;
+        }
+
+        [[nodiscard]] inline Vector2 nextInUnitDisk( void ) noexcept
+        {
+            while ( true ) {
+                const auto v = nextVector2( -1, 1 );
+                if ( lengthSquared( v ) >= 1 ) {
+                    continue;
+                } else {
+                    return v;
+                }
+            }
+        }
+
+    }
 
 }
 

@@ -64,55 +64,6 @@ using namespace crimild;
 
 #define CRIMILD_RT_SAMPLES_PER_FRAME 1
 
-[[nodiscard]] Vector3 randomInUnitSphere( void ) noexcept
-{
-    while ( true ) {
-        const auto v = Vector3 {
-            Random::generate< Real >( -1, 1 ),
-            Random::generate< Real >( -1, 1 ),
-            Random::generate< Real >( -1, 1 ),
-        };
-
-        if ( lengthSquared( v ) >= 1 ) {
-            continue;
-        } else {
-            return v;
-        }
-    }
-}
-
-[[nodiscard]] Vector3 randomInUnitDisk( void ) noexcept
-{
-    while ( true ) {
-        const auto v = Vector3 {
-            Random::generate< Real >( -1, 1 ),
-            Random::generate< Real >( -1, 1 ),
-            Real( 0 ),
-        };
-
-        if ( lengthSquared( v ) >= 1 ) {
-            continue;
-        } else {
-            return v;
-        }
-    }
-}
-
-[[nodiscard]] Vector3 randomUnitVector( void ) noexcept
-{
-    return normalize( randomInUnitSphere() );
-}
-
-[[nodiscard]] Vector3 randomInHemisphere( const Normal3 &N ) noexcept
-{
-    const auto inUnitSphere = randomInUnitSphere();
-    if ( dot( inUnitSphere, N ) > 0 ) {
-        return inUnitSphere;
-    } else {
-        return -inUnitSphere;
-    }
-}
-
 [[nodiscard]] Real reflectance( Real cosTheta, Real refIdx ) noexcept
 {
     // Use Schlick's approximation for reflectance
@@ -154,7 +105,7 @@ struct IntersectionResult {
         }
 
         const bool enableDebug = true;
-        const bool debugging = enableDebug && Random::generate< Real >() < 0.00001;
+        const bool debugging = enableDebug && random::next() < 0.00001;
         if ( debugging )
             std::cerr << "\nt_min=" << t0 << ", t_max=" << t1 << '\n';
 
@@ -167,7 +118,7 @@ struct IntersectionResult {
             Real distanceInsideBoundary = ( t1 - t0 ) * d;
             Real density = material.density;
             Real negInvDensity = Real( -1 ) / density;
-            Real hitDistance = negInvDensity * std::log( Random::generate< Real >() );
+            Real hitDistance = negInvDensity * std::log( random::next() );
             if ( hitDistance <= distanceInsideBoundary ) {
                 Real t = t0 + hitDistance / d;
                 const auto P = R( t );
@@ -517,7 +468,7 @@ namespace crimild {
                 }
             }
 
-            Random::shuffle( m_rays );
+            std::shuffle( m_rays.begin(), m_rays.end(), random::defaultGenerator() );
         }
 
         [[nodiscard]] inline Settings *getSettings( void ) noexcept
@@ -548,7 +499,7 @@ namespace crimild {
 
             // Basic antialliasing by offseting the UV coordinates
             auto uv = rayInfo.uv;
-            uv = uv + Vector2 { Random::generate< Real >(), Random::generate< Real >() };
+            uv = uv + random::nextVector2( -1, 1 );
             uv = uv / Vector2 { m_width - 1.0f, m_height - 1.0f };
 
             Ray3 ray;
@@ -564,7 +515,7 @@ namespace crimild {
             const auto cameraRight = right( m_camera->getWorld() );
             const auto cameraUp = up( m_camera->getWorld() );
 
-            const auto rd = cameraLensRadius * randomInUnitDisk();
+            const auto rd = cameraLensRadius * random::nextInUnitDisk();
             const auto offset = cameraRight * rd.x + cameraUp * rd.y;
 
             rayInfo.ray = Ray3 {
@@ -593,7 +544,7 @@ namespace crimild {
                 double sinTheta = sqrt( Real( 1 ) - cosTheta * cosTheta );
                 const auto cannotRefract = refractionRatio * sinTheta > 1;
                 const auto scatteredDirection = [ & ] {
-                    if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > Random::generate< Real >() ) {
+                    if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > random::next() ) {
                         return reflect( dir, result.normal );
                     } else {
                         return refract( dir, result.normal, refractionRatio );
@@ -607,7 +558,7 @@ namespace crimild {
                 auto reflected = reflect( direction( R ), result.normal );
                 scattered = Ray3 {
                     result.point,
-                    reflected + material.roughness * randomInUnitSphere(),
+                    reflected + material.roughness * random::nextInUnitSphere(),
                 };
                 attenuation = material.albedo;
                 return dot( direction( scattered ), result.normal ) > 0;
@@ -619,7 +570,7 @@ namespace crimild {
                 return true;
             }
 
-            auto scatteredDirection = vector3( result.normal ) + randomUnitVector();
+            auto scatteredDirection = vector3( result.normal ) + normalize( random::nextInUnitSphere() );
             if ( isZero( scatteredDirection ) ) {
                 scatteredDirection = vector3( result.normal );
             }
