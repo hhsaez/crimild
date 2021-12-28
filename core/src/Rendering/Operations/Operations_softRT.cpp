@@ -44,6 +44,7 @@
 #include "Mathematics/easing.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/io.hpp"
+#include "Mathematics/isNaN.hpp"
 #include "Mathematics/min.hpp"
 #include "Mathematics/reflect.hpp"
 #include "Mathematics/refract.hpp"
@@ -468,6 +469,7 @@ namespace crimild {
                 }
             }
 
+            // TODO(hernan): Add a setting for suffling rays.
             std::shuffle( m_rays.begin(), m_rays.end(), random::defaultGenerator() );
         }
 
@@ -478,7 +480,10 @@ namespace crimild {
 
         void onSampleCompleted( RayInfo &rayInfo ) noexcept
         {
-            rayInfo.accumColor = rayInfo.accumColor + rayInfo.sampleColor;
+            // Check for NaN values before accumulating color. That way
+            // we avoid "dead" pixels (either black or white) due to
+            // invalid values.
+            rayInfo.accumColor = rayInfo.accumColor + ( isNaN( rayInfo.sampleColor ) ? ColorRGB { 0, 0, 0 } : rayInfo.sampleColor );
             rayInfo.samples++;
 
             ColorRGB color = rayInfo.accumColor / Real( rayInfo.samples );
@@ -581,8 +586,10 @@ namespace crimild {
 
         void doSampleBounce( RayInfo &rayInfo, const RTAcceleration::Result &scene ) noexcept
         {
-            if ( rayInfo.bounces > 10 ) {
-                // rayInfo.sampleColor = ColorRGB { 0, 0, 0 };
+            if ( rayInfo.bounces > 50 ) {
+                // If ray bounces too many times, it migth indicate that
+                // no light (or only a tiny bit of it) reaches that point.
+                rayInfo.sampleColor = ColorRGB { 0, 0, 0 };
                 onSampleCompleted( rayInfo );
                 return;
             }
