@@ -101,6 +101,22 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                     nodeType = RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
                     break;
                 }
+                case Primitive::Type::TRIANGLES: {
+                    // For the moment, I'm defining as "valid" primitives only those
+                    // containing both vertices and indices.
+                    auto isValid = !primitive->getVertexData().empty();
+                    isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexCount() > 0 );
+                    isValid = isValid && ( primitive->getIndices()->getIndexCount() > 0 );
+                    // Additionally, only the P3N3TC2 layout is valid, since we're going to
+                    // do physically-based rendering calculations.
+                    isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexLayout() == VertexP3N3TC2::getLayout() );
+                    // Make sure we do have the right amount of indices
+                    isValid = isValid && ( primitive->getIndices()->getIndexCount() % 3 == 0 );
+                    if ( isValid ) {
+                        nodeType = RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES;
+                    }
+                    break;
+                }
                 default: {
                     break;
                 }
@@ -161,9 +177,47 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
         return;
     }
 
+    const Int32 primitiveIndex = [ & ] {
+        if ( nodeType != RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES ) {
+            return -1;
+        }
+
+        auto primitive = geometry->anyPrimitive();
+        if ( !m_primitiveIDs.contains( primitive ) ) {
+            // Extend from data
+            auto vbo = primitive->getVertexData()[ 0 ];
+            auto triOffset = m_result.primitives.triangles.size();
+            m_result.primitives.triangles.resize( m_result.primitives.triangles.size() + vbo->getVertexCount() );
+            memcpy( m_result.primitives.triangles.getData() + triOffset, vbo->getBufferView()->getData(), sizeof( VertexP3N3TC2 ) * vbo->getVertexCount() );
+
+            auto ibo = primitive->getIndices();
+            auto indexOffset = m_result.primitives.indices.size();
+            m_result.primitives.indices.resize( m_result.primitives.indices.size() + ibo->getIndexCount() );
+            for ( auto i = Size( 0 ); i < ibo->getIndexCount(); ++i ) {
+                m_result.primitives.indices[ indexOffset + i ] = triOffset + ibo->getIndex( i );
+            }
+
+            const auto triCount = ibo->getIndexCount() / 3;
+            const auto indexOffsets = m_result.primitives.indexOffsets.size();
+            for ( auto i = Size( 0 ); i < triCount; i++ ) {
+                m_result.primitives.indexOffsets.add( indexOffset + i * 3 );
+            }
+
+            const Int32 primitiveID = m_result.primitives.primTree.size();
+            m_result.primitives.primTree.add(
+                RTPrimAccelNode::createLeafNode(
+                    triCount,
+                    indexOffsets ) );
+            m_primitiveIDs.insert( primitive, primitiveID );
+        }
+
+        return m_primitiveIDs[ primitive ];
+    }();
+
     m_result.nodes.add(
         RTAcceleratedNode {
             .type = nodeType,
+            .primitiveIndex = primitiveIndex,
             .parentIndex = m_parentIndex,
             .materialIndex = materialIndex,
             .world = geometry->getWorld(),

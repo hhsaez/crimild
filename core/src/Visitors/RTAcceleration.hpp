@@ -33,11 +33,13 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Rendering/Vertex.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 namespace crimild {
 
     class Material;
+    class Primitive;
 
     /**
        \brief A representation for a node in the scene hierarchy
@@ -125,6 +127,114 @@ namespace crimild {
     };
 
     /**
+     * \brief Primitive acceleration representation
+     * 
+     * Interior nodes provide access to three pieces of information:
+     * - Split axis: which of the x, y or z axes was split at this node.
+     * - Split position: the position of the splitting plane along the axis.
+     * - Children: information about to how to reach the two child nodes beneth it.
+     * 
+     * Leaf nodes need to record only which primitives overlap it.
+     * 
+     * Additional care was taken to ensure that nodes use only 8 bytes of memory
+     * (assuming a 32bits Float and Int representation). This maximizes the number
+     * of nodes that can live in the same cache line at any given point in time
+     * (up to 8 in a 64-byte cache line), improving performance when traversing
+     * later on.
+     * 
+     * \todo (hernan) I don't like the name. Maybe replaced "primitive" by "triangle"
+     * since that's what we're optimizing here.
+     */
+    struct RTPrimAccelNode {
+        union {
+            /**
+             * \remarks Valid only for interior nodes
+             */
+            Real split;
+
+            /**
+             * If the leaf node is overlapped by zero or one triangle, this variable is
+             * used to directly get the index of the first point of that triangle, without
+             * any need to push offsets dynamically.
+             * 
+             * \todo This seems to be overkill. Maybe I just need to use the offset below. 
+             * 
+             * \remarks Valid only for leaf nodes
+             */
+            Int onePrimitive;
+
+            /**
+             * Stores the offset for the first primitive index
+             * 
+             * \todo Since triangles are represented by indexed vertex buffers,
+             * this actually is a double indirection offset. This offset
+             * is used to get index for the first point in a triangle. 
+             * 
+             * \remarks Valid only for leaf nodes
+             */
+            Int primitiveIndicesOffset;
+        };
+
+        union {
+            /**
+             * The two low-order bits of this field are used to identify whether
+             * this is an interior node (with x, y, and z splits, represented
+             * by the values 0, 1 and 2 respectively) and leaf nodes (represented
+             * by the value 3).
+             * 
+             * \remarks Valid for interior and leaf nodes
+             */
+            Int flags;
+
+            /**
+             * Stores the number of primitives that overlap this node.
+             * 
+             * Since this variable shares the same space as the flags variable above,
+             * only 30 bits are actually available for use. Also, keep in mind that
+             * the low-order bits are reserved for flags.
+             * 
+             * \remarks Valid only for leaf nodes
+             */
+            Int primCount;
+
+            /**
+             * \remarks Valid only for interior nodes
+             */
+            Int aboveChild;
+        };
+
+        [[nodiscard]] inline Real getSplitPos( void ) const { return split; }
+        [[nodiscard]] inline Int getPrimCount( void ) const { return primCount >> 2; }
+        [[nodiscard]] inline Int getSplitAxis( void ) const { return flags & 3; }
+        [[nodiscard]] inline Bool isLeaf( void ) const { return ( flags & 3 ) == 3; }
+        [[nodiscard]] inline Int getAboveChild( void ) const { return aboveChild << 2; }
+
+        [[nodiscard]] static RTPrimAccelNode createLeafNode( Int triCount, Int indexOffsets ) noexcept
+        {
+            auto ret = RTPrimAccelNode {};
+            ret.flags = 3; // identifies a leaf node
+            ret.primCount |= ( triCount << 2 );
+            ret.primitiveIndicesOffset = indexOffsets;
+            return ret;
+        }
+
+        // [[nodiscard]] static RTPrimAccelNode forInteriorNode( Real split, Int flags ) noexcept
+        // {
+        //     auto ret = RTPrimAccelNode {};
+        //     ret.split = split;
+        //     ret.flags = flags;
+        //     return ret;
+        // }
+    };
+
+    struct RTPrimAccel {
+        Array< VertexP3N3TC2 > triangles; //< vertices
+        Array< Int > indices;
+        Array< Int > indexOffsets;
+        Array< RTPrimAccelNode > primTree; //< triangleTree
+    };
+
+    /**
      * \todo Add camera parameters (projection, view, fov, etc...)
      */
     class RTAcceleration : public NodeVisitor {
@@ -132,6 +242,8 @@ namespace crimild {
         struct Result {
             Array< RTAcceleratedNode > nodes;
             Array< RTAcceleratedMaterial > materials;
+
+            RTPrimAccel primitives;
         };
 
         virtual void traverse( Node *node ) noexcept override;
@@ -146,6 +258,7 @@ namespace crimild {
         Result m_result;
         Int32 m_parentIndex = -1;
         Map< Material *, Int32 > m_materialIDs;
+        Map< Primitive *, Int32 > m_primitiveIDs;
     };
 
     namespace utils {

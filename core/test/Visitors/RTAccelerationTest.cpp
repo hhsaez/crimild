@@ -146,11 +146,56 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_cylinder )
     ASSERT_EQ( 1, optimized.materials.size() );
 }
 
+TEST( RTAcceleration, it_optimizes_scene_with_triangles )
+{
+    auto scene = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 0 },
+                                },
+                                {
+                                    .position = Vector3 { 4, 5, 6 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 7, 8, 9 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 1 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices( crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, Array< UInt32 > { 0, 1, 2 } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    ASSERT_EQ( 1, optimized.nodes.size() );
+    ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES, optimized.nodes[ 0 ].type );
+    ASSERT_EQ( -1, optimized.nodes[ 0 ].parentIndex );
+    ASSERT_EQ( 0, optimized.nodes[ 0 ].materialIndex );
+    ASSERT_EQ( 1, optimized.materials.size() );
+}
+
 TEST( RTAcceleration, it_ignores_unsupported_geometry )
 {
     auto scene = [] {
         auto geometry = crimild::alloc< Geometry >();
-        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::TRIANGLES ) );
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::LINES ) );
         geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
         return geometry;
     }();
@@ -762,4 +807,572 @@ TEST( RTAcceleration, it_traverses_optimized_scene_with_early_termination )
         } );
 
     ASSERT_EQ( "0, 1, 2, 5, 6, ", ss.str() );
+}
+
+TEST( RTPrimAccel, ignore_empty_primitives )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::TRIANGLES ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 0, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.materials.size() );
+    EXPECT_EQ( 0, optimized.primitives.triangles.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.primTree.size() );
+}
+
+TEST( RTPrimAccel, ignore_non_triangles )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 1, optimized.nodes.size() );
+    EXPECT_EQ( 1, optimized.materials.size() );
+    EXPECT_EQ( 0, optimized.primitives.triangles.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.primTree.size() );
+}
+
+TEST( RTPrimAccel, ignore_degenerated_triangle )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 0 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices( crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, Array< UInt32 > { 0 } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 0, optimized.nodes.size() );
+}
+
+TEST( RTPrimAccel, ignore_invalid_vertex_layout )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3::getLayout(),
+                            Array< VertexP3 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                },
+                                {
+                                    .position = Vector3 { 4, 5, 6 },
+                                },
+                                {
+                                    .position = Vector3 { 7, 8, 9 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices( crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, Array< UInt32 > { 0, 1, 2 } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 0, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.primitives.triangles.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.primTree.size() );
+}
+
+TEST( RTPrimAccel, one_triangle )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 0 },
+                                },
+                                {
+                                    .position = Vector3 { 4, 5, 6 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 7, 8, 9 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 1 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices( crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, Array< UInt32 > { 0, 1, 2 } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 1, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.nodes[ 0 ].primitiveIndex );
+
+    EXPECT_EQ( 3, optimized.primitives.triangles.size() );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 1, 2, 3 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 0 },
+            } ),
+        optimized.primitives.triangles[ 0 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 4, 5, 6 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 1 },
+            } ),
+        optimized.primitives.triangles[ 1 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 7, 8, 9 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 1 },
+            } ),
+        optimized.primitives.triangles[ 2 ] );
+
+    EXPECT_EQ( 3, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 0 ] );
+    EXPECT_EQ( 1, optimized.primitives.indices[ 1 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 2 ] );
+
+    EXPECT_EQ( 1, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets[ 0 ] );
+
+    EXPECT_EQ( 1, optimized.primitives.primTree.size() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 0 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].primitiveIndicesOffset );
+    EXPECT_EQ( 1, optimized.primitives.primTree[ 0 ].getPrimCount() );
+}
+
+TEST( RTPrimAccel, many_triangles )
+{
+    auto geometry = [] {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 0 },
+                                },
+                                {
+                                    .position = Vector3 { 4, 5, 6 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 7, 8, 9 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 10, 11, 12 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 0 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices(
+                    crimild::alloc< IndexBuffer >(
+                        Format::INDEX_32_UINT,
+                        Array< UInt32 > {
+                            0,
+                            1,
+                            2,
+                            0,
+                            2,
+                            3,
+                        } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto optimized = geometry->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 1, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.nodes[ 0 ].primitiveIndex );
+
+    EXPECT_EQ( 4, optimized.primitives.triangles.size() );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 1, 2, 3 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 0 },
+            } ),
+        optimized.primitives.triangles[ 0 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 4, 5, 6 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 1 },
+            } ),
+        optimized.primitives.triangles[ 1 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 7, 8, 9 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 1 },
+            } ),
+        optimized.primitives.triangles[ 2 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 10, 11, 12 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 0 },
+            } ),
+        optimized.primitives.triangles[ 3 ] );
+
+    EXPECT_EQ( 6, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 0 ] );
+    EXPECT_EQ( 1, optimized.primitives.indices[ 1 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 2 ] );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 3 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 4 ] );
+    EXPECT_EQ( 3, optimized.primitives.indices[ 5 ] );
+
+    EXPECT_EQ( 2, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets[ 0 ] );
+    EXPECT_EQ( 3, optimized.primitives.indexOffsets[ 1 ] );
+
+    EXPECT_EQ( 1, optimized.primitives.primTree.size() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 0 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].primitiveIndicesOffset );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 0 ].getPrimCount() );
+}
+
+TEST( RTPrimAccel, two_independent_geometries )
+{
+    auto geometry = []() {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive(
+            [] {
+                auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+                primitive->setVertexData(
+                    {
+                        crimild::alloc< VertexBuffer >(
+                            VertexP3N3TC2::getLayout(),
+                            Array< VertexP3N3TC2 > {
+                                {
+                                    .position = Vector3 { 1, 2, 3 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 0 },
+                                },
+                                {
+                                    .position = Vector3 { 4, 5, 6 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 0, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 7, 8, 9 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 1 },
+                                },
+                                {
+                                    .position = Vector3 { 10, 11, 12 },
+                                    .normal = Vector3 { 0, 1, 0 },
+                                    .texCoord = Vector2 { 1, 0 },
+                                },
+                            } ),
+                    } );
+                primitive->setIndices(
+                    crimild::alloc< IndexBuffer >(
+                        Format::INDEX_32_UINT,
+                        Array< UInt32 > {
+                            0,
+                            1,
+                            2,
+                            0,
+                            2,
+                            3,
+                        } ) );
+                return primitive;
+            }() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    auto group = crimild::alloc< Group >();
+    group->attachNode( geometry() );
+    group->attachNode( geometry() );
+
+    auto optimized = group->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 3, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.nodes[ 1 ].primitiveIndex );
+    EXPECT_EQ( 1, optimized.nodes[ 2 ].primitiveIndex );
+
+    EXPECT_EQ( 8, optimized.primitives.triangles.size() );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 1, 2, 3 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 0 },
+            } ),
+        optimized.primitives.triangles[ 0 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 4, 5, 6 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 1 },
+            } ),
+        optimized.primitives.triangles[ 1 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 7, 8, 9 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 1 },
+            } ),
+        optimized.primitives.triangles[ 2 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 10, 11, 12 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 0 },
+            } ),
+        optimized.primitives.triangles[ 3 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 1, 2, 3 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 0 },
+            } ),
+        optimized.primitives.triangles[ 4 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 4, 5, 6 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 1 },
+            } ),
+        optimized.primitives.triangles[ 5 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 7, 8, 9 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 1 },
+            } ),
+        optimized.primitives.triangles[ 6 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 10, 11, 12 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 0 },
+            } ),
+        optimized.primitives.triangles[ 7 ] );
+
+    EXPECT_EQ( 12, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 0 ] );
+    EXPECT_EQ( 1, optimized.primitives.indices[ 1 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 2 ] );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 3 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 4 ] );
+    EXPECT_EQ( 3, optimized.primitives.indices[ 5 ] );
+    EXPECT_EQ( 4, optimized.primitives.indices[ 6 ] );
+    EXPECT_EQ( 5, optimized.primitives.indices[ 7 ] );
+    EXPECT_EQ( 6, optimized.primitives.indices[ 8 ] );
+    EXPECT_EQ( 4, optimized.primitives.indices[ 9 ] );
+    EXPECT_EQ( 6, optimized.primitives.indices[ 10 ] );
+    EXPECT_EQ( 7, optimized.primitives.indices[ 11 ] );
+
+    EXPECT_EQ( 4, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets[ 0 ] );
+    EXPECT_EQ( 3, optimized.primitives.indexOffsets[ 1 ] );
+    EXPECT_EQ( 6, optimized.primitives.indexOffsets[ 2 ] );
+    EXPECT_EQ( 9, optimized.primitives.indexOffsets[ 3 ] );
+
+    EXPECT_EQ( 2, optimized.primitives.primTree.size() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 0 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].primitiveIndicesOffset );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 0 ].getPrimCount() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 1 ].isLeaf() );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 1 ].primitiveIndicesOffset );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 1 ].getPrimCount() );
+}
+
+TEST( RTPrimAccel, two_geometries_with_shared_primitives )
+{
+    auto primitive = [] {
+        auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+        primitive->setVertexData(
+            {
+                crimild::alloc< VertexBuffer >(
+                    VertexP3N3TC2::getLayout(),
+                    Array< VertexP3N3TC2 > {
+                        {
+                            .position = Vector3 { 1, 2, 3 },
+                            .normal = Vector3 { 0, 1, 0 },
+                            .texCoord = Vector2 { 0, 0 },
+                        },
+                        {
+                            .position = Vector3 { 4, 5, 6 },
+                            .normal = Vector3 { 0, 1, 0 },
+                            .texCoord = Vector2 { 0, 1 },
+                        },
+                        {
+                            .position = Vector3 { 7, 8, 9 },
+                            .normal = Vector3 { 0, 1, 0 },
+                            .texCoord = Vector2 { 1, 1 },
+                        },
+                        {
+                            .position = Vector3 { 10, 11, 12 },
+                            .normal = Vector3 { 0, 1, 0 },
+                            .texCoord = Vector2 { 1, 0 },
+                        },
+                    } ),
+            } );
+        primitive->setIndices(
+            crimild::alloc< IndexBuffer >(
+                Format::INDEX_32_UINT,
+                Array< UInt32 > {
+                    0,
+                    1,
+                    2,
+                    0,
+                    2,
+                    3,
+                } ) );
+        return primitive;
+    }();
+
+    auto geometry = [ primitive ]() {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( primitive );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    };
+
+    auto group = crimild::alloc< Group >();
+    group->attachNode( geometry() );
+    group->attachNode( geometry() );
+
+    auto optimized = group->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 3, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.nodes[ 1 ].primitiveIndex );
+    EXPECT_EQ( 0, optimized.nodes[ 2 ].primitiveIndex );
+
+    EXPECT_EQ( 4, optimized.primitives.triangles.size() );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 1, 2, 3 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 0 },
+            } ),
+        optimized.primitives.triangles[ 0 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 4, 5, 6 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 0, 1 },
+            } ),
+        optimized.primitives.triangles[ 1 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 7, 8, 9 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 1 },
+            } ),
+        optimized.primitives.triangles[ 2 ] );
+    EXPECT_EQ(
+        (
+            VertexP3N3TC2 {
+                .position = Vector3 { 10, 11, 12 },
+                .normal = Vector3 { 0, 1, 0 },
+                .texCoord = Vector2 { 1, 0 },
+            } ),
+        optimized.primitives.triangles[ 3 ] );
+
+    EXPECT_EQ( 6, optimized.primitives.indices.size() );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 0 ] );
+    EXPECT_EQ( 1, optimized.primitives.indices[ 1 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 2 ] );
+    EXPECT_EQ( 0, optimized.primitives.indices[ 3 ] );
+    EXPECT_EQ( 2, optimized.primitives.indices[ 4 ] );
+    EXPECT_EQ( 3, optimized.primitives.indices[ 5 ] );
+
+    EXPECT_EQ( 2, optimized.primitives.indexOffsets.size() );
+    EXPECT_EQ( 0, optimized.primitives.indexOffsets[ 0 ] );
+    EXPECT_EQ( 3, optimized.primitives.indexOffsets[ 1 ] );
+
+    // The tree has only one node since there is only one primitive
+    EXPECT_EQ( 1, optimized.primitives.primTree.size() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 0 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].primitiveIndicesOffset );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 0 ].getPrimCount() );
 }
