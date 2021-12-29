@@ -55,7 +55,13 @@ namespace crimild {
             INVALID,
 
             GROUP,
-            //GEOMETRY, //< TODO
+
+            /**
+             * \brief A geometry is a container of primitives. 
+             * 
+             * In this case, bounds will be used as a first intersection test.
+             */
+            GEOMETRY,
 
             CSG_UNION,
             CSG_INTERSECTION,
@@ -102,10 +108,19 @@ namespace crimild {
          */
         Int32 materialIndex;
 
+        // union {
+        // /**
+        //  * \remarks Only valid for interior nodes (groups, geometries and csg).
+        //  */
+        // Transformation bounds;
+
         /**
-         * \brief World transformation
-         */
+             * \brief World transformation
+             * 
+             * \remarks Only valid for leaf nodes (primitives)
+             */
         Transformation world;
+        // };
     };
 
     struct RTAcceleratedMaterial {

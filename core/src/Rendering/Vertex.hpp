@@ -32,6 +32,7 @@
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/isEqual.hpp"
 #include "Rendering/VertexLayout.hpp"
 
