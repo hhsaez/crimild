@@ -238,6 +238,39 @@ struct IntersectionResult {
                 break;
             }
 
+            case RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES: {
+                const auto primIdx = node.primitiveIndex;
+                const auto &prim = scene.primitives.primTree[ primIdx ];
+                const auto idxOffset = prim.primitiveIndicesOffset;
+                const auto primCount = prim.getPrimCount();
+
+                for ( auto i = 0; i < primCount; ++i ) {
+                    const auto baseIdx = scene.primitives.indexOffsets[ idxOffset + i ];
+
+                    const auto &v0 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 0 ] ];
+                    const auto &v1 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 1 ] ];
+                    const auto &v2 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 2 ] ];
+
+                    const auto T = Triangle {
+                        v0.position,
+                        v1.position,
+                        v2.position,
+                    };
+
+                    Real t;
+                    if ( intersect( R, T, node.world, t ) ) {
+                        if ( t >= numbers::EPSILON && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) && ( !hasResult || t < result.t ) ) {
+                            result.t = t;
+                            result.point = R( result.t );
+                            result.setFaceNormal( R, normal3( v0.normal ) );
+                            result.materialId = node.materialIndex;
+                            hasResult = true;
+                        }
+                    }
+                }
+                break;
+            }
+
             default: {
                 break;
             }
