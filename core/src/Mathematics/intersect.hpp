@@ -33,6 +33,7 @@
 #include "Mathematics/Plane3.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
+#include "Mathematics/Ray3_operators.hpp"
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_apply.hpp"
@@ -77,6 +78,11 @@ namespace crimild {
         return intersect( inverse( sphereWorld )( R ), S, t0, t1 );
     }
 
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    {
+        return intersect( invWorld * R, S, t0, t1 );
+    }
+
     [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, Real &t ) noexcept
     {
         const auto nv = dot( normal( P ), direction( R ) );
@@ -92,6 +98,11 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( planeWorld )( R ), P, t );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, const Matrix4 &invWorld, Real &t ) noexcept
+    {
+        return intersect( invWorld * R, P, t );
     }
 
     [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, Real &tMin, Real &tMax ) noexcept
@@ -126,6 +137,11 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), B, t0, t1 );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    {
+        return intersect( invWorld * R, B, t0, t1 );
     }
 
     namespace internal {
@@ -231,6 +247,11 @@ namespace crimild {
         return intersect( inverse( world )( R ), C, t0, t1 );
     }
 
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    {
+        return intersect( invWorld * R, C, t0, t1 );
+    }
+
     /**
        \brief Ray-Triangle intersection
 
@@ -270,6 +291,11 @@ namespace crimild {
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), T, t );
+    }
+
+    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, const Matrix4 &invWorld, Real &t ) noexcept
+    {
+        return intersect( invWorld * R, T, t );
     }
 
 }
