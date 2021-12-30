@@ -166,6 +166,20 @@ struct IntersectionResult {
                 break;
             }
 
+            case RTAcceleratedNode::Type::GEOMETRY: {
+                const auto B = Box {};
+                Real t0, t1;
+                if ( intersect( R, B, node.world, t0, t1 ) ) {
+                    // TODO(hernan): when traversing optimized triangles, we need to keep
+                    // track of the min/max times for the intersection above.
+                    // TODO(hernan): Maybe by keeping track of those values I can also
+                    // solve how CSG nodes will be evaluated, since they also need to
+                    // save min/max times for intersections.
+                    frontier[ ++currentIndex ] = nodeIdx + 1;
+                }
+                break;
+            }
+
             case RTAcceleratedNode::Type::PRIMITIVE_SPHERE: {
                 const auto S = Sphere {};
                 Real t0, t1;

@@ -62,12 +62,8 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
     m_result.nodes.add(
         RTAcceleratedNode {
             .type = RTAcceleratedNode::Type::GROUP,
-            .parentIndex = m_parentIndex,
             .world = boundingTransform,
         } );
-
-    auto tempParent = m_parentIndex;
-    m_parentIndex = groupIndex;
 
     if ( auto left = group->getNodeAt( 0 ) ) {
         left->accept( *this );
@@ -78,52 +74,51 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
         m_result.nodes[ groupIndex ].secondChildIndex = m_result.nodes.size();
         right->accept( *this );
     }
-
-    m_parentIndex = tempParent;
 }
 
 void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
 {
-    auto nodeType = RTAcceleratedNode::Type::INVALID;
-    geometry->forEachPrimitive(
-        [ & ]( auto primitive ) {
-            switch ( primitive->getType() ) {
-                case Primitive::Type::SPHERE: {
-                    nodeType = RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
-                    break;
-                }
-                case Primitive::Type::BOX: {
-                    nodeType = RTAcceleratedNode::Type::PRIMITIVE_BOX;
-                    break;
-                }
-                case Primitive::Type::OPEN_CYLINDER:
-                case Primitive::Type::CYLINDER: {
-                    nodeType = RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
-                    break;
-                }
-                case Primitive::Type::TRIANGLES: {
-                    // For the moment, I'm defining as "valid" primitives only those
-                    // containing both vertices and indices.
-                    auto isValid = !primitive->getVertexData().empty();
-                    isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexCount() > 0 );
-                    isValid = isValid && ( primitive->getIndices()->getIndexCount() > 0 );
-                    // Additionally, only the P3N3TC2 layout is valid, since we're going to
-                    // do physically-based rendering calculations.
-                    isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexLayout() == VertexP3N3TC2::getLayout() );
-                    // Make sure we do have the right amount of indices
-                    isValid = isValid && ( primitive->getIndices()->getIndexCount() % 3 == 0 );
-                    if ( isValid ) {
-                        nodeType = RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES;
-                    }
-                    break;
-                }
-                default: {
-                    break;
+    auto primitive = geometry->anyPrimitive();
+    if ( primitive == nullptr ) {
+        return;
+    }
+
+    auto primitiveType = [ & ] {
+        switch ( primitive->getType() ) {
+            case Primitive::Type::SPHERE: {
+                return RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
+            }
+            case Primitive::Type::BOX: {
+                return RTAcceleratedNode::Type::PRIMITIVE_BOX;
+            }
+            case Primitive::Type::OPEN_CYLINDER:
+            case Primitive::Type::CYLINDER: {
+                return RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
+            }
+            case Primitive::Type::TRIANGLES: {
+                // For the moment, I'm defining as "valid" primitives only those
+                // containing both vertices and indices.
+                auto isValid = !primitive->getVertexData().empty();
+                isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexCount() > 0 );
+                isValid = isValid && ( primitive->getIndices()->getIndexCount() > 0 );
+                // Additionally, only the P3N3TC2 layout is valid, since we're going to
+                // do physically-based rendering calculations.
+                isValid = isValid && ( primitive->getVertexData()[ 0 ]->getVertexLayout() == VertexP3N3TC2::getLayout() );
+                // Make sure we do have the right amount of indices
+                isValid = isValid && ( primitive->getIndices()->getIndexCount() % 3 == 0 );
+                if ( isValid ) {
+                    return RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES;
+                } else {
+                    return RTAcceleratedNode::Type::INVALID;
                 }
             }
-        } );
+            default: {
+                return RTAcceleratedNode::Type::INVALID;
+            }
+        }
+    }();
 
-    if ( nodeType == RTAcceleratedNode::Type::INVALID ) {
+    if ( primitiveType == RTAcceleratedNode::Type::INVALID ) {
         return;
     }
 
@@ -178,11 +173,10 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
     }
 
     const Int32 primitiveIndex = [ & ] {
-        if ( nodeType != RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES ) {
+        if ( primitiveType != RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES ) {
             return -1;
         }
 
-        auto primitive = geometry->anyPrimitive();
         if ( !m_primitiveIDs.contains( primitive ) ) {
             // Extend from data
             auto vbo = primitive->getVertexData()[ 0 ];
@@ -216,12 +210,20 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
 
     m_result.nodes.add(
         RTAcceleratedNode {
-            .type = nodeType,
-            .primitiveIndex = primitiveIndex,
-            .parentIndex = m_parentIndex,
-            .materialIndex = materialIndex,
-            .world = geometry->getWorld(),
+            .type = RTAcceleratedNode::Type::GEOMETRY,
+            .world = [ & ] {
+                // Compute a transformation for representing bounding volumes
+                const auto size = geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin();
+                return translation( vector3( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
+            }(),
         } );
+
+    m_result.nodes.add( RTAcceleratedNode {
+        .type = primitiveType,
+        .primitiveIndex = primitiveIndex,
+        .materialIndex = materialIndex,
+        .world = geometry->getWorld(),
+    } );
 }
 
 void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
@@ -251,12 +253,8 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
     m_result.nodes.add(
         RTAcceleratedNode {
             .type = nodeType,
-            .parentIndex = m_parentIndex,
             .world = boundingTransform,
         } );
-
-    auto tempParent = m_parentIndex;
-    m_parentIndex = csgIndex;
 
     if ( auto left = csg->getLeft() ) {
         left->accept( *this );
@@ -266,6 +264,4 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
         m_result.nodes[ csgIndex ].secondChildIndex = m_result.nodes.size();
         right->accept( *this );
     }
-
-    m_parentIndex = tempParent;
 }

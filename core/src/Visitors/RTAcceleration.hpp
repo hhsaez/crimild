@@ -51,6 +51,9 @@ namespace crimild {
        moving materialIndex to a different structure.
      */
     struct RTAcceleratedNode {
+        /**
+         * \todo Pack this into a union with other fields (\see RTPrimAccelNode)
+         */
         enum struct Type : UInt32 {
             INVALID,
 
@@ -60,6 +63,10 @@ namespace crimild {
              * \brief A geometry is a container of primitives. 
              * 
              * In this case, bounds will be used as a first intersection test.
+             * 
+             * The primitive associated with this geometry will be stored in the node
+             * right after the current one. Therefore, there's no need to store a 
+             * separated primitive index.
              */
             GEOMETRY,
 
@@ -70,6 +77,12 @@ namespace crimild {
             PRIMITIVE_SPHERE,
             PRIMITIVE_BOX,
             PRIMITIVE_CYLINDER,
+            /**
+             * \brief A triangulated primitive
+             * 
+             * In this case, RTAcceleratedNode::primitiveIndex will point to an optimized
+             * triangulated mesh, represented by the RTPrimAccelNode class.
+             */
             PRIMITIVE_TRIANGLES,
         };
 
@@ -97,22 +110,19 @@ namespace crimild {
             Int32 primitiveIndex;
         };
 
-        /**
-           \brief Index to the parent node
-         */
-        Int32 parentIndex = -1;
-
         /** 
          * \brief Index to a  array
-         * \remarks Only valid for geometries
+         * 
+         * \todo Find a way to pack this field with others in a union.
+         * \remarks Only valid for primitives
          */
         Int32 materialIndex;
 
         // union {
-        // /**
-        //  * \remarks Only valid for interior nodes (groups, geometries and csg).
-        //  */
-        // Transformation bounds;
+        //     /**
+        //      * \remarks Only valid for interior nodes (groups, geometries and csg).
+        //      */
+        //     Transformation bounds;
 
         /**
              * \brief World transformation
@@ -271,61 +281,9 @@ namespace crimild {
 
     private:
         Result m_result;
-        Int32 m_parentIndex = -1;
         Map< Material *, Int32 > m_materialIDs;
         Map< Primitive *, Int32 > m_primitiveIDs;
     };
-
-    namespace utils {
-
-        template< typename Fn >
-        void traverseNonRecursive( const RTAcceleration::Result &scene, Fn fn ) noexcept
-        {
-            if ( scene.nodes.empty() ) {
-                return;
-            }
-
-            Int32 current = 0;
-            Int32 lastVisited = -1;
-
-            while ( current >= 0 ) {
-                const auto &node = scene.nodes[ current ];
-                switch ( node.type ) {
-                    case RTAcceleratedNode::Type::GROUP: {
-                        if ( lastVisited < current ) {
-                            // begin traversal
-                            if ( !fn( node, current ) ) {
-                                // callback failed. don't traverse children
-                                lastVisited = current;
-                                current = node.parentIndex;
-                            } else {
-                                // traverse first child
-                                lastVisited = current;
-                                current = current + 1;
-                            }
-                        } else if ( lastVisited != node.secondChildIndex ) {
-                            // next child
-                            lastVisited = current;
-                            current = node.secondChildIndex;
-                        } else {
-                            // done traversing
-                            lastVisited = current;
-                            current = node.parentIndex;
-                        }
-                        break;
-                    }
-                    default: {
-                        // Don't care for result. Just go back to parent anyway
-                        fn( node, current );
-                        // no children. return to parent
-                        lastVisited = current;
-                        current = node.parentIndex;
-                        break;
-                    }
-                }
-            }
-        }
-    }
 
 }
 
