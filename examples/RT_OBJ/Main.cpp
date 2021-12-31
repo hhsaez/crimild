@@ -77,10 +77,6 @@ public:
 
             return scene;
         }() );
-
-        // if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {
-        //     RenderSystem::getInstance()->useRTSoftRenderPath();
-        // }
     }
 };
 

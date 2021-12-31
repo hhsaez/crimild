@@ -185,23 +185,21 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
             memcpy( m_result.primitives.triangles.getData() + triOffset, vbo->getBufferView()->getData(), sizeof( VertexP3N3TC2 ) * vbo->getVertexCount() );
 
             auto ibo = primitive->getIndices();
-            auto indexOffset = m_result.primitives.indices.size();
+            auto baseIndexOffset = m_result.primitives.indices.size();
             m_result.primitives.indices.resize( m_result.primitives.indices.size() + ibo->getIndexCount() );
             for ( auto i = Size( 0 ); i < ibo->getIndexCount(); ++i ) {
-                m_result.primitives.indices[ indexOffset + i ] = triOffset + ibo->getIndex( i );
+                m_result.primitives.indices[ baseIndexOffset + i ] = triOffset + ibo->getIndex( i );
             }
 
             const auto triCount = ibo->getIndexCount() / 3;
-            const auto indexOffsets = m_result.primitives.indexOffsets.size();
-            for ( auto i = Size( 0 ); i < triCount; i++ ) {
-                m_result.primitives.indexOffsets.add( indexOffset + i * 3 );
+
+            std::vector< Int32 > offsets( triCount );
+            for ( auto i = Size( 0 ); i < triCount; ++i ) {
+                offsets[ i ] = baseIndexOffset + i * 3;
             }
 
             const Int32 primitiveID = m_result.primitives.primTree.size();
-            m_result.primitives.primTree.add(
-                RTPrimAccelNode::createLeafNode(
-                    triCount,
-                    indexOffsets ) );
+            splitPrim( offsets, 0, triCount );
             m_primitiveIDs.insert( primitive, primitiveID );
         }
 
@@ -264,4 +262,42 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
         m_result.nodes[ csgIndex ].secondChildIndex = m_result.nodes.size();
         right->accept( *this );
     }
+}
+
+void RTAcceleration::splitPrim( std::vector< Int32 > &offsets, Index start, Index end ) noexcept
+{
+    const auto span = end - start;
+    if ( span < 1 ) {
+        return;
+    }
+
+    if ( span <= 4 ) {
+        const Int32 indexOffsets = m_result.primitives.indexOffsets.size();
+        for ( auto i = start; i < end; i++ ) {
+            m_result.primitives.indexOffsets.add( offsets[ i ] );
+        }
+        m_result.primitives.primTree.add(
+            RTPrimAccelNode::createLeafNode(
+                span,
+                indexOffsets ) );
+
+        return;
+    }
+
+    const auto nodeIdx = [ & ] {
+        auto node = RTPrimAccelNode {};
+        node.split = 0;
+        node.flags = 0;
+
+        const auto nodeIdx = m_result.primitives.primTree.size();
+        m_result.primitives.primTree.add( node );
+        return nodeIdx;
+    }();
+
+    auto mid = start + span / 2;
+    splitPrim( offsets, start, mid );
+
+    m_result.primitives.primTree[ nodeIdx ].aboveChild |= ( m_result.primitives.primTree.size() << 2 );
+
+    splitPrim( offsets, mid, end );
 }

@@ -232,7 +232,7 @@ namespace crimild {
         [[nodiscard]] inline Int getPrimCount( void ) const { return primCount >> 2; }
         [[nodiscard]] inline Int getSplitAxis( void ) const { return flags & 3; }
         [[nodiscard]] inline Bool isLeaf( void ) const { return ( flags & 3 ) == 3; }
-        [[nodiscard]] inline Int getAboveChild( void ) const { return aboveChild << 2; }
+        [[nodiscard]] inline Int getAboveChild( void ) const { return aboveChild >> 2; }
 
         [[nodiscard]] static RTPrimAccelNode createLeafNode( Int triCount, Int indexOffsets ) noexcept
         {
@@ -278,6 +278,9 @@ namespace crimild {
         virtual void visitCSGNode( CSGNode *csg ) noexcept override;
 
         inline const Result &getResult( void ) noexcept { return m_result; }
+
+    private:
+        void splitPrim( std::vector< Int32 > &offsets, Index start, Index end ) noexcept;
 
     private:
         Result m_result;
