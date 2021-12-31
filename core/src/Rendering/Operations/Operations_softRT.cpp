@@ -87,6 +87,61 @@ struct IntersectionResult {
     }
 };
 
+[[nodiscard]] Bool intersectPrim( const Ray3 &R, const RTAcceleration::Result &scene, Int32 nodeId, IntersectionResult &result ) noexcept
+{
+    Bool hasResult = false;
+
+    const auto &node = scene.nodes[ nodeId ];
+    const auto primIdx = node.primitiveIndex;
+    if ( primIdx < 0 ) {
+        return false;
+    }
+
+    Int32 frontier[ 64 ] = { primIdx, 0 };
+    Int32 currentIdx = 0;
+
+    while ( currentIdx >= 0 ) {
+        const auto primIdx = frontier[ currentIdx-- ];
+        const auto &prim = scene.primitives.primTree[ primIdx ];
+        if ( prim.isLeaf() ) {
+            const auto idxOffset = prim.primitiveIndicesOffset;
+            const auto primCount = prim.getPrimCount();
+            for ( auto i = 0; i < primCount; ++i ) {
+                const auto baseIdx = scene.primitives.indexOffsets[ idxOffset + i ];
+
+                const auto &v0 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 0 ] ];
+                const auto &v1 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 1 ] ];
+                const auto &v2 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 2 ] ];
+
+                const auto T = Triangle {
+                    v0.position,
+                    v1.position,
+                    v2.position,
+                };
+
+                Real t;
+                // TODO(hernan): Pre-compute inverse world ray to avoid doing it every loop
+                if ( intersect( R, T, node.world, t ) ) {
+                    if ( t >= numbers::EPSILON && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) && ( !hasResult || t < result.t ) ) {
+                        result.t = t;
+                        result.point = R( result.t );
+                        result.setFaceNormal( R, normal3( v0.normal ) );
+                        result.materialId = node.materialIndex;
+                        hasResult = true;
+                    }
+                }
+            }
+        } else {
+            if ( prim.aboveChild > ( primIdx + 1 ) ) {
+                frontier[ ++currentIdx ] = prim.getAboveChild();
+            }
+            frontier[ ++currentIdx ] = primIdx + 1;
+        }
+    }
+
+    return hasResult;
+}
+
 [[nodiscard]] Bool intersectNR( const Ray3 &R, const RTAcceleration::Result &scene, IntersectionResult &result ) noexcept
 {
     if ( scene.nodes.empty() ) {
@@ -253,34 +308,8 @@ struct IntersectionResult {
             }
 
             case RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES: {
-                const auto primIdx = node.primitiveIndex;
-                const auto &prim = scene.primitives.primTree[ primIdx ];
-                const auto idxOffset = prim.primitiveIndicesOffset;
-                const auto primCount = prim.getPrimCount();
-
-                for ( auto i = 0; i < primCount; ++i ) {
-                    const auto baseIdx = scene.primitives.indexOffsets[ idxOffset + i ];
-
-                    const auto &v0 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 0 ] ];
-                    const auto &v1 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 1 ] ];
-                    const auto &v2 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 2 ] ];
-
-                    const auto T = Triangle {
-                        v0.position,
-                        v1.position,
-                        v2.position,
-                    };
-
-                    Real t;
-                    if ( intersect( R, T, node.world, t ) ) {
-                        if ( t >= numbers::EPSILON && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) && ( !hasResult || t < result.t ) ) {
-                            result.t = t;
-                            result.point = R( result.t );
-                            result.setFaceNormal( R, normal3( v0.normal ) );
-                            result.materialId = node.materialIndex;
-                            hasResult = true;
-                        }
-                    }
+                if ( intersectPrim( R, scene, nodeIdx, result ) ) {
+                    hasResult = true;
                 }
                 break;
             }
@@ -517,7 +546,9 @@ namespace crimild {
             }
 
             // TODO(hernan): Add a setting for suffling rays.
-            std::shuffle( m_rays.begin(), m_rays.end(), random::defaultGenerator() );
+            if ( getSettings()->get< Bool >( "rt.shuffle", true ) ) {
+                std::shuffle( m_rays.begin(), m_rays.end(), random::defaultGenerator() );
+            }
         }
 
         [[nodiscard]] inline Settings *getSettings( void ) noexcept
