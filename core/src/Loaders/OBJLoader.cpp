@@ -354,7 +354,7 @@ void OBJLoader::readMaterialDiffuse( std::stringstream &line )
 {
     float r, g, b;
     line >> r >> g >> b;
-    _currentMaterial->setDiffuse( ColorRGBA { r, g, b, 1.0f } );
+    _currentMaterial->setAlbedo( ColorRGB { r, g, b } );
 }
 
 void OBJLoader::readMaterialSpecular( std::stringstream &line )
