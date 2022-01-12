@@ -42,18 +42,6 @@ namespace crimild {
         [[nodiscard]] inline constexpr Bool operator!=( const Vector4Impl &other ) const noexcept;
     };
 
-    template< typename T >
-    struct Vector4Impl< T >::Constants {
-        static constexpr auto ZERO = Vector4Impl< T > { 0, 0, 0, 0 };
-        static constexpr auto ONE = Vector4Impl< T > { 1, 1, 1, 1 };
-        static constexpr auto POSITIVE_INFINITY = Vector4Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-        static constexpr auto NEGATIVE_INFINITY = Vector4Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-        static constexpr auto UNIT_X = Vector4Impl< T > { 1, 0, 0, 0 };
-        static constexpr auto UNIT_Y = Vector4Impl< T > { 0, 1, 0, 0 };
-        static constexpr auto UNIT_Z = Vector4Impl< T > { 0, 0, 1, 0 };
-        static constexpr auto UNIT_W = Vector4Impl< T > { 0, 0, 0, 1 };
-    };
-
     using Vector4 = Vector4Impl< Real >;
     using Vector4f = Vector4Impl< Real32 >;
     using Vector4d = Vector4Impl< Real64 >;

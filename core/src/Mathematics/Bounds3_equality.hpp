@@ -38,6 +38,11 @@ namespace crimild {
         return B0.min == B1.min && B0.max == B1.max;
     }
 
+    [[nodiscard]] inline constexpr Bool operator!=( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
+    {
+        return B0.min != B1.min || B0.max != B1.max;
+    }
+
 }
 
 #endif

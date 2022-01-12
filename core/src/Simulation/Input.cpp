@@ -28,6 +28,7 @@
 #include "Input.hpp"
 
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Rendering/Renderer.hpp"
 
 using namespace crimild;

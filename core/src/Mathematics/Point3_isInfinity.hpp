@@ -25,36 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_VECTOR_3_CONSTANTS_
-#define CRIMILD_MATHEMATICS_VECTOR_3_CONSTANTS_
+#ifndef CRIMILD_MATHEMATICS_POINT_3_IS_INFINITY_
+#define CRIMILD_MATHEMATICS_POINT_3_IS_INFINITY_
 
-#include "Mathematics/Vector3.hpp"
-
-#include <limits>
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/isInfinity.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Vector3Impl< T >::Constants {
-        static constexpr auto ZERO = Vector3Impl< T > { 0, 0, 0 };
-        static constexpr auto ONE = Vector3Impl< T > { 1, 1, 1 };
-        static constexpr auto POSITIVE_INFINITY = Vector3Impl< T > {
-            std::numeric_limits< T >::infinity(),
-            std::numeric_limits< T >::infinity(),
-            std::numeric_limits< T >::infinity(),
-        };
-        static constexpr auto NEGATIVE_INFINITY = Vector3Impl< T > {
-            -std::numeric_limits< T >::infinity(),
-            -std::numeric_limits< T >::infinity(),
-            -std::numeric_limits< T >::infinity(),
-        };
-        static constexpr auto UNIT_X = Vector3Impl< T > { 1, 0, 0 };
-        static constexpr auto UNIT_Y = Vector3Impl< T > { 0, 1, 0 };
-        static constexpr auto UNIT_Z = Vector3Impl< T > { 0, 0, 1 };
-        static constexpr auto RIGHT = Vector3Impl< T > { 1, 0, 0 };
-        static constexpr auto UP = Vector3Impl< T > { 0, 1, 0 };
-        static constexpr auto FORWARD = Vector3Impl< T > { 0, 0, -1 };
-    };
+    inline Bool isInfinity( const Point3 &p ) noexcept
+    {
+        return isInfinity( p.x ) || isInfinity( p.y ) || isInfinity( p.z );
+    }
 
 }
 

@@ -43,7 +43,9 @@
 #include "Mathematics/Bounds3_overlaps.hpp"
 #include "Mathematics/Bounds3_surfaceArea.hpp"
 #include "Mathematics/Bounds3_volume.hpp"
+#include "Mathematics/Point3_isInfinity.hpp"
 #include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/io.hpp"
 
@@ -56,8 +58,8 @@ TEST( Bounds3, defaultValue )
 {
     constexpr auto B = Bounds3 {};
 
-    EXPECT_EQ( Point3::Constants::POSITIVE_INFINITY, B.min );
-    EXPECT_EQ( Point3::Constants::NEGATIVE_INFINITY, B.max );
+    EXPECT_TRUE( isInfinity( B.min ) );
+    EXPECT_TRUE( isInfinity( B.max ) );
 }
 
 TEST( Bounds3, indexing )
@@ -149,7 +151,7 @@ TEST( Bounds3, min )
     static_assert( Point3 { 1, 2, 3 } == crimild::min( B0 ) );
     static_assert( Point3 { 1, 2, 3 } == crimild::min( B0, B1 ) );
 
-    EXPECT_TRUE( true );
+    EXPECT_TRUE( isInfinity( min( Bounds3 {} ) ) );
 }
 
 TEST( Bounds3, max )
@@ -167,7 +169,7 @@ TEST( Bounds3, max )
     static_assert( Point3 { 4, 5, 6 } == max( B0 ) );
     static_assert( Point3 { 10, 11, 12 } == max( B0, B1 ) );
 
-    EXPECT_TRUE( true );
+    EXPECT_TRUE( isInfinity( max( Bounds3 {} ) ) );
 }
 
 TEST( Bounds3, minDimension )
@@ -277,6 +279,17 @@ TEST( Bounds3, combine )
     static_assert( B2 == combine( combine( B, B2 ), B0 ) );
     static_assert( B4 == combine( combine( combine( B, B0 ), B2 ), B3 ) );
 
+    {
+        constexpr auto B0 = combine( Bounds3 {}, Point3 { 1, -1, -1 } );
+        EXPECT_EQ( B0, ( Bounds3 { { 1, -1, -1 }, { 1, -1, -1 } } ) );
+
+        constexpr auto B1 = combine( B0, Point3 { 1, -1, 1 } );
+        EXPECT_EQ( B1, ( Bounds3 { { 1, -1, -1 }, { 1, -1, 1 } } ) );
+
+        constexpr auto B2 = combine( B1, Point3 { -1, -1, 1 } );
+        EXPECT_EQ( B2, ( Bounds3 { { -1, -1, -1 }, { 1, -1, 1 } } ) );
+    }
+
     EXPECT_TRUE( true );
 }
 
@@ -304,6 +317,113 @@ TEST( Bounds3, overlaps )
     static_assert( overlaps( B2, B3 ) );
 
     EXPECT_TRUE( true );
+}
+
+// This test aims to replicate the overlap checks when splitting
+// a cube at different depths, which is required in RT.
+TEST( Bounds3, overlaps_cube )
+{
+    // Boundings for each of the faces of a unit cube
+    constexpr auto front = Bounds3 { { -1, -1, 1 }, { 1, 1, 1 } };
+    constexpr auto back = Bounds3 { { -1, -1, -1 }, { 1, 1, -1 } };
+    constexpr auto left = Bounds3 { { -1, -1, -1 }, { -1, 1, 1 } };
+    constexpr auto right = Bounds3 { { 1, -1, -1 }, { 1, 1, 1 } };
+    constexpr auto top = Bounds3 { { -1, 1, -1 }, { 1, 1, 1 } };
+    constexpr auto bottom = Bounds3 { { -1, -1, -1 }, { 1, -1, 1 } };
+
+    auto testOverlap = []( const auto &B, std::vector< Bounds3 > pass, std::vector< Bounds3 > fail ) {
+        for ( const auto &b : pass ) {
+            if ( !overlaps( b, B ) ) {
+                return false;
+            }
+        }
+        for ( const auto &b : fail ) {
+            if ( overlaps( b, B ) ) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, -1, -1 }, { 1, 1, 1 } },
+            { front, back, left, right, top, bottom },
+            {} ) );
+
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, -1, -1 }, { 0, 1, 1 } },
+            { front, back, left, top, bottom },
+            { right } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, -1, -1 }, { 1, 1, 1 } },
+            { front, back, right, top, bottom },
+            { left } ) );
+
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, -1, -1 }, { 0, 0, 1 } },
+            { front, back, left, bottom },
+            { right, top } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, -1, -1 }, { 1, 0, 1 } },
+            { front, back, right, bottom },
+            { left, top } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, 0, -1 }, { 0, 1, 1 } },
+            { front, back, left, top },
+            { right, bottom } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, 0, -1 }, { 1, 1, 1 } },
+            { front, back, right, top },
+            { left, bottom } ) );
+
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, -1, -1 }, { 0, 0, 0 } },
+            { back, left, bottom },
+            { right, top, front } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, -1, -1 }, { 1, 0, 0 } },
+            { back, right, bottom },
+            { left, top, front } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, 0, -1 }, { 0, 1, 0 } },
+            { back, left, top },
+            { right, bottom, front } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, 0, -1 }, { 1, 1, 0 } },
+            { back, right, top },
+            { left, bottom, front } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, -1, 0 }, { 0, 0, 1 } },
+            { front, left, bottom },
+            { right, top, back } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, -1, 0 }, { 1, 0, 1 } },
+            { front, right, bottom },
+            { left, top, back } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { -1, 0, 0 }, { 0, 1, 1 } },
+            { front, left, top },
+            { right, bottom, back } ) );
+    EXPECT_TRUE(
+        testOverlap(
+            Bounds3 { { 0, 0, 0 }, { 1, 1, 1 } },
+            { front, right, top },
+            { left, bottom, back } ) );
 }
 
 TEST( Bounds3, inside )

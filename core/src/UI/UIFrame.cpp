@@ -29,6 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Mathematics/Vector4_constants.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "UIFrameConstraint.hpp"

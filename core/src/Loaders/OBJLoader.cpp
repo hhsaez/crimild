@@ -29,6 +29,7 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Foundation/Log.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/Vector_equality.hpp"
 #include "Primitives/Primitive.hpp"

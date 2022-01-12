@@ -30,8 +30,6 @@
 
 #include "Mathematics/Tuple3.hpp"
 
-#include <limits>
-
 namespace crimild {
 
     template< typename T >
@@ -40,14 +38,6 @@ namespace crimild {
 
         [[nodiscard]] inline constexpr Bool operator==( const Point3Impl &other ) const noexcept;
         [[nodiscard]] inline constexpr Bool operator!=( const Point3Impl &other ) const noexcept;
-    };
-
-    template< typename T >
-    struct Point3Impl< T >::Constants {
-        static constexpr auto ZERO = Point3Impl< T > { 0, 0, 0 };
-        static constexpr auto ONE = Point3Impl< T > { 1, 1, 1 };
-        static constexpr auto POSITIVE_INFINITY = Point3Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-        static constexpr auto NEGATIVE_INFINITY = Point3Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
     };
 
     using Point3 = Point3Impl< Real >;

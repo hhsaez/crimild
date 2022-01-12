@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_
 
 #include "Mathematics/Point3.hpp"
+#include "Mathematics/Point3_constants.hpp"
 
 namespace crimild {
 
@@ -44,12 +45,12 @@ namespace crimild {
         Point3 min = Point3::Constants::POSITIVE_INFINITY;
         Point3 max = Point3::Constants::NEGATIVE_INFINITY;
 
-        [[nodiscard]] const Point3 &operator[]( Index i ) const noexcept
+        [[nodiscard]] inline constexpr const Point3 &operator[]( Index i ) const noexcept
         {
             return i == 0 ? min : max;
         }
 
-        [[nodiscard]] Point3 &operator[]( Index i ) noexcept
+        [[nodiscard]] inline Point3 &operator[]( Index i ) noexcept
         {
             return i == 0 ? min : max;
         }
