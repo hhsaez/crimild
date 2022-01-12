@@ -30,6 +30,7 @@
 #include "ConePrimitive.hpp"
 #include "CylinderPrimitive.hpp"
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/cross.hpp"

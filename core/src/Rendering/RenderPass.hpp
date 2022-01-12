@@ -28,9 +28,10 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_PASS_
 #define CRIMILD_CORE_RENDERING_RENDER_PASS_
 
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphOperation.hpp"

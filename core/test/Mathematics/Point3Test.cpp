@@ -28,6 +28,7 @@
 #include "Mathematics/Point3.hpp"
 
 #include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3_constants.hpp"
 #include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
@@ -156,6 +157,12 @@ TEST( Point3, min )
 
     EXPECT_EQ( 2, crimild::min( u ) );
     EXPECT_TRUE( crimild::isEqual( m, crimild::min( u, v ) ) );
+
+    {
+        const auto A = crimild::Point3 { 1, -1, -1 };
+        const auto B = crimild::min( A, crimild::Point3::Constants::POSITIVE_INFINITY );
+        EXPECT_EQ( A, B );
+    }
 }
 
 TEST( Point3, max )
@@ -166,6 +173,12 @@ TEST( Point3, max )
 
     EXPECT_EQ( 4, crimild::max( u ) );
     EXPECT_TRUE( crimild::isEqual( m, crimild::max( u, v ) ) );
+
+    {
+        const auto A = crimild::Point3 { 1, -1, -1 };
+        const auto B = crimild::max( A, crimild::Point3::Constants::NEGATIVE_INFINITY );
+        EXPECT_EQ( A, B );
+    }
 }
 
 TEST( Point3, minDimension )

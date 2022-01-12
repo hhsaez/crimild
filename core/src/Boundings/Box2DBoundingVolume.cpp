@@ -29,6 +29,7 @@
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Mathematics/Intersection.hpp"
+#include "Mathematics/Point3_constants.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/max.hpp"

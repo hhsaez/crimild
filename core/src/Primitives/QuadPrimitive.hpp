@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_QUAD_
 
 #include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 

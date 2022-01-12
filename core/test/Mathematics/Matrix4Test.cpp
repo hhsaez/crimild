@@ -35,6 +35,7 @@
 #include "Mathematics/Matrix4_transpose.hpp"
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/Vector4Ops.hpp"
+#include "Mathematics/Vector4_constants.hpp"
 #include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/isEqual.hpp"
@@ -258,8 +259,8 @@ TEST( Matrix4, inverse )
         { -0.04511, 0.52068, 0.19737, 0.30639 },
     };
 
-    static_assert( crimild::Matrix4::Constants::IDENTITY == A * B );
-    static_assert( crimild::Matrix4::Constants::IDENTITY == B * A );
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, A * B );
+    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, B * A );
 
     EXPECT_EQ( B, crimild::inverse( A ) );
 

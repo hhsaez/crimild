@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 
 #include "Mathematics/Matrix4_transpose.hpp"
+#include "Mathematics/Point3_constants.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_isIdentity.hpp"
 #include "Mathematics/Transformation_operators.hpp"

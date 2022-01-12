@@ -67,6 +67,8 @@ namespace crimild {
             if constexpr ( traits::isHighPrecision< Real >() ) {
                 return 1e-10;
             } else {
+                // This is probably too big a value for an epsilon
+                // See: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
                 return 1e-4;
             }
         }();
@@ -77,8 +79,8 @@ namespace crimild {
         inline constexpr auto COS_90 = Real( 0 );
         inline constexpr auto COS_180 = Real( -1 );
 
-        inline constexpr auto POSITIVE_INFINITY = std::numeric_limits< Real >::max();
-        inline constexpr auto NEGATIVE_INFINITY = std::numeric_limits< Real >::min();
+        inline constexpr auto POSITIVE_INFINITY = std::numeric_limits< Real >::infinity();
+        inline constexpr auto NEGATIVE_INFINITY = -std::numeric_limits< Real >::infinity();
 
     }
 

@@ -35,6 +35,7 @@
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2_constants.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Simulation/Input.hpp"

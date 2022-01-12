@@ -80,7 +80,7 @@ namespace crimild {
     {
         auto ret = Size( 0 );
         constexpr auto N = traits::tupleComponents< TupleImpl >();
-        for ( auto i = 1l; i < N; ++i ) {
+        for ( auto i = Index( 1 ); i < N; ++i ) {
             if ( t[ i ] > t[ ret ] ) {
                 ret = i;
             }

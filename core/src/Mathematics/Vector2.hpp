@@ -30,8 +30,6 @@
 
 #include "Mathematics/Tuple2.hpp"
 
-#include <limits>
-
 namespace crimild {
 
     template< typename T >
@@ -40,16 +38,6 @@ namespace crimild {
 
         [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl &other ) const noexcept;
         [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl &other ) const noexcept;
-    };
-
-    template< typename T >
-    struct Vector2Impl< T >::Constants {
-        static constexpr auto ZERO = Vector2Impl< T > { 0, 0 };
-        static constexpr auto ONE = Vector2Impl< T > { 1, 1 };
-        static constexpr auto POSITIVE_INFINITY = Vector2Impl< T > { std::numeric_limits< T >::max(), std::numeric_limits< T >::max() };
-        static constexpr auto NEGATIVE_INFINITY = Vector2Impl< T > { std::numeric_limits< T >::min(), std::numeric_limits< T >::min() };
-        static constexpr auto UNIT_X = Vector2Impl< T > { 1, 0 };
-        static constexpr auto UNIT_Y = Vector2Impl< T > { 0, 1 };
     };
 
     using Vector2 = Vector2Impl< Real >;
