@@ -333,7 +333,8 @@ void OBJLoader::readMaterialName( std::stringstream &line )
 
     if ( _materials.count( name ) == 0 ) {
         auto tmp = crimild::alloc< materials::PrincipledBSDF >();
-        tmp->setMetallic( 0.0f );
+        tmp->setMetallic( 0 );
+        tmp->setRoughness( 1 );
         tmp->setName( name );
         _materials[ name ] = tmp;
         std::cout << "new material " << name << std::endl;
