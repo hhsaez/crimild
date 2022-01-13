@@ -169,6 +169,13 @@ namespace crimild {
             return dist( defaultGenerator() );
         }
 
+        [[nodiscard]] inline Int nextInt( Int lo, Int hi ) noexcept
+        {
+            // TODO(Hernan): Should this be static?
+            std::uniform_int_distribution< Int > dist( lo, hi );
+            return dist( defaultGenerator() );
+        }
+
         [[nodiscard]] inline Vector2 nextVector2( void ) noexcept
         {
             return Vector2 {
