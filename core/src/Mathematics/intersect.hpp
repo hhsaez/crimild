@@ -114,10 +114,18 @@ namespace crimild {
         tMax = numbers::POSITIVE_INFINITY;
 
         for ( auto a = 0l; a < 3; a++ ) {
+            if ( isZero( direction( R )[ a ] ) ) {
+                // Ray is parallel to plane in this direction
+                if ( ( origin( R )[ a ] < BMin[ a ] ) || ( origin( R )[ a ] > BMax[ a ] ) ) {
+                    // outside of limits. No intersection possible
+                    return false;
+                }
+            }
+
             const auto invD = Real( 1 ) / direction( R )[ a ];
             auto t0 = ( BMin[ a ] - origin( R )[ a ] ) * invD;
             auto t1 = ( BMax[ a ] - origin( R )[ a ] ) * invD;
-            if ( invD < 0.0f ) {
+            if ( t0 > t1 ) {
                 const auto temp = t0;
                 t0 = t1;
                 t1 = temp;
