@@ -292,7 +292,7 @@ TEST( intersect, ray_and_box_from_inside )
 
     Real t0, t1;
     EXPECT_TRUE( intersect( R, B, t0, t1 ) );
-    EXPECT_TRUE( isZero( t0 ) );
+    EXPECT_EQ( -1, t0 );
     EXPECT_EQ( 1, t1 );
 }
 
