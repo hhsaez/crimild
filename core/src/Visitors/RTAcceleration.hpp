@@ -33,6 +33,7 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/max.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
@@ -242,14 +243,6 @@ namespace crimild {
             ret.primitiveIndicesOffset = indexOffsets;
             return ret;
         }
-
-        // [[nodiscard]] static RTPrimAccelNode forInteriorNode( Real split, Int flags ) noexcept
-        // {
-        //     auto ret = RTPrimAccelNode {};
-        //     ret.split = split;
-        //     ret.flags = flags;
-        //     return ret;
-        // }
     };
 
     struct RTPrimAccel {
@@ -280,12 +273,66 @@ namespace crimild {
         inline const Result &getResult( void ) noexcept { return m_result; }
 
     private:
-        void splitPrim( std::vector< Int32 > &offsets, Index start, Index end ) noexcept;
+        void printStats( void ) noexcept;
 
     private:
         Result m_result;
         Map< Material *, Int32 > m_materialIDs;
         Map< Primitive *, Int32 > m_primitiveIDs;
+
+        struct Stats {
+            Int primitiveCount = 0;
+            Int nodeCount = 0;
+            Int maxNodeCount = 0;
+            Int leafCount = 0;
+            Int maxLeafCount = 0;
+            Int maxLeafTriCount = 0;
+            Int triCount = 0;
+            Int maxTriCount = 0;
+            Int maxDepth = 0;
+            Vector3i splits = Vector3i { 0, 0, 0 };
+
+            void reset( void ) noexcept
+            {
+                // TODO
+            }
+
+            void onBeforePrimitive( void ) noexcept
+            {
+                nodeCount = 0;
+                leafCount = 0;
+                triCount = 0;
+            }
+
+            void onAfterPrimitive( void ) noexcept
+            {
+                primitiveCount++;
+
+                maxNodeCount = crimild::max( maxNodeCount, nodeCount );
+                maxLeafCount = crimild::max( maxLeafCount, leafCount );
+                maxTriCount = crimild::max( maxTriCount, triCount );
+            }
+
+            void onSplit( Int depth ) noexcept
+            {
+                maxDepth = crimild::max( maxDepth, depth );
+            }
+
+            void onLeaf( Int triCount ) noexcept
+            {
+                leafCount++;
+                this->triCount += triCount;
+                maxLeafTriCount = crimild::max( maxLeafTriCount, triCount );
+            }
+
+            void onNode( Int axis ) noexcept
+            {
+                nodeCount++;
+                splits[ axis ]++;
+            }
+        };
+
+        Stats m_stats;
     };
 
 }

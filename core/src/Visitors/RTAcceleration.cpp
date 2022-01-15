@@ -28,10 +28,19 @@
 #include "Visitors/RTAcceleration.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Mathematics/Bounds3.hpp"
+#include "Mathematics/Bounds3_bisect.hpp"
+#include "Mathematics/Bounds3_combine.hpp"
+#include "Mathematics/Bounds3_io.hpp"
+#include "Mathematics/Bounds3_overlaps.hpp"
 #include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Random.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/io.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -43,10 +52,142 @@
 
 using namespace crimild;
 
+static void splitPrimitives(
+    const std::vector< Int32 > &offsets,
+    const Bounds3 &bounds,
+    const std::vector< Bounds3 > &primBounds,
+    Array< Int > &indexOffsets,
+    Array< RTPrimAccelNode > &primTree,
+    Int depth ) noexcept
+{
+    const Int32 N = offsets.size();
+
+    auto addLeaf = [ & ]( bool forced, const auto &offsets ) {
+        const Int32 indexOffset = indexOffsets.size();
+        for ( auto i = 0; i < N; i++ ) {
+            indexOffsets.add( offsets[ i ] );
+        }
+        primTree.add(
+            RTPrimAccelNode::createLeafNode(
+                N,
+                indexOffset ) );
+    };
+
+    if ( N <= 4 || depth == 0 ) {
+        addLeaf( depth == 0, offsets );
+        return;
+    }
+
+    // TODO:
+    // Create an array for each axis
+    // Accumulate above/below tris
+    // Pick the one with the lowest cost
+    // The cost could be the difference between sizes for above/below
+    // Handle special case where one array is empty (?)
+
+    const Int axis = maxDimension( bounds );
+    Real split;
+    Bounds3 aboveB, belowB;
+    bisect( bounds, axis, split, belowB, aboveB );
+    std::vector< Int > above;
+    std::vector< Int > below;
+
+    for ( auto i = 0; i < N; ++i ) {
+        const auto o = offsets[ i ];
+        // Divide by 3 since offsets represent values in the index array
+        // and bounds are per triangle/primitive
+        const auto &B = primBounds[ o / 3 ];
+        if ( overlaps( aboveB, B ) ) {
+            above.push_back( o );
+        }
+
+        if ( overlaps( belowB, B ) ) {
+            below.push_back( o );
+        }
+    }
+
+    if ( below.size() == offsets.size() && above.size() == offsets.size() ) {
+        // Cannot find a good split
+        // TODO: Try a different axis?
+        addLeaf( true, offsets );
+        return;
+    }
+
+    const auto nodeIdx = [ & ] {
+        auto node = RTPrimAccelNode {};
+        node.split = split;
+        node.flags = axis;
+        const auto nodeIdx = primTree.size();
+        primTree.add( node );
+        return nodeIdx;
+    }();
+
+    if ( below.size() == offsets.size() ) {
+        addLeaf( true, below );
+    } else {
+        splitPrimitives( below, belowB, primBounds, indexOffsets, primTree, depth - 1 );
+    }
+
+    primTree[ nodeIdx ].aboveChild |= ( primTree.size() << 2 );
+
+    if ( above.size() == offsets.size() ) {
+        addLeaf( true, above );
+    } else {
+        splitPrimitives( above, aboveB, primBounds, indexOffsets, primTree, depth - 1 );
+    }
+}
+
+static void optimizePrimitive(
+    Primitive *primitive,
+    Array< VertexP3N3TC2 > &triangles,
+    Array< Int > &indices,
+    Array< Int > &indexOffsets,
+    Array< RTPrimAccelNode > &primTree ) noexcept
+{
+    auto vbo = primitive->getVertexData()[ 0 ];
+    auto ibo = primitive->getIndices();
+
+    auto triOffset = triangles.size();
+    triangles.resize( triangles.size() + vbo->getVertexCount() );
+    memcpy( triangles.getData() + triOffset, vbo->getBufferView()->getData(), sizeof( VertexP3N3TC2 ) * vbo->getVertexCount() );
+
+    auto baseIndexOffset = indices.size();
+    indices.resize( indices.size() + ibo->getIndexCount() );
+    for ( auto i = Size( 0 ); i < ibo->getIndexCount(); ++i ) {
+        indices[ baseIndexOffset + i ] = triOffset + ibo->getIndex( i );
+    }
+
+    const auto triCount = ibo->getIndexCount() / 3;
+
+    auto rootBounds = Bounds3 {};
+    std::vector< Int32 > offsets( triCount );
+    std::vector< Bounds3 > primBounds( triCount );
+    for ( auto i = Size( 0 ); i < triCount; ++i ) {
+        const Int32 idx = baseIndexOffset + i * 3;
+        offsets[ i ] = idx;
+
+        auto B = Bounds3 {};
+        for ( auto pi = 0; pi < 3; ++pi ) {
+            const auto P = triangles[ indices[ idx + pi ] ].position;
+            B = combine( B, point3( P ) );
+        }
+
+        primBounds[ i ] = B;
+
+        rootBounds = combine( rootBounds, B );
+    }
+
+    splitPrimitives( offsets, rootBounds, primBounds, indexOffsets, primTree, 10 );
+}
+
 void RTAcceleration::traverse( Node *node ) noexcept
 {
+    m_stats.reset();
+
     node->perform( UpdateWorldState() );
     NodeVisitor::traverse( get_ptr( node ) );
+
+    printStats();
 }
 
 void RTAcceleration::visitGroup( Group *group ) noexcept
@@ -54,7 +195,7 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
     assert( group->getNodeCount() <= 2 && "Invalid group node" );
 
     // Compute a transformation for representing bounding volumes
-    const auto size = group->getWorldBound()->getMax() - group->getWorldBound()->getMin();
+    const auto size = Real( 0.5 ) * ( group->getWorldBound()->getMax() - group->getWorldBound()->getMin() );
     auto boundingTransform = translation( vector3( group->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
 
     const auto groupIndex = m_result.nodes.size();
@@ -178,29 +319,35 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
         }
 
         if ( !m_primitiveIDs.contains( primitive ) ) {
+            if ( primitive->getVertexData().empty() ) {
+                return -1;
+            }
+
             // Extend from data
             auto vbo = primitive->getVertexData()[ 0 ];
-            auto triOffset = m_result.primitives.triangles.size();
-            m_result.primitives.triangles.resize( m_result.primitives.triangles.size() + vbo->getVertexCount() );
-            memcpy( m_result.primitives.triangles.getData() + triOffset, vbo->getBufferView()->getData(), sizeof( VertexP3N3TC2 ) * vbo->getVertexCount() );
+            if ( vbo->getVertexCount() == 0 ) {
+                return -1;
+            }
 
             auto ibo = primitive->getIndices();
-            auto baseIndexOffset = m_result.primitives.indices.size();
-            m_result.primitives.indices.resize( m_result.primitives.indices.size() + ibo->getIndexCount() );
-            for ( auto i = Size( 0 ); i < ibo->getIndexCount(); ++i ) {
-                m_result.primitives.indices[ baseIndexOffset + i ] = triOffset + ibo->getIndex( i );
+            if ( ibo->getIndexCount() == 0 ) {
+                return -1;
             }
 
-            const auto triCount = ibo->getIndexCount() / 3;
+            m_stats.onBeforePrimitive();
 
-            std::vector< Int32 > offsets( triCount );
-            for ( auto i = Size( 0 ); i < triCount; ++i ) {
-                offsets[ i ] = baseIndexOffset + i * 3;
-            }
+            const Int32 primID = m_result.primitives.primTree.size();
 
-            const Int32 primitiveID = m_result.primitives.primTree.size();
-            splitPrim( offsets, 0, triCount );
-            m_primitiveIDs.insert( primitive, primitiveID );
+            optimizePrimitive(
+                primitive,
+                m_result.primitives.triangles,
+                m_result.primitives.indices,
+                m_result.primitives.indexOffsets,
+                m_result.primitives.primTree );
+
+            m_primitiveIDs.insert( primitive, primID );
+
+            m_stats.onAfterPrimitive();
         }
 
         return m_primitiveIDs[ primitive ];
@@ -211,7 +358,7 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
             .type = RTAcceleratedNode::Type::GEOMETRY,
             .world = [ & ] {
                 // Compute a transformation for representing bounding volumes
-                const auto size = geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin();
+                const auto size = Real( 0.5 ) * ( geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin() );
                 return translation( vector3( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
             }(),
         } );
@@ -264,40 +411,17 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
     }
 }
 
-void RTAcceleration::splitPrim( std::vector< Int32 > &offsets, Index start, Index end ) noexcept
+void RTAcceleration::printStats( void ) noexcept
 {
-    const auto span = end - start;
-    if ( span < 1 ) {
-        return;
-    }
-
-    if ( span <= 4 ) {
-        const Int32 indexOffsets = m_result.primitives.indexOffsets.size();
-        for ( auto i = start; i < end; i++ ) {
-            m_result.primitives.indexOffsets.add( offsets[ i ] );
-        }
-        m_result.primitives.primTree.add(
-            RTPrimAccelNode::createLeafNode(
-                span,
-                indexOffsets ) );
-
-        return;
-    }
-
-    const auto nodeIdx = [ & ] {
-        auto node = RTPrimAccelNode {};
-        node.split = 0;
-        node.flags = 0;
-
-        const auto nodeIdx = m_result.primitives.primTree.size();
-        m_result.primitives.primTree.add( node );
-        return nodeIdx;
-    }();
-
-    auto mid = start + span / 2;
-    splitPrim( offsets, start, mid );
-
-    m_result.primitives.primTree[ nodeIdx ].aboveChild |= ( m_result.primitives.primTree.size() << 2 );
-
-    splitPrim( offsets, mid, end );
+    std::cout << "Stats: "
+              << "\n\tPrimitives: " << m_stats.primitiveCount
+              << "\n\tAvg Node/Primitive: " << ( Real( m_result.primitives.primTree.size() ) / m_stats.primitiveCount )
+              << "\n\tMax Nodes/Primitive: " << m_stats.maxNodeCount
+              << "\n\tMax Leaf/Primitive: " << m_stats.maxLeafCount
+              << "\n\tAvg Tri/Primitive: " << ( Real( m_result.primitives.triangles.size() ) / m_stats.primitiveCount )
+              << "\n\tMax Tri/Primitive: " << m_stats.maxTriCount
+              << "\n\tMax Depth: " << m_stats.maxDepth
+              << "\n\tMax Tri/Leaf: " << m_stats.maxLeafTriCount
+              << "\n\tSplits: " << m_stats.splits
+              << std::endl;
 }

@@ -49,6 +49,7 @@
 #include "Mathematics/reflect.hpp"
 #include "Mathematics/refract.hpp"
 #include "Mathematics/swizzle.hpp"
+#include "Mathematics/whichSide.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
@@ -87,7 +88,7 @@ struct IntersectionResult {
     }
 };
 
-[[nodiscard]] Bool intersectPrim( const Ray3 &R, const RTAcceleration::Result &scene, Int32 nodeId, IntersectionResult &result ) noexcept
+[[nodiscard]] Bool intersectPrim( const Ray3 &R, const RTAcceleration::Result &scene, Int32 nodeId, Real minT, Real maxT, IntersectionResult &result ) noexcept
 {
     Bool hasResult = false;
 
@@ -97,12 +98,22 @@ struct IntersectionResult {
         return false;
     }
 
-    Int32 frontier[ 64 ] = { primIdx, 0 };
+    struct FrontierNode {
+        Int32 id;
+        Real t0;
+        Real t1;
+    };
+
+    FrontierNode frontier[ 64 ] = { { primIdx, minT, maxT } };
     Int32 currentIdx = 0;
 
     while ( currentIdx >= 0 ) {
-        const auto primIdx = frontier[ currentIdx-- ];
-        const auto &prim = scene.primitives.primTree[ primIdx ];
+        const auto expanded = frontier[ currentIdx-- ];
+        if ( expanded.id < 0 ) {
+            continue;
+        }
+
+        const auto &prim = scene.primitives.primTree[ expanded.id ];
         if ( prim.isLeaf() ) {
             const auto idxOffset = prim.primitiveIndicesOffset;
             const auto primCount = prim.getPrimCount();
@@ -132,10 +143,54 @@ struct IntersectionResult {
                 }
             }
         } else {
-            if ( prim.aboveChild > ( primIdx + 1 ) ) {
-                frontier[ ++currentIdx ] = prim.getAboveChild();
+            const auto P = Plane3 {
+                [ & ] {
+                    auto N = Normal3 { 0, 0, 0 };
+                    N[ prim.getSplitAxis() ] = 1;
+                    return N;
+                }(),
+                prim.getSplitPos()
+            };
+
+            // TODO: Do this earlier
+            const auto R1 = inverse( node.world )( R );
+
+            Real t;
+            if ( intersect( R1, P, t ) ) {
+                if ( prim.getAboveChild() > ( expanded.id + 1 ) ) {
+                    const bool belowFirst = whichSide( P, origin( R1 ) ) < 0;
+                    if ( belowFirst ) {
+                        frontier[ ++currentIdx ] = {
+                            prim.getAboveChild(),
+                            t,
+                            expanded.t1,
+                        };
+                        frontier[ ++currentIdx ] = {
+                            expanded.id + 1,
+                            expanded.t0,
+                            t,
+                        };
+                    } else {
+                        frontier[ ++currentIdx ] = {
+                            expanded.id + 1,
+                            expanded.t0,
+                            t,
+                        };
+                        frontier[ ++currentIdx ] = {
+                            prim.getAboveChild(),
+                            t,
+                            expanded.t1,
+                        };
+                    }
+                } else {
+                    // visit first child
+                    frontier[ ++currentIdx ] = {
+                        expanded.id + 1,
+                        expanded.t0,
+                        t,
+                    };
+                }
             }
-            frontier[ ++currentIdx ] = primIdx + 1;
         }
     }
 
@@ -230,7 +285,14 @@ struct IntersectionResult {
                     // TODO(hernan): Maybe by keeping track of those values I can also
                     // solve how CSG nodes will be evaluated, since they also need to
                     // save min/max times for intersections.
-                    frontier[ ++currentIndex ] = nodeIdx + 1;
+                    const auto primIdx = nodeIdx + 1;
+                    if ( scene.nodes[ primIdx ].type == RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES ) {
+                        if ( intersectPrim( R, scene, primIdx, t0, t1, result ) ) {
+                            hasResult = true;
+                        }
+                    } else {
+                        frontier[ ++currentIndex ] = nodeIdx + 1;
+                    }
                 }
                 break;
             }
@@ -303,13 +365,6 @@ struct IntersectionResult {
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
-                }
-                break;
-            }
-
-            case RTAcceleratedNode::Type::PRIMITIVE_TRIANGLES: {
-                if ( intersectPrim( R, scene, nodeIdx, result ) ) {
-                    hasResult = true;
                 }
                 break;
             }
