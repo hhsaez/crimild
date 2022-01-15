@@ -45,6 +45,7 @@
 #include "Mathematics/reflect.hpp"
 #include "Mathematics/refract.hpp"
 #include "Mathematics/swizzle.hpp"
+#include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -1280,4 +1281,81 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
     EXPECT_TRUE( optimized.primitives.primTree[ 0 ].isLeaf() );
     EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].primitiveIndicesOffset );
     EXPECT_EQ( 2, optimized.primitives.primTree[ 0 ].getPrimCount() );
+}
+
+TEST( RTPrimAccel, a_box_primitive )
+{
+    auto geometry = []() {
+        auto geometry = crimild::alloc< Geometry >();
+        geometry->attachPrimitive( crimild::alloc< BoxPrimitive >() );
+        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+        return geometry;
+    }();
+
+    auto group = crimild::alloc< Group >();
+    group->attachNode( geometry );
+
+    auto optimized = group->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
+
+    EXPECT_EQ( 2, optimized.nodes.size() );
+    EXPECT_EQ( 0, optimized.nodes[ 1 ].primitiveIndex );
+
+    EXPECT_EQ( 24, optimized.primitives.triangles.size() );
+    EXPECT_EQ(
+        0,
+        memcmp(
+            optimized.primitives.triangles.getData(),
+            geometry->anyPrimitive()->getVertexData().first()->getBufferView()->getData(),
+            sizeof( VertexP3N3TC2 ) * 24 ) );
+
+    EXPECT_EQ( 36, optimized.primitives.indices.size() );
+    EXPECT_EQ(
+        0,
+        memcmp(
+            optimized.primitives.indices.getData(),
+            geometry->anyPrimitive()->getIndices()->getBufferView()->getData(),
+            sizeof( UInt32 ) * 36 ) );
+
+    /*
+                                                              x
+                               _______________________________|_______________________________
+                              |                                                               |
+                              y                                                               y
+               _______________|_______________                                ________________|______________
+              |                               |                              |                               |
+              z                               z                              z                               z
+       _______|_______                ________|_______                 ______|________                _______|_______
+      |               |              |                |               |               |              |               |
+      x               x              x                x               x               x              x               x
+    /   \           /   \          /    \          /    \            /  \            /  \          /   \           /    \
+left    bottom  left    bottom  left    top     left    top     bottom  right   bottom  right   top     right   top     right
+bottom  back    bottom  front   top     back    top     front   back    bottom  front   bottom  back    top     front   top
+back            front           back            front                   back            front           back            front
+
+            */
+
+    EXPECT_EQ( 31, optimized.primitives.primTree.size() );
+
+    EXPECT_FALSE( optimized.primitives.primTree[ 0 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].getSplitAxis() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 0 ].getSplitPos() );
+    EXPECT_EQ( 16, optimized.primitives.primTree[ 0 ].getAboveChild() );
+
+    EXPECT_FALSE( optimized.primitives.primTree[ 1 ].isLeaf() );
+    EXPECT_EQ( 1, optimized.primitives.primTree[ 1 ].getSplitAxis() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 1 ].getSplitPos() );
+    EXPECT_EQ( 9, optimized.primitives.primTree[ 1 ].getAboveChild() );
+
+    EXPECT_FALSE( optimized.primitives.primTree[ 2 ].isLeaf() );
+    EXPECT_EQ( 2, optimized.primitives.primTree[ 2 ].getSplitAxis() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 2 ].getSplitPos() );
+    EXPECT_EQ( 6, optimized.primitives.primTree[ 2 ].getAboveChild() );
+
+    EXPECT_FALSE( optimized.primitives.primTree[ 3 ].isLeaf() );
+    EXPECT_EQ( 0, optimized.primitives.primTree[ 3 ].getSplitAxis() );
+    EXPECT_EQ( -0.5, optimized.primitives.primTree[ 3 ].getSplitPos() );
+    EXPECT_EQ( 5, optimized.primitives.primTree[ 3 ].getAboveChild() );
+
+    EXPECT_TRUE( optimized.primitives.primTree[ 4 ].isLeaf() );
+    EXPECT_TRUE( optimized.primitives.primTree[ 5 ].isLeaf() );
 }
