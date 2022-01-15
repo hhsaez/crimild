@@ -37,20 +37,17 @@ public:
             auto scene = crimild::alloc< Group >();
 
             scene->attachNode( [ & ] {
+                auto scenePath = Simulation::getInstance()->getSettings()->get< std::string >( "scene", "assets/models/cube.obj" );
                 auto path = FilePath {
-                    .path = "assets/models/bunny/bunny.obj"
+                    .path = scenePath,
                 };
                 auto group = crimild::alloc< Group >();
                 OBJLoader loader( path.getAbsolutePath() );
-                loader.setMaterialOverride( "Bunny_Material.001", [] {
-                    auto material = crimild::alloc< materials::PrincipledBSDF >();
-                    material->setAlbedo( ColorRGB { 0.8, 0.2, 0 } );
-                    material->setMetallic( 0.1 );
-                    material->setRoughness( 0.5 );
-                    return material;
-                }() );
+                loader.setVerbose( true );
                 if ( auto model = loader.load() ) {
                     group->attachNode( model );
+                } else {
+                    assert( false && "Cannot load model" );
                 }
                 return group;
             }() );
@@ -66,7 +63,7 @@ public:
                     auto camera = crimild::alloc< Camera >( 60.0f, 4.0f / 3.0f, 0.1f, 5000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 2, 2, 7 },
+                            Point3 { 3, 3, 3 },
                             Point3 { 0, 0, 0 },
                             Vector3 { 0, 1, 0 } ) );
                     camera->attachComponent< FreeLookCameraComponent >();
