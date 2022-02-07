@@ -68,10 +68,6 @@ const char *utils::errorToString( VkResult result ) noexcept
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_INCOMPATIBLE_DISPLAY_KHR );
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_VALIDATION_FAILED_EXT );
         CRIMILD_VULKAN_ERROR_STRING( VK_ERROR_INVALID_SHADER_NV );
-#if defined( CRIMILD_PLATFORM_OSX )
-        CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_BEGIN_RANGE );
-        CRIMILD_VULKAN_ERROR_STRING( VK_RESULT_RANGE_SIZE );
-#endif
         default:
             return "UNKNOWN";
     };
@@ -593,11 +589,7 @@ crimild::Bool utils::checkValidationLayersEnabled( void ) noexcept
 const utils::ValidationLayerArray &utils::getValidationLayers( void ) noexcept
 {
     static ValidationLayerArray validationLayers = {
-#if defined( CRIMILD_PLATFORM_OSX )
-        "VK_LAYER_LUNARG_standard_validation",
-#else
         "VK_LAYER_KHRONOS_validation",
-#endif
     };
     return validationLayers;
 }
