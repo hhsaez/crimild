@@ -47,7 +47,7 @@ namespace crimild {
             void onAttach( void ) noexcept override;
 
         protected:
-            SharedPointer< vulkan::VulkanSurface > create( vulkan::VulkanSurface::Descriptor const &descriptor ) noexcept override;
+            SharedPointer< vulkan::VulkanSurfaceOLD > create( vulkan::VulkanSurfaceOLD::Descriptor const &descriptor ) noexcept override;
 
         private:
             GLFWwindow *m_window = nullptr;

@@ -26,57 +26,55 @@
  */
 
 #include "VulkanInstance.hpp"
-#include "VulkanRenderDevice.hpp"
+
 #include "Foundation/Log.hpp"
+#include "Simulation/Settings.hpp"
+#include "VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-VulkanInstance::~VulkanInstance( void )
+VulkanInstance::VulkanInstance( void ) noexcept
 {
-	CRIMILD_LOG_TRACE( "Destroying instance" );
-
-//	if ( m_renderDevice != nullptr ) {
-//		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
-//		m_renderDevice->waitIdle();
-//	}
-//
-//	m_renderDevice = nullptr;
-//
-//	destroyDebugMessenger();
-//
-//	m_surface = nullptr;
-//
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
+    createInstance();
+    createDebugMessenger();
 }
 
-SharedPointer< VulkanInstance > VulkanInstanceManager::create( VulkanInstance::Descriptor const &descriptor ) noexcept
+VulkanInstance::~VulkanInstance( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan instance" );
+    destroyDebugMessenger();
+    destroyInstance();
+}
+
+void VulkanInstance::createInstance( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating VulkanInstance" );
 
     auto validationLayersEnabled = utils::checkValidationLayersEnabled();
     auto validationLayers = utils::getValidationLayers();
     if ( validationLayersEnabled && !utils::checkValidationLayerSupport( validationLayers ) ) {
-        CRIMILD_LOG_ERROR( "Validation layers requested, but not available" );
-        return nullptr;
+        CRIMILD_LOG_FATAL( "Validation layers requested, but not available" );
+        exit( -1 );
     }
+
+    auto settings = Settings::getInstance();
+    auto appName = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+    auto appVersionMajor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MAJOR, 1 );
+    auto appVersionMinor = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_MINOR, 0 );
+    auto appVersionPatch = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_PATCH, 0 );
 
     auto appInfo = VkApplicationInfo {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pApplicationName = descriptor.appName.c_str(),
+        .pApplicationName = appName.c_str(),
         .applicationVersion = VK_MAKE_VERSION(
-            descriptor.appVersionMajor,
-            descriptor.appVersionMinor,
-            descriptor.appVersionPatch
-        ),
+            appVersionMajor,
+            appVersionMinor,
+            appVersionPatch ),
         .pEngineName = "Crimild",
         .engineVersion = VK_MAKE_VERSION(
             CRIMILD_VERSION_MAJOR,
             CRIMILD_VERSION_MINOR,
-            CRIMILD_VERSION_PATCH
-        ),
+            CRIMILD_VERSION_PATCH ),
     };
 
     auto extensions = utils::getRequiredExtensions();
@@ -100,24 +98,102 @@ SharedPointer< VulkanInstance > VulkanInstanceManager::create( VulkanInstance::D
         createInfo.pNext = ( VkDebugUtilsMessengerCreateInfoEXT * ) &debugCreateInfo;
     }
 
-    VkInstance instanceHandler;
-    if ( vkCreateInstance( &createInfo, nullptr, &instanceHandler ) != VK_SUCCESS ) {
-        CRIMILD_LOG_ERROR( "Failed to create Vulkan instance" );
-        return nullptr;
+    if ( vkCreateInstance( &createInfo, nullptr, &m_instanceHandle ) != VK_SUCCESS ) {
+        CRIMILD_LOG_FATAL( "Failed to create Vulkan instance" );
+        exit( -1 );
     }
 
-    auto instance = crimild::alloc< VulkanInstance >();
-    instance->handler = instanceHandler;
-    insert( crimild::get_ptr( instance ) );
-    return instance;
+    CRIMILD_LOG_INFO( "VulkanInstance created" );
 }
 
-void VulkanInstanceManager::destroy( VulkanInstance *instance ) noexcept
+void VulkanInstance::destroyInstance( void ) noexcept
 {
-    if ( instance->handler != VK_NULL_HANDLE ) {
-        CRIMILD_LOG_TRACE( "Destroying Vulkan instance" );
-        vkDestroyInstance( instance->handler, nullptr );
-        instance->handler = VK_NULL_HANDLE;
+    CRIMILD_LOG_TRACE( "Destroying VulkanInstance" );
+
+    if ( m_instanceHandle != VK_NULL_HANDLE ) {
+        vkDestroyInstance( m_instanceHandle, nullptr );
+        m_instanceHandle = VK_NULL_HANDLE;
+    }
+
+    CRIMILD_LOG_INFO( "VulkanInstance destroyed" );
+}
+
+void VulkanInstance::createDebugMessenger( void ) noexcept
+{
+    if ( !utils::checkValidationLayersEnabled() ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE( "Creating Vulkan debug messenger" );
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    utils::populateDebugMessengerCreateInfo( createInfo );
+
+    auto createDebugUtilsMessengerEXT = [](
+                                            VkInstance instance,
+                                            const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                            const VkAllocationCallbacks *pAllocator,
+                                            VkDebugUtilsMessengerEXT *pDebugMessenger ) {
+        if ( auto func = ( PFN_vkCreateDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" ) ) {
+            return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
+        }
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    };
+
+    if ( createDebugUtilsMessengerEXT(
+             m_instanceHandle,
+             &createInfo,
+             nullptr,
+             &m_debugMessengerHandle )
+         != VK_SUCCESS ) {
+        CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
+        return;
     }
 }
 
+void VulkanInstance::destroyDebugMessenger( void ) noexcept
+{
+    if ( m_debugMessengerHandle == VK_NULL_HANDLE ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE( "Destroying Vulkan debug messenger" );
+
+    auto destroyDebugUtilsMessengerEXT = []( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator ) {
+        if ( auto func = ( PFN_vkDestroyDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" ) ) {
+            func( instance, debugMessenger, pAllocator );
+        }
+    };
+
+    destroyDebugUtilsMessengerEXT( m_instanceHandle, m_debugMessengerHandle, nullptr );
+    m_debugMessengerHandle = VK_NULL_HANDLE;
+}
+
+VulkanInstanceOLD::~VulkanInstanceOLD( void )
+{
+    CRIMILD_LOG_TRACE( "Destroying instance" );
+
+    //	if ( m_renderDevice != nullptr ) {
+    //		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
+    //		m_renderDevice->waitIdle();
+    //	}
+    //
+    //	m_renderDevice = nullptr;
+    //
+    //	destroyDebugMessenger();
+    //
+    //	m_surface = nullptr;
+    //
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
+}
+
+SharedPointer< VulkanInstanceOLD > VulkanInstanceManager::create( VulkanInstanceOLD::Descriptor const &descriptor ) noexcept
+{
+    return nullptr;
+}
+
+void VulkanInstanceManager::destroy( VulkanInstanceOLD *instance ) noexcept
+{
+}

@@ -35,7 +35,6 @@
 #include "Foundation/Singleton.hpp"
 #include "Input.hpp"
 #include "Mathematics/Clock.hpp"
-#include "Messaging/MessageQueue.hpp"
 #include "Rendering/Renderer.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
@@ -80,12 +79,12 @@ namespace crimild {
      */
     class Simulation
         : public NamedObject,
-          public SharedObject,
-          public Messenger,
+          public System,
           public DynamicSingleton< Simulation > {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Simulation )
 
     public:
-        static SharedPointer< Simulation > create( void ) noexcept;
+        static std::unique_ptr< Simulation > create( void ) noexcept;
 
     public:
         Simulation( void ) = default;
@@ -104,7 +103,7 @@ namespace crimild {
            for users to add new systems. Advanced users can remove all existing systems
            and configure a simulation based on their own needs.
          */
-        virtual void onAwake( void ) noexcept { }
+        [[deprecated]] virtual void onAwake( void ) noexcept { }
 
         /**
            brief Executed after all systems have been started
@@ -112,13 +111,13 @@ namespace crimild {
            This is a good entry point for clients to load an initial scene or
            setup the frame composition
          */
-        virtual void onStarted( void ) noexcept { }
+        [[deprecated]] virtual void onStarted( void ) noexcept { }
 
         //@}
 
     public:
         void start( void ) noexcept;
-        bool update( void ) noexcept;
+        bool step( void ) noexcept;
         void stop( void ) noexcept;
 
         int run( void ) noexcept;
@@ -150,22 +149,22 @@ namespace crimild {
         Profiler _profiler;
         Input _input;
 
-    public:
-        void attachSystem( SharedPointer< System > const &system ) noexcept;
+        // public:
+        //     void attachSystem( SharedPointer< System > const &system ) noexcept;
 
-        template< typename SystemType >
-        SystemType *attachSystem( void ) noexcept
-        {
-            auto system = crimild::alloc< SystemType >();
-            attachSystem( system );
-            return crimild::get_ptr( system );
-        }
+        //     template< typename SystemType >
+        //     SystemType *attachSystem( void ) noexcept
+        //     {
+        //         auto system = crimild::alloc< SystemType >();
+        //         attachSystem( system );
+        //         return crimild::get_ptr( system );
+        //     }
 
-        void detachAllSystems( void ) noexcept;
+        //     void detachAllSystems( void ) noexcept;
 
-    private:
-        using SystemArray = Array< SharedPointer< System > >;
-        SystemArray m_systems;
+        // private:
+        //     using SystemArray = Array< SharedPointer< System > >;
+        //     SystemArray m_systems;
 
     public:
         void setRenderer( SharedPointer< Renderer > const &renderer ) { _renderer = renderer; }
@@ -190,12 +189,15 @@ namespace crimild {
 
 }
 
-#define CRIMILD_CREATE_SIMULATION( SimulationType, SimulationName ) \
-    SharedPointer< Simulation > Simulation::create( void ) noexcept \
-    {                                                               \
-        auto sim = crimild::alloc< SimulationType >();              \
-        sim->setName( SimulationName );                             \
-        return sim;                                                 \
+#define CRIMILD_CREATE_SIMULATION( SimulationType, SimulationName )       \
+    std::unique_ptr< Simulation > Simulation::create( void ) noexcept     \
+    {                                                                     \
+        auto sim = std::make_unique< SimulationType >();                  \
+        if ( auto settings = Settings::getInstance() ) {                  \
+            settings->set( Settings::SETTINGS_APP_NAME, SimulationName ); \
+        }                                                                 \
+        sim->setName( SimulationName );                                   \
+        return sim;                                                       \
     }
 
 #endif

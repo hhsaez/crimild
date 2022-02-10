@@ -25,8 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "System.hpp"
-
-#include "Foundation/Log.hpp"
+#include "Simulation/Systems/System.hpp"
 
 using namespace crimild;
+
+void System::attachSystem( std::unique_ptr< System > &&other ) noexcept
+{
+    m_systems.push_back( std::move( other ) );
+}
+
+Event System::dispatch( const Event &e ) noexcept
+{
+    return handle( e );
+}
+
+Event System::handle( const Event &e ) noexcept
+{
+    for ( auto &s : m_systems ) {
+        auto ret = s->handle( e );
+        if ( ret.type != Event::Type::NONE ) {
+            // No need to process the remaining systems if a child has
+            // returned a not-null event.
+            // TODO: what is the alternative? Process everything and the last not-null event?
+            // What if the returned event is a termination one?
+            return ret;
+        }
+    }
+
+    // By default, we return the same event that was dispatched
+    return e;
+}

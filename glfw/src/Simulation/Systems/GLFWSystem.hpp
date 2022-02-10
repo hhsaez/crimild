@@ -38,8 +38,7 @@ namespace crimild {
             CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWSystem )
 
         public:
-            void onInit( void ) noexcept override;
-            void onTerminate( void ) noexcept override;
+            Event handle( const Event &e ) noexcept override;
         };
 
     }

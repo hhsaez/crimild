@@ -28,6 +28,8 @@
 #include "Simulation/Systems/GLFWSystem.hpp"
 
 #include "Foundation/GLFWUtils.hpp"
+#include "Foundation/Log.hpp"
+#include "Simulation/Event.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -37,24 +39,39 @@ void errorCallback( int error, const char *description )
     std::cerr << "GLFW Error: (" << error << ") " << description << std::endl;
 }
 
-void GLFWSystem::onInit( void ) noexcept
+Event GLFWSystem::handle( const Event &e ) noexcept
 {
-    if ( !glfwInit() ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
-        exit( 1 );
+    switch ( e.type ) {
+        case Event::Type::SIMULATION_START: {
+            if ( !glfwInit() ) {
+                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot start GLFW: glfwInit failed" );
+                return Event { .type = Event::Type::TERMINATE };
+            }
+
+            glfwSetErrorCallback( errorCallback );
+
+            int versionMajor;
+            int versionMinor;
+            int versionRevision;
+            glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
+            CRIMILD_LOG_INFO( "Initializing GLFW v", versionMajor, ".", versionMinor, " rev. ", versionRevision );
+            break;
+        }
+
+        case Event::Type::SIMULATION_UPDATE: {
+            glfwPollEvents();
+            break;
+        }
+
+        case Event::Type::SIMULATION_STOP: {
+            CRIMILD_LOG_INFO( "Terminating GLFW" );
+            glfwTerminate();
+            break;
+        }
+
+        default:
+            break;
     }
 
-    glfwSetErrorCallback( errorCallback );
-
-    int versionMajor;
-    int versionMinor;
-    int versionRevision;
-    glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
-    CRIMILD_LOG_INFO( "Initializing GLFW v", versionMajor, ".", versionMinor, " rev. ", versionRevision );
-}
-
-void GLFWSystem::onTerminate( void ) noexcept
-{
-    CRIMILD_LOG_INFO( "Terminating GLFW" );
-    glfwTerminate();
+    return System::handle( e );
 }

@@ -26,6 +26,7 @@
  */
 
 #include "LuaSettings.hpp"
+
 #include "Foundation/ScriptContext.hpp"
 
 #include <Simulation/FileSystem.hpp>
@@ -33,47 +34,22 @@
 using namespace crimild;
 using namespace crimild::scripting;
 
-LuaSettings::LuaSettings( void )
-{
-    
-}
-
-LuaSettings::LuaSettings( int argc, char **argv, std::string filename )
-    : Settings( argc, argv )
-{
-    set( "video.width", 1024 );
-    set( "video.height", 768 );
-    set( "video.fullscreen", false );
-    
-    if ( filename != "" ) {
-        load( filename );
-    }
-}
-
-LuaSettings::~LuaSettings( void )
-{
-    
-}
-
 void LuaSettings::load( std::string filename )
 {
     ScriptContext context;
     if ( context.load( FileSystem::getInstance().pathForResource( filename ) ) ) {
         auto &eval = context.getEvaluator();
-        each( [&eval]( std::string name, Settings *settings ) {
+        each( [ &eval ]( std::string name, Settings *settings ) {
             std::string value;
             if ( eval.getPropValue( name, value ) && value != "" ) {
                 settings->set( name, value );
             }
-        });
-    }
-    else {
+        } );
+    } else {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", filename );
     }
 }
 
 void LuaSettings::save( std::string filename )
 {
-    
 }
-

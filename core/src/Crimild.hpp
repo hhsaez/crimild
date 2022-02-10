@@ -34,6 +34,7 @@
 #include "Animation/Skeleton.hpp"
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioSource.hpp"
+#include "Simulation/Event.hpp"
 #include "Behaviors/Actions/AnimateContextValue.hpp"
 #include "Behaviors/Actions/AnimateParticleSystem.hpp"
 #include "Behaviors/Actions/AnimateSettingValue.hpp"

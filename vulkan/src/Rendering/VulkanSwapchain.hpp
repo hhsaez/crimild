@@ -41,7 +41,7 @@ namespace crimild {
     namespace vulkan {
 
         class RenderDevice;
-        class VulkanSurface;
+        class VulkanSurfaceOLD;
         class Semaphore;
         class SwapchainManager;
 
@@ -58,7 +58,7 @@ namespace crimild {
             ~Swapchain( void ) noexcept;
 
             RenderDevice *renderDevice = nullptr;
-            VulkanSurface *surface = nullptr;
+            VulkanSurfaceOLD *surface = nullptr;
             VkSwapchainKHR handler = VK_NULL_HANDLE;
             VkFormat format;
             VkExtent2D extent;

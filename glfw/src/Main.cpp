@@ -25,13 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// #include "Simulation/Systems/GLFWSystem.hpp"
+// #include "Simulation/Systems/GLFWVulkanSystem.hpp"
+// #include "Simulation/Systems/GLFWWindowSystem.hpp"
+// #include "Simulation/Systems/InputSystem.hpp"
+
+#include "Foundation/GLFWUtils.hpp"
+#include "Rendering/GLFWWindow.hpp"
+
 #include <Crimild.hpp>
-#include <Crimild_GLFW.hpp>
 #include <Crimild_STB.hpp>
 #include <Crimild_Vulkan.hpp>
-
-using namespace crimild;
-using namespace crimild::glfw;
 
 #ifdef CRIMILD_ENABLE_OPENAL
     #include <Crimild_OpenAL.hpp>
@@ -41,6 +45,66 @@ using namespace crimild::glfw;
     #include <Crimild_ImGUI.hpp>
 #endif
 
+void errorCallback( int error, const char *description )
+{
+    CRIMILD_LOG_FATAL( "GLFW Error: (", error, ") ", description );
+}
+
+namespace crimild {
+
+    namespace glfw {
+
+        class GLFWApp {
+        public:
+            GLFWApp( void ) noexcept
+            {
+                if ( !glfwInit() ) {
+                    CRIMILD_LOG_FATAL( "Cannot start GLFW: glfwInit failed" );
+                    exit( -1 );
+                }
+
+                glfwSetErrorCallback( errorCallback );
+
+                int versionMajor;
+                int versionMinor;
+                int versionRevision;
+                glfwGetVersion( &versionMajor, &versionMinor, &versionRevision );
+                CRIMILD_LOG_INFO( "Initializing GLFW v", versionMajor, ".", versionMinor, " rev. ", versionRevision );
+            }
+
+            ~GLFWApp( void ) noexcept
+            {
+                glfwTerminate();
+                CRIMILD_LOG_INFO( "GLFW terminated" );
+            }
+
+            int run( int argc, char **argv ) noexcept
+            {
+                Settings settings;
+                settings.parseCommandLine( argc, argv );
+
+                Window window;
+
+                while ( true ) {
+                    glfwPollEvents();
+
+                    const auto ret = window.handle( Event { Event::Type::TICK } );
+                    if ( ret.type == Event::Type::TERMINATE ) {
+                        break;
+                    }
+                }
+
+                return 0;
+            }
+        };
+
+    }
+
+}
+
+using namespace crimild;
+// using namespace crimild::glfw;
+
 int main( int argc, char **argv )
 {
     crimild::init();
@@ -48,28 +112,42 @@ int main( int argc, char **argv )
 
     Log::setLevel( Log::Level::LOG_LEVEL_ALL );
 
-    CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
+    crimild::glfw::GLFWApp app;
+    return app.run( argc, argv );
 
-    sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
+    //     CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
 
-    SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
+    //     sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
 
-    sim->attachSystem< GLFWSystem >();
-    sim->attachSystem< WindowSystem >();
-    sim->attachSystem< GLFWVulkanSystem >();
-    sim->attachSystem< vulkan::CaptureSystem >();
-    sim->attachSystem< EventSystem >();
-    sim->attachSystem< InputSystem >();
-    sim->attachSystem< UpdateSystem >();
-    sim->attachSystem< RenderSystem >();
+    //     SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
 
-#ifdef CRIMILD_ENABLE_OPENAL
-    sim->attachSystem< audio::OpenALAudioSystem >();
-#endif
+    //     sim->attachSystem(
+    //         [] {
+    //             auto sys = std::make_unique< GLFWSystem >();
+    //             sys->attachSystem(
+    //                 [] {
+    //                     auto sys = std::make_unique< WindowSystem >();
+    //                     return sys;
+    //                 }() );
+    //             return sys;
+    //         }() );
 
-#ifdef CRIMILD_ENABLE_IMGUI
-    sim->attachSystem< imgui::ImGUISystem >();
-#endif
+    //     // sim->attachSystem< GLFWSystem >();
+    //     // sim->attachSystem< WindowSystem >();
+    //     // sim->attachSystem< GLFWVulkanSystem >();
+    //     // sim->attachSystem< vulkan::CaptureSystem >();
+    //     // sim->attachSystem< EventSystem >();
+    //     // sim->attachSystem< InputSystem >();
+    //     // sim->attachSystem< UpdateSystem >();
+    //     // sim->attachSystem< RenderSystem >();
 
-    return sim->run();
+    // #ifdef CRIMILD_ENABLE_OPENAL
+    //     // sim->attachSystem< audio::OpenALAudioSystem >();
+    // #endif
+
+    // #ifdef CRIMILD_ENABLE_IMGUI
+    //     // sim->attachSystem< imgui::ImGUISystem >();
+    // #endif
+
+    //     return sim->run();
 }

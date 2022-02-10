@@ -26,6 +26,7 @@
 */
 
 #include "VulkanPhysicalDevice.hpp"
+
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
 
@@ -35,7 +36,6 @@ using namespace crimild::vulkan;
 PhysicalDevice::PhysicalDevice( void )
     : RenderDeviceManager( this )
 {
-
 }
 
 PhysicalDevice::~PhysicalDevice( void )
@@ -50,9 +50,8 @@ SharedPointer< PhysicalDevice > PhysicalDeviceManager::create( PhysicalDevice::D
     CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
 
     auto physicalDeviceHandler = pickPhysicalDevice(
-   		descriptor.instance->handler,
-   		descriptor.surface->handler
-   	);
+        descriptor.instance->handler,
+        descriptor.surface->handler );
     if ( physicalDeviceHandler == VK_NULL_HANDLE ) {
         return nullptr;
     }
@@ -98,7 +97,7 @@ VkPhysicalDevice PhysicalDeviceManager::pickPhysicalDevice( const VkInstance &in
     vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
     for ( const auto &device : devices ) {
         if ( isDeviceSuitable( device, surface ) ) {
-        	VkPhysicalDeviceProperties physicalDeviceProperties;
+            VkPhysicalDeviceProperties physicalDeviceProperties;
             vkGetPhysicalDeviceProperties( device, &physicalDeviceProperties );
             CRIMILD_LOG_INFO( "Vulkan physical device found: ", physicalDeviceProperties.deviceName );
             return device;
@@ -124,8 +123,8 @@ crimild::Bool PhysicalDeviceManager::isDeviceSuitable( const VkPhysicalDevice &d
     vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
 
     return indices.isComplete()
-        && extensionsSupported
-        && swapchainAdequate
-    	&& supportedFeatures.fillModeNonSolid
-        && supportedFeatures.samplerAnisotropy;
+           && extensionsSupported
+           && swapchainAdequate
+           && supportedFeatures.fillModeNonSolid
+           && supportedFeatures.samplerAnisotropy;
 }

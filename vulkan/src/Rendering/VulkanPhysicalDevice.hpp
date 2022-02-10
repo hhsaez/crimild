@@ -35,8 +35,8 @@ namespace crimild {
 
     namespace vulkan {
 
-        class VulkanInstance;
-        class VulkanSurface;
+        class VulkanInstanceOLD;
+        class VulkanSurfaceOLD;
         class PhysicalDeviceManager;
 
         class PhysicalDevice : public VulkanObject, public RenderDeviceManager {
@@ -45,8 +45,8 @@ namespace crimild {
             using RenderDeviceManager::create;
 
             struct Descriptor {
-                VulkanInstance *instance;
-                VulkanSurface *surface;
+                VulkanInstanceOLD *instance;
+                VulkanSurfaceOLD *surface;
             };
 
         public:
@@ -55,8 +55,8 @@ namespace crimild {
 
             VkPhysicalDevice handler = VK_NULL_HANDLE;
             VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-            VulkanInstance *instance = nullptr;
-            VulkanSurface *surface = nullptr;
+            VulkanInstanceOLD *instance = nullptr;
+            VulkanSurfaceOLD *surface = nullptr;
             PhysicalDeviceManager *manager = nullptr;
         };
 
@@ -78,5 +78,3 @@ namespace crimild {
 }
 
 #endif
-
-

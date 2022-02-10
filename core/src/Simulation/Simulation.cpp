@@ -33,6 +33,7 @@
 #include "Foundation/Version.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Console/ConsoleCommand.hpp"
+#include "Simulation/Event.hpp"
 #include "Simulation/Systems/ConsoleSystem.hpp"
 #include "Simulation/Systems/DebugSystem.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
@@ -121,25 +122,30 @@ void Simulation::start( void ) noexcept
     emscripten_set_main_loop( simulation_step, 0, false );
 #endif
 
+    const auto ret = dispatch( Event { .type = Event::Type::SIMULATION_START } );
+    if ( ret.type == Event::Type::TERMINATE ) {
+        return;
+    }
+
     // Call `onAwake` before starting any system
-    onAwake();
+    // onAwake();
 
     // Invoke onInit before starting systems
-    m_systems.each( []( auto system ) { system->onInit(); } );
+    // m_systems.each( []( auto system ) { system->onInit(); } );
 
     // Start all systems
-    m_systems.each( []( auto system ) { system->start(); } );
+    // m_systems.each( []( auto system ) { system->start(); } );
 
     // Call `onStarted` here to load scenes if needed
-    onStarted();
+    // onStarted();
 
     // Finalize startup
-    m_systems.each( []( auto system ) { system->lateStart(); } );
+    // m_systems.each( []( auto system ) { system->lateStart(); } );
 
     _jobScheduler.start();
 }
 
-bool Simulation::update( void ) noexcept
+bool Simulation::step( void ) noexcept
 {
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
     constexpr auto MIN_FRAME_TIME = std::chrono::milliseconds( 16 );
@@ -160,7 +166,7 @@ bool Simulation::update( void ) noexcept
         } );
     }
 
-    broadcastMessage( messaging::SimulationWillUpdate { scene } );
+    // broadcastMessage( messaging::SimulationWillUpdate { scene } );
 
     _simulationClock.tick();
 
@@ -168,18 +174,26 @@ bool Simulation::update( void ) noexcept
 
     MessageQueue::getInstance()->dispatchDeferredMessages();
 
+    if ( dispatch( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
+        return false;
+    }
+
+    if ( dispatch( Event { .type = Event::Type::SIMULATION_RENDER } ).type == Event::Type::TERMINATE ) {
+        return false;
+    }
+
     // update
-    m_systems.each( []( auto system ) { system->earlyUpdate(); } );
-    m_systems.each( []( auto system ) { system->fixedUpdate(); } ); // TODO: this has to be called at fixed intervals
-    m_systems.each( []( auto system ) { system->update(); } );
-    m_systems.each( []( auto system ) { system->lateUpdate(); } );
+    // m_systems.each( []( auto system ) { system->earlyUpdate(); } );
+    // m_systems.each( []( auto system ) { system->fixedUpdate(); } ); // TODO: this has to be called at fixed intervals
+    // m_systems.each( []( auto system ) { system->update(); } );
+    // m_systems.each( []( auto system ) { system->lateUpdate(); } );
 
     // render
-    m_systems.each( []( auto system ) { system->onPreRender(); } );
-    m_systems.each( []( auto system ) { system->onRender(); } );
-    m_systems.each( []( auto system ) { system->onPostRender(); } );
+    // m_systems.each( []( auto system ) { system->onPreRender(); } );
+    // m_systems.each( []( auto system ) { system->onRender(); } );
+    // m_systems.each( []( auto system ) { system->onPostRender(); } );
 
-    broadcastMessage( messaging::SimulationDidUpdate { scene } );
+    // broadcastMessage( messaging::SimulationDidUpdate { scene } );
 
     if ( !_jobScheduler.isRunning() ) {
         return false;
@@ -190,7 +204,7 @@ bool Simulation::update( void ) noexcept
     auto delta = frameEndTime - frameStartTime;
     auto t = std::max(
         Int64( 1 ),
-        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() ) ); 
+        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() ) );
     std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
 #endif
 
@@ -213,9 +227,10 @@ void Simulation::stop( void ) noexcept
     emscripten_cancel_main_loop();
 #endif
 
-    m_systems.each( []( auto system ) { system->onBeforeStop(); } );
+    dispatch( Event { .type = Event::Type::SIMULATION_STOP } );
+    // m_systems.each( []( auto system ) { system->onBeforeStop(); } );
 
-    m_systems.each( []( auto system ) { system->stop(); } );
+    // m_systems.each( []( auto system ) { system->stop(); } );
 }
 
 int Simulation::run( void ) noexcept
@@ -226,32 +241,32 @@ int Simulation::run( void ) noexcept
     bool done = false;
 
     while ( !done ) {
-        done = !update();
+        done = !step();
     }
 #endif
 
     stop();
 
-    m_systems.each( []( auto system ) { system->onTerminate(); } );
+    // m_systems.each( []( auto system ) { system->onTerminate(); } );
 
     CRIMILD_LOG_INFO( "Simulation terminated" );
 
     return 0;
 }
 
-void Simulation::attachSystem( SharedPointer< System > const &system ) noexcept
-{
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getClassName() );
+// void Simulation::attachSystem( SharedPointer< System > const &system ) noexcept
+// {
+//     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getClassName() );
 
-    m_systems.add( system );
-    system->onAttach();
-}
+//     m_systems.add( system );
+//     system->onAttach();
+// }
 
-void Simulation::detachAllSystems( void ) noexcept
-{
-    m_systems.each( []( auto system ) { system->onDetach(); } );
-    m_systems.clear();
-}
+// void Simulation::detachAllSystems( void ) noexcept
+// {
+//     m_systems.each( []( auto system ) { system->onDetach(); } );
+//     m_systems.clear();
+// }
 
 void Simulation::setScene( SharedPointer< Node > const &scene )
 {
@@ -308,7 +323,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 void Simulation::loadScene( std::string filename )
 {
-    broadcastMessage( messaging::LoadScene { filename } );
+    // broadcastMessage( messaging::LoadScene { filename } );
 }
 
 void Simulation::forEachCamera( std::function< void( Camera * ) > callback )
