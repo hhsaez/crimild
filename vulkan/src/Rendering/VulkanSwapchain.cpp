@@ -25,135 +25,112 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VulkanSwapchain.hpp"
+#include "Rendering/VulkanSwapchain.hpp"
 
+#include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanSurface.hpp"
 #include "Simulation/Simulation.hpp"
 #include "VulkanImage.hpp"
-#include "VulkanPhysicalDevice.hpp"
-#include "VulkanRenderDevice.hpp"
 #include "VulkanSemaphore.hpp"
-#include "VulkanSurface.hpp"
+
+namespace crimild {
+
+    namespace vulkan {
+
+        namespace utils {
+
+            VkSurfaceFormatKHR chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
+            {
+                CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
+
+                // If no format is available, force what we need
+                if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
+                    return {
+                        VK_FORMAT_B8G8R8A8_UNORM,
+                        VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+                    };
+                }
+
+                // Favor 32-bit RGBA and sRGBA non-linear colorspace
+                for ( const auto &availableFormat : availableFormats ) {
+                    if ( availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR ) {
+                        return availableFormat;
+                    }
+                }
+
+                // If nothing is found matching what we need, return whatever is available
+                return availableFormats[ 0 ];
+            }
+
+            /**
+             * \brief Choose the best presentation mode from the available ones
+             *
+             * By default, it will attempt to use VK_PRESENT_MODE_MAILBOX_KHR, which can be considered as
+             * triple buffer and vsync enabled. Otherwhise, it will fallback to use VK_PRESENT_MODE_FIFO_KHR which,
+             * accoriding to the standard, it's the only mode that is mandatory to be supported but it could
+             * introduce some latency (but no tearing).
+             *
+             * If we want to disable vsync, we should use VK_PRESENT_MODE_IMMEDIATE_KHR if available.
+             */
+            VkPresentModeKHR choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
+            {
+                CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
+
+                // VSync by default, but may introduce latency
+                // FIFO mode is always available (defined in standard)
+                VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+
+                for ( const auto &availablePresentMode : availablePresentModes ) {
+                    if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
+                        // VK_PRESENT_MODE_MAILBOX_KHR is the vulkan version of triple buffer
+                        return availablePresentMode;
+                    }
+                }
+
+                return bestMode;
+            }
+
+            VkExtent2D chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept
+            {
+                CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
+
+                if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
+                    // Capabilites are enforcing a given extent. Return that one
+                    return capabilities.currentExtent;
+                }
+
+                // Keep width/heigth values within the allowed ones, though.
+                requestedExtent.width = std::max(
+                    capabilities.minImageExtent.width,
+                    std::min( capabilities.maxImageExtent.width, requestedExtent.width ) );
+                requestedExtent.height = std::max(
+                    capabilities.minImageExtent.height,
+                    std::min( capabilities.maxImageExtent.height, requestedExtent.height ) );
+
+                return requestedExtent;
+            }
+
+        }
+
+    }
+
+}
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-vulkan::Swapchain::~Swapchain( void ) noexcept
-{
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-vulkan::Swapchain::AcquireImageResult vulkan::Swapchain::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
-{
-    crimild::UInt32 imageIndex;
-    auto ret = vkAcquireNextImageKHR(
-        renderDevice->handler,
-        handler,
-        std::numeric_limits< uint64_t >::max(), // disable timeout
-        imageAvailableSemaphore->handler,
-        VK_NULL_HANDLE,
-        &imageIndex );
-
-    return AcquireImageResult {
-        .imageIndex = imageIndex,
-        .success = ( ret == VK_SUCCESS ),
-        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR ),
-    };
-}
-
-vulkan::Swapchain::PresentImageResult vulkan::Swapchain::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
-{
-    VkSemaphore signalSemaphores[] = {
-        signal->handler,
-    };
-
-    VkSwapchainKHR swapchains[] = {
-        handler,
-    };
-
-    auto presentInfo = VkPresentInfoKHR {
-        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .waitSemaphoreCount = 1,
-        .pWaitSemaphores = signalSemaphores,
-        .swapchainCount = 1,
-        .pSwapchains = swapchains,
-        .pImageIndices = &imageIndex,
-        .pResults = nullptr,
-    };
-
-    auto ret = vkQueuePresentKHR(
-        renderDevice->presentQueue,
-        &presentInfo );
-
-    return PresentImageResult {
-        .success = ( ret == VK_SUCCESS ),
-        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR || VK_SUBOPTIMAL_KHR ),
-    };
-}
-
-void vulkan::Swapchain::retrieveSwapchainImages( void ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Retrieving swapchain images" );
-
-    getImages().clear();
-
-    crimild::UInt32 imageCount;
-    vkGetSwapchainImagesKHR(
-        renderDevice->handler,
-        handler,
-        &imageCount,
-        nullptr );
-    std::vector< VkImage > imagesHandlers( imageCount );
-    vkGetSwapchainImagesKHR(
-        renderDevice->handler,
-        handler,
-        &imageCount,
-        imagesHandlers.data() );
-
-    for ( const auto &imageHandler : imagesHandlers ) {
-        auto image = crimild::alloc< Image >();
-        image->format = utils::getFormat( format );
-        image->extent.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
-        if ( auto img = crimild::get_ptr( image ) ) {
-            renderDevice->setBindInfo( img, { .imageHandler = imageHandler } );
-        }
-        getImages().add( image );
-    }
-}
-
-void vulkan::Swapchain::createImageViews( void ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Creating image views" );
-
-    getImageViews().clear();
-    getImages().each(
-        [ & ]( auto &image ) {
-            auto imageView = crimild::alloc< ImageView >();
-            imageView->type = ImageView::Type::IMAGE_VIEW_SWAPCHAIN;
-            imageView->image = image;
-            imageView->format = image->format;
-            renderDevice->bind( crimild::get_ptr( imageView ) );
-            getImageViews().add( imageView );
-        } );
-}
-
-SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descriptor const &descriptor ) noexcept
+vulkan::Swapchain::Swapchain( const RenderDevice *renderDevice, const Extent2D &desiredExtent ) noexcept
+    : m_renderDevice( renderDevice )
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
 
-    auto renderDevice = m_renderDevice;
-    if ( renderDevice == nullptr ) {
-        renderDevice = descriptor.renderDevice;
-    }
+    auto physicalDevice = renderDevice->getPhysicalDevice();
+    auto surface = renderDevice->getSurface();
 
-    auto physicalDevice = renderDevice->physicalDevice;
-    auto surface = renderDevice->surface;
-
-    auto swapchainSupport = utils::querySwapchainSupportDetails( physicalDevice->handler, surface->handler );
-    auto surfaceFormat = chooseSurfaceFormat( swapchainSupport.formats );
-    auto presentMode = choosePresentationMode( swapchainSupport.presentModes );
-    auto extent = chooseExtent( swapchainSupport.capabilities, VkExtent2D { descriptor.extent.x, descriptor.extent.y } );
+    auto swapchainSupport = utils::querySwapchainSupportDetails( physicalDevice->getHandle(), surface->getHandle() );
+    auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
+    auto presentMode = utils::choosePresentationMode( swapchainSupport.presentModes );
+    auto extent = utils::chooseExtent( swapchainSupport.capabilities, utils::getExtent( desiredExtent ) );
 
     // The Vulkan implementation defines a minimum number of images to work with.
     // We request one more image than the minimum. Also, make sure not to exceed the
@@ -167,7 +144,7 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
 
     auto createInfo = VkSwapchainCreateInfoKHR {
         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        .surface = surface->handler,
+        .surface = surface->getHandle(),
         .minImageCount = imageCount,
         .imageFormat = surfaceFormat.format,
         .imageColorSpace = surfaceFormat.colorSpace,
@@ -181,7 +158,7 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
     // VK_IMAGE_USAGE_TRANSFER_SRC_BIT is requried for taking screenshots.
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-    auto indices = utils::findQueueFamilies( physicalDevice->handler, surface->handler );
+    auto indices = utils::findQueueFamilies( physicalDevice->getHandle(), surface->getHandle() );
     uint32_t queueFamilyIndices[] = {
         indices.graphicsFamily[ 0 ],
         indices.presentFamily[ 0 ],
@@ -217,26 +194,139 @@ SharedPointer< vulkan::Swapchain > SwapchainManager::create( Swapchain::Descript
     VkSwapchainKHR swapchainHandler;
     CRIMILD_VULKAN_CHECK(
         vkCreateSwapchainKHR(
-            renderDevice->handler,
+            renderDevice->getHandle(),
             &createInfo,
             nullptr,
-            &swapchainHandler ) );
+            &m_handle ) );
 
-    auto swapchain = crimild::alloc< Swapchain >();
-    swapchain->handler = swapchainHandler;
-    swapchain->renderDevice = renderDevice;
-    swapchain->manager = this;
-    swapchain->extent = extent;
-    swapchain->format = surfaceFormat.format;
-    insert( crimild::get_ptr( swapchain ) );
-    swapchain->retrieveSwapchainImages();
-    swapchain->createImageViews();
+    setExtent( utils::getExtent( extent ) );
+    setFormat( utils::getFormat( surfaceFormat.format ) );
+
+    CRIMILD_LOG_TRACE( "Retrieving swapchain images" );
+
+    getImages().clear();
+
+    vkGetSwapchainImagesKHR(
+        renderDevice->getHandle(),
+        m_handle,
+        &imageCount,
+        nullptr );
+
+    std::vector< VkImage > imagesHandlers( imageCount );
+    vkGetSwapchainImagesKHR(
+        renderDevice->getHandle(),
+        m_handle,
+        &imageCount,
+        imagesHandlers.data() );
+
+    for ( const auto &imageHandler : imagesHandlers ) {
+        auto image = crimild::alloc< Image >();
+        image->format = getFormat();
+        image->extent.scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
+        // TODO!!!
+        // if ( auto img = crimild::get_ptr( image ) ) {
+        //     renderDevice->setBindInfo( img, { .imageHandler = imageHandler } );
+        // }
+        getImages().add( image );
+    }
+
+    CRIMILD_LOG_TRACE( "Creating image views" );
+
+    getImageViews().clear();
+    getImages().each(
+        [ & ]( auto &image ) {
+            auto imageView = crimild::alloc< ImageView >();
+            imageView->type = ImageView::Type::IMAGE_VIEW_SWAPCHAIN;
+            imageView->image = image;
+            imageView->format = image->format;
+            // TODO!!!
+            // renderDevice->bind( crimild::get_ptr( imageView ) );
+            getImageViews().add( imageView );
+        } );
 
     CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", extent.width, "x", extent.height );
-    return swapchain;
 }
 
-void SwapchainManager::destroy( Swapchain *swapchain ) noexcept
+vulkan::Swapchain::~Swapchain( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying swapchain" );
+
+    getImageViews().clear();
+    getImages().clear();
+
+    if ( m_handle != VK_NULL_HANDLE ) {
+        vkDestroySwapchainKHR( m_renderDevice->getHandle(), m_handle, nullptr );
+    }
+
+    m_handle = VK_NULL_HANDLE;
+    m_renderDevice = nullptr;
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
+
+vulkan::SwapchainOLD::~SwapchainOLD( void ) noexcept
+{
+    if ( manager != nullptr ) {
+        manager->destroy( this );
+    }
+}
+
+vulkan::SwapchainOLD::AcquireImageResult vulkan::SwapchainOLD::acquireNextImage( const Semaphore *imageAvailableSemaphore ) const noexcept
+{
+    crimild::UInt32 imageIndex;
+    auto ret = vkAcquireNextImageKHR(
+        renderDevice->handler,
+        handler,
+        std::numeric_limits< uint64_t >::max(), // disable timeout
+        imageAvailableSemaphore->handler,
+        VK_NULL_HANDLE,
+        &imageIndex );
+
+    return AcquireImageResult {
+        .imageIndex = imageIndex,
+        .success = ( ret == VK_SUCCESS ),
+        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR ),
+    };
+}
+
+vulkan::SwapchainOLD::PresentImageResult vulkan::SwapchainOLD::presentImage( crimild::UInt32 imageIndex, const Semaphore *signal ) const noexcept
+{
+    VkSemaphore signalSemaphores[] = {
+        signal->handler,
+    };
+
+    VkSwapchainKHR swapchains[] = {
+        handler,
+    };
+
+    auto presentInfo = VkPresentInfoKHR {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = signalSemaphores,
+        .swapchainCount = 1,
+        .pSwapchains = swapchains,
+        .pImageIndices = &imageIndex,
+        .pResults = nullptr,
+    };
+
+    auto ret = vkQueuePresentKHR(
+        renderDevice->presentQueue,
+        &presentInfo );
+
+    return PresentImageResult {
+        .success = ( ret == VK_SUCCESS ),
+        .outOfDate = ( ret == VK_ERROR_OUT_OF_DATE_KHR || VK_SUBOPTIMAL_KHR ),
+    };
+}
+
+SharedPointer< vulkan::SwapchainOLD > SwapchainManager::create( SwapchainOLD::Descriptor const &descriptor ) noexcept
+{
+    return nullptr;
+}
+
+void SwapchainManager::destroy( SwapchainOLD *swapchain ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying swapchain" );
 
@@ -251,68 +341,4 @@ void SwapchainManager::destroy( Swapchain *swapchain ) noexcept
     swapchain->renderDevice = nullptr;
     swapchain->manager = nullptr;
     erase( swapchain );
-}
-
-VkSurfaceFormatKHR SwapchainManager::chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
-
-    // If no format is available, force what we need
-    if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
-        return {
-            VK_FORMAT_B8G8R8A8_UNORM,
-            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
-        };
-    }
-
-    // Favor 32-bit RGBA and sRGBA non-linear colorspace
-    for ( const auto &availableFormat : availableFormats ) {
-        if ( availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR ) {
-            return availableFormat;
-        }
-    }
-
-    // If nothing is found matching what we need, return whatever is available
-    return availableFormats[ 0 ];
-}
-
-VkPresentModeKHR SwapchainManager::choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
-
-    // VSync by default, but may introduce latency
-    // FIFO mode is always available (defined in standard)
-    VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
-
-    for ( const auto &availablePresentMode : availablePresentModes ) {
-        if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
-            // Triple buffer
-            return availablePresentMode;
-        } else if ( availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR ) {
-            // Double buffer. May produce tearing
-            bestMode = availablePresentMode;
-        }
-    }
-
-    return bestMode;
-}
-
-VkExtent2D SwapchainManager::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
-
-    if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
-        // Capabilites are enforcing a given extent. Return that one
-        return capabilities.currentExtent;
-    }
-
-    // Keep width/heigth values within the allowed ones, though.
-    requestedExtent.width = std::max(
-        capabilities.minImageExtent.width,
-        std::min( capabilities.maxImageExtent.width, requestedExtent.width ) );
-    requestedExtent.height = std::max(
-        capabilities.minImageExtent.height,
-        std::min( capabilities.maxImageExtent.height, requestedExtent.height ) );
-
-    return requestedExtent;
 }

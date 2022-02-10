@@ -537,11 +537,21 @@ VkImageLayout utils::getImageLayout( Image::Layout layout ) noexcept
 }
 */
 
-VkExtent2D utils::getExtent( Extent2D extent, const RenderDeviceOLD *renderDevice ) noexcept
+crimild::Extent2D utils::getExtent( const VkExtent2D &extent ) noexcept
+{
+    return Extent2D {
+        .scalingMode = ScalingMode::FIXED,
+        .width = Real( extent.width ),
+        .height = Real( extent.height ),
+    };
+}
+
+VkExtent2D utils::getExtent( const Extent2D &extent, const RenderDeviceOLD *renderDevice ) noexcept
 {
     auto width = extent.width;
     auto height = extent.height;
     if ( extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+        assert( renderDevice != nullptr && "Invalid renderDevice instance" );
         auto swapchain = renderDevice->getSwapchain();
         width *= swapchain->extent.width;
         height *= swapchain->extent.height;

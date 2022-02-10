@@ -46,7 +46,7 @@ namespace crimild {
         class CommandPool;
         class Fence;
         class Semaphore;
-        class Swapchain;
+        class SwapchainOLD;
 
         /**
            What it takes to work with Vulkan:
@@ -86,7 +86,7 @@ namespace crimild {
 
             inline PhysicalDeviceOLD *getPhysicalDevice( void ) noexcept { return crimild::get_ptr( m_physicalDevice ); }
             inline RenderDeviceOLD *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
-            inline Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
+            inline SwapchainOLD *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
             inline CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
 
             inline UInt32 getCurrentFrameId( void ) const noexcept { return m_currentFrame; }
@@ -117,7 +117,7 @@ namespace crimild {
             SharedPointer< VulkanSurfaceOLD > m_surface;
             SharedPointer< PhysicalDeviceOLD > m_physicalDevice;
             SharedPointer< RenderDeviceOLD > m_renderDevice;
-            SharedPointer< Swapchain > m_swapchain;
+            SharedPointer< SwapchainOLD > m_swapchain;
             SharedPointer< CommandPool > m_commandPool;
             std::vector< SharedPointer< Semaphore > > m_imageAvailableSemaphores;
             std::vector< SharedPointer< Semaphore > > m_renderFinishedSemaphores;

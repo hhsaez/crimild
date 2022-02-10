@@ -44,7 +44,7 @@ namespace crimild {
             PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept;
             ~PhysicalDevice( void ) noexcept;
 
-            [[nodiscard]] inline VkPhysicalDevice getHandle( void ) noexcept { return m_handle; }
+            [[nodiscard]] inline const VkPhysicalDevice &getHandle( void ) const noexcept { return m_handle; }
 
             [[nodiscard]] std::unique_ptr< RenderDevice > createRenderDevice( void ) noexcept;
 

@@ -47,6 +47,8 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept
+    : m_physicalDevice( physicalDevice ),
+      m_surface( surface )
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
 
@@ -122,6 +124,8 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
+    m_swapchain = nullptr;
+
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
     if ( m_handle != VK_NULL_HANDLE ) {
@@ -129,10 +133,21 @@ RenderDevice::~RenderDevice( void ) noexcept
     }
 
     m_handle = VK_NULL_HANDLE;
+    m_physicalDevice = nullptr;
     m_graphicsQueueHandle = VK_NULL_HANDLE;
     m_computeQueueHandle = VK_NULL_HANDLE;
     m_presentQueueHandle = VK_NULL_HANDLE;
 }
+
+vulkan::Swapchain *RenderDevice::createSwapchain( const Extent2D &extent ) noexcept
+{
+    m_swapchain = std::make_unique< Swapchain >( this, extent );
+    return m_swapchain.get();
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
 
 RenderDeviceOLD::RenderDeviceOLD( void )
     : CommandPoolManager( this ),
