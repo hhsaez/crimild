@@ -66,11 +66,11 @@ namespace crimild {
             using ShaderModuleArray = std::vector< SharedPointer< ShaderModule > >;
             using ShaderStageArray = std::vector< VkPipelineShaderStageCreateInfo >;
 
-            ShaderModuleArray createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept;
+            ShaderModuleArray createShaderModules( RenderDeviceOLD *renderDevice, ShaderProgram *program ) const noexcept;
             ShaderStageArray createShaderStages( const ShaderModuleArray &modules ) const noexcept;
             VkPipelineShaderStageCreateInfo createShaderStage( const ShaderModule &module ) const noexcept;
             Array< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( GraphicsPipeline *graphicsPipeline ) const noexcept;
-            Array< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDevice *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept;
+            Array< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDeviceOLD *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept;
             VkPipelineVertexInputStateCreateInfo createVertexInput( const Array< VkVertexInputBindingDescription > &bindingDescriptions, const Array< VkVertexInputAttributeDescription > &attributeDescriptions ) const noexcept;
             VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) const noexcept;
             VkViewport createViewport( const ViewportDimensions &viewport ) const noexcept;

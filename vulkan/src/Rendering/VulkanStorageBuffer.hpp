@@ -37,7 +37,7 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
+        class RenderDeviceOLD;
         class CommandPool;
 
         struct StorageBufferBindInfo {

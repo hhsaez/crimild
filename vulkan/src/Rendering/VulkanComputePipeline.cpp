@@ -121,7 +121,7 @@ crimild::Bool ComputePipelineManager::unbind( ComputePipeline *pipeline ) noexce
     return ManagerImpl::unbind( pipeline );
 }
 
-ComputePipelineManager::ShaderModuleArray ComputePipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
+ComputePipelineManager::ShaderModuleArray ComputePipelineManager::createShaderModules( RenderDeviceOLD *renderDevice, ShaderProgram *program ) const noexcept
 {
     CRIMILD_LOG_TRACE( "Creating shader modules" );
 

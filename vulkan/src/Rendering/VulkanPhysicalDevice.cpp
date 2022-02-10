@@ -30,101 +30,139 @@
 #include "VulkanInstance.hpp"
 #include "VulkanSurface.hpp"
 
+namespace crimild {
+
+    namespace vulkan {
+
+        namespace utils {
+
+            crimild::Bool isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
+            {
+                CRIMILD_LOG_TRACE( "Checking device properties" );
+
+                auto indices = utils::findQueueFamilies( device, surface );
+                auto extensionsSupported = utils::checkDeviceExtensionSupport( device );
+                auto swapchainAdequate = false;
+                if ( extensionsSupported ) {
+                    swapchainAdequate = utils::checkSwapchainSupport( device, surface );
+                }
+
+                VkPhysicalDeviceFeatures supportedFeatures;
+                vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
+
+                return indices.isComplete()
+                       && extensionsSupported
+                       && swapchainAdequate
+                       && supportedFeatures.fillModeNonSolid
+                       && supportedFeatures.samplerAnisotropy;
+            }
+
+            VkPhysicalDevice pickPhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept
+            {
+                CRIMILD_LOG_TRACE( "Picking physical device" );
+
+                crimild::UInt32 deviceCount = 0;
+                vkEnumeratePhysicalDevices( instance->getHandle(), &deviceCount, nullptr );
+                if ( deviceCount == 0 ) {
+                    CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
+                    return VK_NULL_HANDLE;
+                }
+
+                std::vector< VkPhysicalDevice > devices( deviceCount );
+                vkEnumeratePhysicalDevices( instance->getHandle(), &deviceCount, devices.data() );
+                for ( const auto &device : devices ) {
+                    if ( isDeviceSuitable( device, surface->getHandle() ) ) {
+                        VkPhysicalDeviceProperties physicalDeviceProperties;
+                        vkGetPhysicalDeviceProperties( device, &physicalDeviceProperties );
+                        CRIMILD_LOG_INFO( "Vulkan physical device found: ", physicalDeviceProperties.deviceName );
+                        return device;
+                    }
+                }
+
+                CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
+                return VK_NULL_HANDLE;
+            }
+
+        }
+
+    }
+
+}
+
 using namespace crimild;
 using namespace crimild::vulkan;
 
-PhysicalDevice::PhysicalDevice( void )
+PhysicalDevice::PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
+
+    auto physicalDeviceHandler = utils::pickPhysicalDevice( instance, surface );
+    if ( physicalDeviceHandler == VK_NULL_HANDLE ) {
+        CRIMILD_LOG_FATAL( "Failed to pick physical device" );
+        exit( -1 );
+    }
+
+    m_msaaSamples = utils::getMaxUsableSampleCount( physicalDeviceHandler );
+}
+
+PhysicalDevice::~PhysicalDevice( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan physical device" );
+
+    // No need to destroy anything. Just reset members
+    m_handle = VK_NULL_HANDLE;
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
+
+PhysicalDeviceOLD::PhysicalDeviceOLD( void )
     : RenderDeviceManager( this )
 {
 }
 
-PhysicalDevice::~PhysicalDevice( void )
+PhysicalDeviceOLD::~PhysicalDeviceOLD( void )
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-SharedPointer< PhysicalDevice > PhysicalDeviceManager::create( PhysicalDevice::Descriptor const &descriptor ) noexcept
+SharedPointer< PhysicalDeviceOLD > PhysicalDeviceManager::create( PhysicalDeviceOLD::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
+    // CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
 
-    auto physicalDeviceHandler = pickPhysicalDevice(
-        descriptor.instance->handler,
-        descriptor.surface->handler );
-    if ( physicalDeviceHandler == VK_NULL_HANDLE ) {
-        return nullptr;
-    }
+    // auto physicalDeviceHandler = pickPhysicalDevice(
+    //     descriptor.instance->handler,
+    //     descriptor.surface->handler );
+    // if ( physicalDeviceHandler == VK_NULL_HANDLE ) {
+    //     return nullptr;
+    // }
 
-    auto msaaSamples = utils::getMaxUsableSampleCount( physicalDeviceHandler );
+    // auto msaaSamples = utils::getMaxUsableSampleCount( physicalDeviceHandler );
 
-    auto physicalDevice = crimild::alloc< PhysicalDevice >();
-    physicalDevice->handler = physicalDeviceHandler;
-    physicalDevice->msaaSamples = msaaSamples;
-    physicalDevice->instance = descriptor.instance;
-    physicalDevice->surface = descriptor.surface;
-    physicalDevice->manager = this;
-    insert( crimild::get_ptr( physicalDevice ) );
-    return physicalDevice;
+    // auto physicalDevice = crimild::alloc< PhysicalDeviceOLD >();
+    // physicalDevice->handler = physicalDeviceHandler;
+    // physicalDevice->msaaSamples = msaaSamples;
+    // physicalDevice->instance = descriptor.instance;
+    // physicalDevice->surface = descriptor.surface;
+    // physicalDevice->manager = this;
+    // insert( crimild::get_ptr( physicalDevice ) );
+    // return physicalDevice;
+    return nullptr;
 }
 
-void PhysicalDeviceManager::destroy( PhysicalDevice *physicalDevice ) noexcept
+void PhysicalDeviceManager::destroy( PhysicalDeviceOLD *physicalDevice ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan physical device" );
+    // CRIMILD_LOG_TRACE( "Destroying Vulkan physical device" );
 
-    static_cast< RenderDeviceManager * >( physicalDevice )->cleanup();
+    // static_cast< RenderDeviceManager * >( physicalDevice )->cleanup();
 
-    // No need to destroy anything. Just reset members
-    physicalDevice->handler = VK_NULL_HANDLE;
-    physicalDevice->instance = nullptr;
-    physicalDevice->surface = nullptr;
-    physicalDevice->manager = nullptr;
-    erase( physicalDevice );
-}
-
-VkPhysicalDevice PhysicalDeviceManager::pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Picking physical device" );
-
-    crimild::UInt32 deviceCount = 0;
-    vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
-    if ( deviceCount == 0 ) {
-        CRIMILD_LOG_ERROR( "Failed to find GPUs with Vulkan support" );
-        return VK_NULL_HANDLE;
-    }
-
-    std::vector< VkPhysicalDevice > devices( deviceCount );
-    vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
-    for ( const auto &device : devices ) {
-        if ( isDeviceSuitable( device, surface ) ) {
-            VkPhysicalDeviceProperties physicalDeviceProperties;
-            vkGetPhysicalDeviceProperties( device, &physicalDeviceProperties );
-            CRIMILD_LOG_INFO( "Vulkan physical device found: ", physicalDeviceProperties.deviceName );
-            return device;
-        }
-    }
-
-    CRIMILD_LOG_ERROR( "Failed to find a suitable GPU" );
-    return VK_NULL_HANDLE;
-}
-
-crimild::Bool PhysicalDeviceManager::isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
-{
-    CRIMILD_LOG_TRACE( "Checking device properties" );
-
-    auto indices = utils::findQueueFamilies( device, surface );
-    auto extensionsSupported = utils::checkDeviceExtensionSupport( device );
-    auto swapchainAdequate = false;
-    if ( extensionsSupported ) {
-        swapchainAdequate = utils::checkSwapchainSupport( device, surface );
-    }
-
-    VkPhysicalDeviceFeatures supportedFeatures;
-    vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
-
-    return indices.isComplete()
-           && extensionsSupported
-           && swapchainAdequate
-           && supportedFeatures.fillModeNonSolid
-           && supportedFeatures.samplerAnisotropy;
+    // // No need to destroy anything. Just reset members
+    // physicalDevice->handler = VK_NULL_HANDLE;
+    // physicalDevice->instance = nullptr;
+    // physicalDevice->surface = nullptr;
+    // physicalDevice->manager = nullptr;
+    // erase( physicalDevice );
 }

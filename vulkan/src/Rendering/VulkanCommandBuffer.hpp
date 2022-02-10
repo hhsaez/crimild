@@ -60,7 +60,7 @@ namespace crimild {
             void updateCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
 
         private:
-            void recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept;
+            void recordCommands( RenderDeviceOLD *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept;
 
         private:
             GraphicsPipeline *m_currentGraphicsPipeline = nullptr;

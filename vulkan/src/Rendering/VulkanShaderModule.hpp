@@ -38,14 +38,14 @@ namespace crimild {
     namespace vulkan {
 
         class ShaderModuleManager;
-        class RenderDevice;
+        class RenderDeviceOLD;
 
         class ShaderModule : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::ShaderModule )
 
         public:
             struct Descriptor {
-                RenderDevice *renderDevice;
+                RenderDeviceOLD *renderDevice;
                 crimild::Shader *shader;
             };
 
@@ -53,7 +53,7 @@ namespace crimild {
             ~ShaderModule( void );
 
             ShaderModuleManager *manager = nullptr;
-            RenderDevice *renderDevice = nullptr;
+            RenderDeviceOLD *renderDevice = nullptr;
             VkShaderModule handler = VK_NULL_HANDLE;
             VkShaderStageFlagBits stage;
             std::string entryPointName = "main";
@@ -61,7 +61,8 @@ namespace crimild {
 
         class ShaderModuleManager : public VulkanObjectManager< ShaderModule > {
         public:
-            explicit ShaderModuleManager( RenderDevice *renderDevice ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit ShaderModuleManager( RenderDeviceOLD *renderDevice ) noexcept
+                : m_renderDevice( renderDevice ) { }
             virtual ~ShaderModuleManager( void ) = default;
 
             SharedPointer< ShaderModule > create( ShaderModule::Descriptor const &descriptor ) noexcept;
@@ -70,7 +71,7 @@ namespace crimild {
             ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
             ShaderCompiler m_shaderCompiler;
         };
 

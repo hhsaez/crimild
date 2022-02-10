@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VulkanInstance.hpp"
+#include "Rendering/VulkanInstance.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Simulation/Settings.hpp"
 #include "VulkanRenderDevice.hpp"
 
@@ -168,6 +169,15 @@ void VulkanInstance::destroyDebugMessenger( void ) noexcept
     destroyDebugUtilsMessengerEXT( m_instanceHandle, m_debugMessengerHandle, nullptr );
     m_debugMessengerHandle = VK_NULL_HANDLE;
 }
+
+std::unique_ptr< PhysicalDevice > VulkanInstance::createPhysicalDevice( VulkanSurface *surface ) noexcept
+{
+    return std::make_unique< PhysicalDevice >( this, surface );
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
 
 VulkanInstanceOLD::~VulkanInstanceOLD( void )
 {

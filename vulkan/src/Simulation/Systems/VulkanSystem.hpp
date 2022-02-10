@@ -84,8 +84,8 @@ namespace crimild {
             void onRender( void ) noexcept override;
             void stop( void ) noexcept override;
 
-            inline PhysicalDevice *getPhysicalDevice( void ) noexcept { return crimild::get_ptr( m_physicalDevice ); }
-            inline RenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+            inline PhysicalDeviceOLD *getPhysicalDevice( void ) noexcept { return crimild::get_ptr( m_physicalDevice ); }
+            inline RenderDeviceOLD *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
             inline Swapchain *getSwapchain( void ) noexcept { return crimild::get_ptr( m_swapchain ); }
             inline CommandPool *getCommandPool( void ) noexcept { return crimild::get_ptr( m_commandPool ); }
 
@@ -115,8 +115,8 @@ namespace crimild {
             SharedPointer< VulkanInstanceOLD > m_instance;
             SharedPointer< VulkanDebugMessenger > m_debugMessenger;
             SharedPointer< VulkanSurfaceOLD > m_surface;
-            SharedPointer< PhysicalDevice > m_physicalDevice;
-            SharedPointer< RenderDevice > m_renderDevice;
+            SharedPointer< PhysicalDeviceOLD > m_physicalDevice;
+            SharedPointer< RenderDeviceOLD > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;
             SharedPointer< CommandPool > m_commandPool;
             std::vector< SharedPointer< Semaphore > > m_imageAvailableSemaphores;

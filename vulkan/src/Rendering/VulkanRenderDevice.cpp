@@ -35,6 +35,7 @@
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderPass.hpp"
 #include "VulkanSemaphore.hpp"
 #include "VulkanSurface.hpp"
@@ -45,7 +46,7 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-RenderDevice::RenderDevice( void )
+RenderDeviceOLD::RenderDeviceOLD( void )
     : CommandPoolManager( this ),
       SwapchainManager( this ),
       FenceManager( this ),
@@ -55,14 +56,14 @@ RenderDevice::RenderDevice( void )
 {
 }
 
-RenderDevice::~RenderDevice( void )
+RenderDeviceOLD::~RenderDeviceOLD( void )
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffers, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
+void RenderDeviceOLD::submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffers, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept
 {
     VkSemaphore waitSemaphores[] = {
         wait->handler,
@@ -102,7 +103,7 @@ void RenderDevice::submitGraphicsCommands( const Semaphore *wait, Array< Command
             fence != nullptr ? fence->handler : VK_NULL_HANDLE ) );
 }
 
-void RenderDevice::submitComputeCommands( CommandBuffer *commands ) noexcept
+void RenderDeviceOLD::submitComputeCommands( CommandBuffer *commands ) noexcept
 {
     VkCommandBuffer commandBuffers[] = {
         getBindInfo( commands ).handler,
@@ -122,7 +123,7 @@ void RenderDevice::submitComputeCommands( CommandBuffer *commands ) noexcept
             VK_NULL_HANDLE ) );
 }
 
-void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
+void RenderDeviceOLD::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
 {
     auto commandBufferHandler = getBindInfo( commands ).handler;
 
@@ -146,7 +147,7 @@ void RenderDevice::submit( CommandBuffer *commands, crimild::Bool wait ) noexcep
     }
 }
 
-void RenderDevice::waitIdle( void ) const noexcept
+void RenderDeviceOLD::waitIdle( void ) const noexcept
 {
     if ( handler == VK_NULL_HANDLE ) {
         return;
@@ -157,7 +158,7 @@ void RenderDevice::waitIdle( void ) const noexcept
     vkQueueWaitIdle( computeQueue );
 }
 
-SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descriptor const &descriptor ) noexcept
+SharedPointer< RenderDeviceOLD > RenderDeviceManager::create( RenderDeviceOLD::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
 
@@ -238,7 +239,7 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     vkGetDeviceQueue( deviceHandler, indices.computeFamily[ 0 ], 0, &computeQueueHandler );
     vkGetDeviceQueue( deviceHandler, indices.presentFamily[ 0 ], 0, &presentQueueHandler );
 
-    auto renderDevice = crimild::alloc< RenderDevice >();
+    auto renderDevice = crimild::alloc< RenderDeviceOLD >();
     renderDevice->handler = deviceHandler;
     renderDevice->physicalDevice = physicalDevice;
     renderDevice->surface = surface;
@@ -251,7 +252,7 @@ SharedPointer< RenderDevice > RenderDeviceManager::create( RenderDevice::Descrip
     return renderDevice;
 }
 
-void RenderDeviceManager::destroy( RenderDevice *renderDevice ) noexcept
+void RenderDeviceManager::destroy( RenderDeviceOLD *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 

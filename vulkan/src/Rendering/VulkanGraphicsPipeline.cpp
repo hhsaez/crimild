@@ -163,7 +163,7 @@ crimild::Bool GraphicsPipelineManager::unbind( GraphicsPipeline *graphicsPipelin
     return ManagerImpl::unbind( graphicsPipeline );
 }
 
-GraphicsPipelineManager::ShaderModuleArray GraphicsPipelineManager::createShaderModules( RenderDevice *renderDevice, ShaderProgram *program ) const noexcept
+GraphicsPipelineManager::ShaderModuleArray GraphicsPipelineManager::createShaderModules( RenderDeviceOLD *renderDevice, ShaderProgram *program ) const noexcept
 {
     CRIMILD_LOG_TRACE( "Creating shader modules" );
 
@@ -221,7 +221,7 @@ Array< VkVertexInputBindingDescription > GraphicsPipelineManager::getVertexInput
     return ret;
 }
 
-Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInputAttributeDescriptions( RenderDevice *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept
+Array< VkVertexInputAttributeDescription > GraphicsPipelineManager::getVertexInputAttributeDescriptions( RenderDeviceOLD *renderDevice, GraphicsPipeline *graphicsPipeline ) const noexcept
 {
     Array< VkVertexInputAttributeDescription > attributeDescriptions;
 
@@ -560,7 +560,7 @@ VkPipelineColorBlendStateCreateInfo GraphicsPipelineManager::createColorBlending
         .logicOp = VK_LOGIC_OP_COPY,
         .attachmentCount = UInt32( colorBlendAttachments.size() ),
         .pAttachments = colorBlendAttachments.getData(),
-        .blendConstants = { 0, 0, 0, 0},
+        .blendConstants = { 0, 0, 0, 0 },
     };
 }
 

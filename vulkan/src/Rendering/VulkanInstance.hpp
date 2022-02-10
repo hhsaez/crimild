@@ -30,7 +30,7 @@
 
 #include "Debug/VulkanDebugMessenger.hpp"
 #include "Foundation/VulkanObject.hpp"
-#include "VulkanPhysicalDevice.hpp"
+// #include "VulkanPhysicalDevice.hpp"
 
 #include <vector>
 
@@ -38,12 +38,17 @@ namespace crimild {
 
     namespace vulkan {
 
+        class PhysicalDevice;
+        class VulkanSurface;
+
         class VulkanInstance {
         public:
             VulkanInstance( void ) noexcept;
             ~VulkanInstance( void ) noexcept;
 
             inline VkInstance getHandle( void ) noexcept { return m_instanceHandle; }
+
+            [[nodiscard]] std::unique_ptr< PhysicalDevice > createPhysicalDevice( VulkanSurface *surface ) noexcept;
 
         private:
             void createInstance( void ) noexcept;
@@ -56,6 +61,10 @@ namespace crimild {
             VkInstance m_instanceHandle = VK_NULL_HANDLE;
             VkDebugUtilsMessengerEXT m_debugMessengerHandle = VK_NULL_HANDLE;
         };
+
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
 
         class VulkanInstanceManager;
         class VulkanSurface;

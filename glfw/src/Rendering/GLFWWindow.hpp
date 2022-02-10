@@ -31,6 +31,7 @@
 #include "Foundation/GLFWUtils.hpp"
 #include "Rendering/GLFWVulkanSurface.hpp"
 #include "Rendering/VulkanInstance.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Simulation/Event.hpp"
 
 #include <string>
@@ -66,6 +67,9 @@ namespace crimild {
 
             // I think it's ok to have one surface per window
             std::unique_ptr< vulkan::VulkanSurface > m_surface;
+
+            // TODO: For a multi-device setup, we should move the physical device outside of this class
+            std::unique_ptr< vulkan::PhysicalDevice > m_physicalDevice;
         };
 
     }
