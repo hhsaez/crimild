@@ -25,35 +25,32 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Simulation/Systems/CaptureSystem.hpp"
+#ifndef CRIMILD_CORE_SIMULATION_EVENT_
+#define CRIMILD_CORE_SIMULATION_EVENT_
 
-#include "Simulation/Input.hpp"
-#include "Simulation/Simulation.hpp"
+#include "Foundation/Types.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-void CaptureSystem::start( void ) noexcept
-{
-    System::start();
+    struct Event {
+        enum class Type {
+            NONE,
 
-    // registerMessageHandler< crimild::messaging::KeyReleased >(
-    //     [ & ]( crimild::messaging::KeyReleased const &msg ) {
-    //         switch ( msg.key ) {
-    //             case CRIMILD_INPUT_KEY_F8:
-    //                 takeScreenshot();
-    //                 break;
+            START,
+            TICK,
+            RENDER,
+            TERMINATE,
+            STOP,
 
-    //             default:
-    //                 break;
-    //         }
-    //     } );
+            SIMULATION_START,
+            SIMULATION_UPDATE,
+            SIMULATION_RENDER,
+            SIMULATION_STOP,
+        };
+
+        Type type;
+    };
+
 }
 
-void CaptureSystem::onBeforeStop( void ) noexcept
-{
-    System::onBeforeStop();
-
-    if ( Simulation::getInstance()->getSettings()->get< Bool >( "capture.on_terminate", false ) ) {
-        takeScreenshot();
-    }
-}
+#endif

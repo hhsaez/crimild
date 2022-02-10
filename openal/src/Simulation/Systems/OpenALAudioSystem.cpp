@@ -30,6 +30,7 @@
 #include "Audio/OpenALOggAudioSource.hpp"
 #include "Audio/OpenALWavAudioSource.hpp"
 #include "Foundation/OpenALUtils.hpp"
+#include "Foundation/Log.hpp"
 
 namespace crimild {
 

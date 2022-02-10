@@ -194,7 +194,7 @@ void RenderSystem::setFrameGraph( SharedPointer< FrameGraphOperation > const &fr
     m_graphicsCommands.clear();
     m_computeCommands.clear();
 
-    broadcastMessage( messaging::FrameGraphDidChange {} );
+    // broadcastMessage( messaging::FrameGraphDidChange {} );
 }
 
 RenderSystem::CommandBufferArray &RenderSystem::getGraphicsCommands( Size imageIndex, Bool forceAll ) noexcept

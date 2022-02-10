@@ -4,78 +4,77 @@
 #include "Foundation/Profiler.hpp"
 #include "Simulation/Console/Console.hpp"
 #include "Simulation/Input.hpp"
-#include "WindowSystem.hpp"
 
 using namespace crimild;
-using namespace crimild::glfw;
-using namespace crimild::glfw::messages;
+// using namespace crimild::glfw;
+// using namespace crimild::glfw::messages;
 
 InputSystem::InputSystem( void )
 {
-    registerMessageHandler< WindowSystemDidCreateWindow >( [ this ]( WindowSystemDidCreateWindow const &message ) {
-        _window = message.video->getWindowHandler();
+    // registerMessageHandler< WindowSystemDidCreateWindow >( [ this ]( WindowSystemDidCreateWindow const &message ) {
+    //     _window = message.video->getWindowHandler();
 
-        Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
+    //     Input::getInstance()->reset( GLFW_KEY_LAST, GLFW_MOUSE_BUTTON_LAST );
 
-        glfwSetKeyCallback( _window, []( GLFWwindow *window, int key, int scancode, int action, int mods ) {
-            if ( key == GLFW_KEY_UNKNOWN ) {
-                return;
-            }
+    //     glfwSetKeyCallback( _window, []( GLFWwindow *window, int key, int scancode, int action, int mods ) {
+    //         if ( key == GLFW_KEY_UNKNOWN ) {
+    //             return;
+    //         }
 
-            if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
-                if ( action == GLFW_PRESS ) {
-                    switch ( key ) {
-                        case CRIMILD_INPUT_KEY_BACKSPACE:
-                        case CRIMILD_INPUT_KEY_UP:
-                        case CRIMILD_INPUT_KEY_DOWN:
-                        case CRIMILD_INPUT_KEY_ENTER:
-                            Console::getInstance()->handleInput( key, mods );
-                            break;
+    //         if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
+    //             if ( action == GLFW_PRESS ) {
+    //                 switch ( key ) {
+    //                     case CRIMILD_INPUT_KEY_BACKSPACE:
+    //                     case CRIMILD_INPUT_KEY_UP:
+    //                     case CRIMILD_INPUT_KEY_DOWN:
+    //                     case CRIMILD_INPUT_KEY_ENTER:
+    //                         Console::getInstance()->handleInput( key, mods );
+    //                         break;
 
-                        default:
-                            break;
-                    }
-                }
+    //                     default:
+    //                         break;
+    //                 }
+    //             }
 
-                if ( Console::getInstance()->isActive() ) {
-                    return;
-                }
-            }
+    //             if ( Console::getInstance()->isActive() ) {
+    //                 return;
+    //             }
+    //         }
 
-            if ( action == GLFW_PRESS || action == GLFW_REPEAT ) {
-                MessageQueue::getInstance()->pushMessage( messaging::KeyPressed { key } );
-            } else {
-                MessageQueue::getInstance()->pushMessage( messaging::KeyReleased { key } );
-            }
-        } );
+    //         if ( action == GLFW_PRESS || action == GLFW_REPEAT ) {
+    //             MessageQueue::getInstance()->pushMessage( messaging::KeyPressed { key } );
+    //         } else {
+    //             MessageQueue::getInstance()->pushMessage( messaging::KeyReleased { key } );
+    //         }
+    //     } );
 
-        glfwSetCharCallback( _window, []( GLFWwindow *window, unsigned int codepoint ) {
-            if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
-                Console::getInstance()->handleInput( codepoint, 0 );
-            }
-        } );
+    //     glfwSetCharCallback( _window, []( GLFWwindow *window, unsigned int codepoint ) {
+    //         if ( Console::getInstance() && Console::getInstance()->isEnabled() ) {
+    //             Console::getInstance()->handleInput( codepoint, 0 );
+    //         }
+    //     } );
 
-        glfwSetMouseButtonCallback( _window, []( GLFWwindow *window, int button, int action, int mods ) {
-            double x, y;
-            glfwGetCursorPos( window, &x, &y );
+    //     glfwSetMouseButtonCallback( _window, []( GLFWwindow *window, int button, int action, int mods ) {
+    //         double x, y;
+    //         glfwGetCursorPos( window, &x, &y );
 
-            if ( action == GLFW_PRESS ) {
-                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button } );
-            } else {
-                MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button } );
-            }
-        } );
+    //         if ( action == GLFW_PRESS ) {
+    //             MessageQueue::getInstance()->pushMessage( messaging::MouseButtonDown { button } );
+    //         } else {
+    //             MessageQueue::getInstance()->pushMessage( messaging::MouseButtonUp { button } );
+    //         }
+    //     } );
 
-        glfwSetScrollCallback( _window, []( GLFWwindow *window, double xoffset, double yoffset ) {
-            MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
-        } );
+    //     glfwSetScrollCallback( _window, []( GLFWwindow *window, double xoffset, double yoffset ) {
+    //         MessageQueue::getInstance()->pushMessage( messaging::MouseScroll { ( float ) xoffset, ( float ) yoffset } );
+    //     } );
 
-        //        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
-    } );
+    //     //        crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
+    // } );
 
-    registerMessageHandler< WindowSystemWillDestroyWindow >( [ this ]( WindowSystemWillDestroyWindow const &message ) {
-        _window = nullptr;
-    } );
+    // registerMessageHandler< WindowSystemWillDestroyWindow >( [ this ]( WindowSystemWillDestroyWindow const &message ) {
+    //     _window = nullptr;
+    // } );
 }
 
 void InputSystem::earlyUpdate( void ) noexcept

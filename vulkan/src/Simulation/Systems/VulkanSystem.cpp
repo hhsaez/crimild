@@ -48,9 +48,9 @@ using namespace crimild::vulkan;
 
 void VulkanSystem::start( void ) noexcept
 {
-    registerMessageHandler< messaging::FrameGraphDidChange >( [ & ]( auto & ) {
-        m_recordWithNonConditionalPasses = true;
-    } );
+    // registerMessageHandler< messaging::FrameGraphDidChange >( [ & ]( auto & ) {
+    //     m_recordWithNonConditionalPasses = true;
+    // } );
 
     initShaders();
 
@@ -183,7 +183,7 @@ crimild::Bool VulkanSystem::createInstance( void ) noexcept
     auto appVersionPatch = settings->get< crimild::UInt32 >( Settings::SETTINGS_APP_VERSION_PATCH, 0 );
 
     m_instance = create(
-        VulkanInstance::Descriptor {
+        VulkanInstanceOLD::Descriptor {
             .appName = appName,
             .appVersionMajor = appVersionMajor,
             .appVersionMinor = appVersionMinor,
@@ -206,7 +206,7 @@ crimild::Bool VulkanSystem::createSurface( void ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
     m_surface = create(
-        VulkanSurface::Descriptor {
+        VulkanSurfaceOLD::Descriptor {
             .instance = crimild::get_ptr( m_instance ) } );
     if ( m_surface == nullptr ) {
         CRIMILD_LOG_ERROR( "Failed to create Vulkan surface" );

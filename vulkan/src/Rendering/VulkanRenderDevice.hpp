@@ -59,8 +59,8 @@ namespace crimild {
 
         class PhysicalDevice;
         class RenderDeviceManager;
-        class VulkanInstance;
-        class VulkanSurface;
+        class VulkanInstanceOLD;
+        class VulkanSurfaceOLD;
 
         class RenderDevice
             : public VulkanObject,
@@ -137,7 +137,7 @@ namespace crimild {
 
             VkDevice handler = VK_NULL_HANDLE;
             PhysicalDevice *physicalDevice = nullptr;
-            VulkanSurface *surface = nullptr;
+            VulkanSurfaceOLD *surface = nullptr;
             RenderDeviceManager *manager = nullptr;
             VkQueue graphicsQueue;
             VkQueue computeQueue;

@@ -32,41 +32,77 @@
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
-		class VulkanInstance;
-        class VulkanSurfaceManager;
+        class VulkanInstance;
 
-		/**
+        /**
 		   \brief Handles a Vulkan presentation surface
 
-		   The presentation surface represents an application's window. It's purpose is to 
+		   The presentation surface represents an application's window. It's purpose is to
 		   acquire window's paramenters like dimensions, supported color formats or presentation
-		   modes. 
+		   modes.
 
 		   \remarks The surface must be created by each platform
 		 */
-		class VulkanSurface : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanSurface )
+        class VulkanSurface {
+        protected:
+            /**
+             * \brief Construct a new Vulkan Surface
+             *
+             * The constructor is protected since surface construction is dependent of
+             * the platform.
+             */
+            VulkanSurface( VulkanInstance *instance, VkSurfaceKHR handle ) noexcept;
+
+        public:
+            virtual ~VulkanSurface( void ) noexcept;
+
+            [[nodiscard]] inline VkSurfaceKHR getHandle( void ) const noexcept { return m_handle; }
+
+        private:
+            VulkanInstance *m_instance = nullptr;
+            VkSurfaceKHR m_handle = VK_NULL_HANDLE;
+        };
+
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
+
+        class VulkanInstanceOLD;
+        class VulkanSurfaceManager;
+
+        /**
+		   \brief Handles a Vulkan presentation surface
+
+		   The presentation surface represents an application's window. It's purpose is to
+		   acquire window's paramenters like dimensions, supported color formats or presentation
+		   modes.
+
+		   \remarks The surface must be created by each platform
+		 */
+        class [[deprecated]] VulkanSurfaceOLD : public VulkanObject
+        {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanSurfaceOLD )
 
         public:
             struct Descriptor {
-                VulkanInstance *instance;
+                VulkanInstanceOLD *instance;
             };
 
-		public:
-            virtual ~VulkanSurface( void );
+        public:
+            virtual ~VulkanSurfaceOLD( void );
 
-            VulkanInstance *instance = nullptr;
+            VulkanInstanceOLD *instance = nullptr;
             VulkanSurfaceManager *manager = nullptr;
             VkSurfaceKHR handler = VK_NULL_HANDLE;
-		};
+        };
 
-		/**
+        /**
          	Surface creation is platform dependent code. Clients should
             create a derived class and implement creation method
          */
-        class VulkanSurfaceManager : public VulkanObjectManager< VulkanSurface > {
+        class VulkanSurfaceManager : public VulkanObjectManager< VulkanSurfaceOLD > {
         public:
             virtual ~VulkanSurfaceManager( void ) = default;
 
@@ -75,13 +111,12 @@ namespace crimild {
              	Therefore, after creating one on client code, attach it to this manager
              	so it can be properly handled during runtime.
              */
-            void attach( VulkanSurface *surface ) noexcept;
-            void destroy( vulkan::VulkanSurface *surface ) noexcept override;
+            void attach( VulkanSurfaceOLD *surface ) noexcept;
+            void destroy( vulkan::VulkanSurfaceOLD *surface ) noexcept override;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

@@ -29,16 +29,26 @@
 #define CRIMILD_GLFW_RENDERING_VULKAN_SURFACE_
 
 #include "Rendering/VulkanSurface.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
     namespace glfw {
 
-        class GLFWVulkanSurfaceManager : public vulkan::VulkanSurfaceManager {
+        class Window;
+
+        class VulkanSurface : public vulkan::VulkanSurface {
+        public:
+            VulkanSurface( vulkan::VulkanInstance *instance, Window *window ) noexcept;
+            virtual ~VulkanSurface( void ) noexcept = default;
+        };
+
+        class [[deprecated]] GLFWVulkanSurfaceManager : public vulkan::VulkanSurfaceManager
+        {
         public:
             virtual ~GLFWVulkanSurfaceManager( void ) = default;
 
-            SharedPointer< vulkan::VulkanSurface > create( vulkan::VulkanSurface::Descriptor const &descriptor ) noexcept;
+            SharedPointer< vulkan::VulkanSurfaceOLD > create( vulkan::VulkanSurfaceOLD::Descriptor const &descriptor ) noexcept;
         };
 
     }
@@ -46,4 +56,3 @@ namespace crimild {
 }
 
 #endif
-

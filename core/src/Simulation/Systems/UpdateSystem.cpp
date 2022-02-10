@@ -69,7 +69,7 @@ void UpdateSystem::update( void ) noexcept
 
 void UpdateSystem::updateBehaviors( Node *scene )
 {
-    broadcastMessage( messaging::WillUpdateScene { scene } );
+    // broadcastMessage( messaging::WillUpdateScene { scene } );
 
     const auto FIXED_CLOCK = Clock( _targetFrameTime );
 
@@ -88,7 +88,7 @@ void UpdateSystem::updateBehaviors( Node *scene )
         _accumulator -= _targetFrameTime;
     }
 
-    broadcastMessage( messaging::DidUpdateScene { scene } );
+    // broadcastMessage( messaging::DidUpdateScene { scene } );
 }
 
 void UpdateSystem::computeRenderQueues( Node *scene )
@@ -110,5 +110,5 @@ void UpdateSystem::computeRenderQueues( Node *scene )
         } );
     }
 
-    broadcastMessage( messaging::RenderQueueAvailable { renderQueues } );
+    // broadcastMessage( messaging::RenderQueueAvailable { renderQueues } );
 }

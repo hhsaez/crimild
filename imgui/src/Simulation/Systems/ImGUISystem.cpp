@@ -664,48 +664,48 @@ void ImGUISystem::start( void ) noexcept
 
     updateDisplaySize();
 
-    registerMessageHandler< messaging::KeyPressed >( [ this ]( messaging::KeyPressed const &msg ) {
-        // int key = msg.key;
-        // self->_keys[ key ] = true;
-    } );
+    // registerMessageHandler< messaging::KeyPressed >( [ this ]( messaging::KeyPressed const &msg ) {
+    //     // int key = msg.key;
+    //     // self->_keys[ key ] = true;
+    // } );
 
-    registerMessageHandler< messaging::KeyReleased >( [ this ]( messaging::KeyReleased const &msg ) {
-        int key = msg.key;
-        if ( key == CRIMILD_INPUT_KEY_F12 ) {
-            auto sim = Simulation::getInstance();
-            auto settings = sim->getSettings();
-            settings->set( "ui.show", !settings->get< Bool >( "ui.show" ) );
-        }
-        // self->_keys[ key ] = false;
-    } );
+    // registerMessageHandler< messaging::KeyReleased >( [ this ]( messaging::KeyReleased const &msg ) {
+    //     int key = msg.key;
+    //     if ( key == CRIMILD_INPUT_KEY_F12 ) {
+    //         auto sim = Simulation::getInstance();
+    //         auto settings = sim->getSettings();
+    //         settings->set( "ui.show", !settings->get< Bool >( "ui.show" ) );
+    //     }
+    //     // self->_keys[ key ] = false;
+    // } );
 
-    registerMessageHandler< messaging::MouseButtonDown >( [ this ]( messaging::MouseButtonDown const &msg ) {
-        int button = msg.button;
-        auto &io = ImGui::GetIO();
-        io.MouseDown[ button ] = true;
-    } );
+    // registerMessageHandler< messaging::MouseButtonDown >( [ this ]( messaging::MouseButtonDown const &msg ) {
+    //     int button = msg.button;
+    //     auto &io = ImGui::GetIO();
+    //     io.MouseDown[ button ] = true;
+    // } );
 
-    registerMessageHandler< messaging::MouseButtonUp >( [ this ]( messaging::MouseButtonUp const &msg ) {
-        int button = msg.button;
-        auto &io = ImGui::GetIO();
-        io.MouseDown[ button ] = false;
-    } );
+    // registerMessageHandler< messaging::MouseButtonUp >( [ this ]( messaging::MouseButtonUp const &msg ) {
+    //     int button = msg.button;
+    //     auto &io = ImGui::GetIO();
+    //     io.MouseDown[ button ] = false;
+    // } );
 
-    registerMessageHandler< messaging::MouseMotion >( [ this ]( messaging::MouseMotion const &msg ) {
-        auto &io = ImGui::GetIO();
-        io.MousePos = ImVec2( msg.x, msg.y );
-        // Vector2f pos( msg.x, msg.y );
-        // self->_mouseDelta = pos - self->_mousePos;
-        // self->_mousePos = pos;
+    // registerMessageHandler< messaging::MouseMotion >( [ this ]( messaging::MouseMotion const &msg ) {
+    //     auto &io = ImGui::GetIO();
+    //     io.MousePos = ImVec2( msg.x, msg.y );
+    //     // Vector2f pos( msg.x, msg.y );
+    //     // self->_mouseDelta = pos - self->_mousePos;
+    //     // self->_mousePos = pos;
 
-        // Vector2f npos( msg.nx, msg.ny );
-        // self->_normalizedMouseDelta = npos - self->_normalizedMousePos;
-        // self->_normalizedMousePos = npos;
-    } );
+    //     // Vector2f npos( msg.nx, msg.ny );
+    //     // self->_normalizedMouseDelta = npos - self->_normalizedMousePos;
+    //     // self->_normalizedMousePos = npos;
+    // } );
 
-    registerMessageHandler< messaging::MouseScroll >( [ this ]( messaging::MouseScroll const &msg ) {
-        // _mouseScrollDelta = Vector2f( msg.dx, msg.dy );
-    } );
+    // registerMessageHandler< messaging::MouseScroll >( [ this ]( messaging::MouseScroll const &msg ) {
+    //     // _mouseScrollDelta = Vector2f( msg.dx, msg.dy );
+    // } );
 
     setFrameCallback(
         [] {

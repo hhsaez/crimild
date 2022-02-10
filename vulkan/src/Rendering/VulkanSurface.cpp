@@ -26,25 +26,48 @@
 */
 
 #include "VulkanSurface.hpp"
-#include "VulkanInstance.hpp"
+
 #include "Foundation/Log.hpp"
+#include "VulkanInstance.hpp"
 
 using namespace crimild::vulkan;
 
-VulkanSurface::~VulkanSurface( void )
+VulkanSurface::VulkanSurface( VulkanInstance *instance, VkSurfaceKHR handle ) noexcept
+    : m_instance( instance ),
+      m_handle( handle )
+{
+    // no-op
+}
+
+VulkanSurface::~VulkanSurface( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
+
+    if ( m_handle != VK_NULL_HANDLE ) {
+        vkDestroySurfaceKHR( m_instance->getHandle(), m_handle, nullptr );
+        m_instance = nullptr;
+        m_handle = VK_NULL_HANDLE;
+    }
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
+
+VulkanSurfaceOLD::~VulkanSurfaceOLD( void )
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-void VulkanSurfaceManager::attach( VulkanSurface *surface ) noexcept
+void VulkanSurfaceManager::attach( VulkanSurfaceOLD *surface ) noexcept
 {
     surface->manager = this;
     insert( surface );
 }
 
-void VulkanSurfaceManager::destroy( VulkanSurface *surface ) noexcept
+void VulkanSurfaceManager::destroy( VulkanSurfaceOLD *surface ) noexcept
 {
     CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
 
@@ -57,4 +80,3 @@ void VulkanSurfaceManager::destroy( VulkanSurface *surface ) noexcept
     surface->manager = nullptr;
     erase( surface );
 }
-

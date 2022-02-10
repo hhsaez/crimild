@@ -25,27 +25,87 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "WindowSystem.hpp"
+#include "Rendering/GLFWWindow.hpp"
 
-#include "Concurrency/Async.hpp"
-#include "Foundation/Profiler.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Systems/RenderSystem.hpp"
+#include "Simulation/Settings.hpp"
 
 #include <iomanip>
 
 using namespace crimild;
 using namespace crimild::glfw;
 
-#if defined( CRIMILD_ENABLE_VULKAN )
+Window::Window( void ) noexcept
+{
+    if ( !createWindow() ) {
+        exit( -1 );
+    }
 
-    #include "Rendering/VulkanInstance.hpp"
-    #include "Rendering/VulkanSurface.hpp"
+    m_instance = std::make_unique< vulkan::VulkanInstance >();
+    m_surface = std::make_unique< glfw::VulkanSurface >( m_instance.get(), this );
+}
 
-using namespace crimild::vulkan;
+Window::~Window( void ) noexcept
+{
+    m_surface = nullptr;
+    m_instance = nullptr;
 
-#endif
+    destroyWindow();
+}
 
+Event Window::handle( const Event &e ) noexcept
+{
+    switch ( e.type ) {
+        case Event::Type::TICK: {
+            if ( glfwWindowShouldClose( m_window ) ) {
+                return Event { .type = Event::Type::TERMINATE };
+            }
+
+            // if ( Settings->getInstance()->get( "video.show_frame_time", true ) ) {
+            //     auto name = sim->getName();
+            //     auto clock = sim->getSimulationClock();
+            //     std::stringstream ss;
+            //     auto accum = clock.getAccumTime();
+            //     auto h = Int32( accum / 3600 );
+            //     auto m = Int32( ( accum - h * 3600 ) / 60 );
+            //     auto s = Int32( ( accum - h * 3600 - m * 60 ) );
+            //     ss << name << " ("
+            //        << std::fixed
+            //        << std::setprecision( 3 )
+            //        << clock.getDeltaTime() << "ms - "
+            //        << ( h < 10 ? "0" : "" ) << h << ":"
+            //        << ( m < 10 ? "0" : "" ) << m << ":"
+            //        << ( s < 10 ? "0" : "" ) << s << ")";
+            //     glfwSetWindowTitle( m_window, ss.str().c_str() );
+            // }
+
+            break;
+        }
+
+        default: {
+            break;
+        }
+    }
+
+    return e; //m_surface->handle( e );
+
+    // if ( e.type == Event::Type::SIMULATION_START ) {
+    // }
+
+    // if ( e.type == Event::Type::SIMULATION_UPDATE ) {
+
+    // }
+
+    // const auto ret = System::handle( e );
+
+    // if ( ret.type == Event::Type::SIMULATION_STOP ) {
+    //     destroyWindow();
+    // }
+
+    // return ret;
+    // return e; // System::handle( e );
+}
+
+#if 0
 void WindowSystem::onInit( void ) noexcept
 {
     if ( !createWindow() ) {
@@ -182,10 +242,11 @@ void WindowSystem::onTerminate( void ) noexcept
 {
     destroyWindow();
 }
+#endif
 
-bool WindowSystem::createWindow( void )
+bool Window::createWindow( void )
 {
-    auto settings = Simulation::getInstance()->getSettings();
+    auto settings = Settings::getInstance();
 
     auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
     auto height = settings->get< crimild::Int32 >( "video.height", 768 );
@@ -223,10 +284,8 @@ bool WindowSystem::createWindow( void )
     // use discrete GPU by default, by disabling automatic graphics switching
     const auto enableGraphicsSwitching = settings->get< crimild::Bool >( "video.graphicsSwitching", false );
 
-    auto simName = Simulation::getInstance()->getName();
-    if ( simName == "" ) {
-        simName = "Crimild";
-    }
+    auto simName = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+
     auto vsync = settings->get< crimild::Bool >( "video.vsync", true );
 
     CRIMILD_LOG_DEBUG( "Creating window of size (", width, "x", height, ")" );
@@ -276,7 +335,7 @@ bool WindowSystem::createWindow( void )
             Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
         } );
 
-    broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
+    // broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
     glfwMakeContextCurrent( _window );
@@ -300,13 +359,9 @@ bool WindowSystem::createWindow( void )
     return true;
 }
 
-void WindowSystem::destroyWindow( void )
+void Window::destroyWindow( void )
 {
-    broadcastMessage( messages::WindowSystemWillDestroyWindow { this } );
+    glfwDestroyWindow( m_window );
 
-    // TODO: window is automatically destroyed when terminating simulator
-    // Calling this function here may result in an error if the window was
-    // already closed by the user (i.e. by pressing the "X" button) instead
-    // of triggering a termination by other means (i.e. pressing ESC).
-    //glfwDestroyWindow( m_window );
+    CRIMILD_LOG_INFO( "Window destroyed" );
 }

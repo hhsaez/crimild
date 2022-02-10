@@ -37,34 +37,34 @@ namespace crimild {
 
     namespace glfw {
 
-        class WindowSystem;
+        // class WindowSystem;
 
-        namespace messages {
+        // namespace messages {
 
-            struct WindowSystemDidStart {
-                WindowSystem *video;
-            };
+        //     struct WindowSystemDidStart {
+        //         WindowSystem *video;
+        //     };
 
-            struct WindowSystemWillStop {
-                WindowSystem *video;
-            };
+        //     struct WindowSystemWillStop {
+        //         WindowSystem *video;
+        //     };
 
-            struct WindowSystemWillUpdate {
-                WindowSystem *video;
-            };
+        //     struct WindowSystemWillUpdate {
+        //         WindowSystem *video;
+        //     };
 
-            struct WindowSystemDidUpdate {
-                WindowSystem *video;
-            };
+        //     struct WindowSystemDidUpdate {
+        //         WindowSystem *video;
+        //     };
 
-            struct WindowSystemDidCreateWindow {
-                WindowSystem *video;
-            };
+        //     struct WindowSystemDidCreateWindow {
+        //         WindowSystem *video;
+        //     };
 
-            struct WindowSystemWillDestroyWindow {
-                WindowSystem *video;
-            };
-        }
+        //     struct WindowSystemWillDestroyWindow {
+        //         WindowSystem *video;
+        //     };
+        // }
 
         /**
 		   \brief Handle window creation
@@ -73,9 +73,10 @@ namespace crimild {
             CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
 
         public:
-            void onInit( void ) noexcept override;
-            void update( void ) noexcept override;
-            void onTerminate( void ) noexcept override;
+            Event handle( const Event &e ) noexcept override;
+            // void onInit( void ) noexcept override;
+            // void update( void ) noexcept override;
+            // void onTerminate( void ) noexcept override;
 
         public:
             GLFWwindow *getWindowHandler( void ) { return m_window; }

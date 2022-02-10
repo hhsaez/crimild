@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,6 +30,7 @@
 
 #include "Foundation/Log.hpp"
 #include "Foundation/Memory.hpp"
+#include "Foundation/Singleton.hpp"
 
 #include <map>
 #include <sstream>
@@ -37,7 +38,7 @@
 
 namespace crimild {
 
-    class Settings : public SharedObject {
+    class Settings : public DynamicSingleton< Settings > {
     public:
         static const char *SETTINGS_APP_NAME;
         static const char *SETTINGS_APP_VERSION_MAJOR;
@@ -48,12 +49,6 @@ namespace crimild {
         static const char *SETTINGS_RENDERING_SHADOWS_RESOLUTION_HEIGHT;
 
     public:
-        Settings( void );
-
-        Settings( int argc, char **argv );
-
-        virtual ~Settings( void );
-
         virtual void load( std::string filename ) { }
 
         virtual void save( std::string filename ) { }

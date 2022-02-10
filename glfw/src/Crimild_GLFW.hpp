@@ -28,13 +28,6 @@
 #ifndef CRIMILD_GLFW_
 #define CRIMILD_GLFW_
 
-#include "Simulation/GLSimulation.hpp"
-#include "Simulation/Systems/EventSystem.hpp"
-#include "Simulation/Systems/GLFWSystem.hpp"
-#include "Simulation/Systems/GLFWVulkanSystem.hpp"
-#include "Simulation/Systems/InputSystem.hpp"
-#include "Simulation/Systems/WindowSystem.hpp"
-
 namespace crimild {
 
     namespace glfw {

@@ -39,7 +39,6 @@
 #include "Rendering/VulkanSwapchain.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/Simulation.hpp"
-#include "Simulation/Systems/WindowSystem.hpp"
 
 using namespace crimild;
 using namespace crimild::glfw;
@@ -47,13 +46,13 @@ using namespace crimild::vulkan;
 
 void GLFWVulkanSystem::onAttach( void ) noexcept
 {
-    registerMessageHandler< messages::WindowSystemDidCreateWindow >(
-        [ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
-            m_window = msg.video->getWindowHandler();
-        } );
+    // registerMessageHandler< messages::WindowSystemDidCreateWindow >(
+    //     [ this ]( messages::WindowSystemDidCreateWindow const &msg ) {
+    //         m_window = msg.video->getWindowHandler();
+    //     } );
 }
 
-SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descriptor const &descriptor ) noexcept
+SharedPointer< VulkanSurfaceOLD > GLFWVulkanSystem::create( VulkanSurfaceOLD::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
 
@@ -75,7 +74,7 @@ SharedPointer< VulkanSurface > GLFWVulkanSystem::create( VulkanSurface::Descript
         return nullptr;
     }
 
-    auto surface = crimild::alloc< VulkanSurface >();
+    auto surface = crimild::alloc< VulkanSurfaceOLD >();
     surface->handler = surfaceHandler;
     surface->instance = descriptor.instance;
     return surface;

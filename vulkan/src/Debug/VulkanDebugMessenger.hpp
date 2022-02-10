@@ -36,7 +36,7 @@ namespace crimild {
 
     namespace vulkan {
 
-        class VulkanInstance;
+        class VulkanInstanceOLD;
         class VulkanDebugMessengerManager;
 
         class VulkanDebugMessenger : public VulkanObject {
@@ -44,14 +44,14 @@ namespace crimild {
 
         public:
             struct Descriptor {
-                VulkanInstance *instance;
+                VulkanInstanceOLD *instance;
             };
 
         public:
             ~VulkanDebugMessenger( void );
 
             VulkanDebugMessengerManager *manager = nullptr;
-            VulkanInstance *instance = nullptr;
+            VulkanInstanceOLD *instance = nullptr;
             VkDebugUtilsMessengerEXT handler = VK_NULL_HANDLE;
         };
 
@@ -68,4 +68,3 @@ namespace crimild {
 }
 
 #endif
-

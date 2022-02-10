@@ -28,26 +28,46 @@
 #ifndef CRIMILD_VULKAN_RENDERING_INSTANCE_
 #define CRIMILD_VULKAN_RENDERING_INSTANCE_
 
-#include "VulkanPhysicalDevice.hpp"
 #include "Debug/VulkanDebugMessenger.hpp"
 #include "Foundation/VulkanObject.hpp"
+#include "VulkanPhysicalDevice.hpp"
 
 #include <vector>
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
+
+        class VulkanInstance {
+        public:
+            VulkanInstance( void ) noexcept;
+            ~VulkanInstance( void ) noexcept;
+
+            inline VkInstance getHandle( void ) noexcept { return m_instanceHandle; }
+
+        private:
+            void createInstance( void ) noexcept;
+            void destroyInstance( void ) noexcept;
+
+            void createDebugMessenger( void ) noexcept;
+            void destroyDebugMessenger( void ) noexcept;
+
+        private:
+            VkInstance m_instanceHandle = VK_NULL_HANDLE;
+            VkDebugUtilsMessengerEXT m_debugMessengerHandle = VK_NULL_HANDLE;
+        };
 
         class VulkanInstanceManager;
-		class VulkanSurface;
-		class VulkanRenderDevice;
-		class Swapchain;
+        class VulkanSurface;
+        class VulkanRenderDevice;
+        class Swapchain;
 
-		/**
+        /**
 		   \brief Handles creation and setup for the Vulkan instance
 		 */
-        class VulkanInstance : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanInstance )
+        class [[deprecated]] VulkanInstanceOLD : public VulkanObject
+        {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanInstanceOLD )
 
         public:
             struct Descriptor {
@@ -58,7 +78,7 @@ namespace crimild {
             };
 
         public:
-			~VulkanInstance( void );
+            ~VulkanInstanceOLD( void );
 
             VkInstance handler = VK_NULL_HANDLE;
 
@@ -68,46 +88,46 @@ namespace crimild {
             // standardized with other objects
             VulkanInstanceManager *manager = nullptr;
 
-			/**
+            /**
 			   \name Surface
 			 */
-			//@{
+            //@{
 
-//		public:
-//			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
-//			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
+            //		public:
+            //			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
+            //			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
 
-//		private:
-//			SharedPointer< VulkanSurface > m_surface;
+            //		private:
+            //			SharedPointer< VulkanSurface > m_surface;
 
-			//@}
+            //@}
 
-			/**
-			   \name Render Device			   
+            /**
+			   \name Render Device
 			 */
-			//@{
+            //@{
 
-//		public:
-//			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
-//			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
+            //		public:
+            //			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
+            //			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
 
-//		private:
-//			SharedPointer< VulkanRenderDevice > m_renderDevice;
+            //		private:
+            //			SharedPointer< VulkanRenderDevice > m_renderDevice;
 
-			//@}
-		};
+            //@}
+        };
 
-        class VulkanInstanceManager : public VulkanObjectManager< VulkanInstance > {
+        class [[deprecated]] VulkanInstanceManager : public VulkanObjectManager< VulkanInstanceOLD >
+        {
         public:
             virtual ~VulkanInstanceManager( void ) = default;
 
-            SharedPointer< VulkanInstance > create( VulkanInstance::Descriptor const &descriptor ) noexcept;
-            void destroy( VulkanInstance *instance ) noexcept override;
+            SharedPointer< VulkanInstanceOLD > create( VulkanInstanceOLD::Descriptor const &descriptor ) noexcept;
+            void destroy( VulkanInstanceOLD * instance ) noexcept override;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

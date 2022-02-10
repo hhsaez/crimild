@@ -92,7 +92,7 @@ namespace crimild {
             inline UInt32 getCurrentFrameId( void ) const noexcept { return m_currentFrame; }
 
         protected:
-            virtual SharedPointer< VulkanSurface > create( VulkanSurface::Descriptor const &descriptor ) noexcept { return nullptr; }
+            virtual SharedPointer< VulkanSurfaceOLD > create( VulkanSurfaceOLD::Descriptor const &descriptor ) noexcept { return nullptr; }
 
         private:
             crimild::Bool createInstance( void ) noexcept;
@@ -112,9 +112,9 @@ namespace crimild {
             void cleanSwapchain( void ) noexcept;
 
         private:
-            SharedPointer< VulkanInstance > m_instance;
+            SharedPointer< VulkanInstanceOLD > m_instance;
             SharedPointer< VulkanDebugMessenger > m_debugMessenger;
-            SharedPointer< VulkanSurface > m_surface;
+            SharedPointer< VulkanSurfaceOLD > m_surface;
             SharedPointer< PhysicalDevice > m_physicalDevice;
             SharedPointer< RenderDevice > m_renderDevice;
             SharedPointer< Swapchain > m_swapchain;

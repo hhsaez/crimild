@@ -29,28 +29,21 @@
 #define CRIMILD_SCRIPTING_SIMULATION_LUA_SETTINGS_
 
 #include <Simulation/Settings.hpp>
-
-#include <string>
-#include <sstream>
 #include <map>
+#include <sstream>
+#include <string>
 
 namespace crimild {
-    
+
     namespace scripting {
-        
+
         class LuaSettings : public Settings {
         public:
-            LuaSettings( void );
-            LuaSettings( int argc, char **argv, std::string filename = "" );
-            virtual ~LuaSettings( void );
-            
             virtual void load( std::string filename ) override;
             virtual void save( std::string filename ) override;
         };
     }
-    
+
 }
 
 #endif
-
-

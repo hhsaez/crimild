@@ -27,44 +27,29 @@
 
 #include "GLFWVulkanSurface.hpp"
 
+#include "Rendering/GLFWWindow.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Simulation/Simulation.hpp"
-#include "Simulation/Systems/WindowSystem.hpp"
 
 using namespace crimild;
-using namespace crimild::glfw;
-using namespace crimild::vulkan;
 
-SharedPointer< VulkanSurface > GLFWVulkanSurfaceManager::create( VulkanSurface::Descriptor const &descriptor ) noexcept
+glfw::VulkanSurface::VulkanSurface( vulkan::VulkanInstance *instance, Window *window ) noexcept
+    : vulkan::VulkanSurface(
+        instance,
+        [ & ] {
+            CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
+            VkSurfaceKHR handle;
+            auto result = glfwCreateWindowSurface(
+                instance->getHandle(),
+                window->getHandle(),
+                nullptr,
+                &handle );
+            if ( result != VK_SUCCESS ) {
+                CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
+                exit( -1 );
+            }
+            return handle;
+        }() )
 {
-
-    assert( false );
-    /*
-    CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
-
-    auto sim = Simulation::getInstance();
-    auto windowSystem = sim->getSystem< WindowSystem >();
-    auto window = windowSystem->getWindowHandler();
-
-    VkSurfaceKHR surfaceHandler;
-
-    auto result = glfwCreateWindowSurface(
-        descriptor.instance->handler,
-        window,
-        nullptr,
-        &surfaceHandler
-    );
-    if ( result != VK_SUCCESS ) {
-        CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
-        return nullptr;
-    }
-
-    auto surface = crimild::alloc< VulkanSurface >();
-    surface->handler = surfaceHandler;
-    surface->instance = descriptor.instance;
-    surface->manager = this;
-    insert( crimild::get_ptr( surface ) );
-    return surface;
-    */
-    return nullptr;
+    // no-op
 }

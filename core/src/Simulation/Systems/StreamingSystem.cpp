@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -38,9 +38,9 @@ using namespace crimild;
 
 StreamingSystem::StreamingSystem( void )
 {
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::AppendScene, StreamingSystem, onAppendScene );
-	CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
+	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
+	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::AppendScene, StreamingSystem, onAppendScene );
+	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
 }
 
 void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
@@ -51,7 +51,7 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
     if ( !_builders.contains( fileType ) ) {
         std::string message = "Cannot find builder for file" + fileName;
         crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
-        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+        // broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
         return;
     }
 
@@ -68,7 +68,7 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
             MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
             return;
         }
-        
+
         crimild::concurrency::sync_frame( [ scene ] {
             Simulation::getInstance()->setScene( scene );
         });
@@ -85,7 +85,7 @@ void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
     if ( !_builders.contains( fileType ) ) {
         std::string message = "Cannot find builder for file" + fileName;
         crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
-        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+        // broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
         return;
     }
 
@@ -99,7 +99,7 @@ void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
             MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
             return;
         }
-        
+
         crimild::concurrency::sync_frame( [ scene, onLoadSceneCallback, parent ] {
             auto parentNode = parent;
             if ( parentNode == nullptr ) {
@@ -130,7 +130,7 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
     if ( !_builders.contains( fileType ) ) {
         std::string message = "Cannot find builder for file" + fileName;
         crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, message );
-        broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
+        // broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
         return;
     }
 
@@ -149,11 +149,11 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
                 MessageQueue::getInstance()->broadcastMessage( messaging::SceneLoadFailed { fileName, message } );
                 return;
             }
-            
+
             crimild::concurrency::sync_frame( [ scene ] {
                 Simulation::getInstance()->setScene( scene );
             });
-        });        
+        });
     });
 }
 
