@@ -36,12 +36,12 @@
 
 namespace crimild {
 
-    class Swapchain
-        : public SharedObject,
-          public RTTI,
-          public DynamicSingleton< Swapchain > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Swapchain )
-
+    /**
+     * \brief A queue of rendered images waiting to be presented to the surface
+     *
+     * \todo This should not be a singleton, since we might have multiple swapchains (but only one per surface).
+     */
+    class Swapchain : public DynamicSingleton< Swapchain > {
     private:
         using ImageArray = Array< SharedPointer< Image > >;
         using ImageViewArray = Array< SharedPointer< ImageView > >;
@@ -49,10 +49,28 @@ namespace crimild {
     public:
         virtual ~Swapchain( void ) noexcept = default;
 
+        [[nodiscard]] inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
+        [[nodiscard]] inline const Format &getFormat( void ) const noexcept { return m_format; }
+
         inline ImageArray &getImages( void ) noexcept { return m_images; }
         inline ImageViewArray &getImageViews( void ) noexcept { return m_imageViews; };
 
+    protected:
+        inline void setExtent( const Extent2D &extent ) noexcept
+        {
+            m_extent = extent;
+            // Scaling mode is always fixed for the swapchain
+            m_extent.scalingMode = { ScalingMode::FIXED };
+        }
+
+        inline void setFormat( const Format &format ) noexcept
+        {
+            m_format = format;
+        }
+
     private:
+        Extent2D m_extent;
+        Format m_format = Format::UNDEFINED;
         ImageArray m_images;
         ImageViewArray m_imageViews;
     };

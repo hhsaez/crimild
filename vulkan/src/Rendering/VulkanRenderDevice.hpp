@@ -65,11 +65,23 @@ namespace crimild {
             RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept;
             virtual ~RenderDevice( void ) noexcept;
 
+            [[nodiscard]] inline const VkDevice &getHandle( void ) const noexcept { return m_handle; }
+
+            [[nodiscard]] inline const PhysicalDevice *getPhysicalDevice( void ) const noexcept { return m_physicalDevice; }
+            [[nodiscard]] inline const VulkanSurface *getSurface( void ) const noexcept { return m_surface; }
+
+            vulkan::Swapchain *createSwapchain( const Extent2D &extent ) noexcept;
+            [[nodiscard]] inline const Swapchain *getSwapchain( void ) const noexcept { return m_swapchain.get(); }
+            [[nodiscard]] inline Swapchain *getSwapchain( void ) noexcept { return m_swapchain.get(); }
+
         private:
             VkDevice m_handle = VK_NULL_HANDLE;
+            PhysicalDevice *m_physicalDevice = nullptr;
+            VulkanSurface *m_surface = nullptr;
             VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
             VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
             VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
+            std::unique_ptr< Swapchain > m_swapchain;
         };
 
         //////////////////////

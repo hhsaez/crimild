@@ -59,7 +59,7 @@ namespace crimild {
         public:
             virtual ~VulkanSurface( void ) noexcept;
 
-            [[nodiscard]] inline VkSurfaceKHR getHandle( void ) const noexcept { return m_handle; }
+            [[nodiscard]] inline const VkSurfaceKHR &getHandle( void ) const noexcept { return m_handle; }
 
         private:
             VulkanInstance *m_instance = nullptr;

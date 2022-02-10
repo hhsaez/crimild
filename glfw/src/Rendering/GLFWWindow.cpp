@@ -46,7 +46,19 @@ Window::Window( void ) noexcept
     m_surface = std::make_unique< glfw::VulkanSurface >( m_instance.get(), this );
 
     m_physicalDevice = m_instance->createPhysicalDevice( m_surface.get() );
+
     m_renderDevice = m_physicalDevice->createRenderDevice();
+    m_renderDevice->createSwapchain(
+        [] {
+            auto settings = Settings::getInstance();
+            const auto width = settings->get< Real >( "video.width", 1 );
+            const auto height = settings->get< Real >( "video.height", 1 );
+            const auto scale = settings->get< Real >( "video.framebufferScale", 1 );
+            return Extent2D {
+                .width = width * scale,
+                .height = height * scale,
+            };
+        }() );
 }
 
 Window::~Window( void ) noexcept

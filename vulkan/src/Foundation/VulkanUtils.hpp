@@ -98,7 +98,8 @@ namespace crimild {
             crimild::Bool formatIsColor( Format format ) noexcept;
             crimild::Bool formatIsDepthStencil( Format format ) noexcept;
             VkImageUsageFlags getAttachmentUsage( Attachment::Usage usage ) noexcept;
-            VkExtent2D getExtent( Extent2D extent, const RenderDeviceOLD *renderDevice ) noexcept;
+            VkExtent2D getExtent( const Extent2D &extent, const RenderDeviceOLD *renderDevice = nullptr ) noexcept;
+            Extent2D getExtent( const VkExtent2D &extent ) noexcept; //< Reverse
             VkAttachmentLoadOp getLoadOp( Attachment::LoadOp loadOp ) noexcept;
             VkAttachmentStoreOp getStoreOp( Attachment::StoreOp storeOp ) noexcept;
 

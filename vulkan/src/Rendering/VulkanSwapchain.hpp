@@ -40,14 +40,31 @@ namespace crimild {
 
     namespace vulkan {
 
+        class RenderDevice;
+        class VulkanSurface;
+
+        class Swapchain : public crimild::Swapchain {
+        public:
+            Swapchain( const RenderDevice *renderDevice, const Extent2D &extent ) noexcept;
+            virtual ~Swapchain( void ) noexcept;
+
+            [[nodiscard]] inline const VkSwapchainKHR &getHandle( void ) const noexcept { return m_handle; }
+
+        private:
+            VkSwapchainKHR m_handle = VK_NULL_HANDLE;
+            const RenderDevice *m_renderDevice = nullptr;
+        };
+
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
+
         class RenderDeviceOLD;
         class VulkanSurfaceOLD;
         class Semaphore;
         class SwapchainManager;
 
-        class Swapchain : public crimild::Swapchain {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Swapchain )
-
+        class SwapchainOLD : public crimild::Swapchain {
         public:
             struct Descriptor {
                 RenderDeviceOLD *renderDevice;
@@ -55,7 +72,7 @@ namespace crimild {
             };
 
         public:
-            ~Swapchain( void ) noexcept;
+            ~SwapchainOLD( void ) noexcept;
 
             RenderDeviceOLD *renderDevice = nullptr;
             VulkanSurfaceOLD *surface = nullptr;
@@ -81,17 +98,17 @@ namespace crimild {
             void createImageViews( void ) noexcept;
         };
 
-        class SwapchainManager : public VulkanObjectManager< Swapchain > {
+        class SwapchainManager : public VulkanObjectManager< SwapchainOLD > {
         public:
             explicit SwapchainManager( RenderDeviceOLD *renderDevice ) noexcept
                 : m_renderDevice( renderDevice ) { }
             virtual ~SwapchainManager( void ) = default;
 
-            Swapchain *getSwapchain( void ) noexcept { return VulkanObjectManager< Swapchain >::first(); }
-            const Swapchain *getSwapchain( void ) const noexcept { return VulkanObjectManager< Swapchain >::first(); }
+            SwapchainOLD *getSwapchain( void ) noexcept { return VulkanObjectManager< SwapchainOLD >::first(); }
+            const SwapchainOLD *getSwapchain( void ) const noexcept { return VulkanObjectManager< SwapchainOLD >::first(); }
 
-            SharedPointer< Swapchain > create( Swapchain::Descriptor const &descriptor ) noexcept;
-            void destroy( Swapchain *swapchain ) noexcept override;
+            SharedPointer< SwapchainOLD > create( SwapchainOLD::Descriptor const &descriptor ) noexcept;
+            void destroy( SwapchainOLD *swapchain ) noexcept override;
 
         private:
             VkSurfaceFormatKHR chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept;
