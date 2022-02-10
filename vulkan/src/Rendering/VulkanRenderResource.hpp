@@ -38,22 +38,22 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
+        class RenderDeviceOLD;
 
         template< typename T >
         class VulkanRenderResourceManager : public RenderResourceManager< T > {
         protected:
-            VulkanRenderResourceManager( RenderDevice *renderDevice = nullptr ) noexcept
+            VulkanRenderResourceManager( RenderDeviceOLD *renderDevice = nullptr ) noexcept
                 : m_renderDevice( renderDevice ) { }
 
         public:
             virtual ~VulkanRenderResourceManager( void ) noexcept = default;
 
-            RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
-            const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+            RenderDeviceOLD *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            const RenderDeviceOLD *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
         template<
@@ -61,23 +61,23 @@ namespace crimild {
             typename HANDLER_TYPE >
         class VulkanRenderResourceManagerImpl : public RenderResourceManager< RESOURCE_TYPE > {
         protected:
-            VulkanRenderResourceManagerImpl( RenderDevice *renderDevice = nullptr ) noexcept
+            VulkanRenderResourceManagerImpl( RenderDeviceOLD *renderDevice = nullptr ) noexcept
                 : m_renderDevice( renderDevice )
             {
                 if ( m_renderDevice == nullptr ) {
                     // If render device is null, assume that we're the render device
-                    m_renderDevice = static_cast< RenderDevice * >( this );
+                    m_renderDevice = static_cast< RenderDeviceOLD * >( this );
                 }
             }
 
         public:
             virtual ~VulkanRenderResourceManagerImpl( void ) noexcept = default;
 
-            RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
-            const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+            RenderDeviceOLD *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            const RenderDeviceOLD *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
         template< typename ResourceType, typename BindInfoType >

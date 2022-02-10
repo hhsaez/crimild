@@ -28,19 +28,39 @@
 #ifndef CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 #define CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 
-#include "Foundation/VulkanObject.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Foundation/VulkanObject.hpp"      // TODO: Remove this?
+#include "Rendering/VulkanRenderDevice.hpp" // TODO: Remove this?
 
 namespace crimild {
 
     namespace vulkan {
 
+        class VulkanInstance;
+        class VulkanSurface;
+
+        class PhysicalDevice {
+        public:
+            PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept;
+            ~PhysicalDevice( void ) noexcept;
+
+            [[nodiscard]] inline VkPhysicalDevice getHandle( void ) noexcept { return m_handle; }
+
+        private:
+            VkPhysicalDevice m_handle = VK_NULL_HANDLE;
+            VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+        };
+
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
+
         class VulkanInstanceOLD;
         class VulkanSurfaceOLD;
         class PhysicalDeviceManager;
 
-        class PhysicalDevice : public VulkanObject, public RenderDeviceManager {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PhysicalDevice )
+        class [[deprecated]] PhysicalDeviceOLD : public VulkanObject, public RenderDeviceManager
+        {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PhysicalDeviceOLD )
         public:
             using RenderDeviceManager::create;
 
@@ -50,8 +70,8 @@ namespace crimild {
             };
 
         public:
-            PhysicalDevice( void );
-            ~PhysicalDevice( void );
+            PhysicalDeviceOLD( void );
+            ~PhysicalDeviceOLD( void );
 
             VkPhysicalDevice handler = VK_NULL_HANDLE;
             VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -61,12 +81,12 @@ namespace crimild {
         };
 
         // TODO: How to handle an optional surface param?
-        class PhysicalDeviceManager : public VulkanObjectManager< PhysicalDevice > {
+        class PhysicalDeviceManager : public VulkanObjectManager< PhysicalDeviceOLD > {
         public:
             virtual ~PhysicalDeviceManager( void ) = default;
 
-            SharedPointer< PhysicalDevice > create( PhysicalDevice::Descriptor const &descriptor ) noexcept;
-            void destroy( PhysicalDevice *physicalDevice ) noexcept override;
+            SharedPointer< PhysicalDeviceOLD > create( PhysicalDeviceOLD::Descriptor const &descriptor ) noexcept;
+            void destroy( PhysicalDeviceOLD *physicalDevice ) noexcept override;
 
         private:
             VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;

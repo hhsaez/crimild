@@ -57,12 +57,22 @@ namespace crimild {
 
     namespace vulkan {
 
-        class PhysicalDevice;
+        class RenderDevice {
+        public:
+            // RenderDevice( VulkanInstance *instance ) noexcept;
+            // virtual ~RenderDevice( void ) noexcept;
+        };
+
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
+
+        class PhysicalDeviceOLD;
         class RenderDeviceManager;
         class VulkanInstanceOLD;
         class VulkanSurfaceOLD;
 
-        class RenderDevice
+        class [[deprecated]] RenderDeviceOLD
             : public VulkanObject,
               public CommandBufferManager,
               public CommandPoolManager,
@@ -84,8 +94,9 @@ namespace crimild {
               public StorageBufferManager,
               public TextureManager,
               public UniformBufferManager,
-              public VertexBufferManager {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDevice )
+              public VertexBufferManager
+        {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDeviceOLD )
 
         public:
             using CommandBufferManager::bind;
@@ -128,15 +139,15 @@ namespace crimild {
             using VertexBufferManager::getBindInfo;
 
             struct Descriptor {
-                PhysicalDevice *physicalDevice;
+                PhysicalDeviceOLD *physicalDevice;
             };
 
         public:
-            RenderDevice( void );
-            ~RenderDevice( void );
+            RenderDeviceOLD( void );
+            ~RenderDeviceOLD( void );
 
             VkDevice handler = VK_NULL_HANDLE;
-            PhysicalDevice *physicalDevice = nullptr;
+            PhysicalDeviceOLD *physicalDevice = nullptr;
             VulkanSurfaceOLD *surface = nullptr;
             RenderDeviceManager *manager = nullptr;
             VkQueue graphicsQueue;
@@ -145,22 +156,22 @@ namespace crimild {
 
         public:
             void submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
-            void submitComputeCommands( CommandBuffer *commands ) noexcept;
-            void submit( CommandBuffer *commands, crimild::Bool wait ) noexcept;
+            void submitComputeCommands( CommandBuffer * commands ) noexcept;
+            void submit( CommandBuffer * commands, crimild::Bool wait ) noexcept;
             void waitIdle( void ) const noexcept;
         };
 
-        class RenderDeviceManager : public VulkanObjectManager< RenderDevice > {
+        class RenderDeviceManager : public VulkanObjectManager< RenderDeviceOLD > {
         public:
-            explicit RenderDeviceManager( PhysicalDevice *physicalDevice = nullptr ) noexcept
+            explicit RenderDeviceManager( PhysicalDeviceOLD *physicalDevice = nullptr ) noexcept
                 : m_physicalDevice( physicalDevice ) { }
             virtual ~RenderDeviceManager( void ) = default;
 
-            SharedPointer< RenderDevice > create( RenderDevice::Descriptor const &descriptor ) noexcept;
-            void destroy( RenderDevice *renderDevice ) noexcept override;
+            SharedPointer< RenderDeviceOLD > create( RenderDeviceOLD::Descriptor const &descriptor ) noexcept;
+            void destroy( RenderDeviceOLD *renderDevice ) noexcept override;
 
         private:
-            PhysicalDevice *m_physicalDevice = nullptr;
+            PhysicalDeviceOLD *m_physicalDevice = nullptr;
         };
 
     }

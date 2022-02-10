@@ -42,10 +42,12 @@ Window::Window( void ) noexcept
 
     m_instance = std::make_unique< vulkan::VulkanInstance >();
     m_surface = std::make_unique< glfw::VulkanSurface >( m_instance.get(), this );
+    m_physicalDevice = m_instance->createPhysicalDevice( m_surface.get() );
 }
 
 Window::~Window( void ) noexcept
 {
+    m_physicalDevice = nullptr;
     m_surface = nullptr;
     m_instance = nullptr;
 

@@ -148,7 +148,7 @@ VkFilter utils::getSamplerFilter( Sampler::Filter filter ) noexcept
     }
 }
 
-VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderDeviceOLD *renderDevice ) noexcept
 {
     auto x = viewport->dimensions.origin.x;
     auto y = viewport->dimensions.origin.y;
@@ -193,7 +193,7 @@ VkViewport utils::getViewport( const ViewportDimensions *viewport, const RenderD
     };
 }
 
-VkRect2D utils::getViewportRect( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+VkRect2D utils::getViewportRect( const ViewportDimensions *viewport, const RenderDeviceOLD *renderDevice ) noexcept
 {
     auto x = viewport->dimensions.origin.x;
     auto y = viewport->dimensions.origin.y;
@@ -224,7 +224,7 @@ VkRect2D utils::getViewportRect( const ViewportDimensions *viewport, const Rende
     };
 }
 
-VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDevice *renderDevice ) noexcept
+VkRect2D utils::getScissor( const ViewportDimensions *viewport, const RenderDeviceOLD *renderDevice ) noexcept
 {
     return getViewportRect( viewport, renderDevice );
 }
@@ -332,7 +332,7 @@ VkBorderColor utils::getBorderColor( Sampler::BorderColor borderColor ) noexcept
     }
 }
 
-VkFormat utils::getFormat( RenderDevice *renderDevice, Format format ) noexcept
+VkFormat utils::getFormat( RenderDeviceOLD *renderDevice, Format format ) noexcept
 {
     switch ( format ) {
         case Format::R8_UNORM:
@@ -537,7 +537,7 @@ VkImageLayout utils::getImageLayout( Image::Layout layout ) noexcept
 }
 */
 
-VkExtent2D utils::getExtent( Extent2D extent, const RenderDevice *renderDevice ) noexcept
+VkExtent2D utils::getExtent( Extent2D extent, const RenderDeviceOLD *renderDevice ) noexcept
 {
     auto width = extent.width;
     auto height = extent.height;
@@ -873,7 +873,7 @@ crimild::UInt32 utils::findMemoryType( const VkPhysicalDevice &physicalDevice, c
     return -1;
 }
 
-crimild::Bool utils::createBuffer( RenderDevice *renderDevice, BufferDescriptor const &descriptor, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept
+crimild::Bool utils::createBuffer( RenderDeviceOLD *renderDevice, BufferDescriptor const &descriptor, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept
 {
     auto createInfo = VkBufferCreateInfo {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -963,7 +963,7 @@ crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &buffe
     return true;
 }
 
-crimild::Bool utils::copyBuffer( RenderDevice *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept
+crimild::Bool utils::copyBuffer( RenderDeviceOLD *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -978,7 +978,7 @@ crimild::Bool utils::copyBuffer( RenderDevice *renderDevice, VkBuffer src, VkBuf
     return true;
 }
 
-crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept
+crimild::Bool utils::createImage( RenderDeviceOLD *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept
 {
     auto createInfo = VkImageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -1034,7 +1034,7 @@ crimild::Bool utils::createImage( RenderDevice *renderDevice, ImageDescriptor co
     return true;
 }
 
-void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept
+void utils::transitionImageLayout( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -1103,7 +1103,7 @@ void utils::transitionImageLayout( RenderDevice *renderDevice, VkImage image, Vk
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
 
-void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept
+void utils::copyBufferToImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -1136,7 +1136,7 @@ void utils::copyBufferToImage( RenderDevice *renderDevice, VkBuffer buffer, VkIm
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
 
-void utils::copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept
+void utils::copyBufferToLayeredImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept
 {
     auto commandBuffer = beginSingleTimeCommands( renderDevice );
 
@@ -1172,7 +1172,7 @@ void utils::copyBufferToLayeredImage( RenderDevice *renderDevice, VkBuffer buffe
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
 
-void utils::generateMipmaps( RenderDevice *renderDevice, VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept
+void utils::generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept
 {
     // Check if image format supports linear blitting
     auto physicalDevice = renderDevice->physicalDevice->handler;
@@ -1364,7 +1364,7 @@ VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
     }
 }
 
-VkFormat utils::getImageViewFormat( RenderDevice *renderDevice, ImageView *imageView ) noexcept
+VkFormat utils::getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *imageView ) noexcept
 {
     auto format = imageView->format;
     if ( format == Format::UNDEFINED ) {
@@ -1407,7 +1407,7 @@ VkSampleCountFlagBits utils::getMaxUsableSampleCount( VkPhysicalDevice physicalD
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-VkFormat utils::findSupportedFormat( RenderDevice *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept
+VkFormat utils::findSupportedFormat( RenderDeviceOLD *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept
 {
     auto physicalDevice = renderDevice->physicalDevice->handler;
 
@@ -1426,7 +1426,7 @@ VkFormat utils::findSupportedFormat( RenderDevice *renderDevice, const std::vect
     return VK_FORMAT_UNDEFINED;
 }
 
-VkFormat utils::findDepthFormat( RenderDevice *renderDevice ) noexcept
+VkFormat utils::findDepthFormat( RenderDeviceOLD *renderDevice ) noexcept
 {
     return findSupportedFormat(
         renderDevice,
@@ -1444,7 +1444,7 @@ crimild::Bool utils::hasStencilComponent( VkFormat format ) noexcept
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-VkCommandBuffer utils::beginSingleTimeCommands( RenderDevice *renderDevice ) noexcept
+VkCommandBuffer utils::beginSingleTimeCommands( RenderDeviceOLD *renderDevice ) noexcept
 {
     auto commandPool = renderDevice->getCommandPool();
 
@@ -1473,7 +1473,7 @@ VkCommandBuffer utils::beginSingleTimeCommands( RenderDevice *renderDevice ) noe
     return commandBuffer;
 }
 
-void utils::endSingleTimeCommands( RenderDevice *renderDevice, VkCommandBuffer commandBuffer ) noexcept
+void utils::endSingleTimeCommands( RenderDeviceOLD *renderDevice, VkCommandBuffer commandBuffer ) noexcept
 {
     vkEndCommandBuffer( commandBuffer );
 

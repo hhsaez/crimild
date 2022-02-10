@@ -221,7 +221,7 @@ crimild::Bool VulkanSystem::createSurface( void ) noexcept
 crimild::Bool VulkanSystem::createPhysicalDevice( void ) noexcept
 {
     m_physicalDevice = create(
-        PhysicalDevice::Descriptor {
+        PhysicalDeviceOLD::Descriptor {
             .instance = crimild::get_ptr( m_instance ),
             .surface = crimild::get_ptr( m_surface ) } );
     return m_physicalDevice != nullptr;
@@ -229,7 +229,7 @@ crimild::Bool VulkanSystem::createPhysicalDevice( void ) noexcept
 
 crimild::Bool VulkanSystem::createRenderDevice( void ) noexcept
 {
-    m_renderDevice = m_physicalDevice->create( RenderDevice::Descriptor {} );
+    m_renderDevice = m_physicalDevice->create( RenderDeviceOLD::Descriptor {} );
     return m_renderDevice != nullptr;
 }
 

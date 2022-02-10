@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,54 +32,54 @@
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
         class FenceManager;
-		class RenderDevice;
+        class RenderDeviceOLD;
 
-		/**
+        /**
 		   \brief Implements a Vulkan fence
 
 		   Fences are used to inform the application about some work being finished. An
-		   application can acquire the state of a fence and, based on the acquired 
+		   application can acquire the state of a fence and, based on the acquired
 		   information, check whether some commands are still being processed or whether
 		   they have finished the assigned tasks.
 		 */
-		class Fence : public VulkanObject {
+        class Fence : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Fence )
 
         public:
             struct Descriptor {
-                RenderDevice *renderDevice;
+                RenderDeviceOLD *renderDevice;
             };
 
-		public:
-			~Fence( void ) noexcept;
+        public:
+            ~Fence( void ) noexcept;
 
             VkFence handler = VK_NULL_HANDLE;
-            RenderDevice *renderDevice = nullptr;
+            RenderDeviceOLD *renderDevice = nullptr;
             FenceManager *manager = nullptr;
 
         public:
-			void wait( crimild::UInt64 timeout = std::numeric_limits< crimild::UInt64 >::max() ) const noexcept;
-			void reset( void ) const noexcept;
-		};
+            void wait( crimild::UInt64 timeout = std::numeric_limits< crimild::UInt64 >::max() ) const noexcept;
+            void reset( void ) const noexcept;
+        };
 
         class FenceManager : public VulkanObjectManager< Fence > {
         public:
-            explicit FenceManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit FenceManager( RenderDeviceOLD *renderDevice = nullptr ) noexcept
+                : m_renderDevice( renderDevice ) { }
             virtual ~FenceManager( void ) noexcept = default;
 
             SharedPointer< Fence > create( Fence::Descriptor const &descriptor ) noexcept;
             void destroy( Fence *fence ) noexcept override;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

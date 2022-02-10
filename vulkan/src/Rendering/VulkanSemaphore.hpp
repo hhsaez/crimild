@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,49 +32,49 @@
 
 namespace crimild {
 
-	namespace vulkan {
+    namespace vulkan {
 
-		class RenderDevice;
+        class RenderDeviceOLD;
         class SemaphoreManager;
 
-		/**
+        /**
 		   \brief Implements a Vulkan semaphore
 
 		   Semaphores are used to synchronize device's queues. When commands are submitted
 		   for processing, they may require other jobs to be finished first. We can specify that
 		   the former ones wait for them to complete before they're executed by using semaphores.
 		 */
-		class Semaphore : public VulkanObject {
-			CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
+        class Semaphore : public VulkanObject {
+            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
 
         public:
             struct Descriptor {
-                RenderDevice *renderDevice;
+                RenderDeviceOLD *renderDevice;
             };
 
-		public:
-			~Semaphore( void );
+        public:
+            ~Semaphore( void );
 
-            RenderDevice *renderDevice = nullptr;
+            RenderDeviceOLD *renderDevice = nullptr;
             VkSemaphore handler = VK_NULL_HANDLE;
             SemaphoreManager *manager = nullptr;
-		};
+        };
 
         class SemaphoreManager : public VulkanObjectManager< Semaphore > {
         public:
-            explicit SemaphoreManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit SemaphoreManager( RenderDeviceOLD *renderDevice = nullptr ) noexcept
+                : m_renderDevice( renderDevice ) { }
             virtual ~SemaphoreManager( void ) noexcept = default;
 
             SharedPointer< Semaphore > create( Semaphore::Descriptor const &descriptor ) noexcept;
             void destroy( Semaphore *semaphore ) noexcept override;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
-	}
+    }
 
 }
-	
+
 #endif
-	

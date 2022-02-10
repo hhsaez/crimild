@@ -40,7 +40,7 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
+        class RenderDeviceOLD;
         class VulkanSurfaceOLD;
         class Semaphore;
         class SwapchainManager;
@@ -50,14 +50,14 @@ namespace crimild {
 
         public:
             struct Descriptor {
-                RenderDevice *renderDevice;
+                RenderDeviceOLD *renderDevice;
                 crimild::Vector2ui extent;
             };
 
         public:
             ~Swapchain( void ) noexcept;
 
-            RenderDevice *renderDevice = nullptr;
+            RenderDeviceOLD *renderDevice = nullptr;
             VulkanSurfaceOLD *surface = nullptr;
             VkSwapchainKHR handler = VK_NULL_HANDLE;
             VkFormat format;
@@ -83,7 +83,7 @@ namespace crimild {
 
         class SwapchainManager : public VulkanObjectManager< Swapchain > {
         public:
-            explicit SwapchainManager( RenderDevice *renderDevice ) noexcept
+            explicit SwapchainManager( RenderDeviceOLD *renderDevice ) noexcept
                 : m_renderDevice( renderDevice ) { }
             virtual ~SwapchainManager( void ) = default;
 
@@ -99,7 +99,7 @@ namespace crimild {
             VkExtent2D chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
     }

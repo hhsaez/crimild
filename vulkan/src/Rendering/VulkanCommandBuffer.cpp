@@ -118,7 +118,7 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
     return ManagerImpl::unbind( commandBuffer );
 }
 
-void CommandBufferManager::recordCommands( RenderDevice *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept
+void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept
 {
     auto handler = getBindInfo( commandBuffer ).handler;
     if ( handler == VK_NULL_HANDLE ) {

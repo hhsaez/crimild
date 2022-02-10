@@ -28,8 +28,8 @@
 #ifndef CRIMILD_RENDERING_VULKAN_PIPELINE_LAYOUT_
 #define CRIMILD_RENDERING_VULKAN_PIPELINE_LAYOUT_
 
-#include "Foundation/VulkanObject.hpp"
 #include "Foundation/Containers/Array.hpp"
+#include "Foundation/VulkanObject.hpp"
 
 namespace crimild {
 
@@ -37,7 +37,7 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
+        class RenderDeviceOLD;
         class PipelineLayoutManager;
 
         class PipelineLayout : public VulkanObject {
@@ -45,28 +45,29 @@ namespace crimild {
 
         public:
             struct Descriptor {
-                RenderDevice *renderDevice;
+                RenderDeviceOLD *renderDevice;
                 Array< DescriptorSetLayout * > setLayouts;
             };
 
         public:
             ~PipelineLayout( void );
 
-            RenderDevice *renderDevice = nullptr;
+            RenderDeviceOLD *renderDevice = nullptr;
             PipelineLayoutManager *manager = nullptr;
             VkPipelineLayout handler = VK_NULL_HANDLE;
         };
 
         class PipelineLayoutManager : public VulkanObjectManager< PipelineLayout > {
         public:
-            explicit PipelineLayoutManager( RenderDevice *renderDevice = nullptr ) noexcept : m_renderDevice( renderDevice ) { }
+            explicit PipelineLayoutManager( RenderDeviceOLD *renderDevice = nullptr ) noexcept
+                : m_renderDevice( renderDevice ) { }
             virtual ~PipelineLayoutManager( void ) noexcept = default;
 
             SharedPointer< PipelineLayout > create( PipelineLayout::Descriptor const &descriptor ) noexcept;
             void destroy( PipelineLayout *pipelineLayout ) noexcept;
 
         private:
-            RenderDevice *m_renderDevice = nullptr;
+            RenderDeviceOLD *m_renderDevice = nullptr;
         };
 
     }
@@ -74,5 +75,3 @@ namespace crimild {
 }
 
 #endif
-
-
