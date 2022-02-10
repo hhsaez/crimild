@@ -57,10 +57,19 @@ namespace crimild {
 
     namespace vulkan {
 
+        class PhysicalDevice;
+        class VulkanSurface;
+
         class RenderDevice {
         public:
-            // RenderDevice( VulkanInstance *instance ) noexcept;
-            // virtual ~RenderDevice( void ) noexcept;
+            RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept;
+            virtual ~RenderDevice( void ) noexcept;
+
+        private:
+            VkDevice m_handle = VK_NULL_HANDLE;
+            VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
+            VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
+            VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
         };
 
         //////////////////////

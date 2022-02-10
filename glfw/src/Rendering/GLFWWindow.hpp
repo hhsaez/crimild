@@ -38,6 +38,12 @@
 
 namespace crimild {
 
+    namespace vulkan {
+
+        class RenderDevice;
+
+    }
+
     namespace glfw {
 
         /**
@@ -70,6 +76,8 @@ namespace crimild {
 
             // TODO: For a multi-device setup, we should move the physical device outside of this class
             std::unique_ptr< vulkan::PhysicalDevice > m_physicalDevice;
+
+            std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
         };
 
     }

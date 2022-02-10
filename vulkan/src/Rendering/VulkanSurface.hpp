@@ -44,6 +44,7 @@ namespace crimild {
 		   modes.
 
 		   \remarks The surface must be created by each platform
+           \todo Rename to Surface
 		 */
         class VulkanSurface {
         protected:

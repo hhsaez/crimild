@@ -25,9 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanSurface.hpp"
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanFence.hpp"
@@ -35,16 +37,102 @@
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
 #include "VulkanInstance.hpp"
-#include "VulkanPhysicalDevice.hpp"
 #include "VulkanRenderPass.hpp"
 #include "VulkanSemaphore.hpp"
-#include "VulkanSurface.hpp"
 #include "VulkanSwapchain.hpp"
 
 #include <set>
 
 using namespace crimild;
 using namespace crimild::vulkan;
+
+RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
+
+    auto indices = utils::findQueueFamilies( physicalDevice->getHandle(), surface->getHandle() );
+    if ( !indices.isComplete() ) {
+        // Should never happen
+        CRIMILD_LOG_FATAL( "Invalid physical device" );
+        exit( -1 );
+    }
+
+    // Make sure we're creating queue for unique families,
+    // since both graphics and presenatation might be same family
+    // \see utils::findQueueFamilies()
+    std::unordered_set< crimild::UInt32 > uniqueQueueFamilies = {
+        indices.graphicsFamily[ 0 ],
+        indices.computeFamily[ 0 ],
+        indices.presentFamily[ 0 ],
+    };
+
+    // Required even if there's only one queue
+    auto queuePriority = 1.0f;
+
+    std::vector< VkDeviceQueueCreateInfo > queueCreateInfos;
+    for ( auto queueFamily : uniqueQueueFamilies ) {
+        auto createInfo = VkDeviceQueueCreateInfo {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = queueFamily,
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority
+        };
+        queueCreateInfos.push_back( createInfo );
+    }
+
+    // Set the requried device features
+    auto deviceFeatures = VkPhysicalDeviceFeatures {
+        .fillModeNonSolid = VK_TRUE,
+        .samplerAnisotropy = VK_TRUE,
+    };
+
+    const auto &deviceExtensions = utils::getDeviceExtensions();
+    // deviceExtensions.push_back( "VK_KHR_portability_subset" );
+
+    auto createInfo = VkDeviceCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .queueCreateInfoCount = static_cast< crimild::UInt32 >( queueCreateInfos.size() ),
+        .pQueueCreateInfos = queueCreateInfos.data(),
+        .enabledLayerCount = 0,
+        .enabledExtensionCount = static_cast< crimild::UInt32 >( deviceExtensions.size() ),
+        .ppEnabledExtensionNames = deviceExtensions.data(),
+        .pEnabledFeatures = &deviceFeatures,
+    };
+
+    if ( utils::checkValidationLayersEnabled() ) {
+        // New Vulkan implementations seem to be ignoring validation layers per device
+        // Still, it might be a good idea to register them here for backward compatibility
+        const auto &validationLayers = utils::getValidationLayers();
+        createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDevice(
+            physicalDevice->getHandle(),
+            &createInfo,
+            nullptr,
+            &m_handle ) );
+
+    // Fetch device queues
+    vkGetDeviceQueue( m_handle, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueueHandle );
+    vkGetDeviceQueue( m_handle, indices.computeFamily[ 0 ], 0, &m_computeQueueHandle );
+    vkGetDeviceQueue( m_handle, indices.presentFamily[ 0 ], 0, &m_presentQueueHandle );
+}
+
+RenderDevice::~RenderDevice( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
+
+    if ( m_handle != VK_NULL_HANDLE ) {
+        vkDestroyDevice( m_handle, nullptr );
+    }
+
+    m_handle = VK_NULL_HANDLE;
+    m_graphicsQueueHandle = VK_NULL_HANDLE;
+    m_computeQueueHandle = VK_NULL_HANDLE;
+    m_presentQueueHandle = VK_NULL_HANDLE;
+}
 
 RenderDeviceOLD::RenderDeviceOLD( void )
     : CommandPoolManager( this ),
@@ -160,96 +248,7 @@ void RenderDeviceOLD::waitIdle( void ) const noexcept
 
 SharedPointer< RenderDeviceOLD > RenderDeviceManager::create( RenderDeviceOLD::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
-
-    auto physicalDevice = m_physicalDevice;
-    if ( physicalDevice == nullptr ) {
-        physicalDevice = descriptor.physicalDevice;
-    }
-
-    auto surface = physicalDevice->surface;
-
-    auto indices = utils::findQueueFamilies( physicalDevice->handler, surface->handler );
-    if ( !indices.isComplete() ) {
-        // Should never happen
-        CRIMILD_LOG_ERROR( "Invalid physical device" );
-        return nullptr;
-    }
-
-    // Make sure we're creating queue for unique families,
-    // since both graphics and presenatation might be same family
-    // \see utils::findQueueFamilies()
-    std::unordered_set< crimild::UInt32 > uniqueQueueFamilies = {
-        indices.graphicsFamily[ 0 ],
-        indices.computeFamily[ 0 ],
-        indices.presentFamily[ 0 ],
-    };
-
-    // Required even if there's only one queue
-    auto queuePriority = 1.0f;
-
-    std::vector< VkDeviceQueueCreateInfo > queueCreateInfos;
-    for ( auto queueFamily : uniqueQueueFamilies ) {
-        auto createInfo = VkDeviceQueueCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-            .queueFamilyIndex = queueFamily,
-            .queueCount = 1,
-            .pQueuePriorities = &queuePriority
-        };
-        queueCreateInfos.push_back( createInfo );
-    }
-
-    // Set the requried device features
-    auto deviceFeatures = VkPhysicalDeviceFeatures {
-        .fillModeNonSolid = VK_TRUE,
-        .samplerAnisotropy = VK_TRUE,
-    };
-
-    const auto &deviceExtensions = utils::getDeviceExtensions();
-
-    auto createInfo = VkDeviceCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .queueCreateInfoCount = static_cast< crimild::UInt32 >( queueCreateInfos.size() ),
-        .pQueueCreateInfos = queueCreateInfos.data(),
-        .enabledLayerCount = 0,
-        .enabledExtensionCount = static_cast< crimild::UInt32 >( deviceExtensions.size() ),
-        .ppEnabledExtensionNames = deviceExtensions.data(),
-        .pEnabledFeatures = &deviceFeatures,
-    };
-
-    if ( utils::checkValidationLayersEnabled() ) {
-        // New Vulkan implementations seem to be ignoring validation layers per device
-        // Still, it might be a good idea to register them here for backward compatibility
-        const auto &validationLayers = utils::getValidationLayers();
-        createInfo.enabledLayerCount = static_cast< crimild::UInt32 >( validationLayers.size() );
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-    }
-
-    VkDevice deviceHandler;
-    CRIMILD_VULKAN_CHECK(
-        vkCreateDevice(
-            physicalDevice->handler,
-            &createInfo,
-            nullptr,
-            &deviceHandler ) );
-
-    // Fetch device queues
-    VkQueue graphisQueueHandler, computeQueueHandler, presentQueueHandler;
-    vkGetDeviceQueue( deviceHandler, indices.graphicsFamily[ 0 ], 0, &graphisQueueHandler );
-    vkGetDeviceQueue( deviceHandler, indices.computeFamily[ 0 ], 0, &computeQueueHandler );
-    vkGetDeviceQueue( deviceHandler, indices.presentFamily[ 0 ], 0, &presentQueueHandler );
-
-    auto renderDevice = crimild::alloc< RenderDeviceOLD >();
-    renderDevice->handler = deviceHandler;
-    renderDevice->physicalDevice = physicalDevice;
-    renderDevice->surface = surface;
-    renderDevice->manager = this;
-    renderDevice->graphicsQueue = graphisQueueHandler;
-    renderDevice->computeQueue = computeQueueHandler;
-    renderDevice->presentQueue = presentQueueHandler;
-    insert( crimild::get_ptr( renderDevice ) );
-
-    return renderDevice;
+    return nullptr;
 }
 
 void RenderDeviceManager::destroy( RenderDeviceOLD *renderDevice ) noexcept

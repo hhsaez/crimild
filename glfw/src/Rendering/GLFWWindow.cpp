@@ -41,12 +41,17 @@ Window::Window( void ) noexcept
     }
 
     m_instance = std::make_unique< vulkan::VulkanInstance >();
+
+    // TODO: I think the surface should be created by the instance
     m_surface = std::make_unique< glfw::VulkanSurface >( m_instance.get(), this );
+
     m_physicalDevice = m_instance->createPhysicalDevice( m_surface.get() );
+    m_renderDevice = m_physicalDevice->createRenderDevice();
 }
 
 Window::~Window( void ) noexcept
 {
+    m_renderDevice = nullptr;
     m_physicalDevice = nullptr;
     m_surface = nullptr;
     m_instance = nullptr;

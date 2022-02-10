@@ -25,10 +25,11 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanPhysicalDevice.hpp"
 
-#include "VulkanInstance.hpp"
-#include "VulkanSurface.hpp"
+#include "Rendering/VulkanInstance.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanSurface.hpp"
 
 namespace crimild {
 
@@ -96,13 +97,14 @@ PhysicalDevice::PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
 
-    auto physicalDeviceHandler = utils::pickPhysicalDevice( instance, surface );
-    if ( physicalDeviceHandler == VK_NULL_HANDLE ) {
+    m_handle = utils::pickPhysicalDevice( instance, surface );
+    if ( m_handle == VK_NULL_HANDLE ) {
         CRIMILD_LOG_FATAL( "Failed to pick physical device" );
         exit( -1 );
     }
 
-    m_msaaSamples = utils::getMaxUsableSampleCount( physicalDeviceHandler );
+    m_surface = surface;
+    m_msaaSamples = utils::getMaxUsableSampleCount( m_handle );
 }
 
 PhysicalDevice::~PhysicalDevice( void ) noexcept
@@ -111,6 +113,12 @@ PhysicalDevice::~PhysicalDevice( void ) noexcept
 
     // No need to destroy anything. Just reset members
     m_handle = VK_NULL_HANDLE;
+    m_surface = nullptr;
+}
+
+std::unique_ptr< RenderDevice > PhysicalDevice::createRenderDevice( void ) noexcept
+{
+    return std::make_unique< RenderDevice >( this, m_surface );
 }
 
 //////////////////////

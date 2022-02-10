@@ -37,6 +37,7 @@ namespace crimild {
 
         class VulkanInstance;
         class VulkanSurface;
+        class RenderDevice;
 
         class PhysicalDevice {
         public:
@@ -45,8 +46,11 @@ namespace crimild {
 
             [[nodiscard]] inline VkPhysicalDevice getHandle( void ) noexcept { return m_handle; }
 
+            [[nodiscard]] std::unique_ptr< RenderDevice > createRenderDevice( void ) noexcept;
+
         private:
             VkPhysicalDevice m_handle = VK_NULL_HANDLE;
+            VulkanSurface *m_surface = nullptr;
             VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
         };
 

@@ -762,6 +762,11 @@ utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &devi
 
     QueueFamilyIndices indices;
 
+    if ( device == VK_NULL_HANDLE ) {
+        CRIMILD_LOG_WARNING( "Invalid physical device handle" );
+        return indices;
+    }
+
     crimild::UInt32 queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
     if ( queueFamilyCount == 0 ) {
