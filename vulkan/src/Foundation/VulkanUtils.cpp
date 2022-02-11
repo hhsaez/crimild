@@ -679,7 +679,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_debug_callback(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData )
 {
-    std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+    CRIMILD_LOG_DEBUG( "Vulkan validation layer: ", pCallbackData->pMessage );
     return VK_FALSE;
 }
 
