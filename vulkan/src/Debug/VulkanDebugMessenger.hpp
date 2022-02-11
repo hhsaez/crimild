@@ -39,7 +39,8 @@ namespace crimild {
         class VulkanInstanceOLD;
         class VulkanDebugMessengerManager;
 
-        class VulkanDebugMessenger : public VulkanObject {
+        class [[deprecated]] VulkanDebugMessenger : public VulkanObject
+        {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanDebugMessenger )
 
         public:
@@ -55,12 +56,13 @@ namespace crimild {
             VkDebugUtilsMessengerEXT handler = VK_NULL_HANDLE;
         };
 
-        class VulkanDebugMessengerManager : public VulkanObjectManager< VulkanDebugMessenger > {
+        class [[deprecated]] VulkanDebugMessengerManager : public VulkanObjectManager< VulkanDebugMessenger >
+        {
         public:
             virtual ~VulkanDebugMessengerManager( void ) = default;
 
             SharedPointer< VulkanDebugMessenger > create( VulkanDebugMessenger::Descriptor const &descriptor ) noexcept;
-            void destroy( VulkanDebugMessenger *debugMessenger ) noexcept override;
+            void destroy( VulkanDebugMessenger * debugMessenger ) noexcept override;
         };
 
     }

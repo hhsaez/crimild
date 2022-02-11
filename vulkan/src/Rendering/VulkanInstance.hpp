@@ -57,9 +57,13 @@ namespace crimild {
             void createDebugMessenger( void ) noexcept;
             void destroyDebugMessenger( void ) noexcept;
 
+            void createReportCallback( void ) noexcept;
+            void destroyReportCallback( void ) noexcept;
+
         private:
             VkInstance m_instanceHandle = VK_NULL_HANDLE;
             VkDebugUtilsMessengerEXT m_debugMessengerHandle = VK_NULL_HANDLE;
+            VkDebugReportCallbackEXT m_reportCallbackHandle = VK_NULL_HANDLE;
         };
 
         //////////////////////

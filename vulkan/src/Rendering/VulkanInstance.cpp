@@ -39,10 +39,12 @@ VulkanInstance::VulkanInstance( void ) noexcept
 {
     createInstance();
     createDebugMessenger();
+    createReportCallback();
 }
 
 VulkanInstance::~VulkanInstance( void ) noexcept
 {
+    destroyReportCallback();
     destroyDebugMessenger();
     destroyInstance();
 }
@@ -168,6 +170,78 @@ void VulkanInstance::destroyDebugMessenger( void ) noexcept
 
     destroyDebugUtilsMessengerEXT( m_instanceHandle, m_debugMessengerHandle, nullptr );
     m_debugMessengerHandle = VK_NULL_HANDLE;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_report_callback(
+    VkDebugReportFlagsEXT flags,
+    VkDebugReportObjectTypeEXT objectType,
+    uint64_t object,
+    size_t location,
+    int32_t messageCode,
+    const char *pLayerPrefix,
+    const char *pMessage,
+    void *userData )
+{
+    if ( flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT ) {
+        // Performance warnings are silenced to make debug output more readable
+        return VK_FALSE;
+    }
+    CRIMILD_LOG_DEBUG( "Vulkan debug callback (", pLayerPrefix, "): ", pMessage );
+    return VK_FALSE;
+}
+
+void VulkanInstance::createReportCallback( void ) noexcept
+{
+    if ( !utils::checkValidationLayersEnabled() ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE( "Creating Vulkan report callback" );
+
+    auto createInfo = VkDebugReportCallbackCreateInfoEXT {
+        .sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+        .pNext = nullptr,
+        .flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+        .pfnCallback = &crimild_vulkan_report_callback,
+        .pUserData = nullptr
+    };
+
+    auto createDebugReportCallbackEXT =
+        [](
+            VkInstance instance,
+            const VkDebugReportCallbackCreateInfoEXT *pCreateInfo,
+            const VkAllocationCallbacks *pAllocator,
+            VkDebugReportCallbackEXT *pHandler ) {
+            if ( auto func = ( PFN_vkCreateDebugReportCallbackEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugReportCallbackEXT" ) ) {
+                return func( instance, pCreateInfo, pAllocator, pHandler );
+            }
+            return VK_ERROR_EXTENSION_NOT_PRESENT;
+        };
+
+    CRIMILD_VULKAN_CHECK(
+        createDebugReportCallbackEXT(
+            m_instanceHandle,
+            &createInfo,
+            nullptr,
+            &m_reportCallbackHandle ) );
+}
+
+void VulkanInstance::destroyReportCallback( void ) noexcept
+{
+    if ( m_reportCallbackHandle == VK_NULL_HANDLE ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE( "Destroying Vulkan report callback" );
+
+    auto destroyDebugReportCallbackEXT = []( VkInstance instance, VkDebugReportCallbackEXT handler, const VkAllocationCallbacks *pAllocator ) {
+        if ( auto func = ( PFN_vkDestroyDebugReportCallbackEXT ) vkGetInstanceProcAddr( instance, "vkDestroyDebugReportCallbackEXT" ) ) {
+            func( instance, handler, pAllocator );
+        }
+    };
+
+    destroyDebugReportCallbackEXT( m_instanceHandle, m_reportCallbackHandle, nullptr );
+    m_reportCallbackHandle = VK_NULL_HANDLE;
 }
 
 std::unique_ptr< PhysicalDevice > VulkanInstance::createPhysicalDevice( VulkanSurface *surface ) noexcept
