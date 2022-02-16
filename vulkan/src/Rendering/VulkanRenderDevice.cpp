@@ -181,6 +181,11 @@ void RenderDevice::handle( const Event &e ) noexcept
     }
 }
 
+void RenderDevice::flush( void ) noexcept
+{
+    vkDeviceWaitIdle( m_handle );
+}
+
 void RenderDevice::createSwapchain( void ) noexcept
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
