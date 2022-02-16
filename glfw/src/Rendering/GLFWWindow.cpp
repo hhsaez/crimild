@@ -28,6 +28,8 @@
 #include "Rendering/GLFWWindow.hpp"
 
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/RenderPasses/VulkanClearPass.hpp"
+#include "Rendering/RenderPasses/VulkanPresentPass.hpp"
 #include "Simulation/Settings.hpp"
 
 #include <array>
@@ -36,211 +38,31 @@
 using namespace crimild;
 using namespace crimild::glfw;
 
-struct ClearPass : public vulkan::RenderPass {
+class ComposePass : public vulkan::RenderPass {
 public:
-    ClearPass( vulkan::RenderDevice *renderDevice ) noexcept
-        : m_renderDevice( renderDevice )
+    ComposePass( vulkan::RenderDevice *renderDevice )
+        : m_clear( renderDevice ),
+          m_present( renderDevice )
     {
-        init();
     }
 
-    virtual ~ClearPass( void ) noexcept
+    virtual ~ComposePass( void ) = default;
+
+    virtual void render( void ) noexcept override
     {
-        clear();
+        m_clear.render();
+        m_present.render();
     }
 
     virtual void handle( const Event &e ) noexcept override
     {
-        switch ( e.type ) {
-            case Event::Type::WINDOW_RESIZE: {
-                clear();
-                init();
-                break;
-            }
-
-            default:
-                break;
-        }
-    }
-
-    virtual void render( void ) noexcept override
-    {
-        const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-        auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
-
-        beginRenderPass( commandBuffer, currentFrameIndex );
-
-        endRenderPass( commandBuffer );
+        m_clear.handle( e );
+        m_present.handle( e );
     }
 
 private:
-    void init( void ) noexcept
-    {
-        CRIMILD_LOG_TRACE( "Initializing Clear pass" );
-
-        m_renderArea = VkRect2D {
-            .offset = {
-                0,
-                0,
-            },
-            .extent = m_renderDevice->getSwapchainExtent(),
-        };
-
-        auto attachments = std::array< VkAttachmentDescription, 1 > {
-            VkAttachmentDescription {
-                .format = m_renderDevice->getSwapchainFormat(),
-                .samples = VK_SAMPLE_COUNT_1_BIT,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            }
-        };
-
-        auto colorReferences = std::array< VkAttachmentReference, 1 > {
-            VkAttachmentReference {
-                .attachment = 0,
-                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            },
-        };
-
-        auto subpass = VkSubpassDescription {
-            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            .inputAttachmentCount = 0,
-            .pInputAttachments = nullptr,
-            .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-            .pColorAttachments = colorReferences.data(),
-            .pResolveAttachments = nullptr,
-            .pDepthStencilAttachment = nullptr,
-            .preserveAttachmentCount = 0,
-            .pPreserveAttachments = nullptr,
-        };
-
-        auto dependencies = std::array< VkSubpassDependency, 2 > {
-            VkSubpassDependency {
-                .srcSubpass = VK_SUBPASS_EXTERNAL,
-                .dstSubpass = 0,
-                .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-                .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-            },
-            VkSubpassDependency {
-                .srcSubpass = 0,
-                .dstSubpass = VK_SUBPASS_EXTERNAL,
-                .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-            }
-        };
-
-        auto createInfo = VkRenderPassCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-            .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
-            .pAttachments = attachments.data(),
-            .subpassCount = 1,
-            .pSubpasses = &subpass,
-            .dependencyCount = crimild::UInt32( dependencies.size() ),
-            .pDependencies = dependencies.data(),
-        };
-
-        CRIMILD_VULKAN_CHECK(
-            vkCreateRenderPass(
-                m_renderDevice->getHandle(),
-                &createInfo,
-                nullptr,
-                &m_renderPass ) );
-
-        m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
-        for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-            const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
-
-            auto attachments = std::array< VkImageView, 1 > {
-                imageView,
-                // TODO: add depth image view if available
-            };
-
-            auto createInfo = VkFramebufferCreateInfo {
-                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                .pNext = nullptr,
-                .renderPass = m_renderPass,
-                .attachmentCount = uint32_t( attachments.size() ),
-                .pAttachments = attachments.data(),
-                .width = m_renderDevice->getSwapchainExtent().width,
-                .height = m_renderDevice->getSwapchainExtent().height,
-                .layers = 1,
-            };
-
-            CRIMILD_VULKAN_CHECK(
-                vkCreateFramebuffer(
-                    m_renderDevice->getHandle(),
-                    &createInfo,
-                    nullptr,
-                    &m_framebuffers[ i ] ) );
-        }
-    }
-
-    void clear( void ) noexcept
-    {
-        CRIMILD_LOG_TRACE( "Destroying Clear pass" );
-
-        for ( auto &fb : m_framebuffers ) {
-            vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
-        }
-        m_framebuffers.clear();
-
-        vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
-        m_renderPass = VK_NULL_HANDLE;
-    }
-
-    void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
-    {
-        const auto clearValues = std::array< VkClearValue, 2 > {
-            VkClearValue {
-                .color = {
-                    .float32 = {
-                        1.0f,
-                        1.0f,
-                        0.0f,
-                        1.0f,
-                    },
-                },
-            },
-            VkClearValue {
-                .depthStencil = {
-                    1,
-                    0,
-                },
-            },
-        };
-
-        auto renderPassInfo = VkRenderPassBeginInfo {
-            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = m_renderPass,
-            .framebuffer = m_framebuffers[ currentFrameIndex ],
-            .renderArea = m_renderArea,
-            .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
-            .pClearValues = clearValues.data(),
-        };
-
-        vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-    }
-
-    void endRenderPass( VkCommandBuffer commandBuffer ) noexcept
-    {
-        vkCmdEndRenderPass( commandBuffer );
-    }
-
-private:
-    vulkan::RenderDevice *m_renderDevice = nullptr;
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    std::vector< VkFramebuffer > m_framebuffers;
-    VkRect2D m_renderArea;
+    vulkan::ClearPass m_clear;
+    vulkan::PresentPass m_present;
 };
 
 Window::Window( void ) noexcept
@@ -260,11 +82,15 @@ Window::Window( void ) noexcept
 
     m_renderDevice = m_physicalDevice->createRenderDevice();
 
-    m_renderPass = std::make_unique< ClearPass >( m_renderDevice.get() );
+    m_renderPass = std::make_unique< ComposePass >( m_renderDevice.get() );
 }
 
 Window::~Window( void ) noexcept
 {
+    if ( m_renderDevice != nullptr ) {
+        m_renderDevice->flush();
+    }
+
     m_renderPass = nullptr;
     m_renderDevice = nullptr;
     m_physicalDevice = nullptr;

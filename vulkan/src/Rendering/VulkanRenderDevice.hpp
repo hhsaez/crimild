@@ -84,6 +84,8 @@ namespace crimild {
             bool beginRender( void ) noexcept;
             bool endRender( void ) noexcept;
 
+            void flush( void ) noexcept;
+
         private:
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;

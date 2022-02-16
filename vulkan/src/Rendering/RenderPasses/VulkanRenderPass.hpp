@@ -25,64 +25,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_RENDERING_WINDOW_
-#define CRIMILD_GLFW_RENDERING_WINDOW_
-
-#include "Foundation/GLFWUtils.hpp"
-#include "Rendering/GLFWVulkanSurface.hpp"
-#include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Simulation/Event.hpp"
-
-#include <string>
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
+#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
 
 namespace crimild {
+
+    struct Event;
 
     namespace vulkan {
 
         class RenderDevice;
-        class RenderPass;
 
-    }
-
-    namespace glfw {
-
-        /**
-		   \brief Handle window creation
-		 */
-        class Window {
+        class RenderPass {
         public:
-            Window( void ) noexcept;
-            ~Window( void ) noexcept;
+            virtual ~RenderPass( void ) = default;
 
-            [[nodiscard]] inline GLFWwindow *getHandle( void ) noexcept { return m_window; }
-
-            Event handle( const Event &e ) noexcept;
-
-        public:
-            GLFWwindow *getWindowHandler( void ) { return m_window; }
-
-        private:
-            bool createWindow( void );
-            void destroyWindow( void );
-
-        private:
-            GLFWwindow *m_window = nullptr;
-
-            // TODO: For a multi-window setup, we should move the Vulkan instance outside of this class
-            std::unique_ptr< vulkan::VulkanInstance > m_instance;
-
-            // I think it's ok to have one surface per window
-            std::unique_ptr< vulkan::VulkanSurface > m_surface;
-
-            // TODO: For a multi-device setup, we should move the physical device outside of this class
-            std::unique_ptr< vulkan::PhysicalDevice > m_physicalDevice;
-
-            std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
-
-            std::unique_ptr< vulkan::RenderPass > m_renderPass;
-
-            Event m_lastResizeEvent;
+            virtual void handle( const Event & ) noexcept = 0;
+            virtual void render( void ) noexcept = 0;
         };
 
     }
