@@ -39,7 +39,8 @@ namespace crimild {
 
         /**
 		 */
-        class CommandPool : public VulkanObject {
+        class [[deprecated]] CommandPool : public VulkanObject
+        {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::CommandPool )
 
         public:
@@ -56,7 +57,8 @@ namespace crimild {
             CommandPoolManager *manager = nullptr;
         };
 
-        class CommandPoolManager : public VulkanObjectManager< CommandPool > {
+        class [[deprecated]] CommandPoolManager : public VulkanObjectManager< CommandPool >
+        {
         public:
             explicit CommandPoolManager( RenderDeviceOLD *renderDevice = nullptr ) noexcept
                 : m_renderDevice( renderDevice ) { }
@@ -65,9 +67,9 @@ namespace crimild {
             CommandPool *getCommandPool( void ) noexcept { return first(); }
 
             SharedPointer< CommandPool > create( CommandPool::Descriptor const &descriptor ) noexcept;
-            void destroy( CommandPool *commandPool ) noexcept override;
+            void destroy( CommandPool * commandPool ) noexcept override;
 
-            void reset( CommandPool *commandPool ) noexcept;
+            void reset( CommandPool * commandPool ) noexcept;
 
         private:
             RenderDeviceOLD *m_renderDevice = nullptr;

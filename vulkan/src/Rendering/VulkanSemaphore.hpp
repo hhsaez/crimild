@@ -44,7 +44,8 @@ namespace crimild {
 		   for processing, they may require other jobs to be finished first. We can specify that
 		   the former ones wait for them to complete before they're executed by using semaphores.
 		 */
-        class Semaphore : public VulkanObject {
+        class [[deprecated]] Semaphore : public VulkanObject
+        {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::Semaphore );
 
         public:

@@ -27,12 +27,193 @@
 
 #include "Rendering/GLFWWindow.hpp"
 
+#include "Foundation/VulkanUtils.hpp"
 #include "Simulation/Settings.hpp"
 
+#include <array>
 #include <iomanip>
 
 using namespace crimild;
 using namespace crimild::glfw;
+
+struct ClearPass : public vulkan::RenderPass {
+public:
+    ClearPass( vulkan::RenderDevice *renderDevice ) noexcept
+        : m_renderDevice( renderDevice )
+    {
+        m_renderArea = VkRect2D {
+            .offset = {
+                0,
+                0,
+            },
+            .extent = renderDevice->getSwapchainExtent(),
+        };
+
+        auto attachments = std::array< VkAttachmentDescription, 1 > {
+            VkAttachmentDescription {
+                .format = m_renderDevice->getSwapchainFormat(),
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            }
+        };
+
+        auto colorReferences = std::array< VkAttachmentReference, 1 > {
+            VkAttachmentReference {
+                .attachment = 0,
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            },
+        };
+
+        auto subpass = VkSubpassDescription {
+            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            .inputAttachmentCount = 0,
+            .pInputAttachments = nullptr,
+            .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+            .pColorAttachments = colorReferences.data(),
+            .pResolveAttachments = nullptr,
+            .pDepthStencilAttachment = nullptr,
+            .preserveAttachmentCount = 0,
+            .pPreserveAttachments = nullptr,
+        };
+
+        auto dependencies = std::array< VkSubpassDependency, 2 > {
+            VkSubpassDependency {
+                .srcSubpass = VK_SUBPASS_EXTERNAL,
+                .dstSubpass = 0,
+                .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+                .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+            },
+            VkSubpassDependency {
+                .srcSubpass = 0,
+                .dstSubpass = VK_SUBPASS_EXTERNAL,
+                .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+                .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+            }
+        };
+
+        auto createInfo = VkRenderPassCreateInfo {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+            .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
+            .pAttachments = attachments.data(),
+            .subpassCount = 1,
+            .pSubpasses = &subpass,
+            .dependencyCount = crimild::UInt32( dependencies.size() ),
+            .pDependencies = dependencies.data(),
+        };
+
+        CRIMILD_VULKAN_CHECK(
+            vkCreateRenderPass(
+                renderDevice->getHandle(),
+                &createInfo,
+                nullptr,
+                &m_renderPass ) );
+
+        m_framebuffers.resize( renderDevice->getSwapchainImageViews().size() );
+        for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+            const auto &imageView = renderDevice->getSwapchainImageViews()[ i ];
+
+            auto attachments = std::array< VkImageView, 1 > {
+                imageView,
+                // TODO: add depth image view if available
+            };
+
+            auto createInfo = VkFramebufferCreateInfo {
+                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                .pNext = nullptr,
+                .renderPass = m_renderPass,
+                .attachmentCount = uint32_t( attachments.size() ),
+                .pAttachments = attachments.data(),
+                .width = renderDevice->getSwapchainExtent().width,
+                .height = renderDevice->getSwapchainExtent().height,
+                .layers = 1,
+            };
+
+            CRIMILD_VULKAN_CHECK(
+                vkCreateFramebuffer(
+                    renderDevice->getHandle(),
+                    &createInfo,
+                    nullptr,
+                    &m_framebuffers[ i ] ) );
+        }
+    }
+
+    virtual ~ClearPass( void ) noexcept
+    {
+        for ( auto &fb : m_framebuffers ) {
+            vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        }
+        m_framebuffers.clear();
+
+        vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+        m_renderPass = VK_NULL_HANDLE;
+    }
+
+    virtual void render( vulkan::RenderDevice * ) noexcept
+    {
+        const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
+        auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+
+        beginRenderPass( commandBuffer, currentFrameIndex );
+
+        endRenderPass( commandBuffer );
+    }
+
+private:
+    void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
+    {
+        const auto clearValues = std::array< VkClearValue, 2 > {
+            VkClearValue {
+                .color = {
+                    .float32 = {
+                        1.0f,
+                        1.0f,
+                        0.0f,
+                        1.0f,
+                    },
+                },
+            },
+            VkClearValue {
+                .depthStencil = {
+                    1,
+                    0,
+                },
+            },
+        };
+
+        auto renderPassInfo = VkRenderPassBeginInfo {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .renderPass = m_renderPass,
+            .framebuffer = m_framebuffers[ currentFrameIndex ],
+            .renderArea = m_renderArea,
+            .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
+            .pClearValues = clearValues.data(),
+        };
+
+        vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    }
+
+    void endRenderPass( VkCommandBuffer commandBuffer ) noexcept
+    {
+        vkCmdEndRenderPass( commandBuffer );
+    }
+
+private:
+    vulkan::RenderDevice *m_renderDevice = nullptr;
+    VkRenderPass m_renderPass = VK_NULL_HANDLE;
+    std::vector< VkFramebuffer > m_framebuffers;
+    VkRect2D m_renderArea;
+};
 
 Window::Window( void ) noexcept
 {
@@ -40,29 +221,23 @@ Window::Window( void ) noexcept
         exit( -1 );
     }
 
+    // The instance should be independent from the window. What if we have multiple windows?
     m_instance = std::make_unique< vulkan::VulkanInstance >();
 
     // TODO: I think the surface should be created by the instance
     m_surface = std::make_unique< glfw::VulkanSurface >( m_instance.get(), this );
 
+    // The physical device should be independent from the window. What if we have multiple windows?
     m_physicalDevice = m_instance->createPhysicalDevice( m_surface.get() );
 
     m_renderDevice = m_physicalDevice->createRenderDevice();
-    m_renderDevice->createSwapchain(
-        [] {
-            auto settings = Settings::getInstance();
-            const auto width = settings->get< Real >( "video.width", 1 );
-            const auto height = settings->get< Real >( "video.height", 1 );
-            const auto scale = settings->get< Real >( "video.framebufferScale", 1 );
-            return Extent2D {
-                .width = width * scale,
-                .height = height * scale,
-            };
-        }() );
+
+    m_renderPass = std::make_unique< ClearPass >( m_renderDevice.get() );
 }
 
 Window::~Window( void ) noexcept
 {
+    m_renderPass = nullptr;
     m_renderDevice = nullptr;
     m_physicalDevice = nullptr;
     m_surface = nullptr;
@@ -78,6 +253,12 @@ Event Window::handle( const Event &e ) noexcept
             if ( glfwWindowShouldClose( m_window ) ) {
                 return Event { .type = Event::Type::TERMINATE };
             }
+
+            m_renderDevice->beginRender();
+            if ( m_renderPass != nullptr ) {
+                m_renderPass->render( m_renderDevice.get() );
+            }
+            m_renderDevice->endRender();
 
             // if ( Settings->getInstance()->get( "video.show_frame_time", true ) ) {
             //     auto name = sim->getName();
