@@ -30,6 +30,7 @@
 #include "Foundation/Log.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
+#include "Simulation/Event.hpp"
 #include "VulkanCommandBuffer.hpp"
 #include "VulkanCommandPool.hpp"
 #include "VulkanFence.hpp"
@@ -128,27 +129,17 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     createCommandPool( m_commandPool );
 
     createSwapchain();
-
     createSyncObjects();
-
-    // Allocate one command buffer per swapchain image
-    m_commandBuffers.resize( m_swapchainImages.size() );
-    for ( auto &commandBuffer : m_commandBuffers ) {
-        createCommandBuffer( commandBuffer );
-    }
+    createCommandBuffers();
 }
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
-    for ( auto &commandBuffer : m_commandBuffers ) {
-        destroyCommandBuffer( commandBuffer );
-    }
+    destroyCommandBuffers();
+    destroySyncObjects();
+    destroySwapchain();
 
     destroyCommandPool( m_commandPool );
-
-    destroySyncObjects();
-
-    destroySwapchain();
 
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
@@ -161,6 +152,33 @@ RenderDevice::~RenderDevice( void ) noexcept
     m_graphicsQueueHandle = VK_NULL_HANDLE;
     m_computeQueueHandle = VK_NULL_HANDLE;
     m_presentQueueHandle = VK_NULL_HANDLE;
+}
+
+void RenderDevice::handle( const Event &e ) noexcept
+{
+    switch ( e.type ) {
+        case Event::Type::WINDOW_RESIZE: {
+            m_extent = e.extent;
+            vkDeviceWaitIdle( m_handle );
+
+            destroyCommandBuffers();
+            destroySyncObjects();
+            destroySwapchain();
+
+            createSwapchain();
+            createSyncObjects();
+            createCommandBuffers();
+
+            m_imageIndex = 0;
+            m_currentFrame = 0;
+
+            break;
+        }
+
+        default: {
+            break;
+        }
+    }
 }
 
 void RenderDevice::createSwapchain( void ) noexcept
@@ -349,6 +367,8 @@ void RenderDevice::destroySyncObjects( void ) noexcept
         vkDestroyFence( m_handle, f, nullptr );
     }
     m_inFlightFences.clear();
+
+    m_imagesInFlight.clear();
 }
 
 void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
@@ -382,6 +402,22 @@ void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
             commandPool,
             nullptr );
         m_commandPool = VK_NULL_HANDLE;
+    }
+}
+
+void RenderDevice::createCommandBuffers( void ) noexcept
+{
+    // Allocate one command buffer per swapchain image
+    m_commandBuffers.resize( m_swapchainImages.size() );
+    for ( auto &commandBuffer : m_commandBuffers ) {
+        createCommandBuffer( commandBuffer );
+    }
+}
+
+void RenderDevice::destroyCommandBuffers( void ) noexcept
+{
+    for ( auto &commandBuffer : m_commandBuffers ) {
+        destroyCommandBuffer( commandBuffer );
     }
 }
 
@@ -421,7 +457,7 @@ void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexce
     commandBuffer = VK_NULL_HANDLE;
 }
 
-void RenderDevice::beginRender( void ) noexcept
+bool RenderDevice::beginRender( void ) noexcept
 {
     CRIMILD_VULKAN_CHECK( vkWaitForFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ], VK_TRUE, UINT64_MAX ) );
 
@@ -434,12 +470,12 @@ void RenderDevice::beginRender( void ) noexcept
         &m_imageIndex );
     if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
         // TODO: swapchain needs to be recreated
-        return;
+        return false;
     }
 
     if ( ret != VK_SUCCESS ) {
         // no available image index. Skip frame
-        return;
+        return false;
     }
 
     // Wait for any previous frame that is using the image that we've just been assigned for the new frame
@@ -466,9 +502,11 @@ void RenderDevice::beginRender( void ) noexcept
         vkBeginCommandBuffer(
             commandBuffer,
             &beginInfo ) );
+
+    return true;
 }
 
-void RenderDevice::endRender( void ) noexcept
+bool RenderDevice::endRender( void ) noexcept
 {
     auto commandBuffer = getCurrentCommandBuffer();
     vkEndCommandBuffer( commandBuffer );
@@ -513,11 +551,13 @@ void RenderDevice::endRender( void ) noexcept
     auto ret = vkQueuePresentKHR( m_presentQueueHandle, &presentInfo );
     if ( ret == VK_ERROR_OUT_OF_DATE_KHR || ret == VK_SUBOPTIMAL_KHR ) {
         // swapchain needs to be recreated
-        return;
+        return false;
     }
 
     // Advance to the next frame
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_MAX_FRAMES_IN_FLIGHT;
+
+    return true;
 }
 
 //////////////////////
