@@ -45,6 +45,21 @@
     #include <Crimild_ImGUI.hpp>
 #endif
 
+/**
+ * GLFWApp (glfw)
+ *  VulkamSystem (instance, debug callback, physical device)
+ *  AudioSystem (openal)
+ *  ImageSystem (stb-image)
+ *  ImGuiSystem
+ *  WindowSystem (glfw)
+ *      Window (glfw, vulkan surface)
+ *          VulkanPresentantionLayer (render device, swapchain)
+ *              Editor (imgui)
+ *                  Simulation (core)
+ *                      Scene
+ *
+ */
+
 void errorCallback( int error, const char *description )
 {
     CRIMILD_LOG_FATAL( "GLFW Error: (", error, ") ", description );
@@ -60,7 +75,7 @@ namespace crimild {
             {
                 if ( !glfwInit() ) {
                     CRIMILD_LOG_FATAL( "Cannot start GLFW: glfwInit failed" );
-                    exit( -1 );
+                    exit( EXIT_FAILURE );
                 }
 
                 glfwSetErrorCallback( errorCallback );

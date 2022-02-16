@@ -62,7 +62,7 @@ namespace crimild {
 
         class RenderDevice {
         public:
-            RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept;
+            RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface, const Extent2D &extent ) noexcept;
             virtual ~RenderDevice( void ) noexcept;
 
             [[nodiscard]] inline const VkDevice &getHandle( void ) const noexcept { return m_handle; }
@@ -70,18 +70,60 @@ namespace crimild {
             [[nodiscard]] inline const PhysicalDevice *getPhysicalDevice( void ) const noexcept { return m_physicalDevice; }
             [[nodiscard]] inline const VulkanSurface *getSurface( void ) const noexcept { return m_surface; }
 
-            vulkan::Swapchain *createSwapchain( const Extent2D &extent ) noexcept;
-            [[nodiscard]] inline const Swapchain *getSwapchain( void ) const noexcept { return m_swapchain.get(); }
-            [[nodiscard]] inline Swapchain *getSwapchain( void ) noexcept { return m_swapchain.get(); }
+            [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
+            [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
+            [[nodiscard]] inline const std::vector< VkImageView > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
+
+            [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) noexcept { return m_imageIndex; }
+            [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
+
+            void beginRender( void ) noexcept;
+            void endRender( void ) noexcept;
+
+        private:
+            void createSwapchain( void ) noexcept;
+            void destroySwapchain( void ) noexcept;
+
+            void createSyncObjects( void ) noexcept;
+            void destroySyncObjects( void ) noexcept;
+
+            void createCommandPool( VkCommandPool &commandPool ) noexcept;
+            void destroyCommandPool( VkCommandPool &commandPool ) noexcept;
+
+            void createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
+            void destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
 
         private:
             VkDevice m_handle = VK_NULL_HANDLE;
             PhysicalDevice *m_physicalDevice = nullptr;
+
             VulkanSurface *m_surface = nullptr;
+
+            Extent2D m_extent;
+
             VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
             VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
             VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
-            std::unique_ptr< Swapchain > m_swapchain;
+
+            VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+            VkExtent2D m_swapchainExtent;
+            VkFormat m_swapchainFormat = VK_FORMAT_UNDEFINED;
+            std::vector< VkImage > m_swapchainImages;
+            std::vector< VkImageView > m_swapchainImageViews;
+
+            std::vector< VkSemaphore > m_imageAvailableSemaphores;
+            std::vector< VkSemaphore > m_renderFinishedSemaphores;
+            std::vector< VkFence > m_inFlightFences;
+            std::vector< VkFence > m_imagesInFlight;
+
+            VkCommandPool m_commandPool = VK_NULL_HANDLE;
+            std::vector< VkCommandBuffer > m_commandBuffers;
+
+            // Last image index provided by the swapchain
+            uint32_t m_imageIndex = 0;
+
+            // To use the right pair of semaphores every time, we also keep track of the current frame
+            uint8_t m_currentFrame = 0;
         };
 
         //////////////////////

@@ -41,14 +41,18 @@
 #include "VulkanSemaphore.hpp"
 #include "VulkanSwapchain.hpp"
 
+#include <array>
 #include <set>
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface ) noexcept
+const int CRIMILD_MAX_FRAMES_IN_FLIGHT = 2;
+
+RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface, const Extent2D &extent ) noexcept
     : m_physicalDevice( physicalDevice ),
-      m_surface( surface )
+      m_surface( surface ),
+      m_extent( extent )
 {
     CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
 
@@ -56,7 +60,7 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     if ( !indices.isComplete() ) {
         // Should never happen
         CRIMILD_LOG_FATAL( "Invalid physical device" );
-        exit( -1 );
+        exit( EXIT_FAILURE );
     }
 
     // Make sure we're creating queue for unique families,
@@ -120,11 +124,31 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     vkGetDeviceQueue( m_handle, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueueHandle );
     vkGetDeviceQueue( m_handle, indices.computeFamily[ 0 ], 0, &m_computeQueueHandle );
     vkGetDeviceQueue( m_handle, indices.presentFamily[ 0 ], 0, &m_presentQueueHandle );
+
+    createCommandPool( m_commandPool );
+
+    createSwapchain();
+
+    createSyncObjects();
+
+    // Allocate one command buffer per swapchain image
+    m_commandBuffers.resize( m_swapchainImages.size() );
+    for ( auto &commandBuffer : m_commandBuffers ) {
+        createCommandBuffer( commandBuffer );
+    }
 }
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
-    m_swapchain = nullptr;
+    for ( auto &commandBuffer : m_commandBuffers ) {
+        destroyCommandBuffer( commandBuffer );
+    }
+
+    destroyCommandPool( m_commandPool );
+
+    destroySyncObjects();
+
+    destroySwapchain();
 
     CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
 
@@ -139,10 +163,361 @@ RenderDevice::~RenderDevice( void ) noexcept
     m_presentQueueHandle = VK_NULL_HANDLE;
 }
 
-vulkan::Swapchain *RenderDevice::createSwapchain( const Extent2D &extent ) noexcept
+void RenderDevice::createSwapchain( void ) noexcept
 {
-    m_swapchain = std::make_unique< Swapchain >( this, extent );
-    return m_swapchain.get();
+    CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
+
+    auto swapchainSupport = utils::querySwapchainSupportDetails( m_physicalDevice->getHandle(), m_surface->getHandle() );
+    auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
+    auto presentMode = utils::choosePresentationMode( swapchainSupport.presentModes );
+
+    m_swapchainExtent = utils::chooseExtent( swapchainSupport.capabilities, utils::getExtent( m_extent ) );
+    m_swapchainFormat = surfaceFormat.format;
+
+    // The Vulkan implementation defines a minimum number of images to work with.
+    // We request one more image than the minimum. Also, make sure not to exceed the
+    // maximum number of images (a value of 0 means there's no maximum)
+    auto imageCount = swapchainSupport.capabilities.minImageCount + 1;
+    if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
+        imageCount = std::min(
+            swapchainSupport.capabilities.maxImageCount,
+            imageCount );
+    }
+
+    auto createInfo = VkSwapchainCreateInfoKHR {
+        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        .surface = m_surface->getHandle(),
+        .minImageCount = imageCount,
+        .imageFormat = surfaceFormat.format,
+        .imageColorSpace = surfaceFormat.colorSpace,
+        .imageExtent = m_swapchainExtent,
+        .imageArrayLayers = 1, // This may change for stereoscopic rendering (VR)
+    };
+
+    // Images created by the swapchain are usually used as color attachments
+    // It might be possible to used the for other purposes, like sampling or
+    // to copy to or from them to other surfaces.
+    // VK_IMAGE_USAGE_TRANSFER_SRC_BIT is requried for taking screenshots.
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
+    auto indices = utils::findQueueFamilies( m_physicalDevice->getHandle(), m_surface->getHandle() );
+    uint32_t queueFamilyIndices[] = {
+        indices.graphicsFamily[ 0 ],
+        indices.presentFamily[ 0 ],
+    };
+
+    if ( indices.graphicsFamily != indices.presentFamily ) {
+        // If the graphics and present families don't match we need to
+        // share images since they're not exclusive to queues
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    } else {
+        // If they are the same, the queue can have exclusive access to images
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0;
+        createInfo.pQueueFamilyIndices = nullptr;
+    }
+
+    // This can be used to rotate images or flip them horizontally
+    createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
+
+    // Use for blending with other windows in the window system
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+    createInfo.presentMode = presentMode;
+
+    // Ignore pixels that are obscured by other windows
+    createInfo.clipped = VK_TRUE;
+
+    // This is used during the recreation of a swapchain (maybe due to window is resized)
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSwapchainKHR(
+            getHandle(),
+            &createInfo,
+            nullptr,
+            &m_swapchain ) );
+
+    CRIMILD_LOG_TRACE( "Retrieving Vulkan swapchain images" );
+
+    vkGetSwapchainImagesKHR(
+        getHandle(),
+        m_swapchain,
+        &imageCount,
+        nullptr );
+
+    m_swapchainImages.resize( imageCount );
+
+    vkGetSwapchainImagesKHR(
+        getHandle(),
+        m_swapchain,
+        &imageCount,
+        m_swapchainImages.data() );
+
+    CRIMILD_LOG_TRACE( "Creating Vulkan swapchain image views" );
+
+    m_swapchainImageViews.resize( imageCount );
+
+    for ( uint8_t i = 0; i < imageCount; ++i ) {
+        utils::createImageView( getHandle(), m_swapchainImages[ i ], VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, &m_swapchainImageViews[ i ] );
+    }
+
+    CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", m_swapchainExtent.width, "x", m_swapchainExtent.height );
+}
+
+void RenderDevice::destroySwapchain( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain image views" );
+
+    for ( auto &imageView : m_swapchainImageViews ) {
+        vkDestroyImageView( getHandle(), imageView, nullptr );
+    }
+    m_swapchainImageViews.clear();
+
+    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain image" );
+
+    m_swapchainImages.clear();
+
+    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain" );
+
+    vkDestroySwapchainKHR( getHandle(), m_swapchain, nullptr );
+    m_swapchain = VK_NULL_HANDLE;
+}
+
+void RenderDevice::createSyncObjects( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan sync objects" );
+
+    m_imageAvailableSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+    m_renderFinishedSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+    m_inFlightFences.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+    m_imagesInFlight.resize( m_swapchainImages.size(), VK_NULL_HANDLE );
+
+    auto createInfo = VkSemaphoreCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+    };
+
+    auto fenceInfo = VkFenceCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+    };
+
+    for ( int i = 0; i < CRIMILD_MAX_FRAMES_IN_FLIGHT; ++i ) {
+        CRIMILD_VULKAN_CHECK(
+            vkCreateSemaphore(
+                m_handle,
+                &createInfo,
+                nullptr,
+                &m_imageAvailableSemaphores[ i ] ) );
+
+        CRIMILD_VULKAN_CHECK(
+            vkCreateSemaphore(
+                m_handle,
+                &createInfo,
+                nullptr,
+                &m_renderFinishedSemaphores[ i ] ) );
+
+        CRIMILD_VULKAN_CHECK(
+            vkCreateFence(
+                m_handle,
+                &fenceInfo,
+                nullptr,
+                &m_inFlightFences[ i ] ) );
+    }
+}
+
+void RenderDevice::destroySyncObjects( void ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan sync objects" );
+
+    // Wait for all operations to complete before destroying sync objects
+    vkDeviceWaitIdle( m_handle );
+
+    for ( auto &s : m_imageAvailableSemaphores ) {
+        vkDestroySemaphore( m_handle, s, nullptr );
+    }
+    m_imageAvailableSemaphores.clear();
+
+    for ( auto &s : m_renderFinishedSemaphores ) {
+        vkDestroySemaphore( m_handle, s, nullptr );
+    }
+    m_renderFinishedSemaphores.clear();
+
+    for ( auto &f : m_inFlightFences ) {
+        vkDestroyFence( m_handle, f, nullptr );
+    }
+    m_inFlightFences.clear();
+}
+
+void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan command pool" );
+
+    // Is this too performance intensive to do it every time?
+    auto queueFamilyIndices = utils::findQueueFamilies( getPhysicalDevice()->getHandle(), getSurface()->getHandle() );
+    auto createInfo = VkCommandPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        // TODO(hernan): For compute/transfer, we might want to use a different queue, right?
+        .queueFamilyIndex = queueFamilyIndices.graphicsFamily[ 0 ],
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateCommandPool(
+            m_handle,
+            &createInfo,
+            nullptr,
+            &commandPool ) );
+}
+
+void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Destroying Vulkan command pool" );
+
+    if ( commandPool != VK_NULL_HANDLE ) {
+        vkDestroyCommandPool(
+            m_handle,
+            commandPool,
+            nullptr );
+        m_commandPool = VK_NULL_HANDLE;
+    }
+}
+
+void RenderDevice::createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Creating Vulkan command buffer" );
+
+    auto allocInfo = VkCommandBufferAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .commandPool = m_commandPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateCommandBuffers(
+            m_handle,
+            &allocInfo,
+            &commandBuffer ) );
+}
+
+void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
+{
+    if ( commandBuffer == VK_NULL_HANDLE ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE( "Destroying Vulkan command buffer" );
+
+    // renderDevice->waitIdle();
+    vkFreeCommandBuffers(
+        m_handle,
+        m_commandPool,
+        1,
+        &commandBuffer );
+
+    commandBuffer = VK_NULL_HANDLE;
+}
+
+void RenderDevice::beginRender( void ) noexcept
+{
+    CRIMILD_VULKAN_CHECK( vkWaitForFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ], VK_TRUE, UINT64_MAX ) );
+
+    const auto ret = vkAcquireNextImageKHR(
+        getHandle(),
+        m_swapchain,
+        std::numeric_limits< uint64_t >::max(), // disable timeout
+        m_imageAvailableSemaphores[ m_currentFrame ],
+        VK_NULL_HANDLE,
+        &m_imageIndex );
+    if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
+        // TODO: swapchain needs to be recreated
+        return;
+    }
+
+    if ( ret != VK_SUCCESS ) {
+        // no available image index. Skip frame
+        return;
+    }
+
+    // Wait for any previous frame that is using the image that we've just been assigned for the new frame
+    if ( m_imagesInFlight[ m_imageIndex ] != VK_NULL_HANDLE ) {
+        vkWaitForFences( m_handle, 1, &m_imagesInFlight[ m_imageIndex ], VK_TRUE, UINT64_MAX );
+    }
+    m_imagesInFlight[ m_imageIndex ] = m_inFlightFences[ m_currentFrame ];
+
+    auto commandBuffer = getCurrentCommandBuffer();
+
+    CRIMILD_VULKAN_CHECK(
+        vkResetCommandBuffer(
+            commandBuffer,
+            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
+
+    const auto beginInfo = VkCommandBufferBeginInfo {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+        .pInheritanceInfo = nullptr,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkBeginCommandBuffer(
+            commandBuffer,
+            &beginInfo ) );
+}
+
+void RenderDevice::endRender( void ) noexcept
+{
+    auto commandBuffer = getCurrentCommandBuffer();
+    vkEndCommandBuffer( commandBuffer );
+
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    submitInfo.pWaitDstStageMask = &waitStageMask;
+    VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[ m_currentFrame ] };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[ m_currentFrame ] };
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    vkResetFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ] );
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            m_graphicsQueueHandle,
+            1,
+            &submitInfo,
+            m_inFlightFences[ m_currentFrame ] ) );
+
+    VkSwapchainKHR swapchains[] = { m_swapchain };
+
+    auto presentInfo = VkPresentInfoKHR {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = signalSemaphores,
+        .swapchainCount = 1,
+        .pSwapchains = swapchains,
+        .pImageIndices = &m_imageIndex,
+        .pResults = nullptr,
+    };
+
+    auto ret = vkQueuePresentKHR( m_presentQueueHandle, &presentInfo );
+    if ( ret == VK_ERROR_OUT_OF_DATE_KHR || ret == VK_SUBOPTIMAL_KHR ) {
+        // swapchain needs to be recreated
+        return;
+    }
+
+    // Advance to the next frame
+    m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_MAX_FRAMES_IN_FLIGHT;
 }
 
 //////////////////////

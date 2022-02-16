@@ -42,6 +42,13 @@ namespace crimild {
 
         class RenderDevice;
 
+        class RenderPass {
+        public:
+            virtual ~RenderPass( void ) = default;
+
+            virtual void render( RenderDevice *renderDevice ) noexcept = 0;
+        };
+
     }
 
     namespace glfw {
@@ -78,6 +85,8 @@ namespace crimild {
             std::unique_ptr< vulkan::PhysicalDevice > m_physicalDevice;
 
             std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
+
+            std::unique_ptr< vulkan::RenderPass > m_renderPass;
         };
 
     }

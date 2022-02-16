@@ -181,6 +181,20 @@ namespace crimild {
 
             SwapchainSupportDetails querySwapchainSupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
             crimild::Bool checkSwapchainSupport( const VkPhysicalDevice &physicalDevice, const VkSurfaceKHR &surface ) noexcept;
+            VkSurfaceFormatKHR chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept;
+            VkExtent2D chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept;
+
+            /**
+             * \brief Choose the best presentation mode from the available ones
+             *
+             * By default, it will attempt to use VK_PRESENT_MODE_MAILBOX_KHR, which can be considered as
+             * triple buffer and vsync enabled. Otherwhise, it will fallback to use VK_PRESENT_MODE_FIFO_KHR which,
+             * accoriding to the standard, it's the only mode that is mandatory to be supported but it could
+             * introduce some latency (but no tearing).
+             *
+             * If we want to disable vsync, we should use VK_PRESENT_MODE_IMMEDIATE_KHR if available.
+             */
+            VkPresentModeKHR choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept;
 
             //@}
 
@@ -246,6 +260,8 @@ namespace crimild {
             VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
             VkFormat getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *imageView ) noexcept;
             VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;
+
+            void createImageView( VkDevice renderDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept;
 
             //@}
 

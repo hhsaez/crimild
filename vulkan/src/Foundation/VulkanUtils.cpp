@@ -870,6 +870,67 @@ crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, cons
            && !swapchainSupport.presentModes.empty();
 }
 
+VkSurfaceFormatKHR utils::chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
+
+    // If no format is available, force what we need
+    if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
+        return {
+            VK_FORMAT_B8G8R8A8_UNORM,
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+        };
+    }
+
+    // Favor 32-bit RGBA and sRGBA non-linear colorspace
+    for ( const auto &availableFormat : availableFormats ) {
+        if ( availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR ) {
+            return availableFormat;
+        }
+    }
+
+    // If nothing is found matching what we need, return whatever is available
+    return availableFormats[ 0 ];
+}
+
+VkPresentModeKHR utils::choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
+
+    // VSync by default, but may introduce latency
+    // FIFO mode is always available (defined in standard)
+    VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+
+    for ( const auto &availablePresentMode : availablePresentModes ) {
+        if ( availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR ) {
+            // VK_PRESENT_MODE_MAILBOX_KHR is the vulkan version of triple buffer
+            return availablePresentMode;
+        }
+    }
+
+    return bestMode;
+}
+
+VkExtent2D utils::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept
+{
+    CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
+
+    if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
+        // Capabilites are enforcing a given extent. Return that one
+        return capabilities.currentExtent;
+    }
+
+    // Keep width/heigth values within the allowed ones, though.
+    requestedExtent.width = std::max(
+        capabilities.minImageExtent.width,
+        std::min( capabilities.maxImageExtent.width, requestedExtent.width ) );
+    requestedExtent.height = std::max(
+        capabilities.minImageExtent.height,
+        std::min( capabilities.maxImageExtent.height, requestedExtent.height ) );
+
+    return requestedExtent;
+}
+
 crimild::UInt32 utils::findMemoryType( const VkPhysicalDevice &physicalDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
 {
     CRIMILD_LOG_TRACE( "Finding memory type device" );
@@ -1399,6 +1460,26 @@ VkImageAspectFlags utils::getImageViewAspectFlags( ImageView *imageView ) noexce
         return VK_IMAGE_ASPECT_DEPTH_BIT;
     }
     return VK_IMAGE_ASPECT_COLOR_BIT;
+}
+
+void utils::createImageView( VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept
+{
+    const auto imageViewInfo = VkImageViewCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .subresourceRange = {
+            .aspectMask = aspectFlags,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1 },
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateImageView( device, &imageViewInfo, nullptr, imageView ) );
 }
 
 VkSampleCountFlagBits utils::getMaxUsableSampleCount( VkPhysicalDevice physicalDevice ) noexcept

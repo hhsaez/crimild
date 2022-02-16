@@ -43,7 +43,12 @@ namespace crimild {
         class RenderDevice;
         class VulkanSurface;
 
-        class Swapchain : public crimild::Swapchain {
+        //////////////////////
+        // DELETE FROM HERE //
+        //////////////////////
+
+        class [[deprecated]] Swapchain : public crimild::Swapchain
+        {
         public:
             Swapchain( const RenderDevice *renderDevice, const Extent2D &extent ) noexcept;
             virtual ~Swapchain( void ) noexcept;
@@ -54,10 +59,6 @@ namespace crimild {
             VkSwapchainKHR m_handle = VK_NULL_HANDLE;
             const RenderDevice *m_renderDevice = nullptr;
         };
-
-        //////////////////////
-        // DELETE FROM HERE //
-        //////////////////////
 
         class RenderDeviceOLD;
         class VulkanSurfaceOLD;

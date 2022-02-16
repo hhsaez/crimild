@@ -30,6 +30,7 @@
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
+#include "Simulation/Settings.hpp"
 
 namespace crimild {
 
@@ -118,7 +119,18 @@ PhysicalDevice::~PhysicalDevice( void ) noexcept
 
 std::unique_ptr< RenderDevice > PhysicalDevice::createRenderDevice( void ) noexcept
 {
-    return std::make_unique< RenderDevice >( this, m_surface );
+    const auto extent = [] {
+        auto settings = Settings::getInstance();
+        const auto width = settings->get< Real >( "video.width", 1 );
+        const auto height = settings->get< Real >( "video.height", 1 );
+        const auto scale = settings->get< Real >( "video.framebufferScale", 1 );
+        return Extent2D {
+            .width = width * scale,
+            .height = height * scale,
+        };
+    }();
+
+    return std::make_unique< RenderDevice >( this, m_surface, extent );
 }
 
 //////////////////////
