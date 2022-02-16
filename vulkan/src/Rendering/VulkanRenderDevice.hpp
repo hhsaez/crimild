@@ -55,6 +55,8 @@
 
 namespace crimild {
 
+    struct Event;
+
     namespace vulkan {
 
         class PhysicalDevice;
@@ -77,8 +79,10 @@ namespace crimild {
             [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) noexcept { return m_imageIndex; }
             [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
 
-            void beginRender( void ) noexcept;
-            void endRender( void ) noexcept;
+            void handle( const Event &e ) noexcept;
+
+            bool beginRender( void ) noexcept;
+            bool endRender( void ) noexcept;
 
         private:
             void createSwapchain( void ) noexcept;
@@ -90,6 +94,8 @@ namespace crimild {
             void createCommandPool( VkCommandPool &commandPool ) noexcept;
             void destroyCommandPool( VkCommandPool &commandPool ) noexcept;
 
+            void createCommandBuffers( void ) noexcept;
+            void destroyCommandBuffers( void ) noexcept;
             void createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
             void destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
 

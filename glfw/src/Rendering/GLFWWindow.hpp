@@ -46,7 +46,8 @@ namespace crimild {
         public:
             virtual ~RenderPass( void ) = default;
 
-            virtual void render( RenderDevice *renderDevice ) noexcept = 0;
+            virtual void handle( const Event & ) noexcept = 0;
+            virtual void render( void ) noexcept = 0;
         };
 
     }
@@ -87,6 +88,8 @@ namespace crimild {
             std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
 
             std::unique_ptr< vulkan::RenderPass > m_renderPass;
+
+            Event m_lastResizeEvent;
         };
 
     }

@@ -41,12 +41,49 @@ public:
     ClearPass( vulkan::RenderDevice *renderDevice ) noexcept
         : m_renderDevice( renderDevice )
     {
+        init();
+    }
+
+    virtual ~ClearPass( void ) noexcept
+    {
+        clear();
+    }
+
+    virtual void handle( const Event &e ) noexcept override
+    {
+        switch ( e.type ) {
+            case Event::Type::WINDOW_RESIZE: {
+                clear();
+                init();
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    virtual void render( void ) noexcept override
+    {
+        const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
+        auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+
+        beginRenderPass( commandBuffer, currentFrameIndex );
+
+        endRenderPass( commandBuffer );
+    }
+
+private:
+    void init( void ) noexcept
+    {
+        CRIMILD_LOG_TRACE( "Initializing Clear pass" );
+
         m_renderArea = VkRect2D {
             .offset = {
                 0,
                 0,
             },
-            .extent = renderDevice->getSwapchainExtent(),
+            .extent = m_renderDevice->getSwapchainExtent(),
         };
 
         auto attachments = std::array< VkAttachmentDescription, 1 > {
@@ -114,14 +151,14 @@ public:
 
         CRIMILD_VULKAN_CHECK(
             vkCreateRenderPass(
-                renderDevice->getHandle(),
+                m_renderDevice->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_renderPass ) );
 
-        m_framebuffers.resize( renderDevice->getSwapchainImageViews().size() );
+        m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
         for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-            const auto &imageView = renderDevice->getSwapchainImageViews()[ i ];
+            const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
 
             auto attachments = std::array< VkImageView, 1 > {
                 imageView,
@@ -134,22 +171,24 @@ public:
                 .renderPass = m_renderPass,
                 .attachmentCount = uint32_t( attachments.size() ),
                 .pAttachments = attachments.data(),
-                .width = renderDevice->getSwapchainExtent().width,
-                .height = renderDevice->getSwapchainExtent().height,
+                .width = m_renderDevice->getSwapchainExtent().width,
+                .height = m_renderDevice->getSwapchainExtent().height,
                 .layers = 1,
             };
 
             CRIMILD_VULKAN_CHECK(
                 vkCreateFramebuffer(
-                    renderDevice->getHandle(),
+                    m_renderDevice->getHandle(),
                     &createInfo,
                     nullptr,
                     &m_framebuffers[ i ] ) );
         }
     }
 
-    virtual ~ClearPass( void ) noexcept
+    void clear( void ) noexcept
     {
+        CRIMILD_LOG_TRACE( "Destroying Clear pass" );
+
         for ( auto &fb : m_framebuffers ) {
             vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
         }
@@ -159,17 +198,6 @@ public:
         m_renderPass = VK_NULL_HANDLE;
     }
 
-    virtual void render( vulkan::RenderDevice * ) noexcept
-    {
-        const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-        auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
-
-        beginRenderPass( commandBuffer, currentFrameIndex );
-
-        endRenderPass( commandBuffer );
-    }
-
-private:
     void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
     {
         const auto clearValues = std::array< VkClearValue, 2 > {
@@ -254,11 +282,18 @@ Event Window::handle( const Event &e ) noexcept
                 return Event { .type = Event::Type::TERMINATE };
             }
 
-            m_renderDevice->beginRender();
-            if ( m_renderPass != nullptr ) {
-                m_renderPass->render( m_renderDevice.get() );
+            if ( m_lastResizeEvent.type != Event::Type::NONE ) {
+                m_renderDevice->handle( m_lastResizeEvent );
+                m_renderPass->handle( m_lastResizeEvent );
+                m_lastResizeEvent = Event {};
             }
-            m_renderDevice->endRender();
+
+            if ( m_renderDevice->beginRender() ) {
+                if ( m_renderPass != nullptr ) {
+                    m_renderPass->render();
+                }
+                m_renderDevice->endRender();
+            }
 
             // if ( Settings->getInstance()->get( "video.show_frame_time", true ) ) {
             //     auto name = sim->getName();
@@ -278,6 +313,18 @@ Event Window::handle( const Event &e ) noexcept
             //     glfwSetWindowTitle( m_window, ss.str().c_str() );
             // }
 
+            break;
+        }
+
+        case Event::Type::WINDOW_RESIZE: {
+            CRIMILD_LOG_DEBUG( "Window resized to ", e.extent.width, "x", e.extent.height );
+            // Update settings before forwarding events
+            auto settings = Settings::getInstance();
+            settings->set( "video.width", e.extent.width );
+            settings->set( "video.height", e.extent.height );
+
+            // Delay event until next render, so we only forward it once after the resizing is completed
+            m_lastResizeEvent = e;
             break;
         }
 
@@ -486,10 +533,6 @@ bool Window::createWindow( void )
 
     auto simName = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
 
-    auto vsync = settings->get< crimild::Bool >( "video.vsync", true );
-
-    CRIMILD_LOG_DEBUG( "Creating window of size (", width, "x", height, ")" );
-
 #if defined( CRIMILD_PLATFORM_EMSCRIPTEN )
     glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 #elif defined( CRIMILD_ENABLE_VULKAN )
@@ -523,25 +566,36 @@ bool Window::createWindow( void )
         exit( 1 );
     }
 
+    // Set the user pointer to this object so it can be used for different events
+    glfwSetWindowUserPointer( m_window, this );
+
     glfwSetWindowSizeCallback(
         m_window,
-        []( GLFWwindow *window, int width, int height ) {
-            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Window resized to ", width, "x", height );
+        []( GLFWwindow *windowHandle, int width, int height ) {
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                window->handle(
+                    Event {
+                        .type = Event::Type::WINDOW_RESIZE,
+                        .extent = {
+                            .width = Real32( width ),
+                            .height = Real32( height ),
+                        } } );
+            } else {
+                CRIMILD_LOG_WARNING( "glfwSetWindowSizeCallback: GLFW window user pointer not set" );
+            }
         } );
-
-    glfwSetFramebufferSizeCallback(
-        m_window,
-        []( GLFWwindow *window, int width, int height ) {
-            Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Framebuffer resized to ", width, "x", height );
-        } );
-
-    // broadcastMessage( messages::WindowSystemDidCreateWindow { this } );
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
     glfwMakeContextCurrent( _window );
+    auto vsync = settings->get< crimild::Bool >( "video.vsync", true );
     glfwSwapInterval( vsync ? 1 : 0 );
 #endif
 
+    // Compute framebuffer scale
+    // This is doen only once. Resizing the window does not require to recompute the scale
+    // since it's assumed it doesn't chage once the window has been created. Some render targets
+    // might use a different scale, though.
     Real framebufferScale = 1.0f;
     Int32 framebufferWidth = 0;
     Int32 framebufferHeight = 0;
@@ -556,11 +610,14 @@ bool Window::createWindow( void )
     settings->set( "video.fullscreen", fullscreen );
     settings->set( "video.framebufferScale", framebufferScale );
 
+    CRIMILD_LOG_DEBUG( "Created window with size ", width, "x", height, " (x", framebufferScale, ")" );
+
     return true;
 }
 
 void Window::destroyWindow( void )
 {
+    glfwSetWindowUserPointer( m_window, nullptr );
     glfwDestroyWindow( m_window );
 
     CRIMILD_LOG_INFO( "Window destroyed" );

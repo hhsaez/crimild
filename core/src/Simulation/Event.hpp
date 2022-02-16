@@ -29,6 +29,7 @@
 #define CRIMILD_CORE_SIMULATION_EVENT_
 
 #include "Foundation/Types.hpp"
+#include "Rendering/Extent.hpp"
 
 namespace crimild {
 
@@ -42,13 +43,19 @@ namespace crimild {
             TERMINATE,
             STOP,
 
+            WINDOW_RESIZE,
+
             SIMULATION_START,
             SIMULATION_UPDATE,
             SIMULATION_RENDER,
             SIMULATION_STOP,
         };
 
-        Type type;
+        Type type = Type::NONE;
+
+        union {
+            Extent2D extent = Extent2D {};
+        };
     };
 
 }
