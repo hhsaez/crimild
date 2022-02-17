@@ -33,8 +33,8 @@
 #include "Rendering/RenderPass.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "VulkanCommandPool.hpp"
-#include "VulkanGraphicsPipeline.hpp"
-#include "VulkanRenderDevice.hpp"
+#include "VulkanGraphicsPipelineOLD.hpp"
+#include "VulkanRenderDeviceOLD.hpp"
 #include "VulkanRenderPass.hpp"
 
 using namespace crimild;

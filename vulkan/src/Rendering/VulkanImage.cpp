@@ -28,7 +28,7 @@
 #include "VulkanImage.hpp"
 
 #include "Foundation/Log.hpp"
-#include "VulkanRenderDevice.hpp"
+#include "VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;

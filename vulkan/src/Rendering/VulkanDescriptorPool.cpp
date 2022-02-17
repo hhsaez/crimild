@@ -26,7 +26,8 @@
 */
 
 #include "VulkanDescriptorPool.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -66,12 +67,10 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
     VkDescriptorPool handler;
     CRIMILD_VULKAN_CHECK(
         vkCreateDescriptorPool(
-               renderDevice->handler,
+            renderDevice->handler,
             &createInfo,
             nullptr,
-            &handler
-           )
-    );
+            &handler ) );
 
     setHandler( descriptorPool, handler );
 
@@ -97,8 +96,7 @@ crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) no
         vkDestroyDescriptorPool(
             renderDevice->handler,
             handler,
-            nullptr
-        );
+            nullptr );
     }
 
     removeHandlers( descriptorPool );

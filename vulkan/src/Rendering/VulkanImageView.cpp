@@ -27,7 +27,7 @@
 
 #include "Foundation/Log.hpp"
 #include "Rendering/Image.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -77,13 +77,11 @@ crimild::Bool vulkan::ImageViewManager::bind( ImageView *imageView ) noexcept
 
     VkImageView handler;
     CRIMILD_VULKAN_CHECK(
-         vkCreateImageView(
-              renderDevice->handler,
-              &viewInfo,
-              nullptr,
-              &handler
-        )
-    );
+        vkCreateImageView(
+            renderDevice->handler,
+            &viewInfo,
+            nullptr,
+            &handler ) );
 
     setBindInfo( imageView, handler );
 

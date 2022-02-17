@@ -26,7 +26,8 @@
 */
 
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -47,9 +48,9 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
     std::vector< VkDescriptorSetLayoutBinding > bindings( descriptorSetLayout->bindings.size() );
     for ( auto i = 0l; i < bindings.size(); i++ ) {
         auto binding = descriptorSetLayout->bindings[ i ];
-		bindings[ i ] = VkDescriptorSetLayoutBinding {
-        	.binding = static_cast< crimild::UInt32 >( i ),
-        	.descriptorType = utils::getVulkanDescriptorType( binding.descriptorType ),
+        bindings[ i ] = VkDescriptorSetLayoutBinding {
+            .binding = static_cast< crimild::UInt32 >( i ),
+            .descriptorType = utils::getVulkanDescriptorType( binding.descriptorType ),
             .descriptorCount = 1,
             .stageFlags = static_cast< VkShaderStageFlags >( utils::getVulkanShaderStageFlag( binding.stage ) ),
             .pImmutableSamplers = nullptr // optional
@@ -68,9 +69,7 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
             renderDevice->handler,
             &createInfo,
             nullptr,
-            &descriptorSetLayoutHandler
-        )
-    );
+            &descriptorSetLayoutHandler ) );
 
     setHandler( descriptorSetLayout, descriptorSetLayoutHandler );
 
@@ -95,12 +94,10 @@ crimild::Bool DescriptorSetLayoutManager::unbind( DescriptorSetLayout *descripto
         vkDestroyDescriptorSetLayout(
             renderDevice->handler,
             handler,
-            nullptr
-        );
+            nullptr );
     }
 
     removeHandlers( descriptorSetLayout );
 
     return ManagerImpl::unbind( descriptorSetLayout );
 }
-

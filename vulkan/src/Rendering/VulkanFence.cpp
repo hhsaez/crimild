@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,8 @@
  */
 
 #include "VulkanFence.hpp"
-#include "VulkanRenderDevice.hpp"
+
+#include "VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -40,22 +41,20 @@ Fence::~Fence( void ) noexcept
 
 void Fence::wait( crimild::UInt64 timeout ) const noexcept
 {
-	vkWaitForFences(
-		renderDevice->handler,
-		1,
-		&handler,
-		VK_TRUE,
-		timeout
-	);
+    vkWaitForFences(
+        renderDevice->handler,
+        1,
+        &handler,
+        VK_TRUE,
+        timeout );
 }
 
 void Fence::reset( void ) const noexcept
 {
-	vkResetFences(
-		renderDevice->handler,
-		1,
-		&handler
-	);
+    vkResetFences(
+        renderDevice->handler,
+        1,
+        &handler );
 }
 
 SharedPointer< Fence > FenceManager::create( Fence::Descriptor const &descriptor ) noexcept
@@ -80,9 +79,7 @@ SharedPointer< Fence > FenceManager::create( Fence::Descriptor const &descriptor
             renderDevice->handler,
             &fenceInfo,
             nullptr,
-            &fenceHandler
-        )
-    );
+            &fenceHandler ) );
 
     auto fence = crimild::alloc< Fence >();
     fence->manager = this;
@@ -100,8 +97,7 @@ void FenceManager::destroy( Fence *fence ) noexcept
         vkDestroyFence(
             fence->renderDevice->handler,
             fence->handler,
-            nullptr
-        );
+            nullptr );
     }
 
     fence->handler = VK_NULL_HANDLE;

@@ -30,6 +30,8 @@
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 #include "Rendering/RenderPasses/VulkanPresentPass.hpp"
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Settings.hpp"
 
 #include <array>
@@ -42,6 +44,7 @@ class ComposePass : public vulkan::RenderPass {
 public:
     ComposePass( vulkan::RenderDevice *renderDevice )
         : m_clear( renderDevice ),
+          m_scene( renderDevice ),
           m_present( renderDevice )
     {
     }
@@ -51,17 +54,20 @@ public:
     virtual void render( void ) noexcept override
     {
         m_clear.render();
+        m_scene.render();
         m_present.render();
     }
 
     virtual void handle( const Event &e ) noexcept override
     {
         m_clear.handle( e );
+        m_scene.handle( e );
         m_present.handle( e );
     }
 
 private:
     vulkan::ClearPass m_clear;
+    vulkan::ScenePass m_scene;
     vulkan::PresentPass m_present;
 };
 

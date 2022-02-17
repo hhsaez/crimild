@@ -36,7 +36,7 @@
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanSwapchain.hpp"
+#include "Rendering/VulkanSwapchainOLD.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"

@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
-#define CRIMILD_VULKAN_RENDERING_SWAPCHAIN_
+#ifndef CRIMILD_VULKAN_RENDERING_SWAPCHAIN_OLD_
+#define CRIMILD_VULKAN_RENDERING_SWAPCHAIN_OLD_
 
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/VulkanObject.hpp"
@@ -46,19 +46,6 @@ namespace crimild {
         //////////////////////
         // DELETE FROM HERE //
         //////////////////////
-
-        class [[deprecated]] Swapchain : public crimild::Swapchain
-        {
-        public:
-            Swapchain( const RenderDevice *renderDevice, const Extent2D &extent ) noexcept;
-            virtual ~Swapchain( void ) noexcept;
-
-            [[nodiscard]] inline const VkSwapchainKHR &getHandle( void ) const noexcept { return m_handle; }
-
-        private:
-            VkSwapchainKHR m_handle = VK_NULL_HANDLE;
-            const RenderDevice *m_renderDevice = nullptr;
-        };
 
         class RenderDeviceOLD;
         class VulkanSurfaceOLD;

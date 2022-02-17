@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 #define CRIMILD_VULKAN_RENDERING_PHYSICAL_DEVICE_
 
-#include "Foundation/VulkanObject.hpp"      // TODO: Remove this?
-#include "Rendering/VulkanRenderDevice.hpp" // TODO: Remove this?
+#include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
 
@@ -52,49 +51,6 @@ namespace crimild {
             VkPhysicalDevice m_handle = VK_NULL_HANDLE;
             VulkanSurface *m_surface = nullptr;
             VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-        };
-
-        //////////////////////
-        // DELETE FROM HERE //
-        //////////////////////
-
-        class VulkanInstanceOLD;
-        class VulkanSurfaceOLD;
-        class PhysicalDeviceManager;
-
-        class [[deprecated]] PhysicalDeviceOLD : public VulkanObject, public RenderDeviceManager
-        {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::PhysicalDeviceOLD )
-        public:
-            using RenderDeviceManager::create;
-
-            struct Descriptor {
-                VulkanInstanceOLD *instance;
-                VulkanSurfaceOLD *surface;
-            };
-
-        public:
-            PhysicalDeviceOLD( void );
-            ~PhysicalDeviceOLD( void );
-
-            VkPhysicalDevice handler = VK_NULL_HANDLE;
-            VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-            VulkanInstanceOLD *instance = nullptr;
-            VulkanSurfaceOLD *surface = nullptr;
-            PhysicalDeviceManager *manager = nullptr;
-        };
-
-        // TODO: How to handle an optional surface param?
-        class PhysicalDeviceManager : public VulkanObjectManager< PhysicalDeviceOLD > {
-        public:
-            virtual ~PhysicalDeviceManager( void ) = default;
-
-            SharedPointer< PhysicalDeviceOLD > create( PhysicalDeviceOLD::Descriptor const &descriptor ) noexcept;
-            void destroy( PhysicalDeviceOLD *physicalDevice ) noexcept override;
-
-        private:
-            VkPhysicalDevice pickPhysicalDevice( const VkInstance &instance, const VkSurfaceKHR &surface ) noexcept;
-            crimild::Bool isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept;
         };
 
     }

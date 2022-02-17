@@ -26,8 +26,9 @@
 */
 
 #include "Rendering/VulkanSampler.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+
+#include "Rendering/VulkanPhysicalDeviceOLD.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild::vulkan;
 
@@ -45,11 +46,11 @@ crimild::Bool SamplerManager::bind( Sampler *sampler ) noexcept
     auto addressMode = utils::getSamplerAddressMode( sampler->getWrapMode() );
     auto compareOp = utils::getCompareOp( sampler->getCompareOp() );
     auto borderColor = utils::getBorderColor( sampler->getBorderColor() );
-	auto minLod = crimild::Real32( sampler->getMinLod() );
-	auto maxLod = crimild::Real32( sampler->getMaxLod() );
+    auto minLod = crimild::Real32( sampler->getMinLod() );
+    auto maxLod = crimild::Real32( sampler->getMaxLod() );
 
     auto samplerInfo = VkSamplerCreateInfo {
-		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .magFilter = utils::getSamplerFilter( sampler->getMagFilter() ),
         .minFilter = utils::getSamplerFilter( sampler->getMinFilter() ),
         .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
@@ -67,15 +68,13 @@ crimild::Bool SamplerManager::bind( Sampler *sampler ) noexcept
         .unnormalizedCoordinates = VK_FALSE,
     };
 
-	SamplerBindInfo bindInfo;
+    SamplerBindInfo bindInfo;
     CRIMILD_VULKAN_CHECK(
         vkCreateSampler(
             renderDevice->handler,
             &samplerInfo,
             nullptr,
-            &bindInfo.sampler
-        )
-    );
+            &bindInfo.sampler ) );
 
     setBindInfo( sampler, bindInfo );
 
@@ -91,15 +90,14 @@ crimild::Bool SamplerManager::unbind( Sampler *sampler ) noexcept
     CRIMILD_LOG_TRACE( "Unbind Vulkan Sampler" );
 
     auto renderDevice = getRenderDevice();
-	auto bindInfo = getBindInfo( sampler );
+    auto bindInfo = getBindInfo( sampler );
 
-	if ( renderDevice != nullptr && bindInfo.sampler != VK_NULL_HANDLE ) {
-		vkDestroySampler(
-			renderDevice->handler,
-			bindInfo.sampler,
-			nullptr
-		);
-	}
+    if ( renderDevice != nullptr && bindInfo.sampler != VK_NULL_HANDLE ) {
+        vkDestroySampler(
+            renderDevice->handler,
+            bindInfo.sampler,
+            nullptr );
+    }
 
     return ManagerImpl::unbind( sampler );
 }
