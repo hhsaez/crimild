@@ -28,7 +28,7 @@
 #include "Rendering/VulkanRenderPass.hpp"
 
 #include "Rendering/Image.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;

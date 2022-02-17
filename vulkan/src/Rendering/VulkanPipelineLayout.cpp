@@ -26,7 +26,8 @@
 */
 
 #include "Rendering/VulkanPipelineLayout.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -49,11 +50,10 @@ SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::D
 
     std::vector< VkDescriptorSetLayout > setLayouts;
     descriptor.setLayouts.each(
-   		[&]( auto &layout ) {
+        [ & ]( auto &layout ) {
             renderDevice->bind( layout );
             setLayouts.push_back( renderDevice->getHandler( layout ) );
-    	}
-   	);
+        } );
 
     auto createInfo = VkPipelineLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -65,13 +65,11 @@ SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::D
 
     VkPipelineLayout pipelineLayoutHandler;
     CRIMILD_VULKAN_CHECK(
-     	vkCreatePipelineLayout(
-       		renderDevice->handler,
-           	&createInfo,
-           	nullptr,
-           	&pipelineLayoutHandler
-       	)
- 	);
+        vkCreatePipelineLayout(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &pipelineLayoutHandler ) );
 
     auto pipelineLayout = crimild::alloc< PipelineLayout >();
     pipelineLayout->manager = this;
@@ -88,10 +86,9 @@ void PipelineLayoutManager::destroy( PipelineLayout *pipelineLayout ) noexcept
     if ( pipelineLayout->renderDevice != nullptr
          && pipelineLayout->handler != VK_NULL_HANDLE ) {
         vkDestroyPipelineLayout(
-        	pipelineLayout->renderDevice->handler,
+            pipelineLayout->renderDevice->handler,
             pipelineLayout->handler,
-        	nullptr
-        );
+            nullptr );
     }
 
     pipelineLayout->handler = VK_NULL_HANDLE;

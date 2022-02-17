@@ -31,7 +31,7 @@
 #include "Rendering/Shader.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "VulkanPhysicalDevice.hpp"
-#include "VulkanRenderDevice.hpp"
+#include "VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;

@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holders nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,31 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_GRAPHICS_PIPELINE_
-#define CRIMILD_VULKAN_RENDERING_GRAPHICS_PIPELINE_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
+#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 
-#include "Foundation/Memory.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
 
-    class ShaderProgram;
-
     namespace vulkan {
 
-        class RenderDevice;
+        class GraphicsPipeline;
 
-        class GraphicsPipeline {
+        class ScenePass : public RenderPass {
         public:
-            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, SharedPointer< ShaderProgram > const &program ) noexcept;
-            ~GraphicsPipeline( void ) noexcept;
+            explicit ScenePass( RenderDevice *renderDevice ) noexcept;
+            virtual ~ScenePass( void ) noexcept;
 
-            inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }
+            virtual void handle( const Event & ) noexcept override;
+            virtual void render( void ) noexcept override;
 
         private:
-            VkDevice m_renderDevice = VK_NULL_HANDLE;
-            VkPipeline m_pipeline = VK_NULL_HANDLE;
-            VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+            void init( void ) noexcept;
+            void clear( void ) noexcept;
+            void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
+            void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
+
+        private:
+            vulkan::RenderDevice *m_renderDevice = nullptr;
+            VkRenderPass m_renderPass = VK_NULL_HANDLE;
+            std::vector< VkFramebuffer > m_framebuffers;
+            VkRect2D m_renderArea;
+
+            std::unique_ptr< GraphicsPipeline > m_pipeline;
         };
 
     }

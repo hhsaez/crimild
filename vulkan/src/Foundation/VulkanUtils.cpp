@@ -29,8 +29,8 @@
 
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/ViewportDimensions.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanPhysicalDeviceOLD.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 #include <set>
 

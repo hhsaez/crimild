@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,8 @@
  */
 
 #include "VulkanSemaphore.hpp"
-#include "VulkanRenderDevice.hpp"
+
+#include "VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -53,13 +54,11 @@ SharedPointer< Semaphore > SemaphoreManager::create( Semaphore::Descriptor const
 
     VkSemaphore semaphoreHandler;
     CRIMILD_VULKAN_CHECK(
- 		vkCreateSemaphore(
-      		renderDevice->handler,
-          	&createInfo,
-          	nullptr,
-          	&semaphoreHandler
-      	)
- 	);
+        vkCreateSemaphore(
+            renderDevice->handler,
+            &createInfo,
+            nullptr,
+            &semaphoreHandler ) );
 
     auto semaphore = crimild::alloc< Semaphore >();
     semaphore->renderDevice = renderDevice;
@@ -77,8 +76,7 @@ void SemaphoreManager::destroy( Semaphore *semaphore ) noexcept
         vkDestroySemaphore(
             semaphore->renderDevice->handler,
             semaphore->handler,
-            nullptr
-        );
+            nullptr );
     }
 
     semaphore->handler = VK_NULL_HANDLE;
@@ -86,4 +84,3 @@ void SemaphoreManager::destroy( Semaphore *semaphore ) noexcept
     semaphore->manager = nullptr;
     erase( semaphore );
 }
-

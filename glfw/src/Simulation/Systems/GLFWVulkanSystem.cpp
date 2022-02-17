@@ -34,9 +34,9 @@
 #include "Rendering/VulkanCommandPool.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 #include "Rendering/VulkanSurface.hpp"
-#include "Rendering/VulkanSwapchain.hpp"
+#include "Rendering/VulkanSwapchainOLD.hpp"
 #include "Simulation/FileSystem.hpp"
 #include "Simulation/Simulation.hpp"
 

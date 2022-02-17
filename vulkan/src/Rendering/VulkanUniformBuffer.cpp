@@ -28,8 +28,8 @@
 #include "Rendering/VulkanUniformBuffer.hpp"
 
 #include "Rendering/UniformBuffer.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanPhysicalDeviceOLD.hpp"
+#include "Rendering/VulkanRenderDeviceOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
