@@ -38,7 +38,7 @@ crimild::Bool DescriptorSetLayoutManager::bind( DescriptorSetLayout *descriptorS
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan descriptor set layout" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -82,7 +82,7 @@ crimild::Bool DescriptorSetLayoutManager::unbind( DescriptorSetLayout *descripto
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor set layout" );
+    CRIMILD_LOG_TRACE();
 
     auto handler = getHandler( descriptorSetLayout );
     if ( handler == VK_NULL_HANDLE ) {

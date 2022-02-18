@@ -83,8 +83,30 @@ namespace crimild {
 
         return funcName.substr( begin, end );
     }
+
+    inline std::string getFunctionName( const std::string &fqn )
+    {
+        auto end = fqn.find( "(" );
+        if ( end == std::string::npos ) {
+            return "asd" + fqn;
+        }
+
+        auto begin = fqn.substr( 0, end ).rfind( "::" );
+        if ( begin == std::string::npos ) {
+            begin = fqn.substr( 0, end ).rfind( ' ' );
+            if ( begin == std::string::npos ) {
+                return "qwe" + fqn;
+            }
+            begin += 1;
+        } else {
+            begin += 2;
+        }
+
+        return fqn.substr( begin, end - begin );
+    }
 }
 
+#define CRIMILD_CURRENT_FUNCTION_NAME ::crimild::getFunctionName( CRIMILD_CURRENT_FUNCTION )
 #define CRIMILD_CURRENT_CLASS_NAME ::crimild::getClassName( CRIMILD_CURRENT_FUNCTION )
 
 #define CRIMILD_TO_STRING( A ) #A

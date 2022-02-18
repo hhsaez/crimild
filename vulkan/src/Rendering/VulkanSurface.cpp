@@ -41,7 +41,7 @@ VulkanSurface::VulkanSurface( VulkanInstance *instance, VkSurfaceKHR handle ) no
 
 VulkanSurface::~VulkanSurface( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
+    CRIMILD_LOG_TRACE();
 
     if ( m_handle != VK_NULL_HANDLE ) {
         vkDestroySurfaceKHR( m_instance->getHandle(), m_handle, nullptr );
@@ -69,7 +69,7 @@ void VulkanSurfaceManager::attach( VulkanSurfaceOLD *surface ) noexcept
 
 void VulkanSurfaceManager::destroy( VulkanSurfaceOLD *surface ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan surface" );
+    CRIMILD_LOG_TRACE();
 
     if ( surface->handler != VK_NULL_HANDLE ) {
         vkDestroySurfaceKHR( surface->instance->handler, surface->handler, nullptr );

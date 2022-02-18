@@ -51,7 +51,7 @@ Bool vulkan::CaptureSystem::takeScreenshot( void ) noexcept
     CRIMILD_LOG_DEBUG( "Waiting for render device to finish" );
     renderDevice->waitIdle();
 
-    CRIMILD_LOG_TRACE( "Capturing image..." );
+    CRIMILD_LOG_TRACE();
 
     capturing = true;
 

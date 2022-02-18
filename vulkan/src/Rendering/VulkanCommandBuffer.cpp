@@ -46,7 +46,7 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Command Buffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -89,7 +89,7 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan commandBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

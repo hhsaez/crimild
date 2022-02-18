@@ -41,7 +41,7 @@ Semaphore::~Semaphore( void )
 
 SharedPointer< Semaphore > SemaphoreManager::create( Semaphore::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating vulkan semaphore" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
@@ -70,7 +70,7 @@ SharedPointer< Semaphore > SemaphoreManager::create( Semaphore::Descriptor const
 
 void SemaphoreManager::destroy( Semaphore *semaphore ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan semaphore" );
+    CRIMILD_LOG_TRACE();
 
     if ( semaphore->renderDevice != nullptr && semaphore->handler != VK_NULL_HANDLE ) {
         vkDestroySemaphore(

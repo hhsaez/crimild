@@ -38,7 +38,7 @@ crimild::Bool SamplerManager::bind( Sampler *sampler ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Sampler" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
 
@@ -87,7 +87,7 @@ crimild::Bool SamplerManager::unbind( Sampler *sampler ) noexcept
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbind Vulkan Sampler" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto bindInfo = getBindInfo( sampler );

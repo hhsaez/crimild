@@ -649,7 +649,7 @@ void ImGUISystem::start( void ) noexcept
 {
     System::start();
 
-    CRIMILD_LOG_TRACE( "Starting ImGUI System" );
+    CRIMILD_LOG_TRACE();
 
     IMGUI_CHECKVERSION();
 

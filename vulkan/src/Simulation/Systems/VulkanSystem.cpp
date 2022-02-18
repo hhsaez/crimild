@@ -204,7 +204,7 @@ crimild::Bool VulkanSystem::createDebugMessenger( void ) noexcept
 
 crimild::Bool VulkanSystem::createSurface( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan surface" );
+    CRIMILD_LOG_TRACE();
     m_surface = create(
         VulkanSurfaceOLD::Descriptor {
             .instance = crimild::get_ptr( m_instance ) } );
@@ -263,7 +263,7 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
 void VulkanSystem::cleanSwapchain( void ) noexcept
 {
     if ( auto renderDevice = crimild::get_ptr( m_renderDevice ) ) {
-        CRIMILD_LOG_TRACE( "Waiting for pending operations" );
+        CRIMILD_LOG_TRACE();
         m_renderDevice->waitIdle();
 
         static_cast< DescriptorSetManager * >( renderDevice )->clear();

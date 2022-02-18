@@ -43,7 +43,7 @@ crimild::Bool ComputePipelineManager::bind( ComputePipeline *pipeline ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan compute pipeline" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -101,7 +101,7 @@ crimild::Bool ComputePipelineManager::unbind( ComputePipeline *pipeline ) noexce
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbind Vulkan compute pipeline" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -123,7 +123,7 @@ crimild::Bool ComputePipelineManager::unbind( ComputePipeline *pipeline ) noexce
 
 ComputePipelineManager::ShaderModuleArray ComputePipelineManager::createShaderModules( RenderDeviceOLD *renderDevice, ShaderProgram *program ) const noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating shader modules" );
+    CRIMILD_LOG_TRACE();
 
     ShaderModuleArray modules;
     assert( program != nullptr && "Invalid shader program instance" );
@@ -142,7 +142,7 @@ ComputePipelineManager::ShaderModuleArray ComputePipelineManager::createShaderMo
 
 ComputePipelineManager::ShaderStageArray ComputePipelineManager::createShaderStages( const ShaderModuleArray &modules ) const noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating shader stages" );
+    CRIMILD_LOG_TRACE();
 
     ShaderStageArray shaderStages;
     for ( const auto &module : modules ) {

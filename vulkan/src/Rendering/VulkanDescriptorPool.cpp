@@ -38,7 +38,7 @@ crimild::Bool DescriptorPoolManager::bind( DescriptorPool *descriptorPool ) noex
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan descriptor pool" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -83,7 +83,7 @@ crimild::Bool DescriptorPoolManager::unbind( DescriptorPool *descriptorPool ) no
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor pool" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

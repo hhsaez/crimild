@@ -606,7 +606,7 @@ const utils::ValidationLayerArray &utils::getValidationLayers( void ) noexcept
 
 crimild::Bool utils::checkValidationLayerSupport( const utils::ValidationLayerArray &validationLayers ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Checking validation layer support" );
+    CRIMILD_LOG_TRACE();
 
     crimild::UInt32 layerCount;
     vkEnumerateInstanceLayerProperties( &layerCount, nullptr );
@@ -635,7 +635,7 @@ crimild::Bool utils::checkValidationLayerSupport( const utils::ValidationLayerAr
 
 utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Getting required extensions" );
+    CRIMILD_LOG_TRACE();
 
     auto validationLayersEnabled = checkValidationLayersEnabled();
 
@@ -735,7 +735,7 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 
 crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Checking device extension support" );
+    CRIMILD_LOG_TRACE();
 
     const auto &deviceExtensions = getDeviceExtensions();
 
@@ -768,7 +768,7 @@ crimild::Bool utils::checkDeviceExtensionSupport( const VkPhysicalDevice &device
 
 utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Finding device queue families" );
+    CRIMILD_LOG_TRACE();
 
     QueueFamilyIndices indices;
 
@@ -817,7 +817,7 @@ utils::QueueFamilyIndices utils::findQueueFamilies( const VkPhysicalDevice &devi
 
 utils::SwapchainSupportDetails utils::querySwapchainSupportDetails( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Query swapchain support details" );
+    CRIMILD_LOG_TRACE();
 
     SwapchainSupportDetails details;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -860,7 +860,7 @@ utils::SwapchainSupportDetails utils::querySwapchainSupportDetails( const VkPhys
 
 crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Check swapchain support" );
+    CRIMILD_LOG_TRACE();
 
     auto swapchainSupport = querySwapchainSupportDetails(
         device,
@@ -872,7 +872,7 @@ crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, cons
 
 VkSurfaceFormatKHR utils::chooseSurfaceFormat( const std::vector< VkSurfaceFormatKHR > &availableFormats ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Choosing swapchain surface format" );
+    CRIMILD_LOG_TRACE();
 
     // If no format is available, force what we need
     if ( availableFormats.size() == 1 && availableFormats[ 0 ].format == VK_FORMAT_UNDEFINED ) {
@@ -895,7 +895,7 @@ VkSurfaceFormatKHR utils::chooseSurfaceFormat( const std::vector< VkSurfaceForma
 
 VkPresentModeKHR utils::choosePresentationMode( const std::vector< VkPresentModeKHR > &availablePresentModes ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Choosing swapchain presentation mode" );
+    CRIMILD_LOG_TRACE();
 
     // VSync by default, but may introduce latency
     // FIFO mode is always available (defined in standard)
@@ -913,7 +913,7 @@ VkPresentModeKHR utils::choosePresentationMode( const std::vector< VkPresentMode
 
 VkExtent2D utils::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D requestedExtent ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Choosing swapchain extent" );
+    CRIMILD_LOG_TRACE();
 
     if ( capabilities.currentExtent.width != std::numeric_limits< uint32_t >::max() ) {
         // Capabilites are enforcing a given extent. Return that one
@@ -933,7 +933,7 @@ VkExtent2D utils::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, Vk
 
 crimild::UInt32 utils::findMemoryType( const VkPhysicalDevice &physicalDevice, crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Finding memory type device" );
+    CRIMILD_LOG_TRACE();
 
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );

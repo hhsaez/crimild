@@ -51,7 +51,7 @@ VulkanInstance::~VulkanInstance( void ) noexcept
 
 void VulkanInstance::createInstance( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating VulkanInstance" );
+    CRIMILD_LOG_TRACE();
 
     auto validationLayersEnabled = utils::checkValidationLayersEnabled();
     auto validationLayers = utils::getValidationLayers();
@@ -111,7 +111,7 @@ void VulkanInstance::createInstance( void ) noexcept
 
 void VulkanInstance::destroyInstance( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying VulkanInstance" );
+    CRIMILD_LOG_TRACE();
 
     if ( m_instanceHandle != VK_NULL_HANDLE ) {
         vkDestroyInstance( m_instanceHandle, nullptr );
@@ -127,7 +127,7 @@ void VulkanInstance::createDebugMessenger( void ) noexcept
         return;
     }
 
-    CRIMILD_LOG_TRACE( "Creating Vulkan debug messenger" );
+    CRIMILD_LOG_TRACE();
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     utils::populateDebugMessengerCreateInfo( createInfo );
@@ -160,7 +160,7 @@ void VulkanInstance::destroyDebugMessenger( void ) noexcept
         return;
     }
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan debug messenger" );
+    CRIMILD_LOG_TRACE();
 
     auto destroyDebugUtilsMessengerEXT = []( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator ) {
         if ( auto func = ( PFN_vkDestroyDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" ) ) {
@@ -196,7 +196,7 @@ void VulkanInstance::createReportCallback( void ) noexcept
         return;
     }
 
-    CRIMILD_LOG_TRACE( "Creating Vulkan report callback" );
+    CRIMILD_LOG_TRACE();
 
     auto createInfo = VkDebugReportCallbackCreateInfoEXT {
         .sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
@@ -232,7 +232,7 @@ void VulkanInstance::destroyReportCallback( void ) noexcept
         return;
     }
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan report callback" );
+    CRIMILD_LOG_TRACE();
 
     auto destroyDebugReportCallbackEXT = []( VkInstance instance, VkDebugReportCallbackEXT handler, const VkAllocationCallbacks *pAllocator ) {
         if ( auto func = ( PFN_vkDestroyDebugReportCallbackEXT ) vkGetInstanceProcAddr( instance, "vkDestroyDebugReportCallbackEXT" ) ) {
@@ -255,7 +255,7 @@ std::unique_ptr< PhysicalDevice > VulkanInstance::createPhysicalDevice( VulkanSu
 
 VulkanInstanceOLD::~VulkanInstanceOLD( void )
 {
-    CRIMILD_LOG_TRACE( "Destroying instance" );
+    CRIMILD_LOG_TRACE();
 
     //	if ( m_renderDevice != nullptr ) {
     //		CRIMILD_LOG_TRACE( "Waiting for pending operations" );

@@ -40,7 +40,7 @@ crimild::Bool VertexBufferManager::bind( VertexBuffer *vertexBuffer ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan VertexBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto bufferView = vertexBuffer->getBufferView();
@@ -86,7 +86,7 @@ crimild::Bool VertexBufferManager::unbind( VertexBuffer *vertexBuffer ) noexcept
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan vertexBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

@@ -44,7 +44,7 @@ CommandPool::~CommandPool( void )
 
 SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan Command Pool" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
@@ -75,7 +75,7 @@ SharedPointer< CommandPool > CommandPoolManager::create( CommandPool::Descriptor
 
 void CommandPoolManager::destroy( CommandPool *commandPool ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan Command Pool" );
+    CRIMILD_LOG_TRACE();
 
     if ( commandPool->renderDevice != nullptr && commandPool->handler != VK_NULL_HANDLE ) {
         vkDestroyCommandPool(

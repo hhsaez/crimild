@@ -44,7 +44,7 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
       m_surface( surface ),
       m_extent( extent )
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan logical device" );
+    CRIMILD_LOG_TRACE();
 
     auto indices = utils::findQueueFamilies( physicalDevice->getHandle(), surface->getHandle() );
     if ( !indices.isComplete() ) {
@@ -130,7 +130,7 @@ RenderDevice::~RenderDevice( void ) noexcept
 
     destroyCommandPool( m_commandPool );
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
+    CRIMILD_LOG_TRACE();
 
     if ( m_handle != VK_NULL_HANDLE ) {
         vkDestroyDevice( m_handle, nullptr );
@@ -177,7 +177,7 @@ void RenderDevice::flush( void ) noexcept
 
 void RenderDevice::createSwapchain( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan swapchain" );
+    CRIMILD_LOG_TRACE();
 
     auto swapchainSupport = utils::querySwapchainSupportDetails( m_physicalDevice->getHandle(), m_surface->getHandle() );
     auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
@@ -252,7 +252,7 @@ void RenderDevice::createSwapchain( void ) noexcept
             nullptr,
             &m_swapchain ) );
 
-    CRIMILD_LOG_TRACE( "Retrieving Vulkan swapchain images" );
+    CRIMILD_LOG_TRACE();
 
     vkGetSwapchainImagesKHR(
         getHandle(),
@@ -268,7 +268,7 @@ void RenderDevice::createSwapchain( void ) noexcept
         &imageCount,
         m_swapchainImages.data() );
 
-    CRIMILD_LOG_TRACE( "Creating Vulkan swapchain image views" );
+    CRIMILD_LOG_TRACE();
 
     m_swapchainImageViews.resize( imageCount );
 
@@ -281,18 +281,18 @@ void RenderDevice::createSwapchain( void ) noexcept
 
 void RenderDevice::destroySwapchain( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain image views" );
+    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image views" );
 
     for ( auto &imageView : m_swapchainImageViews ) {
         vkDestroyImageView( getHandle(), imageView, nullptr );
     }
     m_swapchainImageViews.clear();
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain image" );
+    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image" );
 
     m_swapchainImages.clear();
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan swapchain" );
+    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain" );
 
     vkDestroySwapchainKHR( getHandle(), m_swapchain, nullptr );
     m_swapchain = VK_NULL_HANDLE;
@@ -300,7 +300,7 @@ void RenderDevice::destroySwapchain( void ) noexcept
 
 void RenderDevice::createSyncObjects( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan sync objects" );
+    CRIMILD_LOG_TRACE();
 
     m_imageAvailableSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
     m_renderFinishedSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
@@ -342,7 +342,7 @@ void RenderDevice::createSyncObjects( void ) noexcept
 
 void RenderDevice::destroySyncObjects( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan sync objects" );
+    CRIMILD_LOG_TRACE();
 
     // Wait for all operations to complete before destroying sync objects
     vkDeviceWaitIdle( m_handle );
@@ -367,7 +367,7 @@ void RenderDevice::destroySyncObjects( void ) noexcept
 
 void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan command pool" );
+    CRIMILD_LOG_TRACE();
 
     // Is this too performance intensive to do it every time?
     auto queueFamilyIndices = utils::findQueueFamilies( getPhysicalDevice()->getHandle(), getSurface()->getHandle() );
@@ -388,7 +388,7 @@ void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
 
 void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan command pool" );
+    CRIMILD_LOG_TRACE();
 
     if ( commandPool != VK_NULL_HANDLE ) {
         vkDestroyCommandPool(
@@ -417,7 +417,7 @@ void RenderDevice::destroyCommandBuffers( void ) noexcept
 
 void RenderDevice::createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan command buffer" );
+    CRIMILD_LOG_TRACE();
 
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -439,7 +439,7 @@ void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexce
         return;
     }
 
-    CRIMILD_LOG_TRACE( "Destroying Vulkan command buffer" );
+    CRIMILD_LOG_TRACE();
 
     // renderDevice->waitIdle();
     vkFreeCommandBuffers(
