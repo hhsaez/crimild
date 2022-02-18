@@ -33,6 +33,8 @@
 
 namespace crimild {
 
+    class UniformBuffer;
+
     namespace vulkan {
 
         class GraphicsPipeline;
@@ -48,8 +50,18 @@ namespace crimild {
         private:
             void init( void ) noexcept;
             void clear( void ) noexcept;
+
             void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
             void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
+
+            void createDescriptorPool( void ) noexcept;
+            void destroyDescriptorPool( void ) noexcept;
+
+            void createDescriptorSetLayout( void ) noexcept;
+            void destroyDescriptorSetLayout( void ) noexcept;
+
+            void createDescriptorSets( void ) noexcept;
+            void destroyDescriptorSets( void ) noexcept;
 
         private:
             vulkan::RenderDevice *m_renderDevice = nullptr;
@@ -58,6 +70,12 @@ namespace crimild {
             VkRect2D m_renderArea;
 
             std::unique_ptr< GraphicsPipeline > m_pipeline;
+
+            std::unique_ptr< UniformBuffer > m_uniforms;
+
+            VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
+            VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > m_descriptorSets;
         };
 
     }

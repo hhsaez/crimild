@@ -28,9 +28,11 @@
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
+#include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Event.hpp"
+#include "Simulation/Settings.hpp"
 
 #include <array>
 
@@ -38,8 +40,11 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice )
+    : m_renderDevice( renderDevice ),
+      m_uniforms( std::make_unique< UniformBuffer >( Vector2 { 1024, 768 } ) )
 {
+    // m_uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+
     init();
 }
 
@@ -53,6 +58,12 @@ void ScenePass::handle( const Event &e ) noexcept
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             clear();
+
+            auto settings = Settings::getInstance();
+            auto width = settings->get< float >( "video.width", 1024 );
+            auto height = settings->get< float >( "video.height", 768 );
+            m_uniforms->setValue( Vector2 { width, height } );
+
             init();
             break;
         }
@@ -69,11 +80,14 @@ void ScenePass::render( void ) noexcept
 
     beginRenderPass( commandBuffer, currentFrameIndex );
 
+    // m_renderDevice->update( m_uniforms.get() );
+
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         m_pipeline->getHandle() );
-    // commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+
+    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_descriptorSets[ currentFrameIndex ], 0, nullptr );
 
     vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
 
@@ -192,9 +206,16 @@ void ScenePass::init( void ) noexcept
                 &m_framebuffers[ i ] ) );
     }
 
+    m_renderDevice->bind( m_uniforms.get() );
+
+    createDescriptorPool();
+    createDescriptorSetLayout();
+    createDescriptorSets();
+
     m_pipeline = std::make_unique< GraphicsPipeline >(
         m_renderDevice,
         m_renderPass,
+        std::vector< VkDescriptorSetLayout > { m_descriptorSetLayout },
         [ & ] {
             auto program = crimild::alloc< ShaderProgram >();
             program->setShaders(
@@ -235,6 +256,10 @@ void ScenePass::init( void ) noexcept
                         R"(
                             layout( location = 0 ) in vec2 inTexCoord;
 
+                            layout ( set = 0, binding = 0 ) uniform Context {
+                                vec2 dimensions;
+                            } context;
+
                             layout( location = 0 ) out vec4 outColor;
 
                             float circleMask( vec2 uv, vec2 p, float r, float blur )
@@ -248,7 +273,7 @@ void ScenePass::init( void ) noexcept
                             {
                                 vec2 uv = inTexCoord;
                                 uv -= 0.5;
-                                uv.x *= 1024.0 / 768.0;// context.dimensions.x / context.dimensions.y;
+                                uv.x *= context.dimensions.x / context.dimensions.y;
 
                                 float blur = 0.00625;
 
@@ -273,11 +298,17 @@ void ScenePass::init( void ) noexcept
 
 void ScenePass::clear( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "deinit" );
+    CRIMILD_LOG_TRACE();
 
     vkDeviceWaitIdle( m_renderDevice->getHandle() );
 
     m_pipeline = nullptr;
+
+    destroyDescriptorSets();
+    destroyDescriptorSetLayout();
+    destroyDescriptorPool();
+
+    m_renderDevice->unbind( m_uniforms.get() );
 
     for ( auto &fb : m_framebuffers ) {
         vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
@@ -305,4 +336,104 @@ void ScenePass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentF
 void ScenePass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
 {
     vkCmdEndRenderPass( commandBuffer );
+}
+
+void ScenePass::createDescriptorPool( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    VkDescriptorPoolSize poolSize {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+    };
+
+    auto createInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
+        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
+}
+
+void ScenePass::destroyDescriptorPool( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_descriptorPool, nullptr );
+    m_descriptorPool = VK_NULL_HANDLE;
+}
+
+void ScenePass::createDescriptorSetLayout( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    const auto layoutBinding = VkDescriptorSetLayoutBinding {
+        .binding = 0,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = 1,
+        .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+        .pImmutableSamplers = nullptr,
+    };
+
+    auto createInfo = VkDescriptorSetLayoutCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = 1,
+        .pBindings = &layoutBinding,
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorSetLayout ) );
+}
+
+void ScenePass::destroyDescriptorSetLayout( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_descriptorSetLayout, nullptr );
+    m_descriptorSetLayout = VK_NULL_HANDLE;
+}
+
+void ScenePass::createDescriptorSets( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_descriptorSetLayout );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = m_descriptorPool,
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    m_descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_descriptorSets.data() ) );
+
+    for ( size_t i = 0; i < m_descriptorSets.size(); ++i ) {
+        const auto bufferInfo = VkDescriptorBufferInfo {
+            .buffer = m_renderDevice->getHandle( m_uniforms.get(), i ),
+            .offset = 0,
+            .range = m_uniforms->getBufferView()->getLength(),
+        };
+
+        const auto descriptorWrite = VkWriteDescriptorSet {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = m_descriptorSets[ i ],
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .pBufferInfo = &bufferInfo,
+            .pImageInfo = nullptr,
+            .pTexelBufferView = nullptr,
+        };
+
+        vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+    }
+}
+
+void ScenePass::destroyDescriptorSets( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
 }

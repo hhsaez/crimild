@@ -132,3 +132,21 @@ std::unique_ptr< RenderDevice > PhysicalDevice::createRenderDevice( void ) noexc
 
     return std::make_unique< RenderDevice >( this, m_surface, extent );
 }
+
+uint32_t PhysicalDevice::findMemoryType( crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) const noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties( m_handle, &memProperties );
+
+    for ( crimild::UInt32 i = 0; i < memProperties.memoryTypeCount; ++i ) {
+        if ( typeFilter & ( 1 << i )
+             && ( memProperties.memoryTypes[ i ].propertyFlags & properties ) == properties ) {
+            return i;
+        }
+    }
+
+    CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
+    return -1;
+}
