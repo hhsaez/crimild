@@ -40,7 +40,7 @@ crimild::Bool StorageBufferManager::bind( StorageBuffer *storageBuffer ) noexcep
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan StorageBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto bufferView = storageBuffer->getBufferView();
@@ -87,7 +87,7 @@ crimild::Bool StorageBufferManager::unbind( StorageBuffer *storageBuffer ) noexc
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan storageBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

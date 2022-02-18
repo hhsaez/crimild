@@ -40,7 +40,7 @@ crimild::Bool UniformBufferManager::bind( UniformBuffer *uniformBuffer ) noexcep
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan UniformBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto bufferView = uniformBuffer->getBufferView();
@@ -87,7 +87,7 @@ crimild::Bool UniformBufferManager::unbind( UniformBuffer *uniformBuffer ) noexc
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan uniformBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

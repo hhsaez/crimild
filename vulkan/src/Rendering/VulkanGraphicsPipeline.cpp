@@ -47,7 +47,7 @@ namespace crimild {
             ShaderModule( RenderDevice *renderDevice, SharedPointer< Shader > const &shader ) noexcept
                 : m_renderDevice( renderDevice )
             {
-                CRIMILD_LOG_TRACE( "Creating shader module for stage ", shader->getStageDescription() );
+                CRIMILD_LOG_DEBUG( "Creating shader module for stage ", shader->getStageDescription() );
 
                 assert( shader != nullptr && "Shader instance is null" );
 
@@ -94,7 +94,7 @@ namespace crimild {
 
         static std::vector< std::unique_ptr< ShaderModule > > createShaderModules( RenderDevice *renderDevice, SharedPointer< ShaderProgram > const &program ) noexcept
         {
-            CRIMILD_LOG_TRACE( "Creating shader modules" );
+            CRIMILD_LOG_TRACE();
 
             std::vector< std::unique_ptr< ShaderModule > > modules;
             assert( program != nullptr && "Invalid shader program instance" );
@@ -108,7 +108,7 @@ namespace crimild {
 
         static std::vector< VkPipelineShaderStageCreateInfo > createShaderStages( const std::vector< std::unique_ptr< ShaderModule > > &modules ) noexcept
         {
-            CRIMILD_LOG_TRACE( "Creating shader stages" );
+            CRIMILD_LOG_TRACE();
 
             std::vector< VkPipelineShaderStageCreateInfo > shaderStages;
             for ( const auto &module : modules ) {
@@ -600,7 +600,7 @@ namespace crimild {
 vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, std::shared_ptr< ShaderProgram > const &program ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
-    CRIMILD_LOG_TRACE( "Binding Vulkan pripeline" );
+    CRIMILD_LOG_TRACE();
 
     const auto pipelineViewport = ViewportDimensions {};
     const auto pipelineScissor = ViewportDimensions {};
@@ -687,7 +687,7 @@ vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRender
 
 vulkan::GraphicsPipeline::~GraphicsPipeline( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Unbind Vulkan graphicsPipeline" );
+    CRIMILD_LOG_TRACE();
 
     vkDestroyPipeline(
         m_renderDevice,

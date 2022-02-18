@@ -170,7 +170,7 @@ const TBuiltInResource DefaultTBuiltInResource = {
 
 bool vulkan::ShaderCompiler::init( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Initializing shader compiler" );
+    CRIMILD_LOG_TRACE();
 
     if ( !m_initialized ) {
         glslang::InitializeProcess();
@@ -186,7 +186,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Compiling shader for stage ", int( shaderStage ) );
+    CRIMILD_LOG_DEBUG( "Compiling shader for stage ", int( shaderStage ) );
 
     auto stage = getShaderStage( shaderStage );
 
@@ -377,15 +377,14 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
                 }
             }
 
-            void initRandom( int seedValue ) 
+            void initRandom( int seedValue )
             {
                 seed = seedValue;
                  flat_idx = int( dot( gl_GlobalInvocationID.xy, vec2( 1, 4096 ) ) );
             }
 
             #endif
-        )"
-    );
+        )" );
 
     m_preprocessor.addChunk(
         "textureCube",
@@ -504,9 +503,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
                 );
             }
 
-            #endif            
-        )"
-    );
+            #endif
+        )" );
 
     m_preprocessor.addChunk(
         "linearizeDepth",
@@ -521,8 +519,7 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )"
-    );
+        )" );
 
     m_preprocessor.addChunk(
         "isZero",
@@ -530,7 +527,7 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             #ifndef CRIMILD_GLSL_IS_ZERO
             #define CRIMILD_GLSL_IS_ZERO
 
-            bool isZero( float x ) 
+            bool isZero( float x )
             {
                 float EPSILON = 0.000001;
                 return abs( x ) < EPSILON;
@@ -542,8 +539,7 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )"
-    );
+        )" );
 
     m_preprocessor.addChunk(
         "reflectance",
@@ -558,8 +554,7 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )"
-    );
+        )" );
 
     m_preprocessor.addChunk(
         "max",
@@ -580,8 +575,7 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )"
-    );
+        )" );
 
     m_preprocessor.addChunk(
         "swapsHandedness",
@@ -595,7 +589,5 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )"
-    );
-
+        )" );
 }

@@ -38,7 +38,7 @@ crimild::Bool DescriptorSetManager::bind( DescriptorSet *descriptorSet ) noexcep
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan descriptor set" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {
@@ -167,7 +167,7 @@ crimild::Bool DescriptorSetManager::unbind( DescriptorSet *descriptorSet ) noexc
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan descriptor set" );
+    CRIMILD_LOG_TRACE();
 
     // No need to explicitly delete descriptor sets
 

@@ -40,7 +40,7 @@ crimild::Bool IndexBufferManager::bind( IndexBuffer *indexBuffer ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan IndexBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto bufferView = indexBuffer->getBufferView();
@@ -87,7 +87,7 @@ crimild::Bool IndexBufferManager::unbind( IndexBuffer *indexBuffer ) noexcept
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbinding Vulkan indexBuffer" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     if ( renderDevice == nullptr ) {

@@ -72,7 +72,7 @@ void PresentPass::render( void ) noexcept
 
 void PresentPass::init( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "init" );
+    CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
         .offset = {
@@ -186,7 +186,7 @@ void PresentPass::init( void ) noexcept
 
 void PresentPass::clear( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "deinit" );
+    CRIMILD_LOG_TRACE();
 
     vkDeviceWaitIdle( m_renderDevice->getHandle() );
 

@@ -37,7 +37,7 @@ glfw::VulkanSurface::VulkanSurface( vulkan::VulkanInstance *instance, Window *wi
     : vulkan::VulkanSurface(
         instance,
         [ & ] {
-            CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
+            CRIMILD_LOG_DEBUG( "Creating GLFW Vulkan Surface" );
             VkSurfaceKHR handle;
             auto result = glfwCreateWindowSurface(
                 instance->getHandle(),

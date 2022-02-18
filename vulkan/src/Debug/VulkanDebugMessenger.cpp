@@ -26,6 +26,7 @@
 */
 
 #include "VulkanDebugMessenger.hpp"
+
 #include "Rendering/VulkanInstance.hpp"
 
 using namespace crimild;
@@ -44,16 +45,16 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
         return nullptr;
     }
 
-    CRIMILD_LOG_TRACE( "Setting up vulkan debug messenger" );
+    CRIMILD_LOG_TRACE();
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     utils::populateDebugMessengerCreateInfo( createInfo );
 
     auto createDebugUtilsMessengerEXT = [](
-        VkInstance instance,
-        const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-        const VkAllocationCallbacks *pAllocator,
-        VkDebugUtilsMessengerEXT *pDebugMessenger ) {
+                                            VkInstance instance,
+                                            const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                            const VkAllocationCallbacks *pAllocator,
+                                            VkDebugUtilsMessengerEXT *pDebugMessenger ) {
         if ( auto func = ( PFN_vkCreateDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" ) ) {
             return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
         }
@@ -62,10 +63,11 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
 
     VkDebugUtilsMessengerEXT debugMessengerHandler = VK_NULL_HANDLE;
     if ( createDebugUtilsMessengerEXT(
-        descriptor.instance->handler,
-        &createInfo,
-        nullptr,
-        &debugMessengerHandler ) != VK_SUCCESS ) {
+             descriptor.instance->handler,
+             &createInfo,
+             nullptr,
+             &debugMessengerHandler )
+         != VK_SUCCESS ) {
         CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
         return nullptr;
     }
@@ -80,7 +82,7 @@ SharedPointer< VulkanDebugMessenger > VulkanDebugMessengerManager::create( Vulka
 
 void VulkanDebugMessengerManager::destroy( VulkanDebugMessenger *debugMessenger ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying vulkan debug messenger" );
+    CRIMILD_LOG_TRACE();
 
     if ( !utils::checkValidationLayersEnabled() ) {
         return;
@@ -101,4 +103,3 @@ void VulkanDebugMessengerManager::destroy( VulkanDebugMessenger *debugMessenger 
     debugMessenger->handler = VK_NULL_HANDLE;
     erase( debugMessenger );
 }
-

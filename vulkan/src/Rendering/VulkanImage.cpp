@@ -61,7 +61,7 @@ crimild::Bool vulkan::ImageManager::bind( Image *image ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Image: ", image->getName() );
+    CRIMILD_LOG_DEBUG( "Binding Vulkan Image: ", image->getName() );
 
     auto renderDevice = getRenderDevice();
 
@@ -211,7 +211,7 @@ crimild::Bool vulkan::ImageManager::unbind( Image *image ) noexcept
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbind Vulkan Image" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
     auto handler = renderDevice->getBindInfo( image );

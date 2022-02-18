@@ -40,7 +40,7 @@ namespace crimild {
 
             crimild::Bool isDeviceSuitable( const VkPhysicalDevice &device, const VkSurfaceKHR &surface ) noexcept
             {
-                CRIMILD_LOG_TRACE( "Checking device properties" );
+                CRIMILD_LOG_TRACE();
 
                 auto indices = utils::findQueueFamilies( device, surface );
                 auto extensionsSupported = utils::checkDeviceExtensionSupport( device );
@@ -61,7 +61,7 @@ namespace crimild {
 
             VkPhysicalDevice pickPhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept
             {
-                CRIMILD_LOG_TRACE( "Picking physical device" );
+                CRIMILD_LOG_TRACE();
 
                 crimild::UInt32 deviceCount = 0;
                 vkEnumeratePhysicalDevices( instance->getHandle(), &deviceCount, nullptr );
@@ -96,7 +96,7 @@ using namespace crimild::vulkan;
 
 PhysicalDevice::PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan physical device" );
+    CRIMILD_LOG_TRACE();
 
     m_handle = utils::pickPhysicalDevice( instance, surface );
     if ( m_handle == VK_NULL_HANDLE ) {
@@ -110,7 +110,7 @@ PhysicalDevice::PhysicalDevice( VulkanInstance *instance, VulkanSurface *surface
 
 PhysicalDevice::~PhysicalDevice( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan physical device" );
+    CRIMILD_LOG_TRACE();
 
     // No need to destroy anything. Just reset members
     m_handle = VK_NULL_HANDLE;

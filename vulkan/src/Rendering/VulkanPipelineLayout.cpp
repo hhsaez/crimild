@@ -41,7 +41,7 @@ PipelineLayout::~PipelineLayout( void )
 
 SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
@@ -81,7 +81,7 @@ SharedPointer< PipelineLayout > PipelineLayoutManager::create( PipelineLayout::D
 
 void PipelineLayoutManager::destroy( PipelineLayout *pipelineLayout ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan pipeline layout" );
+    CRIMILD_LOG_TRACE();
 
     if ( pipelineLayout->renderDevice != nullptr
          && pipelineLayout->handler != VK_NULL_HANDLE ) {

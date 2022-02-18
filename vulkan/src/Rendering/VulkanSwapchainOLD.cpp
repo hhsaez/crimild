@@ -103,7 +103,7 @@ SharedPointer< vulkan::SwapchainOLD > SwapchainManager::create( SwapchainOLD::De
 
 void SwapchainManager::destroy( SwapchainOLD *swapchain ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying swapchain" );
+    CRIMILD_LOG_TRACE();
 
     swapchain->getImageViews().clear();
     swapchain->getImages().clear();

@@ -82,7 +82,7 @@ void ScenePass::render( void ) noexcept
 
 void ScenePass::init( void ) noexcept
 {
-    CRIMILD_LOG_TRACE( "init" );
+    CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
         .offset = {

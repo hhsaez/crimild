@@ -173,7 +173,7 @@ SharedPointer< RenderDeviceOLD > RenderDeviceManager::create( RenderDeviceOLD::D
 
 void RenderDeviceManager::destroy( RenderDeviceOLD *renderDevice ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying Vulkan logical device" );
+    CRIMILD_LOG_TRACE();
 
     static_cast< TextureManager * >( renderDevice )->clear();
     static_cast< SamplerManager * >( renderDevice )->clear();

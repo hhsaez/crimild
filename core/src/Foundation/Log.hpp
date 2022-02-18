@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,18 +32,18 @@
 #include "SharedObject.hpp"
 #include "StringUtils.hpp"
 
-#include <string>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
+#include <string>
 
 namespace crimild {
-    
+
     class Log {
     private:
         Log( void ) { }
         ~Log( void ) { }
-        
+
     public:
         enum Level {
             LOG_LEVEL_NONE = -1,
@@ -55,146 +55,142 @@ namespace crimild {
             LOG_LEVEL_TRACE = 600,
             LOG_LEVEL_ALL = 9999
         };
-        
+
         static void setLevel( int level ) { _level = level; };
         static int getLevel( void ) { return _level; }
-        
+
     private:
         static int _level;
-        
+
     public:
-        template< typename ... Args >
+        template< typename... Args >
         static void fatal( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_FATAL, "F", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void error( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_ERROR, "E", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void warning( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_WARNING, "W", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void info( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_INFO, "I", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void debug( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_DEBUG, "D", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void trace( std::string const &TAG, Args &&... args )
         {
             print( Level::LOG_LEVEL_TRACE, "T", TAG, std::forward< Args >( args )... );
         }
-        
-        template< typename ... Args >
+
+        template< typename... Args >
         static void print( int level, std::string const &levelStr, std::string const &TAG, Args &&... args )
         {
             if ( getLevel() >= level && _outputHandler != nullptr ) {
                 auto tp = std::chrono::system_clock::now();
                 auto s = std::chrono::duration_cast< std::chrono::microseconds >( tp.time_since_epoch() );
                 auto t = ( time_t )( s.count() );
-                
-                auto str = StringUtils::toString( t, " ",
-                    std::this_thread::get_id(), " ",
-                    levelStr, "/", TAG, " - ",
-                    std::forward< Args >( args )... );
-                
+
+                auto str = StringUtils::toString( t, " ", std::this_thread::get_id(), " ", levelStr, "/", TAG, " - ", std::forward< Args >( args )... );
+
                 _outputHandler->printLine( str );
             }
         }
-        
+
     public:
         class OutputHandler {
         public:
             virtual ~OutputHandler( void ) { }
-            
+
             virtual void printLine( std::string const &line ) = 0;
         };
-        
+
         class NullOutputHandler : public OutputHandler {
         public:
             NullOutputHandler( void ) { }
             virtual ~NullOutputHandler( void ) { }
-            
+
             virtual void printLine( std::string const &line ) override
             {
                 // do nothing
             }
         };
-        
+
         class ConsoleOutputHandler : public OutputHandler {
         public:
-            ConsoleOutputHandler( void ) 
-            { 
-
+            ConsoleOutputHandler( void )
+            {
             }
-            
-            virtual ~ConsoleOutputHandler( void ) 
+
+            virtual ~ConsoleOutputHandler( void )
             {
                 // force a flush when destroying
                 std::cout << std::endl;
             }
-            
+
             virtual void printLine( std::string const &line ) override
             {
                 std::lock_guard< std::mutex > lock( _mutex );
-                
+
                 std::cout << line << "\n";
             }
-                
-            private:
-                std::mutex _mutex;
+
+        private:
+            std::mutex _mutex;
         };
-                
+
         class FileOutputHandler : public OutputHandler {
         public:
-            FileOutputHandler( std::string const &path ) : _out( path, std::ios::out ) { }
+            FileOutputHandler( std::string const &path )
+                : _out( path, std::ios::out ) { }
             virtual ~FileOutputHandler( void ) { }
-            
+
             virtual void printLine( std::string const &line ) override
             {
                 std::lock_guard< std::mutex > locK( _mutex );
-                
+
                 _out << line << "\n";
             }
-            
+
         private:
             std::ofstream _out;
             std::mutex _mutex;
         };
-                
-        template< class T, typename ... Args >
+
+        template< class T, typename... Args >
         static void setOutputHandler( Args &&... args )
         {
             _outputHandler = std::move( std::unique_ptr< T >( new T( std::forward< Args >( args )... ) ) );
         }
-        
+
     private:
         static std::unique_ptr< OutputHandler > _outputHandler;
-                
     };
 
 }
 
+// TODO: Disable some of these macros in release build?
 #define CRIMILD_LOG_FATAL( ... ) ( crimild::Log::fatal( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
 #define CRIMILD_LOG_ERROR( ... ) ( crimild::Log::error( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
 #define CRIMILD_LOG_WARNING( ... ) ( crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
 #define CRIMILD_LOG_INFO( ... ) ( crimild::Log::info( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
 #define CRIMILD_LOG_DEBUG( ... ) ( crimild::Log::debug( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
-#define CRIMILD_LOG_TRACE( ... ) ( crimild::Log::trace( CRIMILD_CURRENT_CLASS_NAME, __VA_ARGS__ ) )
+#define CRIMILD_LOG_TRACE() ( crimild::Log::trace( CRIMILD_CURRENT_CLASS_NAME, CRIMILD_CURRENT_FUNCTION_NAME ) )
 
 #endif
-

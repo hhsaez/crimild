@@ -42,7 +42,7 @@ ShaderModule::~ShaderModule( void )
 
 SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating shader module for stage ", descriptor.shader->getStageDescription() );
+    CRIMILD_LOG_DEBUG( "Creating shader module for stage ", descriptor.shader->getStageDescription() );
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {

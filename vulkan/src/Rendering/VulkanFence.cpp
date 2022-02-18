@@ -59,7 +59,7 @@ void Fence::reset( void ) const noexcept
 
 SharedPointer< Fence > FenceManager::create( Fence::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating vulkan fence" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = m_renderDevice;
     if ( renderDevice == nullptr ) {
@@ -91,7 +91,7 @@ SharedPointer< Fence > FenceManager::create( Fence::Descriptor const &descriptor
 
 void FenceManager::destroy( Fence *fence ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Destroying vulkan fence" );
+    CRIMILD_LOG_TRACE();
 
     if ( fence->renderDevice != nullptr && fence->handler != VK_NULL_HANDLE ) {
         vkDestroyFence(

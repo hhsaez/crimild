@@ -54,7 +54,7 @@ void GLFWVulkanSystem::onAttach( void ) noexcept
 
 SharedPointer< VulkanSurfaceOLD > GLFWVulkanSystem::create( VulkanSurfaceOLD::Descriptor const &descriptor ) noexcept
 {
-    CRIMILD_LOG_TRACE( "Creating GLFW Vulkan Surface" );
+    CRIMILD_LOG_TRACE();
 
     auto window = m_window;
     if ( window == nullptr ) {

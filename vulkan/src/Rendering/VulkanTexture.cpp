@@ -38,7 +38,7 @@ crimild::Bool TextureManager::bind( Texture *texture ) noexcept
         return true;
     }
 
-    CRIMILD_LOG_TRACE( "Binding Vulkan Texture" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
 
@@ -59,7 +59,7 @@ crimild::Bool TextureManager::unbind( Texture *texture ) noexcept
         return false;
     }
 
-    CRIMILD_LOG_TRACE( "Unbind Vulkan Texture" );
+    CRIMILD_LOG_TRACE();
 
     auto renderDevice = getRenderDevice();
 
