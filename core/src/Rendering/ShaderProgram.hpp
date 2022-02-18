@@ -69,6 +69,7 @@ namespace crimild {
         virtual ~ShaderProgram( void ) = default;
 
         inline void setShaders( ShaderArray const &shaders ) noexcept { m_shaders = shaders; }
+        const ShaderArray &getShaders( void ) const noexcept { return m_shaders; }
         ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
         Array< VertexLayout > vertexLayouts;

@@ -92,7 +92,7 @@ namespace crimild {
             std::string m_entryPointName;
         };
 
-        static std::vector< std::unique_ptr< ShaderModule > > createShaderModules( RenderDevice *renderDevice, SharedPointer< ShaderProgram > const &program ) noexcept
+        static std::vector< std::unique_ptr< ShaderModule > > createShaderModules( RenderDevice *renderDevice, const ShaderProgram *program ) noexcept
         {
             CRIMILD_LOG_TRACE();
 
@@ -589,7 +589,7 @@ namespace crimild {
 
 }
 
-vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, std::shared_ptr< ShaderProgram > const &program ) noexcept
+vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();

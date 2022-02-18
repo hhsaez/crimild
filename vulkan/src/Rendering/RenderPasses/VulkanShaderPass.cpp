@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/RenderPasses/VulkanShaderPass.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -39,21 +39,71 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
+ShaderPass::ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept
     : m_renderDevice( renderDevice ),
-      m_uniforms( std::make_unique< UniformBuffer >( Vector2 { 1024, 768 } ) )
+      m_uniforms( std::make_unique< UniformBuffer >( Vector2 { 1024, 768 } ) ),
+      m_program(
+          [ & ] {
+              auto program = std::make_unique< ShaderProgram >();
+              const std::string prefix = R"(
+                layout( location = 0 ) in vec2 inTexCoord;
+
+                layout ( set = 0, binding = 0 ) uniform Context {
+                    vec2 dimensions;
+                } context;
+
+                layout( location = 0 ) out vec4 outColor;
+              )";
+              program->setShaders(
+                  Array< SharedPointer< Shader > > {
+                      crimild::alloc< Shader >(
+                          Shader::Stage::VERTEX,
+                          R"(
+                            vec2 positions[6] = vec2[](
+                                vec2( -1.0, 1.0 ),
+                                vec2( -1.0, -1.0 ),
+                                vec2( 1.0, -1.0 ),
+
+                                vec2( -1.0, 1.0 ),
+                                vec2( 1.0, -1.0 ),
+                                vec2( 1.0, 1.0 )
+                            );
+
+                            vec2 texCoords[6] = vec2[](
+                                vec2( 0.0, 1.0 ),
+                                vec2( 0.0, 0.0 ),
+                                vec2( 1.0, 0.0 ),
+
+                                vec2( 0.0, 1.0 ),
+                                vec2( 1.0, 0.0 ),
+                                vec2( 1.0, 1.0 )
+                            );
+
+                            layout ( location = 0 ) out vec2 outTexCoord;
+
+                            void main()
+                            {
+                                gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                                outTexCoord = texCoords[ gl_VertexIndex ];
+                            }
+                        )" ),
+                      crimild::alloc< Shader >(
+                          Shader::Stage::FRAGMENT,
+                          prefix + src ) } );
+              return program;
+          }() )
 {
     // m_uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
 
     init();
 }
 
-ScenePass::~ScenePass( void ) noexcept
+ShaderPass::~ShaderPass( void ) noexcept
 {
     clear();
 }
 
-void ScenePass::handle( const Event &e ) noexcept
+void ShaderPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
@@ -73,7 +123,7 @@ void ScenePass::handle( const Event &e ) noexcept
     }
 }
 
-void ScenePass::render( void ) noexcept
+void ShaderPass::render( void ) noexcept
 {
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
@@ -94,7 +144,7 @@ void ScenePass::render( void ) noexcept
     endRenderPass( commandBuffer );
 }
 
-void ScenePass::init( void ) noexcept
+void ShaderPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -212,91 +262,14 @@ void ScenePass::init( void ) noexcept
     createDescriptorSetLayout();
     createDescriptorSets();
 
-    // m_pipeline = std::make_unique< GraphicsPipeline >(
-    //     m_renderDevice,
-    //     m_renderPass,
-    //     std::vector< VkDescriptorSetLayout > { m_descriptorSetLayout },
-    //     [ & ] {
-    //         auto program = crimild::alloc< ShaderProgram >();
-    //         program->setShaders(
-    //             Array< SharedPointer< Shader > > {
-    //                 crimild::alloc< Shader >(
-    //                     Shader::Stage::VERTEX,
-    //                     R"(
-    //                         vec2 positions[6] = vec2[](
-    //                             vec2( -1.0, 1.0 ),
-    //                             vec2( -1.0, -1.0 ),
-    //                             vec2( 1.0, -1.0 ),
-
-    //                             vec2( -1.0, 1.0 ),
-    //                             vec2( 1.0, -1.0 ),
-    //                             vec2( 1.0, 1.0 )
-    //                         );
-
-    //                         vec2 texCoords[6] = vec2[](
-    //                             vec2( 0.0, 1.0 ),
-    //                             vec2( 0.0, 0.0 ),
-    //                             vec2( 1.0, 0.0 ),
-
-    //                             vec2( 0.0, 1.0 ),
-    //                             vec2( 1.0, 0.0 ),
-    //                             vec2( 1.0, 1.0 )
-    //                         );
-
-    //                         layout ( location = 0 ) out vec2 outTexCoord;
-
-    //                         void main()
-    //                         {
-    //                             gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-    //                             outTexCoord = texCoords[ gl_VertexIndex ];
-    //                         }
-    //                     )" ),
-    //                 crimild::alloc< Shader >(
-    //                     Shader::Stage::FRAGMENT,
-    //                     R"(
-    //                         layout( location = 0 ) in vec2 inTexCoord;
-
-    //                         layout ( set = 0, binding = 0 ) uniform Context {
-    //                             vec2 dimensions;
-    //                         } context;
-
-    //                         layout( location = 0 ) out vec4 outColor;
-
-    //                         float circleMask( vec2 uv, vec2 p, float r, float blur )
-    //                         {
-    //                             float d = length( uv - p );
-    //                             float c = smoothstep( r, r - blur, d );
-    //                             return c;
-    //                         }
-
-    //                         void main()
-    //                         {
-    //                             vec2 uv = inTexCoord;
-    //                             uv -= 0.5;
-    //                             uv.x *= context.dimensions.x / context.dimensions.y;
-
-    //                             float blur = 0.00625;
-
-    //                             float mask = circleMask( uv, vec2( 0.0 ), 0.4, blur );
-    //                             mask -= circleMask( uv, vec2( -0.15, 0.1 ), 0.075, blur );
-    //                             mask -= circleMask( uv, vec2( 0.15, 0.1 ), 0.075, blur );
-    //                             vec3 faceColor = vec3( 1.0, 1.0, 0.0 ) * mask;
-
-    //                             mask = circleMask( uv, vec2( 0.0 ), 0.25, blur );
-    //                             mask -= circleMask( uv, vec2( 0.0, 0.05 ), 0.25, blur );
-    //                             mask *= uv.y <= 0.0 ? 1.0 : 0.0;
-    //                             vec3 mouthColor = vec3( 1.0 ) * mask;
-
-    //                             vec3 color = faceColor - mouthColor;
-
-    //                             outColor = vec4( color, 1.0 );
-    //                         }
-    //                     )" ) } );
-    //         return program;
-    //     }() );
+    m_pipeline = std::make_unique< GraphicsPipeline >(
+        m_renderDevice,
+        m_renderPass,
+        std::vector< VkDescriptorSetLayout > { m_descriptorSetLayout },
+        m_program.get() );
 }
 
-void ScenePass::clear( void ) noexcept
+void ShaderPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -319,7 +292,7 @@ void ScenePass::clear( void ) noexcept
     m_renderPass = VK_NULL_HANDLE;
 }
 
-void ScenePass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
+void ShaderPass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
 {
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -333,12 +306,12 @@ void ScenePass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentF
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 }
 
-void ScenePass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
+void ShaderPass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
 {
     vkCmdEndRenderPass( commandBuffer );
 }
 
-void ScenePass::createDescriptorPool( void ) noexcept
+void ShaderPass::createDescriptorPool( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -357,7 +330,7 @@ void ScenePass::createDescriptorPool( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
 }
 
-void ScenePass::destroyDescriptorPool( void ) noexcept
+void ShaderPass::destroyDescriptorPool( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -365,7 +338,7 @@ void ScenePass::destroyDescriptorPool( void ) noexcept
     m_descriptorPool = VK_NULL_HANDLE;
 }
 
-void ScenePass::createDescriptorSetLayout( void ) noexcept
+void ShaderPass::createDescriptorSetLayout( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -386,7 +359,7 @@ void ScenePass::createDescriptorSetLayout( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorSetLayout ) );
 }
 
-void ScenePass::destroyDescriptorSetLayout( void ) noexcept
+void ShaderPass::destroyDescriptorSetLayout( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -394,7 +367,7 @@ void ScenePass::destroyDescriptorSetLayout( void ) noexcept
     m_descriptorSetLayout = VK_NULL_HANDLE;
 }
 
-void ScenePass::createDescriptorSets( void ) noexcept
+void ShaderPass::createDescriptorSets( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -433,7 +406,9 @@ void ScenePass::createDescriptorSets( void ) noexcept
     }
 }
 
-void ScenePass::destroyDescriptorSets( void ) noexcept
+void ShaderPass::destroyDescriptorSets( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
+
+    // Don't need to destroy descriptor sets since they will be freed when the pool is destroyed.
 }

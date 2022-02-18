@@ -41,7 +41,7 @@ namespace crimild {
 
         class GraphicsPipeline {
         public:
-            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, SharedPointer< ShaderProgram > const &program ) noexcept;
+            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }
