@@ -31,11 +31,14 @@
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
 
+#include <unordered_map>
 #include <vector>
 
 namespace crimild {
 
     struct Event;
+
+    class UniformBuffer;
 
     namespace vulkan {
 
@@ -55,8 +58,9 @@ namespace crimild {
             [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
             [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
             [[nodiscard]] inline const std::vector< VkImageView > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
+            [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
 
-            [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) noexcept { return m_imageIndex; }
+            [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_imageIndex; }
             [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
 
             void handle( const Event &e ) noexcept;
@@ -67,6 +71,11 @@ namespace crimild {
             void flush( void ) noexcept;
 
             inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
+
+            bool bind( UniformBuffer *uniformBuffer ) noexcept;
+            void unbind( UniformBuffer *uniformBuffer ) noexcept;
+            VkBuffer getHandle( UniformBuffer *uniformBuffer, Index imageIndex ) const noexcept;
+            void update( UniformBuffer *uniformBuffer ) const noexcept;
 
         private:
             void createSwapchain( void ) noexcept;
@@ -83,7 +92,17 @@ namespace crimild {
             void createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
             void destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
 
+            void createBuffer(
+                VkDeviceSize size,
+                VkBufferUsageFlags usage,
+                VkMemoryPropertyFlags properties,
+                VkBuffer &bufferHandler,
+                VkDeviceMemory &bufferMemory ) const noexcept;
+
+            void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
+
         private:
+            // TODO(hernan): rename to m_device
             VkDevice m_handle = VK_NULL_HANDLE;
             PhysicalDevice *m_physicalDevice = nullptr;
 
@@ -116,6 +135,9 @@ namespace crimild {
             uint8_t m_currentFrame = 0;
 
             ShaderCompiler m_shaderCompiler;
+
+            std::unordered_map< Size, std::vector< VkBuffer > > m_buffers;
+            std::unordered_map< Size, std::vector< VkDeviceMemory > > m_memories;
         };
 
     }

@@ -41,10 +41,11 @@ namespace crimild {
 
         class GraphicsPipeline {
         public:
-            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, SharedPointer< ShaderProgram > const &program ) noexcept;
+            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, SharedPointer< ShaderProgram > const &program ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }
+            inline VkPipelineLayout getPipelineLayout( void ) const noexcept { return m_pipelineLayout; }
 
         private:
             VkDevice m_renderDevice = VK_NULL_HANDLE;

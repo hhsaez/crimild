@@ -27,6 +27,7 @@
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
+#include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Simulation/Event.hpp"
@@ -157,8 +158,8 @@ void RenderDevice::handle( const Event &e ) noexcept
             createSwapchain();
             createSyncObjects();
             createCommandBuffers();
-
             m_imageIndex = 0;
+
             m_currentFrame = 0;
 
             break;
@@ -552,4 +553,160 @@ bool RenderDevice::endRender( void ) noexcept
     m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_MAX_FRAMES_IN_FLIGHT;
 
     return true;
+}
+
+void RenderDevice::createBuffer(
+    VkDeviceSize size,
+    VkBufferUsageFlags usage,
+    VkMemoryPropertyFlags properties,
+    VkBuffer &bufferHandler,
+    VkDeviceMemory &bufferMemory ) const noexcept
+{
+    auto createInfo = VkBufferCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateBuffer(
+            m_handle,
+            &createInfo,
+            nullptr,
+            &bufferHandler ) );
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements( m_handle, bufferHandler, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = getPhysicalDevice()->findMemoryType( memRequirements.memoryTypeBits, properties ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateMemory(
+            m_handle,
+            &allocInfo,
+            nullptr,
+            &bufferMemory ) );
+
+    CRIMILD_VULKAN_CHECK(
+        vkBindBufferMemory(
+            m_handle,
+            bufferHandler,
+            bufferMemory,
+            0 ) );
+}
+
+void RenderDevice::copyToBuffer( VkDeviceMemory &memory, const void *data, VkDeviceSize size ) const noexcept
+{
+    void *dstData = nullptr;
+
+    CRIMILD_VULKAN_CHECK(
+        vkMapMemory(
+            m_handle,
+            memory,
+            0,
+            size,
+            0,
+            &dstData ) );
+
+    memcpy( dstData, data, ( size_t ) size );
+
+    vkUnmapMemory( m_handle, memory );
+}
+
+bool RenderDevice::bind( UniformBuffer *uniformBuffer ) noexcept
+{
+    // TODO(hernan): this is assuming buffers are static. For dynamic buffers,
+    // we want to create one handle/memory pair per swapchain image
+
+    const auto id = uniformBuffer->getUniqueID();
+    if ( m_buffers.contains( id ) ) {
+        return true;
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto bufferView = uniformBuffer->getBufferView();
+    auto bufferSize = bufferView->getLength();
+
+    VkBufferUsageFlags usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+
+    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+        VkBuffer bufferHandler;
+        VkDeviceMemory bufferMemory;
+
+        createBuffer(
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            bufferHandler,
+            bufferMemory );
+
+        if ( bufferView->getData() != nullptr ) {
+            copyToBuffer(
+                bufferMemory,
+                bufferView->getData(),
+                bufferSize );
+        }
+
+        m_buffers[ id ].push_back( bufferHandler );
+        m_memories[ id ].push_back( bufferMemory );
+    }
+
+    return true;
+}
+
+void RenderDevice::unbind( UniformBuffer *uniformBuffer ) noexcept
+{
+    const auto id = uniformBuffer->getUniqueID();
+    if ( !m_buffers.contains( id ) ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto &buffers = m_buffers[ id ];
+    for ( auto bufferHandler : buffers ) {
+        vkDestroyBuffer( m_handle, bufferHandler, nullptr );
+    }
+
+    auto &memories = m_memories[ id ];
+    for ( auto memory : memories ) {
+        vkFreeMemory( m_handle, memory, nullptr );
+    }
+
+    m_buffers.erase( id );
+    m_memories.erase( id );
+}
+
+VkBuffer RenderDevice::getHandle( UniformBuffer *uniformBuffer, Index imageIndex ) const noexcept
+{
+    const auto id = uniformBuffer->getUniqueID();
+
+    if ( !m_buffers.contains( id ) ) {
+        return VK_NULL_HANDLE;
+    }
+
+    return m_buffers.at( id )[ imageIndex ];
+}
+
+void RenderDevice::update( UniformBuffer *uniformBuffer ) const noexcept
+{
+    const auto id = uniformBuffer->getUniqueID();
+
+    auto bufferView = uniformBuffer->getBufferView();
+    auto bufferSize = bufferView->getLength();
+
+    auto bufferMemory = m_memories.at( id )[ getCurrentFrameIndex() ];
+
+    if ( bufferView->getData() != nullptr ) {
+        copyToBuffer(
+            bufferMemory,
+            bufferView->getData(),
+            bufferSize );
+    }
 }

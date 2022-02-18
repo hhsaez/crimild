@@ -47,6 +47,8 @@ namespace crimild {
 
             [[nodiscard]] std::unique_ptr< RenderDevice > createRenderDevice( void ) noexcept;
 
+            uint32_t findMemoryType( crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) const noexcept;
+
         private:
             VkPhysicalDevice m_handle = VK_NULL_HANDLE;
             VulkanSurface *m_surface = nullptr;

@@ -564,20 +564,12 @@ namespace crimild {
             };
         }
 
-        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice ) noexcept
+        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts ) noexcept
         {
-            std::vector< VkDescriptorSetLayout > setLayouts;
-
-            // descriptor.setLayouts.each(
-            //     [ & ]( auto &layout ) {
-            //         renderDevice->bind( layout );
-            //         setLayouts.push_back( renderDevice->getHandler( layout ) );
-            //     } );
-
             auto createInfo = VkPipelineLayoutCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                .setLayoutCount = static_cast< crimild::UInt32 >( setLayouts.size() ),
-                .pSetLayouts = setLayouts.data(),
+                .setLayoutCount = static_cast< crimild::UInt32 >( descriptorSetLayouts.size() ),
+                .pSetLayouts = descriptorSetLayouts.data(),
                 .pushConstantRangeCount = 0,
                 .pPushConstantRanges = nullptr,
             };
@@ -597,7 +589,7 @@ namespace crimild {
 
 }
 
-vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, std::shared_ptr< ShaderProgram > const &program ) noexcept
+vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, std::shared_ptr< ShaderProgram > const &program ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -635,7 +627,7 @@ vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRender
     auto dynamicState = createDynamicState( dynamicStates );
 
     // Create pipeline layout
-    m_pipelineLayout = createPipelineLayout( renderDevice );
+    m_pipelineLayout = createPipelineLayout( renderDevice, descriptorSetLayouts );
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
