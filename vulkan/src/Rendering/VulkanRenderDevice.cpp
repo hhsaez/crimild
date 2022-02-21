@@ -27,7 +27,9 @@
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Simulation/Event.hpp"
@@ -125,6 +127,20 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
+    for ( auto &it : m_buffers ) {
+        for ( auto handler : it.second ) {
+            vkDestroyBuffer( m_handle, handler, nullptr );
+        }
+    }
+    m_buffers.clear();
+
+    for ( auto &it : m_memories ) {
+        for ( auto memory : it.second ) {
+            vkFreeMemory( m_handle, memory, nullptr );
+        }
+    }
+    m_memories.clear();
+
     destroyCommandBuffers();
     destroySyncObjects();
     destroySwapchain();
@@ -709,4 +725,130 @@ void RenderDevice::update( UniformBuffer *uniformBuffer ) const noexcept
             bufferView->getData(),
             bufferSize );
     }
+}
+
+VkBuffer RenderDevice::bind( VertexBuffer *vertexBuffer ) noexcept
+{
+    const auto id = vertexBuffer->getUniqueID();
+    if ( m_buffers.contains( id ) ) {
+        // TODO(hernan): Handle dynamic buffers by updating the buffer here if needed before returning its handler(?)
+        return m_buffers[ id ][ getCurrentFrameIndex() ];
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto bufferView = vertexBuffer->getBufferView();
+    auto bufferSize = bufferView->getLength();
+
+    VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+        VkBuffer bufferHandler;
+        VkDeviceMemory bufferMemory;
+
+        createBuffer(
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            bufferHandler,
+            bufferMemory );
+
+        if ( bufferView->getData() != nullptr ) {
+            copyToBuffer(
+                bufferMemory,
+                bufferView->getData(),
+                bufferSize );
+        }
+
+        m_buffers[ id ].push_back( bufferHandler );
+        m_memories[ id ].push_back( bufferMemory );
+    }
+
+    return m_buffers[ id ][ getCurrentFrameIndex() ];
+}
+
+void RenderDevice::unbind( VertexBuffer *vertexBuffer ) noexcept
+{
+    const auto id = vertexBuffer->getUniqueID();
+    if ( !m_buffers.contains( id ) ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto &buffers = m_buffers[ id ];
+    for ( auto bufferHandler : buffers ) {
+        vkDestroyBuffer( m_handle, bufferHandler, nullptr );
+    }
+
+    auto &memories = m_memories[ id ];
+    for ( auto memory : memories ) {
+        vkFreeMemory( m_handle, memory, nullptr );
+    }
+
+    m_buffers.erase( id );
+    m_memories.erase( id );
+}
+
+VkBuffer RenderDevice::bind( IndexBuffer *indexBuffer ) noexcept
+{
+    const auto id = indexBuffer->getUniqueID();
+    if ( m_buffers.contains( id ) ) {
+        // TODO(hernan): Handle dynamic buffers by updating the buffer here if needed before returning its handler(?)
+        return m_buffers[ id ][ getCurrentFrameIndex() ];
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto bufferView = indexBuffer->getBufferView();
+    auto bufferSize = bufferView->getLength();
+
+    VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+        VkBuffer bufferHandler;
+        VkDeviceMemory bufferMemory;
+
+        createBuffer(
+            bufferSize,
+            usage,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            bufferHandler,
+            bufferMemory );
+
+        if ( bufferView->getData() != nullptr ) {
+            copyToBuffer(
+                bufferMemory,
+                bufferView->getData(),
+                bufferSize );
+        }
+
+        m_buffers[ id ].push_back( bufferHandler );
+        m_memories[ id ].push_back( bufferMemory );
+    }
+
+    return m_buffers[ id ][ getCurrentFrameIndex() ];
+}
+
+void RenderDevice::unbind( IndexBuffer *indexBuffer ) noexcept
+{
+    const auto id = indexBuffer->getUniqueID();
+    if ( !m_buffers.contains( id ) ) {
+        return;
+    }
+
+    CRIMILD_LOG_TRACE();
+
+    auto &buffers = m_buffers[ id ];
+    for ( auto bufferHandler : buffers ) {
+        vkDestroyBuffer( m_handle, bufferHandler, nullptr );
+    }
+
+    auto &memories = m_memories[ id ];
+    for ( auto memory : memories ) {
+        vkFreeMemory( m_handle, memory, nullptr );
+    }
+
+    m_buffers.erase( id );
+    m_memories.erase( id );
 }

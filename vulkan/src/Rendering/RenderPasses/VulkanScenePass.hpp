@@ -34,6 +34,10 @@
 namespace crimild {
 
     class UniformBuffer;
+    class Simulation;
+    class Material;
+    class Geometry;
+    class Primitive;
 
     namespace vulkan {
 
@@ -54,14 +58,18 @@ namespace crimild {
             void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
             void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
 
-            void createDescriptorPool( void ) noexcept;
-            void destroyDescriptorPool( void ) noexcept;
+            void createRenderPassObjects( void ) noexcept;
+            void destroyRenderPassObjects( void ) noexcept;
 
-            void createDescriptorSetLayout( void ) noexcept;
-            void destroyDescriptorSetLayout( void ) noexcept;
+            void createMaterialObjects( void ) noexcept;
+            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept;
+            void destroyMaterialObjects( void ) noexcept;
 
-            void createDescriptorSets( void ) noexcept;
-            void destroyDescriptorSets( void ) noexcept;
+            void createGeometryObjects( void ) noexcept;
+            void bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept;
+            void destroyGeometryObjects( void ) noexcept;
+
+            void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
 
         private:
             vulkan::RenderDevice *m_renderDevice = nullptr;
@@ -71,11 +79,32 @@ namespace crimild {
 
             std::unique_ptr< GraphicsPipeline > m_pipeline;
 
-            std::unique_ptr< UniformBuffer > m_uniforms;
+            std::unique_ptr< ShaderProgram > m_program;
 
-            VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
-            VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
-            std::vector< VkDescriptorSet > m_descriptorSets;
+            struct RenderPassObjects {
+                VkDescriptorPool pool = VK_NULL_HANDLE;
+                VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+                std::vector< VkDescriptorSet > descriptorSets;
+                std::unique_ptr< UniformBuffer > uniforms;
+            } m_renderPassObjects;
+
+            std::unique_ptr< Simulation > m_simulation;
+
+            // TODO: I wonder if some of this cache should go to RenderDevice instead
+            struct MaterialObjects {
+                VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
+            } m_materialObjects;
+
+            // TODO: I wonder if some of this cache should go to RenderDevice instead
+            struct GeometryObjects {
+                VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+                std::unordered_map< Geometry *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< Geometry *, std::unique_ptr< UniformBuffer > > uniforms;
+            } m_geometryObjects;
         };
 
     }

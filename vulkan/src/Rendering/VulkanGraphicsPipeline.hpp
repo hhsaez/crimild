@@ -30,6 +30,7 @@
 
 #include "Foundation/Memory.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VertexLayout.hpp"
 
 namespace crimild {
 
@@ -41,7 +42,12 @@ namespace crimild {
 
         class GraphicsPipeline {
         public:
-            GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program ) noexcept;
+            GraphicsPipeline(
+                RenderDevice *renderDevice,
+                VkRenderPass renderPass,
+                const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts,
+                const ShaderProgram *program,
+                const std::vector< VertexLayout > &vertexLayouts ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }

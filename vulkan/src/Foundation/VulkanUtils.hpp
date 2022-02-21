@@ -93,6 +93,7 @@ namespace crimild {
             VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept; //< Deprecated
             VkBorderColor getBorderColor( Sampler::BorderColor borderColor ) noexcept;
             VkFilter getSamplerFilter( Sampler::Filter filter ) noexcept;
+            VkFormat getFormat( Format format ) noexcept;
             VkFormat getFormat( RenderDeviceOLD *renderDevice, Format format ) noexcept;
             Format getFormat( VkFormat format ) noexcept; //< Reversed
             crimild::Bool formatIsColor( Format format ) noexcept;

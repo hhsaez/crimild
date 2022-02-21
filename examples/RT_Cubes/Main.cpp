@@ -31,6 +31,16 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
+    virtual Event handle( const Event &e ) noexcept override
+    {
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            // TODO: load scene
+            onStarted();
+        }
+        return ret;
+    }
+
     void onStarted( void ) noexcept override
     {
         setScene(

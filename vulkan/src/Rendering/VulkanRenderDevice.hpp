@@ -77,6 +77,12 @@ namespace crimild {
             VkBuffer getHandle( UniformBuffer *uniformBuffer, Index imageIndex ) const noexcept;
             void update( UniformBuffer *uniformBuffer ) const noexcept;
 
+            VkBuffer bind( VertexBuffer *vertexBuffer ) noexcept;
+            void unbind( VertexBuffer *vertexBuffer ) noexcept;
+
+            VkBuffer bind( IndexBuffer *indexBuffer ) noexcept;
+            void unbind( IndexBuffer *indexBuffer ) noexcept;
+
         private:
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;
