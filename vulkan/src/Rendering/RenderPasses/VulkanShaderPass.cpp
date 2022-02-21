@@ -266,7 +266,8 @@ void ShaderPass::init( void ) noexcept
         m_renderDevice,
         m_renderPass,
         std::vector< VkDescriptorSetLayout > { m_descriptorSetLayout },
-        m_program.get() );
+        m_program.get(),
+        std::vector< VertexLayout > {} );
 }
 
 void ShaderPass::clear( void ) noexcept

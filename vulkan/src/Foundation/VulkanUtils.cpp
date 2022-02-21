@@ -332,7 +332,7 @@ VkBorderColor utils::getBorderColor( Sampler::BorderColor borderColor ) noexcept
     }
 }
 
-VkFormat utils::getFormat( RenderDeviceOLD *renderDevice, Format format ) noexcept
+VkFormat utils::getFormat( Format format ) noexcept
 {
     switch ( format ) {
         case Format::R8_UNORM:
@@ -389,12 +389,20 @@ VkFormat utils::getFormat( RenderDeviceOLD *renderDevice, Format format ) noexce
             return VK_FORMAT_D24_UNORM_S8_UINT;
         case Format::DEPTH_32_SFLOAT_STENCIL_8_UINT:
             return VK_FORMAT_D32_SFLOAT_S8_UINT;
+        default:
+            return VK_FORMAT_UNDEFINED;
+    }
+}
+
+VkFormat utils::getFormat( RenderDeviceOLD *renderDevice, Format format ) noexcept
+{
+    switch ( format ) {
         case Format::COLOR_SWAPCHAIN_OPTIMAL:
             return renderDevice->getSwapchain()->format;
         case Format::DEPTH_STENCIL_DEVICE_OPTIMAL:
             return utils::findDepthFormat( renderDevice );
         default:
-            return VK_FORMAT_UNDEFINED;
+            return utils::getFormat( format );
     }
 }
 

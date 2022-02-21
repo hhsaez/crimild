@@ -88,16 +88,16 @@ public:
     virtual void render( void ) noexcept override
     {
         m_clear.render();
-        // m_scene.render();
-        m_shader.render();
+        m_scene.render();
+        // m_shader.render();
         m_present.render();
     }
 
     virtual void handle( const Event &e ) noexcept override
     {
         m_clear.handle( e );
-        // m_scene.handle( e );
-        m_shader.handle( e );
+        m_scene.handle( e );
+        // m_shader.handle( e );
         m_present.handle( e );
     }
 
@@ -151,6 +151,8 @@ Event Window::handle( const Event &e ) noexcept
                 return Event { .type = Event::Type::TERMINATE };
             }
 
+            m_renderPass->handle( e );
+
             if ( m_lastResizeEvent.type != Event::Type::NONE ) {
                 m_renderDevice->handle( m_lastResizeEvent );
                 m_renderPass->handle( m_lastResizeEvent );
@@ -164,23 +166,24 @@ Event Window::handle( const Event &e ) noexcept
                 m_renderDevice->endRender();
             }
 
-            // if ( Settings->getInstance()->get( "video.show_frame_time", true ) ) {
-            //     auto name = sim->getName();
-            //     auto clock = sim->getSimulationClock();
-            //     std::stringstream ss;
-            //     auto accum = clock.getAccumTime();
-            //     auto h = Int32( accum / 3600 );
-            //     auto m = Int32( ( accum - h * 3600 ) / 60 );
-            //     auto s = Int32( ( accum - h * 3600 - m * 60 ) );
-            //     ss << name << " ("
-            //        << std::fixed
-            //        << std::setprecision( 3 )
-            //        << clock.getDeltaTime() << "ms - "
-            //        << ( h < 10 ? "0" : "" ) << h << ":"
-            //        << ( m < 10 ? "0" : "" ) << m << ":"
-            //        << ( s < 10 ? "0" : "" ) << s << ")";
-            //     glfwSetWindowTitle( m_window, ss.str().c_str() );
-            // }
+            if ( Settings::getInstance()->get( "video.show_frame_time", true ) ) {
+                auto name = Settings::getInstance()->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+                std::stringstream ss;
+                auto accum = m_clock.getAccumTime();
+                auto h = Int32( accum / 3600 );
+                auto m = Int32( ( accum - h * 3600 ) / 60 );
+                auto s = Int32( ( accum - h * 3600 - m * 60 ) );
+                ss << name << " ("
+                   << std::fixed
+                   << std::setprecision( 3 )
+                   << m_clock.getDeltaTime() << "ms - "
+                   << ( h < 10 ? "0" : "" ) << h << ":"
+                   << ( m < 10 ? "0" : "" ) << m << ":"
+                   << ( s < 10 ? "0" : "" ) << s << ")";
+                glfwSetWindowTitle( m_window, ss.str().c_str() );
+            }
+
+            m_clock.tick();
 
             break;
         }

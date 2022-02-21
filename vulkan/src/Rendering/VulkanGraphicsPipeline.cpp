@@ -123,17 +123,17 @@ namespace crimild {
             return shaderStages;
         }
 
-        static std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( void ) noexcept
+        static std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( const std::vector< VertexLayout > &vertexLayouts ) noexcept
         {
             std::vector< VkVertexInputBindingDescription > ret;
-            // graphicsPipeline->getProgram()->vertexLayouts.each(
-            //     [ & ]( const auto &layout ) {
-            //         ret.add( VkVertexInputBindingDescription {
-            //             .binding = uint32_t( ret.size() ),
-            //             .stride = layout.getSize(),
-            //             .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-            //         } );
-            //     } );
+            for ( const auto &vertexLayout : vertexLayouts ) {
+                ret.push_back(
+                    VkVertexInputBindingDescription {
+                        .binding = uint32_t( ret.size() ),
+                        .stride = vertexLayout.getSize(),
+                        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+                    } );
+            }
             // graphicsPipeline->getProgram()->instanceLayouts.each(
             //     [ & ]( const auto &layout ) {
             //         ret.add( VkVertexInputBindingDescription {
@@ -145,27 +145,27 @@ namespace crimild {
             return ret;
         }
 
-        static std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDevice *renderDevice ) noexcept
+        static std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDevice *renderDevice, const std::vector< VertexLayout > &vertexLayouts ) noexcept
         {
             std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
 
             Index binding = 0;
             Index location = 0;
 
-            // graphicsPipeline->getProgram()->vertexLayouts.each(
-            //     [ & ]( const auto &layout ) {
-            //         layout.eachAttribute(
-            //             [ & ]( const auto &attrib ) {
-            //                 attributeDescriptions.add(
-            //                     VkVertexInputAttributeDescription {
-            //                         .location = crimild::UInt32( location++ ),
-            //                         .binding = crimild::UInt32( binding ),
-            //                         .format = utils::getFormat( renderDevice, attrib.format ),
-            //                         .offset = attrib.offset,
-            //                     } );
-            //             } );
-            //         binding++;
-            //     } );
+            for ( const auto &vertexLayout : vertexLayouts ) {
+                vertexLayout.eachAttribute(
+                    [ & ]( const auto &attrib ) {
+                        attributeDescriptions.push_back(
+                            VkVertexInputAttributeDescription {
+                                .location = crimild::UInt32( location++ ),
+                                .binding = crimild::UInt32( binding ),
+                                .format = utils::getFormat( attrib.format ),
+                                .offset = attrib.offset,
+                            } );
+                    } );
+                binding++;
+            }
+
             // graphicsPipeline->getProgram()->instanceLayouts.each(
             //     [ & ]( const auto &layout ) {
             //         layout.eachAttribute(
@@ -589,7 +589,7 @@ namespace crimild {
 
 }
 
-vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program ) noexcept
+vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program, const std::vector< VertexLayout > &vertexLayouts ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -604,8 +604,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRender
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
     auto shaderModules = createShaderModules( renderDevice, program );
     auto shaderStages = createShaderStages( shaderModules );
-    auto vertexBindingDescriptions = getVertexInputBindingDescriptions();
-    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice );
+    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( vertexLayouts );
+    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, vertexLayouts );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
     auto inputAssembly = createInputAssemby( Primitive::Type::TRIANGLES );
     auto viewport = createViewport( renderDevice, pipelineViewport );

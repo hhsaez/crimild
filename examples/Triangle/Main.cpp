@@ -36,6 +36,7 @@ public:
         const auto ret = Simulation::handle( e );
         if ( ret.type == Event::Type::SIMULATION_START ) {
             // TODO: load scene
+            onStarted();
         }
         return ret;
     }
@@ -55,19 +56,19 @@ public:
                                 {
                                     [ & ] {
                                         return crimild::alloc< VertexBuffer >(
-                                            VertexP3C3::getLayout(),
-                                            Array< VertexP3C3 > {
+                                            VertexP3N3TC2::getLayout(),
+                                            Array< VertexP3N3TC2 > {
                                                 {
                                                     .position = Vector3f { -0.5f, -0.5f, 0.0f },
-                                                    .color = ColorRGB { 1.0f, 0.0f, 0.0f },
+                                                    // .color = ColorRGB { 1.0f, 0.0f, 0.0f },
                                                 },
                                                 {
                                                     .position = Vector3f { 0.5f, -0.5f, 0.0f },
-                                                    .color = ColorRGB { 0.0f, 1.0f, 0.0f },
+                                                    // .color = ColorRGB { 0.0f, 1.0f, 0.0f },
                                                 },
                                                 {
                                                     .position = Vector3f { 0.0f, 0.5f, 0.0f },
-                                                    .color = ColorRGB { 0.0f, 0.0f, 1.0f },
+                                                    // .color = ColorRGB { 0.0f, 0.0f, 1.0f },
                                                 },
                                             } );
                                     }(),

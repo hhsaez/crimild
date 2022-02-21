@@ -42,6 +42,7 @@
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
@@ -194,6 +195,11 @@ bool Simulation::step( void ) noexcept
     // m_systems.each( []( auto system ) { system->onPostRender(); } );
 
     // broadcastMessage( messaging::SimulationDidUpdate { scene } );
+
+    if ( scene != nullptr ) {
+        scene->perform( UpdateComponents( _simulationClock ) );
+        scene->perform( UpdateWorldState() );
+    }
 
     if ( !_jobScheduler.isRunning() ) {
         return false;

@@ -29,6 +29,7 @@
 #define CRIMILD_GLFW_RENDERING_WINDOW_
 
 #include "Foundation/GLFWUtils.hpp"
+#include "Mathematics/Clock.hpp"
 #include "Rendering/GLFWVulkanSurface.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
@@ -83,6 +84,8 @@ namespace crimild {
             std::unique_ptr< vulkan::RenderPass > m_renderPass;
 
             Event m_lastResizeEvent;
+
+            Clock m_clock;
         };
 
     }
