@@ -208,10 +208,10 @@ void ClearPass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentF
         VkClearValue {
             .color = {
                 .float32 = {
-                    1.0f,
-                    1.0f,
                     0.0f,
-                    1.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f,
                 },
             },
         },

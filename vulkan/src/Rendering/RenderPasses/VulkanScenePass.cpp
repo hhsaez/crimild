@@ -31,6 +31,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -90,10 +91,10 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
                           R"(
                             // layout( location = 0 ) in vec2 inTexCoord;
 
-                            // layout( set = 1, binding = 0 ) uniform MaterialUniform
-                            // {
-                            //     vec4 color;
-                            // };
+                            layout( set = 1, binding = 0 ) uniform MaterialUniform
+                            {
+                                vec4 color;
+                            };
 
                             // layout( set = 1, binding = 1 ) uniform sampler2D uSampler;
 
@@ -102,7 +103,8 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
                             void main()
                             {
                                 // outColor = color * texture( uSampler, inTexCoord );
-                                outColor = vec4( 1.0, 0.0, 1.0, 1.0 );
+                                outColor = color;
+                                // outColor = vec4( 0, 1, 1, 1 );
                                 if ( outColor.a <= 0.01 ) {
                                     discard;
                                 }
@@ -477,7 +479,7 @@ void ScenePass::createMaterialObjects( void ) noexcept
         .binding = 0,
         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
         .pImmutableSamplers = nullptr,
     };
 
@@ -492,50 +494,64 @@ void ScenePass::createMaterialObjects( void ) noexcept
 
 void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
 {
-    // vertexLayouts = { VertexP3N3TC2::getLayout() };
+    struct MaterialUniforms {
+        alignas( 16 ) ColorRGBA color = ColorRGBA { 1, 1, 1, 1 };
+    };
 
-    // descriptorSetLayouts = {
-    //     [] {
-    //         auto layout = crimild::alloc< DescriptorSetLayout >();
-    //         layout->bindings = {
-    //             {
-    //                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-    //                 .stage = Shader::Stage::VERTEX,
-    //             },
-    //         };
-    //         return layout;
-    //     }(),
-    //     [] {
-    //         auto layout = crimild::alloc< DescriptorSetLayout >();
-    //         layout->bindings = {
-    //             {
-    //                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-    //                 .stage = Shader::Stage::FRAGMENT,
-    //             },
-    //             {
-    //                 .descriptorType = DescriptorType::TEXTURE,
-    //                 .stage = Shader::Stage::FRAGMENT,
-    //             },
-    //         };
-    //         return layout;
-    //     }(),
-    //     [] {
-    //         auto layout = crimild::alloc< DescriptorSetLayout >();
-    //         layout->bindings = {
-    //             {
-    //                 .descriptorType = DescriptorType::UNIFORM_BUFFER,
-    //                 .stage = Shader::Stage::VERTEX,
-    //             },
-    //         };
-    //         return layout;
-    //     }(),
-    // };
+    if ( !m_materialObjects.descriptorSets.contains( material ) ) {
+        m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
+            MaterialUniforms {
+                .color = static_cast< UnlitMaterial * >( material )->getColor(),
+            } );
+        m_renderDevice->bind( m_materialObjects.uniforms[ material ].get() );
 
-    // if ( !m_materialDescriptors.descriptorSets.contains( material ) ) {
+        std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
 
-    // }
+        const auto allocInfo = VkDescriptorSetAllocateInfo {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .descriptorPool = m_materialObjects.descriptorPool,
+            .descriptorSetCount = uint32_t( layouts.size() ),
+            .pSetLayouts = layouts.data(),
+        };
 
-    // vkCmdBindDescriptorSets( cmds, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_materialDescriptors.descriptorSets[ material ][ currentFrameIndex ], 0, nullptr );
+        m_materialObjects.descriptorSets[ material ].resize( m_renderDevice->getSwapchainImageCount() );
+        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+
+        for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
+            const auto bufferInfo = VkDescriptorBufferInfo {
+                .buffer = m_renderDevice->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
+                .offset = 0,
+                .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
+            };
+
+            const auto descriptorWrite = VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .pBufferInfo = &bufferInfo,
+                .pImageInfo = nullptr,
+                .pTexelBufferView = nullptr,
+            };
+
+            vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+        }
+    }
+
+    // m_materialObjects.uniforms[ material ]->setValue( material->getWorld().mat );
+    m_renderDevice->update( m_materialObjects.uniforms[ material ].get() );
+
+    vkCmdBindDescriptorSets(
+        cmds,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getPipelineLayout(),
+        1,
+        1,
+        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+        0,
+        nullptr );
 }
 
 void ScenePass::destroyMaterialObjects( void ) noexcept
