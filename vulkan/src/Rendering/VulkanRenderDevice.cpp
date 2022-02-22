@@ -720,6 +720,9 @@ void RenderDevice::update( UniformBuffer *uniformBuffer ) const noexcept
     auto bufferMemory = m_memories.at( id )[ getCurrentFrameIndex() ];
 
     if ( bufferView->getData() != nullptr ) {
+        // TODO: Instad of using copyToBuffer (which requires a vkMapMemory call), we should
+        // append these commands to the current command buffer. Better still, we should use
+        // a transfer queue if possible and add synchronization barriers as needed.
         copyToBuffer(
             bufferMemory,
             bufferView->getData(),
