@@ -29,9 +29,6 @@
 
 #include "Foundation/Log.hpp"
 #include "Primitives/Primitive.hpp"
-#include "Rendering/ColorBlendState.hpp"
-#include "Rendering/DepthStencilState.hpp"
-#include "Rendering/RasterizationState.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
@@ -589,16 +586,21 @@ namespace crimild {
 
 }
 
-vulkan::GraphicsPipeline::GraphicsPipeline( RenderDevice *renderDevice, VkRenderPass renderPass, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts, const ShaderProgram *program, const std::vector< VertexLayout > &vertexLayouts ) noexcept
+vulkan::GraphicsPipeline::GraphicsPipeline(
+    RenderDevice *renderDevice,
+    VkRenderPass renderPass,
+    const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts,
+    const ShaderProgram *program,
+    const std::vector< VertexLayout > &vertexLayouts,
+    const DepthStencilState &pipelineDepthStencilState,
+    const RasterizationState &pipelineRasterizationState,
+    const ColorBlendState &pipelineColorBlendState ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
 
     const auto pipelineViewport = ViewportDimensions {};
     const auto pipelineScissor = ViewportDimensions {};
-    const DepthStencilState pipelineDepthStencilState;
-    const RasterizationState pipelineRasterizationState;
-    const ColorBlendState pipelineColorBlendState;
 
     // WARNING: all of these config params are used when creating the graphicsPipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!

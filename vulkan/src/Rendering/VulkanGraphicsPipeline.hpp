@@ -30,6 +30,9 @@
 
 #include "Foundation/Memory.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/ColorBlendState.hpp"
+#include "Rendering/DepthStencilState.hpp"
+#include "Rendering/RasterizationState.hpp"
 #include "Rendering/VertexLayout.hpp"
 
 namespace crimild {
@@ -47,7 +50,10 @@ namespace crimild {
                 VkRenderPass renderPass,
                 const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts,
                 const ShaderProgram *program,
-                const std::vector< VertexLayout > &vertexLayouts ) noexcept;
+                const std::vector< VertexLayout > &vertexLayouts,
+                const DepthStencilState &pipelineDepthStencilState = DepthStencilState {},
+                const RasterizationState &pipelineRasterizationState = RasterizationState {},
+                const ColorBlendState &pipelineColorBlendState = ColorBlendState {} ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }
