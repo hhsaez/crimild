@@ -239,14 +239,14 @@ namespace crimild {
                 crimild::UInt32 flags = 0;
             };
 
-            crimild::Bool createImage( RenderDeviceOLD *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept;
+            [[deprecated]] crimild::Bool createImage( RenderDeviceOLD *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept;
 
-            void transitionImageLayout( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept;
+            [[deprecated]] void transitionImageLayout( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept;
 
-            void copyBufferToImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept;
+            [[deprecated]] void copyBufferToImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept;
             void copyBufferToLayeredImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept;
 
-            void generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
+            [[deprecated]] void generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
 
             VkImageType getImageType( Image *image ) noexcept;
             VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
@@ -258,9 +258,9 @@ namespace crimild {
 			*/
             //@{
 
-            VkImageViewType getImageViewType( ImageView *imageView ) noexcept;
+            VkImageViewType getImageViewType( const ImageView *imageView ) noexcept;
             VkFormat getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *imageView ) noexcept;
-            VkImageAspectFlags getImageViewAspectFlags( ImageView *imageView ) noexcept;
+            VkImageAspectFlags getImageViewAspectFlags( const ImageView *imageView ) noexcept;
 
             void createImageView( VkDevice renderDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept;
 

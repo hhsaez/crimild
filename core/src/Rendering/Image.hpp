@@ -112,6 +112,7 @@ namespace crimild {
     public:
         inline void setBufferView( SharedPointer< BufferView > const &bufferView ) noexcept { m_bufferView = bufferView; }
         inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
 
     private:
         SharedPointer< BufferView > m_bufferView;

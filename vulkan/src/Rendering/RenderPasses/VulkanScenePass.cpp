@@ -77,33 +77,33 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
                                 mat4 model;
                             };
 
-                            // layout ( location = 0 ) out vec2 outTexCoord;
+                            layout ( location = 0 ) out vec2 outTexCoord;
 
                             void main()
                             {
                                 gl_Position = proj * view * model * vec4( inPosition, 1.0 );
-                                // outTexCoord = inTexCoord;
+                                outTexCoord = inTexCoord;
                             }
 
                         )" ),
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
-                            // layout( location = 0 ) in vec2 inTexCoord;
+                            layout( location = 0 ) in vec2 inTexCoord;
 
                             layout( set = 1, binding = 0 ) uniform MaterialUniform
                             {
                                 vec4 color;
                             };
 
-                            // layout( set = 1, binding = 1 ) uniform sampler2D uSampler;
+                            layout( set = 1, binding = 1 ) uniform sampler2D uSampler;
 
                             layout( location = 0 ) out vec4 outColor;
 
                             void main()
                             {
-                                // outColor = color * texture( uSampler, inTexCoord );
-                                outColor = color;
+                                outColor = color * texture( uSampler, inTexCoord );
+                                // outColor = color;
                                 // outColor = vec4( 0, 1, 1, 1 );
                                 if ( outColor.a <= 0.01 ) {
                                     discard;
@@ -189,7 +189,7 @@ void ScenePass::render( void ) noexcept
 
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, material );
+                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, static_cast< UnlitMaterial * >( material ) );
                     bindGeometryDescriptors( commandBuffer, currentFrameIndex, geometry );
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
@@ -461,38 +461,53 @@ void ScenePass::createMaterialObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        },
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        },
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
+        .poolSizeCount = uint32_t( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
         .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPool ) );
 
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-        .pImmutableSamplers = nullptr,
+    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 2 > {
+        VkDescriptorSetLayoutBinding {
+            .binding = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
+        },
+        VkDescriptorSetLayoutBinding {
+            .binding = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
+        },
     };
 
     auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
+        .bindingCount = uint32_t( bindings.size() ),
+        .pBindings = bindings.data(),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
+void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, UnlitMaterial *material ) noexcept
 {
     struct MaterialUniforms {
         alignas( 16 ) ColorRGBA color = ColorRGBA { 1, 1, 1, 1 };
@@ -501,7 +516,7 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
     if ( !m_materialObjects.descriptorSets.contains( material ) ) {
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
-                .color = static_cast< UnlitMaterial * >( material )->getColor(),
+                .color = material->getColor(),
             } );
         m_renderDevice->bind( m_materialObjects.uniforms[ material ].get() );
 
@@ -517,6 +532,9 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         m_materialObjects.descriptorSets[ material ].resize( m_renderDevice->getSwapchainImageCount() );
         CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
+        auto imageView = m_renderDevice->bind( material->getTexture()->imageView.get() );
+        auto sampler = m_renderDevice->bind( material->getTexture()->sampler.get() );
+
         for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
                 .buffer = m_renderDevice->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
@@ -524,19 +542,37 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
                 .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
             };
 
-            const auto descriptorWrite = VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
-                .pImageInfo = nullptr,
-                .pTexelBufferView = nullptr,
+            const auto imageInfo = VkDescriptorImageInfo {
+                .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                .imageView = imageView,
+                .sampler = sampler,
             };
 
-            vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+            const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+                VkWriteDescriptorSet {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+                    .dstBinding = 0,
+                    .dstArrayElement = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    .descriptorCount = 1,
+                    .pBufferInfo = &bufferInfo,
+                    .pImageInfo = nullptr,
+                    .pTexelBufferView = nullptr,
+                },
+                VkWriteDescriptorSet {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+                    .dstBinding = 1,
+                    .dstArrayElement = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    .descriptorCount = 1,
+                    .pBufferInfo = nullptr,
+                    .pImageInfo = &imageInfo,
+                    .pTexelBufferView = nullptr,
+                },
+            };
+            vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
         }
     }
 
