@@ -31,50 +31,58 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
-    virtual void onStarted( void ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
-        setScene( [ & ] {
-            auto scene = crimild::alloc< Group >();
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            setScene( [ & ] {
+                auto scene = crimild::alloc< Group >();
 
-            scene->attachNode( [ & ] {
-                auto path = FilePath {
-                    .path = "assets/models/sponza/sponza.obj"
-                };
-                auto group = crimild::alloc< Group >();
-                OBJLoader loader( path.getAbsolutePath() );
-                loader.setVerbose( true );
-                if ( auto model = loader.load() ) {
-                    group->attachNode( model );
-                }
-                return group;
+                scene->attachNode( [ & ] {
+                    auto scenePath = Settings::getInstance()->get< std::string >( "scene", "assets/models/cube.obj" );
+                    auto path = FilePath {
+                        .path = scenePath,
+                    };
+                    auto group = crimild::alloc< Group >();
+                    OBJLoader loader( path.getAbsolutePath() );
+                    loader.setVerbose( true );
+                    if ( auto model = loader.load() ) {
+                        group->attachNode( model );
+                    } else {
+                        assert( false && "Cannot load model" );
+                    }
+                    return group;
+                }() );
+
+                // scene->attachNode( crimild::alloc< Skybox >( ColorRGB { 0.5f, 0.6f, 0.7f } ) );
+
+                // scene->attachNode(
+                //     [] {
+                //         auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                //         light->setColor( ColorRGBA::Constants::WHITE );
+                //         light->setEnergy( 10.0f );
+                //         light->setLocal( rotationX( -0.25f * numbers::PI ) );
+                //         light->setCastShadows( true );
+                //         return light;
+                //     }() );
+
+                scene->attachNode(
+                    [ & ] {
+                        auto camera = crimild::alloc< Camera >( 60.0f, 4.0f / 3.0f, 0.1f, 5000.0f );
+                        camera->setLocal(
+                            lookAt(
+                                Point3 { 3, 3, 3 },
+                                Point3 { 0, 0, 0 },
+                                Vector3 { 0, 1, 0 } ) );
+                        camera->attachComponent< FreeLookCameraComponent >();
+                        return camera;
+                    }() );
+
+                scene->perform( StartComponents() );
+
+                return scene;
             }() );
-
-            scene->attachNode( crimild::alloc< Skybox >( ColorRGB { 0.25f, 0.36f, 0.9f } ) );
-
-            scene->attachNode(
-                [] {
-                    auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-                    light->setColor( ColorRGBA::Constants::WHITE );
-                    light->setEnergy( 10.0f );
-                    light->setLocal( rotationX( -0.25f * numbers::PI ) );
-                    light->setCastShadows( true );
-                    return light;
-                }() );
-
-            scene->attachNode(
-                [ & ] {
-                    auto camera = crimild::alloc< Camera >( 60.0f, 4.0f / 3.0f, 0.1f, 5000.0f );
-                    camera->setLocal( translation( 350.0f, 350.0f, 0.0f ) );
-//                    camera->local().setTranslate( 350.0f, 350.0f, 0.0f );
-//                    camera->local().rotate().fromAxisAngle( Vector3f::UNIT_Y, Numericf::HALF_PI );
-                    camera->attachComponent< FreeLookCameraComponent >()->setSpeed( 30.0f );
-                    return camera;
-                }() );
-
-            scene->perform( StartComponents() );
-
-            return scene;
-        }() );
+        }
     }
 };
 

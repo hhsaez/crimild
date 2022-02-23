@@ -29,8 +29,10 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -189,7 +191,7 @@ void ScenePass::render( void ) noexcept
 
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, static_cast< UnlitMaterial * >( material ) );
+                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, material );
                     bindGeometryDescriptors( commandBuffer, currentFrameIndex, geometry );
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
@@ -507,8 +509,18 @@ void ScenePass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, UnlitMaterial *material ) noexcept
+void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
 {
+    auto [ color, texture ] = [ & ]() {
+        if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+            const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
+            return std::make_tuple( rgba( bsdf->getAlbedo() ), bsdf->getAlbedoMap() );
+        } else {
+            const auto unlit = static_cast< UnlitMaterial * >( material );
+            return std::make_tuple( unlit->getColor(), unlit->getTexture() );
+        }
+    }();
+
     struct MaterialUniforms {
         alignas( 16 ) ColorRGBA color = ColorRGBA { 1, 1, 1, 1 };
     };
@@ -516,7 +528,7 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
     if ( !m_materialObjects.descriptorSets.contains( material ) ) {
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
-                .color = material->getColor(),
+                .color = color,
             } );
         m_renderDevice->bind( m_materialObjects.uniforms[ material ].get() );
 
@@ -532,8 +544,8 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         m_materialObjects.descriptorSets[ material ].resize( m_renderDevice->getSwapchainImageCount() );
         CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
-        auto imageView = m_renderDevice->bind( material->getTexture()->imageView.get() );
-        auto sampler = m_renderDevice->bind( material->getTexture()->sampler.get() );
+        auto imageView = m_renderDevice->bind( texture->imageView.get() );
+        auto sampler = m_renderDevice->bind( texture->sampler.get() );
 
         for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
@@ -576,7 +588,6 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         }
     }
 
-    // m_materialObjects.uniforms[ material ]->setValue( material->getWorld().mat );
     m_renderDevice->update( m_materialObjects.uniforms[ material ].get() );
 
     vkCmdBindDescriptorSets(
