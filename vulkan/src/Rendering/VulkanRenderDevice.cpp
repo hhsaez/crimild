@@ -755,7 +755,13 @@ VkBuffer RenderDevice::bind( VertexBuffer *vertexBuffer ) noexcept
 {
     const auto id = vertexBuffer->getUniqueID();
     if ( m_buffers.contains( id ) ) {
-        // TODO(hernan): Handle dynamic buffers by updating the buffer here if needed before returning its handler(?)
+        if ( vertexBuffer->getBufferView()->getUsage() == BufferView::Usage::DYNAMIC ) {
+            copyToBuffer(
+                m_memories[ id ][ getCurrentFrameIndex() ],
+                vertexBuffer->getBufferView()->getData(),
+                vertexBuffer->getBufferView()->getLength() );
+        }
+
         return m_buffers[ id ][ getCurrentFrameIndex() ];
     }
 
@@ -769,6 +775,8 @@ VkBuffer RenderDevice::bind( VertexBuffer *vertexBuffer ) noexcept
     for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
         VkBuffer bufferHandler;
         VkDeviceMemory bufferMemory;
+
+        // TODO: for static buffers, we should use staging buffers instead and send the data to the GPU only once.
 
         createBuffer(
             bufferSize,
@@ -818,7 +826,12 @@ VkBuffer RenderDevice::bind( IndexBuffer *indexBuffer ) noexcept
 {
     const auto id = indexBuffer->getUniqueID();
     if ( m_buffers.contains( id ) ) {
-        // TODO(hernan): Handle dynamic buffers by updating the buffer here if needed before returning its handler(?)
+        if ( indexBuffer->getBufferView()->getUsage() == BufferView::Usage::DYNAMIC ) {
+            copyToBuffer(
+                m_memories[ id ][ getCurrentFrameIndex() ],
+                indexBuffer->getBufferView()->getData(),
+                indexBuffer->getBufferView()->getLength() );
+        }
         return m_buffers[ id ][ getCurrentFrameIndex() ];
     }
 
@@ -832,6 +845,8 @@ VkBuffer RenderDevice::bind( IndexBuffer *indexBuffer ) noexcept
     for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
         VkBuffer bufferHandler;
         VkDeviceMemory bufferMemory;
+
+        // TODO: for static buffers, we should use staging buffers instead and send the data to the GPU only once.
 
         createBuffer(
             bufferSize,

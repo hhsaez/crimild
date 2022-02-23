@@ -29,6 +29,7 @@
 
 #include "Foundation/Log.hpp"
 #include "Mathematics/Vector4_constants.hpp"
+#include "Rendering/IndexBuffer.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Vertex.hpp"
@@ -36,12 +37,21 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
+#include "Simulation/Simulation.hpp"
 #include "imgui.h"
 
 #include <array>
 
+#define MAX_VERTEX_COUNT 10000
+#define MAX_INDEX_COUNT 10000
+
 using namespace crimild;
 using namespace crimild::vulkan;
+
+struct RenderPassUniforms {
+    Vector4 scale = Vector4::Constants::ONE;
+    Vector4 translate = Vector4::Constants::ZERO;
+};
 
 EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
@@ -89,6 +99,18 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
                                 }
                         )" ) } );
               return program;
+          }() ),
+      m_vertices(
+          [] {
+              auto vbo = std::make_unique< VertexBuffer >( VertexP2TC2C4::getLayout(), MAX_VERTEX_COUNT );
+              vbo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+              return vbo;
+          }() ),
+      m_indices(
+          [] {
+              auto ibo = std::make_unique< IndexBuffer >( Format::INDEX_16_UINT, MAX_INDEX_COUNT );
+              ibo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+              return ibo;
           }() )
 {
     CRIMILD_LOG_TRACE();
@@ -136,6 +158,45 @@ void EditorLayer::render( void ) noexcept
     // TODO: move this to event handling?
     renderUI();
 
+    auto drawData = ImGui::GetDrawData();
+    if ( drawData == nullptr ) {
+        return;
+    }
+
+    auto vertexCount = drawData->TotalVtxCount;
+    auto indexCount = drawData->TotalIdxCount;
+    if ( vertexCount == 0 || indexCount == 0 ) {
+        // No vertex data. Nothing to render
+        return;
+    }
+
+    auto positions = m_vertices->get( VertexAttribute::Name::POSITION );
+    auto texCoords = m_vertices->get( VertexAttribute::Name::TEX_COORD );
+    auto colors = m_vertices->get( VertexAttribute::Name::COLOR );
+
+    auto vertexId = 0l;
+    auto indexId = 0l;
+
+    for ( auto i = 0; i < drawData->CmdListsCount; i++ ) {
+        const auto cmdList = drawData->CmdLists[ i ];
+        for ( auto j = 0l; j < cmdList->VtxBuffer.Size; j++ ) {
+            auto vertex = cmdList->VtxBuffer[ j ];
+            positions->set( vertexId + j, Vector2f { vertex.pos.x, vertex.pos.y } );
+            texCoords->set( vertexId + j, Vector2f { vertex.uv.x, vertex.uv.y } );
+            colors->set( vertexId + j, ColorRGBA {
+                                           ( ( vertex.col >> 0 ) & 0xFF ) / 255.0f,
+                                           ( ( vertex.col >> 8 ) & 0xFF ) / 255.0f,
+                                           ( ( vertex.col >> 16 ) & 0xFF ) / 255.0f,
+                                           ( ( vertex.col >> 24 ) & 0xFF ) / 255.0f,
+                                       } );
+        }
+        for ( auto j = 0l; j < cmdList->IdxBuffer.Size; j++ ) {
+            m_indices->setIndex( indexId + j, cmdList->IdxBuffer[ j ] );
+        }
+        vertexId += cmdList->VtxBuffer.Size;
+        indexId += cmdList->IdxBuffer.Size;
+    }
+
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
 
@@ -148,9 +209,82 @@ void EditorLayer::render( void ) noexcept
         .pClearValues = nullptr,
     };
 
+    m_renderPassObjects.uniforms->setValue(
+        [] {
+            auto scale = Vector4::Constants::ONE;
+            auto translate = Vector4::Constants::ZERO;
+
+            auto drawData = ImGui::GetDrawData();
+            if ( drawData != nullptr ) {
+                // TODO: this scale value seems wrongs. It probably works only on Retina displays
+                scale = Vector4f {
+                    4.0f / drawData->DisplaySize.x,
+                    -4.0f / drawData->DisplaySize.y,
+                    0,
+                    0,
+                };
+                translate = Vector4f {
+                    -1.0,
+                    1.0,
+                    0,
+                    0,
+                };
+            }
+            return RenderPassUniforms {
+                .scale = scale,
+                .translate = translate,
+            };
+        }() );
+    m_renderDevice->update( m_renderPassObjects.uniforms.get() );
+
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    // TODO: render
+    vkCmdBindPipeline(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getHandle() );
+
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getPipelineLayout(),
+        0,
+        1,
+        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+        0,
+        nullptr );
+
+    {
+        VkBuffer buffers[] = { m_renderDevice->bind( m_vertices.get() ) };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers( commandBuffer, 0, 1, buffers, offsets );
+    }
+
+    vkCmdBindIndexBuffer(
+        commandBuffer,
+        m_renderDevice->bind( m_indices.get() ),
+        0,
+        vulkan::utils::getIndexType( m_indices.get() ) );
+
+    crimild::Size vertexOffset = 0;
+    crimild::Size indexOffset = 0;
+    for ( int i = 0; i < drawData->CmdListsCount; i++ ) {
+        const auto cmds = drawData->CmdLists[ i ];
+        for ( auto cmdIt = 0l; cmdIt < cmds->CmdBuffer.Size; cmdIt++ ) {
+            const auto cmd = &cmds->CmdBuffer[ cmdIt ];
+            if ( cmd->UserCallback != nullptr ) {
+                if ( cmd->UserCallback == ImDrawCallback_ResetRenderState ) {
+                    // Do nothing?
+                } else {
+                    cmd->UserCallback( cmds, cmd );
+                }
+            } else {
+                vkCmdDrawIndexed( commandBuffer, cmd->ElemCount, 1, cmd->IdxOffset + indexOffset, cmd->VtxOffset + vertexOffset, 0 );
+            }
+        }
+        indexOffset += cmds->IdxBuffer.Size;
+        vertexOffset += cmds->VtxBuffer.Size;
+    }
 
     vkCmdEndRenderPass( commandBuffer );
 }
@@ -159,8 +293,8 @@ void EditorLayer::renderUI( void ) noexcept
 {
     auto &io = ImGui::GetIO();
 
-    // auto clock = Simulation::getInstance()->getSimulationClock();
-    // io.DeltaTime = Numericf::max( 1.0f / 60.0f, clock.getDeltaTime() );
+    auto clock = Simulation::getInstance()->getSimulationClock();
+    io.DeltaTime = Numericf::max( 1.0f / 60.0f, clock.getDeltaTime() );
 
     if ( !io.Fonts->IsBuilt() ) {
         CRIMILD_LOG_ERROR( "Font atlas is not built!" );
@@ -315,7 +449,21 @@ void EditorLayer::init( void ) noexcept
             m_renderPassObjects.descriptorSetLayout,
         },
         m_program.get(),
-        std::vector< VertexLayout > { VertexP2TC2C4::getLayout() } );
+        std::vector< VertexLayout > { VertexP2TC2C4::getLayout() },
+        DepthStencilState {
+            .depthTestEnable = false,
+            .stencilTestEnable = false,
+        },
+        RasterizationState { .cullMode = CullMode::NONE },
+        ColorBlendState {
+            .enable = true,
+            .srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+            .dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+            .colorBlendOp = BlendOp::ADD,
+            .srcAlphaBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+            .dstAlphaBlendFactor = BlendFactor::ZERO,
+            .alphaBlendOp = BlendOp::ADD,
+        } );
 }
 
 void EditorLayer::clean( void ) noexcept
@@ -343,37 +491,8 @@ void EditorLayer::createRenderPassObjects( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderPassObjects.uniforms = [ & ] {
-        struct RenderPassUniforms {
-            Vector4 scale = Vector4::Constants::ONE;
-            Vector4 translate = Vector4::Constants::ZERO;
-        };
-
-        auto scale = Vector4::Constants::ONE;
-        auto translate = Vector4::Constants::ZERO;
-
-        auto drawData = ImGui::GetDrawData();
-        if ( drawData != nullptr ) {
-            // TODO: this scale value seems wrongs. It probably works only on Retina displays
-            scale = Vector4f {
-                4.0f / drawData->DisplaySize.x,
-                -4.0f / drawData->DisplaySize.y,
-                0,
-                0,
-            };
-            translate = Vector4f {
-                -1.0,
-                1.0,
-                0,
-                0,
-            };
-        }
-
-        auto ubo = std::make_unique< UniformBuffer >(
-            RenderPassUniforms {
-                .scale = scale,
-                .translate = translate,
-            } );
-        // ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+        auto ubo = std::make_unique< UniformBuffer >( RenderPassUniforms {} );
+        ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
         m_renderDevice->bind( ubo.get() );
         return ubo;
     }();

@@ -90,8 +90,8 @@ public:
     virtual void render( void ) noexcept override
     {
         m_clear.render();
-        m_editor.render();
         m_scene.render();
+        m_editor.render();
         // m_shader.render();
         m_present.render();
     }

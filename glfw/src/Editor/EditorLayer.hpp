@@ -35,6 +35,8 @@ namespace crimild {
 
     class UniformBuffer;
     class Texture;
+    class VertexBuffer;
+    class IndexBuffer;
 
     namespace vulkan {
 
@@ -79,6 +81,9 @@ namespace crimild {
             std::vector< VkDescriptorSet > descriptorSets;
             std::unique_ptr< UniformBuffer > uniforms;
         } m_renderPassObjects;
+
+        std::unique_ptr< VertexBuffer > m_vertices;
+        std::unique_ptr< IndexBuffer > m_indices;
 
         std::unique_ptr< Texture > m_fontAtlas;
     };
