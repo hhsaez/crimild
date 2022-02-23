@@ -27,6 +27,7 @@
 
 #include "Rendering/GLFWWindow.hpp"
 
+#include "Editor/EditorLayer.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 #include "Rendering/RenderPasses/VulkanPresentPass.hpp"
@@ -79,6 +80,7 @@ public:
                     outColor = vec4( color, 1.0 );
                 }
             )" ),
+          m_editor( renderDevice ),
           m_present( renderDevice )
     {
     }
@@ -88,6 +90,7 @@ public:
     virtual void render( void ) noexcept override
     {
         m_clear.render();
+        m_editor.render();
         m_scene.render();
         // m_shader.render();
         m_present.render();
@@ -96,6 +99,7 @@ public:
     virtual void handle( const Event &e ) noexcept override
     {
         m_clear.handle( e );
+        m_editor.handle( e );
         m_scene.handle( e );
         // m_shader.handle( e );
         m_present.handle( e );
@@ -105,6 +109,7 @@ private:
     vulkan::ClearPass m_clear;
     vulkan::ScenePass m_scene;
     vulkan::ShaderPass m_shader;
+    EditorLayer m_editor;
     vulkan::PresentPass m_present;
 };
 
