@@ -35,7 +35,7 @@ namespace crimild {
 
     class UniformBuffer;
     class Simulation;
-    class Material;
+    class UnlitMaterial;
     class Geometry;
     class Primitive;
 
@@ -62,7 +62,7 @@ namespace crimild {
             void destroyRenderPassObjects( void ) noexcept;
 
             void createMaterialObjects( void ) noexcept;
-            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept;
+            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, UnlitMaterial *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
             void createGeometryObjects( void ) noexcept;
@@ -94,8 +94,8 @@ namespace crimild {
             struct MaterialObjects {
                 VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
+                std::unordered_map< UnlitMaterial *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< UnlitMaterial *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
 
             // TODO: I wonder if some of this cache should go to RenderDevice instead

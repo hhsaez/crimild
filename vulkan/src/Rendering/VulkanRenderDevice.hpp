@@ -83,6 +83,15 @@ namespace crimild {
             VkBuffer bind( IndexBuffer *indexBuffer ) noexcept;
             void unbind( IndexBuffer *indexBuffer ) noexcept;
 
+            VkImage bind( const Image *image ) noexcept;
+            void unbind( const Image *image ) noexcept;
+
+            VkImageView bind( const ImageView *imageView ) noexcept;
+            void unbind( const ImageView *imageView ) noexcept;
+
+            VkSampler bind( const Sampler *sampler ) noexcept;
+            void unbind( const Sampler *sampler ) noexcept;
+
         private:
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;
@@ -98,6 +107,9 @@ namespace crimild {
             void createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
             void destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
 
+            VkCommandBuffer beginSingleTimeCommands( void ) const noexcept;
+            void endSingleTimeCommands( VkCommandBuffer commandBuffer ) const noexcept;
+
             void createBuffer(
                 VkDeviceSize size,
                 VkBufferUsageFlags usage,
@@ -106,6 +118,18 @@ namespace crimild {
                 VkDeviceMemory &bufferMemory ) const noexcept;
 
             void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
+
+            void copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept;
+
+            void transitionImageLayout(
+                VkImage image,
+                VkFormat format,
+                VkImageLayout oldLayout,
+                VkImageLayout newLayout,
+                crimild::UInt32 mipLevels,
+                crimild::UInt32 layerCount ) const noexcept;
+
+            void generateMipmaps( VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) const noexcept;
 
         private:
             // TODO(hernan): rename to m_device
@@ -144,6 +168,9 @@ namespace crimild {
 
             std::unordered_map< Size, std::vector< VkBuffer > > m_buffers;
             std::unordered_map< Size, std::vector< VkDeviceMemory > > m_memories;
+            std::unordered_map< Size, std::vector< VkImage > > m_images;
+            std::unordered_map< Size, std::vector< VkImageView > > m_imageViews;
+            std::unordered_map< Size, std::vector< VkSampler > > m_samplers;
         };
 
     }

@@ -31,55 +31,58 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
-    void onStarted( void ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
-        setScene(
-            [ & ] {
-                auto scene = crimild::alloc< Group >();
-                scene->attachNode(
-                    [] {
-                        auto geometry = crimild::alloc< Geometry >();
-                        geometry->attachPrimitive(
-                            crimild::alloc< QuadPrimitive >(
-                                QuadPrimitive::Params {
-                                    .layout = VertexP3N3TC2::getLayout(),
-                                } ) );
-                        geometry->attachComponent< MaterialComponent >(
-                            [] {
-                                auto material = crimild::alloc< UnlitMaterial >();
-                                material->setTexture(
-                                    [] {
-                                        auto texture = crimild::alloc< Texture >();
-                                        texture->imageView = [ & ] {
-                                            auto imageView = crimild::alloc< ImageView >();
-                                            imageView->image = [ & ] {
-                                                return ImageManager::getInstance()->loadImage(
-                                                    {
-                                                        .filePath = {
-                                                            .path = "assets/textures/test.png" },
-                                                    } );
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            setScene(
+                [ & ] {
+                    auto scene = crimild::alloc< Group >();
+                    scene->attachNode(
+                        [] {
+                            auto geometry = crimild::alloc< Geometry >();
+                            geometry->attachPrimitive(
+                                crimild::alloc< QuadPrimitive >(
+                                    QuadPrimitive::Params {
+                                        .layout = VertexP3N3TC2::getLayout(),
+                                    } ) );
+                            geometry->attachComponent< MaterialComponent >(
+                                [] {
+                                    auto material = crimild::alloc< UnlitMaterial >();
+                                    material->setTexture(
+                                        [] {
+                                            auto texture = crimild::alloc< Texture >();
+                                            texture->imageView = [ & ] {
+                                                auto imageView = crimild::alloc< ImageView >();
+                                                imageView->image = [ & ] {
+                                                    return ImageManager::getInstance()->loadImage(
+                                                        {
+                                                            .filePath = {
+                                                                .path = "assets/textures/test.png" },
+                                                        } );
+                                                }();
+                                                return imageView;
                                             }();
-                                            return imageView;
-                                        }();
-                                        texture->sampler = [ & ] {
-                                            auto sampler = crimild::alloc< Sampler >();
-                                            sampler->setMinFilter( Sampler::Filter::NEAREST );
-                                            sampler->setMagFilter( Sampler::Filter::NEAREST );
-                                            return sampler;
-                                        }();
-                                        return texture;
-                                    }() );
-                                return material;
-                            }() );
-                        return geometry;
+                                            texture->sampler = [ & ] {
+                                                auto sampler = crimild::alloc< Sampler >();
+                                                sampler->setMinFilter( Sampler::Filter::NEAREST );
+                                                sampler->setMagFilter( Sampler::Filter::NEAREST );
+                                                return sampler;
+                                            }();
+                                            return texture;
+                                        }() );
+                                    return material;
+                                }() );
+                            return geometry;
+                        }() );
+                    scene->attachNode( [] {
+                        auto camera = crimild::alloc< Camera >();
+                        camera->setLocal( translation( 0.0f, 0.0f, 3.0f ) );
+                        return camera;
                     }() );
-                scene->attachNode( [] {
-                    auto camera = crimild::alloc< Camera >();
-                    camera->setLocal( translation( 0.0f, 0.0f, 3.0f ) );
-                    return camera;
+                    return scene;
                 }() );
-                return scene;
-            }() );
+        }
     }
 };
 

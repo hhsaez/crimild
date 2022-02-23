@@ -28,6 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 #define CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 
+#include "Coding/Codable.hpp"
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Foundation/SharedObject.hpp"
@@ -42,9 +43,8 @@ namespace crimild {
 
     class ImageView
         : public RenderResourceImpl< ImageView >,
-          public SharedObject,
-          public RTTI,
           public NamedObject,
+          public coding::Codable,
           public FrameGraphResource {
         CRIMILD_IMPLEMENT_RTTI( crimild::ImageView )
 

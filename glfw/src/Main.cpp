@@ -98,6 +98,8 @@ namespace crimild {
                 Settings settings;
                 settings.parseCommandLine( argc, argv );
 
+                crimild::stb::ImageManager imageManager;
+
                 Window window;
 
                 while ( true ) {

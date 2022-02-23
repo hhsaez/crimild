@@ -1418,7 +1418,7 @@ VkImageAspectFlags utils::getImageAspectFlags( Image *image ) noexcept
     return aspect;
 }
 
-VkImageViewType utils::getImageViewType( ImageView *imageView ) noexcept
+VkImageViewType utils::getImageViewType( const ImageView *imageView ) noexcept
 {
     switch ( imageView->type ) {
         case ImageView::Type::IMAGE_VIEW_1D:
@@ -1457,7 +1457,7 @@ VkFormat utils::getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *im
     return getFormat( renderDevice, format );
 }
 
-VkImageAspectFlags utils::getImageViewAspectFlags( ImageView *imageView ) noexcept
+VkImageAspectFlags utils::getImageViewAspectFlags( const ImageView *imageView ) noexcept
 {
     auto format = imageView->format;
     if ( format == Format::UNDEFINED ) {
