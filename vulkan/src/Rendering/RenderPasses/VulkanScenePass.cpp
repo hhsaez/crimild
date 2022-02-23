@@ -133,12 +133,6 @@ void ScenePass::handle( const Event &e ) noexcept
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             clear();
-
-            // auto settings = Settings::getInstance();
-            // auto width = settings->get< float >( "video.width", 1024 );
-            // auto height = settings->get< float >( "video.height", 768 );
-            // m_uniforms->setValue( Vector2 { width, height } );
-
             init();
             break;
         }
