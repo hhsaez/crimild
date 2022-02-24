@@ -121,13 +121,38 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
     ImGui::StyleColorsDark();
 
     auto &io = ImGui::GetIO();
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
+    // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
+    io.KeyMap[ ImGuiKey_Tab ] = CRIMILD_INPUT_KEY_TAB;
+    io.KeyMap[ ImGuiKey_LeftArrow ] = CRIMILD_INPUT_KEY_LEFT;
+    io.KeyMap[ ImGuiKey_RightArrow ] = CRIMILD_INPUT_KEY_RIGHT;
+    io.KeyMap[ ImGuiKey_UpArrow ] = CRIMILD_INPUT_KEY_UP;
+    io.KeyMap[ ImGuiKey_DownArrow ] = CRIMILD_INPUT_KEY_DOWN;
+    io.KeyMap[ ImGuiKey_PageUp ] = CRIMILD_INPUT_KEY_PAGE_UP;
+    io.KeyMap[ ImGuiKey_PageDown ] = CRIMILD_INPUT_KEY_PAGE_DOWN;
+    io.KeyMap[ ImGuiKey_Home ] = CRIMILD_INPUT_KEY_HOME;
+    io.KeyMap[ ImGuiKey_End ] = CRIMILD_INPUT_KEY_END;
+    io.KeyMap[ ImGuiKey_Insert ] = CRIMILD_INPUT_KEY_INSERT;
+    io.KeyMap[ ImGuiKey_Delete ] = CRIMILD_INPUT_KEY_DELETE;
+    io.KeyMap[ ImGuiKey_Backspace ] = CRIMILD_INPUT_KEY_BACKSPACE;
+    io.KeyMap[ ImGuiKey_Space ] = CRIMILD_INPUT_KEY_SPACE;
+    io.KeyMap[ ImGuiKey_Enter ] = CRIMILD_INPUT_KEY_ENTER;
+    io.KeyMap[ ImGuiKey_Escape ] = CRIMILD_INPUT_KEY_ESCAPE;
+    io.KeyMap[ ImGuiKey_KeyPadEnter ] = CRIMILD_INPUT_KEY_KP_ENTER;
+    io.KeyMap[ ImGuiKey_A ] = CRIMILD_INPUT_KEY_A;
+    io.KeyMap[ ImGuiKey_C ] = CRIMILD_INPUT_KEY_C;
+    io.KeyMap[ ImGuiKey_V ] = CRIMILD_INPUT_KEY_V;
+    io.KeyMap[ ImGuiKey_X ] = CRIMILD_INPUT_KEY_X;
+    io.KeyMap[ ImGuiKey_Y ] = CRIMILD_INPUT_KEY_Y;
+    io.KeyMap[ ImGuiKey_Z ] = CRIMILD_INPUT_KEY_Z;
+
     updateDisplaySize();
     init();
+    updateUI();
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
@@ -138,6 +163,10 @@ EditorLayer::~EditorLayer( void ) noexcept
 
 Event EditorLayer::handle( const Event &e ) noexcept
 {
+    bool needsUpdate = true;
+
+    auto &io = ImGui::GetIO();
+
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             clean();
@@ -146,8 +175,63 @@ Event EditorLayer::handle( const Event &e ) noexcept
             break;
         }
 
-        default:
+        case Event::Type::KEY_DOWN: {
+            io.KeysDown[ e.keyboard.key ] = true;
+
+            io.KeyCtrl = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_CONTROL ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_CONTROL ];
+            io.KeyShift = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_SHIFT ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_SHIFT ];
+            io.KeyAlt = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_ALT ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_ALT ];
+            io.KeySuper = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_SUPER ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_SUPER ];
+
             break;
+        }
+
+        case Event::Type::KEY_UP: {
+            io.KeysDown[ e.keyboard.key ] = false;
+            break;
+        }
+
+        case Event::Type::MOUSE_MOTION: {
+            io.MousePos = ImVec2( e.motion.pos.x, e.motion.pos.y );
+            break;
+        }
+
+        case Event::Type::MOUSE_BUTTON_DOWN: {
+            io.MouseDown[ e.button.button ] = true;
+            break;
+        }
+
+        case Event::Type::MOUSE_BUTTON_UP: {
+            io.MouseDown[ e.button.button ] = false;
+            break;
+        }
+
+        case Event::Type::MOUSE_WHEEL: {
+            io.MouseWheelH += e.wheel.x;
+            io.MouseWheel += e.wheel.y;
+            break;
+        }
+
+        case Event::Type::TEXT: {
+            if ( e.text.codepoint > 0 && e.text.codepoint < 0x10000 ) {
+                io.AddInputCharacter( e.text.codepoint );
+            }
+            break;
+        }
+
+        default: {
+            // Unhandled events won't trigger a redraw
+            needsUpdate = false;
+            break;
+        }
+    }
+
+    if ( needsUpdate ) {
+        updateUI();
+    }
+
+    if ( io.WantCaptureMouse || io.WantCaptureKeyboard ) {
+        return Event {};
     }
 
     return e;
@@ -155,9 +239,6 @@ Event EditorLayer::handle( const Event &e ) noexcept
 
 void EditorLayer::render( void ) noexcept
 {
-    // TODO: move this to event handling?
-    renderUI();
-
     auto drawData = ImGui::GetDrawData();
     if ( drawData == nullptr ) {
         return;
@@ -289,7 +370,7 @@ void EditorLayer::render( void ) noexcept
     vkCmdEndRenderPass( commandBuffer );
 }
 
-void EditorLayer::renderUI( void ) noexcept
+void EditorLayer::updateUI( void ) noexcept
 {
     auto &io = ImGui::GetIO();
 

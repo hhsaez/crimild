@@ -206,6 +206,8 @@ Event Window::handle( const Event &e ) noexcept
         }
 
         default: {
+            m_renderDevice->handle( e );
+            m_renderPass->handle( e );
             break;
         }
     }
@@ -489,7 +491,138 @@ bool Window::createWindow( void )
 
     CRIMILD_LOG_DEBUG( "Created window with size ", width, "x", height, " (x", framebufferScale, ")" );
 
+    registerEventCallbacks();
+
     return true;
+}
+
+void Window::registerEventCallbacks( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    glfwSetKeyCallback(
+        m_window,
+        []( GLFWwindow *windowHandle, int key, int scancode, int action, int mod ) {
+            if ( key == GLFW_KEY_UNKNOWN ) {
+                CRIMILD_LOG_WARNING( "Unknown key pressed (", key, ")" );
+                return;
+            }
+
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                window->handle(
+                    Event {
+                        .type = [ & ] {
+                            switch ( action ) {
+                                case GLFW_PRESS:
+                                    return Event::Type::KEY_DOWN;
+                                case GLFW_REPEAT:
+                                    return Event::Type::KEY_REPEAT;
+                                case GLFW_RELEASE:
+                                default:
+                                    return Event::Type::KEY_UP;
+                            }
+                        }(),
+                        .timestamp = window->getTimestamp(),
+                        .keyboard = Keyboard {
+                            .state = [ & ] {
+                                switch ( action ) {
+                                    case GLFW_PRESS:
+                                        return Keyboard::State::PRESSED;
+                                    case GLFW_REPEAT:
+                                        return Keyboard::State::REPEAT;
+                                    case GLFW_RELEASE:
+                                    default:
+                                        return Keyboard::State::RELEASED;
+                                }
+                            }(),
+                            .key = UInt32( key ),
+                            .scancode = UInt32( scancode ),
+                            .mod = UInt32( mod ),
+                        },
+                    } );
+            }
+        } );
+
+    glfwSetCharCallback(
+        m_window,
+        []( GLFWwindow *windowHandle, unsigned int codepoint ) {
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                window->handle(
+                    Event {
+                        .type = Event::Type::TEXT,
+                        .timestamp = window->getTimestamp(),
+                        .text = {
+                            .codepoint = codepoint,
+                        },
+                    } );
+            }
+        } );
+
+    glfwSetMouseButtonCallback(
+        m_window,
+        []( GLFWwindow *windowHandle, int button, int action, int mods ) {
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                double x, y;
+                glfwGetCursorPos( window->m_window, &x, &y );
+
+                window->handle(
+                    Event {
+                        .type = action == GLFW_PRESS ? Event::Type::MOUSE_BUTTON_DOWN : Event::Type::MOUSE_BUTTON_UP,
+                        .timestamp = window->getTimestamp(),
+                        .button = MouseButton {
+                            .button = UInt8( button ),
+                            .state = action == GLFW_PRESS ? MouseButton::State::PRESSED : MouseButton::State::RELEASED,
+                            .pos = Vector2i {
+                                Int( std::floor( x ) ),
+                                Int( std::floor( y ) ),
+                            },
+                        },
+                    } );
+            }
+        } );
+
+    // Required in order to receive mouse motion events when cursor is disabled
+    if ( glfwRawMouseMotionSupported() ) {
+        glfwSetInputMode( m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE );
+    }
+
+    glfwSetCursorPosCallback(
+        m_window,
+        []( GLFWwindow *windowHandle, double xpos, double ypos ) {
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                window->handle(
+                    Event {
+                        .type = Event::Type::MOUSE_MOTION,
+                        .timestamp = window->getTimestamp(),
+                        .motion = MouseMotion {
+                            .pos = Vector2i {
+                                Int( std::floor( xpos ) ),
+                                Int( std::floor( ypos ) ),
+                            },
+                        },
+                    } );
+            }
+        } );
+
+    glfwSetScrollCallback(
+        m_window,
+        []( GLFWwindow *windowHandle, double xoffset, double yoffset ) {
+            auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
+            if ( window != nullptr ) {
+                window->handle(
+                    Event {
+                        .type = Event::Type::MOUSE_WHEEL,
+                        .timestamp = window->getTimestamp(),
+                        .wheel = MouseWheel {
+                            .x = Int32( std::floor( xoffset ) ),
+                            .y = Int32( std::floor( yoffset ) ),
+                        } } );
+            }
+        } );
 }
 
 void Window::destroyWindow( void )
@@ -498,4 +631,10 @@ void Window::destroyWindow( void )
     glfwDestroyWindow( m_window );
 
     CRIMILD_LOG_INFO( "Window destroyed" );
+}
+
+UInt64 Window::getTimestamp( void ) const noexcept
+{
+    const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+    return std::chrono::duration_cast< std::chrono::milliseconds >( now ).count();
 }

@@ -30,8 +30,57 @@
 
 #include "Foundation/Types.hpp"
 #include "Rendering/Extent.hpp"
+#include "Simulation/Input.hpp"
 
 namespace crimild {
+
+    /**
+     * \brief Keyboard button event information
+     */
+    struct Keyboard {
+        enum class State {
+            PRESSED,
+            REPEAT,
+            RELEASED,
+        };
+
+        State state = State::PRESSED;
+        UInt32 key = CRIMILD_INPUT_KEY_UNKNOWN;
+        UInt32 scancode = 0;
+        UInt32 mod = 0;
+    };
+
+    struct MouseButton {
+        enum class State {
+            PRESSED,
+            RELEASED,
+        };
+
+        UInt8 button = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
+        State state = State::PRESSED;
+        Vector2i pos = Vector2i { 0, 0 };
+    };
+
+    struct MouseMotion {
+        Vector2i pos = Vector2i { 0, 0 };
+    };
+
+    /**
+     * \brief Mouse wheel event information
+     */
+    struct MouseWheel {
+        // Horizontal scroll offset
+        Int32 x;
+        // Vertical scroll offset
+        Int32 y;
+    };
+
+    /**
+     * \brief Text input event information
+     */
+    struct TextInput {
+        UInt32 codepoint;
+    };
 
     struct Event {
         enum class Type {
@@ -45,6 +94,17 @@ namespace crimild {
 
             WINDOW_RESIZE,
 
+            KEY_DOWN,
+            KEY_REPEAT,
+            KEY_UP,
+
+            MOUSE_MOTION,
+            MOUSE_BUTTON_DOWN,
+            MOUSE_BUTTON_UP,
+            MOUSE_WHEEL,
+
+            TEXT,
+
             SIMULATION_START,
             SIMULATION_UPDATE,
             SIMULATION_RENDER,
@@ -52,9 +112,15 @@ namespace crimild {
         };
 
         Type type = Type::NONE;
+        UInt64 timestamp = 0;
 
         union {
             Extent2D extent = Extent2D {};
+            Keyboard keyboard;
+            MouseButton button;
+            MouseMotion motion;
+            MouseWheel wheel;
+            TextInput text;
         };
     };
 
