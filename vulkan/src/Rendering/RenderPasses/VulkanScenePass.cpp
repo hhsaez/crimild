@@ -320,7 +320,8 @@ void ScenePass::init( void ) noexcept
             m_geometryObjects.descriptorSetLayout,
         },
         m_program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 } );
+        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+        DepthStencilState { .depthTestEnable = false, .stencilTestEnable = false, .depthWriteEnable = false } );
 }
 
 void ScenePass::clear( void ) noexcept

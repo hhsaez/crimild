@@ -57,7 +57,7 @@ namespace crimild {
         void init( void ) noexcept;
         void clean( void ) noexcept;
 
-        void renderUI( void ) noexcept;
+        void updateUI( void ) noexcept;
 
         void createRenderPassObjects( void ) noexcept;
         void destroyRenderPassObjects( void ) noexcept;

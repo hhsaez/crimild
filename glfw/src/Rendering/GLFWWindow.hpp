@@ -65,7 +65,10 @@ namespace crimild {
 
         private:
             bool createWindow( void );
+            void registerEventCallbacks( void ) noexcept;
             void destroyWindow( void );
+
+            UInt64 getTimestamp( void ) const noexcept;
 
         private:
             GLFWwindow *m_window = nullptr;
@@ -83,7 +86,7 @@ namespace crimild {
 
             std::unique_ptr< vulkan::RenderPass > m_renderPass;
 
-            Event m_lastResizeEvent;
+            Event m_lastResizeEvent = Event {};
 
             Clock m_clock;
         };
