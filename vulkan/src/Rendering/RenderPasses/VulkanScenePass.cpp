@@ -28,7 +28,6 @@
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Material.hpp"
@@ -50,11 +49,6 @@
 
 using namespace crimild;
 using namespace crimild::vulkan;
-
-struct RenderPassUniforms {
-    alignas( 16 ) Matrix4 view = Matrix4::Constants::IDENTITY;
-    alignas( 16 ) Matrix4 proj = Matrix4::Constants::IDENTITY;
-};
 
 ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
@@ -163,11 +157,13 @@ void ScenePass::render( void ) noexcept
             } ) );
 
     auto camera = Camera::getMainCamera();
-    m_renderPassObjects.uniforms->setValue(
-        RenderPassUniforms {
-            .view = camera->getViewMatrix(),
-            .proj = camera->getProjectionMatrix() } );
-    m_renderDevice->update( m_renderPassObjects.uniforms.get() );
+    if ( m_renderPassObjects.uniforms != nullptr ) {
+        m_renderPassObjects.uniforms->setValue(
+            RenderPassObjects::Uniforms {
+                .view = camera->getViewMatrix(),
+                .proj = camera->getProjectionMatrix() } );
+        m_renderDevice->update( m_renderPassObjects.uniforms.get() );
+    }
 
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
@@ -369,7 +365,7 @@ void ScenePass::createRenderPassObjects( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderPassObjects.uniforms = [ & ] {
-        auto ubo = std::make_unique< UniformBuffer >( RenderPassUniforms {} );
+        auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
         ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
         m_renderDevice->bind( ubo.get() );
         return ubo;
@@ -729,7 +725,6 @@ void ScenePass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Pr
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
             if ( vertices != nullptr ) {
-                auto handler = m_renderDevice->bind( vertices.get() );
                 VkBuffer buffers[] = { m_renderDevice->bind( vertices.get() ) };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
@@ -749,23 +744,16 @@ void ScenePass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Pr
 
     auto indices = primitive->getIndices();
     if ( indices != nullptr ) {
-        m_renderDevice->bind( indices );
         vkCmdBindIndexBuffer(
             cmds,
             m_renderDevice->bind( indices ),
             0,
             utils::getIndexType( crimild::get_ptr( indices ) ) );
-        // bindIndexBuffer( indices );
-        // drawIndexed(
-        //     DrawIndexedInfo {
-        //         .indexCount = UInt32( indices->getIndexCount() ),
-        //         .instanceCount = instanceCount } );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];
         if ( vertices != nullptr && vertices->getVertexCount() > 0 ) {
             vkCmdDraw( cmds, vertices->getVertexCount(), 1, 0, 0 );
-            // draw( vertices->getVertexCount() );
         }
     }
 }

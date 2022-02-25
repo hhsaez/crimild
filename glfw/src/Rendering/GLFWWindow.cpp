@@ -90,18 +90,18 @@ public:
     virtual void render( void ) noexcept override
     {
         m_clear.render();
+        m_shader.render();
         m_scene.render();
         m_editor.render();
-        // m_shader.render();
         m_present.render();
     }
 
     virtual void handle( const Event &e ) noexcept override
     {
         m_clear.handle( e );
+        m_shader.handle( e );
         m_editor.handle( e );
         m_scene.handle( e );
-        // m_shader.handle( e );
         m_present.handle( e );
     }
 
