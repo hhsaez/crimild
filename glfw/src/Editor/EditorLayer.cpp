@@ -28,7 +28,6 @@
 #include "Editor/EditorLayer.hpp"
 
 #include "Foundation/Log.hpp"
-#include "Mathematics/Vector4_constants.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -48,11 +47,6 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-struct RenderPassUniforms {
-    Vector4 scale = Vector4::Constants::ONE;
-    Vector4 translate = Vector4::Constants::ZERO;
-};
-
 EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
       m_program(
@@ -63,40 +57,40 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
                       crimild::alloc< Shader >(
                           Shader::Stage::VERTEX,
                           R"(
-                                layout ( location = 0 ) in vec2 aPosition;
-                                layout ( location = 1 ) in vec2 aTexCoord;
-                                layout ( location = 2 ) in vec4 aColor;
+                            layout ( location = 0 ) in vec2 aPosition;
+                            layout ( location = 1 ) in vec2 aTexCoord;
+                            layout ( location = 2 ) in vec4 aColor;
 
-                                layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                                    vec4 scale;
-                                    vec4 translate;
-                                } ubo;
+                            layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
+                                vec4 scale;
+                                vec4 translate;
+                            } ubo;
 
-                                layout ( location = 0 ) out vec4 vColor;
-                                layout ( location = 1 ) out vec2 vTexCoord;
+                            layout ( location = 0 ) out vec4 vColor;
+                            layout ( location = 1 ) out vec2 vTexCoord;
 
-                                void main()
-                                {
-                                    gl_Position = vec4( aPosition * ubo.scale.xy + ubo.translate.xy, 0.0, 1.0 );
-                                    vColor = aColor;
-                                    vTexCoord = aTexCoord;
-                                }
+                            void main()
+                            {
+                                gl_Position = vec4( aPosition * ubo.scale.xy + ubo.translate.xy, 0.0, 1.0 );
+                                vColor = aColor;
+                                vTexCoord = aTexCoord;
+                            }
                         )" ),
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
-                                layout ( location = 0 ) in vec4 vColor;
-                                layout ( location = 1 ) in vec2 vTexCoord;
+                            layout ( location = 0 ) in vec4 vColor;
+                            layout ( location = 1 ) in vec2 vTexCoord;
 
-                                layout ( set = 0, binding = 1 ) uniform sampler2D uTexture;
+                            layout ( set = 0, binding = 1 ) uniform sampler2D uTexture;
 
-                                layout ( location = 0 ) out vec4 FragColor;
+                            layout ( location = 0 ) out vec4 FragColor;
 
-                                void main()
-                                {
-                                    vec2 uv = vTexCoord;
-                                    FragColor = vColor * texture( uTexture, uv );
-                                }
+                            void main()
+                            {
+                                vec2 uv = vTexCoord;
+                                FragColor = vColor * texture( uTexture, uv );
+                            }
                         )" ) } );
               return program;
           }() ),
@@ -239,6 +233,13 @@ Event EditorLayer::handle( const Event &e ) noexcept
 
 void EditorLayer::render( void ) noexcept
 {
+    // TODO: it seems that we require to update the UI until something gets render for the very first time.
+    // Not sure if some initialization process is happening in ImGUI that I'm missing. Need to double check.
+    static bool forceUpdate = true;
+    if ( forceUpdate ) {
+        updateUI();
+    }
+
     auto drawData = ImGui::GetDrawData();
     if ( drawData == nullptr ) {
         return;
@@ -250,6 +251,8 @@ void EditorLayer::render( void ) noexcept
         // No vertex data. Nothing to render
         return;
     }
+
+    forceUpdate = false;
 
     auto positions = m_vertices->get( VertexAttribute::Name::POSITION );
     auto texCoords = m_vertices->get( VertexAttribute::Name::TEX_COORD );
@@ -311,7 +314,7 @@ void EditorLayer::render( void ) noexcept
                     0,
                 };
             }
-            return RenderPassUniforms {
+            return RenderPassObjects::Uniforms {
                 .scale = scale,
                 .translate = translate,
             };
@@ -572,7 +575,7 @@ void EditorLayer::createRenderPassObjects( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderPassObjects.uniforms = [ & ] {
-        auto ubo = std::make_unique< UniformBuffer >( RenderPassUniforms {} );
+        auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
         ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
         m_renderDevice->bind( ubo.get() );
         return ubo;

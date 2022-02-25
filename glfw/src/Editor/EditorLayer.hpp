@@ -29,6 +29,7 @@
 #define CRIMILD_GLFW_EDITOR_LAYER_
 
 #include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Vector4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
@@ -79,6 +80,12 @@ namespace crimild {
             VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
             VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
             std::vector< VkDescriptorSet > descriptorSets;
+
+            struct Uniforms {
+                Vector4 scale = Vector4::Constants::ONE;
+                Vector4 translate = Vector4::Constants::ZERO;
+            };
+
             std::unique_ptr< UniformBuffer > uniforms;
         } m_renderPassObjects;
 

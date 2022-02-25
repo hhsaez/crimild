@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 
 #include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
@@ -85,6 +86,11 @@ namespace crimild {
                 VkDescriptorPool pool = VK_NULL_HANDLE;
                 VkDescriptorSetLayout layout = VK_NULL_HANDLE;
                 std::vector< VkDescriptorSet > descriptorSets;
+
+                struct Uniforms {
+                    alignas( 16 ) Matrix4 view = Matrix4::Constants::IDENTITY;
+                    alignas( 16 ) Matrix4 proj = Matrix4::Constants::IDENTITY;
+                };
                 std::unique_ptr< UniformBuffer > uniforms;
             } m_renderPassObjects;
 
