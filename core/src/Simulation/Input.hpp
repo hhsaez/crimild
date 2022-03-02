@@ -30,9 +30,10 @@
 
 #include "Foundation/Singleton.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Messaging/MessageQueue.hpp"
 
-#include <map>
+#include <array>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 // This codes are ment to match those of GLFW to avoid translation tables
@@ -181,70 +182,9 @@
 
 namespace crimild {
 
-    namespace messaging {
+    struct Event;
 
-        struct KeyPressed {
-            int key;
-            int scancode;
-            int mods;
-        };
-
-        struct KeyReleased {
-            int key;
-            int scancode;
-            int mods;
-        };
-
-        struct MouseButtonDown {
-            int button;
-            float x;
-            float y;
-            float nx;
-            float ny;
-        };
-
-        struct MouseButtonUp {
-            int button;
-            float x;
-            float y;
-            float nx;
-            float ny;
-        };
-
-        struct MouseMotion {
-            float x;
-            float y;
-            float nx;
-            float ny;
-        };
-
-        struct MouseScroll {
-            float dx;
-            float dy;
-        };
-
-        struct SwipeLeft {
-        };
-        struct SwipeRight {
-        };
-        struct SwipeUp {
-        };
-        struct SwipeDown {
-        };
-
-        struct ButtonAcceptActivated {
-        };
-        struct ButtonBackActivated {
-        };
-        struct ButtonPauseActivated {
-        };
-        struct ButtonMenuActivated {
-        };
-
-    }
-
-    class Input : public DynamicSingleton< Input >,
-                  public Messenger {
+    class Input : public DynamicSingleton< Input > {
     public:
         enum class MouseCursorMode {
             NORMAL, // default
@@ -253,11 +193,7 @@ namespace crimild {
         };
 
     public:
-        Input( void );
-        virtual ~Input( void );
-
-        void reset( void );
-        void reset( int keyCount, int mouseButtonCount );
+        void handle( const Event & ) noexcept;
 
         bool isKeyDown( int key ) { return _keys[ key ]; }
         bool isKeyUp( int key ) { return !_keys[ key ]; }
@@ -275,8 +211,8 @@ namespace crimild {
         void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
 
     private:
-        std::vector< bool > _keys;
-        std::vector< bool > _mouseButtons;
+        std::array< Int8, CRIMILD_INPUT_KEY_LAST > _keys;
+        std::array< Int8, CRIMILD_INPUT_MOUSE_BUTTON_LAST > _mouseButtons;
 
         Vector2f _mousePos;
         Vector2f _mouseDelta;
@@ -294,7 +230,7 @@ namespace crimild {
         float getAxis( std::string key ) { return _axes[ key ]; }
 
     private:
-        std::map< std::string, float > _axes;
+        std::unordered_map< std::string, float > _axes;
 
     public:
         bool joystickIsPresent( void ) const { return _joystickAxes.size(); }

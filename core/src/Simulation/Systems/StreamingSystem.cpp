@@ -27,20 +27,21 @@
 
 #include "StreamingSystem.hpp"
 
-#include "Simulation/Simulation.hpp"
-#include "Simulation/FileSystem.hpp"
 #include "Concurrency/Async.hpp"
-#include "Visitors/UpdateWorldState.hpp"
-#include "Visitors/UpdateRenderState.hpp"
+#include "Messaging/MessageQueue.hpp"
+#include "Simulation/FileSystem.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateRenderState.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
 StreamingSystem::StreamingSystem( void )
 {
-	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
-	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::AppendScene, StreamingSystem, onAppendScene );
-	// CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
+    // CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::LoadScene, StreamingSystem, onLoadScene );
+    // CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::AppendScene, StreamingSystem, onAppendScene );
+    // CRIMILD_BIND_MEMBER_MESSAGE_HANDLER( messaging::ReloadScene, StreamingSystem, onReloadScene );
 }
 
 void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
@@ -71,8 +72,8 @@ void StreamingSystem::onLoadScene( messaging::LoadScene const &message )
 
         crimild::concurrency::sync_frame( [ scene ] {
             Simulation::getInstance()->setScene( scene );
-        });
-    });
+        } );
+    } );
 }
 
 void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
@@ -106,20 +107,20 @@ void StreamingSystem::onAppendScene( messaging::AppendScene const &message )
                 parentNode = static_cast< Group * >( Simulation::getInstance()->getScene() );
             }
 
-			parentNode->attachNode( scene );
+            parentNode->attachNode( scene );
 
-			scene->perform( UpdateWorldState() );
-			scene->perform( UpdateRenderState() );
-			scene->perform( StartComponents() );
-			// update state one more time after starting components
-			scene->perform( UpdateWorldState() );
-			scene->perform( UpdateRenderState() );
+            scene->perform( UpdateWorldState() );
+            scene->perform( UpdateRenderState() );
+            scene->perform( StartComponents() );
+            // update state one more time after starting components
+            scene->perform( UpdateWorldState() );
+            scene->perform( UpdateRenderState() );
 
             if ( onLoadSceneCallback != nullptr ) {
                 onLoadSceneCallback( crimild::get_ptr( scene ) );
             }
-        });
-    });
+        } );
+    } );
 }
 
 void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
@@ -152,8 +153,7 @@ void StreamingSystem::onReloadScene( messaging::ReloadScene const &message )
 
             crimild::concurrency::sync_frame( [ scene ] {
                 Simulation::getInstance()->setScene( scene );
-            });
-        });
-    });
+            } );
+        } );
+    } );
 }
-

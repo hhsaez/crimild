@@ -98,11 +98,13 @@ public:
 
     virtual void handle( const Event &e ) noexcept override
     {
-        m_clear.handle( e );
-        m_shader.handle( e );
-        m_editor.handle( e );
-        m_scene.handle( e );
-        m_present.handle( e );
+        auto ev = e;
+
+        m_clear.handle( ev );
+        m_shader.handle( ev );
+        ev = m_editor.handle( ev );
+        m_scene.handle( ev );
+        m_present.handle( ev );
     }
 
 private:
@@ -154,6 +156,25 @@ Event Window::handle( const Event &e ) noexcept
         case Event::Type::TICK: {
             if ( glfwWindowShouldClose( m_window ) ) {
                 return Event { .type = Event::Type::TERMINATE };
+            }
+
+            if ( Input::getInstance() != nullptr ) {
+                switch ( Input::getInstance()->getMouseCursorMode() ) {
+                    case Input::MouseCursorMode::NORMAL:
+                        glfwSetInputMode( m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+                        break;
+
+                    case Input::MouseCursorMode::HIDDEN:
+                        glfwSetInputMode( m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
+                        break;
+
+                    case Input::MouseCursorMode::GRAB:
+                        glfwSetInputMode( m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             m_renderPass->handle( e );
