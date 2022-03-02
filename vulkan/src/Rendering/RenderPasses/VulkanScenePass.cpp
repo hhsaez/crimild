@@ -136,8 +136,10 @@ void ScenePass::handle( const Event &e ) noexcept
             break;
         }
 
-        default:
+        default: {
+            m_simulation->handle( e );
             break;
+        }
     }
 }
 

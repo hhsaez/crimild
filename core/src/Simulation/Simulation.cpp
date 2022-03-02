@@ -31,6 +31,7 @@
 #include "FileSystem.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/Version.hpp"
+#include "Messaging/MessageQueue.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Console/ConsoleCommand.hpp"
 #include "Simulation/Event.hpp"
@@ -123,7 +124,7 @@ void Simulation::start( void ) noexcept
     emscripten_set_main_loop( simulation_step, 0, false );
 #endif
 
-    const auto ret = dispatch( Event { .type = Event::Type::SIMULATION_START } );
+    const auto ret = handle( Event { .type = Event::Type::SIMULATION_START } );
     if ( ret.type == Event::Type::TERMINATE ) {
         return;
     }
@@ -175,11 +176,11 @@ bool Simulation::step( void ) noexcept
 
     MessageQueue::getInstance()->dispatchDeferredMessages();
 
-    if ( dispatch( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
+    if ( handle( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
         return false;
     }
 
-    if ( dispatch( Event { .type = Event::Type::SIMULATION_RENDER } ).type == Event::Type::TERMINATE ) {
+    if ( handle( Event { .type = Event::Type::SIMULATION_RENDER } ).type == Event::Type::TERMINATE ) {
         return false;
     }
 
@@ -233,32 +234,39 @@ void Simulation::stop( void ) noexcept
     emscripten_cancel_main_loop();
 #endif
 
-    dispatch( Event { .type = Event::Type::SIMULATION_STOP } );
+    handle( Event { .type = Event::Type::SIMULATION_STOP } );
     // m_systems.each( []( auto system ) { system->onBeforeStop(); } );
 
     // m_systems.each( []( auto system ) { system->stop(); } );
 }
 
-int Simulation::run( void ) noexcept
+Event Simulation::handle( const Event &e ) noexcept
 {
-    start();
+    _input.handle( e );
 
-#if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
-    bool done = false;
-
-    while ( !done ) {
-        done = !step();
-    }
-#endif
-
-    stop();
-
-    // m_systems.each( []( auto system ) { system->onTerminate(); } );
-
-    CRIMILD_LOG_INFO( "Simulation terminated" );
-
-    return 0;
+    return e;
 }
+
+// int Simulation::run( void ) noexcept
+// {
+//     start();
+
+// #if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
+//     bool done = false;
+
+//     while ( !done ) {
+//         done = !step();
+//     }
+// #endif
+
+//     stop();
+
+//     // m_systems.each( []( auto system ) { system->onTerminate(); } );
+
+//     CRIMILD_LOG_INFO( "Simulation terminated" );
+
+//     return 0;
+// }
 
 // void Simulation::attachSystem( SharedPointer< System > const &system ) noexcept
 // {

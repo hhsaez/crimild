@@ -47,94 +47,6 @@ void FreeLookCameraComponent::start( void )
 {
     _lastMousePos = Vector2::Constants::ZERO;
 
-    registerMessageHandler< crimild::messaging::KeyPressed >(
-        [ & ]( crimild::messaging::KeyPressed const &msg ) {
-            if ( !isEnabled() ) {
-                return;
-            }
-
-            float cameraAxisCoeff = 5.0f;
-
-            if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
-                cameraAxisCoeff = 20.0f;
-            }
-
-            switch ( msg.key ) {
-                case 'A':
-                case CRIMILD_INPUT_KEY_LEFT:
-                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, -cameraAxisCoeff );
-                    break;
-
-                case 'D':
-                case CRIMILD_INPUT_KEY_RIGHT:
-                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, +cameraAxisCoeff );
-                    break;
-
-                case 'W':
-                case CRIMILD_INPUT_KEY_UP:
-                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, +cameraAxisCoeff );
-                    break;
-
-                case 'S':
-                case CRIMILD_INPUT_KEY_DOWN:
-                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, -cameraAxisCoeff );
-                    break;
-
-                case 'Q':
-                    Input::getInstance()->setAxis( "CameraAxisRoll", -cameraAxisCoeff );
-                    break;
-
-                case 'E':
-                    Input::getInstance()->setAxis( "CameraAxisRoll", +cameraAxisCoeff );
-                    break;
-            }
-        } );
-
-    registerMessageHandler< crimild::messaging::KeyReleased >(
-        [ & ]( crimild::messaging::KeyReleased const &msg ) {
-            if ( !isEnabled() ) {
-                return;
-            }
-
-            switch ( msg.key ) {
-                case 'A':
-                case 'D':
-                case CRIMILD_INPUT_KEY_LEFT:
-                case CRIMILD_INPUT_KEY_RIGHT:
-                    Input::getInstance()->setAxis( Input::AXIS_HORIZONTAL, 0.0f );
-                    break;
-
-                case 'W':
-                case CRIMILD_INPUT_KEY_UP:
-                case 'S':
-                case CRIMILD_INPUT_KEY_DOWN:
-                    Input::getInstance()->setAxis( Input::AXIS_VERTICAL, 0.0f );
-                    break;
-
-                case 'Q':
-                case 'E':
-                    Input::getInstance()->setAxis( "CameraAxisRoll", 0.0f );
-                    break;
-            }
-        } );
-
-    registerMessageHandler< crimild::messaging::MouseMotion >(
-        [ & ]( crimild::messaging::MouseMotion const &msg ) {
-            if ( !isEnabled() ) {
-                return;
-            }
-
-            auto currentPos = Vector2 { msg.nx, msg.ny };
-            auto mouseDelta = _initialized ? currentPos - _lastMousePos : Vector2f::Constants::ZERO;
-            _initialized = true;
-            _lastMousePos = currentPos;
-
-            if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
-                m_pitch -= mouseDelta[ 1 ];
-                m_yaw -= mouseDelta[ 0 ];
-            }
-        } );
-
     m_position = location( getNode()->getLocal() );
 
     extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
@@ -148,13 +60,28 @@ void FreeLookCameraComponent::update( const Clock &c )
         Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
     }
 
-    float dSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
-    float rSpeed = getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
-    float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
+    auto speedCoeff = 1.0f;
+    if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
+        speedCoeff = 20.0f;
+    }
 
+    float dSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
+    float rSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
+
+    float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
     m_roll += 0.005f * zSpeed;
 
     auto root = getNode();
+
+    const auto mousePos = Input::getInstance()->getMousePosition();
+    const auto mouseDelta = _initialized ? mousePos - _lastMousePos : Vector2::Constants::ZERO;
+    _initialized = true;
+    _lastMousePos = mousePos;
+
+    if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
+        m_pitch -= 0.005f * mouseDelta[ 1 ];
+        m_yaw -= 0.005f * mouseDelta[ 0 ];
+    }
 
     const auto E = euler( m_yaw, m_pitch, m_roll );
 

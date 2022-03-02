@@ -2,6 +2,7 @@
 
 #include "Concurrency/Async.hpp"
 #include "Foundation/Profiler.hpp"
+#include "Messaging/MessageQueue.hpp"
 #include "Simulation/Console/Console.hpp"
 #include "Simulation/Input.hpp"
 
@@ -110,22 +111,22 @@ void InputSystem::earlyUpdate( void ) noexcept
     glfwGetWindowSize( _window, &windowWidth, &windowHeight );
     glfwGetCursorPos( _window, &x, &y );
 
-    MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
-        ( float ) x,
-        ( float ) y,
-        ( float ) x / ( float ) windowWidth,
-        ( float ) y / ( float ) windowHeight } );
+    // MessageQueue::getInstance()->pushMessage( messaging::MouseMotion {
+    //     ( float ) x,
+    //     ( float ) y,
+    //     ( float ) x / ( float ) windowWidth,
+    //     ( float ) y / ( float ) windowHeight } );
 
-    std::vector< float > axes;
-    auto joyPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
-    if ( joyPresent == 1 ) {
-        int axesCount;
-        const float *axesData = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
-        for ( int i = 0; i < axesCount; i++ ) {
-            axes.push_back( axesData[ i ] );
-        }
-    }
-    Input::getInstance()->resetJoystickAxes( axes );
+    // std::vector< float > axes;
+    // auto joyPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
+    // if ( joyPresent == 1 ) {
+    //     int axesCount;
+    //     const float *axesData = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
+    //     for ( int i = 0; i < axesCount; i++ ) {
+    //         axes.push_back( axesData[ i ] );
+    //     }
+    // }
+    // Input::getInstance()->resetJoystickAxes( axes );
 
     //    crimild::concurrency::sync_frame( std::bind( &InputSystem::update, this ) );
 }

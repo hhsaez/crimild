@@ -61,7 +61,7 @@ namespace crimild {
         Real m_yaw = 0;
         Real m_roll = 0;
 
-        Int32 m_mouseLookButton = CRIMILD_INPUT_MOUSE_BUTTON_RIGHT;
+        Int32 m_mouseLookButton = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
     };
 
 }

@@ -158,6 +158,7 @@ EditorLayer::~EditorLayer( void ) noexcept
 Event EditorLayer::handle( const Event &e ) noexcept
 {
     bool needsUpdate = true;
+    bool overrideEvent = true;
 
     auto &io = ImGui::GetIO();
 
@@ -182,6 +183,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
 
         case Event::Type::KEY_UP: {
             io.KeysDown[ e.keyboard.key ] = false;
+            overrideEvent = false;
             break;
         }
 
@@ -197,6 +199,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
 
         case Event::Type::MOUSE_BUTTON_UP: {
             io.MouseDown[ e.button.button ] = false;
+            overrideEvent = false;
             break;
         }
 
@@ -224,7 +227,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
         updateUI();
     }
 
-    if ( io.WantCaptureMouse || io.WantCaptureKeyboard ) {
+    if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard ) ) {
         return Event {};
     }
 

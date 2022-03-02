@@ -39,6 +39,7 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Settings.hpp"
+#include "Simulation/Event.hpp"
 #include "Systems/System.hpp"
 
 #include <functional>
@@ -79,7 +80,7 @@ namespace crimild {
      */
     class Simulation
         : public NamedObject,
-          public System,
+          public RTTI,
           public DynamicSingleton< Simulation > {
         CRIMILD_IMPLEMENT_RTTI( crimild::Simulation )
 
@@ -89,6 +90,8 @@ namespace crimild {
     public:
         Simulation( void ) = default;
         virtual ~Simulation( void ) = default;
+
+        virtual Event handle( const Event &e ) noexcept;
 
         /**
            \name Hooks
@@ -120,7 +123,7 @@ namespace crimild {
         bool step( void ) noexcept;
         void stop( void ) noexcept;
 
-        int run( void ) noexcept;
+        // int run( void ) noexcept;
 
     private:
         concurrency::JobScheduler _jobScheduler;
