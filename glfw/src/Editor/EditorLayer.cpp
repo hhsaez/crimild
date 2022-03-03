@@ -27,6 +27,7 @@
 
 #include "Editor/EditorLayer.hpp"
 
+#include "Editor/Menus/mainMenu.hpp"
 #include "Foundation/Log.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -393,12 +394,10 @@ void EditorLayer::updateUI( void ) noexcept
 
     ImGui::NewFrame();
 
-    // if ( m_frameCallback != nullptr ) {
-    //     m_frameCallback();
-    // }
+    // static bool open = true;
+    // ImGui::ShowDemoWindow( &open );
 
-    static bool open = true;
-    ImGui::ShowDemoWindow( &open );
+    editor::mainMenu();
 
     ImGui::Render();
 }
