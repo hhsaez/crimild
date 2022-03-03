@@ -49,6 +49,8 @@ namespace crimild {
 
             uint32_t findMemoryType( crimild::UInt32 typeFilter, VkMemoryPropertyFlags properties ) const noexcept;
 
+            VkFormat findSupportedFormat( const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) const noexcept;
+
         private:
             VkPhysicalDevice m_handle = VK_NULL_HANDLE;
             VulkanSurface *m_surface = nullptr;

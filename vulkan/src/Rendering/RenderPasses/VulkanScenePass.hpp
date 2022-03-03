@@ -98,16 +98,16 @@ namespace crimild {
 
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {
-                VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+                std::unordered_map< Material *, VkDescriptorPool > descriptorPools;
                 std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
                 std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
 
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct GeometryObjects {
-                VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+                std::unordered_map< Geometry *, VkDescriptorPool > descriptorPools;
                 std::unordered_map< Geometry *, std::vector< VkDescriptorSet > > descriptorSets;
                 std::unordered_map< Geometry *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_geometryObjects;

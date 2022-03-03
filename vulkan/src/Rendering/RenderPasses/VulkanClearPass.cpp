@@ -82,7 +82,7 @@ void ClearPass::init( void ) noexcept
         .extent = m_renderDevice->getSwapchainExtent(),
     };
 
-    auto attachments = std::array< VkAttachmentDescription, 1 > {
+    auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
             // TODO(hernan): assume we're clearing a swapchain image, but this is not always the case
             .format = m_renderDevice->getSwapchainFormat(),
@@ -96,6 +96,20 @@ void ClearPass::init( void ) noexcept
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
             // Final layout is ready for use in another pass (not presentation, though)
             .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        },
+        // TODO: Depth/Stencil clear should be optional (i.e. occluders)
+        VkAttachmentDescription {
+            .format = m_renderDevice->getDepthStencilFormat(),
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            // Clear color input
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            // Initial layout is undefined and we don't really care
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            // Final layout is ready for use in another pass (not presentation, though)
+            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         }
     };
 
@@ -103,6 +117,13 @@ void ClearPass::init( void ) noexcept
         VkAttachmentReference {
             .attachment = 0,
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        },
+    };
+
+    auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
+        VkAttachmentReference {
+            .attachment = 1,
+            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         },
     };
 
@@ -114,7 +135,7 @@ void ClearPass::init( void ) noexcept
         .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
         .pColorAttachments = colorReferences.data(),
         .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = nullptr,
+        .pDepthStencilAttachment = depthStencilReferences.data(),
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr,
     };
@@ -161,9 +182,9 @@ void ClearPass::init( void ) noexcept
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
 
-        auto attachments = std::array< VkImageView, 1 > {
+        auto attachments = std::array< VkImageView, 2 > {
             imageView,
-            // TODO: add depth image view if available
+            m_renderDevice->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

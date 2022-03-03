@@ -150,3 +150,19 @@ uint32_t PhysicalDevice::findMemoryType( crimild::UInt32 typeFilter, VkMemoryPro
     CRIMILD_LOG_ERROR( "Failed to find suitable memory type" );
     return -1;
 }
+
+VkFormat PhysicalDevice::findSupportedFormat( const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) const noexcept
+{
+    for ( auto format : candidates ) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties( m_handle, format, &props );
+        if ( tiling == VK_IMAGE_TILING_LINEAR && ( props.linearTilingFeatures & features ) == features ) {
+            return format;
+        } else if ( tiling == VK_IMAGE_TILING_OPTIMAL && ( props.optimalTilingFeatures & features ) == features ) {
+            return format;
+        }
+    }
+
+    CRIMILD_LOG_FATAL( "Failed to find supported format!" );
+    exit( EXIT_FAILURE );
+}

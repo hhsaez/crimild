@@ -205,7 +205,7 @@ void ScenePass::init( void ) noexcept
         .extent = m_renderDevice->getSwapchainExtent(),
     };
 
-    auto attachments = std::array< VkAttachmentDescription, 1 > {
+    auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
             .format = m_renderDevice->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -216,6 +216,17 @@ void ScenePass::init( void ) noexcept
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
             .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        },
+        VkAttachmentDescription {
+            .format = m_renderDevice->getDepthStencilFormat(),
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            // Don't clear input. Just load it as it is
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         }
     };
 
@@ -223,6 +234,13 @@ void ScenePass::init( void ) noexcept
         VkAttachmentReference {
             .attachment = 0,
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        },
+    };
+
+    auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
+        VkAttachmentReference {
+            .attachment = 1,
+            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         },
     };
 
@@ -234,7 +252,7 @@ void ScenePass::init( void ) noexcept
         .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
         .pColorAttachments = colorReferences.data(),
         .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = nullptr,
+        .pDepthStencilAttachment = depthStencilReferences.data(),
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr,
     };
@@ -281,9 +299,9 @@ void ScenePass::init( void ) noexcept
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
 
-        auto attachments = std::array< VkImageView, 1 > {
+        auto attachments = std::array< VkImageView, 2 > {
             imageView,
-            // TODO: add depth image view if available
+            m_renderDevice->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -318,8 +336,7 @@ void ScenePass::init( void ) noexcept
             m_geometryObjects.descriptorSetLayout,
         },
         m_program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-        DepthStencilState { .depthTestEnable = false, .stencilTestEnable = false, .depthWriteEnable = false } );
+        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 } );
 }
 
 void ScenePass::clear( void ) noexcept
@@ -456,26 +473,6 @@ void ScenePass::createMaterialObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
-        },
-    };
-
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = uint32_t( poolSizes.size() ),
-        .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPool ) );
-
     const auto bindings = std::array< VkDescriptorSetLayoutBinding, 2 > {
         VkDescriptorSetLayoutBinding {
             .binding = 0,
@@ -519,6 +516,26 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
     };
 
     if ( !m_materialObjects.descriptorSets.contains( material ) ) {
+        const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+            VkDescriptorPoolSize {
+                .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            },
+            VkDescriptorPoolSize {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            },
+        };
+
+        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .poolSizeCount = uint32_t( poolSizes.size() ),
+            .pPoolSizes = poolSizes.data(),
+            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        };
+
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
                 .color = color,
@@ -529,7 +546,7 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_materialObjects.descriptorPool,
+            .descriptorPool = m_materialObjects.descriptorPools[ material ],
             .descriptorSetCount = uint32_t( layouts.size() ),
             .pSetLayouts = layouts.data(),
         };
@@ -604,8 +621,10 @@ void ScenePass::destroyMaterialObjects( void ) noexcept
     vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
     m_materialObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
-    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_materialObjects.descriptorPool, nullptr );
-    m_materialObjects.descriptorPool = VK_NULL_HANDLE;
+    for ( auto &it : m_materialObjects.descriptorPools ) {
+        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+    }
+    m_materialObjects.descriptorPools.clear();
 
     for ( auto &it : m_materialObjects.uniforms ) {
         m_renderDevice->unbind( it.second.get() );
@@ -616,20 +635,6 @@ void ScenePass::destroyMaterialObjects( void ) noexcept
 void ScenePass::createGeometryObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
-
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
-    };
-
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPool ) );
 
     const auto layoutBinding = VkDescriptorSetLayoutBinding {
         .binding = 0,
@@ -651,6 +656,20 @@ void ScenePass::createGeometryObjects( void ) noexcept
 void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
 {
     if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
+        VkDescriptorPoolSize poolSize {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        };
+
+        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .poolSizeCount = 1,
+            .pPoolSizes = &poolSize,
+            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        };
+
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
+
         m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
         m_renderDevice->bind( m_geometryObjects.uniforms[ geometry ].get() );
 
@@ -658,7 +677,7 @@ void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFram
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_geometryObjects.descriptorPool,
+            .descriptorPool = m_geometryObjects.descriptorPools[ geometry ],
             .descriptorSetCount = uint32_t( layouts.size() ),
             .pSetLayouts = layouts.data(),
         };
@@ -713,8 +732,10 @@ void ScenePass::destroyGeometryObjects( void ) noexcept
     vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
     m_geometryObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
-    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_geometryObjects.descriptorPool, nullptr );
-    m_geometryObjects.descriptorPool = VK_NULL_HANDLE;
+    for ( auto &it : m_geometryObjects.descriptorPools ) {
+        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+    }
+    m_geometryObjects.descriptorPools.clear();
 
     for ( auto &it : m_geometryObjects.uniforms ) {
         m_renderDevice->unbind( it.second.get() );

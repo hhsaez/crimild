@@ -60,6 +60,9 @@ namespace crimild {
             [[nodiscard]] inline const std::vector< VkImageView > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
             [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
 
+            [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
+            [[nodiscard]] inline VkImageView getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
+
             [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_imageIndex; }
             [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
 
@@ -96,6 +99,9 @@ namespace crimild {
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;
 
+            void createDepthStencilResources( void ) noexcept;
+            void destroyDepthStencilResources( void ) noexcept;
+
             void createSyncObjects( void ) noexcept;
             void destroySyncObjects( void ) noexcept;
 
@@ -120,6 +126,20 @@ namespace crimild {
             void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
 
             void copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept;
+
+            void createImage(
+                crimild::UInt32 width,
+                crimild::UInt32 height,
+                VkFormat format,
+                VkImageTiling tiling,
+                VkImageUsageFlags usage,
+                VkMemoryPropertyFlags memoryProperties,
+                crimild::UInt32 mipLevels,
+                VkSampleCountFlagBits numSamples,
+                crimild::UInt32 arrayLayers,
+                crimild::UInt32 flags,
+                VkImage &image,
+                VkDeviceMemory &imageMemory ) const noexcept;
 
             void transitionImageLayout(
                 VkImage image,
@@ -171,6 +191,13 @@ namespace crimild {
             std::unordered_map< Size, std::vector< VkImage > > m_images;
             std::unordered_map< Size, std::vector< VkImageView > > m_imageViews;
             std::unordered_map< Size, std::vector< VkSampler > > m_samplers;
+
+            struct DepthStencilResources {
+                VkFormat format = VK_FORMAT_UNDEFINED;
+                VkImage image = VK_NULL_HANDLE;
+                VkDeviceMemory memory = VK_NULL_HANDLE;
+                VkImageView imageView = VK_NULL_HANDLE;
+            } m_depthStencilResources;
         };
 
     }
