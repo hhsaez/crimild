@@ -121,6 +121,7 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     createCommandPool( m_commandPool );
 
     createSwapchain();
+    createDepthStencilResources();
     createSyncObjects();
     createCommandBuffers();
 }
@@ -164,6 +165,7 @@ RenderDevice::~RenderDevice( void ) noexcept
 
     destroyCommandBuffers();
     destroySyncObjects();
+    destroyDepthStencilResources();
     destroySwapchain();
 
     destroyCommandPool( m_commandPool );
@@ -190,9 +192,11 @@ void RenderDevice::handle( const Event &e ) noexcept
 
             destroyCommandBuffers();
             destroySyncObjects();
+            destroyDepthStencilResources();
             destroySwapchain();
 
             createSwapchain();
+            createDepthStencilResources();
             createSyncObjects();
             createCommandBuffers();
             m_imageIndex = 0;
@@ -334,6 +338,53 @@ void RenderDevice::destroySwapchain( void ) noexcept
 
     vkDestroySwapchainKHR( getHandle(), m_swapchain, nullptr );
     m_swapchain = VK_NULL_HANDLE;
+}
+
+void RenderDevice::createDepthStencilResources( void ) noexcept
+{
+    m_depthStencilResources.format = m_physicalDevice->findSupportedFormat(
+        {
+            VK_FORMAT_D32_SFLOAT,
+            VK_FORMAT_D32_SFLOAT_S8_UINT,
+            VK_FORMAT_D24_UNORM_S8_UINT,
+        },
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT );
+
+    createImage(
+        m_swapchainExtent.width,
+        m_swapchainExtent.height,
+        m_depthStencilResources.format,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        1,
+        VK_SAMPLE_COUNT_1_BIT,
+        1,
+        0,
+        m_depthStencilResources.image,
+        m_depthStencilResources.memory );
+
+    utils::createImageView(
+        getHandle(),
+        m_depthStencilResources.image,
+        m_depthStencilResources.format,
+        VK_IMAGE_ASPECT_DEPTH_BIT,
+        &m_depthStencilResources.imageView );
+}
+
+void RenderDevice::destroyDepthStencilResources( void ) noexcept
+{
+    vkDestroyImageView( m_handle, m_depthStencilResources.imageView, nullptr );
+    m_depthStencilResources.imageView = VK_NULL_HANDLE;
+
+    vkDestroyImage( m_handle, m_depthStencilResources.image, nullptr );
+    m_depthStencilResources.image = VK_NULL_HANDLE;
+
+    vkFreeMemory( m_handle, m_depthStencilResources.memory, nullptr );
+    m_depthStencilResources.memory = VK_NULL_HANDLE;
+
+    m_depthStencilResources.format = VK_FORMAT_UNDEFINED;
 }
 
 void RenderDevice::createSyncObjects( void ) noexcept
@@ -1175,6 +1226,69 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
         &barrier );
 
     endSingleTimeCommands( commandBuffer );
+}
+
+void RenderDevice::createImage(
+    crimild::UInt32 width,
+    crimild::UInt32 height,
+    VkFormat format,
+    VkImageTiling tiling,
+    VkImageUsageFlags usage,
+    VkMemoryPropertyFlags memoryProperties,
+    crimild::UInt32 mipLevels,
+    VkSampleCountFlagBits numSamples,
+    crimild::UInt32 arrayLayers,
+    crimild::UInt32 flags,
+    VkImage &image,
+    VkDeviceMemory &imageMemory ) const noexcept
+{
+    auto createInfo = VkImageCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .flags = flags,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent = {
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
+        .mipLevels = mipLevels,
+        .arrayLayers = arrayLayers,
+        .samples = numSamples,
+        .tiling = tiling,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateImage(
+            m_handle,
+            &createInfo,
+            nullptr,
+            &image ) );
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements( m_handle, image, &memRequirements );
+
+    auto allocInfo = VkMemoryAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = m_physicalDevice->findMemoryType( memRequirements.memoryTypeBits, memoryProperties ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateMemory(
+            m_handle,
+            &allocInfo,
+            nullptr,
+            &imageMemory ) );
+
+    CRIMILD_VULKAN_CHECK(
+        vkBindImageMemory(
+            m_handle,
+            image,
+            imageMemory,
+            0 ) );
 }
 
 VkImage RenderDevice::bind( const Image *image ) noexcept
