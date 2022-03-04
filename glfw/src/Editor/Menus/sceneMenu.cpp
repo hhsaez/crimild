@@ -25,22 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/mainMenu.hpp"
-
-#include "Editor/Menus/fileMenu.hpp"
-#include "Editor/Menus/helpMenu.hpp"
 #include "Editor/Menus/sceneMenu.hpp"
-#include "Editor/Menus/viewMenu.hpp"
+
 #include "imgui.h"
 
-void crimild::editor::mainMenu( EditorLayer *editor ) noexcept
+void crimild::editor::sceneMenu( void ) noexcept
 {
-    if ( ImGui::BeginMainMenuBar() ) {
-        fileMenu();
-        sceneMenu();
-        viewMenu( editor );
-        helpMenu();
+    if ( ImGui::BeginMenu( "Scene" ) ) {
+        if ( ImGui::MenuItem( "Add Empty" ) ) {
+            // addEmptyNode();
+        }
 
-        ImGui::EndMainMenuBar();
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Geometry" ) ) {
+            if ( ImGui::MenuItem( "Plane" ) ) {
+                // addGeometry( BoxPrimitive::UNIT_BOX );
+            }
+
+            if ( ImGui::MenuItem( "Box" ) ) {
+                // addGeometry( BoxPrimitive::UNIT_BOX );
+            }
+
+            if ( ImGui::MenuItem( "Sphere" ) ) {
+                // addGeometry( SpherePrimitive::UNIT_SPHERE );
+            }
+
+            ImGui::EndMenu();
+        }
+
+        if ( ImGui::BeginMenu( "Light" ) ) {
+            if ( ImGui::MenuItem( "Directional" ) ) {
+                // TODO
+            }
+            if ( ImGui::MenuItem( "Point" ) ) {
+                // TODO
+            }
+            if ( ImGui::MenuItem( "Spot" ) ) {
+                // TODO
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Add Camera" ) ) {
+            // TODO
+        }
+
+        ImGui::EndMenu();
     }
 }

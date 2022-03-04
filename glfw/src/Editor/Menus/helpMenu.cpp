@@ -57,13 +57,21 @@ void helpAboutDialog( bool &open ) noexcept
 void crimild::editor::helpMenu( void ) noexcept
 {
     static bool showHelpAboutDialog = false;
+    static bool showImGuiDemoWindow = false;
 
     if ( ImGui::BeginMenu( "Help" ) ) {
         if ( ImGui::MenuItem( "About..." ) ) {
             showHelpAboutDialog = true;
         }
+        if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
+            showImGuiDemoWindow = true;
+        }
         ImGui::EndMenu();
     }
 
     helpAboutDialog( showHelpAboutDialog );
+
+    if ( showImGuiDemoWindow ) {
+        ImGui::ShowDemoWindow( &showImGuiDemoWindow );
+    }
 }

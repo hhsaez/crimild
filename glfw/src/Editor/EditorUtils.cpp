@@ -25,7 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include "Editor/EditorUtils.hpp"
+
+#include "Components/FreeLookCameraComponent.hpp"
+#include "Components/MaterialComponent.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Primitives/BoxPrimitive.hpp"
+#include "Primitives/QuadPrimitive.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Sampler.hpp"
+#include "Rendering/Texture.hpp"
+#include "SceneGraph/Camera.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
+#include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
@@ -91,17 +111,3 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
 
     return scene;
 }
-
-class Example : public Simulation {
-public:
-    virtual Event handle( const Event &e ) noexcept override
-    {
-        const auto ret = Simulation::handle( e );
-        if ( ret.type == Event::Type::SIMULATION_START ) {
-            setScene( createDefaultScene() );
-        }
-        return ret;
-    }
-};
-
-CRIMILD_CREATE_SIMULATION( Example, "Playground" );
