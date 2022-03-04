@@ -34,6 +34,7 @@
 
 namespace crimild {
 
+    class Node;
     class UniformBuffer;
     class Texture;
     class VertexBuffer;
@@ -51,6 +52,9 @@ namespace crimild {
 
         Event handle( const Event &e ) noexcept;
         void render( void ) noexcept;
+
+        inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
+        inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
 
     private:
         void updateDisplaySize( void ) const noexcept;
@@ -93,6 +97,8 @@ namespace crimild {
         std::unique_ptr< IndexBuffer > m_indices;
 
         std::unique_ptr< Texture > m_fontAtlas;
+
+        Node *m_selectedNode = nullptr;
     };
 }
 

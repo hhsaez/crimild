@@ -394,10 +394,7 @@ void EditorLayer::updateUI( void ) noexcept
 
     ImGui::NewFrame();
 
-    // static bool open = true;
-    // ImGui::ShowDemoWindow( &open );
-
-    editor::mainMenu();
+    editor::mainMenu( this );
 
     ImGui::Render();
 }

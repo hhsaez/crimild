@@ -30,9 +30,11 @@
 
 namespace crimild {
 
+    class EditorLayer;
+
     namespace editor {
 
-        void mainMenu( void ) noexcept;
+        void mainMenu( EditorLayer *editor ) noexcept;
 
     }
 

@@ -25,22 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/mainMenu.hpp"
+#ifndef CRIMILD_EDITOR_UTILS_
+#define CRIMILD_EDITOR_UTILS_
 
-#include "Editor/Menus/fileMenu.hpp"
-#include "Editor/Menus/helpMenu.hpp"
-#include "Editor/Menus/sceneMenu.hpp"
-#include "Editor/Menus/viewMenu.hpp"
-#include "imgui.h"
+#include "Foundation/Memory.hpp"
 
-void crimild::editor::mainMenu( EditorLayer *editor ) noexcept
-{
-    if ( ImGui::BeginMainMenuBar() ) {
-        fileMenu();
-        sceneMenu();
-        viewMenu( editor );
-        helpMenu();
+namespace crimild {
 
-        ImGui::EndMainMenuBar();
+    class Node;
+
+    namespace editor {
+
+        SharedPointer< Node > createDefaultScene( void ) noexcept;
+
     }
+
 }
+
+#endif
