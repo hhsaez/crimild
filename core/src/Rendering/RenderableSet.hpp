@@ -65,6 +65,12 @@ namespace crimild {
             m_geometries.each( fn );
         }
 
+        template< typename Fn >
+        inline void eachGeometry( Fn fn ) const
+        {
+            m_geometries.each( fn );
+        }
+
     private:
         Camera *m_camera = nullptr;
         Array< Geometry * > m_geometries;

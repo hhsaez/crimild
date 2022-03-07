@@ -122,6 +122,8 @@ namespace crimild {
 
         static std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( const std::vector< VertexLayout > &vertexLayouts ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             std::vector< VkVertexInputBindingDescription > ret;
             for ( const auto &vertexLayout : vertexLayouts ) {
                 ret.push_back(
@@ -144,6 +146,8 @@ namespace crimild {
 
         static std::vector< VkVertexInputAttributeDescription > getVertexInputAttributeDescriptions( RenderDevice *renderDevice, const std::vector< VertexLayout > &vertexLayouts ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             std::vector< VkVertexInputAttributeDescription > attributeDescriptions;
 
             Index binding = 0;
@@ -182,6 +186,8 @@ namespace crimild {
 
         static VkPipelineVertexInputStateCreateInfo createVertexInput( const std::vector< VkVertexInputBindingDescription > &bindingDescriptions, const std::vector< VkVertexInputAttributeDescription > &attributeDescriptions ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             return VkPipelineVertexInputStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
                 .vertexBindingDescriptionCount = static_cast< crimild::UInt32 >( bindingDescriptions.size() ),
@@ -193,6 +199,8 @@ namespace crimild {
 
         static VkPipelineInputAssemblyStateCreateInfo createInputAssemby( Primitive::Type primitiveType ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
             VkBool32 restartEnable = VK_FALSE;
 
@@ -233,6 +241,8 @@ namespace crimild {
 
         VkViewport createViewport( RenderDevice *renderDevice, const ViewportDimensions &viewport ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             auto x = viewport.dimensions.origin.x;
             auto y = viewport.dimensions.origin.y;
             auto w = viewport.dimensions.size.width;
@@ -274,6 +284,8 @@ namespace crimild {
 
         VkRect2D createScissor( RenderDevice *renderDevice, const ViewportDimensions &scissor ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             auto x = scissor.dimensions.origin.x;
             auto y = scissor.dimensions.origin.y;
             auto w = scissor.dimensions.size.width;
@@ -301,6 +313,8 @@ namespace crimild {
 
         VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             return VkPipelineViewportStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
                 .flags = 0,
@@ -313,6 +327,8 @@ namespace crimild {
 
         VkPipelineViewportStateCreateInfo createDynamicViewportState( crimild::Bool hasViewport, crimild::Bool hasScissor ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             return VkPipelineViewportStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
                 .flags = 0,
@@ -325,6 +341,8 @@ namespace crimild {
 
         VkPipelineRasterizationStateCreateInfo createRasterizer( const RasterizationState &rasterizationState ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             static auto getVkPolygonMode = []( auto input ) {
                 switch ( input ) {
                     case PolygonMode::FILL:
@@ -381,6 +399,8 @@ namespace crimild {
 
         VkPipelineMultisampleStateCreateInfo createMultiplesampleState( void ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             // auto physicalDevice = renderDevice->physicalDevice;
             auto msaaSamples = VK_SAMPLE_COUNT_1_BIT; //physicalDevice->msaaSamples;
 
@@ -397,6 +417,8 @@ namespace crimild {
 
         VkPipelineDepthStencilStateCreateInfo createDepthStencilState( const DepthStencilState &state ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             static auto getStencilOp = []( auto in ) {
                 switch ( in ) {
                     case StencilOp::KEEP:
@@ -449,6 +471,8 @@ namespace crimild {
 
         VkPipelineColorBlendAttachmentState createColorBlendAttachment( const ColorBlendState &state ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             static auto getVkBlendFactor = []( auto input ) {
                 switch ( input ) {
                     case BlendFactor::ZERO:
@@ -526,6 +550,8 @@ namespace crimild {
 
         VkPipelineColorBlendStateCreateInfo createColorBlending( const std::vector< VkPipelineColorBlendAttachmentState > &colorBlendAttachments ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             return VkPipelineColorBlendStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
                 .logicOpEnable = VK_FALSE,
@@ -538,6 +564,8 @@ namespace crimild {
 
         std::vector< VkDynamicState > getDynamicStates( const ViewportDimensions &viewport, const ViewportDimensions &scissor ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             std::vector< VkDynamicState > dynamicStates;
 
             if ( viewport.scalingMode == ScalingMode::DYNAMIC ) {
@@ -553,6 +581,8 @@ namespace crimild {
 
         VkPipelineDynamicStateCreateInfo createDynamicState( std::vector< VkDynamicState > &dynamicStates ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             return VkPipelineDynamicStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
                 .flags = 0,
@@ -563,6 +593,8 @@ namespace crimild {
 
         VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts ) noexcept
         {
+            CRIMILD_LOG_TRACE();
+
             auto createInfo = VkPipelineLayoutCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
                 .setLayoutCount = static_cast< crimild::UInt32 >( descriptorSetLayouts.size() ),
@@ -658,25 +690,6 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
             &createInfo,
             nullptr,
             &m_pipeline ) );
-
-#if 0
-    auto renderPass = renderDevice->getBindInfo( renderDevice->getCurrentRenderPass() );
-
-    setBindInfo(
-        graphicsPipeline,
-        {
-            .pipelineHandler = pipelineHander,
-            .pipelineLayout = pipelineLayout,
-        } );
-
-    utils::setObjectName(
-        renderDevice->handler,
-        UInt64( pipelineHander ),
-        VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
-        graphicsPipeline->getName().c_str() );
-
-    return ManagerImpl::bind( graphicsPipeline );
-#endif
 }
 
 vulkan::GraphicsPipeline::~GraphicsPipeline( void ) noexcept

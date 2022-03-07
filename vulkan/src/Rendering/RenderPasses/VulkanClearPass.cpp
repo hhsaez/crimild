@@ -101,11 +101,12 @@ void ClearPass::init( void ) noexcept
         VkAttachmentDescription {
             .format = m_renderDevice->getDepthStencilFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Clear color input
+            // Clear depth input
             .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            // Clear depth input
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE,
             // Initial layout is undefined and we don't really care
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
             // Final layout is ready for use in another pass (not presentation, though)
