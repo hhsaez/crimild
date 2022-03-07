@@ -32,6 +32,7 @@
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 #include "Rendering/RenderPasses/VulkanPresentPass.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/RenderPasses/VulkanSelectionOutlinePass.hpp"
 #include "Rendering/RenderPasses/VulkanShaderPass.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Settings.hpp"
@@ -47,6 +48,7 @@ public:
     ComposePass( vulkan::RenderDevice *renderDevice )
         : m_clear( renderDevice ),
           m_scene( renderDevice ),
+          m_selection( renderDevice ),
           m_shader(
               renderDevice,
               R"(
@@ -92,6 +94,7 @@ public:
         m_clear.render();
         m_shader.render();
         m_scene.render();
+        m_selection.render( m_editor.getSelectedNode() );
         m_editor.render();
         m_present.render();
     }
@@ -104,12 +107,14 @@ public:
         m_shader.handle( ev );
         ev = m_editor.handle( ev );
         m_scene.handle( ev );
+        m_selection.handle( ev );
         m_present.handle( ev );
     }
 
 private:
     vulkan::ClearPass m_clear;
     vulkan::ScenePass m_scene;
+    vulkan::SelectionOutlinePass m_selection;
     vulkan::ShaderPass m_shader;
     EditorLayer m_editor;
     vulkan::PresentPass m_present;

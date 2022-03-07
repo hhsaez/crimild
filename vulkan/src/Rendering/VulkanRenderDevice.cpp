@@ -344,9 +344,12 @@ void RenderDevice::createDepthStencilResources( void ) noexcept
 {
     m_depthStencilResources.format = m_physicalDevice->findSupportedFormat(
         {
-            VK_FORMAT_D32_SFLOAT,
+            // Important: These formats must be sorted by priority
+            // Only the very first one that is found is going to
+            // be used in the end.
             VK_FORMAT_D32_SFLOAT_S8_UINT,
             VK_FORMAT_D24_UNORM_S8_UINT,
+            VK_FORMAT_D32_SFLOAT,
         },
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT );
