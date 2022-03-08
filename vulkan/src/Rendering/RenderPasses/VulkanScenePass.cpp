@@ -40,7 +40,6 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
-#include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
@@ -122,23 +121,22 @@ ScenePass::~ScenePass( void ) noexcept
     clear();
 }
 
-void ScenePass::handle( const Event &e ) noexcept
+Event ScenePass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
-            break;
+            return e;
         }
 
         case Event::Type::TICK: {
             m_simulation->step();
-            break;
+            return e;
         }
 
         default: {
-            m_simulation->handle( e );
-            break;
+            return m_simulation->handle( e );
         }
     }
 }

@@ -30,7 +30,7 @@
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
@@ -42,15 +42,16 @@ namespace crimild {
 
     namespace vulkan {
 
+        class RenderDevice;
         class GraphicsPipeline;
 
-        class ScenePass : public RenderPass {
+        class ScenePass {
         public:
             explicit ScenePass( RenderDevice *renderDevice ) noexcept;
             virtual ~ScenePass( void ) noexcept;
 
-            virtual void handle( const Event & ) noexcept override;
-            virtual void render( void ) noexcept override;
+            Event handle( const Event & ) noexcept;
+            void render( void ) noexcept;
 
         private:
             void init( void ) noexcept;

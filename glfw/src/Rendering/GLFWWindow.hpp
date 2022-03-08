@@ -30,6 +30,7 @@
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Mathematics/Clock.hpp"
+#include "Rendering/Extent.hpp"
 #include "Rendering/GLFWVulkanSurface.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
@@ -87,8 +88,11 @@ namespace crimild {
             std::unique_ptr< vulkan::RenderPass > m_renderPass;
 
             Event m_lastResizeEvent = Event {};
+            Event m_lastMouseButtonDownEvent = Event {};
 
             Clock m_clock;
+
+            Extent2D m_extent;
         };
 
     }

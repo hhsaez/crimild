@@ -217,6 +217,11 @@ Event EditorLayer::handle( const Event &e ) noexcept
             break;
         }
 
+        case Event::Type::NODE_SELECTED: {
+            setSelectedNode( e.node );
+            break;
+        }
+
         default: {
             // Unhandled events won't trigger a redraw
             needsUpdate = false;
