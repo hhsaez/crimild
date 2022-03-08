@@ -106,7 +106,11 @@ public:
         m_clear.handle( ev );
         m_shader.handle( ev );
         ev = m_editor.handle( ev );
-        m_scene.handle( ev );
+        ev = m_scene.handle( ev );
+        if ( ev.type == Event::Type::NODE_SELECTED ) {
+            // TODO: ScenePass should be a child of EditorLayer
+            m_editor.handle( ev );
+        }
         m_selection.handle( ev );
         m_present.handle( ev );
     }
@@ -471,6 +475,8 @@ bool Window::createWindow( void )
         exit( 1 );
     }
 
+    m_extent = Extent2D { .width = Real( width ), .height = Real( height ) };
+
     // Set the user pointer to this object so it can be used for different events
     glfwSetWindowUserPointer( m_window, this );
 
@@ -479,6 +485,7 @@ bool Window::createWindow( void )
         []( GLFWwindow *windowHandle, int width, int height ) {
             auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
             if ( window != nullptr ) {
+                window->m_extent = Extent2D { .width = Real( width ), .height = Real( height ) };
                 window->handle(
                     Event {
                         .type = Event::Type::WINDOW_RESIZE,
@@ -594,19 +601,50 @@ void Window::registerEventCallbacks( void ) noexcept
                 double x, y;
                 glfwGetCursorPos( window->m_window, &x, &y );
 
-                window->handle(
-                    Event {
-                        .type = action == GLFW_PRESS ? Event::Type::MOUSE_BUTTON_DOWN : Event::Type::MOUSE_BUTTON_UP,
-                        .timestamp = window->getTimestamp(),
-                        .button = MouseButton {
-                            .button = UInt8( button ),
-                            .state = action == GLFW_PRESS ? MouseButton::State::PRESSED : MouseButton::State::RELEASED,
-                            .pos = Vector2i {
-                                Int( std::floor( x ) ),
-                                Int( std::floor( y ) ),
-                            },
+                const auto ts = window->getTimestamp();
+
+                const auto e = Event {
+                    .type = action == GLFW_PRESS ? Event::Type::MOUSE_BUTTON_DOWN : Event::Type::MOUSE_BUTTON_UP,
+                    .timestamp = ts,
+                    .button = MouseButton {
+                        .button = UInt8( button ),
+                        .state = action == GLFW_PRESS ? MouseButton::State::PRESSED : MouseButton::State::RELEASED,
+                        .pos = Vector2i {
+                            Int( std::floor( x ) ),
+                            Int( std::floor( y ) ),
                         },
-                    } );
+                        .npos = Vector2f {
+                            Real( x / window->m_extent.width ),
+                            Real( y / window->m_extent.height ),
+                        },
+                    },
+                };
+
+                window->handle( e );
+
+                if ( action == GLFW_PRESS ) {
+                    window->m_lastMouseButtonDownEvent = e;
+                } else if ( action == GLFW_RELEASE ) {
+                    if ( e.timestamp - window->m_lastMouseButtonDownEvent.timestamp < 500 ) {
+                        window->handle(
+                            Event {
+                                .type = Event::Type::MOUSE_CLICK,
+                                .timestamp = ts,
+                                .button = MouseButton {
+                                    .button = UInt8( button ),
+                                    .state = MouseButton::State::RELEASED,
+                                    .pos = Vector2i {
+                                        Int( std::floor( x ) ),
+                                        Int( std::floor( y ) ),
+                                    },
+                                    .npos = Vector2f {
+                                        Real( x / window->m_extent.width ),
+                                        Real( y / window->m_extent.height ),
+                                    },
+                                },
+                            } );
+                    }
+                }
             }
         } );
 
@@ -628,6 +666,10 @@ void Window::registerEventCallbacks( void ) noexcept
                             .pos = Vector2i {
                                 Int( std::floor( xpos ) ),
                                 Int( std::floor( ypos ) ),
+                            },
+                            .npos = Vector2f {
+                                Real( xpos / window->m_extent.width ),
+                                Real( ypos / window->m_extent.height ),
                             },
                         },
                     } );

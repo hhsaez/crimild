@@ -42,6 +42,7 @@
 #include "Simulation/Systems/UISystem.hpp"
 #include "Simulation/Systems/UpdateSystem.hpp"
 #include "Visitors/FetchCameras.hpp"
+#include "Visitors/Picking.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateComponents.hpp"
 #include "Visitors/UpdateRenderState.hpp"
@@ -243,6 +244,27 @@ void Simulation::stop( void ) noexcept
 Event Simulation::handle( const Event &e ) noexcept
 {
     _input.handle( e );
+
+    if ( e.type == Event::Type::MOUSE_CLICK ) {
+        if ( auto scene = getScene() ) {
+            if ( auto camera = Camera::getMainCamera() ) {
+                auto x = e.button.npos.x;
+                auto y = e.button.npos.y;
+                Ray3 R;
+                if ( camera->getPickRay( x, y, R ) ) {
+                    Picking::Results res;
+                    scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
+                    if ( res.hasResults() ) {
+                        auto node = res.getBestCandidate();
+                        return Event {
+                            .type = Event::Type::NODE_SELECTED,
+                            .node = node,
+                        };
+                    }
+                }
+            }
+        }
+    }
 
     return e;
 }

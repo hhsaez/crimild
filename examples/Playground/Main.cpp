@@ -91,7 +91,7 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
                 Point3 { 10, 10, 10 },
                 Point3 { 0, 0, 0 },
                 Vector3::Constants::UP ) );
-        camera->attachComponent< FreeLookCameraComponent >();
+        camera->attachComponent< FreeLookCameraComponent >()->setMouseLookButton( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT );
         return camera;
     }() );
 

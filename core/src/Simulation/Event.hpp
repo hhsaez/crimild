@@ -34,6 +34,8 @@
 
 namespace crimild {
 
+    class Node;
+
     /**
      * \brief Keyboard button event information
      */
@@ -59,10 +61,16 @@ namespace crimild {
         UInt8 button = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
         State state = State::PRESSED;
         Vector2i pos = Vector2i { 0, 0 };
+
+        // Normalized mouse position in range [0, 1]
+        Vector2f npos = Vector2f { 0, 0 };
     };
 
     struct MouseMotion {
         Vector2i pos = Vector2i { 0, 0 };
+
+        // Normalized mouse position in range [0, 1]
+        Vector2f npos = Vector2f { 0, 0 };
     };
 
     /**
@@ -101,9 +109,12 @@ namespace crimild {
             MOUSE_MOTION,
             MOUSE_BUTTON_DOWN,
             MOUSE_BUTTON_UP,
+            MOUSE_CLICK,
             MOUSE_WHEEL,
 
             TEXT,
+
+            NODE_SELECTED,
 
             SIMULATION_START,
             SIMULATION_UPDATE,
@@ -121,6 +132,7 @@ namespace crimild {
             MouseMotion motion;
             MouseWheel wheel;
             TextInput text;
+            Node *node;
         };
     };
 
