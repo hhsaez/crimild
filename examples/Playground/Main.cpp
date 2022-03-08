@@ -70,6 +70,15 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
 
     scene->attachNode(
         [ & ] {
+            auto group = crimild::alloc< Group >();
+            auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.2, 0.3, 0.5 } );
+            box->setLocal( translation( 3, 1, 3 ) );
+            group->attachNode( box );
+            return group;
+        }() );
+
+    scene->attachNode(
+        [ & ] {
             auto plane = geometry( crimild::alloc< QuadPrimitive >(), ColorRGB { 0.75f, 0.75f, 0.75f } );
             plane->setLocal( rotationX( -numbers::PI_DIV_2 ) * scale( 10.0f ) );
             return plane;

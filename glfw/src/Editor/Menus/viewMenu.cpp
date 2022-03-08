@@ -69,63 +69,82 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
     ImGui::End();
 }
 
+class SceneTreeBuilder : public NodeVisitor {
+public:
+    explicit SceneTreeBuilder( EditorLayer *editor )
+        : m_editor( editor )
+    {
+        // Makes sure the root node is always expanded.
+        ImGui::SetNextItemOpen( true, ImGuiCond_Once );
+    }
+
+    ~SceneTreeBuilder( void ) = default;
+
+    void visitNode( Node *node ) override
+    {
+        visit(
+            node,
+            [] {},
+            true );
+    }
+
+    void visitGroup( Group *group ) override
+    {
+        visit(
+            group,
+            [ & ] { NodeVisitor::visitGroup( group ); },
+            group->getNodeCount() == 0 );
+    }
+
+    void visitCSGNode( CSGNode *csg ) override
+    {
+        visit(
+            csg,
+            [ & ] { NodeVisitor::visitCSGNode( csg ); },
+            csg->getLeft() == nullptr && csg->getRight() == nullptr );
+    }
+
+private:
+    std::string getNodeName( Node *node ) noexcept
+    {
+        return !node->getName().empty()
+                   ? node->getName()
+                   : node->getClassName();
+    }
+
+    template< typename NodeType, typename Fn >
+    void visit( NodeType *node, Fn fn, bool isLeaf )
+    {
+        auto flags = m_baseFlags;
+        if ( m_editor->getSelectedNode() == node ) {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+
+        if ( isLeaf ) {
+            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+        }
+
+        ImGui::PushID( node->getUniqueID() );
+        if ( ImGui::TreeNodeEx( getNodeName( node ).c_str(), flags ) ) {
+            if ( ImGui::IsItemClicked() ) {
+                m_editor->setSelectedNode( node );
+            }
+            fn();
+            if ( !isLeaf ) {
+                ImGui::TreePop();
+            }
+        }
+        ImGui::PopID();
+    }
+
+private:
+    EditorLayer *m_editor = nullptr;
+    Size m_ptrId = 0;
+    ImGuiTreeNodeFlags m_baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+};
+
 void sceneHierarchyPanel( bool &open, EditorLayer *editor )
 {
-    class SceneTreeBuilder : public NodeVisitor {
-    public:
-        explicit SceneTreeBuilder( EditorLayer *editor )
-            : m_editor( editor )
-        {
-        }
-
-        ~SceneTreeBuilder( void ) = default;
-
-        void visitNode( Node *node ) override
-        {
-            if ( ImGui::TreeNodeEx( getNodeName( node ).c_str() ) ) {
-                if ( ImGui::IsItemClicked() ) {
-                    m_editor->setSelectedNode( node );
-                }
-                ImGui::TreePop();
-            }
-        }
-
-        void visitGroup( Group *group ) override
-        {
-            if ( ImGui::TreeNode( getNodeName( group ).c_str() ) ) {
-                if ( ImGui::IsItemClicked() ) {
-                    m_editor->setSelectedNode( group );
-                }
-                NodeVisitor::visitGroup( group );
-                ImGui::TreePop();
-            }
-        }
-
-        void visitCSGNode( CSGNode *csg ) override
-        {
-            if ( ImGui::TreeNode( getNodeName( csg ).c_str() ) ) {
-                if ( ImGui::IsItemClicked() ) {
-                    m_editor->setSelectedNode( csg );
-                }
-                NodeVisitor::visitCSGNode( csg );
-                ImGui::TreePop();
-            }
-        }
-
-    private:
-        std::string getNodeName( Node *node ) noexcept
-        {
-            return !node->getName().empty()
-                       ? node->getName()
-                       : node->getClassName();
-        }
-
-    private:
-        EditorLayer *m_editor = nullptr;
-        Size m_ptrId = 0;
-        ImGuiTreeNodeFlags m_baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-    };
-
     if ( !open ) {
         return;
     }
