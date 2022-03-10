@@ -28,7 +28,10 @@
 #include "Editor/EditorLayer.hpp"
 
 #include "Editor/Menus/mainMenu.hpp"
+#include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Log.hpp"
+#include "Mathematics/Matrix4_inverse.hpp"
+#include "Mathematics/Matrix4_transpose.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -38,7 +41,7 @@
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
-#include "imgui.h"
+#include "Visitors/UpdateWorldState.hpp"
 
 #include <array>
 
@@ -47,6 +50,56 @@
 
 using namespace crimild;
 using namespace crimild::vulkan;
+
+void drawGizmo( Node *selectedNode )
+{
+    if ( selectedNode == nullptr ) {
+        return;
+    }
+
+    static ImGuizmo::OPERATION gizmoOperation( ImGuizmo::TRANSLATE );
+    static ImGuizmo::MODE gizmoMode( ImGuizmo::LOCAL );
+    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_W ) )
+        gizmoOperation = ImGuizmo::TRANSLATE;
+    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_E ) )
+        gizmoOperation = ImGuizmo::ROTATE;
+    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_R ) ) // r Key
+        gizmoOperation = ImGuizmo::SCALE;
+
+    ImGuizmo::BeginFrame();
+
+    ImGuizmo::SetOrthographic( false );
+    // TODO: Set this to nullptr if we are drawing inside a window
+    // Otherwise, use ImGui::GetForegroundDrawList() to draw in the whole screen.
+    ImGuizmo::SetDrawlist( ImGui::GetForegroundDrawList() );
+    ImGuiIO &io = ImGui::GetIO();
+    ImGuizmo::SetRect( 0, 0, io.DisplaySize.x / io.DisplayFramebufferScale.x, io.DisplaySize.y / io.DisplayFramebufferScale.y );
+
+    const auto [ view, proj ] = [] {
+        if ( auto camera = Camera::getMainCamera() ) {
+            return std::make_pair( camera->getViewMatrix(), camera->getProjectionMatrix() );
+        }
+        return std::make_pair( Matrix4::Constants::IDENTITY, Matrix4::Constants::IDENTITY );
+    }();
+
+    // TODO: Snapping
+    bool snap = false;
+    // TODO: Snapping values should depend on the mode (i.e. meters, degrees, etc.)
+    const auto snapValues = Vector3 { 1, 1, 1 };
+
+    auto res = selectedNode->getLocal().mat;
+    ImGuizmo::Manipulate(
+        static_cast< const float * >( &view.c0.x ),
+        static_cast< const float * >( &proj.c0.x ),
+        gizmoOperation,
+        gizmoMode,
+        static_cast< float * >( &res.c0.x ),
+        nullptr,
+        snap ? static_cast< const float * >( &snapValues.x ) : nullptr );
+
+    selectedNode->setLocal( Transformation { res, inverse( res ) } );
+    selectedNode->perform( UpdateWorldState() );
+}
 
 EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
@@ -233,7 +286,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
         updateUI();
     }
 
-    if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard ) ) {
+    if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard || ImGuizmo::IsOver() || ImGuizmo::IsUsing() ) ) {
         return Event {};
     }
 
@@ -399,6 +452,8 @@ void EditorLayer::updateUI( void ) noexcept
 
     ImGui::NewFrame();
 
+    drawGizmo( getSelectedNode() );
+
     editor::mainMenu( this );
 
     ImGui::Render();
@@ -412,7 +467,7 @@ void EditorLayer::updateDisplaySize( void ) const noexcept
     auto framebufferScale = Settings::getInstance()->get< float >( "video.framebufferScale", 1 );
     auto displaySizeScale = 2.0f / framebufferScale;
     io.DisplaySize = ImVec2( width * displaySizeScale, height * displaySizeScale );
-    io.DisplayFramebufferScale = ImVec2( 1, 1 );
+    io.DisplayFramebufferScale = ImVec2( displaySizeScale, displaySizeScale );
 }
 
 void EditorLayer::init( void ) noexcept

@@ -29,6 +29,10 @@
 #define CRIMILD_CORE_SCENE_GRAPH_NODE_WITH_TRANSFORMATION_
 
 #include "Mathematics/Transformation.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Node.hpp"
 
 namespace crimild {
@@ -54,6 +58,12 @@ namespace crimild {
     static SharedPointer< Node > withRotationY( SharedPointer< Node > const &node, Radians angle ) noexcept
     {
         node->setLocal( rotationY( angle ) * node->getLocal() );
+        return node;
+    }
+
+    static SharedPointer< Node > withRotationZ( SharedPointer< Node > const &node, Radians angle ) noexcept
+    {
+        node->setLocal( rotationZ( angle ) * node->getLocal() );
         return node;
     }
 

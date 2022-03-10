@@ -23,7 +23,10 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
    	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
 	  	 	${CRIMILD_INCLUDE_DIRECTORIES}
 	  	 	{CRIMILD_SOURCE_DIR}/imgui/src
-			${CRIMILD_SOURCE_DIR}/third-party/imgui )
+			${CRIMILD_SOURCE_DIR}/third-party/imgui
+			${CRIMILD_SOURCE_DIR}/third-party/imgui/examples
+			${CRIMILD_SOURCE_DIR}/third-party/imguizmo
+			${CRIMILD_SOURCE_DIR}/third-party/imguizmo/examples )
 	ENDIF ()
 
 	IF ( CRIMILD_ENABLE_SCRIPTING )

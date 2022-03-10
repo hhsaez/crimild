@@ -22,3 +22,6 @@
 	path = third-party/googletest
 	url = https://github.com/google/googletest.git
 	ignore = dirty
+[submodule "third-party/imguizmo"]
+	path = third-party/imguizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

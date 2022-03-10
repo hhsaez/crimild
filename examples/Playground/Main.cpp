@@ -64,7 +64,7 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
     scene->attachNode(
         [ & ] {
             auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.5, 0.3, 0.2 } );
-            box->setLocal( translation( 0, 1, 0 ) );
+            box->setLocal( translation( 5, 1, 0 ) );
             return box;
         }() );
 
@@ -72,7 +72,7 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
         [ & ] {
             auto group = crimild::alloc< Group >();
             auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.2, 0.3, 0.5 } );
-            box->setLocal( translation( 3, 1, 3 ) );
+            box->setLocal( translation( -5, 1, 5 ) );
             group->attachNode( box );
             return group;
         }() );
