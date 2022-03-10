@@ -58,7 +58,7 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
             ImGui::Text( "ID: %llu", node->getUniqueID() );
 
             Point3 pos = location( node->getLocal() );
-            if ( ImGui::InputFloat3( "Position", &pos.x, 6, 0 ) ) {
+            if ( ImGui::InputFloat3( "Position", &pos.x ) ) {
                 node->setLocal( translation( pos.x, pos.y, pos.z ) );
                 node->perform( UpdateWorldState() );
             }
