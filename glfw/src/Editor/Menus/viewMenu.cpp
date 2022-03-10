@@ -28,9 +28,12 @@
 #include "Editor/Menus/viewMenu.hpp"
 
 #include "Editor/EditorLayer.hpp"
+#include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
+#include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/get_ptr.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -38,7 +41,6 @@
 #include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/UpdateWorldState.hpp"
-#include "imgui.h"
 
 using namespace crimild;
 
@@ -57,9 +59,19 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
             ImGui::Text( "Class: %s", node->getClassName() );
             ImGui::Text( "ID: %llu", node->getUniqueID() );
 
-            Point3 pos = location( node->getLocal() );
-            if ( ImGui::InputFloat3( "Position", &pos.x ) ) {
-                node->setLocal( translation( pos.x, pos.y, pos.z ) );
+            Point3 nodeTranslation;
+            Vector3 nodeRotation;
+            Vector3 nodeScale;
+            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
+
+            bool changed = false;
+            changed = changed || ImGui::InputFloat3( "Tr", get_ptr( nodeTranslation ) );
+            changed = changed || ImGui::InputFloat3( "Rt", get_ptr( nodeRotation ) );
+            changed = changed || ImGui::InputFloat3( "Sc", get_ptr( nodeScale ) );
+            if ( changed ) {
+                Matrix4 mat;
+                ImGuizmo::RecomposeMatrixFromComponents( get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ), get_ptr( mat ) );
+                node->setLocal( Transformation { mat, inverse( mat ) } );
                 node->perform( UpdateWorldState() );
             }
         } else {
