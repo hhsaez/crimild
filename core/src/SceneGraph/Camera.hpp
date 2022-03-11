@@ -92,6 +92,14 @@ namespace crimild {
         float computeAspect( void ) const;
 
     private:
+        void updateProjectionMatrix( void );
+
+    private:
+        Real m_fov = 45.0f;
+        Real m_aspect = 4.0f / 3.0f;
+        Real m_near = 0.1f;
+        Real m_far = 1000.0f;
+
         Frustum m_frustum;
         Rectf _viewport;
         Matrix4f _projectionMatrix;
