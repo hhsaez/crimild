@@ -27,6 +27,7 @@
 
 #include "Editor/Menus/viewMenu.hpp"
 
+#include "Components/MaterialComponent.hpp"
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
@@ -34,6 +35,8 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/get_ptr.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/UnlitMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -43,6 +46,41 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
+
+void materialComponentDetails( MaterialComponent *materials )
+{
+    auto material = materials->first();
+    if ( material == nullptr ) {
+        return;
+    }
+
+    ImGui::Text( "Material (%s)", material->getClassName() );
+
+    if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+        const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
+        auto albedo = bsdf->getAlbedo();
+        ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
+        bsdf->setAlbedo( albedo );
+    } else {
+        const auto unlit = static_cast< UnlitMaterial * >( material );
+        auto color = rgb( unlit->getColor() );
+        ImGui::ColorEdit3( "Color", get_ptr( color ) );
+        // return std::make_tuple( unlit->getColor(), unlit->getTexture() );
+    }
+}
+
+void nodeComponentsSection( Node *node )
+{
+    ImGui::SetNextItemOpen( true );
+    if ( ImGui::CollapsingHeader( "Components", nullptr ) ) {
+        node->forEachComponent(
+            []( NodeComponent *cmp ) {
+                if ( cmp->getClassName() == MaterialComponent::__CLASS_NAME ) {
+                    materialComponentDetails( static_cast< MaterialComponent * >( cmp ) );
+                }
+            } );
+    }
+}
 
 void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
 {
@@ -74,6 +112,8 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
                 node->setLocal( Transformation { mat, inverse( mat ) } );
                 node->perform( UpdateWorldState() );
             }
+
+            nodeComponentsSection( node );
         } else {
             ImGui::Text( "No node selected" );
         }

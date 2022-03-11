@@ -592,6 +592,9 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         }
     }
 
+    // TODO: This should be handled in a different way. What if texture changes?
+    // Also, update only when material changes.
+    m_materialObjects.uniforms[ material ]->setValue( color );
     m_renderDevice->update( m_materialObjects.uniforms[ material ].get() );
 
     vkCmdBindDescriptorSets(

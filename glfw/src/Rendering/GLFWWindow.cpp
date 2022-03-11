@@ -404,12 +404,12 @@ bool Window::createWindow( void )
 {
     auto settings = Settings::getInstance();
 
-    auto width = settings->get< crimild::Int32 >( "video.width", 1024 );
-    auto height = settings->get< crimild::Int32 >( "video.height", 768 );
+    auto width = settings->get< crimild::Int32 >( "video.width", 1920 );
+    auto height = settings->get< crimild::Int32 >( "video.height", 1080 );
     auto fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
 
     if ( settings->hasKey( "video.resolution" ) ) {
-        auto resolution = settings->get< std::string >( "video.resolution", "hd" );
+        auto resolution = settings->get< std::string >( "video.resolution", "1080p" );
         if ( resolution == "480p" ) {
             width = 640;
             height = 480;
