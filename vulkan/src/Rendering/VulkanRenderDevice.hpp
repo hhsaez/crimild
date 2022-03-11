@@ -95,8 +95,12 @@ namespace crimild {
             VkSampler bind( const Sampler *sampler ) noexcept;
             void unbind( const Sampler *sampler ) noexcept;
 
+            inline void setObjectName( VkImageView handle, const char *name ) noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
+            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept;
+
         private:
-            void createSwapchain( void ) noexcept;
+            void
+            createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;
 
             void createDepthStencilResources( void ) noexcept;
