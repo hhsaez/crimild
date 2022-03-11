@@ -28,7 +28,6 @@
 #include "Editor/Menus/sceneMenu.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Concurrency/Async.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Transformation_constants.hpp"
@@ -47,15 +46,12 @@ using namespace crimild;
 
 static void addToScene( SharedPointer< Node > const &node ) noexcept
 {
-    crimild::concurrency::sync_frame(
-        [ node ] {
-            // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
-            // always be the case. Maybe I should check the class type
-            auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
-            node->perform( UpdateWorldState() );
-            node->perform( StartComponents() );
-            scene->attachNode( node );
-        } );
+    // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
+    // always be the case. Maybe I should check the class type
+    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    node->perform( UpdateWorldState() );
+    node->perform( StartComponents() );
+    scene->attachNode( node );
 }
 
 static void addGeometry( SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept

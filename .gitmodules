@@ -25,3 +25,6 @@
 [submodule "third-party/imguizmo"]
 	path = third-party/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "third-party/ImGuiFileDialog"]
+	path = third-party/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
