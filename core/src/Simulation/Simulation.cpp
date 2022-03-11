@@ -245,25 +245,52 @@ Event Simulation::handle( const Event &e ) noexcept
 {
     _input.handle( e );
 
-    if ( e.type == Event::Type::MOUSE_CLICK ) {
-        if ( auto scene = getScene() ) {
-            if ( auto camera = Camera::getMainCamera() ) {
-                auto x = e.button.npos.x;
-                auto y = e.button.npos.y;
-                Ray3 R;
-                if ( camera->getPickRay( x, y, R ) ) {
-                    Picking::Results res;
-                    scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
-                    if ( res.hasResults() ) {
-                        auto node = res.getBestCandidate();
-                        return Event {
-                            .type = Event::Type::NODE_SELECTED,
-                            .node = node,
-                        };
+    switch ( e.type ) {
+        case Event::Type::WINDOW_RESIZE: {
+            Real aspect = e.extent.width / e.extent.height;
+            if ( getMainCamera() != nullptr ) {
+                getMainCamera()->setAspectRatio( aspect );
+            }
+            break;
+        }
+
+        case Event::Type::TICK: {
+            if ( !step() ) {
+                return Event { .type = Event::Type::TERMINATE };
+            }
+            break;
+        }
+
+        case Event::Type::MOUSE_CLICK: {
+            if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
+                if ( auto scene = getScene() ) {
+                    if ( auto camera = Camera::getMainCamera() ) {
+                        auto x = e.button.npos.x;
+                        auto y = e.button.npos.y;
+                        Ray3 R;
+                        if ( camera->getPickRay( x, y, R ) ) {
+                            Picking::Results res;
+                            scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
+                            if ( res.hasResults() ) {
+                                auto node = res.getBestCandidate();
+                                return Event {
+                                    .type = Event::Type::NODE_SELECTED,
+                                    .node = node,
+                                };
+                            }
+                        }
                     }
                 }
+                return Event {
+                    .type = Event::Type::NODE_SELECTED,
+                    .node = nullptr,
+                };
             }
+            break;
         }
+
+        default:
+            break;
     }
 
     return e;
