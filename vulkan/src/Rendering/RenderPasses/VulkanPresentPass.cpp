@@ -65,9 +65,18 @@ void PresentPass::render( void ) noexcept
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
 
-    beginRenderPass( commandBuffer, currentFrameIndex );
+    auto renderPassInfo = VkRenderPassBeginInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        .renderPass = m_renderPass,
+        .framebuffer = m_framebuffers[ currentFrameIndex ],
+        .renderArea = m_renderArea,
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
+    };
 
-    endRenderPass( commandBuffer );
+    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+    vkCmdEndRenderPass( commandBuffer );
 }
 
 void PresentPass::init( void ) noexcept
@@ -94,7 +103,7 @@ void PresentPass::init( void ) noexcept
             .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             // Final layout for presentation
             .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        }
+        },
     };
 
     auto colorReferences = std::array< VkAttachmentReference, 1 > {
@@ -155,13 +164,14 @@ void PresentPass::init( void ) noexcept
             nullptr,
             &m_renderPass ) );
 
+    m_renderDevice->setObjectName( UInt64( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, "PresentPass: RenderPass" );
+
     m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
             imageView,
-            // TODO: add depth image view if available
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -181,6 +191,8 @@ void PresentPass::init( void ) noexcept
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
+
+        m_renderDevice->setObjectName( UInt64( m_framebuffers[ i ] ), VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, "Framebuffer" );
     }
 }
 
@@ -197,23 +209,4 @@ void PresentPass::clear( void ) noexcept
 
     vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
-}
-
-void PresentPass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
-{
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
-
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-}
-
-void PresentPass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
-{
-    vkCmdEndRenderPass( commandBuffer );
 }

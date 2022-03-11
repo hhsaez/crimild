@@ -46,8 +46,6 @@ namespace crimild {
         private:
             void init( void ) noexcept;
             void clear( void ) noexcept;
-            void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
-            void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
 
         private:
             vulkan::RenderDevice *m_renderDevice = nullptr;

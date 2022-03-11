@@ -316,6 +316,9 @@ void RenderDevice::createSwapchain( void ) noexcept
 
     for ( uint8_t i = 0; i < imageCount; ++i ) {
         utils::createImageView( getHandle(), m_swapchainImages[ i ], VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, &m_swapchainImageViews[ i ] );
+        setObjectName(
+            m_swapchainImageViews[ i ],
+            StringUtils::toString( "RenderDevice::swapchainImageView[", uint32_t( i ), "]" ).c_str() );
     }
 
     CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", m_swapchainExtent.width, "x", m_swapchainExtent.height );
@@ -1640,4 +1643,24 @@ void RenderDevice::unbind( const Sampler *sampler ) noexcept
     }
 
     m_samplers.erase( id );
+}
+
+void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept
+{
+#if defined( CRIMILD_PLATFORM_OSX )
+    static auto vkDebugMarkerSetObjectName = ( PFN_vkDebugMarkerSetObjectNameEXT ) vkGetDeviceProcAddr( m_handle, "vkDebugMarkerSetObjectNameEXT" );
+    if ( vkDebugMarkerSetObjectName == VK_NULL_HANDLE ) {
+        CRIMILD_LOG_ERROR( "Cannot get procedure address for vkDebugMarkerSetObjectName" );
+        return;
+    }
+
+    VkDebugMarkerObjectNameInfoEXT nameInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT,
+        .objectType = objectType,
+        .object = object,
+        .pObjectName = name,
+    };
+
+    vkDebugMarkerSetObjectName( m_handle, &nameInfo );
+#endif
 }
