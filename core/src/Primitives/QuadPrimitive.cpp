@@ -32,6 +32,8 @@
 
 using namespace crimild;
 
+SharedPointer< Primitive > QuadPrimitive::UNIT_QUAD = crimild::alloc< QuadPrimitive >( QuadPrimitive::Params {} );
+
 QuadPrimitive::QuadPrimitive( void ) noexcept
     : QuadPrimitive( Params {} )
 {
