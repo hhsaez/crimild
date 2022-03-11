@@ -39,22 +39,36 @@
 #include "Mathematics/normalize.hpp"
 #include "Mathematics/perspective.hpp"
 #include "Mathematics/trigonometry.hpp"
+#include "Simulation/Settings.hpp"
 
 using namespace crimild;
 
 Camera *Camera::_mainCamera = nullptr;
 
 Camera::Camera( void )
-    : Camera( 45.0, 4.0f / 3.0f, 0.1f, 1000.0f )
+    : Camera(
+        45.0,
+        [] {
+            auto settings = Settings::getInstance();
+            auto w = settings->get< Real >( "video.width", 1024 );
+            auto h = settings->get< Real >( "video.height", 768 );
+            return w / h;
+        }(),
+        0.1f,
+        1000.0f )
 {
 }
 
 Camera::Camera( float fov, float aspect, float near, float far )
-    : m_frustum( fov, aspect, near, far ),
+    : m_fov( fov ),
+      m_aspect( aspect ),
+      m_near( near ),
+      m_far( far ),
+      m_frustum( fov, aspect, near, far ),
       _viewport { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
       _viewMatrixIsCurrent( false )
 {
-    _projectionMatrix = perspective( fov, aspect, near, far );
+    updateProjectionMatrix();
 
     if ( getMainCamera() == nullptr ) {
         // Set itself as the main camera if there isn't one already set
@@ -88,6 +102,11 @@ const Matrix4f &Camera::getViewMatrix( void )
     return getWorld().invMat;
 }
 
+void Camera::updateProjectionMatrix( void )
+{
+    _projectionMatrix = perspective( m_fov, m_aspect, m_near, m_far );
+}
+
 bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
 {
     const float x = 2.0f * portX - 1.0f;
@@ -109,16 +128,13 @@ bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
 
 float Camera::computeAspect( void ) const
 {
-    //return getFrustum().computeAspect();
-    return 1;
+    return m_aspect;
 }
 
 void Camera::setAspectRatio( float aspect )
 {
-    /*
-    auto &f = getFrustum();
-    setFrustum( Frustumf( -aspect * f.getUMax(), aspect * f.getUMax(), f.getUMin(), f.getUMax(), f.getDMin(), f.getDMax() ) );
-    */
+    m_aspect = aspect;
+    updateProjectionMatrix();
 }
 
 void Camera::computeCullingPlanes( void )
