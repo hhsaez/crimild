@@ -27,28 +27,76 @@
 
 #include "Editor/Menus/sceneMenu.hpp"
 
-#include "imgui.h"
+#include "Components/MaterialComponent.hpp"
+#include "Concurrency/Async.hpp"
+#include "Foundation/ImGUIUtils.hpp"
+#include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/Transformation_constants.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Primitives/BoxPrimitive.hpp"
+#include "Primitives/QuadPrimitive.hpp"
+#include "Primitives/SpherePrimitive.hpp"
+#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
+
+using namespace crimild;
+
+static void addToScene( SharedPointer< Node > const &node ) noexcept
+{
+    crimild::concurrency::sync_frame(
+        [ node ] {
+            // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
+            // always be the case. Maybe I should check the class type
+            auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+            node->perform( UpdateWorldState() );
+            node->perform( StartComponents() );
+            scene->attachNode( node );
+        } );
+}
+
+static void addGeometry( SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept
+{
+    auto geometry = crimild::alloc< Geometry >();
+    geometry->attachPrimitive( primitive );
+    geometry->attachComponent< MaterialComponent >(
+        [] {
+            auto material = crimild::alloc< materials::PrincipledBSDF >();
+            material->setAlbedo( ColorRGB { 0.8, 0.8, 0.8 } );
+            return material;
+        }() );
+    geometry->setLocal( local );
+    addToScene( geometry );
+}
+
+static void addEmptyNode( void ) noexcept
+{
+    addToScene( crimild::alloc< Group >() );
+}
 
 void crimild::editor::sceneMenu( void ) noexcept
 {
     if ( ImGui::BeginMenu( "Scene" ) ) {
         if ( ImGui::MenuItem( "Add Empty" ) ) {
-            // addEmptyNode();
+            addEmptyNode();
         }
 
         ImGui::Separator();
 
         if ( ImGui::BeginMenu( "Geometry" ) ) {
             if ( ImGui::MenuItem( "Plane" ) ) {
-                // addGeometry( BoxPrimitive::UNIT_BOX );
+                addGeometry( QuadPrimitive::UNIT_QUAD, rotationX( -numbers::PI_DIV_2 ) );
             }
 
             if ( ImGui::MenuItem( "Box" ) ) {
-                // addGeometry( BoxPrimitive::UNIT_BOX );
+                addGeometry( BoxPrimitive::UNIT_BOX );
             }
 
             if ( ImGui::MenuItem( "Sphere" ) ) {
-                // addGeometry( SpherePrimitive::UNIT_SPHERE );
+                addGeometry( SpherePrimitive::UNIT_SPHERE );
             }
 
             ImGui::EndMenu();
