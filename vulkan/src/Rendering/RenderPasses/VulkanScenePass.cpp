@@ -127,18 +127,14 @@ Event ScenePass::handle( const Event &e ) noexcept
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
-            return e;
+            break;
         }
 
-        case Event::Type::TICK: {
-            m_simulation->step();
-            return e;
-        }
-
-        default: {
-            return m_simulation->handle( e );
-        }
+        default:
+            break;
     }
+
+    return m_simulation->handle( e );
 }
 
 void ScenePass::render( void ) noexcept

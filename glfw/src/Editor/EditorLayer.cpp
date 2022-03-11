@@ -212,7 +212,7 @@ EditorLayer::~EditorLayer( void ) noexcept
 Event EditorLayer::handle( const Event &e ) noexcept
 {
     bool needsUpdate = true;
-    bool overrideEvent = true;
+    bool overrideEvent = false;
 
     auto &io = ImGui::GetIO();
 
@@ -232,34 +232,36 @@ Event EditorLayer::handle( const Event &e ) noexcept
             io.KeyAlt = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_ALT ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_ALT ];
             io.KeySuper = io.KeysDown[ CRIMILD_INPUT_KEY_LEFT_SUPER ] || io.KeysDown[ CRIMILD_INPUT_KEY_RIGHT_SUPER ];
 
+            overrideEvent = true;
             break;
         }
 
         case Event::Type::KEY_UP: {
             io.KeysDown[ e.keyboard.key ] = false;
-            overrideEvent = false;
             break;
         }
 
         case Event::Type::MOUSE_MOTION: {
             io.MousePos = ImVec2( e.motion.pos.x, e.motion.pos.y );
+            overrideEvent = true;
             break;
         }
 
         case Event::Type::MOUSE_BUTTON_DOWN: {
             io.MouseDown[ e.button.button ] = true;
+            overrideEvent = true;
             break;
         }
 
         case Event::Type::MOUSE_BUTTON_UP: {
             io.MouseDown[ e.button.button ] = false;
-            overrideEvent = false;
             break;
         }
 
         case Event::Type::MOUSE_WHEEL: {
             io.MouseWheelH += e.wheel.x;
             io.MouseWheel += e.wheel.y;
+            overrideEvent = true;
             break;
         }
 
@@ -267,17 +269,20 @@ Event EditorLayer::handle( const Event &e ) noexcept
             if ( e.text.codepoint > 0 && e.text.codepoint < 0x10000 ) {
                 io.AddInputCharacter( e.text.codepoint );
             }
+            overrideEvent = true;
             break;
         }
 
         case Event::Type::NODE_SELECTED: {
             setSelectedNode( e.node );
+            overrideEvent = true;
             break;
         }
 
         default: {
             // Unhandled events won't trigger a redraw
             needsUpdate = false;
+            overrideEvent = true;
             break;
         }
     }
