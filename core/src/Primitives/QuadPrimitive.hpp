@@ -79,6 +79,9 @@ namespace crimild {
      */
     class QuadPrimitive : public Primitive {
     public:
+        static SharedPointer< Primitive > UNIT_QUAD;
+
+    public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             Vector2f size = Vector2f::Constants::ONE;
