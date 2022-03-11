@@ -38,6 +38,10 @@ namespace crimild {
 
         SharedPointer< Node > createDefaultScene( void ) noexcept;
 
+        bool addToScene( SharedPointer< Node > const &node ) noexcept;
+
+        bool importFile( std::string filePath ) noexcept;
+
     }
 
 }

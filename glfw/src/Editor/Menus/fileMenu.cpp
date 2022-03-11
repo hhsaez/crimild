@@ -27,8 +27,11 @@
 
 #include "Editor/Menus/fileMenu.hpp"
 
+#include "Editor/EditorUtils.hpp"
+#include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
-#include "imgui.h"
+
+#include <iostream>
 
 void crimild::editor::fileMenu( void ) noexcept
 {
@@ -48,6 +51,12 @@ void crimild::editor::fileMenu( void ) noexcept
 
         ImGui::Separator();
 
+        if ( ImGui::MenuItem( "Import..." ) ) {
+            ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Choose File", ".obj,.gltf", "." );
+        }
+
+        ImGui::Separator();
+
         if ( ImGui::MenuItem( "Quit" ) ) {
             // crimild::concurrency::sync_frame( [] {
             // Simulation::getInstance()->stop();
@@ -55,5 +64,14 @@ void crimild::editor::fileMenu( void ) noexcept
         }
 
         ImGui::EndMenu();
+    }
+
+    if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey" ) ) {
+        if ( ImGuiFileDialog::Instance()->IsOk() ) {
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+            crimild::editor::importFile( filePathName );
+        }
+        ImGuiFileDialog::Instance()->Close();
     }
 }

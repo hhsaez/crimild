@@ -103,6 +103,8 @@ using namespace crimild;
 
 void OBJLoader::FileProcessor::readFile( std::string fileName )
 {
+    CRIMILD_LOG_DEBUG( "Read file ", fileName );
+
     std::ifstream input;
     input.open( fileName.c_str() );
     if ( !input.is_open() ) {

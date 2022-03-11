@@ -29,6 +29,8 @@
 
 #include "Components/FreeLookCameraComponent.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Importers/SceneImporter.hpp"
+#include "Loaders/OBJLoader.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
@@ -44,12 +46,13 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
-SharedPointer< Node > createDefaultScene( void ) noexcept
+SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
 {
     auto scene = crimild::alloc< Group >();
 
@@ -110,4 +113,53 @@ SharedPointer< Node > createDefaultScene( void ) noexcept
     scene->perform( UpdateWorldState() );
 
     return scene;
+}
+
+bool crimild::editor::addToScene( SharedPointer< Node > const &node ) noexcept
+{
+    // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
+    // always be the case. Maybe I should check the class type
+    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    node->perform( UpdateWorldState() );
+    node->perform( StartComponents() );
+    scene->attachNode( node );
+    return true;
+}
+
+bool crimild::editor::importFile( std::string fileName ) noexcept
+{
+    auto path = FilePath {
+        .path = fileName,
+        .pathType = FilePath::PathType::ABSOLUTE,
+        .fileType = FilePath::FileType::DOCUMENT,
+    };
+
+    SharedPointer< Node > model;
+    if ( path.getExtension() == "crimild" ) {
+        // TODO
+        CRIMILD_LOG_ERROR( "Crimild binary file not supported" );
+        return false;
+    } else if ( path.getExtension() == "obj" ) {
+        OBJLoader loader( path.getAbsolutePath() );
+        loader.setVerbose( false );
+        model = loader.load();
+    } else {
+#ifdef CRIMILD_ENABLE_IMPORT
+        import::SceneImporter importer;
+        model = importer.import( path.getAbsolutePath() );
+#else
+        CRIMILD_LOG_ERROR( "Unsupported file type" );
+        return false;
+#endif
+    }
+
+    // OBJLoader loader( fileName ); //path.getAbsolutePath() );
+    // loader.setVerbose( true );
+    // auto model = loader.load();
+    if ( model == nullptr ) {
+        CRIMILD_LOG_ERROR( "Cannot import file ", fileName );
+        return false;
+    }
+
+    return addToScene( model );
 }

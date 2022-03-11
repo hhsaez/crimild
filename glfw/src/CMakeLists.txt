@@ -19,6 +19,17 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
 	  	 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
 		 glfw )
 
+	IF ( CRIMILD_ENABLE_IMPORT )
+		 SET( CRIMILD_LIBRARY_LINK_LIBRARIES
+			 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
+			 crimild_import )
+		 SET( CRIMILD_INCLUDE_DIRECTORIES
+			 ${CRIMILD_INCLUDE_DIRECTORIES}
+			 ${CRIMILD_SOURCE_DIR}/import/src
+			 ${Assimp_SOURCE_DIR}/include
+			 ${Assimp_SOURCE_DIR}/code )
+	 ENDIF ( CRIMILD_ENABLE_IMPORT )
+
 	IF ( CRIMILD_ENABLE_IMGUI )
    	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
 	  	 	${CRIMILD_INCLUDE_DIRECTORIES}
@@ -26,7 +37,8 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
 			${CRIMILD_SOURCE_DIR}/third-party/imgui
 			${CRIMILD_SOURCE_DIR}/third-party/imgui/examples
 			${CRIMILD_SOURCE_DIR}/third-party/imguizmo
-			${CRIMILD_SOURCE_DIR}/third-party/imguizmo/examples )
+			${CRIMILD_SOURCE_DIR}/third-party/imguizmo/examples
+			${CRIMILD_SOURCE_DIR}/third-party/ImGuiFileDialog )
 	ENDIF ()
 
 	IF ( CRIMILD_ENABLE_SCRIPTING )

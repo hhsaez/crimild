@@ -33,6 +33,7 @@
 // clang-format off
 #include "imgui.h"
 #include "ImGuizmo.h"
+#include "ImGuiFileDialog.h"
 // clang-format on
 
 #endif
