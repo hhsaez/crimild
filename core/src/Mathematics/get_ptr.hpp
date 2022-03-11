@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_GET_PTR_
 #define CRIMILD_MATHEMATICS_GET_PTR_
 
+#include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Matrix3.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Tuple2.hpp"
@@ -94,6 +96,30 @@ namespace crimild {
     inline constexpr T *get_ptr( Matrix4Impl< T > &m ) noexcept
     {
         return static_cast< T * >( &m.c0.x );
+    }
+
+    template< typename T >
+    inline constexpr const T *get_ptr( const ColorRGBImpl< T > &c )
+    {
+        return static_cast< const T * >( &c.r );
+    }
+
+    template< typename T >
+    inline constexpr T *get_ptr( ColorRGBImpl< T > &c )
+    {
+        return static_cast< T * >( &c.r );
+    }
+
+    template< typename T >
+    inline constexpr const T *get_ptr( const ColorRGBAImpl< T > &c )
+    {
+        return static_cast< const T * >( &c.r );
+    }
+
+    template< typename T >
+    inline constexpr T *get_ptr( ColorRGBAImpl< T > &c )
+    {
+        return static_cast< T * >( &c.r );
     }
 
 }
