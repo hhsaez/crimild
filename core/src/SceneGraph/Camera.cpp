@@ -49,10 +49,13 @@ Camera::Camera( void )
     : Camera(
         45.0,
         [] {
-            auto settings = Settings::getInstance();
-            auto w = settings->get< Real >( "video.width", 1024 );
-            auto h = settings->get< Real >( "video.height", 768 );
-            return w / h;
+            if ( auto settings = Settings::getInstance() ) {
+                auto w = settings->get< Real >( "video.width", 1024 );
+                auto h = settings->get< Real >( "video.height", 768 );
+                return w / h;
+            } else {
+                return Real( 4.0 / 3.0 );
+            }
         }(),
         0.1f,
         1000.0f )
