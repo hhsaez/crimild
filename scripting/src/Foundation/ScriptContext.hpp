@@ -160,7 +160,7 @@ namespace crimild {
             void push( void ) { }
 
             template< typename T, typename... Ts >
-            void push( T &&value, Ts &&...values )
+            void push( T &&value, Ts &&... values )
             {
                 LuaUtils::push( _state, std::forward< T >( value ) );
                 push( std::forward< Ts >( values )... );
@@ -197,7 +197,7 @@ namespace crimild {
 
         public:
             template< typename... Ret, typename... Args >
-            typename LuaUtils::PopTrait< sizeof...( Ret ), Ret... >::Type invoke( const std::string &name, Args &&...args )
+            typename LuaUtils::PopTrait< sizeof...( Ret ), Ret... >::Type invoke( const std::string &name, Args &&... args )
             {
                 lua_getglobal( _state, name.c_str() );
 
@@ -289,13 +289,32 @@ namespace crimild {
         }
 
         template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, ColorRGB &result )
+        {
+            return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                result[ index ] = v;
+            } );
+        }
+
+        template<>
+        inline bool ScriptEvaluator::getPropValue( const std::string &name, ColorRGBA &result )
+        {
+            return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
+                float v;
+                eval.getPropValue< float >( v );
+                result[ index ] = v;
+            } );
+        }
+
+        template<>
         inline bool ScriptEvaluator::getPropValue( const std::string &name, Vector2f &result )
         {
             return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
                 float v;
                 eval.getPropValue< float >( v );
-                //result[ index ] = v;
-                assert( false );
+                result[ index ] = v;
             } );
         }
 
@@ -305,8 +324,7 @@ namespace crimild {
             return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
                 float v;
                 eval.getPropValue< float >( v );
-                //result[ index ] = v;
-                assert( false );
+                result[ index ] = v;
             } );
         }
 
@@ -316,8 +334,7 @@ namespace crimild {
             return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
                 float v;
                 eval.getPropValue< float >( v );
-                //result[ index ] = v;
-                assert( false );
+                result[ index ] = v;
             } );
         }
 
@@ -325,10 +342,9 @@ namespace crimild {
         inline bool ScriptEvaluator::getPropValue( const std::string &name, Matrix3f &result )
         {
             return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
-                float v;
-                eval.getPropValue< float >( v );
-                //result[ index ] = v;
-                assert( false );
+                Vector3 v;
+                eval.getPropValue( v );
+                result[ index ] = v;
             } );
         }
 
@@ -336,10 +352,9 @@ namespace crimild {
         inline bool ScriptEvaluator::getPropValue( const std::string &name, Matrix4f &result )
         {
             return foreach ( name, [ &result ]( ScriptEvaluator &eval, int index ) {
-                float v;
-                eval.getPropValue< float >( v );
-                //result[ index ] = v;
-                assert( false );
+                Vector4 v;
+                eval.getPropValue( v );
+                result[ index ] = v;
             } );
         }
 
@@ -387,7 +402,7 @@ namespace crimild {
             getContext()->setFailOnParse( true );
             */
 
-            assert( false );
+            // assert( false );
 
             return true;
         }

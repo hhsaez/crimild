@@ -74,10 +74,10 @@ namespace crimild {
 
 using namespace crimild;
 
-#if 0
-
 TEST( LuaCodableTest, codingEncoding )
 {
+#if 0
+
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
 
     auto n = crimild::alloc< crimild::CodableNode >( "a scene" );
@@ -110,6 +110,5 @@ TEST( LuaCodableTest, codingEncoding )
     EXPECT_EQ( n->getChildren()[ 0 ]->getName(), n2->getChildren()[ 0 ]->getName() );
     EXPECT_EQ( n->getChildren()[ 1 ]->getName(), n2->getChildren()[ 1 ]->getName() );
     EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );
-}
-
 #endif
+}
