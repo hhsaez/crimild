@@ -114,6 +114,12 @@ IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
 	    )
     ENDIF ()
 
+	SET(
+		CRIMILD_INCLUDE_DIRECTORIES
+		${CRIMILD_INCLUDE_DIRECTORIES}
+		${CRIMILD_SOURCE_DIR}/third-party/json/include
+	)
+
 ENDIF ()
 
 INCLUDE( ModuleBuildLibrary )
