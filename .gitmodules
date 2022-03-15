@@ -28,3 +28,6 @@
 [submodule "third-party/ImGuiFileDialog"]
 	path = third-party/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "third-party/json"]
+	path = third-party/json
+	url = https://github.com/nlohmann/json.git

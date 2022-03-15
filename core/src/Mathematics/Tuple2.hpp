@@ -50,6 +50,17 @@ namespace crimild {
                     return NAN;
             }
         }
+
+        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return x;
+                case 1:
+                default:
+                    return y;
+            }
+        }
     };
 
     using Tuple2 = Tuple2Impl< Real >;
