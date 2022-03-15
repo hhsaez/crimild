@@ -38,7 +38,7 @@ namespace crimild {
         T y;
         T z;
 
-        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
+        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
         {
             switch ( index ) {
                 case 0:
@@ -51,7 +51,7 @@ namespace crimild {
             }
         }
 
-        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
         {
             switch ( index ) {
                 case 0:
@@ -59,9 +59,8 @@ namespace crimild {
                 case 1:
                     return y;
                 case 2:
-                    return z;
                 default:
-                    return 0;
+                    return z;
             }
         }
     };

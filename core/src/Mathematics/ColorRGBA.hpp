@@ -54,9 +54,23 @@ namespace crimild {
                 case 2:
                     return b;
                 case 3:
-                    return a;
                 default:
-                    return NAN;
+                    return a;
+            }
+        }
+
+        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
+        {
+            switch ( index ) {
+                case 0:
+                    return r;
+                case 1:
+                    return g;
+                case 2:
+                    return b;
+                case 3:
+                default:
+                    return a;
             }
         }
 
