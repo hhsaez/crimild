@@ -54,6 +54,8 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeValue( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Real32 value ) override { return encodeValue( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Real64 value ) override { return encodeValue( key, value ); }
+            virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.r ) ); }
+            virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.r ) ); }
             virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }
