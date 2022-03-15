@@ -25,54 +25,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/fileMenu.hpp"
-
 #include "Coding/JSONEncoder.hpp"
-#include "Editor/EditorUtils.hpp"
-#include "Foundation/ImGUIUtils.hpp"
-#include "Foundation/Version.hpp"
 
-#include <iostream>
+#include "SceneGraph/Group.hpp"
 
-void crimild::editor::fileMenu( void ) noexcept
+#include <gtest/gtest.h>
+
+using namespace crimild;
+using namespace nlohmann;
+
+TEST( JSONEncoder, encodeVector3 )
 {
-    if ( ImGui::BeginMenu( "File" ) ) {
-        if ( ImGui::MenuItem( "New Scene" ) ) {
-            // TODO
-        }
-        if ( ImGui::MenuItem( "Open Scene..." ) ) {
-            // TODO
-        }
-        if ( ImGui::BeginMenu( "Open Recent" ) ) {
-            if ( ImGui::MenuItem( "TODO" ) ) {
-                // TODO
-            }
-            ImGui::EndMenu();
-        }
+    coding::JSONEncoder encoder;
+    encoder.encode( "v", Vector3 { 1, 2, 3 } );
+    const auto res = encoder.getResult();
+    const auto expected = json { { "v", { 1.0, 2.0, 3.0 } } };
+    EXPECT_EQ( expected, res );
+}
 
-        ImGui::Separator();
+TEST( JSONEncoder, encodeGroup )
+{
+    auto group = crimild::alloc< Group >();
+    group->setName( "a group" );
 
-        if ( ImGui::MenuItem( "Import..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Choose File", ".obj,.gltf", "." );
-        }
+    const auto expected = json {
+        { "__CLASS_NAME", "crimild::Group" },
+        { "__id", group->getUniqueID() },
+        { "layer", 0 },
+        { "name", "a group" },
+        { "worldIsCurrent", false },
+    };
 
-        ImGui::Separator();
+    coding::JSONEncoder encoder;
+    encoder.encode( group );
+    const auto res = encoder.getResult();
+    EXPECT_EQ( expected, res );
+}
 
-        if ( ImGui::MenuItem( "Quit" ) ) {
-            // crimild::concurrency::sync_frame( [] {
-            // Simulation::getInstance()->stop();
-            // } );
-        }
+TEST( JSONEncoder, encodes_group_with_child_nodes )
+{
+    auto group = crimild::alloc< Group >();
+    group->setName( "a group" );
+    group->attachNode( crimild::alloc< Group >( "a child" ) );
 
-        ImGui::EndMenu();
-    }
+    const auto expected = json {
+        { "__CLASS_NAME", "crimild::Group" },
+        { "__id", group->getUniqueID() },
+        { "layer", 0 },
+        { "name", "a group" },
+        { "worldIsCurrent", false },
+        { "nodes", {} },
+    };
 
-    if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey" ) ) {
-        if ( ImGuiFileDialog::Instance()->IsOk() ) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            crimild::editor::importFile( filePathName );
-        }
-        ImGuiFileDialog::Instance()->Close();
-    }
+    coding::JSONEncoder encoder;
+    encoder.encode( group );
+    const auto res = encoder.getResult();
+    EXPECT_EQ( expected, res );
 }

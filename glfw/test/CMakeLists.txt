@@ -1,0 +1,8 @@
+SET ( CRIMILD_INCLUDE_DIRECTORIES
+	${CRIMILD_INCLUDE_DIRECTORIES}
+	${CRIMILD_SOURCE_DIR}/core/src
+    ${CRIMILD_SOURCE_DIR}/third-party/json/include
+)
+
+INCLUDE( ModuleBuildLibraryTest )
+
