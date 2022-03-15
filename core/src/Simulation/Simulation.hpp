@@ -192,15 +192,15 @@ namespace crimild {
 
 }
 
-#define CRIMILD_CREATE_SIMULATION( SimulationType, SimulationName )       \
-    std::unique_ptr< Simulation > Simulation::create( void ) noexcept     \
-    {                                                                     \
-        auto sim = std::make_unique< SimulationType >();                  \
-        if ( auto settings = Settings::getInstance() ) {                  \
-            settings->set( Settings::SETTINGS_APP_NAME, SimulationName ); \
-        }                                                                 \
-        sim->setName( SimulationName );                                   \
-        return sim;                                                       \
+#define CRIMILD_CREATE_SIMULATION( SimulationType, SimulationName )                     \
+    std::unique_ptr< crimild::Simulation > crimild::Simulation::create( void ) noexcept \
+    {                                                                                   \
+        auto sim = std::make_unique< SimulationType >();                                \
+        if ( auto settings = crimild::Settings::getInstance() ) {                       \
+            settings->set( crimild::Settings::SETTINGS_APP_NAME, SimulationName );      \
+        }                                                                               \
+        sim->setName( SimulationName );                                                 \
+        return sim;                                                                     \
     }
 
 #endif
