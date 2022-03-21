@@ -45,6 +45,17 @@ namespace crimild {
         void setTexture( SharedPointer< Texture > const &texture ) noexcept;
         const Texture *getTexture( void ) const noexcept;
         Texture *getTexture( void ) noexcept;
+
+        /**
+            \name Coding support
+        */
+        //@{
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }

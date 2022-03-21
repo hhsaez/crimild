@@ -41,6 +41,8 @@ namespace crimild {
             Based on Disney/Unreal PBR system
         */
         class PrincipledBSDF : public Material {
+            CRIMILD_IMPLEMENT_RTTI( crimild::materials::PrincipledBSDF )
+
         public:
             struct Props {
                 alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
@@ -99,6 +101,17 @@ namespace crimild {
 
             Props &getProps( void ) noexcept;
             const Props &getProps( void ) const noexcept;
+
+            /**
+                \name Coding support
+            */
+            //@{
+
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
         };
 
     }

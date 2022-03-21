@@ -37,9 +37,14 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Matrix3.hpp"
+#include "Mathematics/Point2.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Quaternion.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector2.hpp"
+#include "Rendering/Extent.hpp"
+#include "Rendering/Format.hpp"
+#include "Rendering/VertexAttribute.hpp"
 
 #include <sstream>
 
@@ -49,12 +54,18 @@ namespace crimild {
 
         class Codable;
 
+        /**
+         * \brief Base class for encoders
+         *
+         * \todo Encoders should get const versions of objects to be encoded.
+         * \todo Should not retain pointers either.
+         */
         class Encoder : public SharedObject {
         protected:
-            Encoder( void );
+            Encoder( void ) = default;
 
         public:
-            virtual ~Encoder( void );
+            virtual ~Encoder( void ) = default;
 
             const Version &getVersion( void ) const { return _version; }
             void setVersion( const Version &version ) { _version = version; }
@@ -65,6 +76,7 @@ namespace crimild {
         public:
             // objects
             virtual crimild::Bool encode( SharedPointer< Codable > const &codable ) = 0;
+            crimild::Bool encode( std::string key, Codable *codable );
             virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
 
             // values
@@ -80,6 +92,8 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Real64 value ) = 0;
             virtual crimild::Bool encode( std::string key, const ColorRGB & ) = 0;
             virtual crimild::Bool encode( std::string key, const ColorRGBA & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Point2f & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Point3f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Vector2f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Vector3f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Vector4f & ) = 0;
@@ -87,6 +101,21 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Quaternion & ) = 0;
             virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Format & ) = 0;
+
+            virtual crimild::Bool encode( std::string key, const VertexAttribute &attr )
+            {
+                encode( key + "_name", Int32( attr.name ) );
+                encode( key + "_format", attr.format );
+                encode( key + "_offset", attr.offset );
+            }
+
+            virtual crimild::Bool encode( std::string key, const Extent3D &extent )
+            {
+                encode( key + "_width", extent.width );
+                encode( key + "_height", extent.height );
+                encode( key + "_depth", extent.depth );
+            }
 
             virtual crimild::Bool encode( std::string key, ByteArray & ) = 0;
             virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > & ) = 0;
@@ -114,6 +143,12 @@ namespace crimild {
                 return true;
             }
 
+            template< typename EnumType >
+            crimild::Bool encodeEnum( std::string key, const EnumType &value )
+            {
+                encode( key, Int32( value ) );
+            }
+
         protected:
             virtual void encodeArrayBegin( std::string key, crimild::Size count ) = 0;
             virtual std::string beginEncodingArrayElement( std::string key, crimild::Size index ) = 0;
@@ -123,7 +158,6 @@ namespace crimild {
         public:
             virtual std::string dump( void );
         };
-
     }
 
 }

@@ -27,20 +27,21 @@
 
 #include "Rendering/VertexBuffer.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+
 using namespace crimild;
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
     : VertexBuffer(
         vertexLayout,
-        [&] {
+        [ & ] {
             return crimild::alloc< BufferView >(
                 BufferView::Target::VERTEX,
                 crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
                 0,
-                vertexLayout.getSize()
-            );
-        }()
-    )
+                vertexLayout.getSize() );
+        }() )
 {
     // no-op
 }
@@ -50,17 +51,15 @@ VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, SharedPointer< Buf
       m_bufferView( bufferView )
 {
     assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
-    
+
     vertexLayout.eachAttribute(
-        [&]( const auto &attrib ) {
+        [ & ]( const auto &attrib ) {
             auto accessor = crimild::alloc< BufferAccessor >(
                 bufferView,
                 attrib.offset,
-                utils::getFormatSize( attrib.format )
-            );
+                utils::getFormatSize( attrib.format ) );
             m_accessors[ attrib.name ] = accessor;
-        }
-    );
+        } );
 }
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
@@ -69,3 +68,39 @@ VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, BufferView *buffer
     // no-op
 }
 
+void VertexBuffer::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    Array< VertexAttribute > attribs;
+    m_vertexLayout.eachAttribute(
+        [ & ]( auto attr ) {
+            attribs.add( attr );
+        } );
+
+    encoder.encode( "vertexLayoutAttribs", attribs );
+
+    encoder.encode( "bufferView", m_bufferView );
+    // encoder.encode( "accessor", m_accessors );
+}
+
+void VertexBuffer::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    Array< VertexAttribute > attribs;
+    decoder.decode( "vertexLayoutAttribs", attribs );
+    m_vertexLayout = VertexLayout( attribs );
+
+    decoder.decode( "bufferView", m_bufferView );
+
+    // Re-creating accessors seems simpler than actually encoding them.
+    m_vertexLayout.eachAttribute(
+        [ & ]( const auto &attrib ) {
+            auto accessor = crimild::alloc< BufferAccessor >(
+                m_bufferView,
+                attrib.offset,
+                utils::getFormatSize( attrib.format ) );
+            m_accessors[ attrib.name ] = accessor;
+        } );
+}

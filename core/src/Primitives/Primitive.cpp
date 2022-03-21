@@ -74,7 +74,7 @@ void Primitive::encode( coding::Encoder &encoder )
 
     encoder.encode( "primitiveType", type );
     encoder.encode( "vertexData", m_vertexData );
-    encoder.encode( "indexData", m_indices );
+    encoder.encode( "indices", m_indices );
 }
 
 void Primitive::decode( coding::Decoder &decoder )

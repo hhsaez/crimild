@@ -186,22 +186,19 @@ void Texture::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "target", _target );
-    encoder.encode( "images", _images );
+    encoder.encode( "name", getName() );
+    encoder.encode( "imageView", imageView );
+    encoder.encode( "sampler", sampler );
 }
 
 void Texture::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    _images.clear();
+    std::string name;
+    decoder.decode( "name", name );
+    setName( name );
 
-    decoder.decode( "target", _target );
-    decoder.decode( "images", _images );
-
-    SharedPointer< Image > image;
-    decoder.decode( "image", image );
-    if ( image != nullptr ) {
-        _images.add( image );
-    }
+    decoder.decode( "imageView", imageView );
+    decoder.decode( "sampler", sampler );
 }

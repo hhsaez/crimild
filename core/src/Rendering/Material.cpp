@@ -49,28 +49,28 @@ void Material::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "ambient", _ambient );
-    encoder.encode( "diffuse", _diffuse );
-    encoder.encode( "specular", _specular );
-    encoder.encode( "emissive", _emissive );
-    encoder.encode( "shininess", _shininess );
-    encoder.encode( "colorMap", _colorMap );
-    encoder.encode( "normalMap", _normalMap );
-    encoder.encode( "specularMap", _specularMap );
-    encoder.encode( "emissiveMap", _emissiveMap );
+    // encoder.encode( "ambient", _ambient );
+    // encoder.encode( "diffuse", _diffuse );
+    // encoder.encode( "specular", _specular );
+    // encoder.encode( "emissive", _emissive );
+    // encoder.encode( "shininess", _shininess );
+    // encoder.encode( "colorMap", _colorMap );
+    // encoder.encode( "normalMap", _normalMap );
+    // encoder.encode( "specularMap", _specularMap );
+    // encoder.encode( "emissiveMap", _emissiveMap );
 }
 
 void Material::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    decoder.decode( "ambient", _ambient );
-    decoder.decode( "diffuse", _diffuse );
-    decoder.decode( "specular", _specular );
-    decoder.decode( "emissive", _emissive );
-    decoder.decode( "shininess", _shininess );
-    decoder.decode( "colorMap", _colorMap );
-    decoder.decode( "normalMap", _normalMap );
-    decoder.decode( "specularMap", _specularMap );
-    decoder.decode( "emissiveMap", _emissiveMap );
+    // decoder.decode( "ambient", _ambient );
+    // decoder.decode( "diffuse", _diffuse );
+    // decoder.decode( "specular", _specular );
+    // decoder.decode( "emissive", _emissive );
+    // decoder.decode( "shininess", _shininess );
+    // decoder.decode( "colorMap", _colorMap );
+    // decoder.decode( "normalMap", _normalMap );
+    // decoder.decode( "specularMap", _specularMap );
+    // decoder.decode( "emissiveMap", _emissiveMap );
 }

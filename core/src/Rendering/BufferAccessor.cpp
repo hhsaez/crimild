@@ -25,32 +25,27 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/BufferAccessor.hpp"
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
-IndexBuffer::IndexBuffer( Format format, crimild::Size count ) noexcept
-    : IndexBuffer( format, Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
-{
-}
-
-void IndexBuffer::encode( coding::Encoder &encoder )
+void BufferAccessor::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "format", m_format );
+    encoder.encode( "offset", m_offset );
+    encoder.encode( "size", m_size );
     encoder.encode( "bufferView", m_bufferView );
-    encoder.encode( "accessor", m_accessor );
 }
 
-void IndexBuffer::decode( coding::Decoder &decoder )
+void BufferAccessor::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    decoder.decode( "format", m_format );
+    decoder.decode( "offset", m_offset );
+    decoder.decode( "size", m_size );
     decoder.decode( "bufferView", m_bufferView );
-    decoder.decode( "accessor", m_accessor );
 }

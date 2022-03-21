@@ -25,32 +25,39 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/BufferView.hpp"
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
-IndexBuffer::IndexBuffer( Format format, crimild::Size count ) noexcept
-    : IndexBuffer( format, Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
-{
-}
-
-void IndexBuffer::encode( coding::Encoder &encoder )
+void BufferView::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "format", m_format );
-    encoder.encode( "bufferView", m_bufferView );
-    encoder.encode( "accessor", m_accessor );
+    encoder.encode( "target", Int32( m_target ) );
+    encoder.encode( "buffer", m_buffer );
+    encoder.encode( "offset", m_offset );
+    encoder.encode( "stride", m_stride );
+    encoder.encode( "length", m_length );
+    encoder.encode( "usage", Int32( m_usage ) );
 }
 
-void IndexBuffer::decode( coding::Decoder &decoder )
+void BufferView::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    decoder.decode( "format", m_format );
-    decoder.decode( "bufferView", m_bufferView );
-    decoder.decode( "accessor", m_accessor );
+    Int32 target;
+    decoder.decode( "target", target );
+    m_target = Target( target );
+
+    decoder.decode( "buffer", m_buffer );
+    decoder.decode( "offset", m_offset );
+    decoder.decode( "stride", m_stride );
+    decoder.decode( "length", m_length );
+
+    Int32 usage;
+    decoder.decode( "usage", usage );
+    m_usage = Usage( usage );
 }

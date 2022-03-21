@@ -150,8 +150,8 @@ namespace crimild {
         //@}
 
         /**
-        \name Coding support
-     */
+            \name Coding support
+        */
         //@{
 
     public:

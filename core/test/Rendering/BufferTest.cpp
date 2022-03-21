@@ -27,6 +27,8 @@
 
 #include "Rendering/Buffer.hpp"
 
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Vector3.hpp"
@@ -102,4 +104,32 @@ TEST( Buffer, constructionWithStruct )
     ASSERT_NE( nullptr, buffer->getData() );
     ASSERT_EQ( ( ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f } ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
     ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
+}
+
+TEST( Buffer, coding )
+{
+    auto data = Array< crimild::Real32 > {
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
+    };
+
+    auto buffer = crimild::alloc< Buffer >( data );
+    coding::MemoryEncoder encoder;
+    ASSERT_TRUE( encoder.encode( buffer ) );
+    const auto bytes = encoder.getBytes();
+
+    coding::MemoryDecoder decoder;
+    ASSERT_TRUE( decoder.fromBytes( bytes ) );
+    ASSERT_EQ( 1, decoder.getObjectCount() );
+    auto decoded = decoder.getObjectAt< Buffer >( 0 );
+
+    EXPECT_EQ( buffer->getSize(), decoded->getSize() );
+    EXPECT_EQ( 0, memcmp( buffer->getData(), decoded->getData(), decoded->getSize() ) );
 }

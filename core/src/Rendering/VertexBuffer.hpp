@@ -28,39 +28,44 @@
 #ifndef CRIMILD_RENDERING_VERTEX_BUFFER_
 #define CRIMILD_RENDERING_VERTEX_BUFFER_
 
-#include "Rendering/Buffer.hpp"
-#include "Rendering/BufferView.hpp"
-#include "Rendering/BufferAccessor.hpp"
-#include "Rendering/VertexLayout.hpp"
 #include "Foundation/RTTI.hpp"
+#include "Rendering/Buffer.hpp"
+#include "Rendering/BufferAccessor.hpp"
+#include "Rendering/BufferView.hpp"
+#include "Rendering/VertexLayout.hpp"
 
 namespace crimild {
 
-	class VertexBuffer
+    class VertexBuffer
         : public coding::Codable,
           public RenderResourceImpl< VertexBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::VertexBuffer )
 
-	public:
+    public:
+        /**
+         * \brief Default constructor
+         *
+         * \remarks This is only used in order to comply with the Codable interface.
+         */
+        VertexBuffer( void ) = default;
+
         template< typename DATA_TYPE >
-		VertexBuffer( const VertexLayout &vertexLayout, const Array< DATA_TYPE > &data ) noexcept
+        VertexBuffer( const VertexLayout &vertexLayout, const Array< DATA_TYPE > &data ) noexcept
             : VertexBuffer(
                 vertexLayout,
-                [&] {
+                [ & ] {
                     return crimild::alloc< BufferView >(
                         BufferView::Target::VERTEX,
                         crimild::alloc< Buffer >( data ),
                         0,
-                        vertexLayout.getSize()
-                    );
-                }()
-            )
-		{
+                        vertexLayout.getSize() );
+                }() )
+        {
             // no-op
-		}
+        }
 
         // Compute data size based on the vertex layout and the count
-		VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept;
+        VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept;
 
         /**
            \brief Creates a vertex buffer from a buffer view
@@ -71,9 +76,9 @@ namespace crimild {
 
         VertexBuffer( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept;
 
-		virtual ~VertexBuffer( void ) = default;
+        virtual ~VertexBuffer( void ) = default;
 
-		inline const VertexLayout &getVertexLayout( void ) const noexcept { return m_vertexLayout; }
+        inline const VertexLayout &getVertexLayout( void ) const noexcept { return m_vertexLayout; }
 
         inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
         inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
@@ -91,10 +96,20 @@ namespace crimild {
         }
 
     private:
-		VertexLayout m_vertexLayout;
+        VertexLayout m_vertexLayout;
         SharedPointer< BufferView > m_bufferView;
-        Map< VertexAttribute::Name, SharedPointer< BufferAccessor >> m_accessors;
-	};
+        Map< VertexAttribute::Name, SharedPointer< BufferAccessor > > m_accessors;
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
+    };
 
 }
 

@@ -37,17 +37,23 @@ namespace crimild {
      */
     class BufferAccessor : public coding::Codable {
         CRIMILD_IMPLEMENT_RTTI( crimild::BufferAccessor )
-        
+
     public:
+        /**
+         * \brief Default constructor
+         *
+         * \remarks This is only used in order to comply with the Codable interface.
+         */
+        BufferAccessor( void ) = default;
+
         template< typename BufferViewPtr >
         BufferAccessor( BufferViewPtr bufferView, crimild::Size offset = 0, crimild::Size size = 0 ) noexcept
             : m_bufferView( crimild::retain( bufferView ) ),
               m_offset( offset ),
               m_size( size > 0 ? size : bufferView->getStride() )
         {
-            
         }
-        
+
         virtual ~BufferAccessor( void ) = default;
 
         inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
@@ -62,8 +68,8 @@ namespace crimild {
         {
             assert( sizeof( T ) == getSize() && "Invalid template type argument" );
             auto data = getBufferView()->getData();
-			auto offset = getOffset();
-			auto stride = getBufferView()->getStride();
+            auto offset = getOffset();
+            auto stride = getBufferView()->getStride();
             return *reinterpret_cast< T * >( &data[ index * stride + offset ] );
         }
 
@@ -72,8 +78,8 @@ namespace crimild {
         {
             assert( sizeof( T ) == getSize() && "Invalid template type argument" );
             auto data = getBufferView()->getData();
-			auto offset = getOffset();
-			auto stride = getBufferView()->getStride();
+            auto offset = getOffset();
+            auto stride = getBufferView()->getStride();
             return *reinterpret_cast< T * >( &data[ index * stride + offset ] );
         }
 
@@ -83,8 +89,8 @@ namespace crimild {
             assert( sizeof( T ) == getSize() && "Invalid template type argument" );
 
             auto data = getBufferView()->getData();
-			auto offset = getOffset();
-			auto stride = getBufferView()->getStride();
+            auto offset = getOffset();
+            auto stride = getBufferView()->getStride();
             auto N = getBufferView()->getCount();
 
             for ( auto index = 0l; index < N; index++ ) {
@@ -97,33 +103,43 @@ namespace crimild {
         {
             assert( sizeof( T ) == getSize() && "Invalid template type argument" );
             auto data = getBufferView()->getData();
-			auto offset = getOffset();
-			auto stride = getBufferView()->getStride();
+            auto offset = getOffset();
+            auto stride = getBufferView()->getStride();
             memcpy( &data[ index * stride + offset ], &value, getSize() );
         }
 
         template< typename T >
-		void set( Array< T > const &src ) noexcept
-		{
+        void set( Array< T > const &src ) noexcept
+        {
             auto data = getBufferView()->getData();
-			auto O = getOffset();
-			auto S = getBufferView()->getStride();
+            auto O = getOffset();
+            auto S = getBufferView()->getStride();
             auto N = getBufferView()->getCount();
             auto size = getSize();
             auto srcData = src.getData();
             auto srcStride = size / sizeof( T );
 
-			assert( src.size() * sizeof( T ) / size == N && "Invalid data size" );
+            assert( src.size() * sizeof( T ) / size == N && "Invalid data size" );
 
-			for ( auto i = 0l; i < N; i++ ) {
-				memcpy( &data[ i * S + O ], &srcData[ i * srcStride ], size );
-			}
-		}
+            for ( auto i = 0l; i < N; i++ ) {
+                memcpy( &data[ i * S + O ], &srcData[ i * srcStride ], size );
+            }
+        }
 
     private:
         SharedPointer< BufferView > m_bufferView;
         crimild::Size m_offset;
         crimild::Size m_size;
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }

@@ -27,6 +27,8 @@
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
@@ -41,7 +43,9 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
     setGraphicsPipeline(
         [] {
             auto pipeline = crimild::alloc< GraphicsPipeline >();
-            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
+            if ( auto assets = AssetManager::getInstance() ) {
+                pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
+            }
             return pipeline;
         }() );
 
@@ -85,4 +89,27 @@ const Texture *UnlitMaterial::getTexture( void ) const noexcept
 Texture *UnlitMaterial::getTexture( void ) noexcept
 {
     return getDescriptors()->descriptors[ 1 ].get< Texture >();
+}
+
+void UnlitMaterial::encode( coding::Encoder &encoder )
+{
+    Material::encode( encoder );
+
+    encoder.encode( "color", getColor() );
+    encoder.encode( "colorMap", getTexture() );
+}
+
+void UnlitMaterial::decode( coding::Decoder &decoder )
+{
+    Material::decode( decoder );
+
+    ColorRGBA color;
+    decoder.decode( "color", color );
+    setColor( color );
+
+    SharedPointer< Texture > colorMap;
+    decoder.decode( "colorMap", colorMap );
+    if ( colorMap != nullptr ) {
+        setTexture( colorMap );
+    }
 }

@@ -42,9 +42,19 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Primitive );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Image );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ImageView );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ImageTGA );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Texture );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Sampler );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Buffer );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BufferView );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BufferAccessor );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBuffer );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBuffer );
+
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::UnlitMaterial );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::materials::PrincipledBSDF );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::FreeLookCameraComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );

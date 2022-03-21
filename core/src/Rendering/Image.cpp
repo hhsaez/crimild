@@ -279,20 +279,28 @@ void Image::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "width", _width );
-    encoder.encode( "height", _height );
-    encoder.encode( "bpp", _bpp );
-    encoder.encode( "data", _data );
+    encoder.encode( "format", format );
+    encoder.encode( "type", Int32( type ) );
+    encoder.encode( "extent", extent );
+    encoder.encode( "bufferView", m_bufferView );
+    encoder.encode( "layerCount", m_layerCount );
+    encoder.encode( "mipLevels", m_mipLevels );
 }
 
 void Image::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    decoder.decode( "width", _width );
-    decoder.decode( "height", _height );
-    decoder.decode( "bpp", _bpp );
-    decoder.decode( "data", _data );
+    decoder.decode( "format", format );
+
+    Int32 type;
+    decoder.decode( "type", type );
+    this->type = Type( type );
+
+    decoder.decode( "extent", extent );
+    decoder.decode( "bufferView", m_bufferView );
+    decoder.decode( "layerCount", m_layerCount );
+    decoder.decode( "mipLevels", m_mipLevels );
 }
 
 void Image::setMipLevels( crimild::UInt32 mipLevels ) noexcept

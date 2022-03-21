@@ -38,10 +38,15 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Matrix3.hpp"
+#include "Mathematics/Point2.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Quaternion.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
+#include "Rendering/Extent.hpp"
+#include "Rendering/Format.hpp"
+#include "Rendering/VertexAttribute.hpp"
 
 namespace crimild {
 
@@ -88,6 +93,8 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::ColorRGB &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::ColorRGBA &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Point2f &value ) = 0;
+            virtual crimild::Bool decode( std::string key, crimild::Point3f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) = 0;
@@ -95,6 +102,24 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) = 0;
             virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Format &value ) = 0;
+
+            virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
+            {
+                Int32 name;
+                decode( key + "_name", name );
+                attr.name = VertexAttribute::Name( name );
+
+                decode( key + "_format", attr.format );
+                decode( key + "_offset", attr.offset );
+            }
+
+            virtual crimild::Bool decode( std::string key, Extent3D &extent )
+            {
+                decode( key + "_width", extent.width );
+                decode( key + "_height", extent.height );
+                decode( key + "_depth", extent.depth );
+            }
 
             virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
@@ -140,6 +165,14 @@ namespace crimild {
                 endDecodingArray( key );
 
                 return true;
+            }
+
+            template< typename EnumType >
+            crimild::Bool decodeEnum( std::string key, EnumType &value )
+            {
+                Int32 encoded;
+                decode( key, encoded );
+                value = EnumType( encoded );
             }
 
             inline crimild::Size getObjectCount( void ) const

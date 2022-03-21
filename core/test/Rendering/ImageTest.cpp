@@ -27,6 +27,9 @@
 
 #include "Rendering/Image.hpp"
 
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -36,4 +39,30 @@ TEST( Image, construction )
     auto image = crimild::alloc< Image >();
 
     EXPECT_EQ( FrameGraphResource::Type::IMAGE, image->getType() );
+}
+
+TEST( Image, coding )
+{
+    auto image = Image::CHECKERBOARD_4;
+
+    coding::MemoryEncoder encoder;
+    ASSERT_TRUE( encoder.encode( image ) );
+    const auto bytes = encoder.getBytes();
+
+    coding::MemoryDecoder decoder;
+    ASSERT_TRUE( decoder.fromBytes( bytes ) );
+    ASSERT_EQ( 1, decoder.getObjectCount() );
+    auto decoded = decoder.getObjectAt< Image >( 0 );
+
+    ASSERT_NE( nullptr, decoded );
+    ASSERT_EQ( image->format, decoded->format );
+    ASSERT_EQ( image->type, decoded->type );
+    ASSERT_EQ( image->extent.width, decoded->extent.width );
+    ASSERT_EQ( image->extent.height, decoded->extent.height );
+    ASSERT_EQ( image->extent.depth, decoded->extent.depth );
+    ASSERT_NE( nullptr, decoded->getBufferView() );
+    ASSERT_EQ( image->getBufferView()->getLength(), decoded->getBufferView()->getLength() );
+    ASSERT_EQ( 0, memcmp( image->getBufferView()->getData(), decoded->getBufferView()->getData(), decoded->getBufferView()->getLength() ) );
+    ASSERT_EQ( image->getLayerCount(), decoded->getLayerCount() );
+    ASSERT_EQ( image->getMipLevels(), decoded->getMipLevels() );
 }

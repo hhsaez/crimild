@@ -199,6 +199,10 @@ void Camera::encode( coding::Encoder &encoder )
 
     encoder.encode( "focus_distance", m_focusDistance );
     encoder.encode( "aperture", m_aperture );
+    encoder.encode( "fov", m_fov );
+    encoder.encode( "aspect", m_aspect );
+    encoder.encode( "near", m_near );
+    encoder.encode( "far", m_far );
 }
 
 void Camera::decode( coding::Decoder &decoder )
@@ -207,4 +211,10 @@ void Camera::decode( coding::Decoder &decoder )
 
     decoder.decode( "focus_distance", m_focusDistance );
     decoder.decode( "aperture", m_aperture );
+    decoder.decode( "fov", m_fov );
+    decoder.decode( "aspect", m_aspect );
+    decoder.decode( "near", m_near );
+    decoder.decode( "far", m_far );
+
+    updateProjectionMatrix();
 }

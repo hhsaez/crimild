@@ -57,6 +57,8 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::ColorRGB &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::ColorRGBA &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Point2f &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Point3f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) override { return decodeData( key, value ); }
@@ -64,6 +66,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, Format &value ) override { return decodeData( key, value ); }
 
             virtual crimild::Bool decode( std::string key, ByteArray &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return decodeDataArray( key, value ); }
