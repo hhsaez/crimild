@@ -27,6 +27,8 @@
 
 #include "FreeLookCameraComponent.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_euler.hpp"
@@ -92,4 +94,27 @@ void FreeLookCameraComponent::update( const Clock &c )
     const auto T = translation( vector3( m_position ) );
 
     root->setLocal( T * E );
+}
+
+void FreeLookCameraComponent::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    // TODO: This should be a stateless component. It should correctly
+    // initialize with the position and orientation of the camera in which
+    // this component is attached.
+    encoder.encode( "position", m_position );
+    encoder.encode( "pitch", m_pitch );
+    encoder.encode( "yaw", m_yaw );
+    encoder.encode( "roll", m_roll );
+}
+
+void FreeLookCameraComponent::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    decoder.decode( "position", m_position );
+    decoder.decode( "pitch", m_pitch );
+    decoder.decode( "yaw", m_yaw );
+    decoder.decode( "roll", m_roll );
 }

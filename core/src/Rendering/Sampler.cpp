@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,18 +26,34 @@
  */
 
 #include "Sampler.hpp"
-#include "Coding/Encoder.hpp"
+
 #include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 
 using namespace crimild;
 
 void Sampler::encode( coding::Encoder &encoder )
 {
-	Codable::encode( encoder );
+    Codable::encode( encoder );
+
+    encoder.encodeEnum< WrapMode >( "wrapMode", m_wrapMode );
+    encoder.encodeEnum< Filter >( "minFilter", m_minFilter );
+    encoder.encodeEnum< Filter >( "magFilter", m_magFilter );
+    encoder.encodeEnum< BorderColor >( "borderColor", m_borderColor );
+    encoder.encode( "minLod", m_minLod );
+    encoder.encode( "maxLod", m_maxLod );
+    encoder.encodeEnum< CompareOp >( "compareOp", m_compareOp );
 }
 
 void Sampler::decode( coding::Decoder &decoder )
 {
-	Codable::decode( decoder );
-}
+    Codable::decode( decoder );
 
+    decoder.decodeEnum< WrapMode >( "wrapMode", m_wrapMode );
+    decoder.decodeEnum< Filter >( "minFilter", m_minFilter );
+    decoder.decodeEnum< Filter >( "magFilter", m_magFilter );
+    decoder.decodeEnum< BorderColor >( "borderColor", m_borderColor );
+    decoder.decode( "minLod", m_minLod );
+    decoder.decode( "maxLod", m_maxLod );
+    decoder.decodeEnum< CompareOp >( "compareOp", m_compareOp );
+}

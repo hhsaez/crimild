@@ -41,6 +41,13 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
 
     public:
+        /**
+         * \brief Default constructor
+         *
+         * \remarks This is only used in order to comply with the Codable interface.
+         */
+        IndexBuffer( void ) = default;
+
         IndexBuffer( Format format, crimild::Size count ) noexcept;
 
         template< typename T >
@@ -114,6 +121,16 @@ namespace crimild {
         Format m_format;
         SharedPointer< BufferView > m_bufferView;
         SharedPointer< BufferAccessor > m_accessor;
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }

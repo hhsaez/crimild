@@ -51,6 +51,13 @@ namespace crimild {
 
     public:
         /**
+         * \brief Default constructor
+         *
+         * \remarks This is only used in order to comply with the Codable interface.
+         */
+        Buffer( void ) = default;
+
+        /**
            \brief Initialize buffer with array of data
 
            This is usually used for vertex or index buffers
@@ -101,6 +108,16 @@ namespace crimild {
 
     public:
         inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER; }
+
+        //@}
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
     };

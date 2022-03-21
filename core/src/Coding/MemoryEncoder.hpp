@@ -61,6 +61,8 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Real64 value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override { return encodeData( key, value ); }
+            virtual crimild::Bool encode( std::string key, const Point2f &value ) override { return encodeData( key, value ); }
+            virtual crimild::Bool encode( std::string key, const Point3f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeData( key, value ); }
@@ -68,6 +70,7 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Quaternion &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeData( key, value ); }
+            virtual crimild::Bool encode( std::string key, const Format &value ) override { return encodeData( key, value ); }
 
             virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return encodeData( key, value ); }

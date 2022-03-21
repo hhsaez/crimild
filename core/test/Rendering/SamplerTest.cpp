@@ -25,20 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Coding/Encoder.hpp"
+#include "Rendering/Sampler.hpp"
 
-#include "Coding/Codable.hpp"
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace crimild;
-using namespace crimild::coding;
 
-crimild::Bool Encoder::encode( std::string key, Codable *codable )
+TEST( Sampler, construction )
 {
-    // TODO: why retaining?
-    return encode( key, retain( codable ) );
+    auto sampler = crimild::alloc< Sampler >();
+
+    EXPECT_EQ( Sampler::WrapMode::REPEAT, sampler->getWrapMode() );
+    EXPECT_EQ( Sampler::Filter::LINEAR, sampler->getMinFilter() );
+    EXPECT_EQ( Sampler::Filter::LINEAR, sampler->getMagFilter() );
+    EXPECT_EQ( Sampler::BorderColor::INT_OPAQUE_BLACK, sampler->getBorderColor() );
+    EXPECT_EQ( 0, sampler->getMinLod() );
+    EXPECT_EQ( 1, sampler->getMaxLod() );
+    EXPECT_EQ( CompareOp::ALWAYS, sampler->getCompareOp() );
 }
 
-std::string Encoder::dump( void )
+TEST( Sampler, coding )
 {
-    return "empty";
+    auto sampler = crimild::alloc< Sampler >();
+
+    coding::MemoryEncoder encoder;
+    ASSERT_TRUE( encoder.encode( sampler ) );
+    const auto bytes = encoder.getBytes();
+
+    coding::MemoryDecoder decoder;
+    ASSERT_TRUE( decoder.fromBytes( bytes ) );
+    ASSERT_EQ( 1, decoder.getObjectCount() );
+    auto decoded = decoder.getObjectAt< Sampler >( 0 );
+
+    ASSERT_NE( nullptr, decoded );
+
+    EXPECT_EQ( sampler->getWrapMode(), decoded->getWrapMode() );
+    EXPECT_EQ( sampler->getMinFilter(), decoded->getMinFilter() );
+    EXPECT_EQ( sampler->getMagFilter(), decoded->getMagFilter() );
+    EXPECT_EQ( sampler->getBorderColor(), decoded->getBorderColor() );
+    EXPECT_EQ( sampler->getMinLod(), decoded->getMinLod() );
+    EXPECT_EQ( sampler->getMaxLod(), decoded->getMaxLod() );
+    EXPECT_EQ( sampler->getCompareOp(), decoded->getCompareOp() );
 }

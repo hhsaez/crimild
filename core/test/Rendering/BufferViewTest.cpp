@@ -27,6 +27,9 @@
 
 #include "Rendering/BufferView.hpp"
 
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -202,4 +205,43 @@ TEST( BufferView, withEmptyData )
     ASSERT_EQ( 3 * sizeof( Real32 ), bufferView->getLength() );
     ASSERT_EQ( sizeof( Real32 ), bufferView->getStride() );
     ASSERT_EQ( 3, bufferView->getCount() );
+}
+
+TEST( BufferView, coding )
+{
+    auto data = Array< crimild::Real32 > {
+        -0.5f,
+        -0.5f,
+        0.0f,
+        0.5f,
+        -0.5f,
+        0.0f,
+        0.0f,
+        0.5f,
+        0.0f,
+    };
+
+    auto buffer = crimild::alloc< Buffer >( data );
+
+    auto bufferView = crimild::alloc< BufferView >(
+        BufferView::Target::VERTEX,
+        buffer );
+
+    coding::MemoryEncoder encoder;
+    ASSERT_TRUE( encoder.encode( bufferView ) );
+    const auto bytes = encoder.getBytes();
+
+    coding::MemoryDecoder decoder;
+    ASSERT_TRUE( decoder.fromBytes( bytes ) );
+    ASSERT_EQ( 1, decoder.getObjectCount() );
+    auto decoded = decoder.getObjectAt< BufferView >( 0 );
+
+    ASSERT_NE( nullptr, decoded->getBuffer() );
+    ASSERT_EQ( bufferView->getBuffer()->getSize(), decoded->getBuffer()->getSize() );
+    ASSERT_EQ( bufferView->getOffset(), decoded->getOffset() );
+    ASSERT_EQ( bufferView->getLength(), decoded->getLength() );
+    ASSERT_EQ( bufferView->getStride(), decoded->getStride() );
+    ASSERT_EQ( bufferView->getCount(), decoded->getCount() );
+
+    ASSERT_NE( nullptr, decoded->getData() );
 }

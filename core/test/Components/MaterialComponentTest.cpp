@@ -30,6 +30,7 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Mathematics/isEqual.hpp"
+#include "Rendering/Materials/UnlitMaterial.hpp"
 
 #include "gtest/gtest.h"
 
@@ -56,9 +57,9 @@ TEST( MaterialComponent, attachMaterial )
 
 TEST( MaterialComponent, coding )
 {
-    auto material = crimild::alloc< Material >();
-    material->setDiffuse( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f } );
-    material->setColorMap( crimild::alloc< Texture >() );
+    auto material = crimild::alloc< UnlitMaterial >();
+    material->setColor( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f } );
+    material->setTexture( crimild::alloc< Texture >() );
 
     auto materials = crimild::alloc< MaterialComponent >();
     materials->attachMaterial( material );
@@ -69,11 +70,13 @@ TEST( MaterialComponent, coding )
     auto decoder = crimild::alloc< coding::MemoryDecoder >();
     decoder->fromBytes( bytes );
 
+    ASSERT_NE( 0, decoder->getObjectCount() );
+
     auto ms = decoder->getObjectAt< MaterialComponent >( 0 );
-    EXPECT_TRUE( ms != nullptr );
+    ASSERT_TRUE( ms != nullptr );
 
-    EXPECT_TRUE( ms->hasMaterials() );
+    ASSERT_TRUE( ms->hasMaterials() );
 
-    EXPECT_NE( nullptr, ms->first() );
-    EXPECT_TRUE( isEqual( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f }, ms->first()->getDiffuse() ) );
+    ASSERT_NE( nullptr, ms->first() );
+    EXPECT_TRUE( isEqual( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f }, static_cast< UnlitMaterial * >( ms->first() )->getColor() ) );
 }

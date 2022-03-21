@@ -27,6 +27,8 @@
 
 #include "Rendering/ImageView.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Rendering/Image.hpp"
 
 using namespace crimild;
@@ -45,4 +47,29 @@ void ImageView::setReadBy( FrameGraphOperation *op ) noexcept
     if ( image != nullptr ) {
         image->setReadBy( op );
     }
+}
+
+void ImageView::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    encoder.encode( "type", Int32( type ) );
+    encoder.encode( "image", image );
+    encoder.encode( "format", format );
+    encoder.encode( "mipLevels", mipLevels );
+    encoder.encode( "layerCount", layerCount );
+}
+
+void ImageView::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    Int32 type;
+    decoder.decode( "type", type );
+    this->type = Type( type );
+
+    decoder.decode( "image", image );
+    decoder.decode( "format", format );
+    decoder.decode( "mipLevels", mipLevels );
+    decoder.decode( "layerCount", layerCount );
 }

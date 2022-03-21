@@ -27,13 +27,65 @@
 
 #include "Rendering/Texture.hpp"
 
-#include "gtest/gtest.h"
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/Sampler.hpp"
+
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( Texture, construction )
 {
     auto texture = crimild::alloc< Texture >();
+    texture->imageView = [ & ] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = Image::CHECKERBOARD_16;
+        return imageView;
+    }();
+    texture->sampler = [ & ] {
+        auto sampler = crimild::alloc< Sampler >();
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        return sampler;
+    }();
 
     EXPECT_EQ( FrameGraphResource::Type::TEXTURE, texture->getType() );
+
+    EXPECT_NE( nullptr, texture->imageView );
+    EXPECT_NE( nullptr, texture->sampler );
+}
+
+TEST( Texture, coding )
+{
+    auto texture = crimild::alloc< Texture >();
+    texture->setName( "color" );
+    texture->imageView = [ & ] {
+        auto imageView = crimild::alloc< ImageView >();
+        imageView->image = Image::CHECKERBOARD_16;
+        return imageView;
+    }();
+    texture->sampler = [ & ] {
+        auto sampler = crimild::alloc< Sampler >();
+        sampler->setMinFilter( Sampler::Filter::NEAREST );
+        sampler->setMagFilter( Sampler::Filter::NEAREST );
+        return sampler;
+    }();
+
+    coding::MemoryEncoder encoder;
+    ASSERT_TRUE( encoder.encode( texture ) );
+    const auto bytes = encoder.getBytes();
+
+    coding::MemoryDecoder decoder;
+    ASSERT_TRUE( decoder.fromBytes( bytes ) );
+    ASSERT_EQ( 1, decoder.getObjectCount() );
+    auto decoded = decoder.getObjectAt< Texture >( 0 );
+
+    ASSERT_NE( nullptr, decoded );
+    EXPECT_EQ( "color", decoded->getName() );
+    EXPECT_NE( nullptr, decoded->imageView );
+    EXPECT_NE( nullptr, decoded->imageView->image );
+    EXPECT_NE( nullptr, decoded->sampler );
 }

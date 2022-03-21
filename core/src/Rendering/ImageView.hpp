@@ -69,6 +69,17 @@ namespace crimild {
 
         virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override;
         virtual void setReadBy( FrameGraphOperation *op ) noexcept override;
+
+        /**
+            \name Coding support
+         */
+        //@{
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }

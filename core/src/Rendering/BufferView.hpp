@@ -63,6 +63,13 @@ namespace crimild {
 
     public:
         /**
+         * \brief Default constructor
+         *
+         * \remarks This is only used in order to comply with the Codable interface.
+         */
+        BufferView( void ) = default;
+
+        /**
            \brief Constructs a buffer view from an existing buffer
 
            \param offset (optional) Offset to the first element, in bytes
@@ -160,6 +167,16 @@ namespace crimild {
                 m_buffer->setReadBy( op );
             }
         }
+
+        //@}
+
+        /**
+            \name Coding
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
     };

@@ -27,6 +27,8 @@
 
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/LitShaderProgram.hpp"
@@ -193,4 +195,96 @@ const Texture *PrincipledBSDF::getNormalMap( void ) const noexcept
 Texture *PrincipledBSDF::getNormalMap( void ) noexcept
 {
     return getDescriptors()->descriptors[ 6 ].get< Texture >();
+}
+
+void PrincipledBSDF::encode( coding::Encoder &encoder )
+{
+    Material::encode( encoder );
+
+    encoder.encode( "albedo", getAlbedo() );
+    encoder.encode( "metallic", getMetallic() );
+    encoder.encode( "roughness", getRoughness() );
+    encoder.encode( "ambientOcclusion", getAmbientOcclusion() );
+    encoder.encode( "transmission", getTransmission() );
+    encoder.encode( "indexOfRefraction", getIndexOfRefraction() );
+    encoder.encode( "emissive", getEmissive() );
+
+    {
+        auto texture = crimild::retain( getAlbedoMap() );
+        encoder.encode( "albedoMap", texture );
+    }
+
+    {
+        auto texture = crimild::retain( getMetallicMap() );
+        encoder.encode( "metallicMap", texture );
+    }
+
+    {
+        auto texture = crimild::retain( getRoughnessMap() );
+        encoder.encode( "roughnessMap", texture );
+    }
+
+    {
+        auto texture = crimild::retain( getAmbientOcclusionMap() );
+        encoder.encode( "ambientOcclusionMap", texture );
+    }
+
+    {
+        auto texture = crimild::retain( getCombinedRoughnessMetallicMap() );
+        encoder.encode( "combinedRoughnessMetallicMap", texture );
+    }
+
+    {
+        auto texture = crimild::retain( getNormalMap() );
+        encoder.encode( "normalMap", texture );
+    }
+}
+
+void PrincipledBSDF::decode( coding::Decoder &decoder )
+{
+    Material::decode( decoder );
+
+    decoder.decode( "albedo", getProps().albedo );
+    decoder.decode( "metallic", getProps().metallic );
+    decoder.decode( "roughness", getProps().roughness );
+    decoder.decode( "ambientOcclusion", getProps().ambientOcclusion );
+    decoder.decode( "transmission", getProps().transmission );
+    decoder.decode( "indexOfRefraction", getProps().indexOfRefraction );
+    decoder.decode( "emissive", getProps().emissive );
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "albedoMap", texture );
+        setAlbedoMap( texture );
+    }
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "metallicMap", texture );
+        setMetallicMap( texture );
+    }
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "roughnessMap", texture );
+        setRoughnessMap( texture );
+    }
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "ambientOcclusionMap", texture );
+        setAmbientOcclusionMap( texture );
+    }
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "combinedRoughnessMetallicMap", texture );
+        setCombinedRoughnessMetallicMap( texture );
+    }
+
+    {
+        SharedPointer< Texture > texture;
+        decoder.decode( "normalMap", texture );
+        setNormalMap( texture );
+    }
 }
