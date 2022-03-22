@@ -27,6 +27,7 @@
 
 #include "Editor/EditorLayer.hpp"
 
+#include "Editor/EditorUtils.hpp"
 #include "Editor/Menus/mainMenu.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Log.hpp"
@@ -197,6 +198,20 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice ) noexcept
     io.KeyMap[ ImGuiKey_X ] = CRIMILD_INPUT_KEY_X;
     io.KeyMap[ ImGuiKey_Y ] = CRIMILD_INPUT_KEY_Y;
     io.KeyMap[ ImGuiKey_Z ] = CRIMILD_INPUT_KEY_Z;
+
+    if ( auto sim = Simulation::getInstance() ) {
+        if ( sim->getScene() == nullptr ) {
+            if ( auto settings = Settings::getInstance() ) {
+                if ( settings->hasKey( "scene" ) ) {
+                    editor::loadScene( settings->get< std::string >( "scene", "" ) );
+                }
+            }
+        }
+
+        // if ( sim->getScene() == nullptr ) {
+        //     sim->setScene( editor::createDefaultScene() );
+        // }
+    }
 
     updateDisplaySize();
     init();

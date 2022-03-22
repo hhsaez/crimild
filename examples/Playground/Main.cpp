@@ -107,7 +107,7 @@ public:
     {
         const auto ret = Simulation::handle( e );
         if ( ret.type == Event::Type::SIMULATION_START ) {
-            setScene( createDefaultScene() );
+            // setScene( createDefaultScene() );
         }
         return ret;
     }
