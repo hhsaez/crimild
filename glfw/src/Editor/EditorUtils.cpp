@@ -27,8 +27,13 @@
 
 #include "Editor/EditorUtils.hpp"
 
+#include "Coding/FileDecoder.hpp"
+#include "Coding/FileEncoder.hpp"
+#include "Coding/JSONDecoder.hpp"
+#include "Coding/JSONEncoder.hpp"
 #include "Components/FreeLookCameraComponent.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Concurrency/Async.hpp"
 #include "Importers/SceneImporter.hpp"
 #include "Loaders/OBJLoader.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
@@ -115,14 +120,66 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
     return scene;
 }
 
+bool crimild::editor::loadNewScene( void )
+{
+    auto scene = createDefaultScene();
+    Simulation::getInstance()->setScene( scene );
+}
+
 bool crimild::editor::addToScene( SharedPointer< Node > const &node ) noexcept
 {
     // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
     // always be the case. Maybe I should check the class type
     auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
-    node->perform( UpdateWorldState() );
-    node->perform( StartComponents() );
-    scene->attachNode( node );
+    if ( scene == nullptr ) {
+        Simulation::getInstance()->setScene( node );
+    } else {
+        scene->attachNode( node );
+        node->perform( UpdateWorldState() );
+        node->perform( StartComponents() );
+    }
+    return true;
+}
+
+bool crimild::editor::saveSceneAs( std::string fileName )
+{
+    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    coding::JSONEncoder encoder;
+    encoder.encode( crimild::retain( scene ) );
+    encoder.write( fileName );
+
+    return true;
+}
+
+bool crimild::editor::loadScene( std::string fileName )
+{
+    coding::JSONDecoder decoder;
+    CRIMILD_LOG_DEBUG( "Before decode" );
+    if ( !decoder.fromFile( fileName ) ) {
+        return false;
+    }
+
+    CRIMILD_LOG_DEBUG( "Adfter decode" );
+
+    if ( decoder.getObjectCount() == 0 ) {
+        return false;
+    }
+
+    CRIMILD_LOG_DEBUG( "Loaded" );
+
+    auto scene = decoder.getObjectAt< Group >( 0 );
+    Simulation::getInstance()->setScene( scene );
+
+    CRIMILD_LOG_DEBUG( "Added" );
+    return true;
+}
+
+bool crimild::editor::exportScene( std::string fileName )
+{
+    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    coding::FileEncoder encoder;
+    encoder.encode( crimild::retain( scene ) );
+    encoder.write( fileName );
     return true;
 }
 
@@ -136,9 +193,13 @@ bool crimild::editor::importFile( std::string fileName ) noexcept
 
     SharedPointer< Node > model;
     if ( path.getExtension() == "crimild" ) {
-        // TODO
-        CRIMILD_LOG_ERROR( "Crimild binary file not supported" );
-        return false;
+        coding::FileDecoder decoder;
+        decoder.read( fileName );
+        if ( decoder.getObjectCount() == 0 ) {
+            CRIMILD_LOG_ERROR( "Cannot read file ", fileName );
+            return false;
+        }
+        model = decoder.getObjectAt< Node >( 0 );
     } else if ( path.getExtension() == "obj" ) {
         OBJLoader loader( path.getAbsolutePath() );
         loader.setVerbose( false );
@@ -153,9 +214,6 @@ bool crimild::editor::importFile( std::string fileName ) noexcept
 #endif
     }
 
-    // OBJLoader loader( fileName ); //path.getAbsolutePath() );
-    // loader.setVerbose( true );
-    // auto model = loader.load();
     if ( model == nullptr ) {
         CRIMILD_LOG_ERROR( "Cannot import file ", fileName );
         return false;

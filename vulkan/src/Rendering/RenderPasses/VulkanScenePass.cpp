@@ -496,6 +496,11 @@ void ScenePass::createMaterialObjects( void ) noexcept
 void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
 {
     auto [ color, texture ] = [ & ]() {
+        if ( material == nullptr ) {
+            CRIMILD_LOG_WARNING( "Material is null" );
+            return std::make_tuple( ColorRGBA { 1, 0, 1, 1 }, crimild::get_ptr( Texture::ONE ) );
+        }
+
         if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
             const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
             return std::make_tuple( rgba( bsdf->getAlbedo() ), bsdf->getAlbedoMap() );
