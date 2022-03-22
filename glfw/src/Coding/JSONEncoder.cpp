@@ -27,29 +27,45 @@
 
 #include "JSONEncoder.hpp"
 
-#include <Coding/Codable.hpp>
+#include "Coding/Codable.hpp"
+#include "Foundation/StringUtils.hpp"
+
+#include <fstream>
 
 using namespace crimild;
 using namespace crimild::coding;
-using namespace nlohmann;
 
 crimild::Bool JSONEncoder::encode( SharedPointer< Codable > const &codable )
 {
-    // This is wrong!!! It should be handled by arrays instead
-    json temp;
-    if ( m_json != nullptr ) {
-        temp = m_json;
-        m_json = json {};
+    if ( codable == nullptr ) {
+        return false;
     }
 
-    m_json[ "__CLASS_NAME" ] = codable->getClassName();
-    m_json[ "__id" ] = codable->getUniqueID();
+    if ( m_sortedObjects.contains( codable ) ) {
+        // object already register, remove it so it will be reinserted
+        // again with a higher priority
+        m_sortedObjects.remove( codable );
+        m_sortedObjects.push( codable );
+        return true;
+    }
+
+    m_sortedObjects.push( codable );
+
+    if ( m_parent == nullptr ) {
+        m_roots.add( codable );
+    }
+
+    auto temp = m_parent;
+    m_parent = codable;
+
+    m_encoded[ codable->getUniqueID() ] = {
+        { "__CLASS_NAME__", codable->getClassName() },
+        { "__ID__", codable->getUniqueID() },
+    };
 
     codable->encode( *this );
 
-    if ( temp != nullptr ) {
-        m_json = temp;
-    }
+    m_parent = temp;
 
     return true;
 }
@@ -60,46 +76,33 @@ crimild::Bool JSONEncoder::encode( std::string key, SharedPointer< Codable > con
         return false;
     }
 
-    encodeKey( key );
-    encode( codable );
-    // _ss << ", ";
+    auto parentID = m_parent->getUniqueID();
 
-    return true;
+    m_links[ parentID ][ key ] = codable->getUniqueID();
+
+    return encode( codable );
 }
 
 crimild::Bool JSONEncoder::encode( std::string key, const Transformation &value )
 {
-    /*
-	encodeKey( key );
-
-    _ss << "{ ";
-    _indentLevel++;
-
-    encode( "translate", value.getTranslate() );
-    encode( "rotate_q", value.getRotate() );
-    encode( "scale", value.getScale() );
-
-    _indentLevel--;
-	_ss << getIndentSpaces() << "}, ";
-    */
-
-    // assert( false );
-
+    encode( key + "_mat", value.mat );
+    encode( key + "_invMat", value.invMat );
+    encode( key + "_contents", value.contents );
     return true;
 }
 
 void JSONEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 {
-    // _arrayKeys.push( key );
-
-    // _ss << getIndentSpaces() << key << " = { ";
-
-    // ++_indentLevel;
+    std::cout << "encodeArrayBegin " << key << " " << count << std::endl;
+    encode( key + "_size", count );
 }
 
 std::string JSONEncoder::beginEncodingArrayElement( std::string key, crimild::Size index )
 {
-    return key;
+    std::stringstream ss;
+    ss << key << "_" << index;
+    std::cout << "beginEncodingArrayElement " << ss.str() << std::endl;
+    return ss.str();
 }
 
 void JSONEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
@@ -109,32 +112,48 @@ void JSONEncoder::endEncodingArrayElement( std::string key, crimild::Size index 
 
 void JSONEncoder::encodeArrayEnd( std::string key )
 {
-    // _arrayKeys.pop();
-
-    // --_indentLevel;
-    // _ss << getIndentSpaces() << "},";
+    // no-op
 }
 
-crimild::Bool JSONEncoder::encodeKey( std::string key )
+nlohmann::json JSONEncoder::getResult( void ) const
 {
-    // _ss << getIndentSpaces();
-    // if ( _arrayKeys.empty() || key.find( _arrayKeys.top() ) != 0 ) {
-    //     _ss << key << " = ";
-    // }
+    // return m_json;
 
-    return true;
-}
+    nlohmann::json json;
 
-std::string JSONEncoder::getIndentSpaces( void )
-{
-    std::string res = "\n";
-    for ( crimild::Size i = 0; i < _indentLevel; i++ ) {
-        res += "    ";
+    json[ "__VERSION__" ] = getVersion().getDescription();
+
+    auto temp = m_sortedObjects;
+    while ( !temp.empty() ) {
+        auto obj = temp.pop();
+        auto &objJSON = m_encoded[ obj->getUniqueID() ];
+        if ( objJSON != nullptr ) {
+            json[ "__OBJS__" ].push_back( objJSON );
+        }
     }
-    return res;
+
+    m_links.each(
+        [ & ]( const Codable::UniqueID &uniqueID, const Map< std::string, Codable::UniqueID > &ls ) {
+            const auto key = StringUtils::toString( uniqueID );
+            ls.each(
+                [ & ]( const std::string &name, const Codable::UniqueID &value ) {
+                    json[ "__LINKS__" ][ key ][ name ] = value;
+                } );
+        } );
+
+    m_roots.each(
+        [ & ]( const SharedPointer< Codable > &obj ) {
+            json[ "__ROOTS__" ].push_back( obj->getUniqueID() );
+        } );
+
+    return json;
 }
 
-std::string JSONEncoder::dump( void )
+void JSONEncoder::write( std::string path ) const
 {
-    return _ss.str();
+    const auto json = getResult();
+
+    auto fs = std::ofstream( path, std::ios::out );
+    fs << json.dump( 2 );
+    fs.close();
 }

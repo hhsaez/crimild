@@ -28,6 +28,7 @@
 #ifndef CRIMILD_DESKTOP_CODING_JSON_ENCODER_
 #define CRIMILD_DESKTOP_CODING_JSON_ENCODER_
 
+#include "Coding/Codable.hpp"
 #include "Coding/Encoder.hpp"
 #include "Foundation/Containers/Stack.hpp"
 #include "Foundation/JSONUtils.hpp"
@@ -53,27 +54,28 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Real64 value ) override { return encodeValue( key, value ); }
             virtual crimild::Bool encode( std::string key, const ColorRGB &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.r ) ); }
             virtual crimild::Bool encode( std::string key, const ColorRGBA &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.r ) ); }
-            virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
-            virtual crimild::Bool encode( std::string key, const Vector3f &value ) override
-            {
-                m_json[ key ] = { value.x, value.y, value.z };
-                return true;
-            }
+            virtual crimild::Bool encode( std::string key, const Point2f &value ) override { return encodeValues( key, 2, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Point3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector2f &value ) override { return encodeValues( key, 2, static_cast< const float * >( &value.x ) ); }
+            virtual crimild::Bool encode( std::string key, const Vector3f &value ) override { return encodeValues( key, 3, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Vector4f &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.x ) ); }
             virtual crimild::Bool encode( std::string key, const Matrix3f &value ) override { return encodeValues( key, 9, static_cast< const float * >( &value.c0.x ) ); }
-            virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, static_cast< const float * >( &value[ 0 ].x ) ); }
+            virtual crimild::Bool encode( std::string key, const Matrix4f &value ) override { return encodeValues( key, 16, static_cast< const float * >( &value.c0.x ) ); }
             virtual crimild::Bool encode( std::string key, const Quaternion &value ) override { return encodeValues( key, 4, static_cast< const float * >( &value.getRawData().x ) ); }
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override;
+            virtual crimild::Bool encode( std::string key, const Format &value ) override { return encodeValue( key, value ); }
 
-            virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return false; }
-            virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return false; }
-            virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return false; }
-            virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return false; }
-            virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return false; }
-            virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return false; }
+            virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return encodeValues( key, value.size(), value.getData() ); }
+            virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return encodeValues( key, value.size(), value.getData() ); }
+            virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return encodeValues( key, 3 * value.size(), value.size() > 0 ? &value[ 0 ].x : nullptr ); }
+            virtual crimild::Bool encode( std::string key, Array< Vector4f > &value ) override { return encodeValues( key, 4 * value.size(), value.size() > 0 ? &value[ 0 ].x : nullptr ); }
+            virtual crimild::Bool encode( std::string key, Array< Matrix3f > &value ) override { return encodeValues( key, 9 * value.size(), value.size() > 0 ? &value[ 0 ].c0.x : nullptr ); }
+            virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return encodeValues( key, 16 * value.size(), value.size() > 0 ? &value[ 0 ].c0.x : nullptr ); }
             virtual crimild::Bool encode( std::string key, Array< Quaternion > &value ) override { return false; }
 
-            inline const nlohmann::json &getResult( void ) const { return m_json; }
+            nlohmann::json getResult( void ) const;
+
+            void write( std::string path ) const;
 
         protected:
             virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;
@@ -85,29 +87,31 @@ namespace crimild {
             template< typename T >
             crimild::Bool encodeValue( std::string key, const T &value )
             {
-                m_json[ key ] = value;
+                if ( m_parent != nullptr ) {
+                    m_encoded[ m_parent->getUniqueID() ][ key ] = value;
+                }
                 return true;
             }
 
             template< typename T >
             crimild::Bool encodeValues( std::string key, crimild::Size count, const T *values )
             {
-                // encodeKey( key );
-                // _ss << "{ ";
-                // for ( crimild::Size i = 0; i < count; i++ ) {
-                //     if ( i > 0 ) {
-                //         _ss << ", ";
-                //     }
-                //     _ss << values[ i ];
-                // }
-                // _ss << "}, ";
+                if ( m_parent != nullptr ) {
+                    m_encoded[ m_parent->getUniqueID() ][ key ] = {};
+                    for ( auto i = 0l; i < count; ++i ) {
+                        m_encoded[ m_parent->getUniqueID() ][ key ].push_back( values[ i ] );
+                    }
+                }
 
                 return true;
             }
 
         private:
-            nlohmann::json m_json;
-            Stack< nlohmann::json > m_arrayStack;
+            Stack< SharedPointer< Codable > > m_sortedObjects;
+            Map< Codable::UniqueID, Map< std::string, Codable::UniqueID > > m_links;
+            Map< Codable::UniqueID, nlohmann::json > m_encoded;
+            SharedPointer< Codable > m_parent;
+            Array< SharedPointer< Codable > > m_roots;
         };
 
     }

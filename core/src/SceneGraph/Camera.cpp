@@ -195,7 +195,7 @@ bool Camera::culled( const BoundingVolume *volume ) const
 
 void Camera::encode( coding::Encoder &encoder )
 {
-    Node::encode( encoder );
+    Group::encode( encoder );
 
     encoder.encode( "focus_distance", m_focusDistance );
     encoder.encode( "aperture", m_aperture );
