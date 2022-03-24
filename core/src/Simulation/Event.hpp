@@ -32,6 +32,8 @@
 #include "Rendering/Extent.hpp"
 #include "Simulation/Input.hpp"
 
+#include <iostream>
+
 namespace crimild {
 
     class Node;
@@ -135,6 +137,71 @@ namespace crimild {
             Node *node;
         };
     };
+
+    static std::ostream &operator<<( std::ostream &out, const Event &e )
+    {
+        switch ( e.type ) {
+            case Event::Type::NONE:
+                out << "NONE";
+                break;
+            case Event::Type::START:
+                out << "START";
+                break;
+            case Event::Type::TICK:
+                out << "TICK";
+                break;
+            case Event::Type::STOP:
+                out << "STOP";
+                break;
+            case Event::Type::WINDOW_RESIZE:
+                out << "WINDOW_RESIZE";
+                break;
+            case Event::Type::KEY_DOWN:
+                out << "KEY_DOWN";
+                break;
+            case Event::Type::KEY_REPEAT:
+                out << "KEY_REPEAT";
+                break;
+            case Event::Type::KEY_UP:
+                out << "KEY_UP";
+                break;
+            case Event::Type::MOUSE_MOTION:
+                out << "MOUSE_MOTION";
+                break;
+            case Event::Type::MOUSE_BUTTON_DOWN:
+                out << "MOUSE_BUTTON_DOWN";
+                break;
+            case Event::Type::MOUSE_BUTTON_UP:
+                out << "MOUSE_BUTTON_UP";
+                break;
+            case Event::Type::MOUSE_CLICK:
+                out << "MOUSE_CLICK";
+                break;
+            case Event::Type::MOUSE_WHEEL:
+                out << "MOUSE_WHEEL";
+                break;
+            case Event::Type::TEXT:
+                out << "TEXT";
+                break;
+            case Event::Type::NODE_SELECTED:
+                out << "NODE_SELECTED";
+                break;
+            case Event::Type::SIMULATION_START:
+                out << "SIMULATION_START";
+                break;
+            case Event::Type::SIMULATION_UPDATE:
+                out << "SIMULATION_UPDATE";
+                break;
+            case Event::Type::SIMULATION_RENDER:
+                out << "SIMULATION_RENDER";
+                break;
+            case Event::Type::SIMULATION_STOP:
+                out << "SIMULATION_STOP";
+                break;
+        }
+
+        return out;
+    }
 
 }
 
