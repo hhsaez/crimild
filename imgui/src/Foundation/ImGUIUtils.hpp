@@ -34,6 +34,7 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "ImGuiFileDialog.h"
+#include "GraphEditor.h"
 // clang-format on
 
 #endif
