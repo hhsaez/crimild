@@ -44,6 +44,9 @@ namespace crimild {
                 Rotate( const Vector3 &axis, Radians angle ) noexcept;
                 virtual ~Rotate( void ) = default;
 
+                [[nodiscard]] inline const Vector3 &getAxis( void ) const { return m_axis; }
+                [[nodiscard]] inline Radians getAngle( void ) const { return m_angle; }
+
                 void init( BehaviorContext *context ) noexcept override;
                 Behavior::State step( BehaviorContext *context ) noexcept override;
 
@@ -52,6 +55,17 @@ namespace crimild {
                 Vector3 m_axis;
                 Radians m_angle;
                 Clock m_clock;
+
+                /**
+                    \name Coding support
+                */
+                //@{
+
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+
+                //@}
             };
 
             [[nodiscard]] inline SharedPointer< Rotate > rotate( const Vector3 &axis, Radians angle ) noexcept

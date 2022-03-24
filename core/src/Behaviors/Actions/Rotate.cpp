@@ -27,6 +27,8 @@
 
 #include "Behaviors/Actions/Rotate.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "SceneGraph/Node.hpp"
@@ -55,4 +57,20 @@ Behavior::State Rotate::step( BehaviorContext *context ) noexcept
     agent->setLocal( agent->getLocal() * rotation( m_axis, dt * m_angle ) );
 
     return Behavior::State::RUNNING;
+}
+
+void Rotate::encode( coding::Encoder &encoder )
+{
+    Behavior::encode( encoder );
+
+    encoder.encode( "axis", m_axis );
+    encoder.encode( "angle", m_angle );
+}
+
+void Rotate::decode( coding::Decoder &decoder )
+{
+    Behavior::decode( decoder );
+
+    decoder.decode( "axis", m_axis );
+    decoder.decode( "angle", m_angle );
 }
