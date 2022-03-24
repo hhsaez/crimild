@@ -55,8 +55,7 @@ public:
                 float circleMask( vec2 uv, vec2 p, float r, float blur )
                 {
                     float d = length( uv - p );
-                    float c = smoothstep( r, r - blur, d );
-                    return c;
+                    return d > r ? 0.0 : 1.0;
                 }
 
                 void main()
@@ -68,16 +67,11 @@ public:
                     float blur = 0.00625;
 
                     float mask = circleMask( uv, vec2( 0.0 ), 0.4, blur );
-                    mask -= circleMask( uv, vec2( -0.15, 0.1 ), 0.075, blur );
-                    mask -= circleMask( uv, vec2( 0.15, 0.1 ), 0.075, blur );
-                    vec3 faceColor = vec3( 1.0, 1.0, 0.0 ) * mask;
+                    mask -= circleMask( uv, vec2( 0.0, 0.0 ), 0.25, blur );
+                    if ( uv.x > 0.2 ) mask = 0.0;
+                    vec3 faceColor = vec3( 0.3, 0.3, 0.3 ) * mask;
 
-                    mask = circleMask( uv, vec2( 0.0 ), 0.25, blur );
-                    mask -= circleMask( uv, vec2( 0.0, 0.05 ), 0.25, blur );
-                    mask *= uv.y <= 0.0 ? 1.0 : 0.0;
-                    vec3 mouthColor = vec3( 1.0 ) * mask;
-
-                    vec3 color = faceColor - mouthColor;
+                    vec3 color = faceColor;
 
                     outColor = vec4( color, 1.0 );
                 }
