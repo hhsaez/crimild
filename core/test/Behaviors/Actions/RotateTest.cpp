@@ -31,6 +31,7 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <gtest/gtest.h>
