@@ -27,6 +27,8 @@
 
 #include "Editor/EditorUtils.hpp"
 
+#include "Behaviors/Actions/Rotate.hpp"
+#include "Behaviors/withBehavior.hpp"
 #include "Coding/FileDecoder.hpp"
 #include "Coding/FileEncoder.hpp"
 #include "Coding/JSONDecoder.hpp"
@@ -93,7 +95,12 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
         [ & ] {
             auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.5, 0.3, 0.2 } );
             box->setLocal( translation( 0, 1, 0 ) );
-            return box;
+            return behaviors::withBehavior(
+                box,
+                behaviors::actions::rotate(
+                    normalize( Vector3::Constants::UNIT_Y ),
+                    0.1f ) );
+            ;
         }() );
 
     scene->attachNode(

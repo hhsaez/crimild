@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,80 +29,77 @@
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTROLLER_
 
 #include "Components/NodeComponent.hpp"
-
-#include "Messaging/MessageQueue.hpp"
 #include "Foundation/Containers/Map.hpp"
+#include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
 
-	namespace behaviors {
+    namespace behaviors {
 
-		class Behavior;
-		class BehaviorTree;
-		class BehaviorContext;
+        class Behavior;
+        class BehaviorTree;
+        class BehaviorContext;
 
-		class BehaviorController :
-			public crimild::NodeComponent,
-			public crimild::Messenger {
-			CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
+        class BehaviorController : public crimild::NodeComponent,
+                                   public crimild::Messenger {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
 
-		public:
-			static constexpr const crimild::Char *DEFAULT_BEHAVIOR_NAME = "__default__";
-			static constexpr const crimild::Char *SCENE_STARTED_BEHAVIOR_NAME = "__scene_started__";
+        public:
+            static constexpr const crimild::Char *DEFAULT_BEHAVIOR_NAME = "__default__";
+            static constexpr const crimild::Char *SCENE_STARTED_BEHAVIOR_NAME = "__scene_started__";
 
-			static constexpr const crimild::Char *SETTINGS_EXECUTE_BEHAVIORS = "execute_behaviors";
+            static constexpr const crimild::Char *SETTINGS_EXECUTE_BEHAVIORS = "execute_behaviors";
 
-		public:
-			explicit BehaviorController( void );
-			virtual ~BehaviorController( void );
+        public:
+            explicit BehaviorController( void );
+            virtual ~BehaviorController( void );
 
-			virtual void onAttach( void ) override;
-			virtual void onDetach( void ) override;
+            virtual void onAttach( void ) override;
+            virtual void onDetach( void ) override;
 
-			virtual void start( void ) override;
-			virtual void update( const crimild::Clock & ) override;
+            virtual void start( void ) override;
+            virtual void update( const crimild::Clock & ) override;
 
-		public:
-			crimild::behaviors::BehaviorContext *getContext( void ) { return crimild::get_ptr( _context ); }
+        public:
+            crimild::behaviors::BehaviorContext *getContext( void ) { return crimild::get_ptr( _context ); }
 
-		public:
-			void attachBehaviorTree( SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
-			void attachBehaviorTree( std::string eventName, SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
-			
-			/**
+        public:
+            void attachBehaviorTree( SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
+            void attachBehaviorTree( std::string eventName, SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
+
+            /**
 			 \brief Executes the behavior tree matching the given name
 
 			\remarks If no behavior is found, the current behavior is not modified
 			*/
-			bool executeBehaviorTree( std::string name );
+            bool executeBehaviorTree( std::string name );
 
-			inline crimild::behaviors::BehaviorTree *getBehaviorTree( std::string name ) { return crimild::get_ptr( _behaviors[ name ] ); }
+            inline crimild::behaviors::BehaviorTree *getBehaviorTree( std::string name = DEFAULT_BEHAVIOR_NAME ) { return crimild::get_ptr( _behaviors[ name ] ); }
 
-		private:
-			crimild::behaviors::BehaviorTree *getCurrentBehaviorTree( void ) { return _currentBehaviorTree; }
-			void setCurrentBehaviorTree( crimild::behaviors::BehaviorTree *behaviorTree ) { _currentBehaviorTree = behaviorTree; }
+        private:
+            crimild::behaviors::BehaviorTree *getCurrentBehaviorTree( void ) { return _currentBehaviorTree; }
+            void setCurrentBehaviorTree( crimild::behaviors::BehaviorTree *behaviorTree ) { _currentBehaviorTree = behaviorTree; }
 
-		private:
-			Map< std::string, SharedPointer< crimild::behaviors::BehaviorTree >> _behaviors;
-			crimild::behaviors::BehaviorTree *_currentBehaviorTree = nullptr;
-			std::string _currentEvent;
-			SharedPointer< crimild::behaviors::BehaviorContext > _context;
+        private:
+            Map< std::string, SharedPointer< crimild::behaviors::BehaviorTree > > _behaviors;
+            crimild::behaviors::BehaviorTree *_currentBehaviorTree = nullptr;
+            std::string _currentEvent;
+            SharedPointer< crimild::behaviors::BehaviorContext > _context;
 
-			/**
+            /**
 			 \name Coding support
 			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}
-		};
+            //@{
 
-	}
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+        };
+
+    }
 
 }
 
 #endif
-

@@ -84,6 +84,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionComputePathToTarget );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionReset );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionSeek );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::Rotate );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::PrintMessage );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetContextValue );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::SetSettingValue );
