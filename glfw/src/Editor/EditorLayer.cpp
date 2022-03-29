@@ -295,6 +295,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
         case Event::Type::TICK: {
             // Do nothing, but forces an update. And do not override.
             overrideEvent = false;
+            updateUI();
             break;
         }
 
@@ -307,7 +308,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
     }
 
     if ( needsUpdate ) {
-        updateUI();
+        // updateUI();
     }
 
     if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard || ImGuizmo::IsOver() || ImGuizmo::IsUsing() ) ) {

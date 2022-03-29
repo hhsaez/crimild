@@ -42,6 +42,7 @@
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/get_ptr.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
@@ -57,34 +58,31 @@ using namespace crimild;
 
 void behaviorEditor( bool &open, EditorLayer *editor )
 {
-    // Graph datas
-    static const GraphEditor::Template mTemplates[] = {
-        {
-            IM_COL32( 160, 160, 180, 255 ),
-            IM_COL32( 100, 100, 140, 255 ),
-            IM_COL32( 110, 110, 150, 255 ),
-            1,
-            ( Array { "MyInput" } ).getData(),
-            nullptr,
-            2,
-            ( Array { "MyOutput0", "MyOuput1" } ).getData(),
-            nullptr,
-        },
-
-        {
-            IM_COL32( 180, 160, 160, 255 ),
-            IM_COL32( 140, 100, 100, 255 ),
-            IM_COL32( 150, 110, 110, 255 ),
-            3,
-            nullptr,
-            ( Array { IM_COL32( 200, 100, 100, 255 ), IM_COL32( 100, 200, 100, 255 ), IM_COL32( 100, 100, 200, 255 ) } ).getData(),
-            1,
-            ( Array { "MyOutput0" } ).getData(),
-            ( Array { IM_COL32( 200, 200, 200, 255 ) } ).getData(),
-        },
-    };
-
     struct GraphEditorDelegate : public GraphEditor::Delegate {
+        struct Node {
+            enum Type {
+                TREE,
+                DECORATOR,
+                ACTION,
+                COMPOSITE,
+            };
+
+            std::string name;
+            Type type;
+
+            union {
+                behaviors::BehaviorTree *tree = nullptr;
+                behaviors::composites::Composite *composite;
+                behaviors::decorators::Decorator *decorator;
+                behaviors::Behavior *action;
+            };
+
+            // const char *name;
+            GraphEditor::TemplateIndex templateIndex = 0;
+            float x = 0;
+            float y = 0;
+            bool mSelected = false;
+        };
 
         void configure( behaviors::BehaviorController *behaviors )
         {
@@ -97,23 +95,29 @@ void behaviorEditor( bool &open, EditorLayer *editor )
             m_nodes.clear();
             m_links.clear();
             m_index.clear();
+            m_templates.clear();
+            m_allBehaviors.clear();
 
             if ( m_behaviors == nullptr ) {
                 return;
             }
 
-            configure( behaviors->getBehaviorTree() );
+            configure( behaviors->getBehaviorTree(), Vector2 { 0, 300 } );
         }
 
-        void configure( behaviors::BehaviorTree *tree )
+        void configure( behaviors::BehaviorTree *tree, const Vector2 &offset )
         {
             m_index[ tree->getUniqueID() ] = m_nodes.size();
             m_nodes.push_back(
                 Node {
-                    .type = Node::Type::EVENT,
+                    .type = Node::Type::TREE,
                     .name = tree->getName(),
-                    .tree = crimild::retain( tree ),
+                    .tree = tree,
+                    .x = offset.x,
+                    .y = offset.y,
+                    .templateIndex = m_templates.size(),
                 } );
+            m_templates.emplace_back( getBehaviorTreeTemplate() );
 
             auto root = tree->getRootBehavior();
             if ( root == nullptr ) {
@@ -121,25 +125,55 @@ void behaviorEditor( bool &open, EditorLayer *editor )
             }
 
             size_t rootIdx;
-            if ( configure( root, rootIdx ) ) {
+            if ( configure( root, offset + Vector2 { 300, 0 }, rootIdx ) ) {
                 m_links.push_back( { 0, 0, rootIdx, 0 } );
             }
         }
 
-        bool configure( behaviors::Behavior *behavior, size_t &idx )
+        bool configure( behaviors::Behavior *behavior, const Vector2 offset, size_t &idx )
         {
             if ( behavior == nullptr ) {
                 return false;
             }
 
-            m_index[ behavior->getUniqueID() ] = m_nodes.size();
+            m_allBehaviors.push_back( crimild::retain( behavior ) );
+
+            idx = m_nodes.size();
+            m_index[ behavior->getUniqueID() ] = idx;
             m_nodes.push_back(
                 Node {
-                    .type = Node::Type::ACTION,
                     .name = getBehaviorName( behavior->getClassName() ),
-                    .behavior = crimild::retain( behavior ),
+                    .templateIndex = m_templates.size(),
+                    .x = offset.x,
+                    .y = offset.y,
                 } );
-            idx = m_index[ behavior->getUniqueID() ];
+
+            if ( auto composite = dynamic_cast< behaviors::composites::Composite * >( behavior ) ) {
+                m_nodes[ idx ].type = Node::Type::COMPOSITE;
+                m_nodes[ idx ].composite = composite;
+                m_templates.push_back( getBehaviorCompositeTemplate() );
+                const auto N = composite->getBehaviorCount();
+                for ( auto i = 0l; i < N; ++i ) {
+                    size_t childIdx;
+                    if ( configure( composite->getBehaviorAt( i ), offset + Vector2 { 300.0f, 300.0f * i }, childIdx ) ) {
+                        m_links.push_back( { idx, 0, childIdx, 0 } );
+                    }
+                }
+            } else if ( auto decorator = dynamic_cast< behaviors::decorators::Decorator * >( behavior ) ) {
+                m_nodes[ idx ].type = Node::Type::DECORATOR;
+                m_nodes[ idx ].decorator = decorator;
+                m_templates.push_back( getBehaviorDecoratorTemplate() );
+                if ( auto childBehavior = decorator->getBehavior() ) {
+                    size_t childIdx;
+                    if ( configure( childBehavior, offset + Vector2 { 300, 0 }, childIdx ) ) {
+                        m_links.push_back( { idx, 0, childIdx, 0 } );
+                    }
+                }
+            } else {
+                m_nodes[ idx ].type = Node::Type::ACTION;
+                m_nodes[ idx ].action = behavior;
+                m_templates.push_back( getBehaviorActionTemplate() );
+            }
 
             return true;
         }
@@ -157,7 +191,7 @@ void behaviorEditor( bool &open, EditorLayer *editor )
         void addBehavior( SharedPointer< behaviors::Behavior > const &behavior )
         {
             size_t idx;
-            configure( crimild::get_ptr( behavior ), idx );
+            configure( crimild::get_ptr( behavior ), Vector2 { 0, 0 }, idx );
         }
 
         bool AllowedLink( GraphEditor::NodeIndex from, GraphEditor::NodeIndex to ) override
@@ -187,12 +221,20 @@ void behaviorEditor( bool &open, EditorLayer *editor )
 
         void AddLink( GraphEditor::NodeIndex inputNodeIndex, GraphEditor::SlotIndex inputSlotIndex, GraphEditor::NodeIndex outputNodeIndex, GraphEditor::SlotIndex outputSlotIndex ) override
         {
-            std::cout << inputNodeIndex << " " << inputSlotIndex << " " << outputNodeIndex << " " << outputSlotIndex << std::endl;
-
             auto &in = m_nodes[ inputNodeIndex ];
             auto &out = m_nodes[ outputNodeIndex ];
 
-            if ( in.type == Node::Type::EVENT ) {
+            auto getOutBehavior = [ & ]() -> SharedPointer< behaviors::Behavior > {
+                if ( out.composite ) {
+                    return crimild::retain( out.composite );
+                } else if ( out.decorator ) {
+                    return crimild::retain( out.decorator );
+                } else {
+                    return crimild::retain( out.action );
+                }
+            };
+
+            auto delCurrentLink = [ & ] {
                 // Remove existing links
                 auto it = std::find_if(
                     m_links.begin(),
@@ -203,8 +245,16 @@ void behaviorEditor( bool &open, EditorLayer *editor )
                 if ( it != m_links.end() ) {
                     m_links.erase( it );
                 }
+            };
 
-                in.tree->setRootBehavior( out.behavior );
+            if ( in.type == Node::Type::TREE ) {
+                delCurrentLink();
+                in.tree->setRootBehavior( getOutBehavior() );
+            } else if ( in.type == Node::Type::COMPOSITE ) {
+                in.composite->attachBehavior( getOutBehavior() );
+            } else if ( in.type == Node::Type::DECORATOR ) {
+                delCurrentLink();
+                in.decorator->setBehavior( getOutBehavior() );
             }
 
             m_links.push_back( { inputNodeIndex, inputSlotIndex, outputNodeIndex, outputSlotIndex } );
@@ -212,6 +262,27 @@ void behaviorEditor( bool &open, EditorLayer *editor )
 
         void DelLink( GraphEditor::LinkIndex linkIndex ) override
         {
+            auto link = m_links[ linkIndex ];
+            auto in = m_nodes[ link.mInputNodeIndex ];
+            auto out = m_nodes[ link.mOutputNodeIndex ];
+
+            auto getOutBehavior = [ & ]() -> SharedPointer< behaviors::Behavior > {
+                if ( out.composite ) {
+                    return crimild::retain( out.composite );
+                } else if ( out.decorator ) {
+                    return crimild::retain( out.decorator );
+                } else {
+                    return crimild::retain( out.action );
+                }
+            };
+
+            if ( in.type == Node::Type::TREE ) {
+                in.tree->setRootBehavior( nullptr );
+            } else if ( in.type == Node::Type::COMPOSITE ) {
+                in.composite->detachBehavior( getOutBehavior() );
+            } else if ( in.type == Node::Type::DECORATOR ) {
+                in.decorator->setBehavior( nullptr );
+            }
             m_links.erase( m_links.begin() + linkIndex );
         }
 
@@ -223,12 +294,72 @@ void behaviorEditor( bool &open, EditorLayer *editor )
 
         const size_t GetTemplateCount() override
         {
-            return sizeof( mTemplates ) / sizeof( GraphEditor::Template );
+            return m_templates.size();
         }
 
         const GraphEditor::Template GetTemplate( GraphEditor::TemplateIndex index ) override
         {
-            return mTemplates[ index ];
+            return m_templates[ index ];
+        }
+
+        GraphEditor::Template getBehaviorTreeTemplate( void ) const
+        {
+            return {
+                IM_COL32( 160, 160, 180, 255 ),
+                IM_COL32( 140, 140, 100, 255 ),
+                IM_COL32( 150, 150, 110, 255 ),
+                0,
+                nullptr,
+                nullptr,
+                1,
+                nullptr,
+                nullptr,
+            };
+        }
+
+        GraphEditor::Template getBehaviorActionTemplate( void ) const
+        {
+            return {
+                IM_COL32( 160, 160, 180, 255 ),
+                IM_COL32( 140, 100, 100, 255 ),
+                IM_COL32( 150, 110, 110, 255 ),
+                1,
+                nullptr,
+                nullptr,
+                0,
+                nullptr,
+                nullptr,
+            };
+        }
+
+        GraphEditor::Template getBehaviorDecoratorTemplate( void ) const
+        {
+            return {
+                IM_COL32( 160, 160, 180, 255 ),
+                IM_COL32( 100, 100, 140, 255 ),
+                IM_COL32( 110, 110, 150, 255 ),
+                1,
+                nullptr,
+                nullptr,
+                1,
+                nullptr,
+                nullptr,
+            };
+        }
+
+        GraphEditor::Template getBehaviorCompositeTemplate( void ) const
+        {
+            return {
+                IM_COL32( 160, 160, 180, 255 ),
+                IM_COL32( 100, 140, 100, 255 ),
+                IM_COL32( 110, 150, 110, 255 ),
+                1,
+                nullptr,
+                nullptr,
+                1,
+                nullptr,
+                nullptr,
+            };
         }
 
         const size_t GetNodeCount() override
@@ -258,55 +389,13 @@ void behaviorEditor( bool &open, EditorLayer *editor )
             return m_links[ index ];
         }
 
+    private:
         behaviors::BehaviorController *m_behaviors = nullptr;
-
-        struct Node {
-            enum Type {
-                EVENT,
-                DECORATOR,
-                ACTION,
-                COMPOSITE,
-            };
-
-            std::string name;
-            Type type;
-
-            // TODO: It would be ideal to use a union here, but it makes things more complex to declare.
-            SharedPointer< behaviors::BehaviorTree > tree;
-            SharedPointer< behaviors::Behavior > behavior;
-
-            // const char *name;
-            GraphEditor::TemplateIndex templateIndex;
-            float x = 0;
-            float y = 0;
-            bool mSelected = false;
-        };
-
         std::unordered_map< size_t, size_t > m_index;
         std::vector< Node > m_nodes;
         std::vector< GraphEditor::Link > m_links;
-
-        // std::vector< Node > mNodes = {
-        //     { "My Node 0",
-        //       0,
-        //       0,
-        //       0,
-        //       false },
-
-        //     { "My Node 1",
-        //       0,
-        //       400,
-        //       0,
-        //       false },
-
-        //     { "My Node 2",
-        //       1,
-        //       400,
-        //       400,
-        //       false }
-        // };
-
-        // std::vector< GraphEditor::Link > mLinks = { { 0, 0, 1, 0 } };
+        std::vector< GraphEditor::Template > m_templates;
+        std::vector< SharedPointer< behaviors::Behavior > > m_allBehaviors;
     };
 
     static GraphEditor::Options options;
@@ -342,8 +431,20 @@ void behaviorEditor( bool &open, EditorLayer *editor )
 
         ImGui::SameLine();
 
-        if ( ImGui::Button( "Add Print..." ) ) {
-            delegate.addBehavior( crimild::alloc< behaviors::actions::PrintMessage >() );
+        if ( ImGui::Button( "Add Print A..." ) ) {
+            delegate.addBehavior( crimild::alloc< behaviors::actions::PrintMessage >( "A" ) );
+        }
+
+        ImGui::SameLine();
+
+        if ( ImGui::Button( "Add Print B..." ) ) {
+            delegate.addBehavior( crimild::alloc< behaviors::actions::PrintMessage >( "B" ) );
+        }
+
+        ImGui::SameLine();
+
+        if ( ImGui::Button( "Add Print C..." ) ) {
+            delegate.addBehavior( crimild::alloc< behaviors::actions::PrintMessage >( "C" ) );
         }
 
         ImGui::SameLine();
