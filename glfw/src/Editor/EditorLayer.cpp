@@ -46,8 +46,8 @@
 
 #include <array>
 
-#define MAX_VERTEX_COUNT 10000
-#define MAX_INDEX_COUNT 10000
+#define MAX_VERTEX_COUNT 100000
+#define MAX_INDEX_COUNT 100000
 
 using namespace crimild;
 using namespace crimild::vulkan;
