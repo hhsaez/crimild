@@ -35,6 +35,7 @@
 #include "Behaviors/Composites/Sequence.hpp"
 #include "Behaviors/Decorators/Decorator.hpp"
 #include "Behaviors/Decorators/Repeat.hpp"
+#include "Behaviors/withBehavior.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
@@ -56,7 +57,7 @@
 
 using namespace crimild;
 
-void behaviorEditor( bool &open, EditorLayer *editor )
+void behaviorEditor( bool &open, behaviors::BehaviorController *controller )
 {
     struct GraphEditorDelegate : public GraphEditor::Delegate {
         struct Node {
@@ -407,12 +408,7 @@ void behaviorEditor( bool &open, EditorLayer *editor )
         return;
     }
 
-    auto selected = editor->getSelectedNode();
-    if ( selected == nullptr ) {
-        return;
-    }
-
-    delegate.configure( editor->getSelectedNode()->getComponent< behaviors::BehaviorController >() );
+    delegate.configure( controller );
 
     if ( ImGui::Begin( "Behaviors", &open, 0 ) ) {
         if ( ImGui::Button( "Fit All Nodes" ) ) {
@@ -471,6 +467,19 @@ void behaviorEditor( bool &open, EditorLayer *editor )
     }
 }
 
+void behaviorEditor( bool &open, EditorLayer *editor )
+{
+    auto selected = editor->getSelectedNode();
+    if ( selected == nullptr ) {
+        return;
+    }
+
+    auto controller = selected->getComponent< behaviors::BehaviorController >();
+    if ( controller ) {
+        behaviorEditor( open, controller );
+    }
+}
+
 void materialComponentDetails( MaterialComponent *materials )
 {
     auto material = materials->first();
@@ -478,31 +487,51 @@ void materialComponentDetails( MaterialComponent *materials )
         return;
     }
 
-    ImGui::Text( "Material (%s)", material->getClassName() );
-
-    if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-        const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
-        auto albedo = bsdf->getAlbedo();
-        ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
-        bsdf->setAlbedo( albedo );
-    } else {
-        const auto unlit = static_cast< UnlitMaterial * >( material );
-        auto color = rgb( unlit->getColor() );
-        ImGui::ColorEdit3( "Color", get_ptr( color ) );
-        // return std::make_tuple( unlit->getColor(), unlit->getTexture() );
+    if ( ImGui::CollapsingHeader( material->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+            const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
+            auto albedo = bsdf->getAlbedo();
+            ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
+            bsdf->setAlbedo( albedo );
+        } else {
+            const auto unlit = static_cast< UnlitMaterial * >( material );
+            auto color = rgb( unlit->getColor() );
+            ImGui::ColorEdit3( "Color", get_ptr( color ) );
+        }
     }
+}
+
+void behaviorControllerDetails( behaviors::BehaviorController *controller )
+{
+    static bool showBehaviorEditor = false;
+    ImGui::SetNextItemOpen( true );
+    if ( ImGui::CollapsingHeader( controller->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        if ( ImGui::Button( "Edit Behaviors..." ) ) {
+            showBehaviorEditor = true;
+        }
+    }
+
+    behaviorEditor( showBehaviorEditor, controller );
 }
 
 void nodeComponentsSection( Node *node )
 {
     ImGui::SetNextItemOpen( true );
-    if ( ImGui::CollapsingHeader( "Components", nullptr ) ) {
+    if ( ImGui::CollapsingHeader( "Components", ImGuiTreeNodeFlags_None ) ) {
         node->forEachComponent(
-            []( NodeComponent *cmp ) {
+            [ & ]( NodeComponent *cmp ) {
                 if ( cmp->getClassName() == MaterialComponent::__CLASS_NAME ) {
                     materialComponentDetails( static_cast< MaterialComponent * >( cmp ) );
+                } else if ( cmp->getClassName() == behaviors::BehaviorController::__CLASS_NAME ) {
+                    behaviorControllerDetails( static_cast< behaviors::BehaviorController * >( cmp ) );
                 }
             } );
+
+        if ( node->getComponent< behaviors::BehaviorController >() == nullptr ) {
+            if ( ImGui::Button( "Add Behaviors..." ) ) {
+                withBehavior( retain( node ), behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
+            }
+        }
     }
 }
 
