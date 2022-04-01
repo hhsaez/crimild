@@ -98,6 +98,22 @@ namespace crimild {
             inline void setObjectName( VkImageView handle, const char *name ) noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
             void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept;
 
+            void createImage(
+                crimild::UInt32 width,
+                crimild::UInt32 height,
+                VkFormat format,
+                VkImageTiling tiling,
+                VkImageUsageFlags usage,
+                VkMemoryPropertyFlags memoryProperties,
+                crimild::UInt32 mipLevels,
+                VkSampleCountFlagBits numSamples,
+                crimild::UInt32 arrayLayers,
+                crimild::UInt32 flags,
+                VkImage &image,
+                VkDeviceMemory &imageMemory ) const noexcept;
+
+            void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) noexcept;
+
         private:
             void
             createSwapchain( void ) noexcept;
@@ -130,20 +146,6 @@ namespace crimild {
             void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
 
             void copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept;
-
-            void createImage(
-                crimild::UInt32 width,
-                crimild::UInt32 height,
-                VkFormat format,
-                VkImageTiling tiling,
-                VkImageUsageFlags usage,
-                VkMemoryPropertyFlags memoryProperties,
-                crimild::UInt32 mipLevels,
-                VkSampleCountFlagBits numSamples,
-                crimild::UInt32 arrayLayers,
-                crimild::UInt32 flags,
-                VkImage &image,
-                VkDeviceMemory &imageMemory ) const noexcept;
 
             void transitionImageLayout(
                 VkImage image,

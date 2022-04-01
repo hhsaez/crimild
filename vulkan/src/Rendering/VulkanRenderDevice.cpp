@@ -1297,6 +1297,11 @@ void RenderDevice::createImage(
             0 ) );
 }
 
+void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) noexcept
+{
+    utils::createImageView( m_handle, image, format, aspectFlags, &imageView );
+}
+
 VkImage RenderDevice::bind( const Image *image ) noexcept
 {
     const auto id = image->getUniqueID();

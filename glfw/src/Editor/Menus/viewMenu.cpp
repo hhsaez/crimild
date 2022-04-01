@@ -410,6 +410,9 @@ void behaviorEditor( bool &open, behaviors::BehaviorController *controller )
 
     delegate.configure( controller );
 
+    ImGui::SetNextWindowPos( ImVec2( 310, 750 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 1280, 325 ), ImGuiCond_Always );
+
     if ( ImGui::Begin( "Behaviors", &open, 0 ) ) {
         if ( ImGui::Button( "Fit All Nodes" ) ) {
             fit = GraphEditor::Fit_AllNodes;
@@ -469,15 +472,15 @@ void behaviorEditor( bool &open, behaviors::BehaviorController *controller )
 
 void behaviorEditor( bool &open, EditorLayer *editor )
 {
-    auto selected = editor->getSelectedNode();
-    if ( selected == nullptr ) {
-        return;
-    }
+    auto controller = [ & ]() -> behaviors::BehaviorController * {
+        auto selected = editor->getSelectedNode();
+        if ( selected == nullptr ) {
+            return nullptr;
+        }
+        return selected->getComponent< behaviors::BehaviorController >();
+    }();
 
-    auto controller = selected->getComponent< behaviors::BehaviorController >();
-    if ( controller ) {
-        behaviorEditor( open, controller );
-    }
+    behaviorEditor( open, controller );
 }
 
 void materialComponentDetails( MaterialComponent *materials )
@@ -541,8 +544,8 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
         return;
     }
 
-    ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( 200, 300 ), ImGuiCond_FirstUseEver );
+    ImGui::SetNextWindowPos( ImVec2( 1595, 25 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 320, 1050 ), ImGuiCond_Always );
 
     if ( ImGui::Begin( "Node Inspector", &open, ImGuiWindowFlags_NoCollapse ) ) {
         auto node = editor->getSelectedNode();
@@ -654,10 +657,10 @@ void sceneHierarchyPanel( bool &open, EditorLayer *editor )
         return;
     }
 
-    ImGui::SetNextWindowPos( ImVec2( 20, 40 ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( 280, 500 ), ImGuiCond_FirstUseEver );
+    ImGui::SetNextWindowPos( ImVec2( 5, 25 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 300, 1050 ), ImGuiCond_Always );
 
-    if ( ImGui::Begin( "Scene", &open, ImGuiWindowFlags_NoCollapse ) ) {
+    if ( ImGui::Begin( "Scene Hierarchy", &open, ImGuiWindowFlags_NoCollapse ) ) {
         if ( Simulation::getInstance() != nullptr ) {
             auto scene = Simulation::getInstance()->getScene();
             if ( scene ) {
@@ -674,13 +677,50 @@ void sceneHierarchyPanel( bool &open, EditorLayer *editor )
     ImGui::End();
 }
 
+void scenePanel( bool &open, EditorLayer *editor )
+{
+    if ( !open ) {
+        return;
+    }
+
+    static int selectedRenderMode = 1;
+
+    ImGui::SetNextWindowPos( ImVec2( 310, 25 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 1280, 720 ), ImGuiCond_Always );
+
+    if ( ImGui::Begin( "Scene", &open ) ) {
+        if ( ImGui::BeginCombo( "Select render mode", "Final", 0 ) ) {
+            if ( ImGui::Selectable( "Final", selectedRenderMode == 1 ) ) {
+                selectedRenderMode = 1;
+            }
+            if ( ImGui::Selectable( "Depth", selectedRenderMode == 2 ) ) {
+                selectedRenderMode = 2;
+            }
+            ImGui::EndCombo();
+        }
+
+        ImTextureID tex_id = ( ImTextureID )( intptr_t ) selectedRenderMode;
+        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+        ImGui::Image( tex_id, ImVec2( 1260, 660 ), uv_min, uv_max, tint_col, border_col );
+
+        ImGui::End();
+    }
+}
+
 void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 {
+    static bool showScenePanel = true;
     static bool showSceneHierarchyPanel = true;
     static bool showNodeInspectorPanel = true;
-    static bool showBehaviorEditor = false;
+    static bool showBehaviorEditor = true;
 
     if ( ImGui::BeginMenu( "View" ) ) {
+        if ( ImGui::MenuItem( "Scene..." ) ) {
+            showScenePanel = true;
+        }
         if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
             showSceneHierarchyPanel = true;
         }
@@ -694,4 +734,5 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
     sceneHierarchyPanel( showSceneHierarchyPanel, editor );
     nodeInspectorPanel( showNodeInspectorPanel, editor );
     behaviorEditor( showBehaviorEditor, editor );
+    scenePanel( showScenePanel, editor );
 }
