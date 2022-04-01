@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
-#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GBUFFER_
+#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GBUFFER_
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
@@ -45,28 +45,20 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class ScenePass {
+        class GBufferPass {
         public:
-            struct FramebufferAttachment {
-                VkImage image;
-                VkDeviceMemory memory;
-                VkImageView imageView;
-                VkSampler sampler;
-            };
-
-        public:
-            explicit ScenePass( RenderDevice *renderDevice ) noexcept;
-            virtual ~ScenePass( void ) noexcept;
+            explicit GBufferPass( RenderDevice *renderDevice ) noexcept;
+            virtual ~GBufferPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
             void render( void ) noexcept;
 
-            [[nodiscard]] inline const FramebufferAttachment &getColorAttachment( void ) const noexcept { return m_colorAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment &getDepthAttachment( void ) const noexcept { return m_depthAttachment; }
-
         private:
             void init( void ) noexcept;
             void clear( void ) noexcept;
+
+            void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
+            void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
 
             void createRenderPassObjects( void ) noexcept;
             void destroyRenderPassObjects( void ) noexcept;
@@ -87,9 +79,6 @@ namespace crimild {
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
 
-            FramebufferAttachment m_colorAttachment;
-            FramebufferAttachment m_depthAttachment;
-
             std::unique_ptr< GraphicsPipeline > m_pipeline;
 
             std::unique_ptr< ShaderProgram > m_program;
@@ -105,8 +94,6 @@ namespace crimild {
                 };
                 std::unique_ptr< UniformBuffer > uniforms;
             } m_renderPassObjects;
-
-            std::unique_ptr< Simulation > m_simulation;
 
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {

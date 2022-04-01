@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/swizzle.hpp"
@@ -49,7 +49,7 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
+GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
       m_program(
           [ & ] {
@@ -108,20 +108,15 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
               return program;
           }() )
 {
-    m_simulation = Simulation::create();
-    m_simulation->start();
-
     init();
 }
 
-ScenePass::~ScenePass( void ) noexcept
+GBufferPass::~GBufferPass( void ) noexcept
 {
-    m_simulation->stop();
-
     clear();
 }
 
-Event ScenePass::handle( const Event &e ) noexcept
+Event GBufferPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
@@ -134,10 +129,10 @@ Event ScenePass::handle( const Event &e ) noexcept
             break;
     }
 
-    return m_simulation->handle( e );
+    return e;
 }
 
-void ScenePass::render( void ) noexcept
+void GBufferPass::render( void ) noexcept
 {
     auto scene = Simulation::getInstance()->getScene();
     if ( scene == nullptr ) {
@@ -164,35 +159,7 @@ void ScenePass::render( void ) noexcept
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
 
-    const auto clearValues = std::array< VkClearValue, 2 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                },
-            },
-        },
-        VkClearValue {
-            .depthStencil = {
-                1,
-                0,
-            },
-        },
-    };
-
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ 0 ],
-        .renderArea = m_renderArea,
-        .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
-        .pClearValues = clearValues.data(),
-    };
-
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    beginRenderPass( commandBuffer, currentFrameIndex );
 
     renderables.eachGeometry(
         [ & ]( Geometry *geometry ) {
@@ -212,45 +179,43 @@ void ScenePass::render( void ) noexcept
             }
         } );
 
-    vkCmdEndRenderPass( commandBuffer );
+    endRenderPass( commandBuffer );
 }
 
-void ScenePass::init( void ) noexcept
+void GBufferPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
-
-    const auto colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    const auto depthFormat = m_renderDevice->getDepthStencilFormat();
-    const auto extent = m_renderDevice->getSwapchainExtent();
 
     m_renderArea = VkRect2D {
         .offset = {
             0,
             0,
         },
-        .extent = extent,
+        .extent = m_renderDevice->getSwapchainExtent(),
     };
 
     auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
-            .format = colorFormat,
+            .format = m_renderDevice->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            // Don't clear input. Just load it as it is
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         },
         VkAttachmentDescription {
-            .format = depthFormat,
+            .format = m_renderDevice->getDepthStencilFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            // Don't clear input. Just load it as it is
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         }
     };
 
@@ -285,18 +250,18 @@ void ScenePass::init( void ) noexcept
         VkSubpassDependency {
             .srcSubpass = VK_SUBPASS_EXTERNAL,
             .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         },
         VkSubpassDependency {
             .srcSubpass = 0,
             .dstSubpass = VK_SUBPASS_EXTERNAL,
             .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
             .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
             .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
         }
@@ -319,104 +284,13 @@ void ScenePass::init( void ) noexcept
             nullptr,
             &m_renderPass ) );
 
-    // Color attachment
-    {
-        m_renderDevice->createImage(
-            extent.width,
-            extent.height,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
-            1,
-            VK_SAMPLE_COUNT_1_BIT,
-            1,
-            0,
-            m_colorAttachment.image,
-            m_colorAttachment.memory );
-        m_renderDevice->createImageView(
-            m_colorAttachment.image,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            m_colorAttachment.imageView );
-        auto samplerInfo = VkSamplerCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter = VK_FILTER_LINEAR,
-            .minFilter = VK_FILTER_LINEAR,
-            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-            .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .mipLodBias = 0,
-            .anisotropyEnable = VK_TRUE,
-            .maxAnisotropy = 1,
-            .compareEnable = VK_FALSE,
-            .compareOp = VK_COMPARE_OP_ALWAYS,
-            .minLod = 0,
-            .maxLod = 1,
-            .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-            .unnormalizedCoordinates = VK_FALSE,
-        };
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSampler(
-                m_renderDevice->getHandle(),
-                &samplerInfo,
-                nullptr,
-                &m_colorAttachment.sampler ) );
-    }
-
-    // Depth attachment
-    {
-        m_renderDevice->createImage(
-            extent.width,
-            extent.height,
-            m_renderDevice->getDepthStencilFormat(),
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
-            1,
-            VK_SAMPLE_COUNT_1_BIT,
-            1,
-            0,
-            m_depthAttachment.image,
-            m_depthAttachment.memory );
-        m_renderDevice->createImageView(
-            m_depthAttachment.image,
-            m_renderDevice->getDepthStencilFormat(),
-            VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
-            m_depthAttachment.imageView );
-        auto samplerInfo = VkSamplerCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter = VK_FILTER_LINEAR,
-            .minFilter = VK_FILTER_LINEAR,
-            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-            .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .mipLodBias = 0,
-            .anisotropyEnable = VK_TRUE,
-            .maxAnisotropy = 1,
-            .compareEnable = VK_FALSE,
-            .compareOp = VK_COMPARE_OP_ALWAYS,
-            .minLod = 0,
-            .maxLod = 1,
-            .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-            .unnormalizedCoordinates = VK_FALSE,
-        };
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSampler(
-                m_renderDevice->getHandle(),
-                &samplerInfo,
-                nullptr,
-                &m_depthAttachment.sampler ) );
-    }
-
-    // We won't be swapping framebuffers, so create only one
-    m_framebuffers.resize( 1 );
+    m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+        const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
+
         auto attachments = std::array< VkImageView, 2 > {
-            m_colorAttachment.imageView,
-            m_depthAttachment.imageView,
+            imageView,
+            m_renderDevice->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -425,8 +299,8 @@ void ScenePass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = extent.width,
-            .height = extent.height,
+            .width = m_renderDevice->getSwapchainExtent().width,
+            .height = m_renderDevice->getSwapchainExtent().height,
             .layers = 1,
         };
 
@@ -454,7 +328,7 @@ void ScenePass::init( void ) noexcept
         std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 } );
 }
 
-void ScenePass::clear( void ) noexcept
+void GBufferPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -471,29 +345,30 @@ void ScenePass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    vkDestroySampler( m_renderDevice->getHandle(), m_colorAttachment.sampler, nullptr );
-    m_colorAttachment.sampler = VK_NULL_HANDLE;
-    vkDestroyImageView( m_renderDevice->getHandle(), m_colorAttachment.imageView, nullptr );
-    m_colorAttachment.imageView = VK_NULL_HANDLE;
-    vkDestroyImage( m_renderDevice->getHandle(), m_colorAttachment.image, nullptr );
-    m_colorAttachment.image = VK_NULL_HANDLE;
-    vkFreeMemory( m_renderDevice->getHandle(), m_colorAttachment.memory, nullptr );
-    m_colorAttachment.memory = VK_NULL_HANDLE;
-
-    vkDestroySampler( m_renderDevice->getHandle(), m_depthAttachment.sampler, nullptr );
-    m_depthAttachment.sampler = VK_NULL_HANDLE;
-    vkDestroyImageView( m_renderDevice->getHandle(), m_depthAttachment.imageView, nullptr );
-    m_depthAttachment.imageView = VK_NULL_HANDLE;
-    vkDestroyImage( m_renderDevice->getHandle(), m_depthAttachment.image, nullptr );
-    m_depthAttachment.image = VK_NULL_HANDLE;
-    vkFreeMemory( m_renderDevice->getHandle(), m_depthAttachment.memory, nullptr );
-    m_depthAttachment.memory = VK_NULL_HANDLE;
-
     vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
 
-void ScenePass::createRenderPassObjects( void ) noexcept
+void GBufferPass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
+{
+    auto renderPassInfo = VkRenderPassBeginInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        .renderPass = m_renderPass,
+        .framebuffer = m_framebuffers[ currentFrameIndex ],
+        .renderArea = m_renderArea,
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
+    };
+
+    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+}
+
+void GBufferPass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
+{
+    vkCmdEndRenderPass( commandBuffer );
+}
+
+void GBufferPass::createRenderPassObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -569,7 +444,7 @@ void ScenePass::createRenderPassObjects( void ) noexcept
     }
 }
 
-void ScenePass::destroyRenderPassObjects( void ) noexcept
+void GBufferPass::destroyRenderPassObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -583,7 +458,7 @@ void ScenePass::destroyRenderPassObjects( void ) noexcept
     m_renderPassObjects.uniforms = nullptr;
 }
 
-void ScenePass::createMaterialObjects( void ) noexcept
+void GBufferPass::createMaterialObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -613,7 +488,7 @@ void ScenePass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
+void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
 {
     auto [ color, texture ] = [ & ]() {
         if ( material == nullptr ) {
@@ -733,7 +608,7 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         nullptr );
 }
 
-void ScenePass::destroyMaterialObjects( void ) noexcept
+void GBufferPass::destroyMaterialObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -754,7 +629,7 @@ void ScenePass::destroyMaterialObjects( void ) noexcept
     m_materialObjects.uniforms.clear();
 }
 
-void ScenePass::createGeometryObjects( void ) noexcept
+void GBufferPass::createGeometryObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -775,7 +650,7 @@ void ScenePass::createGeometryObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
 }
 
-void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
+void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
 {
     if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
         VkDescriptorPoolSize poolSize {
@@ -844,7 +719,7 @@ void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFram
         nullptr );
 }
 
-void ScenePass::destroyGeometryObjects( void ) noexcept
+void GBufferPass::destroyGeometryObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -865,7 +740,7 @@ void ScenePass::destroyGeometryObjects( void ) noexcept
     m_geometryObjects.uniforms.clear();
 }
 
-void ScenePass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
+void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {

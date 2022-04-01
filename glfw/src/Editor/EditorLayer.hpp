@@ -43,11 +43,13 @@ namespace crimild {
     namespace vulkan {
 
         class GraphicsPipeline;
+        class ScenePass;
     }
 
     class EditorLayer {
     public:
-        EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept;
+        // EditorLayer( vulkan::RenderDevice *renderDevice, std::unordered_map< std::string, VulkanFramebufferAttachment > attachments );
+        EditorLayer( vulkan::RenderDevice *renderDevice, vulkan::ScenePass *scenePass ) noexcept;
         ~EditorLayer( void ) noexcept;
 
         Event handle( const Event &e ) noexcept;
@@ -55,6 +57,8 @@ namespace crimild {
 
         inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
         inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
+
+        [[nodiscard]] inline size_t getSceneTextureID( void ) const { return 1; }
 
     private:
         void updateDisplaySize( void ) const noexcept;
@@ -70,6 +74,8 @@ namespace crimild {
         void createFontAtlas( void ) noexcept;
         void destroyFontAtlas( void ) noexcept;
 
+        size_t createOffscreenPassDescriptor( VkImageView imageView, VkSampler sampler );
+
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
@@ -81,9 +87,9 @@ namespace crimild {
         std::unique_ptr< ShaderProgram > m_program;
 
         struct RenderPassObjects {
-            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
             VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-            std::vector< VkDescriptorSet > descriptorSets;
+            std::vector< VkDescriptorPool > descriptorPools;
+            std::vector< std::vector< VkDescriptorSet > > descriptorSets;
 
             struct Uniforms {
                 Vector4 scale = Vector4::Constants::ONE;
@@ -99,6 +105,8 @@ namespace crimild {
         std::unique_ptr< Texture > m_fontAtlas;
 
         Node *m_selectedNode = nullptr;
+
+        vulkan::ScenePass *m_scenePass = nullptr;
     };
 }
 

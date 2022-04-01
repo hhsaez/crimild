@@ -76,7 +76,7 @@ public:
                     outColor = vec4( color, 1.0 );
                 }
             )" ),
-          m_editor( renderDevice ),
+          m_editor( renderDevice, &m_scene ),
           m_present( renderDevice )
     {
     }
