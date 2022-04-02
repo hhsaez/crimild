@@ -373,6 +373,24 @@ void EditorLayer::render( void ) noexcept
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
 
+    m_renderDevice->transitionImageLayout(
+        commandBuffer,
+        m_scenePass->getColorAttachment().image,
+        m_scenePass->getColorAttachment().format,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        m_scenePass->getColorAttachment().mipLevels,
+        m_scenePass->getColorAttachment().layerCount );
+
+    m_renderDevice->transitionImageLayout(
+        commandBuffer,
+        m_scenePass->getDepthAttachment().image,
+        m_scenePass->getDepthAttachment().format,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        m_scenePass->getDepthAttachment().mipLevels,
+        m_scenePass->getDepthAttachment().layerCount );
+
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,

@@ -30,6 +30,7 @@
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Simulation/Event.hpp"
 
 namespace crimild {
@@ -46,14 +47,6 @@ namespace crimild {
         class GraphicsPipeline;
 
         class ScenePass {
-        public:
-            struct FramebufferAttachment {
-                VkImage image;
-                VkDeviceMemory memory;
-                VkImageView imageView;
-                VkSampler sampler;
-            };
-
         public:
             explicit ScenePass( RenderDevice *renderDevice ) noexcept;
             virtual ~ScenePass( void ) noexcept;
