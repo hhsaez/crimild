@@ -114,6 +114,18 @@ namespace crimild {
 
             void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) noexcept;
 
+            [[nodiscard]] bool formatIsColor( VkFormat format ) const;
+            [[nodiscard]] bool formatIsDepthStencil( VkFormat format ) const;
+
+            void transitionImageLayout(
+                VkCommandBuffer commandBuffer,
+                VkImage image,
+                VkFormat format,
+                VkImageLayout oldLayout,
+                VkImageLayout newLayout,
+                crimild::UInt32 mipLevels,
+                crimild::UInt32 layerCount ) const noexcept;
+
         private:
             void
             createSwapchain( void ) noexcept;
