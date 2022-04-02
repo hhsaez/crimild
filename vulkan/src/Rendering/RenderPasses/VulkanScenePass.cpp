@@ -223,8 +223,11 @@ void ScenePass::init( void ) noexcept
     const auto depthFormat = m_renderDevice->getDepthStencilFormat();
     const auto extent = m_renderDevice->getSwapchainExtent();
 
+    m_colorAttachment.name = "Scene/Color";
     m_colorAttachment.format = colorFormat;
     m_colorAttachment.extent = extent;
+
+    m_depthAttachment.name = "Scene/Depth";
     m_depthAttachment.format = depthFormat;
     m_depthAttachment.extent = extent;
 

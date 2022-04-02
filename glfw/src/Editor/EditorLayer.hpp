@@ -43,13 +43,12 @@ namespace crimild {
     namespace vulkan {
 
         class GraphicsPipeline;
-        class ScenePass;
+        struct FramebufferAttachment;
     }
 
     class EditorLayer {
     public:
-        // EditorLayer( vulkan::RenderDevice *renderDevice, std::unordered_map< std::string, VulkanFramebufferAttachment > attachments );
-        EditorLayer( vulkan::RenderDevice *renderDevice, vulkan::ScenePass *scenePass ) noexcept;
+        EditorLayer( vulkan::RenderDevice *renderDevice, const std::vector< const vulkan::FramebufferAttachment * > &sceneAttachments ) noexcept;
         ~EditorLayer( void ) noexcept;
 
         Event handle( const Event &e ) noexcept;
@@ -58,7 +57,13 @@ namespace crimild {
         inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
         inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
 
-        [[nodiscard]] inline size_t getSceneTextureID( void ) const { return 1; }
+        template< typename Fn >
+        void eachSceneAttachment( Fn fn ) const noexcept
+        {
+            for ( const auto att : m_sceneAttachments ) {
+                fn( att );
+            }
+        }
 
     private:
         void updateDisplaySize( void ) const noexcept;
@@ -106,7 +111,7 @@ namespace crimild {
 
         Node *m_selectedNode = nullptr;
 
-        vulkan::ScenePass *m_scenePass = nullptr;
+        std::vector< const vulkan::FramebufferAttachment * > m_sceneAttachments;
     };
 }
 

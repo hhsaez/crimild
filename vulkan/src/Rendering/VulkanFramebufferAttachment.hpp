@@ -30,11 +30,14 @@
 
 #include "Foundation/VulkanUtils.hpp"
 
+#include <string>
+
 namespace crimild {
 
     namespace vulkan {
 
         struct FramebufferAttachment {
+            std::string name;
             VkExtent2D extent;
             VkFormat format = VK_FORMAT_UNDEFINED;
             VkImage image = VK_NULL_HANDLE;
