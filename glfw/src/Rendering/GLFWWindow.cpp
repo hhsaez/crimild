@@ -76,7 +76,7 @@ public:
                     outColor = vec4( color, 1.0 );
                 }
             )" ),
-          m_editor( renderDevice, &m_scene ),
+          m_editor( renderDevice, { &m_scene.getColorAttachment(), &m_scene.getDepthAttachment() } ),
           m_present( renderDevice )
     {
     }

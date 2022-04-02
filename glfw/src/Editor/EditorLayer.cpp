@@ -103,7 +103,7 @@ void drawGizmo( Node *selectedNode )
     selectedNode->perform( UpdateWorldState() );
 }
 
-EditorLayer::EditorLayer( RenderDevice *renderDevice, vulkan::ScenePass *scenePass ) noexcept
+EditorLayer::EditorLayer( RenderDevice *renderDevice, const std::vector< const vulkan::FramebufferAttachment * > &sceneAttachments ) noexcept
     : m_renderDevice( renderDevice ),
       m_program(
           [ & ] {
@@ -162,7 +162,7 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice, vulkan::ScenePass *scenePa
               ibo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
               return ibo;
           }() ),
-      m_scenePass( scenePass )
+      m_sceneAttachments( sceneAttachments )
 {
     CRIMILD_LOG_TRACE();
 
@@ -373,23 +373,16 @@ void EditorLayer::render( void ) noexcept
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
 
-    m_renderDevice->transitionImageLayout(
-        commandBuffer,
-        m_scenePass->getColorAttachment().image,
-        m_scenePass->getColorAttachment().format,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_scenePass->getColorAttachment().mipLevels,
-        m_scenePass->getColorAttachment().layerCount );
-
-    m_renderDevice->transitionImageLayout(
-        commandBuffer,
-        m_scenePass->getDepthAttachment().image,
-        m_scenePass->getDepthAttachment().format,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_scenePass->getDepthAttachment().mipLevels,
-        m_scenePass->getDepthAttachment().layerCount );
+    for ( const auto att : m_sceneAttachments ) {
+        m_renderDevice->transitionImageLayout(
+            commandBuffer,
+            att->image,
+            att->format,
+            m_renderDevice->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            att->mipLevels,
+            att->layerCount );
+    }
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -460,8 +453,8 @@ void EditorLayer::render( void ) noexcept
                     cmd->UserCallback( cmds, cmd );
                 }
             } else {
-                const auto textureId = ( size_t )( cmd->TextureId );
-                auto &descriptors = m_renderPassObjects.descriptorSets[ textureId ][ currentFrameIndex ];
+                const auto samplerIdx = ( size_t )( cmd->TextureId );
+                auto &descriptors = m_renderPassObjects.descriptorSets[ samplerIdx ][ currentFrameIndex ];
                 vkCmdBindDescriptorSets(
                     commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -632,8 +625,9 @@ void EditorLayer::init( void ) noexcept
     createRenderPassObjects();
     createFontAtlas();
 
-    createOffscreenPassDescriptor( m_scenePass->getColorAttachment().imageView, m_scenePass->getColorAttachment().sampler );
-    createOffscreenPassDescriptor( m_scenePass->getDepthAttachment().imageView, m_scenePass->getDepthAttachment().sampler );
+    for ( const auto att : m_sceneAttachments ) {
+        createOffscreenPassDescriptor( att->imageView, att->sampler );
+    }
 
     m_pipeline = std::make_unique< vulkan::GraphicsPipeline >(
         m_renderDevice,
