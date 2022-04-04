@@ -38,6 +38,7 @@
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Editor/EditorLayer.hpp"
+#include "Editor/Panels/scenePanel.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
@@ -47,7 +48,6 @@
 #include "Mathematics/get_ptr.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
-#include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
@@ -678,59 +678,15 @@ void sceneHierarchyPanel( bool &open, EditorLayer *editor )
     ImGui::End();
 }
 
-void scenePanel( bool &open, EditorLayer *editor )
-{
-    if ( !open ) {
-        return;
-    }
-
-    static size_t selectedRenderMode = 0;
-
-    ImGui::SetNextWindowPos( ImVec2( 310, 25 ), ImGuiCond_Always );
-    ImGui::SetNextWindowSize( ImVec2( 1280, 720 ), ImGuiCond_Always );
-
-    if ( ImGui::Begin( "Scene", &open ) ) {
-        std::vector< const char * > attachments;
-        editor->eachSceneAttachment(
-            [ & ]( const auto att ) {
-                attachments.push_back( att->name.c_str() );
-            } );
-
-        if ( !attachments.empty() ) {
-            if ( ImGui::BeginCombo( "Select render mode", attachments[ 0 ], 0 ) ) {
-                for ( size_t i = 0; i < attachments.size(); ++i ) {
-                    if ( ImGui::Selectable( attachments[ i ], selectedRenderMode == i ) ) {
-                        selectedRenderMode = i;
-                    }
-                }
-                ImGui::EndCombo();
-            }
-
-            ImTextureID tex_id = ( ImTextureID )( intptr_t )( 1 + selectedRenderMode );
-            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-            ImGui::Image( tex_id, ImVec2( 1260, 660 ), uv_min, uv_max, tint_col, border_col );
-
-        } else {
-            ImGui::Text( "No scene attachments found" );
-        }
-
-        ImGui::End();
-    }
-}
-
 void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 {
-    static bool showScenePanel = true;
     static bool showSceneHierarchyPanel = true;
     static bool showNodeInspectorPanel = true;
     static bool showBehaviorEditor = true;
 
     if ( ImGui::BeginMenu( "View" ) ) {
         if ( ImGui::MenuItem( "Scene..." ) ) {
-            showScenePanel = true;
+            setScenePanelVisible( true );
         }
         if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
             showSceneHierarchyPanel = true;
@@ -745,5 +701,4 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
     sceneHierarchyPanel( showSceneHierarchyPanel, editor );
     nodeInspectorPanel( showNodeInspectorPanel, editor );
     behaviorEditor( showBehaviorEditor, editor );
-    scenePanel( showScenePanel, editor );
 }
