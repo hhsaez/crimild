@@ -29,10 +29,9 @@
 
 #include "Editor/EditorUtils.hpp"
 #include "Editor/Menus/mainMenu.hpp"
+#include "Editor/Panels/scenePanel.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Log.hpp"
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Matrix4_transpose.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 #include "Rendering/ShaderProgram.hpp"
@@ -43,7 +42,6 @@
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
-#include "Visitors/UpdateWorldState.hpp"
 
 #include <array>
 
@@ -52,56 +50,6 @@
 
 using namespace crimild;
 using namespace crimild::vulkan;
-
-void drawGizmo( Node *selectedNode )
-{
-    if ( selectedNode == nullptr ) {
-        return;
-    }
-
-    static ImGuizmo::OPERATION gizmoOperation( ImGuizmo::TRANSLATE );
-    static ImGuizmo::MODE gizmoMode( ImGuizmo::LOCAL );
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_W ) )
-        gizmoOperation = ImGuizmo::TRANSLATE;
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_E ) )
-        gizmoOperation = ImGuizmo::ROTATE;
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_R ) ) // r Key
-        gizmoOperation = ImGuizmo::SCALE;
-
-    ImGuizmo::BeginFrame();
-
-    ImGuizmo::SetOrthographic( false );
-    // TODO: Set this to nullptr if we are drawing inside a window
-    // Otherwise, use ImGui::GetForegroundDrawList() to draw in the whole screen.
-    ImGuizmo::SetDrawlist( ImGui::GetForegroundDrawList() );
-    ImGuiIO &io = ImGui::GetIO();
-    ImGuizmo::SetRect( 0, 0, io.DisplaySize.x / io.DisplayFramebufferScale.x, io.DisplaySize.y / io.DisplayFramebufferScale.y );
-
-    const auto [ view, proj ] = [] {
-        if ( auto camera = Camera::getMainCamera() ) {
-            return std::make_pair( camera->getViewMatrix(), camera->getProjectionMatrix() );
-        }
-        return std::make_pair( Matrix4::Constants::IDENTITY, Matrix4::Constants::IDENTITY );
-    }();
-
-    // TODO: Snapping
-    bool snap = false;
-    // TODO: Snapping values should depend on the mode (i.e. meters, degrees, etc.)
-    const auto snapValues = Vector3 { 1, 1, 1 };
-
-    auto res = selectedNode->getLocal().mat;
-    ImGuizmo::Manipulate(
-        static_cast< const float * >( &view.c0.x ),
-        static_cast< const float * >( &proj.c0.x ),
-        gizmoOperation,
-        gizmoMode,
-        static_cast< float * >( &res.c0.x ),
-        nullptr,
-        snap ? static_cast< const float * >( &snapValues.x ) : nullptr );
-
-    selectedNode->setLocal( Transformation { res, inverse( res ) } );
-    selectedNode->perform( UpdateWorldState() );
-}
 
 EditorLayer::EditorLayer( RenderDevice *renderDevice, const std::vector< const vulkan::FramebufferAttachment * > &sceneAttachments ) noexcept
     : m_renderDevice( renderDevice ),
@@ -492,7 +440,9 @@ void EditorLayer::updateUI( void ) noexcept
 
     ImGui::NewFrame();
 
-    drawGizmo( getSelectedNode() );
+    // drawGizmo( getSelectedNode() );
+
+    editor::renderScenePanel( this );
 
     editor::mainMenu( this );
 
