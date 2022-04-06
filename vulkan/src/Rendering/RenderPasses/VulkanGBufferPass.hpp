@@ -28,9 +28,8 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GBUFFER_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GBUFFER_
 
-#include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Simulation/Event.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
 
@@ -45,7 +44,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class GBufferPass {
+        class GBufferPass : public RenderPass {
         public:
             explicit GBufferPass( RenderDevice *renderDevice ) noexcept;
             virtual ~GBufferPass( void ) noexcept;
@@ -74,7 +73,6 @@ namespace crimild {
             void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;

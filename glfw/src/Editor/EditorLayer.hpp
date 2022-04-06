@@ -28,6 +28,8 @@
 #ifndef CRIMILD_GLFW_EDITOR_LAYER_
 #define CRIMILD_GLFW_EDITOR_LAYER_
 
+#include "Editor/Panels/ScenePanel.hpp"
+#include "Editor/Panels/SimulationPanel.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Vector4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPass.hpp"
@@ -43,12 +45,12 @@ namespace crimild {
     namespace vulkan {
 
         class GraphicsPipeline;
-        struct FramebufferAttachment;
+
     }
 
     class EditorLayer {
     public:
-        EditorLayer( vulkan::RenderDevice *renderDevice, const std::vector< const vulkan::FramebufferAttachment * > &sceneAttachments ) noexcept;
+        EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept;
         ~EditorLayer( void ) noexcept;
 
         Event handle( const Event &e ) noexcept;
@@ -56,14 +58,6 @@ namespace crimild {
 
         inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
         inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
-
-        template< typename Fn >
-        void eachSceneAttachment( Fn fn ) const noexcept
-        {
-            for ( const auto att : m_sceneAttachments ) {
-                fn( att );
-            }
-        }
 
     private:
         void updateDisplaySize( void ) const noexcept;
@@ -79,8 +73,6 @@ namespace crimild {
         void createFontAtlas( void ) noexcept;
         void destroyFontAtlas( void ) noexcept;
 
-        size_t createOffscreenPassDescriptor( VkImageView imageView, VkSampler sampler );
-
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
@@ -93,8 +85,8 @@ namespace crimild {
 
         struct RenderPassObjects {
             VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-            std::vector< VkDescriptorPool > descriptorPools;
-            std::vector< std::vector< VkDescriptorSet > > descriptorSets;
+            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > descriptorSets;
 
             struct Uniforms {
                 Vector4 scale = Vector4::Constants::ONE;
@@ -107,11 +99,20 @@ namespace crimild {
         std::unique_ptr< VertexBuffer > m_vertices;
         std::unique_ptr< IndexBuffer > m_indices;
 
-        std::unique_ptr< Texture > m_fontAtlas;
+        struct FontAtlas {
+            VkImage image = VK_NULL_HANDLE;
+            VkDeviceMemory memory = VK_NULL_HANDLE;
+            VkImageView imageView = VK_NULL_HANDLE;
+            VkSampler sampler = VK_NULL_HANDLE;
+            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > descriptorSets;
+        } m_fontAtlas;
 
         Node *m_selectedNode = nullptr;
 
-        std::vector< const vulkan::FramebufferAttachment * > m_sceneAttachments;
+        editor::ScenePanel m_scenePanel;
+        editor::SimulationPanel m_simulationPanel;
     };
 }
 

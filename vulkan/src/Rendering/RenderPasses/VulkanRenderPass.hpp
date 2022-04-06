@@ -28,6 +28,9 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
 
+#include "Foundation/VulkanUtils.hpp"
+#include "Simulation/Event.hpp"
+
 namespace crimild {
 
     struct Event;
@@ -36,12 +39,46 @@ namespace crimild {
 
         class RenderDevice;
 
+        struct FramebufferAttachment {
+            std::string name;
+            VkExtent2D extent;
+            VkFormat format = VK_FORMAT_UNDEFINED;
+            VkImage image = VK_NULL_HANDLE;
+            VkDeviceMemory memory = VK_NULL_HANDLE;
+            VkImageView imageView = VK_NULL_HANDLE;
+            VkSampler sampler = VK_NULL_HANDLE;
+            uint32_t mipLevels = 1;
+            uint32_t layerCount = 1;
+            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE; // TODO: overkill?
+            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > descriptorSets;
+        };
+
         class RenderPass {
+        protected:
+            explicit RenderPass( RenderDevice *renderDevice ) noexcept;
+
         public:
             virtual ~RenderPass( void ) = default;
 
-            virtual void handle( const Event & ) noexcept = 0;
+            inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+
+            virtual Event handle( const Event &e ) noexcept { return e; };
+
             virtual void render( void ) noexcept = 0;
+
+        protected:
+            void createFramebufferAttachment(
+                RenderDevice *renderDevice,
+                std::string name,
+                const VkExtent2D &extent,
+                VkFormat format,
+                FramebufferAttachment &out ) const;
+            void destroyFramebufferAttachment( RenderDevice *renderDevice, FramebufferAttachment &att ) const;
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
         };
 
     }

@@ -51,7 +51,7 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-EditorLayer::EditorLayer( RenderDevice *renderDevice, const std::vector< const vulkan::FramebufferAttachment * > &sceneAttachments ) noexcept
+EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
       m_program(
           [ & ] {
@@ -86,7 +86,7 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice, const std::vector< const v
                             layout ( location = 0 ) in vec4 vColor;
                             layout ( location = 1 ) in vec2 vTexCoord;
 
-                            layout ( set = 0, binding = 1 ) uniform sampler2D uTexture;
+                            layout ( set = 1, binding = 0 ) uniform sampler2D uTexture;
 
                             layout ( location = 0 ) out vec4 FragColor;
 
@@ -110,7 +110,8 @@ EditorLayer::EditorLayer( RenderDevice *renderDevice, const std::vector< const v
               ibo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
               return ibo;
           }() ),
-      m_sceneAttachments( sceneAttachments )
+      m_scenePanel( renderDevice ),
+      m_simulationPanel( renderDevice )
 {
     CRIMILD_LOG_TRACE();
 
@@ -176,7 +177,6 @@ EditorLayer::~EditorLayer( void ) noexcept
 
 Event EditorLayer::handle( const Event &e ) noexcept
 {
-    bool needsUpdate = true;
     bool overrideEvent = true;
 
     auto &io = ImGui::GetIO();
@@ -251,20 +251,17 @@ Event EditorLayer::handle( const Event &e ) noexcept
 
         default: {
             // Unhandled events won't trigger a redraw
-            needsUpdate = false;
             overrideEvent = false;
             break;
         }
-    }
-
-    if ( needsUpdate ) {
-        // updateUI();
     }
 
     if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard || ImGuizmo::IsOver() || ImGuizmo::IsUsing() ) ) {
         return Event {};
     }
 
+    m_scenePanel.handle( e );
+    m_simulationPanel.handle( e );
     return e;
 }
 
@@ -276,6 +273,9 @@ void EditorLayer::render( void ) noexcept
     if ( forceUpdate ) {
         updateUI();
     }
+
+    m_scenePanel.render();
+    m_simulationPanel.render();
 
     auto drawData = ImGui::GetDrawData();
     if ( drawData == nullptr ) {
@@ -320,17 +320,6 @@ void EditorLayer::render( void ) noexcept
 
     const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
     auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
-
-    for ( const auto att : m_sceneAttachments ) {
-        m_renderDevice->transitionImageLayout(
-            commandBuffer,
-            att->image,
-            att->format,
-            m_renderDevice->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            att->mipLevels,
-            att->layerCount );
-    }
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -388,6 +377,16 @@ void EditorLayer::render( void ) noexcept
         0,
         vulkan::utils::getIndexType( m_indices.get() ) );
 
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getPipelineLayout(),
+        0,
+        1,
+        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+        0,
+        nullptr );
+
     crimild::Size vertexOffset = 0;
     crimild::Size indexOffset = 0;
     for ( int i = 0; i < drawData->CmdListsCount; i++ ) {
@@ -401,13 +400,13 @@ void EditorLayer::render( void ) noexcept
                     cmd->UserCallback( cmds, cmd );
                 }
             } else {
-                const auto samplerIdx = ( size_t )( cmd->TextureId );
-                auto &descriptors = m_renderPassObjects.descriptorSets[ samplerIdx ][ currentFrameIndex ];
+                auto descriptorSets = ( VkDescriptorSet * ) ( cmd->TextureId );
+                auto &descriptors = descriptorSets[ currentFrameIndex ];
                 vkCmdBindDescriptorSets(
                     commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
                     m_pipeline->getPipelineLayout(),
-                    0,
+                    1,
                     1,
                     &descriptors,
                     0,
@@ -440,11 +439,26 @@ void EditorLayer::updateUI( void ) noexcept
 
     ImGui::NewFrame();
 
-    // drawGizmo( getSelectedNode() );
-
-    editor::renderScenePanel( this );
-
     editor::mainMenu( this );
+
+    ImGui::SetNextWindowPos( ImVec2( 310, 25 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 1280, 720 ), ImGuiCond_Always );
+    bool open = true;
+
+    if ( ImGui::Begin( "MainPanel", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar ) ) {
+        if ( ImGui::BeginTabBar( "MainTabs" ) ) {
+            if ( ImGui::BeginTabItem( "Scene" ) ) {
+                m_scenePanel.updateUI( this, true );
+                ImGui::EndTabItem();
+            }
+            if ( ImGui::BeginTabItem( "Simulation" ) ) {
+                m_simulationPanel.updateUI( this, true );
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::End();
+    }
 
     ImGui::Render();
 }
@@ -575,15 +589,12 @@ void EditorLayer::init( void ) noexcept
     createRenderPassObjects();
     createFontAtlas();
 
-    for ( const auto att : m_sceneAttachments ) {
-        createOffscreenPassDescriptor( att->imageView, att->sampler );
-    }
-
     m_pipeline = std::make_unique< vulkan::GraphicsPipeline >(
         m_renderDevice,
         m_renderPass,
         std::vector< VkDescriptorSetLayout > {
             m_renderPassObjects.descriptorSetLayout,
+            m_fontAtlas.descriptorSetLayout,
         },
         m_program.get(),
         std::vector< VertexLayout > { VertexP2TC2C4::getLayout() },
@@ -634,19 +645,12 @@ void EditorLayer::createRenderPassObjects( void ) noexcept
         return ubo;
     }();
 
-    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 2 > {
+    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 1 > {
         VkDescriptorSetLayoutBinding {
             .binding = 0,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
             .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
             .pImmutableSamplers = nullptr,
         },
     };
@@ -657,9 +661,74 @@ void EditorLayer::createRenderPassObjects( void ) noexcept
         .pBindings = bindings.data(),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            m_renderDevice->getHandle(),
+            &layoutCreateInfo,
+            nullptr,
+            &m_renderPassObjects.descriptorSetLayout ) );
+
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        },
+    };
+
+    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = uint32_t( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
+        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+            m_renderDevice->getHandle(),
+            &poolCreateInfo,
+            nullptr,
+            &m_renderPassObjects.descriptorPool ) );
+
+    m_renderPassObjects.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
 
     std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_renderPassObjects.descriptorSetLayout );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = m_renderPassObjects.descriptorPool,
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateDescriptorSets(
+            m_renderDevice->getHandle(),
+            &allocInfo,
+            m_renderPassObjects.descriptorSets.data() ) );
+
+    for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
+        const auto bufferInfo = VkDescriptorBufferInfo {
+            .buffer = m_renderDevice->getHandle( m_renderPassObjects.uniforms.get(), i ),
+            .offset = 0,
+            .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
+        };
+
+        const auto writes = std::array< VkWriteDescriptorSet, 1 > {
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = m_renderPassObjects.descriptorSets[ i ],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .pBufferInfo = &bufferInfo,
+                .pImageInfo = nullptr,
+                .pTexelBufferView = nullptr,
+            },
+        };
+
+        vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
+    }
 }
 
 void EditorLayer::destroyRenderPassObjects( void ) noexcept
@@ -672,10 +741,8 @@ void EditorLayer::destroyRenderPassObjects( void ) noexcept
     vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_renderPassObjects.descriptorSetLayout, nullptr );
     m_renderPassObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
-    for ( auto pool : m_renderPassObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( m_renderDevice->getHandle(), pool, nullptr );
-    }
-    m_renderPassObjects.descriptorPools.clear();
+    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_renderPassObjects.descriptorPool, nullptr );
+    m_renderPassObjects.descriptorPool = VK_NULL_HANDLE;
 
     m_renderDevice->unbind( m_renderPassObjects.uniforms.get() );
     m_renderPassObjects.uniforms = nullptr;
@@ -691,58 +758,77 @@ void EditorLayer::createFontAtlas( void ) noexcept
     int width, height;
     io.Fonts->GetTexDataAsRGBA32( &pixels, &width, &height );
 
-    auto texture = std::make_unique< Texture >();
-    texture->imageView = crimild::alloc< ImageView >();
-    texture->imageView->image = [ & ] {
-        auto image = crimild::alloc< Image >();
-        image->setName( "ImGUI_font_atlas" );
-        image->extent = {
-            .width = Real32( width ),
-            .height = Real32( height ),
-        };
-        image->format = Format::R8G8B8A8_UNORM;
-        image->setBufferView(
-            crimild::alloc< BufferView >(
-                BufferView::Target::IMAGE,
-                crimild::alloc< Buffer >(
-                    [ & ] {
-                        auto data = ByteArray( width * height * 4 );
-                        memset( data.getData(), 0, data.size() );
-                        memcpy( data.getData(), pixels, data.size() );
-                        return data;
-                    }() ) ) );
-        return image;
-    }();
+    m_renderDevice->createImage(
+        width,
+        height,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        1,
+        VK_SAMPLE_COUNT_1_BIT,
+        1,
+        0,
+        m_fontAtlas.image,
+        m_fontAtlas.memory,
+        pixels );
 
-    texture->sampler = crimild::alloc< Sampler >();
-    texture->sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_EDGE );
-    texture->sampler->setBorderColor( Sampler::BorderColor::FLOAT_OPAQUE_WHITE );
+    m_renderDevice->createImageView(
+        m_fontAtlas.image,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        m_fontAtlas.imageView );
 
-    m_fontAtlas = std::move( texture );
+    auto samplerInfo = VkSamplerCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .magFilter = VK_FILTER_LINEAR,
+        .minFilter = VK_FILTER_LINEAR,
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .mipLodBias = 0,
+        .anisotropyEnable = VK_TRUE,
+        .maxAnisotropy = 1,
+        .compareEnable = VK_FALSE,
+        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .minLod = 0,
+        .maxLod = 1,
+        .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
+        .unnormalizedCoordinates = VK_FALSE,
+    };
 
-    auto imageView = m_renderDevice->bind( m_fontAtlas->imageView.get() );
-    auto sampler = m_renderDevice->bind( m_fontAtlas->sampler.get() );
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSampler(
+            m_renderDevice->getHandle(),
+            &samplerInfo,
+            nullptr,
+            &m_fontAtlas.sampler ) );
 
-    io.Fonts->TexID = ( ImTextureID ) createOffscreenPassDescriptor( imageView, sampler );
-}
-
-void EditorLayer::destroyFontAtlas( void ) noexcept
-{
-    m_renderDevice->unbind( m_fontAtlas->imageView.get() );
-    m_renderDevice->unbind( m_fontAtlas->sampler.get() );
-
-    m_fontAtlas = nullptr;
-}
-
-size_t EditorLayer::createOffscreenPassDescriptor( VkImageView imageView, VkSampler sampler )
-{
-    const auto descriptorId = m_renderPassObjects.descriptorSets.size();
-
-    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 1 > {
+        VkDescriptorSetLayoutBinding {
+            .binding = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
         },
+    };
+
+    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = uint32_t( bindings.size() ),
+        .pBindings = bindings.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            m_renderDevice->getHandle(),
+            &layoutCreateInfo,
+            nullptr,
+            &m_fontAtlas.descriptorSetLayout ) );
+
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
@@ -756,53 +842,42 @@ size_t EditorLayer::createOffscreenPassDescriptor( VkImageView imageView, VkSamp
         .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
     };
 
-    VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &descriptorPool ) );
-    m_renderPassObjects.descriptorPools.push_back( descriptorPool );
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+            m_renderDevice->getHandle(),
+            &poolCreateInfo,
+            nullptr,
+            &m_fontAtlas.descriptorPool ) );
 
-    m_renderPassObjects.descriptorSets.push_back( {} );
-    m_renderPassObjects.descriptorSets[ descriptorId ].resize( m_renderDevice->getSwapchainImageCount() );
+    m_fontAtlas.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
 
-    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_renderPassObjects.descriptorSetLayout );
+    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_fontAtlas.descriptorSetLayout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = descriptorPool,
+        .descriptorPool = m_fontAtlas.descriptorPool,
         .descriptorSetCount = uint32_t( layouts.size() ),
         .pSetLayouts = layouts.data(),
     };
 
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets[ descriptorId ].data() ) );
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateDescriptorSets(
+            m_renderDevice->getHandle(),
+            &allocInfo,
+            m_fontAtlas.descriptorSets.data() ) );
 
-    for ( size_t i = 0; i < m_renderPassObjects.descriptorSets[ descriptorId ].size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = m_renderDevice->getHandle( m_renderPassObjects.uniforms.get(), i ),
-            .offset = 0,
-            .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
-        };
-
+    for ( size_t i = 0; i < m_fontAtlas.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = imageView,
-            .sampler = sampler,
+            .imageView = m_fontAtlas.imageView,
+            .sampler = m_fontAtlas.sampler,
         };
 
-        const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+        const auto writes = std::array< VkWriteDescriptorSet, 1 > {
             VkWriteDescriptorSet {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ descriptorId ][ i ],
+                .dstSet = m_fontAtlas.descriptorSets[ i ],
                 .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
-                .pImageInfo = nullptr,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ descriptorId ][ i ],
-                .dstBinding = 1,
                 .dstArrayElement = 0,
                 .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
@@ -811,8 +886,144 @@ size_t EditorLayer::createOffscreenPassDescriptor( VkImageView imageView, VkSamp
                 .pTexelBufferView = nullptr,
             },
         };
+
         vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
     }
 
-    return descriptorId;
+    // auto texture = std::make_unique< Texture >();
+    // texture->imageView = crimild::alloc< ImageView >();
+    // texture->imageView->image = [ & ] {
+    //     auto image = crimild::alloc< Image >();
+    //     image->setName( "ImGUI_font_atlas" );
+    //     image->extent = {
+    //         .width = Real32( width ),
+    //         .height = Real32( height ),
+    //     };
+    //     image->format = Format::R8G8B8A8_UNORM;
+    //     image->setBufferView(
+    //         crimild::alloc< BufferView >(
+    //             BufferView::Target::IMAGE,
+    //             crimild::alloc< Buffer >(
+    //                 [ & ] {
+    //                     auto data = ByteArray( width * height * 4 );
+    //                     memset( data.getData(), 0, data.size() );
+    //                     memcpy( data.getData(), pixels, data.size() );
+    //                     return data;
+    //                 }() ) ) );
+    //     return image;
+    // }();
+
+    // texture->sampler = crimild::alloc< Sampler >();
+    // texture->sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_EDGE );
+    // texture->sampler->setBorderColor( Sampler::BorderColor::FLOAT_OPAQUE_WHITE );
+
+    // m_fontAtlas = std::move( texture );
+
+    // auto imageView = m_renderDevice->bind( m_fontAtlas->imageView.get() );
+    // auto sampler = m_renderDevice->bind( m_fontAtlas->sampler.get() );
+
+    io.Fonts->TexID = ( ImTextureID ) m_fontAtlas.descriptorSets.data();
 }
+
+void EditorLayer::destroyFontAtlas( void ) noexcept
+{
+    m_fontAtlas.descriptorSets.clear();
+
+    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_fontAtlas.descriptorSetLayout, nullptr );
+    m_fontAtlas.descriptorSetLayout = VK_NULL_HANDLE;
+
+    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_fontAtlas.descriptorPool, nullptr );
+    m_fontAtlas.descriptorPool = VK_NULL_HANDLE;
+
+    vkDestroySampler( m_renderDevice->getHandle(), m_fontAtlas.sampler, nullptr );
+    m_fontAtlas.sampler = VK_NULL_HANDLE;
+    vkDestroyImageView( m_renderDevice->getHandle(), m_fontAtlas.imageView, nullptr );
+    m_fontAtlas.imageView = VK_NULL_HANDLE;
+    vkDestroyImage( m_renderDevice->getHandle(), m_fontAtlas.image, nullptr );
+    m_fontAtlas.image = VK_NULL_HANDLE;
+    vkFreeMemory( m_renderDevice->getHandle(), m_fontAtlas.memory, nullptr );
+    m_fontAtlas.memory = VK_NULL_HANDLE;
+}
+
+// size_t EditorLayer::createOffscreenPassDescriptor( VkImageView imageView, VkSampler sampler )
+// {
+//     const auto descriptorId = m_renderPassObjects.descriptorSets.size();
+
+//     const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+//         VkDescriptorPoolSize {
+//             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//             .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+//         },
+//         VkDescriptorPoolSize {
+//             .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+//             .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+//         },
+//     };
+
+//     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+//         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+//         .poolSizeCount = uint32_t( poolSizes.size() ),
+//         .pPoolSizes = poolSizes.data(),
+//         .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+//     };
+
+//     VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+//     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &descriptorPool ) );
+//     m_renderPassObjects.descriptorPools.push_back( descriptorPool );
+
+//     m_renderPassObjects.descriptorSets.push_back( {} );
+//     m_renderPassObjects.descriptorSets[ descriptorId ].resize( m_renderDevice->getSwapchainImageCount() );
+
+//     std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_renderPassObjects.descriptorSetLayout );
+
+//     const auto allocInfo = VkDescriptorSetAllocateInfo {
+//         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+//         .descriptorPool = descriptorPool,
+//         .descriptorSetCount = uint32_t( layouts.size() ),
+//         .pSetLayouts = layouts.data(),
+//     };
+
+//     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets[ descriptorId ].data() ) );
+
+//     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets[ descriptorId ].size(); ++i ) {
+//         const auto bufferInfo = VkDescriptorBufferInfo {
+//             .buffer = m_renderDevice->getHandle( m_renderPassObjects.uniforms.get(), i ),
+//             .offset = 0,
+//             .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
+//         };
+
+//         const auto imageInfo = VkDescriptorImageInfo {
+//             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+//             .imageView = imageView,
+//             .sampler = sampler,
+//         };
+
+//         const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+//             VkWriteDescriptorSet {
+//                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//                 .dstSet = m_renderPassObjects.descriptorSets[ descriptorId ][ i ],
+//                 .dstBinding = 0,
+//                 .dstArrayElement = 0,
+//                 .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//                 .descriptorCount = 1,
+//                 .pBufferInfo = &bufferInfo,
+//                 .pImageInfo = nullptr,
+//                 .pTexelBufferView = nullptr,
+//             },
+//             VkWriteDescriptorSet {
+//                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//                 .dstSet = m_renderPassObjects.descriptorSets[ descriptorId ][ i ],
+//                 .dstBinding = 1,
+//                 .dstArrayElement = 0,
+//                 .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+//                 .descriptorCount = 1,
+//                 .pBufferInfo = nullptr,
+//                 .pImageInfo = &imageInfo,
+//                 .pTexelBufferView = nullptr,
+//             },
+//         };
+//         vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
+//     }
+
+//     return descriptorId;
+// }

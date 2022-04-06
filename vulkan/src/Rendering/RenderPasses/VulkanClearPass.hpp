@@ -28,19 +28,20 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_CLEAR_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_CLEAR_
 
-#include "Foundation/VulkanUtils.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
+        class RenderDevice;
+
         class ClearPass : public RenderPass {
         public:
             explicit ClearPass( RenderDevice *renderDevice ) noexcept;
             virtual ~ClearPass( void ) noexcept;
 
-            virtual void handle( const Event & ) noexcept override;
+            virtual Event handle( const Event & ) noexcept override;
             virtual void render( void ) noexcept override;
 
         private:
@@ -50,7 +51,6 @@ namespace crimild {
             void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;

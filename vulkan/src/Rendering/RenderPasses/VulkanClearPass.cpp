@@ -35,8 +35,8 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-ClearPass::ClearPass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice )
+ClearPass::ClearPass( vulkan::RenderDevice *renderDevice ) noexcept
+    : RenderPass( renderDevice )
 {
     init();
 }
@@ -46,7 +46,7 @@ ClearPass::~ClearPass( void ) noexcept
     clear();
 }
 
-void ClearPass::handle( const Event &e ) noexcept
+Event ClearPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
@@ -58,12 +58,14 @@ void ClearPass::handle( const Event &e ) noexcept
         default:
             break;
     }
+
+    return RenderPass::handle( e );
 }
 
 void ClearPass::render( void ) noexcept
 {
-    const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-    auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     beginRenderPass( commandBuffer, currentFrameIndex );
 
@@ -79,13 +81,13 @@ void ClearPass::init( void ) noexcept
             0,
             0,
         },
-        .extent = m_renderDevice->getSwapchainExtent(),
+        .extent = getRenderDevice()->getSwapchainExtent(),
     };
 
     auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
             // TODO(hernan): assume we're clearing a swapchain image, but this is not always the case
-            .format = m_renderDevice->getSwapchainFormat(),
+            .format = getRenderDevice()->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Clear color input
             .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -99,7 +101,7 @@ void ClearPass::init( void ) noexcept
         },
         // TODO: Depth/Stencil clear should be optional (i.e. occluders)
         VkAttachmentDescription {
-            .format = m_renderDevice->getDepthStencilFormat(),
+            .format = getRenderDevice()->getDepthStencilFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Clear depth input
             .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -174,18 +176,18 @@ void ClearPass::init( void ) noexcept
 
     CRIMILD_VULKAN_CHECK(
         vkCreateRenderPass(
-            m_renderDevice->getHandle(),
+            getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
             &m_renderPass ) );
 
-    m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
+        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 2 > {
             imageView,
-            m_renderDevice->getDepthStencilImageView(),
+            getRenderDevice()->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -195,14 +197,14 @@ void ClearPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = m_renderDevice->getSwapchainExtent().width,
-            .height = m_renderDevice->getSwapchainExtent().height,
+            .width = getRenderDevice()->getSwapchainExtent().width,
+            .height = getRenderDevice()->getSwapchainExtent().height,
             .layers = 1,
         };
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFramebuffer(
-                m_renderDevice->getHandle(),
+                getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
@@ -213,14 +215,14 @@ void ClearPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDeviceWaitIdle( m_renderDevice->getHandle() );
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
     for ( auto &fb : m_framebuffers ) {
-        vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
 

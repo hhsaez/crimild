@@ -110,9 +110,10 @@ namespace crimild {
                 crimild::UInt32 arrayLayers,
                 crimild::UInt32 flags,
                 VkImage &image,
-                VkDeviceMemory &imageMemory ) const noexcept;
+                VkDeviceMemory &imageMemory,
+                void *imageData = nullptr ) const noexcept;
 
-            void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) noexcept;
+            void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept;
 
             [[nodiscard]] bool formatIsColor( VkFormat format ) const;
             [[nodiscard]] bool formatIsDepthStencil( VkFormat format ) const;
@@ -127,8 +128,7 @@ namespace crimild {
                 crimild::UInt32 layerCount ) const noexcept;
 
         private:
-            void
-            createSwapchain( void ) noexcept;
+            void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;
 
             void createDepthStencilResources( void ) noexcept;

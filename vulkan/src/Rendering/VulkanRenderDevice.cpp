@@ -1259,7 +1259,8 @@ void RenderDevice::createImage(
     crimild::UInt32 arrayLayers,
     crimild::UInt32 flags,
     VkImage &image,
-    VkDeviceMemory &imageMemory ) const noexcept
+    VkDeviceMemory &imageMemory,
+    void *imageData ) const noexcept
 {
     auto createInfo = VkImageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -1308,9 +1309,57 @@ void RenderDevice::createImage(
             image,
             imageMemory,
             0 ) );
+
+    if ( imageData != nullptr ) {
+        VkDeviceSize imageSize = memRequirements.size;
+        VkBuffer stagingBuffer = VK_NULL_HANDLE;
+        VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
+
+        createBuffer(
+            imageSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer,
+            stagingBufferMemory );
+
+        copyToBuffer( stagingBufferMemory, imageData, imageSize );
+
+        transitionImageLayout(
+            image,
+            format,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            mipLevels,
+            arrayLayers );
+
+        copyBufferToImage(
+            stagingBuffer,
+            image,
+            width,
+            height,
+            arrayLayers );
+
+        transitionImageLayout(
+            image,
+            format,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            mipLevels,
+            arrayLayers );
+
+        vkDestroyBuffer(
+            m_handle,
+            stagingBuffer,
+            nullptr );
+
+        vkFreeMemory(
+            m_handle,
+            stagingBufferMemory,
+            nullptr );
+    }
 }
 
-void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) noexcept
+void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept
 {
     utils::createImageView( m_handle, image, format, aspectFlags, &imageView );
 }

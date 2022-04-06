@@ -36,7 +36,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 PresentPass::PresentPass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice )
+    : RenderPass( renderDevice )
 {
     init();
 }
@@ -46,7 +46,7 @@ PresentPass::~PresentPass( void ) noexcept
     clear();
 }
 
-void PresentPass::handle( const Event &e ) noexcept
+Event PresentPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
@@ -58,12 +58,14 @@ void PresentPass::handle( const Event &e ) noexcept
         default:
             break;
     }
+
+    return RenderPass::handle( e );
 }
 
 void PresentPass::render( void ) noexcept
 {
-    const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-    auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -88,12 +90,12 @@ void PresentPass::init( void ) noexcept
             0,
             0,
         },
-        .extent = m_renderDevice->getSwapchainExtent(),
+        .extent = getRenderDevice()->getSwapchainExtent(),
     };
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
-            .format = m_renderDevice->getSwapchainFormat(),
+            .format = getRenderDevice()->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Don't clear input. Just load it as it is
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
@@ -159,16 +161,16 @@ void PresentPass::init( void ) noexcept
 
     CRIMILD_VULKAN_CHECK(
         vkCreateRenderPass(
-            m_renderDevice->getHandle(),
+            getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
             &m_renderPass ) );
 
-    m_renderDevice->setObjectName( UInt64( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, "PresentPass: RenderPass" );
+    getRenderDevice()->setObjectName( UInt64( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, "PresentPass: RenderPass" );
 
-    m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
+        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
             imageView,
@@ -180,19 +182,19 @@ void PresentPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = m_renderDevice->getSwapchainExtent().width,
-            .height = m_renderDevice->getSwapchainExtent().height,
+            .width = getRenderDevice()->getSwapchainExtent().width,
+            .height = getRenderDevice()->getSwapchainExtent().height,
             .layers = 1,
         };
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFramebuffer(
-                m_renderDevice->getHandle(),
+                getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
 
-        m_renderDevice->setObjectName( UInt64( m_framebuffers[ i ] ), VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, "Framebuffer" );
+        getRenderDevice()->setObjectName( UInt64( m_framebuffers[ i ] ), VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, "Framebuffer" );
     }
 }
 
@@ -200,13 +202,13 @@ void PresentPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDeviceWaitIdle( m_renderDevice->getHandle() );
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
     for ( auto &fb : m_framebuffers ) {
-        vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }

@@ -50,7 +50,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice ),
+    : RenderPass( renderDevice ),
       m_program(
           [ & ] {
               auto program = std::make_unique< ShaderProgram >();
@@ -158,11 +158,11 @@ void ScenePass::render( void ) noexcept
             RenderPassObjects::Uniforms {
                 .view = camera->getViewMatrix(),
                 .proj = camera->getProjectionMatrix() } );
-        m_renderDevice->update( m_renderPassObjects.uniforms.get() );
+        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
     }
 
-    const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-    auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     const auto clearValues = std::array< VkClearValue, 2 > {
         VkClearValue {
@@ -220,12 +220,12 @@ void ScenePass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     const auto colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    const auto depthFormat = m_renderDevice->getDepthStencilFormat();
-    const auto extent = m_renderDevice->getSwapchainExtent();
+    const auto depthFormat = getRenderDevice()->getDepthStencilFormat();
+    const auto extent = getRenderDevice()->getSwapchainExtent();
 
-    m_colorAttachment.name = "Scene/Color";
-    m_colorAttachment.format = colorFormat;
-    m_colorAttachment.extent = extent;
+    // m_colorAttachment.name = "Scene/Color";
+    // m_colorAttachment.format = colorFormat;
+    // m_colorAttachment.extent = extent;
 
     m_depthAttachment.name = "Scene/Depth";
     m_depthAttachment.format = depthFormat;
@@ -322,102 +322,13 @@ void ScenePass::init( void ) noexcept
 
     CRIMILD_VULKAN_CHECK(
         vkCreateRenderPass(
-            m_renderDevice->getHandle(),
+            getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
             &m_renderPass ) );
 
-    // Color attachment
-    {
-        m_renderDevice->createImage(
-            extent.width,
-            extent.height,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
-            1,
-            VK_SAMPLE_COUNT_1_BIT,
-            1,
-            0,
-            m_colorAttachment.image,
-            m_colorAttachment.memory );
-        m_renderDevice->createImageView(
-            m_colorAttachment.image,
-            VK_FORMAT_R8G8B8A8_UNORM,
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            m_colorAttachment.imageView );
-        auto samplerInfo = VkSamplerCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter = VK_FILTER_LINEAR,
-            .minFilter = VK_FILTER_LINEAR,
-            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-            .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .mipLodBias = 0,
-            .anisotropyEnable = VK_TRUE,
-            .maxAnisotropy = 1,
-            .compareEnable = VK_FALSE,
-            .compareOp = VK_COMPARE_OP_ALWAYS,
-            .minLod = 0,
-            .maxLod = 1,
-            .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-            .unnormalizedCoordinates = VK_FALSE,
-        };
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSampler(
-                m_renderDevice->getHandle(),
-                &samplerInfo,
-                nullptr,
-                &m_colorAttachment.sampler ) );
-    }
-
-    // Depth attachment
-    {
-        m_renderDevice->createImage(
-            extent.width,
-            extent.height,
-            m_renderDevice->getDepthStencilFormat(),
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
-            1,
-            VK_SAMPLE_COUNT_1_BIT,
-            1,
-            0,
-            m_depthAttachment.image,
-            m_depthAttachment.memory );
-        m_renderDevice->createImageView(
-            m_depthAttachment.image,
-            m_renderDevice->getDepthStencilFormat(),
-            VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
-            m_depthAttachment.imageView );
-        auto samplerInfo = VkSamplerCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter = VK_FILTER_LINEAR,
-            .minFilter = VK_FILTER_LINEAR,
-            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-            .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-            .mipLodBias = 0,
-            .anisotropyEnable = VK_TRUE,
-            .maxAnisotropy = 1,
-            .compareEnable = VK_FALSE,
-            .compareOp = VK_COMPARE_OP_ALWAYS,
-            .minLod = 0,
-            .maxLod = 1,
-            .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-            .unnormalizedCoordinates = VK_FALSE,
-        };
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSampler(
-                m_renderDevice->getHandle(),
-                &samplerInfo,
-                nullptr,
-                &m_depthAttachment.sampler ) );
-    }
+    createFramebufferAttachment( getRenderDevice(), "Scene/color", extent, colorFormat, m_colorAttachment );
+    createFramebufferAttachment( getRenderDevice(), "Scene/depth", extent, depthFormat, m_depthAttachment );
 
     // We won't be swapping framebuffers, so create only one
     m_framebuffers.resize( 1 );
@@ -440,7 +351,7 @@ void ScenePass::init( void ) noexcept
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFramebuffer(
-                m_renderDevice->getHandle(),
+                getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
@@ -451,7 +362,7 @@ void ScenePass::init( void ) noexcept
     createGeometryObjects();
 
     m_pipeline = std::make_unique< GraphicsPipeline >(
-        m_renderDevice,
+        getRenderDevice(),
         m_renderPass,
         std::vector< VkDescriptorSetLayout > {
             m_renderPassObjects.layout,
@@ -466,7 +377,7 @@ void ScenePass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDeviceWaitIdle( m_renderDevice->getHandle() );
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
     m_pipeline = nullptr;
 
@@ -475,29 +386,14 @@ void ScenePass::clear( void ) noexcept
     destroyRenderPassObjects();
 
     for ( auto &fb : m_framebuffers ) {
-        vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    vkDestroySampler( m_renderDevice->getHandle(), m_colorAttachment.sampler, nullptr );
-    m_colorAttachment.sampler = VK_NULL_HANDLE;
-    vkDestroyImageView( m_renderDevice->getHandle(), m_colorAttachment.imageView, nullptr );
-    m_colorAttachment.imageView = VK_NULL_HANDLE;
-    vkDestroyImage( m_renderDevice->getHandle(), m_colorAttachment.image, nullptr );
-    m_colorAttachment.image = VK_NULL_HANDLE;
-    vkFreeMemory( m_renderDevice->getHandle(), m_colorAttachment.memory, nullptr );
-    m_colorAttachment.memory = VK_NULL_HANDLE;
+    destroyFramebufferAttachment( getRenderDevice(), m_colorAttachment );
+    destroyFramebufferAttachment( getRenderDevice(), m_depthAttachment );
 
-    vkDestroySampler( m_renderDevice->getHandle(), m_depthAttachment.sampler, nullptr );
-    m_depthAttachment.sampler = VK_NULL_HANDLE;
-    vkDestroyImageView( m_renderDevice->getHandle(), m_depthAttachment.imageView, nullptr );
-    m_depthAttachment.imageView = VK_NULL_HANDLE;
-    vkDestroyImage( m_renderDevice->getHandle(), m_depthAttachment.image, nullptr );
-    m_depthAttachment.image = VK_NULL_HANDLE;
-    vkFreeMemory( m_renderDevice->getHandle(), m_depthAttachment.memory, nullptr );
-    m_depthAttachment.memory = VK_NULL_HANDLE;
-
-    vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
 
@@ -508,23 +404,23 @@ void ScenePass::createRenderPassObjects( void ) noexcept
     m_renderPassObjects.uniforms = [ & ] {
         auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
         ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        m_renderDevice->bind( ubo.get() );
+        getRenderDevice()->bind( ubo.get() );
         return ubo;
     }();
 
     VkDescriptorPoolSize poolSize {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
 
     const auto layoutBinding = VkDescriptorSetLayoutBinding {
         .binding = 0,
@@ -540,9 +436,9 @@ void ScenePass::createRenderPassObjects( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -551,12 +447,12 @@ void ScenePass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
         const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = m_renderDevice->getHandle( m_renderPassObjects.uniforms.get(), i ),
+            .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
             .offset = 0,
             .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
         };
@@ -573,7 +469,7 @@ void ScenePass::createRenderPassObjects( void ) noexcept
             .pTexelBufferView = nullptr,
         };
 
-        vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
     }
 }
 
@@ -581,13 +477,13 @@ void ScenePass::destroyRenderPassObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_renderPassObjects.layout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_renderPassObjects.layout, nullptr );
     m_renderPassObjects.layout = VK_NULL_HANDLE;
 
-    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_renderPassObjects.pool, nullptr );
+    vkDestroyDescriptorPool( getRenderDevice()->getHandle(), m_renderPassObjects.pool, nullptr );
     m_renderPassObjects.pool = VK_NULL_HANDLE;
 
-    m_renderDevice->unbind( m_renderPassObjects.uniforms.get() );
+    getRenderDevice()->unbind( m_renderPassObjects.uniforms.get() );
     m_renderPassObjects.uniforms = nullptr;
 }
 
@@ -618,7 +514,7 @@ void ScenePass::createMaterialObjects( void ) noexcept
         .pBindings = bindings.data(),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
 void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
@@ -646,11 +542,11 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
         const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             },
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             },
         };
 
@@ -658,18 +554,18 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .poolSizeCount = uint32_t( poolSizes.size() ),
             .pPoolSizes = poolSizes.data(),
-            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
 
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
                 .color = color,
             } );
-        m_renderDevice->bind( m_materialObjects.uniforms[ material ].get() );
+        getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
-        std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -678,15 +574,15 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
             .pSetLayouts = layouts.data(),
         };
 
-        m_materialObjects.descriptorSets[ material ].resize( m_renderDevice->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+        m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
+        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
-        auto imageView = m_renderDevice->bind( texture->imageView.get() );
-        auto sampler = m_renderDevice->bind( texture->sampler.get() );
+        auto imageView = getRenderDevice()->bind( texture->imageView.get() );
+        auto sampler = getRenderDevice()->bind( texture->sampler.get() );
 
         for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = m_renderDevice->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
+                .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
                 .offset = 0,
                 .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
             };
@@ -721,14 +617,14 @@ void ScenePass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFram
                     .pTexelBufferView = nullptr,
                 },
             };
-            vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
+            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
         }
     }
 
     // TODO: This should be handled in a different way. What if texture changes?
     // Also, update only when material changes.
     m_materialObjects.uniforms[ material ]->setValue( color );
-    m_renderDevice->update( m_materialObjects.uniforms[ material ].get() );
+    getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
 
     vkCmdBindDescriptorSets(
         cmds,
@@ -748,16 +644,16 @@ void ScenePass::destroyMaterialObjects( void ) noexcept
     // no need to destroy sets
     m_materialObjects.descriptorSets.clear();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
     m_materialObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
     for ( auto &it : m_materialObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
     }
     m_materialObjects.descriptorPools.clear();
 
     for ( auto &it : m_materialObjects.uniforms ) {
-        m_renderDevice->unbind( it.second.get() );
+        getRenderDevice()->unbind( it.second.get() );
     }
     m_materialObjects.uniforms.clear();
 }
@@ -780,7 +676,7 @@ void ScenePass::createGeometryObjects( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
 }
 
 void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
@@ -788,22 +684,22 @@ void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFram
     if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
         VkDescriptorPoolSize poolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
 
         m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-        m_renderDevice->bind( m_geometryObjects.uniforms[ geometry ].get() );
+        getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
 
-        std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -812,12 +708,12 @@ void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFram
             .pSetLayouts = layouts.data(),
         };
 
-        m_geometryObjects.descriptorSets[ geometry ].resize( m_renderDevice->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
+        m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
+        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
 
         for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = m_renderDevice->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
+                .buffer = getRenderDevice()->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
                 .offset = 0,
                 .range = m_geometryObjects.uniforms[ geometry ]->getBufferView()->getLength(),
             };
@@ -834,12 +730,12 @@ void ScenePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFram
                 .pTexelBufferView = nullptr,
             };
 
-            vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
         }
     }
 
     m_geometryObjects.uniforms[ geometry ]->setValue( geometry->getWorld().mat );
-    m_renderDevice->update( m_geometryObjects.uniforms[ geometry ].get() );
+    getRenderDevice()->update( m_geometryObjects.uniforms[ geometry ].get() );
 
     vkCmdBindDescriptorSets(
         cmds,
@@ -859,16 +755,16 @@ void ScenePass::destroyGeometryObjects( void ) noexcept
     // no need to destroy sets
     m_geometryObjects.descriptorSets.clear();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
     m_geometryObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
     for ( auto &it : m_geometryObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
     }
     m_geometryObjects.descriptorPools.clear();
 
     for ( auto &it : m_geometryObjects.uniforms ) {
-        m_renderDevice->unbind( it.second.get() );
+        getRenderDevice()->unbind( it.second.get() );
     }
     m_geometryObjects.uniforms.clear();
 }
@@ -878,7 +774,7 @@ void ScenePass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Pr
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
             if ( vertices != nullptr ) {
-                VkBuffer buffers[] = { m_renderDevice->bind( vertices.get() ) };
+                VkBuffer buffers[] = { getRenderDevice()->bind( vertices.get() ) };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
@@ -899,7 +795,7 @@ void ScenePass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Pr
     if ( indices != nullptr ) {
         vkCmdBindIndexBuffer(
             cmds,
-            m_renderDevice->bind( indices ),
+            getRenderDevice()->bind( indices ),
             0,
             utils::getIndexType( crimild::get_ptr( indices ) ) );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
