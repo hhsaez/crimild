@@ -25,8 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_PANELS_SCENE_
-#define CRIMILD_EDITOR_PANELS_SCENE_
+#ifndef CRIMILD_EDITOR_PANELS_SIMULATION_
+#define CRIMILD_EDITOR_PANELS_SIMULATION_
+
+#include "Mathematics/Point2.hpp"
+#include "Rendering/Extent.hpp"
+#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
 
 namespace crimild {
 
@@ -34,9 +38,29 @@ namespace crimild {
 
     namespace editor {
 
-        void setScenePanelVisible( bool open ) noexcept;
+        class SimulationPanel : public vulkan::RenderPass {
+        private:
+            static bool s_visible;
 
-        void renderScenePanel( EditorLayer *editor ) noexcept;
+        public:
+            inline static void setVisible( bool visible ) { s_visible = visible; }
+            inline static bool isVibisle( void ) { return s_visible; }
+
+        public:
+            explicit SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept;
+            virtual ~SimulationPanel( void ) = default;
+
+            void updateUI( EditorLayer *editor, bool embedded ) noexcept;
+
+            Event handle( const Event &e ) noexcept override;
+            void render( void ) noexcept override;
+
+        private:
+            Point2 m_pos = Point2 { 310, 25 };
+            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 720.0 };
+
+            vulkan::GBufferPass m_gBufferPass;
+        };
 
     }
 

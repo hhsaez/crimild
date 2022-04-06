@@ -685,9 +685,6 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
     static bool showBehaviorEditor = true;
 
     if ( ImGui::BeginMenu( "View" ) ) {
-        if ( ImGui::MenuItem( "Scene..." ) ) {
-            setScenePanelVisible( true );
-        }
         if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
             showSceneHierarchyPanel = true;
         }

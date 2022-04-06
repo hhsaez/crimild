@@ -38,13 +38,14 @@ namespace crimild {
     namespace vulkan {
 
         class GraphicsPipeline;
+        class RenderDevice;
 
         class ShaderPass : public RenderPass {
         public:
             explicit ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept;
             virtual ~ShaderPass( void ) noexcept;
 
-            virtual void handle( const Event & ) noexcept override;
+            virtual Event handle( const Event & ) noexcept override;
             virtual void render( void ) noexcept override;
 
         private:
@@ -64,7 +65,6 @@ namespace crimild {
             void destroyDescriptorSets( void ) noexcept;
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;

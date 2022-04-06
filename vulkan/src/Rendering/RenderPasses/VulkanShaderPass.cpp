@@ -40,7 +40,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ShaderPass::ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept
-    : m_renderDevice( renderDevice ),
+    : RenderPass( renderDevice ),
       m_uniforms( std::make_unique< UniformBuffer >( Vector2 { 1024, 768 } ) ),
       m_program(
           [ & ] {
@@ -103,7 +103,7 @@ ShaderPass::~ShaderPass( void ) noexcept
     clear();
 }
 
-void ShaderPass::handle( const Event &e ) noexcept
+Event ShaderPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
@@ -121,16 +121,18 @@ void ShaderPass::handle( const Event &e ) noexcept
         default:
             break;
     }
+
+    return RenderPass::handle( e );
 }
 
 void ShaderPass::render( void ) noexcept
 {
-    const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-    auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     beginRenderPass( commandBuffer, currentFrameIndex );
 
-    // m_renderDevice->update( m_uniforms.get() );
+    // getRenderDevice()->update( m_uniforms.get() );
 
     vkCmdBindPipeline(
         commandBuffer,
@@ -153,12 +155,12 @@ void ShaderPass::init( void ) noexcept
             0,
             0,
         },
-        .extent = m_renderDevice->getSwapchainExtent(),
+        .extent = getRenderDevice()->getSwapchainExtent(),
     };
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
-            .format = m_renderDevice->getSwapchainFormat(),
+            .format = getRenderDevice()->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Don't clear input. Just load it as it is
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
@@ -223,14 +225,14 @@ void ShaderPass::init( void ) noexcept
 
     CRIMILD_VULKAN_CHECK(
         vkCreateRenderPass(
-            m_renderDevice->getHandle(),
+            getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
             &m_renderPass ) );
 
-    m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
+        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
             imageView,
@@ -243,27 +245,27 @@ void ShaderPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = m_renderDevice->getSwapchainExtent().width,
-            .height = m_renderDevice->getSwapchainExtent().height,
+            .width = getRenderDevice()->getSwapchainExtent().width,
+            .height = getRenderDevice()->getSwapchainExtent().height,
             .layers = 1,
         };
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFramebuffer(
-                m_renderDevice->getHandle(),
+                getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
     }
 
-    m_renderDevice->bind( m_uniforms.get() );
+    getRenderDevice()->bind( m_uniforms.get() );
 
     createDescriptorPool();
     createDescriptorSetLayout();
     createDescriptorSets();
 
     m_pipeline = std::make_unique< GraphicsPipeline >(
-        m_renderDevice,
+        getRenderDevice(),
         m_renderPass,
         std::vector< VkDescriptorSetLayout > { m_descriptorSetLayout },
         m_program.get(),
@@ -274,7 +276,7 @@ void ShaderPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDeviceWaitIdle( m_renderDevice->getHandle() );
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
     m_pipeline = nullptr;
 
@@ -282,14 +284,14 @@ void ShaderPass::clear( void ) noexcept
     destroyDescriptorSetLayout();
     destroyDescriptorPool();
 
-    m_renderDevice->unbind( m_uniforms.get() );
+    getRenderDevice()->unbind( m_uniforms.get() );
 
     for ( auto &fb : m_framebuffers ) {
-        vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
 
@@ -318,24 +320,24 @@ void ShaderPass::createDescriptorPool( void ) noexcept
 
     VkDescriptorPoolSize poolSize {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
 }
 
 void ShaderPass::destroyDescriptorPool( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_descriptorPool, nullptr );
+    vkDestroyDescriptorPool( getRenderDevice()->getHandle(), m_descriptorPool, nullptr );
     m_descriptorPool = VK_NULL_HANDLE;
 }
 
@@ -357,14 +359,14 @@ void ShaderPass::createDescriptorSetLayout( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &createInfo, nullptr, &m_descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &createInfo, nullptr, &m_descriptorSetLayout ) );
 }
 
 void ShaderPass::destroyDescriptorSetLayout( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_descriptorSetLayout, nullptr );
     m_descriptorSetLayout = VK_NULL_HANDLE;
 }
 
@@ -372,7 +374,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_descriptorSetLayout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_descriptorSetLayout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -381,12 +383,12 @@ void ShaderPass::createDescriptorSets( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_descriptorSets.data() ) );
+    m_descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_descriptorSets.size(); ++i ) {
         const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = m_renderDevice->getHandle( m_uniforms.get(), i ),
+            .buffer = getRenderDevice()->getHandle( m_uniforms.get(), i ),
             .offset = 0,
             .range = m_uniforms->getBufferView()->getLength(),
         };
@@ -403,7 +405,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
             .pTexelBufferView = nullptr,
         };
 
-        vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
     }
 }
 

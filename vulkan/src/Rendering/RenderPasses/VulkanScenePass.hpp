@@ -30,8 +30,7 @@
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/VulkanFramebufferAttachment.hpp"
-#include "Simulation/Event.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
 
 namespace crimild {
 
@@ -46,16 +45,16 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class ScenePass {
+        class ScenePass : public RenderPass {
         public:
             explicit ScenePass( RenderDevice *renderDevice ) noexcept;
             virtual ~ScenePass( void ) noexcept;
 
-            Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            Event handle( const Event & ) noexcept override;
+            void render( void ) noexcept override;
 
-            [[nodiscard]] inline const FramebufferAttachment &getColorAttachment( void ) const noexcept { return m_colorAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment &getDepthAttachment( void ) const noexcept { return m_depthAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return &m_colorAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getDepthAttachment( void ) const noexcept { return &m_depthAttachment; }
 
         private:
             void init( void ) noexcept;
@@ -75,7 +74,6 @@ namespace crimild {
             void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;

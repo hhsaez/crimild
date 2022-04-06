@@ -25,27 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_ATTACHMENT_
-#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_ATTACHMENT_
+#ifndef CRIMILD_EDITOR_PANELS_SCENE_
+#define CRIMILD_EDITOR_PANELS_SCENE_
 
-#include "Foundation/VulkanUtils.hpp"
-
-#include <string>
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 namespace crimild {
 
-    namespace vulkan {
+    class EditorLayer;
 
-        struct FramebufferAttachment {
-            std::string name;
-            VkExtent2D extent;
-            VkFormat format = VK_FORMAT_UNDEFINED;
-            VkImage image = VK_NULL_HANDLE;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
-            VkImageView imageView = VK_NULL_HANDLE;
-            VkSampler sampler = VK_NULL_HANDLE;
-            uint32_t mipLevels = 1;
-            uint32_t layerCount = 1;
+    namespace editor {
+
+        class ScenePanel : public vulkan::RenderPass {
+        private:
+            static bool s_visible;
+
+        public:
+            inline static void setVisible( bool visible ) { s_visible = visible; }
+            inline static bool isVibisle( void ) { return s_visible; }
+
+        public:
+            explicit ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept;
+            virtual ~ScenePanel( void ) = default;
+
+            void updateUI( EditorLayer *editor, bool embedded ) noexcept;
+
+            Event handle( const Event &e ) noexcept override;
+            void render( void ) noexcept override;
+
+            vulkan::ScenePass m_scenePass;
         };
 
     }

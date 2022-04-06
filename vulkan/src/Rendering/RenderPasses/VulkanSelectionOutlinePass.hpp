@@ -44,13 +44,14 @@ namespace crimild {
     namespace vulkan {
 
         class GraphicsPipeline;
+        class RenderDevice;
 
-        class SelectionOutlinePass {
+        class SelectionOutlinePass : public RenderPass {
         public:
             explicit SelectionOutlinePass( RenderDevice *renderDevice ) noexcept;
             ~SelectionOutlinePass( void ) noexcept;
 
-            void handle( const Event & ) noexcept;
+            Event handle( const Event & ) noexcept override;
             void render( Node *selectedScene ) noexcept;
 
         private:
@@ -70,7 +71,6 @@ namespace crimild {
             void renderOutline( const RenderableSet &renderables, const Camera *camera );
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRect2D m_renderArea;
 
             VkRenderPass m_renderPass = VK_NULL_HANDLE;

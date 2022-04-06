@@ -46,9 +46,10 @@ using namespace crimild::glfw;
 class ComposePass : public vulkan::RenderPass {
 public:
     ComposePass( vulkan::RenderDevice *renderDevice )
-        : m_clear( renderDevice ),
-          m_scene( renderDevice ),
-          m_selection( renderDevice ),
+        : vulkan::RenderPass( renderDevice ),
+          m_clear( renderDevice ),
+          //   m_scene( renderDevice ),
+          //   m_selection( renderDevice ),
           m_shader(
               renderDevice,
               R"(
@@ -76,7 +77,7 @@ public:
                     outColor = vec4( color, 1.0 );
                 }
             )" ),
-          m_editor( renderDevice, { &m_scene.getColorAttachment(), &m_scene.getDepthAttachment() } ),
+          m_editor( renderDevice ),
           m_present( renderDevice )
     {
     }
@@ -87,32 +88,34 @@ public:
     {
         m_clear.render();
         m_shader.render();
-        m_scene.render();
-        m_selection.render( m_editor.getSelectedNode() );
+        // m_scene.render();
+        // m_selection.render( m_editor.getSelectedNode() );
         m_editor.render();
         m_present.render();
     }
 
-    virtual void handle( const Event &e ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
         auto ev = e;
 
         m_clear.handle( ev );
         m_shader.handle( ev );
         ev = m_editor.handle( ev );
-        ev = m_scene.handle( ev );
-        if ( ev.type == Event::Type::NODE_SELECTED ) {
-            // TODO: ScenePass should be a child of EditorLayer
-            m_editor.handle( ev );
-        }
-        m_selection.handle( ev );
+        // ev = m_scene.handle( ev );
+        // if ( ev.type == Event::Type::NODE_SELECTED ) {
+        //     // TODO: ScenePass should be a child of EditorLayer
+        //     m_editor.handle( ev );
+        // }
+        // m_selection.handle( ev );
         m_present.handle( ev );
+
+        return RenderPass::handle( ev );
     }
 
 private:
     vulkan::ClearPass m_clear;
-    vulkan::ScenePass m_scene;
-    vulkan::SelectionOutlinePass m_selection;
+    // vulkan::ScenePass m_scene;
+    // vulkan::SelectionOutlinePass m_selection;
     vulkan::ShaderPass m_shader;
     EditorLayer m_editor;
     vulkan::PresentPass m_present;

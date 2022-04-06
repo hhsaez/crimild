@@ -35,12 +35,14 @@ namespace crimild {
 
     namespace vulkan {
 
+        class RenderDevice;
+
         class PresentPass : public RenderPass {
         public:
             explicit PresentPass( RenderDevice *renderDevice ) noexcept;
             virtual ~PresentPass( void ) noexcept;
 
-            virtual void handle( const Event & ) noexcept override;
+            virtual Event handle( const Event & ) noexcept override;
             virtual void render( void ) noexcept override;
 
         private:
@@ -48,7 +50,6 @@ namespace crimild {
             void clear( void ) noexcept;
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;

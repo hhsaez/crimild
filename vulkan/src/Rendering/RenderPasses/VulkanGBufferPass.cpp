@@ -50,7 +50,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice ),
+    : RenderPass( renderDevice ),
       m_program(
           [ & ] {
               auto program = std::make_unique< ShaderProgram >();
@@ -153,11 +153,11 @@ void GBufferPass::render( void ) noexcept
             RenderPassObjects::Uniforms {
                 .view = camera->getViewMatrix(),
                 .proj = camera->getProjectionMatrix() } );
-        m_renderDevice->update( m_renderPassObjects.uniforms.get() );
+        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
     }
 
-    const auto currentFrameIndex = m_renderDevice->getCurrentFrameIndex();
-    auto commandBuffer = m_renderDevice->getCurrentCommandBuffer();
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     beginRenderPass( commandBuffer, currentFrameIndex );
 
@@ -191,12 +191,12 @@ void GBufferPass::init( void ) noexcept
             0,
             0,
         },
-        .extent = m_renderDevice->getSwapchainExtent(),
+        .extent = getRenderDevice()->getSwapchainExtent(),
     };
 
     auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
-            .format = m_renderDevice->getSwapchainFormat(),
+            .format = getRenderDevice()->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Don't clear input. Just load it as it is
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
@@ -207,7 +207,7 @@ void GBufferPass::init( void ) noexcept
             .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         },
         VkAttachmentDescription {
-            .format = m_renderDevice->getDepthStencilFormat(),
+            .format = getRenderDevice()->getDepthStencilFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
             // Don't clear input. Just load it as it is
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
@@ -279,18 +279,18 @@ void GBufferPass::init( void ) noexcept
 
     CRIMILD_VULKAN_CHECK(
         vkCreateRenderPass(
-            m_renderDevice->getHandle(),
+            getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
             &m_renderPass ) );
 
-    m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
+        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 2 > {
             imageView,
-            m_renderDevice->getDepthStencilImageView(),
+            getRenderDevice()->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -299,14 +299,14 @@ void GBufferPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = m_renderDevice->getSwapchainExtent().width,
-            .height = m_renderDevice->getSwapchainExtent().height,
+            .width = getRenderDevice()->getSwapchainExtent().width,
+            .height = getRenderDevice()->getSwapchainExtent().height,
             .layers = 1,
         };
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFramebuffer(
-                m_renderDevice->getHandle(),
+                getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
                 &m_framebuffers[ i ] ) );
@@ -317,7 +317,7 @@ void GBufferPass::init( void ) noexcept
     createGeometryObjects();
 
     m_pipeline = std::make_unique< GraphicsPipeline >(
-        m_renderDevice,
+        getRenderDevice(),
         m_renderPass,
         std::vector< VkDescriptorSetLayout > {
             m_renderPassObjects.layout,
@@ -332,7 +332,7 @@ void GBufferPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDeviceWaitIdle( m_renderDevice->getHandle() );
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
     m_pipeline = nullptr;
 
@@ -341,11 +341,11 @@ void GBufferPass::clear( void ) noexcept
     destroyRenderPassObjects();
 
     for ( auto &fb : m_framebuffers ) {
-        vkDestroyFramebuffer( m_renderDevice->getHandle(), fb, nullptr );
+        vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    vkDestroyRenderPass( m_renderDevice->getHandle(), m_renderPass, nullptr );
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
 
@@ -375,23 +375,23 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
     m_renderPassObjects.uniforms = [ & ] {
         auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
         ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        m_renderDevice->bind( ubo.get() );
+        getRenderDevice()->bind( ubo.get() );
         return ubo;
     }();
 
     VkDescriptorPoolSize poolSize {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
 
     const auto layoutBinding = VkDescriptorSetLayoutBinding {
         .binding = 0,
@@ -407,9 +407,9 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -418,12 +418,12 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
         const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = m_renderDevice->getHandle( m_renderPassObjects.uniforms.get(), i ),
+            .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
             .offset = 0,
             .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
         };
@@ -440,7 +440,7 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
             .pTexelBufferView = nullptr,
         };
 
-        vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
     }
 }
 
@@ -448,13 +448,13 @@ void GBufferPass::destroyRenderPassObjects( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_renderPassObjects.layout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_renderPassObjects.layout, nullptr );
     m_renderPassObjects.layout = VK_NULL_HANDLE;
 
-    vkDestroyDescriptorPool( m_renderDevice->getHandle(), m_renderPassObjects.pool, nullptr );
+    vkDestroyDescriptorPool( getRenderDevice()->getHandle(), m_renderPassObjects.pool, nullptr );
     m_renderPassObjects.pool = VK_NULL_HANDLE;
 
-    m_renderDevice->unbind( m_renderPassObjects.uniforms.get() );
+    getRenderDevice()->unbind( m_renderPassObjects.uniforms.get() );
     m_renderPassObjects.uniforms = nullptr;
 }
 
@@ -485,7 +485,7 @@ void GBufferPass::createMaterialObjects( void ) noexcept
         .pBindings = bindings.data(),
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
 void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
@@ -513,11 +513,11 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
         const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             },
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             },
         };
 
@@ -525,18 +525,18 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .poolSizeCount = uint32_t( poolSizes.size() ),
             .pPoolSizes = poolSizes.data(),
-            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
 
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
                 .color = color,
             } );
-        m_renderDevice->bind( m_materialObjects.uniforms[ material ].get() );
+        getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
-        std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -545,15 +545,15 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
             .pSetLayouts = layouts.data(),
         };
 
-        m_materialObjects.descriptorSets[ material ].resize( m_renderDevice->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+        m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
+        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
-        auto imageView = m_renderDevice->bind( texture->imageView.get() );
-        auto sampler = m_renderDevice->bind( texture->sampler.get() );
+        auto imageView = getRenderDevice()->bind( texture->imageView.get() );
+        auto sampler = getRenderDevice()->bind( texture->sampler.get() );
 
         for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = m_renderDevice->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
+                .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
                 .offset = 0,
                 .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
             };
@@ -588,14 +588,14 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
                     .pTexelBufferView = nullptr,
                 },
             };
-            vkUpdateDescriptorSets( m_renderDevice->getHandle(), writes.size(), writes.data(), 0, nullptr );
+            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
         }
     }
 
     // TODO: This should be handled in a different way. What if texture changes?
     // Also, update only when material changes.
     m_materialObjects.uniforms[ material ]->setValue( color );
-    m_renderDevice->update( m_materialObjects.uniforms[ material ].get() );
+    getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
 
     vkCmdBindDescriptorSets(
         cmds,
@@ -615,16 +615,16 @@ void GBufferPass::destroyMaterialObjects( void ) noexcept
     // no need to destroy sets
     m_materialObjects.descriptorSets.clear();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
     m_materialObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
     for ( auto &it : m_materialObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
     }
     m_materialObjects.descriptorPools.clear();
 
     for ( auto &it : m_materialObjects.uniforms ) {
-        m_renderDevice->unbind( it.second.get() );
+        getRenderDevice()->unbind( it.second.get() );
     }
     m_materialObjects.uniforms.clear();
 }
@@ -647,7 +647,7 @@ void GBufferPass::createGeometryObjects( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( m_renderDevice->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
 }
 
 void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
@@ -655,22 +655,22 @@ void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFr
     if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
         VkDescriptorPoolSize poolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( m_renderDevice->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
+        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
 
         m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-        m_renderDevice->bind( m_geometryObjects.uniforms[ geometry ].get() );
+        getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
 
-        std::vector< VkDescriptorSetLayout > layouts( m_renderDevice->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -679,12 +679,12 @@ void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFr
             .pSetLayouts = layouts.data(),
         };
 
-        m_geometryObjects.descriptorSets[ geometry ].resize( m_renderDevice->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( m_renderDevice->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
+        m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
+        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
 
         for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = m_renderDevice->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
+                .buffer = getRenderDevice()->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
                 .offset = 0,
                 .range = m_geometryObjects.uniforms[ geometry ]->getBufferView()->getLength(),
             };
@@ -701,12 +701,12 @@ void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFr
                 .pTexelBufferView = nullptr,
             };
 
-            vkUpdateDescriptorSets( m_renderDevice->getHandle(), 1, &descriptorWrite, 0, nullptr );
+            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
         }
     }
 
     m_geometryObjects.uniforms[ geometry ]->setValue( geometry->getWorld().mat );
-    m_renderDevice->update( m_geometryObjects.uniforms[ geometry ].get() );
+    getRenderDevice()->update( m_geometryObjects.uniforms[ geometry ].get() );
 
     vkCmdBindDescriptorSets(
         cmds,
@@ -726,16 +726,16 @@ void GBufferPass::destroyGeometryObjects( void ) noexcept
     // no need to destroy sets
     m_geometryObjects.descriptorSets.clear();
 
-    vkDestroyDescriptorSetLayout( m_renderDevice->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
     m_geometryObjects.descriptorSetLayout = VK_NULL_HANDLE;
 
     for ( auto &it : m_geometryObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( m_renderDevice->getHandle(), it.second, nullptr );
+        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
     }
     m_geometryObjects.descriptorPools.clear();
 
     for ( auto &it : m_geometryObjects.uniforms ) {
-        m_renderDevice->unbind( it.second.get() );
+        getRenderDevice()->unbind( it.second.get() );
     }
     m_geometryObjects.uniforms.clear();
 }
@@ -745,7 +745,7 @@ void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, 
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
             if ( vertices != nullptr ) {
-                VkBuffer buffers[] = { m_renderDevice->bind( vertices.get() ) };
+                VkBuffer buffers[] = { getRenderDevice()->bind( vertices.get() ) };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
@@ -766,7 +766,7 @@ void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, 
     if ( indices != nullptr ) {
         vkCmdBindIndexBuffer(
             cmds,
-            m_renderDevice->bind( indices ),
+            getRenderDevice()->bind( indices ),
             0,
             utils::getIndexType( crimild::get_ptr( indices ) ) );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
