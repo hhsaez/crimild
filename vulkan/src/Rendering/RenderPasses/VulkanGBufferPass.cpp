@@ -32,7 +32,6 @@
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
-#include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -72,11 +71,16 @@ GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
                                 mat4 model;
                             };
 
-                            layout ( location = 0 ) out vec2 outTexCoord;
+                            layout ( location = 0 ) out vec3 outPosition;
+                            layout ( location = 1 ) out vec3 outNormal;
+                            layout ( location = 2 ) out vec2 outTexCoord;
 
                             void main()
                             {
                                 gl_Position = proj * view * model * vec4( inPosition, 1.0 );
+
+                                outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+                                outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
                                 outTexCoord = inTexCoord;
                             }
 
@@ -84,25 +88,42 @@ GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
-                            layout( location = 0 ) in vec2 inTexCoord;
+                            layout ( location = 0 ) in vec3 inPosition;
+                            layout ( location = 1 ) in vec3 inNormal;
+                            layout ( location = 2 ) in vec2 inTexCoord;
 
                             layout( set = 1, binding = 0 ) uniform MaterialUniform
                             {
-                                vec4 color;
-                            };
+                                vec3 albedo;
+                                float metallic;
+                                float roughness;
+                                float ambientOcclusion;
+                                float transmission;
+                                float indexOfRefraction;
+                                vec3 emissive;
+                            } uMaterial;
 
-                            layout( set = 1, binding = 1 ) uniform sampler2D uSampler;
+                            layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
 
-                            layout( location = 0 ) out vec4 outColor;
+                            layout ( location = 0 ) out vec4 outAlbedo;
+                            layout ( location = 1 ) out vec4 outPosition;
+                            layout ( location = 2 ) out vec4 outNormal;
+                            layout ( location = 3 ) out vec4 outMaterial;
 
                             void main()
                             {
-                                outColor = color * texture( uSampler, inTexCoord );
-                                // outColor = color;
-                                // outColor = vec4( 0, 1, 1, 1 );
-                                if ( outColor.a <= 0.01 ) {
-                                    discard;
-                                }
+                                vec3 albedo = uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
+                                float metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
+                                float roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;
+                                float ambientOcclusion = uMaterial.ambientOcclusion;// * texture( uAmbientOcclusionMap, inTexCoord ).r;
+
+                                metallic = clamp( metallic, 0.0, 1.0 );
+                                roughness = clamp( roughness, 0.05, 0.999 );
+
+                                outAlbedo = vec4( albedo, 1.0 );
+                                outPosition = vec4( inPosition, 1.0 );
+                                outNormal = vec4( inNormal, 1.0 );
+                                outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                             }
                         )" ) } );
               return program;
@@ -144,7 +165,13 @@ void GBufferPass::render( void ) noexcept
     scene->perform(
         ApplyToGeometries(
             [ & ]( Geometry *geometry ) {
-                renderables.addGeometry( geometry );
+                if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+                    if ( auto m = ms->first() ) {
+                        if ( m->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
+                            renderables.addGeometry( geometry );
+                        }
+                    }
+                }
             } ) );
 
     auto camera = Camera::getMainCamera();
@@ -159,7 +186,40 @@ void GBufferPass::render( void ) noexcept
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    beginRenderPass( commandBuffer, currentFrameIndex );
+    const auto clearColorValue = VkClearValue {
+        .color = {
+            .float32 = {
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+            },
+        },
+    };
+
+    const auto clearValues = std::array< VkClearValue, 5 > {
+        clearColorValue,
+        clearColorValue,
+        clearColorValue,
+        clearColorValue,
+        VkClearValue {
+            .depthStencil = {
+                1,
+                0,
+            },
+        },
+    };
+
+    auto renderPassInfo = VkRenderPassBeginInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        .renderPass = m_renderPass,
+        .framebuffer = m_framebuffers[ currentFrameIndex ],
+        .renderArea = m_renderArea,
+        .clearValueCount = clearValues.size(),
+        .pClearValues = clearValues.data(),
+    };
+
+    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
     renderables.eachGeometry(
         [ & ]( Geometry *geometry ) {
@@ -172,65 +232,77 @@ void GBufferPass::render( void ) noexcept
 
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, material );
+                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, static_cast< materials::PrincipledBSDF * >( material ) );
                     bindGeometryDescriptors( commandBuffer, currentFrameIndex, geometry );
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
             }
         } );
 
-    endRenderPass( commandBuffer );
+    vkCmdEndRenderPass( commandBuffer );
 }
 
 void GBufferPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
+    const auto extent = getRenderDevice()->getSwapchainExtent();
+
     m_renderArea = VkRect2D {
         .offset = {
             0,
             0,
         },
-        .extent = getRenderDevice()->getSwapchainExtent(),
+        .extent = extent,
     };
 
-    auto attachments = std::array< VkAttachmentDescription, 2 > {
-        VkAttachmentDescription {
-            .format = getRenderDevice()->getSwapchainFormat(),
+    createFramebufferAttachment( "Scene/Albedo", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_albedoAttachment );
+    createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_positionAttachment );
+    createFramebufferAttachment( "Scene/Normal", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_normalAttachment );
+    createFramebufferAttachment( "Scene/Material", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_materialAttachment );
+    createFramebufferAttachment( "Scene/Depth", extent, getRenderDevice()->getDepthStencilFormat(), m_depthStencilAttachment );
+
+    auto getAttachmentDescription = [ & ]( const auto &att ) {
+        return VkAttachmentDescription {
+            .format = att.format,
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Don't clear input. Just load it as it is
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
-        VkAttachmentDescription {
-            .format = getRenderDevice()->getDepthStencilFormat(),
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Don't clear input. Just load it as it is
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        }
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = getRenderDevice()->formatIsColor( att.format )
+                               ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                               : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        };
     };
 
-    auto colorReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
+    auto attachments = std::array< VkAttachmentDescription, 5 > {
+        getAttachmentDescription( m_albedoAttachment ),
+        getAttachmentDescription( m_positionAttachment ),
+        getAttachmentDescription( m_normalAttachment ),
+        getAttachmentDescription( m_materialAttachment ),
+        getAttachmentDescription( m_depthStencilAttachment ),
+    };
+
+    auto getAttachmentReference = [ & ]( const auto &att, uint32_t idx ) {
+        return VkAttachmentReference {
+            .attachment = idx,
+            .layout = getRenderDevice()->formatIsColor( att.format )
+                          ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                          : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        };
+    };
+
+    auto colorReferences = std::array< VkAttachmentReference, 4 > {
+        getAttachmentReference( m_albedoAttachment, 0 ),
+        getAttachmentReference( m_positionAttachment, 1 ),
+        getAttachmentReference( m_normalAttachment, 2 ),
+        getAttachmentReference( m_materialAttachment, 3 ),
     };
 
     auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 1,
-            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        },
+        getAttachmentReference( m_depthStencilAttachment, 4 ),
     };
 
     auto subpass = VkSubpassDescription {
@@ -286,11 +358,12 @@ void GBufferPass::init( void ) noexcept
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
-
-        auto attachments = std::array< VkImageView, 2 > {
-            imageView,
-            getRenderDevice()->getDepthStencilImageView(),
+        auto attachments = std::array< VkImageView, 5 > {
+            m_albedoAttachment.imageView,
+            m_positionAttachment.imageView,
+            m_normalAttachment.imageView,
+            m_materialAttachment.imageView,
+            m_depthStencilAttachment.imageView,
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -299,8 +372,8 @@ void GBufferPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = getRenderDevice()->getSwapchainExtent().width,
-            .height = getRenderDevice()->getSwapchainExtent().height,
+            .width = extent.width,
+            .height = extent.height,
             .layers = 1,
         };
 
@@ -325,7 +398,11 @@ void GBufferPass::init( void ) noexcept
             m_geometryObjects.descriptorSetLayout,
         },
         m_program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 } );
+        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+        DepthStencilState {},
+        RasterizationState {},
+        ColorBlendState {},
+        colorReferences.size() );
 }
 
 void GBufferPass::clear( void ) noexcept
@@ -345,27 +422,14 @@ void GBufferPass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
+    destroyFramebufferAttachment( m_albedoAttachment );
+    destroyFramebufferAttachment( m_positionAttachment );
+    destroyFramebufferAttachment( m_normalAttachment );
+    destroyFramebufferAttachment( m_materialAttachment );
+    destroyFramebufferAttachment( m_depthStencilAttachment );
+
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
-}
-
-void GBufferPass::beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept
-{
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
-
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-}
-
-void GBufferPass::endRenderPass( VkCommandBuffer commandBuffer ) noexcept
-{
-    vkCmdEndRenderPass( commandBuffer );
 }
 
 void GBufferPass::createRenderPassObjects( void ) noexcept
@@ -488,26 +552,12 @@ void GBufferPass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
+void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, materials::PrincipledBSDF *material ) noexcept
 {
-    auto [ color, texture ] = [ & ]() {
-        if ( material == nullptr ) {
-            CRIMILD_LOG_WARNING( "Material is null" );
-            return std::make_tuple( ColorRGBA { 1, 0, 1, 1 }, crimild::get_ptr( Texture::ONE ) );
-        }
-
-        if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-            const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
-            return std::make_tuple( rgba( bsdf->getAlbedo() ), bsdf->getAlbedoMap() );
-        } else {
-            const auto unlit = static_cast< UnlitMaterial * >( material );
-            return std::make_tuple( unlit->getColor(), unlit->getTexture() );
-        }
-    }();
-
-    struct MaterialUniforms {
-        alignas( 16 ) ColorRGBA color = ColorRGBA { 1, 1, 1, 1 };
-    };
+    if ( material == nullptr ) {
+        CRIMILD_LOG_WARNING( "Material is null" );
+        return;
+    }
 
     if ( !m_materialObjects.descriptorSets.contains( material ) ) {
         const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
@@ -530,10 +580,7 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
 
         CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
 
-        m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
-            MaterialUniforms {
-                .color = color,
-            } );
+        m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( materials::PrincipledBSDF::Props {} );
         getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
         std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
@@ -548,8 +595,8 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
         m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
         CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
-        auto imageView = getRenderDevice()->bind( texture->imageView.get() );
-        auto sampler = getRenderDevice()->bind( texture->sampler.get() );
+        auto imageView = getRenderDevice()->bind( material->getAlbedoMap()->imageView.get() );
+        auto sampler = getRenderDevice()->bind( material->getAlbedoMap()->sampler.get() );
 
         for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
             const auto bufferInfo = VkDescriptorBufferInfo {
@@ -594,7 +641,7 @@ void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFr
 
     // TODO: This should be handled in a different way. What if texture changes?
     // Also, update only when material changes.
-    m_materialObjects.uniforms[ material ]->setValue( color );
+    m_materialObjects.uniforms[ material ]->setValue( material->getProps() );
     getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
 
     vkCmdBindDescriptorSets(

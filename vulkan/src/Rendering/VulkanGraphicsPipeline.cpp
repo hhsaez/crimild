@@ -626,7 +626,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     const std::vector< VertexLayout > &vertexLayouts,
     const DepthStencilState &pipelineDepthStencilState,
     const RasterizationState &pipelineRasterizationState,
-    const ColorBlendState &pipelineColorBlendState ) noexcept
+    const ColorBlendState &pipelineColorBlendState,
+    size_t colorAttachmentCount ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -651,9 +652,9 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     auto multisampleState = createMultiplesampleState();
     auto depthStencilState = createDepthStencilState( pipelineDepthStencilState );
 
-    std::vector< VkPipelineColorBlendAttachmentState > colorBlendAttachments = {
-        // TODO: We must create one blend state for each attachment
-        createColorBlendAttachment( pipelineColorBlendState ),
+    std::vector< VkPipelineColorBlendAttachmentState > colorBlendAttachments( colorAttachmentCount );
+    for ( size_t i = 0; i < colorAttachmentCount; ++i ) {
+        colorBlendAttachments[ i ] = createColorBlendAttachment( pipelineColorBlendState );
     };
     auto colorBlending = createColorBlending( colorBlendAttachments );
 

@@ -38,7 +38,7 @@ vulkan::RenderPass::RenderPass( RenderDevice *renderDevice ) noexcept
     // no-op
 }
 
-void vulkan::RenderPass::createFramebufferAttachment( RenderDevice *, std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out ) const
+void vulkan::RenderPass::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out ) const
 {
     CRIMILD_LOG_TRACE();
 
@@ -49,8 +49,10 @@ void vulkan::RenderPass::createFramebufferAttachment( RenderDevice *, std::strin
         return;
     }
 
-    // Name
+    // Basic properties
     out.name = name;
+    out.extent = extent;
+    out.format = format;
 
     // Image
     getRenderDevice()->createImage(
@@ -198,22 +200,22 @@ void vulkan::RenderPass::createFramebufferAttachment( RenderDevice *, std::strin
     }
 }
 
-void vulkan::RenderPass::destroyFramebufferAttachment( RenderDevice *renderDevice, FramebufferAttachment &att ) const
+void vulkan::RenderPass::destroyFramebufferAttachment( FramebufferAttachment &att ) const
 {
     att.descriptorSets.clear();
 
-    vkDestroyDescriptorSetLayout( renderDevice->getHandle(), att.descriptorSetLayout, nullptr );
+    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), att.descriptorSetLayout, nullptr );
     att.descriptorSetLayout = VK_NULL_HANDLE;
 
-    vkDestroyDescriptorPool( renderDevice->getHandle(), att.descriptorPool, nullptr );
+    vkDestroyDescriptorPool( getRenderDevice()->getHandle(), att.descriptorPool, nullptr );
     att.descriptorPool = VK_NULL_HANDLE;
 
-    vkDestroySampler( renderDevice->getHandle(), att.sampler, nullptr );
+    vkDestroySampler( getRenderDevice()->getHandle(), att.sampler, nullptr );
     att.sampler = VK_NULL_HANDLE;
-    vkDestroyImageView( renderDevice->getHandle(), att.imageView, nullptr );
+    vkDestroyImageView( getRenderDevice()->getHandle(), att.imageView, nullptr );
     att.imageView = VK_NULL_HANDLE;
-    vkDestroyImage( renderDevice->getHandle(), att.image, nullptr );
+    vkDestroyImage( getRenderDevice()->getHandle(), att.image, nullptr );
     att.image = VK_NULL_HANDLE;
-    vkFreeMemory( renderDevice->getHandle(), att.memory, nullptr );
+    vkFreeMemory( getRenderDevice()->getHandle(), att.memory, nullptr );
     att.memory = VK_NULL_HANDLE;
 }

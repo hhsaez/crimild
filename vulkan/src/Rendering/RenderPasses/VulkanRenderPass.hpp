@@ -70,12 +70,11 @@ namespace crimild {
 
         protected:
             void createFramebufferAttachment(
-                RenderDevice *renderDevice,
                 std::string name,
                 const VkExtent2D &extent,
                 VkFormat format,
                 FramebufferAttachment &out ) const;
-            void destroyFramebufferAttachment( RenderDevice *renderDevice, FramebufferAttachment &att ) const;
+            void destroyFramebufferAttachment( FramebufferAttachment &att ) const;
 
         private:
             RenderDevice *m_renderDevice = nullptr;
