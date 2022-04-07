@@ -35,9 +35,14 @@ namespace crimild {
 
     class UniformBuffer;
     class Simulation;
-    class Material;
     class Geometry;
     class Primitive;
+
+    namespace materials {
+
+        class PrincipledBSDF;
+
+    }
 
     namespace vulkan {
 
@@ -52,18 +57,21 @@ namespace crimild {
             Event handle( const Event & ) noexcept;
             void render( void ) noexcept;
 
+            [[nodiscard]] inline const FramebufferAttachment *getAlbedoAttachment( void ) const noexcept { return &m_albedoAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getPositionAttachment( void ) const noexcept { return &m_positionAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getNormalAttachment( void ) const noexcept { return &m_normalAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getMaterialAttachment( void ) const noexcept { return &m_materialAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getDepthStencilAttachment( void ) const noexcept { return &m_depthStencilAttachment; }
+
         private:
             void init( void ) noexcept;
             void clear( void ) noexcept;
-
-            void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
-            void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
 
             void createRenderPassObjects( void ) noexcept;
             void destroyRenderPassObjects( void ) noexcept;
 
             void createMaterialObjects( void ) noexcept;
-            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept;
+            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, materials::PrincipledBSDF *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
             void createGeometryObjects( void ) noexcept;
@@ -76,6 +84,12 @@ namespace crimild {
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
+
+            vulkan::FramebufferAttachment m_albedoAttachment;
+            vulkan::FramebufferAttachment m_positionAttachment;
+            vulkan::FramebufferAttachment m_normalAttachment;
+            vulkan::FramebufferAttachment m_materialAttachment;
+            vulkan::FramebufferAttachment m_depthStencilAttachment;
 
             std::unique_ptr< GraphicsPipeline > m_pipeline;
 
@@ -96,9 +110,9 @@ namespace crimild {
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Material *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
+                std::unordered_map< materials::PrincipledBSDF *, VkDescriptorPool > descriptorPools;
+                std::unordered_map< materials::PrincipledBSDF *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
 
             // TODO: I wonder if some of this cache should go to RenderDevice instead

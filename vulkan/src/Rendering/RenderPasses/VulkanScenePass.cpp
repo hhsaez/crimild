@@ -223,14 +223,6 @@ void ScenePass::init( void ) noexcept
     const auto depthFormat = getRenderDevice()->getDepthStencilFormat();
     const auto extent = getRenderDevice()->getSwapchainExtent();
 
-    // m_colorAttachment.name = "Scene/Color";
-    // m_colorAttachment.format = colorFormat;
-    // m_colorAttachment.extent = extent;
-
-    m_depthAttachment.name = "Scene/Depth";
-    m_depthAttachment.format = depthFormat;
-    m_depthAttachment.extent = extent;
-
     m_renderArea = VkRect2D {
         .offset = {
             0,
@@ -327,8 +319,8 @@ void ScenePass::init( void ) noexcept
             nullptr,
             &m_renderPass ) );
 
-    createFramebufferAttachment( getRenderDevice(), "Scene/color", extent, colorFormat, m_colorAttachment );
-    createFramebufferAttachment( getRenderDevice(), "Scene/depth", extent, depthFormat, m_depthAttachment );
+    createFramebufferAttachment( "Scene/color", extent, colorFormat, m_colorAttachment );
+    createFramebufferAttachment( "Scene/depth", extent, depthFormat, m_depthAttachment );
 
     // We won't be swapping framebuffers, so create only one
     m_framebuffers.resize( 1 );
@@ -390,8 +382,8 @@ void ScenePass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( getRenderDevice(), m_colorAttachment );
-    destroyFramebufferAttachment( getRenderDevice(), m_depthAttachment );
+    destroyFramebufferAttachment( m_colorAttachment );
+    destroyFramebufferAttachment( m_depthAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;

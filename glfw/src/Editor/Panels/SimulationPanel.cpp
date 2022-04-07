@@ -29,6 +29,7 @@
 
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
@@ -44,37 +45,68 @@ SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept
 
 Event SimulationPanel::handle( const Event &e ) noexcept
 {
-    return e;
+    return m_gBufferPass.handle( e );
 }
 
 void SimulationPanel::render( void ) noexcept
 {
-    // m_gBufferPass.render();
+    m_gBufferPass.render();
+
+    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
+        m_gBufferPass.getAlbedoAttachment(),
+        m_gBufferPass.getPositionAttachment(),
+        m_gBufferPass.getNormalAttachment(),
+        m_gBufferPass.getMaterialAttachment(),
+        m_gBufferPass.getDepthStencilAttachment()
+    };
+
+    for ( const auto att : attachments ) {
+        getRenderDevice()->transitionImageLayout(
+            commandBuffer,
+            att->image,
+            att->format,
+            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            att->mipLevels,
+            att->layerCount );
+    }
 }
 
-void SimulationPanel::updateUI( EditorLayer *, bool embedded ) noexcept
+void SimulationPanel::updateUI( EditorLayer *, bool ) noexcept
 {
     if ( !isVibisle() ) {
         return;
     }
 
-    if ( !embedded ) {
-        ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_Always );
-        ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_Always );
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
+        m_gBufferPass.getAlbedoAttachment(),
+        m_gBufferPass.getPositionAttachment(),
+        m_gBufferPass.getNormalAttachment(),
+        m_gBufferPass.getMaterialAttachment(),
+        m_gBufferPass.getDepthStencilAttachment()
+    };
 
-        if ( !ImGui::Begin( "Simulation", &s_visible ) ) {
-            return;
+    static size_t selectedRenderMode = 0;
+    if ( ImGui::BeginCombo( "Select render mode", attachments[ selectedRenderMode ]->name.c_str(), 0 ) ) {
+        for ( size_t i = 0; i < attachments.size(); ++i ) {
+            if ( ImGui::Selectable( attachments[ i ]->name.c_str(), selectedRenderMode == i ) ) {
+                selectedRenderMode = i;
+            }
         }
+        ImGui::EndCombo();
     }
 
-    // ImTextureID tex_id = ( ImTextureID )( intptr_t )( 0 );
-    // ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-    // ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-    // ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-    // ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-    // ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-
-    if ( !embedded ) {
-        ImGui::End();
+    const auto att = attachments[ selectedRenderMode ];
+    if ( !att->descriptorSets.empty() ) {
+        ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
+        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+    } else {
+        ImGui::Text( "No scene attachments found" );
     }
 }
