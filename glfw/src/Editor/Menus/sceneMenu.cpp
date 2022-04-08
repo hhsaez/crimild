@@ -100,13 +100,13 @@ void crimild::editor::sceneMenu( void ) noexcept
 
         if ( ImGui::BeginMenu( "Light" ) ) {
             if ( ImGui::MenuItem( "Directional" ) ) {
-                // TODO
+                addToScene( crimild::alloc< Light >( Light::Type::DIRECTIONAL ) );
             }
             if ( ImGui::MenuItem( "Point" ) ) {
-                // TODO
+                addToScene( crimild::alloc< Light >( Light::Type::POINT ) );
             }
             if ( ImGui::MenuItem( "Spot" ) ) {
-                // TODO
+                addToScene( crimild::alloc< Light >( Light::Type::SPOT ) );
             }
 
             ImGui::EndMenu();

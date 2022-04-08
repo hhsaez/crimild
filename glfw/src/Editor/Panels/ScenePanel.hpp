@@ -28,7 +28,8 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE_
 #define CRIMILD_EDITOR_PANELS_SCENE_
 
-#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
+#include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
 
 namespace crimild {
 
@@ -53,7 +54,9 @@ namespace crimild {
             Event handle( const Event &e ) noexcept override;
             void render( void ) noexcept override;
 
-            vulkan::ScenePass m_scenePass;
+        private:
+            vulkan::GBufferPass m_gBufferPass;
+            vulkan::LocalLightingPass m_localLightingPass;
         };
 
     }

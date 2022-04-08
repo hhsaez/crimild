@@ -110,6 +110,15 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
             return plane;
         }() );
 
+    scene->attachNode(
+        [ & ] {
+            auto light = crimild::alloc< Light >( Light::Type::POINT );
+            light->setLocal( translation( 0, 3, 3 ) );
+            light->setRadius( 5 );
+            light->setEnergy( 20.0f );
+            return light;
+        }() );
+
     scene->attachNode( [] {
         auto camera = crimild::alloc< Camera >();
         camera->setLocal(

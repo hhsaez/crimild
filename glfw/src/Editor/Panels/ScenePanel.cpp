@@ -90,26 +90,39 @@ void drawGizmo( Node *selectedNode, float x, float y, float width, float height 
 
 ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
     : RenderPass( renderDevice ),
-      m_scenePass( renderDevice )
+      m_gBufferPass( renderDevice ),
+      m_localLightingPass(
+          renderDevice,
+          m_gBufferPass.getAlbedoAttachment(),
+          m_gBufferPass.getPositionAttachment(),
+          m_gBufferPass.getNormalAttachment(),
+          m_gBufferPass.getMaterialAttachment(),
+          // TODO: Use actual shadow map
+          m_gBufferPass.getAlbedoAttachment() )
 {
     // no-op
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
 {
-    return m_scenePass.handle( e );
+    m_gBufferPass.handle( e );
+    m_localLightingPass.handle( e );
+    return e;
 }
 
 void ScenePanel::render( void ) noexcept
 {
-    m_scenePass.render();
-
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
-        m_scenePass.getColorAttachment(),
-        m_scenePass.getDepthAttachment()
-    };
+    m_gBufferPass.render();
 
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
+        m_gBufferPass.getAlbedoAttachment(),
+        m_gBufferPass.getPositionAttachment(),
+        m_gBufferPass.getNormalAttachment(),
+        m_gBufferPass.getMaterialAttachment(),
+        m_gBufferPass.getDepthStencilAttachment(),
+    };
 
     for ( const auto att : attachments ) {
         getRenderDevice()->transitionImageLayout(
@@ -121,6 +134,17 @@ void ScenePanel::render( void ) noexcept
             att->mipLevels,
             att->layerCount );
     }
+
+    m_localLightingPass.render();
+
+    getRenderDevice()->transitionImageLayout(
+        commandBuffer,
+        m_localLightingPass.getColorAttachment()->image,
+        m_localLightingPass.getColorAttachment()->format,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        m_localLightingPass.getColorAttachment()->mipLevels,
+        m_localLightingPass.getColorAttachment()->layerCount );
 }
 
 void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
@@ -129,13 +153,17 @@ void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
-        m_scenePass.getColorAttachment(),
-        m_scenePass.getDepthAttachment()
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 6 > {
+        m_localLightingPass.getColorAttachment(),
+        m_gBufferPass.getAlbedoAttachment(),
+        m_gBufferPass.getPositionAttachment(),
+        m_gBufferPass.getNormalAttachment(),
+        m_gBufferPass.getMaterialAttachment(),
+        m_gBufferPass.getDepthStencilAttachment(),
     };
 
     static size_t selectedRenderMode = 0;
-    if ( ImGui::BeginCombo( "Select render mode", attachments[ 0 ]->name.c_str(), 0 ) ) {
+    if ( ImGui::BeginCombo( "Select render mode", attachments[ selectedRenderMode ]->name.c_str(), 0 ) ) {
         for ( size_t i = 0; i < attachments.size(); ++i ) {
             if ( ImGui::Selectable( attachments[ i ]->name.c_str(), selectedRenderMode == i ) ) {
                 selectedRenderMode = i;

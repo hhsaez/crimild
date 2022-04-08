@@ -38,29 +38,26 @@ bool SimulationPanel::s_visible = true;
 
 SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept
     : RenderPass( renderDevice ),
-      m_gBufferPass( renderDevice )
+      m_scenePass( renderDevice )
 {
     // no-op
 }
 
 Event SimulationPanel::handle( const Event &e ) noexcept
 {
-    return m_gBufferPass.handle( e );
+    return m_scenePass.handle( e );
 }
 
 void SimulationPanel::render( void ) noexcept
 {
-    m_gBufferPass.render();
+    m_scenePass.render();
+
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
+        m_scenePass.getColorAttachment(),
+        m_scenePass.getDepthAttachment()
+    };
 
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
-        m_gBufferPass.getAlbedoAttachment(),
-        m_gBufferPass.getPositionAttachment(),
-        m_gBufferPass.getNormalAttachment(),
-        m_gBufferPass.getMaterialAttachment(),
-        m_gBufferPass.getDepthStencilAttachment()
-    };
 
     for ( const auto att : attachments ) {
         getRenderDevice()->transitionImageLayout(
@@ -80,16 +77,13 @@ void SimulationPanel::updateUI( EditorLayer *, bool ) noexcept
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
-        m_gBufferPass.getAlbedoAttachment(),
-        m_gBufferPass.getPositionAttachment(),
-        m_gBufferPass.getNormalAttachment(),
-        m_gBufferPass.getMaterialAttachment(),
-        m_gBufferPass.getDepthStencilAttachment()
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
+        m_scenePass.getColorAttachment(),
+        m_scenePass.getDepthAttachment()
     };
 
     static size_t selectedRenderMode = 0;
-    if ( ImGui::BeginCombo( "Select render mode", attachments[ selectedRenderMode ]->name.c_str(), 0 ) ) {
+    if ( ImGui::BeginCombo( "Select render mode", attachments[ 0 ]->name.c_str(), 0 ) ) {
         for ( size_t i = 0; i < attachments.size(); ++i ) {
             if ( ImGui::Selectable( attachments[ i ]->name.c_str(), selectedRenderMode == i ) ) {
                 selectedRenderMode = i;
