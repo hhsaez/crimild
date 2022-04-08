@@ -49,72 +49,8 @@
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Uniforms/CallbackUniformBuffer.hpp"
+#include "Rendering/Uniforms/LightUniform.hpp"
 #include "SceneGraph/Camera.hpp"
-
-namespace crimild {
-
-    class LightUniform : public UniformBuffer {
-    public:
-        struct LightProps {
-            alignas( 4 ) UInt32 type;
-            alignas( 16 ) Vector4f position;
-            alignas( 16 ) Vector4f direction;
-            alignas( 16 ) ColorRGBA ambient;
-            alignas( 16 ) ColorRGBA color;
-            alignas( 16 ) Vector4f attenuation;
-            alignas( 16 ) Vector4f cutoff;
-            alignas( 4 ) UInt32 castShadows;
-            alignas( 4 ) Real32 shadowBias;
-            alignas( 16 ) Vector4f cascadeSplits;
-            alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
-            alignas( 16 ) Vector4f viewport;
-            alignas( 4 ) Real32 energy;
-            alignas( 4 ) Real32 radius;
-        };
-
-    public:
-        explicit LightUniform( Light *light ) noexcept
-            : UniformBuffer( LightProps {} ),
-              m_light( light )
-        {
-            // no-op
-        }
-
-        virtual ~LightUniform( void ) = default;
-
-        void onPreRender( void ) noexcept override
-        {
-            auto &props = getValue< LightProps >();
-
-            props.type = static_cast< UInt32 >( m_light->getType() );
-            props.position = vector4( m_light->getPosition(), Real( 1 ) );
-            props.direction = vector4( m_light->getDirection(), Real( 0 ) );
-            props.color = m_light->getColor();
-            props.attenuation = vector4( m_light->getAttenuation(), Real( 0 ) );
-            props.ambient = m_light->getAmbient();
-            props.cutoff = Vector4f {
-                Numericf::cos( m_light->getInnerCutoff() ),
-                Numericf::cos( m_light->getOuterCutoff() ),
-                0.0f,
-                0.0f,
-            };
-            props.castShadows = m_light->castShadows() ? 1 : 0;
-            if ( m_light->castShadows() ) {
-                props.shadowBias = m_light->getShadowMap()->getBias();
-                props.cascadeSplits = m_light->getShadowMap()->getCascadeSplits();
-                for ( auto split = 0; split < 4; ++split ) {
-                    props.lightSpaceMatrix[ split ] = m_light->getShadowMap()->getLightProjectionMatrix( split );
-                }
-                props.viewport = m_light->getShadowMap()->getViewport();
-            }
-            props.energy = m_light->getEnergy();
-            props.radius = m_light->getRadius();
-        }
-
-    private:
-        Light *m_light = nullptr;
-    };
-}
 
 using namespace crimild;
 

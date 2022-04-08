@@ -539,6 +539,44 @@ void nodeComponentsSection( Node *node )
     }
 }
 
+void lightPropertiesSection( Node *node )
+{
+    auto light = dynamic_cast< Light * >( node );
+    if ( light == nullptr ) {
+        return;
+    }
+
+    ImGui::SetNextItemOpen( true );
+    if ( ImGui::CollapsingHeader( "Light", ImGuiTreeNodeFlags_None ) ) {
+        ImGui::Text(
+            "Type: %s",
+            [ & ] {
+                switch ( light->getType() ) {
+                    case Light::Type::AMBIENT:
+                        return "Ambient";
+                    case Light::Type::DIRECTIONAL:
+                        return "Directional";
+                    case Light::Type::POINT:
+                        return "Point";
+                    case Light::Type::SPOT:
+                        return "Spot";
+                }
+            }() );
+
+        auto energy = light->getEnergy();
+        ImGui::InputFloat( "Energy", &energy );
+        light->setEnergy( energy );
+
+        auto radius = light->getRadius();
+        ImGui::InputFloat( "Radius", &radius );
+        light->setRadius( radius );
+
+        auto color = rgb( light->getColor() );
+        ImGui::ColorEdit3( "Color", get_ptr( color ) );
+        light->setColor( rgba( color ) );
+    }
+}
+
 void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
 {
     if ( !open ) {
@@ -570,6 +608,7 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
                 node->perform( UpdateWorldState() );
             }
 
+            lightPropertiesSection( node );
             nodeComponentsSection( node );
         } else {
             ImGui::Text( "No node selected" );

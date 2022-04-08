@@ -30,7 +30,7 @@
 
 #include "Mathematics/Point2.hpp"
 #include "Rendering/Extent.hpp"
-#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 namespace crimild {
 
@@ -58,8 +58,7 @@ namespace crimild {
         private:
             Point2 m_pos = Point2 { 310, 25 };
             Extent2D m_extent = Extent2D { .width = 1280.0, .height = 720.0 };
-
-            vulkan::GBufferPass m_gBufferPass;
+            vulkan::ScenePass m_scenePass;
         };
 
     }
