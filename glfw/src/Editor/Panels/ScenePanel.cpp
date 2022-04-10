@@ -90,33 +90,40 @@ void drawGizmo( Node *selectedNode, float x, float y, float width, float height 
 
 ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
     : RenderPass( renderDevice ),
+      m_shadowPass( renderDevice ),
+      m_shadowDebugPass( renderDevice, "Scene/Shadow (Debug)", m_shadowPass.getShadowAttachment() ),
       m_gBufferPass( renderDevice ),
+      m_depthDebugPass( renderDevice, "Scene/Depth (Debug)", m_gBufferPass.getDepthStencilAttachment() ),
       m_localLightingPass(
           renderDevice,
           m_gBufferPass.getAlbedoAttachment(),
           m_gBufferPass.getPositionAttachment(),
           m_gBufferPass.getNormalAttachment(),
           m_gBufferPass.getMaterialAttachment(),
-          // TODO: Use actual shadow map
-          m_gBufferPass.getAlbedoAttachment() )
+          m_shadowPass.getShadowAttachment() )
 {
     // no-op
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
 {
+    m_shadowPass.handle( e );
+    m_shadowDebugPass.handle( e );
     m_gBufferPass.handle( e );
+    m_depthDebugPass.handle( e );
     m_localLightingPass.handle( e );
     return e;
 }
 
 void ScenePanel::render( void ) noexcept
 {
-    m_gBufferPass.render();
-
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 5 > {
+    m_shadowPass.render();
+
+    m_gBufferPass.render();
+
+    const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
         m_gBufferPass.getAlbedoAttachment(),
         m_gBufferPass.getPositionAttachment(),
         m_gBufferPass.getNormalAttachment(),
@@ -130,10 +137,25 @@ void ScenePanel::render( void ) noexcept
             att->image,
             att->format,
             getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
             att->mipLevels,
             att->layerCount );
     }
+
+    if ( auto camera = Camera::getMainCamera() ) {
+        m_depthDebugPass.setNear( camera->getNear() );
+        m_depthDebugPass.setFar( camera->getFar() );
+    }
+    m_depthDebugPass.render();
+
+    getRenderDevice()->transitionImageLayout(
+        commandBuffer,
+        m_depthDebugPass.getColorAttachment()->image,
+        m_depthDebugPass.getColorAttachment()->format,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        m_depthDebugPass.getColorAttachment()->mipLevels,
+        m_depthDebugPass.getColorAttachment()->layerCount );
 
     m_localLightingPass.render();
 
@@ -145,6 +167,17 @@ void ScenePanel::render( void ) noexcept
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         m_localLightingPass.getColorAttachment()->mipLevels,
         m_localLightingPass.getColorAttachment()->layerCount );
+
+    m_shadowDebugPass.render();
+
+    getRenderDevice()->transitionImageLayout(
+        commandBuffer,
+        m_shadowDebugPass.getColorAttachment()->image,
+        m_shadowDebugPass.getColorAttachment()->format,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        m_shadowDebugPass.getColorAttachment()->mipLevels,
+        m_shadowDebugPass.getColorAttachment()->layerCount );
 }
 
 void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
@@ -153,13 +186,14 @@ void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 6 > {
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 7 > {
         m_localLightingPass.getColorAttachment(),
         m_gBufferPass.getAlbedoAttachment(),
         m_gBufferPass.getPositionAttachment(),
         m_gBufferPass.getNormalAttachment(),
         m_gBufferPass.getMaterialAttachment(),
-        m_gBufferPass.getDepthStencilAttachment(),
+        m_depthDebugPass.getColorAttachment(),
+        m_shadowDebugPass.getColorAttachment(),
     };
 
     static size_t selectedRenderMode = 0;

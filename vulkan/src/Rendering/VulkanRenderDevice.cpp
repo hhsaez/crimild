@@ -1063,7 +1063,7 @@ void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
         sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    } else if ( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) {
+    } else if ( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL ) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
         sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
@@ -1712,7 +1712,7 @@ void RenderDevice::unbind( const Sampler *sampler ) noexcept
     m_samplers.erase( id );
 }
 
-void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept
+void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT objectType, std::string name ) const noexcept
 {
 #if defined( CRIMILD_PLATFORM_OSX )
     static auto vkDebugMarkerSetObjectName = ( PFN_vkDebugMarkerSetObjectNameEXT ) vkGetDeviceProcAddr( m_handle, "vkDebugMarkerSetObjectNameEXT" );
@@ -1725,7 +1725,7 @@ void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT obje
         .sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT,
         .objectType = objectType,
         .object = object,
-        .pObjectName = name,
+        .pObjectName = name.c_str(),
     };
 
     vkDebugMarkerSetObjectName( m_handle, &nameInfo );

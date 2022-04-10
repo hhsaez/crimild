@@ -54,7 +54,8 @@ namespace crimild {
                 const DepthStencilState &pipelineDepthStencilState = DepthStencilState {},
                 const RasterizationState &pipelineRasterizationState = RasterizationState {},
                 const ColorBlendState &pipelineColorBlendState = ColorBlendState {},
-                size_t colorAttachmentCount = 1 ) noexcept;
+                size_t colorAttachmentCount = 1,
+                std::vector< VkDynamicState > dynamicStates = {} ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }

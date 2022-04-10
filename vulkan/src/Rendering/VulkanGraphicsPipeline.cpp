@@ -562,23 +562,6 @@ namespace crimild {
             };
         }
 
-        std::vector< VkDynamicState > getDynamicStates( const ViewportDimensions &viewport, const ViewportDimensions &scissor ) noexcept
-        {
-            CRIMILD_LOG_TRACE();
-
-            std::vector< VkDynamicState > dynamicStates;
-
-            if ( viewport.scalingMode == ScalingMode::DYNAMIC ) {
-                dynamicStates.push_back( VK_DYNAMIC_STATE_VIEWPORT );
-            }
-
-            if ( scissor.scalingMode == ScalingMode::DYNAMIC ) {
-                dynamicStates.push_back( VK_DYNAMIC_STATE_SCISSOR );
-            }
-
-            return dynamicStates;
-        }
-
         VkPipelineDynamicStateCreateInfo createDynamicState( std::vector< VkDynamicState > &dynamicStates ) noexcept
         {
             CRIMILD_LOG_TRACE();
@@ -627,7 +610,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     const DepthStencilState &pipelineDepthStencilState,
     const RasterizationState &pipelineRasterizationState,
     const ColorBlendState &pipelineColorBlendState,
-    size_t colorAttachmentCount ) noexcept
+    size_t colorAttachmentCount,
+    std::vector< VkDynamicState > dynamicStates ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -658,7 +642,6 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     };
     auto colorBlending = createColorBlending( colorBlendAttachments );
 
-    auto dynamicStates = getDynamicStates( pipelineViewport, pipelineScissor );
     auto dynamicState = createDynamicState( dynamicStates );
 
     // Create pipeline layout
