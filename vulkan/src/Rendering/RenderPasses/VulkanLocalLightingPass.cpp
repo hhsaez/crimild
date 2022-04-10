@@ -510,6 +510,23 @@ void LocalLightingPass::init( void ) noexcept
                                     return shadow;
                                 }
 
+                                float calculateDirectionalShadow( vec4 lightSpacePosition, vec3 N, vec3 L, float bias )
+                                {
+                                    vec4 P = lightSpacePosition / lightSpacePosition.w;
+                                    // P.t = 1.0 - P.t;
+                                    // P.st = 1.0 - P.st;
+
+                                    float shadow = 1.0;
+                                    if ( P.z > -1.0 && P.z < 1.0 ) {
+                                        float dist = texture( uShadowAtlas, P.st ).r;
+                                        if ( P.w > 0.0 && dist < P.z ) {
+                                            // Not in shadow
+                                            shadow = 0.0;
+                                        }
+                                    }
+                                    return shadow;
+                                }
+
                                 float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
                                 {
                                     float depth = dist;
@@ -556,50 +573,69 @@ void LocalLightingPass::init( void ) noexcept
                                         radiance = uLight.energy * uLight.color.rgb;
 
                                         if ( uLight.castShadows == 1 ) {
-                                            vec4 cascadeSplits = uLight.cascadeSplits;
+                                            // vec4 cascadeSplits = uLight.cascadeSplits;
 
                                             // these are all negative values. Lower means farther away from the eye
                                             float depth = viewSpacePositionDepth;
                                             int cascadeId = 0;
 
-                                            if ( depth < cascadeSplits[ 0 ] ) {
-                                                cascadeId = 1;
-                                            }
+                                            // if ( depth < cascadeSplits[ 0 ] ) {
+                                            //     cascadeId = 1;
+                                            // }
 
-                                            if ( depth < cascadeSplits[ 1 ] ) {
-                                                cascadeId = 2;
-                                            }
+                                            // if ( depth < cascadeSplits[ 1 ] ) {
+                                            //     cascadeId = 2;
+                                            // }
 
-                                            if ( depth < cascadeSplits[ 2 ] ) {
-                                                cascadeId = 3;
-                                            }
+                                            // if ( depth < cascadeSplits[ 2 ] ) {
+                                            //     cascadeId = 3;
+                                            // }
 
                                             mat4 lightSpaceMatrix = uLight.lightSpaceMatrix[ cascadeId ];
-                                            vec4 viewport = uLight.viewport;
-                                            vec2 viewportSize = viewport.zw;
-                                            viewport.z = 0.5 * viewportSize.x;
-                                            viewport.w = 0.5 * viewportSize.y;
-                                            if ( cascadeId == 1 ) {
-                                                // top-right cascade
-                                                viewport.x += 0.5 * viewportSize.x;
-                                            } else if ( cascadeId == 2 ) {
-                                                // bottom-left cascade
-                                                viewport.y += 0.5 * viewportSize.y;
-                                            } else if ( cascadeId == 3 ) {
-                                                // bottom-rigth cascade
-                                                viewport.x += 0.5 * viewportSize.x;
-                                                viewport.y += 0.5 * viewportSize.y;
+                                            // vec4 viewport = uLight.viewport;
+                                            // vec2 viewportSize = viewport.zw;
+                                            // viewport.z = 0.5 * viewportSize.x;
+                                            // viewport.w = 0.5 * viewportSize.y;
+                                            // if ( cascadeId == 1 ) {
+                                            //     // top-right cascade
+                                            //     viewport.x += 0.5 * viewportSize.x;
+                                            // } else if ( cascadeId == 2 ) {
+                                            //     // bottom-left cascade
+                                            //     viewport.y += 0.5 * viewportSize.y;
+                                            // } else if ( cascadeId == 3 ) {
+                                            //     // bottom-rigth cascade
+                                            //     viewport.x += 0.5 * viewportSize.x;
+                                            //     viewport.y += 0.5 * viewportSize.y;
+                                            // }
+
+                                            {
+                                                vec4 lightSpacePos = ( bias * lightSpaceMatrix * vec4( P, 1.0 ) );
+                                                lightSpacePos = lightSpacePos / lightSpacePos.w;
+                                                // lightSpacePos.t = 1.0 - lightSpacePos.t;
+
+                                                shadow = 0.0;
+                                                if ( lightSpacePos.z > -1.0 && lightSpacePos.z < 1.0 ) {
+                                                    float dist = texture( uShadowAtlas, lightSpacePos.st ).r;
+                                                    if ( lightSpacePos.w > 0.0 && dist < lightSpacePos.z ) {
+                                                        // In shadow
+                                                        shadow = 1.0;
+                                                    }
+                                                }
                                             }
 
-                                            vec4 lightSpacePos = ( bias * lightSpaceMatrix * vec4( P, 1.0 ) );
-                                            if ( lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
-                                                shadow = calculateShadow( lightSpacePos, viewport, N, L, 0.005 );
-                                            } else {
-                                                // the projected position in light space is outside the light's view frustum.
-                                                // For directional lights, this means the object will be never in shadows
-                                                // This might not be true for other types of lights. For example, a spot light
-                                                // will produce shadows on objects outside its cone of influence
-                                            }
+
+                                            // if ( true || lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
+                                            //     // vec4 viewport = vec4(0, 0, 1, 1 );
+                                            //     // shadow = calculateShadow( lightSpacePos, viewport, N, L, 0.005 );
+                                            //     //shadow = calculateDirectionalShadow( lightSpacePos, N, L, 0.005 );
+                                            //     shadow = 1.0;
+                                            // } else {
+                                            //     // the projected position in light space is outside the light's view frustum.
+                                            //     // For directional lights, this means the object will be never in shadows
+                                            //     // This might not be true for other types of lights. For example, a spot light
+                                            //     // will produce shadows on objects outside its cone of influence
+                                            //     shadow = 0.5;
+                                            // }
                                         }
                                     } else if ( uLight.type == 3 ) {
                                         // spot
@@ -850,7 +886,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
         };
 
         const auto shadowImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
             .imageView = m_shadowInput->imageView,
             .sampler = m_shadowInput->sampler,
         };

@@ -31,6 +31,7 @@
 #include "Foundation/ImGUIUtils.hpp"
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Transformation_constants.hpp"
+#include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
@@ -100,7 +101,10 @@ void crimild::editor::sceneMenu( void ) noexcept
 
         if ( ImGui::BeginMenu( "Light" ) ) {
             if ( ImGui::MenuItem( "Directional" ) ) {
-                addToScene( crimild::alloc< Light >( Light::Type::DIRECTIONAL ) );
+                auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                light->setEnergy( 20 );
+                light->setLocal( euler( 0, -numbers::PI_DIV_4, 0 ) );
+                addToScene( light );
             }
             if ( ImGui::MenuItem( "Point" ) ) {
                 addToScene( crimild::alloc< Light >( Light::Type::POINT ) );

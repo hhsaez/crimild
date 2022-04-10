@@ -38,6 +38,7 @@
 #include "Concurrency/Async.hpp"
 #include "Importers/SceneImporter.hpp"
 #include "Loaders/OBJLoader.hpp"
+#include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
@@ -112,10 +113,14 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
 
     scene->attachNode(
         [ & ] {
-            auto light = crimild::alloc< Light >( Light::Type::POINT );
-            light->setLocal( translation( 0, 3, 3 ) );
-            light->setRadius( 5 );
-            light->setEnergy( 20.0f );
+            auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+            light->setEnergy( 20 );
+            light->setLocal(
+                lookAt(
+                    Point3 { 0, 10, 10 },
+                    Point3 { 0, 0, 0 },
+                    Vector3 { 0, 1, 0 } ) );
+            light->setCastShadows( true );
             return light;
         }() );
 

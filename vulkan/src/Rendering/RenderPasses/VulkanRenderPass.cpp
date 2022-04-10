@@ -70,15 +70,20 @@ void vulkan::RenderPass::createFramebufferAttachment( std::string name, const Vk
         0,
         out.image,
         out.memory );
+    getRenderDevice()->setObjectName( out.image, ( name + "/Image" ).c_str() );
 
     // Image View
-    getRenderDevice()->createImageView(
-        out.image,
-        format,
-        getRenderDevice()->formatIsColor( format )
-            ? VK_IMAGE_ASPECT_COLOR_BIT
-            : VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
-        out.imageView );
+    getRenderDevice()
+        ->createImageView(
+            out.image,
+            format,
+            getRenderDevice()->formatIsColor( format )
+                ? VK_IMAGE_ASPECT_COLOR_BIT
+                : utils::hasStencilComponent( format )
+                      ? VK_IMAGE_ASPECT_STENCIL_BIT
+                      : VK_IMAGE_ASPECT_DEPTH_BIT,
+            out.imageView );
+    getRenderDevice()->setObjectName( out.imageView, ( name + "/ImageView" ).c_str() );
 
     // Sampler
     auto samplerInfo = VkSamplerCreateInfo {
@@ -106,6 +111,7 @@ void vulkan::RenderPass::createFramebufferAttachment( std::string name, const Vk
             &samplerInfo,
             nullptr,
             &out.sampler ) );
+    getRenderDevice()->setObjectName( out.sampler, ( name + "/Sampler" ).c_str() );
 
     // Descriptor Set Layout
     const auto bindings = std::array< VkDescriptorSetLayoutBinding, 1 > {
@@ -130,6 +136,7 @@ void vulkan::RenderPass::createFramebufferAttachment( std::string name, const Vk
             &layoutCreateInfo,
             nullptr,
             &out.descriptorSetLayout ) );
+    getRenderDevice()->setObjectName( out.descriptorSetLayout, ( name + "/DescriptorSetLayout" ).c_str() );
 
     // Descriptor Pool
     const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
@@ -152,6 +159,7 @@ void vulkan::RenderPass::createFramebufferAttachment( std::string name, const Vk
             &poolCreateInfo,
             nullptr,
             &out.descriptorPool ) );
+    getRenderDevice()->setObjectName( out.descriptorPool, ( name + "/DescriptorPool" ).c_str() );
 
     out.descriptorSets.resize( swapchainImageCount );
 

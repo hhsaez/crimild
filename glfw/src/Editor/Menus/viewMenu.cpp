@@ -574,6 +574,10 @@ void lightPropertiesSection( Node *node )
         auto color = rgb( light->getColor() );
         ImGui::ColorEdit3( "Color", get_ptr( color ) );
         light->setColor( rgba( color ) );
+
+        auto castShadows = light->castShadows();
+        ImGui::Checkbox( "Cast Shadows", &castShadows );
+        light->setCastShadows( castShadows );
     }
 }
 

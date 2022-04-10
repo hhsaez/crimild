@@ -121,7 +121,7 @@ GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
                                 roughness = clamp( roughness, 0.05, 0.999 );
 
                                 outAlbedo = vec4( albedo, 1.0 );
-                                outPosition = vec4( inPosition, 1.0 );
+                                outPosition = vec4( inPosition, gl_FragCoord.z );
                                 outNormal = vec4( inNormal, 1.0 );
                                 outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                             }
@@ -260,7 +260,7 @@ void GBufferPass::init( void ) noexcept
     createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_positionAttachment );
     createFramebufferAttachment( "Scene/Normal", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_normalAttachment );
     createFramebufferAttachment( "Scene/Material", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_materialAttachment );
-    createFramebufferAttachment( "Scene/Depth", extent, getRenderDevice()->getDepthStencilFormat(), m_depthStencilAttachment );
+    createFramebufferAttachment( "Scene/Depth", extent, VK_FORMAT_D32_SFLOAT, m_depthStencilAttachment );
 
     auto getAttachmentDescription = [ & ]( const auto &att ) {
         return VkAttachmentDescription {

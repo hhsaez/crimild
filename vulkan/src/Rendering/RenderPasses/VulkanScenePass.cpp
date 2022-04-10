@@ -220,7 +220,7 @@ void ScenePass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     const auto colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    const auto depthFormat = getRenderDevice()->getDepthStencilFormat();
+    const auto depthFormat = VK_FORMAT_D32_SFLOAT;
     const auto extent = getRenderDevice()->getSwapchainExtent();
 
     m_renderArea = VkRect2D {

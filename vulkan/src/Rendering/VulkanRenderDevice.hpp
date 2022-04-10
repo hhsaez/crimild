@@ -95,8 +95,12 @@ namespace crimild {
             VkSampler bind( const Sampler *sampler ) noexcept;
             void unbind( const Sampler *sampler ) noexcept;
 
-            inline void setObjectName( VkImageView handle, const char *name ) noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
-            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, const char *name ) noexcept;
+            inline void setObjectName( VkImage handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
+            inline void setObjectName( VkImageView handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
+            inline void setObjectName( VkSampler handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
+            inline void setObjectName( VkDescriptorSetLayout handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
+            inline void setObjectName( VkDescriptorPool handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
+            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string name ) const noexcept;
 
             void createImage(
                 crimild::UInt32 width,
