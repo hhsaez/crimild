@@ -114,7 +114,7 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
     scene->attachNode(
         [ & ] {
             auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-            light->setEnergy( 20 );
+            light->setEnergy( 5 );
             light->setLocal(
                 lookAt(
                     Point3 { 0, 10, 10 },
