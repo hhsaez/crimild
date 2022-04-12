@@ -39,6 +39,7 @@
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node_withTransformation.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -102,12 +103,16 @@ void crimild::editor::sceneMenu( void ) noexcept
         if ( ImGui::BeginMenu( "Light" ) ) {
             if ( ImGui::MenuItem( "Directional" ) ) {
                 auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-                light->setEnergy( 20 );
-                light->setLocal( euler( 0, -numbers::PI_DIV_4, 0 ) );
-                addToScene( light );
+                light->setEnergy( 5 );
+                addToScene( withRotationY( light, -numbers::PI_DIV_4 ) );
             }
             if ( ImGui::MenuItem( "Point" ) ) {
-                addToScene( crimild::alloc< Light >( Light::Type::POINT ) );
+                addToScene(
+                    withTranslation(
+                        crimild::alloc< Light >( Light::Type::POINT ),
+                        0,
+                        1,
+                        0 ) );
             }
             if ( ImGui::MenuItem( "Spot" ) ) {
                 addToScene( crimild::alloc< Light >( Light::Type::SPOT ) );
