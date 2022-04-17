@@ -562,7 +562,7 @@ namespace crimild {
             };
         }
 
-        VkPipelineDynamicStateCreateInfo createDynamicState( std::vector< VkDynamicState > &dynamicStates ) noexcept
+        VkPipelineDynamicStateCreateInfo createDynamicState( const std::vector< VkDynamicState > &dynamicStates ) noexcept
         {
             CRIMILD_LOG_TRACE();
 
@@ -612,6 +612,27 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     const ColorBlendState &pipelineColorBlendState,
     size_t colorAttachmentCount,
     std::vector< VkDynamicState > dynamicStates ) noexcept
+    : vulkan::GraphicsPipeline(
+        renderDevice,
+        renderPass,
+        vulkan::GraphicsPipeline::Descriptor {
+            .descriptorSetLayouts = descriptorSetLayouts,
+            .program = program,
+            .vertexLayouts = vertexLayouts,
+            .pipelineDepthStencilState = pipelineDepthStencilState,
+            .pipelineRasterizationState = pipelineRasterizationState,
+            .pipelineColorBlendState = pipelineColorBlendState,
+            .colorAttachmentCount = colorAttachmentCount,
+            .dynamicStates = dynamicStates,
+        } )
+{
+    // no-op
+}
+
+vulkan::GraphicsPipeline::GraphicsPipeline(
+    RenderDevice *renderDevice,
+    VkRenderPass renderPass,
+    const vulkan::GraphicsPipeline::Descriptor &descriptor ) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -621,31 +642,31 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
 
     // WARNING: all of these config params are used when creating the graphicsPipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
-    auto shaderModules = createShaderModules( renderDevice, program );
+    auto shaderModules = createShaderModules( renderDevice, descriptor.program );
     auto shaderStages = createShaderStages( shaderModules );
-    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( vertexLayouts );
-    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, vertexLayouts );
+    auto vertexBindingDescriptions = getVertexInputBindingDescriptions( descriptor.vertexLayouts );
+    auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, descriptor.vertexLayouts );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
-    auto inputAssembly = createInputAssemby( Primitive::Type::TRIANGLES );
+    auto inputAssembly = createInputAssemby( descriptor.primitiveType );
     auto viewport = createViewport( renderDevice, pipelineViewport );
     auto scissor = createScissor( renderDevice, pipelineScissor );
     auto viewportState = pipelineViewport.scalingMode != ScalingMode::DYNAMIC
                              ? createViewportState( viewport, scissor )
                              : createDynamicViewportState( true, true );
-    auto rasterizer = createRasterizer( pipelineRasterizationState );
+    auto rasterizer = createRasterizer( descriptor.pipelineRasterizationState );
     auto multisampleState = createMultiplesampleState();
-    auto depthStencilState = createDepthStencilState( pipelineDepthStencilState );
+    auto depthStencilState = createDepthStencilState( descriptor.pipelineDepthStencilState );
 
-    std::vector< VkPipelineColorBlendAttachmentState > colorBlendAttachments( colorAttachmentCount );
-    for ( size_t i = 0; i < colorAttachmentCount; ++i ) {
-        colorBlendAttachments[ i ] = createColorBlendAttachment( pipelineColorBlendState );
+    std::vector< VkPipelineColorBlendAttachmentState > colorBlendAttachments( descriptor.colorAttachmentCount );
+    for ( size_t i = 0; i < descriptor.colorAttachmentCount; ++i ) {
+        colorBlendAttachments[ i ] = createColorBlendAttachment( descriptor.pipelineColorBlendState );
     };
     auto colorBlending = createColorBlending( colorBlendAttachments );
 
-    auto dynamicState = createDynamicState( dynamicStates );
+    auto dynamicState = createDynamicState( descriptor.dynamicStates );
 
     // Create pipeline layout
-    m_pipelineLayout = createPipelineLayout( renderDevice, descriptorSetLayouts );
+    m_pipelineLayout = createPipelineLayout( renderDevice, descriptor.descriptorSetLayouts );
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
