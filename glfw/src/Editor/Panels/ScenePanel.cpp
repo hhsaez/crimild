@@ -100,7 +100,15 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
           m_gBufferPass.getPositionAttachment(),
           m_gBufferPass.getNormalAttachment(),
           m_gBufferPass.getMaterialAttachment(),
-          m_shadowPass.getShadowAttachment() )
+          m_shadowPass.getShadowAttachment() ),
+      m_sceneDebugPass( renderDevice ),
+      m_sceneDebugOverlayPass(
+          renderDevice,
+          "Scene/Debug/Overlay",
+          {
+              m_localLightingPass.getColorAttachment(),
+              m_sceneDebugPass.getColorAttachment(),
+          } )
 {
     // no-op
 }
@@ -112,6 +120,8 @@ Event ScenePanel::handle( const Event &e ) noexcept
     m_gBufferPass.handle( e );
     m_depthDebugPass.handle( e );
     m_localLightingPass.handle( e );
+    m_sceneDebugPass.handle( e );
+    m_sceneDebugOverlayPass.handle( e );
     return e;
 }
 
@@ -123,6 +133,21 @@ void ScenePanel::render( void ) noexcept
 
     m_gBufferPass.render();
 
+    auto transitionAttachment = [ & ]( const auto att ) {
+        getRenderDevice()->transitionImageLayout(
+            commandBuffer,
+            att->image,
+            att->format,
+            getRenderDevice()->formatIsColor( att->format )
+                ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            getRenderDevice()->formatIsColor( att->format )
+                ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+            att->mipLevels,
+            att->layerCount );
+    };
+
     const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
         m_gBufferPass.getAlbedoAttachment(),
         m_gBufferPass.getPositionAttachment(),
@@ -132,14 +157,7 @@ void ScenePanel::render( void ) noexcept
     };
 
     for ( const auto att : attachments ) {
-        getRenderDevice()->transitionImageLayout(
-            commandBuffer,
-            att->image,
-            att->format,
-            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            att->mipLevels,
-            att->layerCount );
+        transitionAttachment( att );
     }
 
     if ( auto camera = Camera::getMainCamera() ) {
@@ -147,37 +165,19 @@ void ScenePanel::render( void ) noexcept
         m_depthDebugPass.setFar( camera->getFar() );
     }
     m_depthDebugPass.render();
-
-    getRenderDevice()->transitionImageLayout(
-        commandBuffer,
-        m_depthDebugPass.getColorAttachment()->image,
-        m_depthDebugPass.getColorAttachment()->format,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_depthDebugPass.getColorAttachment()->mipLevels,
-        m_depthDebugPass.getColorAttachment()->layerCount );
+    transitionAttachment( m_depthDebugPass.getColorAttachment() );
 
     m_localLightingPass.render();
-
-    getRenderDevice()->transitionImageLayout(
-        commandBuffer,
-        m_localLightingPass.getColorAttachment()->image,
-        m_localLightingPass.getColorAttachment()->format,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_localLightingPass.getColorAttachment()->mipLevels,
-        m_localLightingPass.getColorAttachment()->layerCount );
+    transitionAttachment( m_localLightingPass.getColorAttachment() );
 
     m_shadowDebugPass.render();
+    transitionAttachment( m_shadowDebugPass.getColorAttachment() );
 
-    getRenderDevice()->transitionImageLayout(
-        commandBuffer,
-        m_shadowDebugPass.getColorAttachment()->image,
-        m_shadowDebugPass.getColorAttachment()->format,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_shadowDebugPass.getColorAttachment()->mipLevels,
-        m_shadowDebugPass.getColorAttachment()->layerCount );
+    m_sceneDebugPass.render();
+    transitionAttachment( m_sceneDebugPass.getColorAttachment() );
+
+    m_sceneDebugOverlayPass.render();
+    transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
 }
 
 void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
@@ -186,7 +186,7 @@ void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 7 > {
+    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 9 > {
         m_localLightingPass.getColorAttachment(),
         m_gBufferPass.getAlbedoAttachment(),
         m_gBufferPass.getPositionAttachment(),
@@ -194,6 +194,8 @@ void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
         m_gBufferPass.getMaterialAttachment(),
         m_depthDebugPass.getColorAttachment(),
         m_shadowDebugPass.getColorAttachment(),
+        m_sceneDebugPass.getColorAttachment(),
+        m_sceneDebugOverlayPass.getColorAttachment(),
     };
 
     static size_t selectedRenderMode = 0;
