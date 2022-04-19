@@ -71,11 +71,11 @@ namespace crimild {
             void destroyRenderPassObjects( void ) noexcept;
 
             void createMaterialObjects( void ) noexcept;
-            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, materials::PrincipledBSDF *material ) noexcept;
+            void bind( materials::PrincipledBSDF *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
             void createGeometryObjects( void ) noexcept;
-            void bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept;
+            void bind( Geometry *geometry ) noexcept;
             void destroyGeometryObjects( void ) noexcept;
 
             void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
@@ -90,10 +90,6 @@ namespace crimild {
             vulkan::FramebufferAttachment m_normalAttachment;
             vulkan::FramebufferAttachment m_materialAttachment;
             vulkan::FramebufferAttachment m_depthStencilAttachment;
-
-            std::unique_ptr< GraphicsPipeline > m_pipeline;
-
-            std::unique_ptr< ShaderProgram > m_program;
 
             struct RenderPassObjects {
                 VkDescriptorPool pool = VK_NULL_HANDLE;
@@ -110,6 +106,7 @@ namespace crimild {
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+                std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< GraphicsPipeline > > pipelines;
                 std::unordered_map< materials::PrincipledBSDF *, VkDescriptorPool > descriptorPools;
                 std::unordered_map< materials::PrincipledBSDF *, std::vector< VkDescriptorSet > > descriptorSets;
                 std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< UniformBuffer > > uniforms;

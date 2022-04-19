@@ -590,4 +590,33 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
 
             #endif
         )" );
+
+    resetPreprocessor();
+}
+
+void vulkan::ShaderCompiler::resetPreprocessor( void ) noexcept
+{
+    m_preprocessor.addChunk(
+        "frag_main",
+        "void frag_main( inout Fragment frag ) { }" );
+}
+
+void vulkan::ShaderCompiler::addChunks( const Array< SharedPointer< Shader > > &chunks ) noexcept
+{
+    chunks.each(
+        [ & ]( auto shader ) {
+            if ( shader->getDataType() != Shader::DataType::INLINE ) {
+                // Ignore shaders without code
+                return;
+            }
+            const auto &code = shader->getData();
+            auto src = std::string( code.data(), code.size() );
+            switch ( shader->getStage() ) {
+                case Shader::Stage::FRAGMENT:
+                    m_preprocessor.addChunk( "frag_main", src );
+                    break;
+                default:
+                    break;
+            }
+        } );
 }
