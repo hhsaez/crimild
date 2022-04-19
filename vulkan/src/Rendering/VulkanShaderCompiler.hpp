@@ -28,6 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 #define CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 
+#include "Foundation/Containers/Array.hpp"
 #include "Foundation/Types.hpp"
 #include "Rendering/Shader.hpp"
 
@@ -35,8 +36,6 @@
 #include <unordered_map>
 
 namespace crimild {
-
-    class Shader;
 
     namespace vulkan {
 
@@ -81,7 +80,11 @@ namespace crimild {
         public:
             Bool init( void ) noexcept;
 
+            void addChunks( const Array< SharedPointer< Shader > > &chunks ) noexcept;
+
             Bool compile( Shader::Stage stage, const std::string &source, Shader::Data &out ) noexcept;
+
+            void resetPreprocessor( void ) noexcept;
 
         private:
             void initPreprocessor( void ) noexcept;

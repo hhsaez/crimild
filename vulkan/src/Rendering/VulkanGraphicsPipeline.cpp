@@ -100,6 +100,9 @@ namespace crimild {
                 modules.push_back( std::make_unique< ShaderModule >( renderDevice, shader ) );
             } );
 
+            // Reset preprocessor after building shader modules to prevent garbage code to be used unintentionally
+            renderDevice->getShaderCompiler().resetPreprocessor();
+
             return modules;
         }
 

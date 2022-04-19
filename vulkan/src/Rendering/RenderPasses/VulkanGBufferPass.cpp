@@ -49,204 +49,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice ),
-      m_program(
-          [ & ] {
-              auto program = std::make_unique< ShaderProgram >();
-              program->setShaders(
-                  Array< SharedPointer< Shader > > {
-                      crimild::alloc< Shader >(
-                          Shader::Stage::VERTEX,
-                          R"(
-                            layout ( location = 0 ) in vec3 inPosition;
-                            layout ( location = 1 ) in vec3 inNormal;
-                            layout ( location = 2 ) in vec2 inTexCoord;
-
-                            layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                                mat4 view;
-                                mat4 proj;
-                            };
-
-                            layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
-                                mat4 model;
-                            };
-
-                            layout ( location = 0 ) out vec3 outPosition;
-                            layout ( location = 1 ) out vec3 outNormal;
-                            layout ( location = 2 ) out vec2 outTexCoord;
-
-                            void main()
-                            {
-                                gl_Position = proj * view * model * vec4( inPosition, 1.0 );
-
-                                outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
-                                outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
-                                outTexCoord = inTexCoord;
-                            }
-
-                        )" ),
-                      crimild::alloc< Shader >(
-                          Shader::Stage::FRAGMENT,
-                          R"(
-                            layout ( location = 0 ) in vec3 inPosition;
-                            layout ( location = 1 ) in vec3 inNormal;
-                            layout ( location = 2 ) in vec2 inTexCoord;
-
-                            layout( set = 1, binding = 0 ) uniform MaterialUniform
-                            {
-                                vec3 albedo;
-                                float metallic;
-                                float roughness;
-                                float ambientOcclusion;
-                                float transmission;
-                                float indexOfRefraction;
-                                vec3 emissive;
-                            } uMaterial;
-
-                            layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
-
-                            layout ( location = 0 ) out vec4 outAlbedo;
-                            layout ( location = 1 ) out vec4 outPosition;
-                            layout ( location = 2 ) out vec4 outNormal;
-                            layout ( location = 3 ) out vec4 outMaterial;
-
-                            vec3 getPosition()
-                            {
-                                return inPosition;
-                            }
-
-                            vec3 getNormal()
-                            {
-                                return inNormal;
-                            }
-
-                            vec3 getAlbedo()
-                            {
-                                return uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
-                            }
-
-
-                            vec3 gridLines( float size, float lineWidth )
-                            {
-                                vec3 P = getPosition();
-                                vec3 N = getNormal();
-
-                                vec3 G = mod( P, size / 100.0 );
-                                G = G * G;
-                                vec3 s = vec3(
-                                    step( G.x, lineWidth / 100.0 ),
-                                    step( G.y, lineWidth / 100.0 ),
-                                    step( G.z, lineWidth / 100.0 )
-                                );
-
-                                vec3 grid = vec3(
-                                    dot(
-                                        vec3(
-                                            mix(
-                                                mix(
-                                                    s.r + s.b,
-                                                    s.g + s.b,
-                                                    abs( N.x )
-                                                ),
-                                                s.r + s.g,
-                                                abs( N.z )
-                                            )
-                                        ),
-                                        vec3( 1.0 )
-                                    )
-                                );
-
-                                return grid;
-                            }
-
-                            vec3 checker( float size )
-                            {
-                                vec3 P = getPosition();
-                                vec3 N = getNormal();
-
-                                float PTC = 0.0;
-                                float contrast = 0.5;
-                                vec3 wallColor = vec3( 0.5, 0.5, 0.6 );
-                                vec3 floorColor = vec3( 0.5, 0.5, 0.6 );
-
-                                vec3 A0 = P * vec3( -1.0 );
-                                float A1 = size / 100.0;
-
-                                vec3 B0 = mod( A0, vec3( A1 ) );
-                                vec3 B1 = mod( P, vec3( A1 ) );
-                                vec3 B2 = vec3( A1 / 2.0 );
-                                vec3 B3 = P * vec3( 100.0, 100.0, 100.0 );
-
-                                vec3 C0 = B0 - B2;
-                                vec3 C1 = B1 - B2;
-
-                                vec3 D0 = C0 * vec3( -1 );
-                                vec3 D1 = C1;
-                                vec3 D2 = clamp( B3, vec3( 0 ), vec3( 1.0 ) );
-
-                                vec3 E0 = mix( D0, D1, D2 );
-
-                                float F0 = E0.x;
-                                float F1 = E0.y;
-                                float F2 = E0.z;
-
-                                float F3 = 0 - PTC;
-                                float F4 = PTC + 1;
-                                float F5 = abs( N.z );
-                                float F6 = abs( N.y );
-
-                                float G0 = F2 * F1;
-                                float G1 = F0 * F1;
-                                float G2 = F2 * F0;
-
-                                float G3 = mix( F3, F4, F5 );
-                                float G4 = mix( F3, F4, F6 );
-
-                                float H0 = step( G0, 0 );
-                                float H1 = step( G1, 0 );
-                                float H2 = step( G2, 0 );
-
-                                float H3 = clamp( G3, 0, 1 );
-                                float H4 = clamp( G4, 0, 1 );
-
-                                float I0 = mix( H0, H1, H3 );
-
-                                float J0 = mix( I0, H2, H4 );
-
-                                float K0 = mix( 1.0, J0, contrast );
-                                vec3 K1 = mix( wallColor, floorColor, H4 );
-
-                                return K0 * K1;
-                            }
-
-                            vec3 fragColor()
-                            {
-                                float size = 100.0;
-                                float lineWidth = 0.01;
-
-                                return gridLines( size, lineWidth ) + checker( size ) + 0.25 * gridLines( 0.5 * size, 0.5 * lineWidth );
-                            }
-
-                            void main()
-                            {
-                                float metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
-                                float roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;
-                                float ambientOcclusion = uMaterial.ambientOcclusion;// * texture( uAmbientOcclusionMap, inTexCoord ).r;
-
-                                metallic = clamp( metallic, 0.0, 1.0 );
-                                roughness = clamp( roughness, 0.05, 0.999 );
-
-                                vec3 albedo = getAlbedo();
-                                // albedo = fragColor();
-
-                                outAlbedo = vec4( albedo, 1.0 );
-                                outPosition = vec4( inPosition, gl_FragCoord.z );
-                                outNormal = vec4( inNormal, 1.0 );
-                                outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
-                            }
-                        )" ) } );
-              return program;
-          }() )
+    : RenderPass( renderDevice )
 {
     init();
 }
@@ -342,17 +145,50 @@ void GBufferPass::render( void ) noexcept
 
     renderables.eachGeometry(
         [ & ]( Geometry *geometry ) {
+            if ( geometry == nullptr ) {
+                return;
+            }
+            bind( geometry );
+
             if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
+                if ( auto material = static_cast< materials::PrincipledBSDF * >( ms->first() ) ) {
+                    bind( material );
+
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_pipeline->getHandle() );
+                        m_materialObjects.pipelines[ material ]->getHandle() );
 
-                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        0,
+                        1,
+                        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                        0,
+                        nullptr );
 
-                    bindMaterialDescriptors( commandBuffer, currentFrameIndex, static_cast< materials::PrincipledBSDF * >( material ) );
-                    bindGeometryDescriptors( commandBuffer, currentFrameIndex, geometry );
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        1,
+                        1,
+                        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+                        0,
+                        nullptr );
+
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        2,
+                        1,
+                        &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
+                        0,
+                        nullptr );
+
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
             }
@@ -507,21 +343,6 @@ void GBufferPass::init( void ) noexcept
     createRenderPassObjects();
     createMaterialObjects();
     createGeometryObjects();
-
-    m_pipeline = std::make_unique< GraphicsPipeline >(
-        getRenderDevice(),
-        m_renderPass,
-        std::vector< VkDescriptorSetLayout > {
-            m_renderPassObjects.layout,
-            m_materialObjects.descriptorSetLayout,
-            m_geometryObjects.descriptorSetLayout,
-        },
-        m_program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-        DepthStencilState {},
-        RasterizationState {},
-        ColorBlendState {},
-        colorReferences.size() );
 }
 
 void GBufferPass::clear( void ) noexcept
@@ -529,8 +350,6 @@ void GBufferPass::clear( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     vkDeviceWaitIdle( getRenderDevice()->getHandle() );
-
-    m_pipeline = nullptr;
 
     destroyGeometryObjects();
     destroyMaterialObjects();
@@ -671,107 +490,211 @@ void GBufferPass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void GBufferPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, materials::PrincipledBSDF *material ) noexcept
+void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
 {
-    if ( material == nullptr ) {
-        CRIMILD_LOG_WARNING( "Material is null" );
+    if ( m_materialObjects.pipelines.contains( material ) ) {
+        // Already bound
+        // TODO: This should be handled in a different way. What if texture changes?
+        // Also, update only when material changes.
+        m_materialObjects.uniforms[ material ]->setValue( material->getProps() );
+        getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
         return;
     }
 
-    if ( !m_materialObjects.descriptorSets.contains( material ) ) {
-        const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
-            VkDescriptorPoolSize {
-                .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-            },
-            VkDescriptorPoolSize {
-                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-            },
-        };
+    // create pipeline
+    auto program = std::make_unique< ShaderProgram >();
+    program->setShaders(
+        Array< SharedPointer< Shader > > {
+            crimild::alloc< Shader >(
+                Shader::Stage::VERTEX,
+                R"(
+                    layout ( location = 0 ) in vec3 inPosition;
+                    layout ( location = 1 ) in vec3 inNormal;
+                    layout ( location = 2 ) in vec2 inTexCoord;
 
-        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .poolSizeCount = uint32_t( poolSizes.size() ),
-            .pPoolSizes = poolSizes.data(),
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
+                    layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
+                        mat4 view;
+                        mat4 proj;
+                    };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+                    layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
+                        mat4 model;
+                    };
 
-        m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( materials::PrincipledBSDF::Props {} );
-        getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
+                    layout ( location = 0 ) out vec3 outPosition;
+                    layout ( location = 1 ) out vec3 outNormal;
+                    layout ( location = 2 ) out vec2 outTexCoord;
 
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+                    void main()
+                    {
+                        gl_Position = proj * view * model * vec4( inPosition, 1.0 );
 
-        const auto allocInfo = VkDescriptorSetAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_materialObjects.descriptorPools[ material ],
-            .descriptorSetCount = uint32_t( layouts.size() ),
-            .pSetLayouts = layouts.data(),
-        };
+                        outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+                        outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
+                        outTexCoord = inTexCoord;
+                    }
 
-        m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+                )" ),
+            crimild::alloc< Shader >(
+                Shader::Stage::FRAGMENT,
+                R"(
+                    layout ( location = 0 ) in vec3 inPosition;
+                    layout ( location = 1 ) in vec3 inNormal;
+                    layout ( location = 2 ) in vec2 inTexCoord;
 
-        auto imageView = getRenderDevice()->bind( material->getAlbedoMap()->imageView.get() );
-        auto sampler = getRenderDevice()->bind( material->getAlbedoMap()->sampler.get() );
+                    layout( set = 1, binding = 0 ) uniform MaterialUniform
+                    {
+                        vec3 albedo;
+                        float metallic;
+                        float roughness;
+                        float ambientOcclusion;
+                        float transmission;
+                        float indexOfRefraction;
+                        vec3 emissive;
+                    } uMaterial;
 
-        for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
-            const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
-                .offset = 0,
-                .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
-            };
+                    layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
 
-            const auto imageInfo = VkDescriptorImageInfo {
-                .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                .imageView = imageView,
-                .sampler = sampler,
-            };
+                    layout ( location = 0 ) out vec4 outAlbedo;
+                    layout ( location = 1 ) out vec4 outPosition;
+                    layout ( location = 2 ) out vec4 outNormal;
+                    layout ( location = 3 ) out vec4 outMaterial;
 
-            const auto writes = std::array< VkWriteDescriptorSet, 2 > {
-                VkWriteDescriptorSet {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                    .dstBinding = 0,
-                    .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .descriptorCount = 1,
-                    .pBufferInfo = &bufferInfo,
-                    .pImageInfo = nullptr,
-                    .pTexelBufferView = nullptr,
-                },
-                VkWriteDescriptorSet {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                    .dstBinding = 1,
-                    .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    .descriptorCount = 1,
-                    .pBufferInfo = nullptr,
-                    .pImageInfo = &imageInfo,
-                    .pTexelBufferView = nullptr,
-                },
-            };
-            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
-        }
+                    struct Fragment {
+                        vec3 albedo;
+                        vec3 position;
+                        vec3 normal;
+                        float metallic;
+                        float roughness;
+                        float ambientOcclusion;
+                    };
+
+                    #include <frag_main>
+
+                    void main()
+                    {
+                        Fragment frag;
+
+                        frag.albedo = uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
+                        frag.position = inPosition;
+                        frag.normal = inNormal;
+
+                        frag.metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
+                        frag.roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;
+                        frag.ambientOcclusion = uMaterial.ambientOcclusion;// * texture( uAmbientOcclusionMap, inTexCoord ).r;
+
+                        // Clamp metallic and roughness
+                        frag.metallic = clamp( frag.metallic, 0.0, 1.0 );
+                        frag.roughness = clamp( frag.roughness, 0.05, 0.999 );
+
+                        frag_main( frag );
+
+                        outAlbedo = vec4( frag.albedo, 1.0 );
+                        outPosition = vec4( frag.position, gl_FragCoord.z );
+                        outNormal = vec4( frag.normal, 1.0 );
+                        outMaterial = vec4( frag.metallic, frag.roughness, frag.ambientOcclusion, 1.0 );
+                    }
+                )" ) } );
+
+    if ( auto program = material->getProgram() ) {
+        getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
     }
 
-    // TODO: This should be handled in a different way. What if texture changes?
-    // Also, update only when material changes.
-    m_materialObjects.uniforms[ material ]->setValue( material->getProps() );
-    getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
+    auto pipeline = std::make_unique< GraphicsPipeline >(
+        getRenderDevice(),
+        m_renderPass,
+        GraphicsPipeline::Descriptor {
+            .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
+                m_renderPassObjects.layout,
+                m_materialObjects.descriptorSetLayout,
+                m_geometryObjects.descriptorSetLayout,
+            },
+            .program = program.get(),
+            .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .colorAttachmentCount = 4,
+        } );
 
-    vkCmdBindDescriptorSets(
-        cmds,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        1,
-        1,
-        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
-        0,
-        nullptr );
+    // m_materialObjects.pipelines.insert( material, std::move( pipeline ) );
+    m_materialObjects.pipelines[ material ] = std::move( pipeline );
+
+    // create descriptors
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        },
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        },
+    };
+
+    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = uint32_t( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+
+    m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( material->getProps() );
+    getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
+
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = m_materialObjects.descriptorPools[ material ],
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+
+    auto imageView = getRenderDevice()->bind( material->getAlbedoMap()->imageView.get() );
+    auto sampler = getRenderDevice()->bind( material->getAlbedoMap()->sampler.get() );
+
+    for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
+        const auto bufferInfo = VkDescriptorBufferInfo {
+            .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
+            .offset = 0,
+            .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
+        };
+
+        const auto imageInfo = VkDescriptorImageInfo {
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .imageView = imageView,
+            .sampler = sampler,
+        };
+
+        const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .pBufferInfo = &bufferInfo,
+                .pImageInfo = nullptr,
+                .pTexelBufferView = nullptr,
+            },
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+                .dstBinding = 1,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = 1,
+                .pBufferInfo = nullptr,
+                .pImageInfo = &imageInfo,
+                .pTexelBufferView = nullptr,
+            },
+        };
+        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
+    }
 }
 
 void GBufferPass::destroyMaterialObjects( void ) noexcept
@@ -793,6 +716,8 @@ void GBufferPass::destroyMaterialObjects( void ) noexcept
         getRenderDevice()->unbind( it.second.get() );
     }
     m_materialObjects.uniforms.clear();
+
+    m_materialObjects.pipelines.clear();
 }
 
 void GBufferPass::createGeometryObjects( void ) noexcept
@@ -816,73 +741,65 @@ void GBufferPass::createGeometryObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
 }
 
-void GBufferPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept
+void GBufferPass::bind( Geometry *geometry ) noexcept
 {
-    if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
-        VkDescriptorPoolSize poolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
-
-        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .poolSizeCount = 1,
-            .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
-
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
-
-        m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-        getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
-
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
-
-        const auto allocInfo = VkDescriptorSetAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_geometryObjects.descriptorPools[ geometry ],
-            .descriptorSetCount = uint32_t( layouts.size() ),
-            .pSetLayouts = layouts.data(),
-        };
-
-        m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
-
-        for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {
-            const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = getRenderDevice()->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
-                .offset = 0,
-                .range = m_geometryObjects.uniforms[ geometry ]->getBufferView()->getLength(),
-            };
-
-            const auto descriptorWrite = VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_geometryObjects.descriptorSets[ geometry ][ i ],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
-                .pImageInfo = nullptr,
-                .pTexelBufferView = nullptr,
-            };
-
-            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-        }
+    if ( m_geometryObjects.descriptorSets.contains( geometry ) ) {
+        // Already bound
+        m_geometryObjects.uniforms[ geometry ]->setValue( geometry->getWorld().mat );
+        getRenderDevice()->update( m_geometryObjects.uniforms[ geometry ].get() );
+        return;
     }
 
-    m_geometryObjects.uniforms[ geometry ]->setValue( geometry->getWorld().mat );
-    getRenderDevice()->update( m_geometryObjects.uniforms[ geometry ].get() );
+    VkDescriptorPoolSize poolSize {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    };
 
-    vkCmdBindDescriptorSets(
-        cmds,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        2,
-        1,
-        &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
-        0,
-        nullptr );
+    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
+
+    m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
+    getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
+
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = m_geometryObjects.descriptorPools[ geometry ],
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
+
+    for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {
+        const auto bufferInfo = VkDescriptorBufferInfo {
+            .buffer = getRenderDevice()->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
+            .offset = 0,
+            .range = m_geometryObjects.uniforms[ geometry ]->getBufferView()->getLength(),
+        };
+
+        const auto descriptorWrite = VkWriteDescriptorSet {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = m_geometryObjects.descriptorSets[ geometry ][ i ],
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .pBufferInfo = &bufferInfo,
+            .pImageInfo = nullptr,
+            .pTexelBufferView = nullptr,
+        };
+
+        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
+    }
 }
 
 void GBufferPass::destroyGeometryObjects( void ) noexcept
