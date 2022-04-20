@@ -88,10 +88,9 @@ void GBufferPass::render( void ) noexcept
         ApplyToGeometries(
             [ & ]( Geometry *geometry ) {
                 if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                    if ( auto m = ms->first() ) {
-                        if ( m->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-                            renderables.addGeometry( geometry );
-                        }
+                    // TODO: replace with render mode for materials
+                    if ( auto m = dynamic_cast< materials::PrincipledBSDF * >( ms->first() ) ) {
+                        renderables.addGeometry( geometry );
                     }
                 }
             } ) );
@@ -524,6 +523,9 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                     layout ( location = 0 ) out vec3 outPosition;
                     layout ( location = 1 ) out vec3 outNormal;
                     layout ( location = 2 ) out vec2 outTexCoord;
+                    layout ( location = 3 ) out vec3 outScale;
+                    layout ( location = 4 ) out vec3 outModelPosition;
+                    layout ( location = 5 ) out vec3 outModelNormal;
 
                     void main()
                     {
@@ -532,8 +534,15 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                         outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
                         outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
                         outTexCoord = inTexCoord;
-                    }
 
+                        outScale = vec3(
+                            length( model[ 0 ].xyz ),
+                            length( model[ 1 ].xyz ),
+                            length( model[ 2 ].xyz ) );
+
+                        outModelPosition = inPosition;
+                        outModelNormal = inNormal;
+                    }
                 )" ),
             crimild::alloc< Shader >(
                 Shader::Stage::FRAGMENT,
@@ -541,6 +550,9 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                     layout ( location = 0 ) in vec3 inPosition;
                     layout ( location = 1 ) in vec3 inNormal;
                     layout ( location = 2 ) in vec2 inTexCoord;
+                    layout ( location = 3 ) in vec3 inScale;
+                    layout ( location = 4 ) in vec3 inModelPosition;
+                    layout ( location = 5 ) in vec3 inModelNormal;
 
                     layout( set = 1, binding = 0 ) uniform MaterialUniform
                     {
@@ -563,7 +575,12 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                     struct Fragment {
                         vec3 albedo;
                         vec3 position;
+                        vec3 modelPosition;
                         vec3 normal;
+                        vec3 modelNormal;
+                        vec2 uv;
+                        vec3 scale;
+                        float depth;
                         float metallic;
                         float roughness;
                         float ambientOcclusion;
@@ -578,6 +595,11 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                         frag.albedo = uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
                         frag.position = inPosition;
                         frag.normal = inNormal;
+                        frag.uv = inTexCoord;
+                        frag.modelPosition = inModelPosition;
+                        frag.modelNormal = inModelNormal;
+                        frag.scale = inScale;
+                        frag.depth = gl_FragCoord.z;
 
                         frag.metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
                         frag.roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;

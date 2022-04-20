@@ -36,7 +36,7 @@
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
+#include "Rendering/Materials/WorldGridMaterial.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node_withTransformation.hpp"
@@ -60,12 +60,7 @@ static void addGeometry( SharedPointer< Primitive > const &primitive, const Tran
 {
     auto geometry = crimild::alloc< Geometry >();
     geometry->attachPrimitive( primitive );
-    geometry->attachComponent< MaterialComponent >(
-        [] {
-            auto material = crimild::alloc< materials::PrincipledBSDF >();
-            material->setAlbedo( ColorRGB { 0.8, 0.8, 0.8 } );
-            return material;
-        }() );
+    geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
     geometry->setLocal( local );
     addToScene( geometry );
 }
