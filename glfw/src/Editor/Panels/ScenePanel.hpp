@@ -28,6 +28,7 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE_
 #define CRIMILD_EDITOR_PANELS_SCENE_
 
+#include "Mathematics/Transformation_constants.hpp"
 #include "Rendering/RenderPasses/VulkanDepthDebugPass.hpp"
 #include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
 #include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
@@ -38,6 +39,7 @@
 namespace crimild {
 
     class EditorLayer;
+    class Camera;
 
     namespace editor {
 
@@ -66,6 +68,12 @@ namespace crimild {
             vulkan::LocalLightingPass m_localLightingPass;
             vulkan::SceneDebugPass m_sceneDebugPass;
             vulkan::OverlayPass m_sceneDebugOverlayPass;
+
+            std::unique_ptr< Camera > m_editorCamera;
+            bool m_editorCameraEnabled = false;
+            Vector2i m_lastMousePos = Vector2i { 0, 0 };
+            Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
+            Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
         };
 
     }
