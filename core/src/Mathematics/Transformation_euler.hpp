@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline Transformation euler( Real yaw, Real pitch, Real roll ) noexcept
+    [[nodiscard]] inline Transformation euler( Radians yaw, Radians pitch, Radians roll ) noexcept
     {
         const auto cy = cos( yaw );
         const auto sy = sin( yaw );

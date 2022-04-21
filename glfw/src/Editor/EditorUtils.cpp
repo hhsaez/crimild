@@ -33,7 +33,6 @@
 #include "Coding/FileEncoder.hpp"
 #include "Coding/JSONDecoder.hpp"
 #include "Coding/JSONEncoder.hpp"
-#include "Components/FreeLookCameraComponent.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Concurrency/Async.hpp"
 #include "Importers/SceneImporter.hpp"
@@ -112,7 +111,6 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
                 Point3 { 10, 10, 10 },
                 Point3 { 0, 0, 0 },
                 Vector3::Constants::UP ) );
-        camera->attachComponent< FreeLookCameraComponent >();
         return camera;
     }() );
 

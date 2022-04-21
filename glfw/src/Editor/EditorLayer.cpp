@@ -256,9 +256,9 @@ Event EditorLayer::handle( const Event &e ) noexcept
         }
     }
 
-    if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard || ImGuizmo::IsOver() || ImGuizmo::IsUsing() ) ) {
-        return Event {};
-    }
+    // if ( overrideEvent && ( io.WantCaptureMouse || io.WantCaptureKeyboard || ImGuizmo::IsOver() || ImGuizmo::IsUsing() ) ) {
+    //     return Event {};
+    // }
 
     m_scenePanel.handle( e );
     m_simulationPanel.handle( e );

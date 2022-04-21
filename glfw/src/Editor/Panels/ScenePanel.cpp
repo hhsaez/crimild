@@ -30,6 +30,13 @@
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_euler.hpp"
+#include "Mathematics/Transformation_operators.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -110,11 +117,90 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
               m_sceneDebugPass.getColorAttachment(),
           } )
 {
-    // no-op
+    m_editorCamera = std::make_unique< Camera >();
+    m_cameraTranslation = translation( 10, 10, 10 );
+    m_cameraRotation = euler( radians( 45 ), radians( -30 ), 0 );
+    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
 {
+    switch ( e.type ) {
+        case Event::Type::WINDOW_RESIZE:
+            m_editorCamera->setAspectRatio( e.extent.width / e.extent.height );
+            break;
+
+        case Event::Type::MOUSE_BUTTON_DOWN:
+            if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) {
+                Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
+                m_editorCameraEnabled = true;
+                return Event {};
+            }
+
+        case Event::Type::MOUSE_MOTION: {
+            const auto delta = e.motion.pos - m_lastMousePos;
+            m_lastMousePos = e.motion.pos;
+
+            if ( m_editorCameraEnabled ) {
+                if ( !isZero( delta[ 1 ] ) ) {
+                    const auto R = right( m_cameraRotation );
+                    m_cameraRotation = rotation( R, -0.005 * delta[ 1 ] ) * m_cameraRotation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+
+                if ( !isZero( delta[ 0 ] ) ) {
+                    // This leads to gimbal lock when looking straight up/down, but I'm ok with it for now
+                    const auto U = Vector3 { 0, 1, 0 };
+                    m_cameraRotation = rotation( U, -0.005 * delta[ 0 ] ) * m_cameraRotation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+            }
+            break;
+        }
+
+        case Event::Type::MOUSE_BUTTON_UP:
+            if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) {
+                Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
+                m_editorCameraEnabled = false;
+                return Event {};
+            }
+
+        case Event::Type::KEY_DOWN:
+        case Event::Type::KEY_REPEAT: {
+            // TODO: This makes the camera movement a bit jerky, since KEY_REPEAT events
+            // are not continunous. It's ok for now, but I'll probably change it in the
+            // future to use TICK events instead.
+            if ( m_editorCameraEnabled ) {
+                const auto F = forward( m_cameraRotation );
+                const auto R = right( m_cameraRotation );
+
+                if ( e.keyboard.key == CRIMILD_INPUT_KEY_W ) {
+                    m_cameraTranslation = translation( F ) * m_cameraTranslation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+
+                if ( e.keyboard.key == CRIMILD_INPUT_KEY_S ) {
+                    m_cameraTranslation = translation( -F ) * m_cameraTranslation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+
+                if ( e.keyboard.key == CRIMILD_INPUT_KEY_A ) {
+                    m_cameraTranslation = translation( -R ) * m_cameraTranslation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+
+                if ( e.keyboard.key == CRIMILD_INPUT_KEY_D ) {
+                    m_cameraTranslation = translation( R ) * m_cameraTranslation;
+                    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+                }
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+
     m_shadowPass.handle( e );
     m_shadowDebugPass.handle( e );
     m_gBufferPass.handle( e );
@@ -127,6 +213,8 @@ Event ScenePanel::handle( const Event &e ) noexcept
 
 void ScenePanel::render( void ) noexcept
 {
+    Camera::setMainCamera( m_editorCamera.get() );
+
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
     m_shadowPass.render();
