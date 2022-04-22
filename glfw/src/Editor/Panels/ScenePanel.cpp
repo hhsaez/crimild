@@ -108,6 +108,10 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
           m_gBufferPass.getNormalAttachment(),
           m_gBufferPass.getMaterialAttachment(),
           m_shadowPass.getShadowAttachment() ),
+      m_skyboxPass(
+          renderDevice,
+          m_localLightingPass.getColorAttachment(),
+          m_gBufferPass.getDepthStencilAttachment() ),
       m_sceneDebugPass( renderDevice ),
       m_sceneDebugOverlayPass(
           renderDevice,
@@ -206,6 +210,7 @@ Event ScenePanel::handle( const Event &e ) noexcept
     m_gBufferPass.handle( e );
     m_depthDebugPass.handle( e );
     m_localLightingPass.handle( e );
+    m_skyboxPass.handle( e );
     m_sceneDebugPass.handle( e );
     m_sceneDebugOverlayPass.handle( e );
     return e;
@@ -241,12 +246,22 @@ void ScenePanel::render( void ) noexcept
         m_gBufferPass.getPositionAttachment(),
         m_gBufferPass.getNormalAttachment(),
         m_gBufferPass.getMaterialAttachment(),
-        m_gBufferPass.getDepthStencilAttachment(),
     };
 
     for ( const auto att : attachments ) {
         transitionAttachment( att );
     }
+
+    m_localLightingPass.render();
+    m_skyboxPass.render();
+
+    // transitionAttachment( m_skyboxPass.getColorAttachment() );
+
+    // Accumulated color buffer can be transitioned now
+    transitionAttachment( m_localLightingPass.getColorAttachment() );
+
+    // Depth buffer can be transition now
+    transitionAttachment( m_gBufferPass.getDepthStencilAttachment() );
 
     if ( auto camera = Camera::getMainCamera() ) {
         m_depthDebugPass.setNear( camera->getNear() );
@@ -254,9 +269,6 @@ void ScenePanel::render( void ) noexcept
     }
     m_depthDebugPass.render();
     transitionAttachment( m_depthDebugPass.getColorAttachment() );
-
-    m_localLightingPass.render();
-    transitionAttachment( m_localLightingPass.getColorAttachment() );
 
     m_shadowDebugPass.render();
     transitionAttachment( m_shadowDebugPass.getColorAttachment() );
@@ -274,7 +286,8 @@ void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 9 > {
+    const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
+        m_skyboxPass.getColorAttachment(),
         m_localLightingPass.getColorAttachment(),
         m_gBufferPass.getAlbedoAttachment(),
         m_gBufferPass.getPositionAttachment(),

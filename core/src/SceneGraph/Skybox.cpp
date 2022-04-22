@@ -49,110 +49,33 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
         crimild::alloc< BoxPrimitive >(
             BoxPrimitive::Params {
                 .type = Primitive::Type::TRIANGLES,
-                .layout = VertexP3::getLayout(),
+                .layout = VertexP3N3TC2::getLayout(),
                 .size = Vector3f { 10.0f, 10.0f, 10.0f },
                 .invertFaces = true,
             } ) );
 
     attachComponent< MaterialComponent >(
         [ color ] {
-            auto material = crimild::alloc< Material >();
-            material->setGraphicsPipeline(
-                [] {
-                    auto pipeline = crimild::alloc< GraphicsPipeline >();
-                    pipeline->primitiveType = Primitive::Type::TRIANGLES;
-                    pipeline->setProgram(
-                        [ & ] {
-                            auto program = crimild::alloc< ShaderProgram >(
-                                Array< SharedPointer< Shader > > {
-                                    crimild::alloc< Shader >(
-                                        Shader::Stage::VERTEX,
-                                        R"(
-                                        layout ( location = 0 ) in vec3 inPosition;
+            auto material = crimild::alloc< UnlitMaterial >();
+            material->setProgram(
+                crimild::alloc< ShaderProgram >(
+                    Array< SharedPointer< Shader > > {
+                        crimild::alloc< Shader >(
+                            Shader::Stage::FRAGMENT,
+                            R"(
+                                void frag_main( inout Fragment frag )
+                                {
+                                    vec3 skyColor = frag.color;
+                                    vec3 groundColor = vec3( 0.1, 0.1, 0.0 );
+                                    vec3 horizonColor = vec3( 1.0, 1.0, 1.0 );
+                                    float e = 0.75;
+                                    float y = normalize( frag.worldPosition ).y;
 
-                                        layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                                            mat4 view;
-                                            mat4 proj;
-                                        };
-
-                                        layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
-                                            mat4 model;
-                                        };
-
-                                        layout ( location = 0 ) out vec3 outPosition;
-
-                                        void main()
-                                        {
-                                            gl_Position = proj * mat4( mat3 ( view ) ) * model * vec4( inPosition, 1.0 );
-                                            gl_Position = gl_Position.xyww;
-                                            outPosition = inPosition;
-                                        }
-                                    )" ),
-                                    crimild::alloc< Shader >(
-                                        Shader::Stage::FRAGMENT,
-                                        R"(
-                                        layout ( location = 0 ) in vec3 inPosition;
-
-                                        layout ( set = 1, binding = 0 ) uniform MaterialUniforms {
-                                            vec4 color;
-                                        };
-
-                                        layout ( location = 0 ) out vec4 outColor;
-
-                                        void main() {
-                                            outColor = color;
-                                        }
-                                    )" ) } );
-                            program->vertexLayouts = { VertexP3::getLayout() };
-                            program->descriptorSetLayouts = {
-                                [] {
-                                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                                    layout->bindings = {
-                                        {
-                                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                            .stage = Shader::Stage::VERTEX,
-                                        },
-                                    };
-                                    return layout;
-                                }(),
-                                [] {
-                                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                                    layout->bindings = {
-                                        {
-                                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                            .stage = Shader::Stage::FRAGMENT,
-                                        },
-                                    };
-                                    return layout;
-                                }(),
-                                [] {
-                                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                                    layout->bindings = {
-                                        {
-                                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                            .stage = Shader::Stage::VERTEX,
-                                        },
-                                    };
-                                    return layout;
-                                }(),
-                            };
-                            return program;
-                        }() );
-                    pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
-                    pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
-                    return pipeline;
-                }() );
-            material->setDescriptors(
-                [ & ] {
-                    auto descriptors = crimild::alloc< DescriptorSet >();
-                    descriptors->descriptors = {
-                        {
-                            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                            .obj = crimild::alloc< UniformBuffer >( rgba( color ) ),
-                        },
-                    };
-                    return descriptors;
-                }() );
+                                    frag.color = mix(horizonColor, y < 0 ? groundColor : skyColor, pow( abs( y ), e ) );
+                                }
+                            )" ),
+                    } ) );
+            material->setColor( rgba( color ) );
             return material;
         }() );
 }
