@@ -35,6 +35,7 @@
 #include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
 #include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
 #include "Rendering/RenderPasses/VulkanShadowPass.hpp"
+#include "Rendering/RenderPasses/VulkanSkyboxPass.hpp"
 
 namespace crimild {
 
@@ -66,6 +67,7 @@ namespace crimild {
             vulkan::GBufferPass m_gBufferPass;
             vulkan::DepthDebugPass m_depthDebugPass;
             vulkan::LocalLightingPass m_localLightingPass;
+            vulkan::SkyboxPass m_skyboxPass;
             vulkan::SceneDebugPass m_sceneDebugPass;
             vulkan::OverlayPass m_sceneDebugOverlayPass;
 

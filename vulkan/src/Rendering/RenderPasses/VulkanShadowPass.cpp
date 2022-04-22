@@ -91,7 +91,9 @@ void ShadowPass::render( void ) noexcept
     scene->perform(
         ApplyToGeometries(
             [ & ]( Geometry *geometry ) {
-                renderables.addGeometry( geometry );
+                if ( geometry->getLayer() == Node::Layer::DEFAULT ) {
+                    renderables.addGeometry( geometry );
+                }
             } ) );
 
     FetchLights fetch;

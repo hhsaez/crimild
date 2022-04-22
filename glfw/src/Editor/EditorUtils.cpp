@@ -55,6 +55,7 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/Skybox.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
@@ -113,6 +114,12 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
                 Vector3::Constants::UP ) );
         return camera;
     }() );
+
+    scene->attachNode(
+        [] {
+            auto skybox = crimild::alloc< Skybox >( ColorRGB { 0.28, 0.63, 0.72 } );
+            return skybox;
+        }() );
 
     scene->perform( StartComponents() );
     scene->perform( UpdateWorldState() );
