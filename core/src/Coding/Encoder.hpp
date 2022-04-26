@@ -146,7 +146,7 @@ namespace crimild {
             template< typename EnumType >
             crimild::Bool encodeEnum( std::string key, const EnumType &value )
             {
-                encode( key, Int32( value ) );
+                return encode( key, Int32( value ) );
             }
 
         protected:

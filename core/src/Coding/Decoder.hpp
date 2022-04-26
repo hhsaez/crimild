@@ -173,6 +173,7 @@ namespace crimild {
                 Int32 encoded;
                 decode( key, encoded );
                 value = EnumType( encoded );
+                return true;
             }
 
             inline crimild::Size getObjectCount( void ) const
