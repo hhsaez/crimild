@@ -596,6 +596,11 @@ void nodeInspectorPanel( bool &open, EditorLayer *editor ) noexcept
             ImGui::Text( "Class: %s", node->getClassName() );
             ImGui::Text( "ID: %llu", node->getUniqueID() );
 
+            char nameStr[ 256 ] = { '\0' };
+            strcpy( nameStr, node->getName().c_str() );
+            ImGui::InputText( "Name", nameStr, 256 );
+            node->setName( nameStr );
+
             Point3 nodeTranslation;
             Vector3 nodeRotation;
             Vector3 nodeScale;
