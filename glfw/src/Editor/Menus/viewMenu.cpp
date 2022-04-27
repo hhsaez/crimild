@@ -38,7 +38,7 @@
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Editor/EditorLayer.hpp"
-#include "Editor/Panels/scenePanel.hpp"
+#include "Editor/Panels/ScenePanel.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
@@ -637,7 +637,8 @@ public:
         visit(
             node,
             [] {},
-            true );
+            true,
+            false );
     }
 
     void visitGroup( Group *group ) override
@@ -645,7 +646,8 @@ public:
         visit(
             group,
             [ & ] { NodeVisitor::visitGroup( group ); },
-            group->getNodeCount() == 0 );
+            group->getNodeCount() == 0,
+            true );
     }
 
     void visitCSGNode( CSGNode *csg ) override
@@ -653,7 +655,8 @@ public:
         visit(
             csg,
             [ & ] { NodeVisitor::visitCSGNode( csg ); },
-            csg->getLeft() == nullptr && csg->getRight() == nullptr );
+            csg->getLeft() == nullptr && csg->getRight() == nullptr,
+            false );
     }
 
 private:
@@ -665,7 +668,7 @@ private:
     }
 
     template< typename NodeType, typename Fn >
-    void visit( NodeType *node, Fn fn, bool isLeaf )
+    void visit( NodeType *node, Fn fn, bool isLeaf, bool isDropTarget )
     {
         auto flags = m_baseFlags;
         if ( m_editor->getSelectedNode() == node ) {
@@ -681,7 +684,31 @@ private:
             if ( ImGui::IsItemClicked() ) {
                 m_editor->setSelectedNode( node );
             }
+            if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
+                ImGui::SetDragDropPayload( "DND_NODE", node, sizeof( Node ) );
+                ImGui::Text( "%s", getNodeName( node ).c_str() );
+                ImGui::EndDragDropSource();
+            }
+
+            if ( isDropTarget ) {
+                if ( ImGui::BeginDragDropTarget() ) {
+                    if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+                        auto other = ( Node * ) payload->Data;
+                        if ( other != nullptr ) {
+                            auto child = other->detachFromParent();
+                            if ( auto group = dynamic_cast< Group * >( node ) ) {
+                                group->attachNode( child );
+                            } else {
+                                CRIMILD_LOG_WARNING( "Drop target node is not a group" );
+                            }
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+            }
+
             fn();
+
             if ( !isLeaf ) {
                 ImGui::TreePop();
             }
