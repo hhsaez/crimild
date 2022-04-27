@@ -46,6 +46,12 @@
 
 using namespace crimild;
 
+auto withName( auto node, std::string name ) noexcept
+{
+    node->setName( name );
+    return node;
+}
+
 static void addToScene( SharedPointer< Node > const &node ) noexcept
 {
     // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
@@ -56,9 +62,9 @@ static void addToScene( SharedPointer< Node > const &node ) noexcept
     scene->attachNode( node );
 }
 
-static void addGeometry( SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept
+static void addGeometry( std::string name, SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept
 {
-    auto geometry = crimild::alloc< Geometry >();
+    auto geometry = crimild::alloc< Geometry >( name );
     geometry->attachPrimitive( primitive );
     geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
     geometry->setLocal( local );
@@ -81,15 +87,15 @@ void crimild::editor::sceneMenu( void ) noexcept
 
         if ( ImGui::BeginMenu( "Geometry" ) ) {
             if ( ImGui::MenuItem( "Plane" ) ) {
-                addGeometry( QuadPrimitive::UNIT_QUAD, rotationX( -numbers::PI_DIV_2 ) );
+                addGeometry( "Plane", QuadPrimitive::UNIT_QUAD, rotationX( -numbers::PI_DIV_2 ) );
             }
 
             if ( ImGui::MenuItem( "Box" ) ) {
-                addGeometry( BoxPrimitive::UNIT_BOX );
+                addGeometry( "Box", BoxPrimitive::UNIT_BOX );
             }
 
             if ( ImGui::MenuItem( "Sphere" ) ) {
-                addGeometry( SpherePrimitive::UNIT_SPHERE );
+                addGeometry( "Sphere", SpherePrimitive::UNIT_SPHERE );
             }
 
             ImGui::EndMenu();
@@ -98,19 +104,22 @@ void crimild::editor::sceneMenu( void ) noexcept
         if ( ImGui::BeginMenu( "Light" ) ) {
             if ( ImGui::MenuItem( "Directional" ) ) {
                 auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                light->setName( "Directional Light" );
                 light->setEnergy( 5 );
                 addToScene( withRotationY( light, -numbers::PI_DIV_4 ) );
             }
             if ( ImGui::MenuItem( "Point" ) ) {
                 addToScene(
                     withTranslation(
-                        crimild::alloc< Light >( Light::Type::POINT ),
+                        withName(
+                            crimild::alloc< Light >( Light::Type::POINT ),
+                            "Point Light" ),
                         0,
                         1,
                         0 ) );
             }
             if ( ImGui::MenuItem( "Spot" ) ) {
-                addToScene( crimild::alloc< Light >( Light::Type::SPOT ) );
+                addToScene( withName( crimild::alloc< Light >( Light::Type::SPOT ), "Spot Light" ) );
             }
 
             ImGui::EndMenu();
