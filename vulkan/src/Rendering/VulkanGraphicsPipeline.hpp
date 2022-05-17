@@ -51,11 +51,13 @@ namespace crimild {
                 std::vector< VkDescriptorSetLayout > descriptorSetLayouts;
                 const ShaderProgram *program = nullptr;
                 std::vector< VertexLayout > vertexLayouts;
-                DepthStencilState pipelineDepthStencilState;
-                RasterizationState pipelineRasterizationState;
-                ColorBlendState pipelineColorBlendState;
+                DepthStencilState depthStencilState;
+                RasterizationState rasterizationState;
+                ColorBlendState colorBlendState;
                 size_t colorAttachmentCount = 1;
                 std::vector< VkDynamicState > dynamicStates;
+                ViewportDimensions viewport;
+                ViewportDimensions scissor;
             };
 
         public:

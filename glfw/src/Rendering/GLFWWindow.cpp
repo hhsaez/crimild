@@ -29,6 +29,8 @@
 
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/ImGUILayer.hpp"
+#include "Rendering/Layer.hpp"
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 #include "Rendering/RenderPasses/VulkanPresentPass.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
@@ -43,13 +45,10 @@
 using namespace crimild;
 using namespace crimild::glfw;
 
-class ComposePass : public vulkan::RenderPass {
+class MainLayer : public Layer {
 public:
-    ComposePass( vulkan::RenderDevice *renderDevice )
-        : vulkan::RenderPass( renderDevice ),
-          m_clear( renderDevice ),
-          //   m_scene( renderDevice ),
-          //   m_selection( renderDevice ),
+    explicit MainLayer( vulkan::RenderDevice *renderDevice ) noexcept
+        : m_clear( renderDevice ),
           m_shader(
               renderDevice,
               R"(
@@ -77,47 +76,35 @@ public:
                     outColor = vec4( color, 1.0 );
                 }
             )" ),
-          m_editor( renderDevice ),
           m_present( renderDevice )
     {
+        // no-op
     }
 
-    virtual ~ComposePass( void ) = default;
+    virtual ~MainLayer( void ) = default;
+
+    virtual Event handle( const Event &e ) noexcept override
+    {
+        m_clear.handle( e );
+        m_shader.handle( e );
+        m_present.handle( e );
+
+        return Layer::handle( e );
+    }
 
     virtual void render( void ) noexcept override
     {
         m_clear.render();
         m_shader.render();
-        // m_scene.render();
-        // m_selection.render( m_editor.getSelectedNode() );
-        m_editor.render();
+
+        Layer::render();
+
         m_present.render();
-    }
-
-    virtual Event handle( const Event &e ) noexcept override
-    {
-        auto ev = e;
-
-        m_clear.handle( ev );
-        m_shader.handle( ev );
-        ev = m_editor.handle( ev );
-        // ev = m_scene.handle( ev );
-        // if ( ev.type == Event::Type::NODE_SELECTED ) {
-        //     // TODO: ScenePass should be a child of EditorLayer
-        //     m_editor.handle( ev );
-        // }
-        // m_selection.handle( ev );
-        m_present.handle( ev );
-
-        return RenderPass::handle( ev );
     }
 
 private:
     vulkan::ClearPass m_clear;
-    // vulkan::ScenePass m_scene;
-    // vulkan::SelectionOutlinePass m_selection;
     vulkan::ShaderPass m_shader;
-    EditorLayer m_editor;
     vulkan::PresentPass m_present;
 };
 
@@ -138,7 +125,10 @@ Window::Window( void ) noexcept
 
     m_renderDevice = m_physicalDevice->createRenderDevice();
 
-    m_renderPass = std::make_unique< ComposePass >( m_renderDevice.get() );
+    m_mainLayer = std::make_unique< MainLayer >( m_renderDevice.get() );
+    m_mainLayer
+        ->attach< ImGUILayer >( m_renderDevice.get() )
+        ->attach< EditorLayer >( m_renderDevice.get() );
 }
 
 Window::~Window( void ) noexcept
@@ -147,7 +137,8 @@ Window::~Window( void ) noexcept
         m_renderDevice->flush();
     }
 
-    m_renderPass = nullptr;
+    m_mainLayer = nullptr;
+
     m_renderDevice = nullptr;
     m_physicalDevice = nullptr;
     m_surface = nullptr;
@@ -183,18 +174,17 @@ Event Window::handle( const Event &e ) noexcept
                 }
             }
 
-            m_renderPass->handle( e );
+            // TODO: handle layer return events
+            m_mainLayer->handle( e );
 
             if ( m_lastResizeEvent.type != Event::Type::NONE ) {
                 m_renderDevice->handle( m_lastResizeEvent );
-                m_renderPass->handle( m_lastResizeEvent );
+                m_mainLayer->handle( m_lastResizeEvent );
                 m_lastResizeEvent = Event {};
             }
 
             if ( m_renderDevice->beginRender() ) {
-                if ( m_renderPass != nullptr ) {
-                    m_renderPass->render();
-                }
+                m_mainLayer->render();
                 m_renderDevice->endRender();
             }
 
@@ -234,28 +224,12 @@ Event Window::handle( const Event &e ) noexcept
 
         default: {
             m_renderDevice->handle( e );
-            m_renderPass->handle( e );
+            m_mainLayer->handle( e );
             break;
         }
     }
 
-    return e; //m_surface->handle( e );
-
-    // if ( e.type == Event::Type::SIMULATION_START ) {
-    // }
-
-    // if ( e.type == Event::Type::SIMULATION_UPDATE ) {
-
-    // }
-
-    // const auto ret = System::handle( e );
-
-    // if ( ret.type == Event::Type::SIMULATION_STOP ) {
-    //     destroyWindow();
-    // }
-
-    // return ret;
-    // return e; // System::handle( e );
+    return e;
 }
 
 #if 0

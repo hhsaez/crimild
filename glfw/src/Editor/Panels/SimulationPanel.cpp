@@ -27,17 +27,16 @@
 
 #include "Editor/Panels/SimulationPanel.hpp"
 
-#include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
+
+#include <sstream>
 
 using namespace crimild;
 using namespace crimild::editor;
 
-bool SimulationPanel::s_visible = true;
-
-SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice ),
+SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
+    : m_pos( position ),
+      m_extent( extent ),
       m_scenePass( renderDevice )
 {
     // no-op
@@ -45,62 +44,67 @@ SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept
 
 Event SimulationPanel::handle( const Event &e ) noexcept
 {
-    return m_scenePass.handle( e );
+    switch ( e.type ) {
+        case Event::Type::WINDOW_RESIZE:
+            // Don't forward resize to scene pass since it will be handled
+            // during update.
+            break;
+
+        default:
+            m_scenePass.handle( e );
+            break;
+    }
+
+    return Layer::handle( e );
 }
 
 void SimulationPanel::render( void ) noexcept
 {
-    m_scenePass.render();
+    ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_FirstUseEver );
+    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
-        m_scenePass.getColorAttachment(),
-        m_scenePass.getDepthAttachment()
-    };
+    // Allow opening multiple panels with the same name
+    std::stringstream ss;
+    ss << "Simulation##" << ( size_t ) this;
 
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    bool open = true;
+    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
+        ImVec2 actualSize = ImGui::GetContentRegionAvail();
+        if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
+            m_extent.width = actualSize.x;
+            m_extent.height = actualSize.y;
+            m_lastResizeEvent = Event {
+                .type = Event::Type::WINDOW_RESIZE,
+                .extent = m_extent,
+            };
+        }
 
-    for ( const auto att : attachments ) {
-        getRenderDevice()->transitionImageLayout(
-            commandBuffer,
-            att->image,
-            att->format,
-            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            getRenderDevice()->formatIsColor( att->format ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            att->mipLevels,
-            att->layerCount );
+        if ( m_lastResizeEvent.type != Event::Type::NONE ) {
+            m_scenePass.handle( m_lastResizeEvent );
+            m_lastResizeEvent = Event {};
+        }
+
+        const auto att = m_scenePass.getColorAttachment();
+        if ( !att->descriptorSets.empty() ) {
+            ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
+            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+        } else {
+            ImGui::Text( "No scene attachments found" );
+        }
+
+        ImGui::End();
     }
-}
 
-void SimulationPanel::updateUI( EditorLayer *, bool ) noexcept
-{
-    if ( !isVibisle() ) {
+    if ( !open ) {
+        detachFromParent();
         return;
     }
 
-    const auto attachments = std::array< const vulkan::FramebufferAttachment *, 2 > {
-        m_scenePass.getColorAttachment(),
-        m_scenePass.getDepthAttachment()
-    };
+    Layer::render();
 
-    static size_t selectedRenderMode = 0;
-    if ( ImGui::BeginCombo( "Select render mode", attachments[ 0 ]->name.c_str(), 0 ) ) {
-        for ( size_t i = 0; i < attachments.size(); ++i ) {
-            if ( ImGui::Selectable( attachments[ i ]->name.c_str(), selectedRenderMode == i ) ) {
-                selectedRenderMode = i;
-            }
-        }
-        ImGui::EndCombo();
-    }
-
-    const auto att = attachments[ selectedRenderMode ];
-    if ( !att->descriptorSets.empty() ) {
-        ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
-        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-    } else {
-        ImGui::Text( "No scene attachments found" );
-    }
+    m_scenePass.render();
 }

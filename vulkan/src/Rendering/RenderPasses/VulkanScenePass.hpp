@@ -28,9 +28,10 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 
-#include "Foundation/VulkanUtils.hpp"
-#include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
+#include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
+#include "Rendering/RenderPasses/VulkanShadowPass.hpp"
+#include "Rendering/RenderPasses/VulkanSkyboxPass.hpp"
 
 namespace crimild {
 
@@ -45,75 +46,24 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class ScenePass : public RenderPass {
+        class ScenePass {
         public:
             explicit ScenePass( RenderDevice *renderDevice ) noexcept;
-            virtual ~ScenePass( void ) noexcept;
+            virtual ~ScenePass( void ) noexcept = default;
 
-            Event handle( const Event & ) noexcept override;
-            void render( void ) noexcept override;
+            Event handle( const Event & ) noexcept;
+            void render( void ) noexcept;
 
-            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return &m_colorAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment *getDepthAttachment( void ) const noexcept { return &m_depthAttachment; }
+            inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
-        private:
-            void init( void ) noexcept;
-            void clear( void ) noexcept;
-
-            void createRenderPassObjects( void ) noexcept;
-            void destroyRenderPassObjects( void ) noexcept;
-
-            void createMaterialObjects( void ) noexcept;
-            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept;
-            void destroyMaterialObjects( void ) noexcept;
-
-            void createGeometryObjects( void ) noexcept;
-            void bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept;
-            void destroyGeometryObjects( void ) noexcept;
-
-            void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
+            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return m_localLightingPass.getColorAttachment(); }
 
         private:
-            VkRenderPass m_renderPass = VK_NULL_HANDLE;
-            std::vector< VkFramebuffer > m_framebuffers;
-            VkRect2D m_renderArea;
-
-            FramebufferAttachment m_colorAttachment;
-            FramebufferAttachment m_depthAttachment;
-
-            std::unique_ptr< GraphicsPipeline > m_pipeline;
-
-            std::unique_ptr< ShaderProgram > m_program;
-
-            struct RenderPassObjects {
-                VkDescriptorPool pool = VK_NULL_HANDLE;
-                VkDescriptorSetLayout layout = VK_NULL_HANDLE;
-                std::vector< VkDescriptorSet > descriptorSets;
-
-                struct Uniforms {
-                    alignas( 16 ) Matrix4 view = Matrix4::Constants::IDENTITY;
-                    alignas( 16 ) Matrix4 proj = Matrix4::Constants::IDENTITY;
-                };
-                std::unique_ptr< UniformBuffer > uniforms;
-            } m_renderPassObjects;
-
-            std::unique_ptr< Simulation > m_simulation;
-
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct MaterialObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Material *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_materialObjects;
-
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct GeometryObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Geometry *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Geometry *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Geometry *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_geometryObjects;
+            vulkan::RenderDevice *m_renderDevice = nullptr;
+            ShadowPass m_shadowPass;
+            GBufferPass m_gBufferPass;
+            LocalLightingPass m_localLightingPass;
+            SkyboxPass m_skyboxPass;
         };
 
     }

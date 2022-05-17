@@ -98,18 +98,42 @@ namespace crimild {
                 Settings settings;
                 settings.parseCommandLine( argc, argv );
 
+                concurrency::JobScheduler jobScheduler;
+                jobScheduler.configure( 0 );
+                jobScheduler.start();
+
+                // TODO: Move AssetManager here
+                // TODO: Move AudioManager here
                 crimild::stb::ImageManager imageManager;
 
+                // Create simulation before creating the window, but
+                // delay its actual start until the window has been
+                // created
+                auto simulation = Simulation::create();
+
+                // Create the window and all of its layers
+                // TODO: Add editor/sim layers here based on settings/environment flags
                 Window window;
+
+                simulation->start();
 
                 while ( true ) {
                     glfwPollEvents();
 
-                    const auto ret = window.handle( Event { Event::Type::TICK } );
+                    // This also dispatch any sync_frame calls
+                    jobScheduler.executeDelayedJobs();
+
+                    // Dispatch deferred messages
+                    MessageQueue::getInstance()->dispatchDeferredMessages();
+
+                    const auto ret = window.handle( Event { .type = Event::Type::TICK } );
                     if ( ret.type == Event::Type::TERMINATE ) {
                         break;
                     }
                 }
+
+                jobScheduler.stop();
+                MessageQueue::getInstance()->clear();
 
                 return 0;
             }

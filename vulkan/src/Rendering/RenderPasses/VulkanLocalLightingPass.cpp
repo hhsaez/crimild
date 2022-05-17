@@ -65,6 +65,17 @@ LocalLightingPass::LocalLightingPass(
       m_materialInput( materialInput ),
       m_shadowInput( shadowInput )
 {
+    m_renderArea = VkRect2D {
+        .offset = {
+            0,
+            0,
+        },
+        .extent = {
+            .width = 1024,
+            .height = 1024,
+        },
+    };
+
     m_lightVolume = std::make_unique< SpherePrimitive >(
         SpherePrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
@@ -84,6 +95,10 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
+            m_renderArea.extent = {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
             clear();
             init();
             break;
@@ -176,15 +191,7 @@ void LocalLightingPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto extent = getRenderDevice()->getSwapchainExtent();
-
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = extent,
-    };
+    const auto extent = m_renderArea.extent;
 
     createFramebufferAttachment( "Scene/Lighting", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
 
@@ -687,32 +694,36 @@ void LocalLightingPass::init( void ) noexcept
                             )" ),
             } );
 
+        const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+
         const auto vertexLayouts = lightType != Light::Type::DIRECTIONAL
                                        ? std::vector< VertexLayout > { VertexP3::getLayout() }
                                        : std::vector< VertexLayout > {};
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             m_renderPass,
-            std::vector< VkDescriptorSetLayout > {
-                m_renderPassObjects.layout,
-                m_lightObjects.descriptorSetLayout,
-            },
-            program.get(),
-            vertexLayouts,
-            DepthStencilState {
-                .depthTestEnable = false,
-            },
-            RasterizationState {
-                .cullMode = lightType == Light::Type::DIRECTIONAL
-                                ? CullMode::BACK
-                                : CullMode::FRONT, // Render back faces only
-            },
-            ColorBlendState {
-                .enable = true,
-                .srcColorBlendFactor = BlendFactor::ONE,
-                .dstColorBlendFactor = BlendFactor::ONE,
-            },
-            colorReferences.size() );
+            GraphicsPipeline::Descriptor {
+                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
+                    m_renderPassObjects.layout,
+                    m_lightObjects.descriptorSetLayout,
+                },
+                .program = program.get(),
+                .vertexLayouts = vertexLayouts,
+                .depthStencilState = DepthStencilState {
+                    .depthTestEnable = false,
+                },
+                .rasterizationState = RasterizationState {
+                    .cullMode = lightType == Light::Type::DIRECTIONAL ? CullMode::BACK : CullMode::FRONT, // Render back faces only
+                },
+                .colorBlendState = ColorBlendState {
+                    .enable = true,
+                    .srcColorBlendFactor = BlendFactor::ONE,
+                    .dstColorBlendFactor = BlendFactor::ONE,
+                },
+                .colorAttachmentCount = colorReferences.size(),
+                .viewport = viewport,
+                .scissor = viewport,
+            } );
     };
 
     m_pointLightPipeline = createPipeline( Light::Type::POINT );

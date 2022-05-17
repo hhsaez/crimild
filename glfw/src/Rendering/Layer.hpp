@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,45 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/viewMenu.hpp"
+#ifndef CRIMILD_GLFW_LAYER_
+#define CRIMILD_GLFW_LAYER_
 
-#include "Editor/EditorLayer.hpp"
-#include "Editor/Panels/BehaviorEditorPanel.hpp"
-#include "Editor/Panels/NodeInspectorPanel.hpp"
-#include "Editor/Panels/SceneHierarchyPanel.hpp"
-#include "Editor/Panels/ScenePanel.hpp"
-#include "Editor/Panels/SimulationPanel.hpp"
-#include "Foundation/ImGUIUtils.hpp"
+#include "Simulation/Event.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
-{
-    if ( ImGui::BeginMenu( "View" ) ) {
-        if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
-            editor->attach< SceneHierarchyPanel >();
+    class Layer {
+    public:
+        Layer( void ) = default;
+        virtual ~Layer( void ) = default;
+
+        virtual Event handle( const Event & ) noexcept;
+        virtual void render( void ) noexcept;
+
+        inline Layer *getParent( void ) { return m_parent; }
+
+        template< typename LayerType, typename... Args >
+        LayerType *attach( Args &&... args ) noexcept
+        {
+            m_sublayers.push_back(
+                std::move(
+                    std::make_unique< LayerType >(
+                        std::forward< Args >( args )... ) ) );
+            auto newLayer = static_cast< LayerType * >( m_sublayers.back().get() );
+            newLayer->m_parent = this;
+            return newLayer;
         }
 
-        if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            editor->attach< NodeInspectorPanel >();
-        }
+        void detach( Layer *sublayer ) noexcept;
 
-        ImGui::Separator();
+        void detachFromParent( void ) noexcept;
 
-        if ( ImGui::MenuItem( "Scene..." ) ) {
-            editor->attach< ScenePanel >( editor->getRenderDevice() );
-        }
+    private:
+        Layer *m_parent = nullptr;
+        std::vector< std::unique_ptr< Layer > > m_sublayers;
+    };
 
-        if ( ImGui::MenuItem( "Simulation..." ) ) {
-            editor->attach< SimulationPanel >( editor->getRenderDevice() );
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
-            editor->attach< BehaviorEditorPanel >();
-        }
-
-        ImGui::EndMenu();
-    }
 }
+
+#endif

@@ -128,24 +128,24 @@ namespace crimild {
             template< typename T >
             void setValue( std::string key, T value )
             {
-                std::stringstream ss;
-                ss << value;
-                _values[ key ] = crimild::alloc< BehaviorContextValue >( key, ss.str() );
+                // std::stringstream ss;
+                // ss << value;
+                // _values[ key ] = crimild::alloc< BehaviorContextValue >( key, ss.str() );
             }
 
             template< typename T >
             T getValue( std::string key )
             {
-                if ( !hasValue( key ) ) {
-                    crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
-                    return T();
-                }
+                // if ( !hasValue( key ) ) {
+                // crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
+                return T();
+                // }
 
-                T value;
-                std::stringstream ss;
-                ss << _values[ key ]->getValue();
-                ss >> value;
-                return value;
+                // T value;
+                // std::stringstream ss;
+                // ss << _values[ key ]->getValue();
+                // ss >> value;
+                // return value;
             }
 
         private:

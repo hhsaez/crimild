@@ -28,46 +28,47 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE_
 #define CRIMILD_EDITOR_PANELS_SCENE_
 
+#include "Mathematics/Point2.hpp"
 #include "Mathematics/Transformation_constants.hpp"
-#include "Rendering/RenderPasses/VulkanDepthDebugPass.hpp"
-#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
-#include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
+#include "Rendering/Layer.hpp"
 #include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
 #include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
-#include "Rendering/RenderPasses/VulkanShadowPass.hpp"
-#include "Rendering/RenderPasses/VulkanSkyboxPass.hpp"
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "SceneGraph/Camera.hpp"
 
 namespace crimild {
 
-    class EditorLayer;
     class Camera;
+
+    namespace vulkan {
+
+        class RenderDevice;
+
+    }
 
     namespace editor {
 
-        class ScenePanel : public vulkan::RenderPass {
-        private:
-            static bool s_visible;
-
+        class ScenePanel : public Layer {
         public:
-            inline static void setVisible( bool visible ) { s_visible = visible; }
-            inline static bool isVibisle( void ) { return s_visible; }
-
-        public:
-            explicit ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept;
+            ScenePanel(
+                vulkan::RenderDevice *renderDevice,
+                const Point2 &position = { 310, 50 },
+                const Extent2D &extent = { .width = 1280.0, .height = 695.0 } ) noexcept;
             virtual ~ScenePanel( void ) = default;
 
-            void updateUI( EditorLayer *editor, bool embedded ) noexcept;
+            virtual Event handle( const Event &e ) noexcept override;
+            virtual void render( void ) noexcept override;
 
-            Event handle( const Event &e ) noexcept override;
-            void render( void ) noexcept override;
+            inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
         private:
-            vulkan::ShadowPass m_shadowPass;
-            vulkan::DepthDebugPass m_shadowDebugPass;
-            vulkan::GBufferPass m_gBufferPass;
-            vulkan::DepthDebugPass m_depthDebugPass;
-            vulkan::LocalLightingPass m_localLightingPass;
-            vulkan::SkyboxPass m_skyboxPass;
+            vulkan::RenderDevice *m_renderDevice = nullptr;
+
+            Point2 m_pos = Point2 { 310, 50 };
+            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+            Event m_lastResizeEvent = Event {};
+            vulkan::ScenePass m_scenePass;
+
             vulkan::SceneDebugPass m_sceneDebugPass;
             vulkan::OverlayPass m_sceneDebugOverlayPass;
 
