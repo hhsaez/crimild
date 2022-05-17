@@ -29,7 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GBUFFER_
 
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -49,7 +49,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class GBufferPass : public RenderPass {
+        class GBufferPass : public RenderPassBase {
         public:
             explicit GBufferPass( RenderDevice *renderDevice ) noexcept;
             virtual ~GBufferPass( void ) noexcept;

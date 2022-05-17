@@ -51,7 +51,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 DepthDebugPass::DepthDebugPass( RenderDevice *renderDevice, std::string name, const FramebufferAttachment *depthInput ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       m_name( name ),
       m_depthInput( depthInput )
 {

@@ -25,20 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-vulkan::RenderPass::RenderPass( RenderDevice *renderDevice ) noexcept
+vulkan::RenderPassBase::RenderPassBase( RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice )
 {
     // no-op
 }
 
-void vulkan::RenderPass::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out ) const
+void vulkan::RenderPassBase::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out ) const
 {
     CRIMILD_LOG_TRACE();
 
@@ -208,7 +208,7 @@ void vulkan::RenderPass::createFramebufferAttachment( std::string name, const Vk
     }
 }
 
-void vulkan::RenderPass::destroyFramebufferAttachment( FramebufferAttachment &att ) const
+void vulkan::RenderPassBase::destroyFramebufferAttachment( FramebufferAttachment &att ) const
 {
     att.descriptorSets.clear();
 

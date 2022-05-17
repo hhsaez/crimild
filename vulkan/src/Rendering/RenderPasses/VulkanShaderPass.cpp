@@ -40,7 +40,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ShaderPass::ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       m_uniforms( std::make_unique< UniformBuffer >( Vector2 { 1024, 768 } ) ),
       m_program(
           [ & ] {
@@ -122,7 +122,7 @@ Event ShaderPass::handle( const Event &e ) noexcept
             break;
     }
 
-    return RenderPass::handle( e );
+    return e;
 }
 
 void ShaderPass::render( void ) noexcept

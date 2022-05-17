@@ -50,7 +50,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 SkyboxPass::SkyboxPass( RenderDevice *renderDevice, const FramebufferAttachment *colorAttachment, const FramebufferAttachment *depthAttachment ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       m_colorAttachment( colorAttachment ),
       m_depthAttachment( depthAttachment )
 {

@@ -40,7 +40,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 OverlayPass::OverlayPass( RenderDevice *renderDevice, std::string name, const std::vector< const FramebufferAttachment * > &inputs ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       NamedObject( name ),
       m_inputs( inputs )
 {
@@ -80,7 +80,7 @@ Event OverlayPass::handle( const Event &e ) noexcept
             break;
     }
 
-    return RenderPass::handle( e );
+    return e;
 }
 
 void OverlayPass::render( void ) noexcept

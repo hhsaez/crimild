@@ -51,7 +51,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       m_program(
           [ & ] {
               auto program = std::make_unique< ShaderProgram >();

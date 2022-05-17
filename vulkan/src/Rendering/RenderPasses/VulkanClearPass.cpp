@@ -36,7 +36,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ClearPass::ClearPass( vulkan::RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice )
+    : RenderPassBase( renderDevice )
 {
     init();
 }
@@ -59,7 +59,7 @@ Event ClearPass::handle( const Event &e ) noexcept
             break;
     }
 
-    return RenderPass::handle( e );
+    return e;
 }
 
 void ClearPass::render( void ) noexcept

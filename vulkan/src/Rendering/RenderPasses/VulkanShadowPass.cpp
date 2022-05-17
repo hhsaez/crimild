@@ -54,7 +54,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 ShadowPass::ShadowPass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice )
+    : RenderPassBase( renderDevice )
 {
     init();
 }

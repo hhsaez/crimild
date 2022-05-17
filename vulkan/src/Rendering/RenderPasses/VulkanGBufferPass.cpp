@@ -49,7 +49,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice )
+    : RenderPassBase( renderDevice )
 {
     m_renderArea = VkRect2D {
         .offset = {

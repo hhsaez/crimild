@@ -29,7 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_PRESENT_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -37,13 +37,13 @@ namespace crimild {
 
         class RenderDevice;
 
-        class PresentPass : public RenderPass {
+        class PresentPass : public RenderPassBase {
         public:
             explicit PresentPass( RenderDevice *renderDevice ) noexcept;
             virtual ~PresentPass( void ) noexcept;
 
-            virtual Event handle( const Event & ) noexcept override;
-            virtual void render( void ) noexcept override;
+            virtual Event handle( const Event & ) noexcept;
+            virtual void render( void ) noexcept;
 
         private:
             void init( void ) noexcept;

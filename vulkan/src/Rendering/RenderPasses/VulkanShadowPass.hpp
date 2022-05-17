@@ -30,7 +30,7 @@
 
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -45,7 +45,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class ShadowPass : public RenderPass {
+        class ShadowPass : public RenderPassBase {
         public:
             ShadowPass( RenderDevice *renderDevice ) noexcept;
             virtual ~ShadowPass( void ) noexcept;

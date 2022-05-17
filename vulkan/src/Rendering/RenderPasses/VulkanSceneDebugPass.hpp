@@ -30,7 +30,7 @@
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -45,13 +45,13 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class SceneDebugPass : public RenderPass {
+        class SceneDebugPass : public RenderPassBase {
         public:
             explicit SceneDebugPass( RenderDevice *renderDevice ) noexcept;
             virtual ~SceneDebugPass( void ) noexcept;
 
-            Event handle( const Event & ) noexcept override;
-            void render( void ) noexcept override;
+            Event handle( const Event & ) noexcept;
+            void render( void ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return &m_colorAttachment; }
             [[nodiscard]] inline const FramebufferAttachment *getDepthAttachment( void ) const noexcept { return &m_depthAttachment; }

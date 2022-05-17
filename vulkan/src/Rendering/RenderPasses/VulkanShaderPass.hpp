@@ -29,7 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SHADER_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -40,13 +40,13 @@ namespace crimild {
         class GraphicsPipeline;
         class RenderDevice;
 
-        class ShaderPass : public RenderPass {
+        class ShaderPass : public RenderPassBase {
         public:
             explicit ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept;
             virtual ~ShaderPass( void ) noexcept;
 
-            virtual Event handle( const Event & ) noexcept override;
-            virtual void render( void ) noexcept override;
+            virtual Event handle( const Event & ) noexcept;
+            virtual void render( void ) noexcept;
 
         private:
             void init( void ) noexcept;
