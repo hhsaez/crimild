@@ -38,12 +38,13 @@
 #include "Mathematics/Vector2Ops.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
 
-void drawGizmo( Node *selectedNode, float x, float y, float width, float height )
+void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float width, float height )
 {
     if ( selectedNode == nullptr ) {
         return;
@@ -66,12 +67,8 @@ void drawGizmo( Node *selectedNode, float x, float y, float width, float height 
     ImGuizmo::SetDrawlist( ImGui::GetForegroundDrawList() );
     ImGuizmo::SetRect( x, y, width, height );
 
-    const auto [ view, proj ] = [] {
-        if ( auto camera = Camera::getMainCamera() ) {
-            return std::make_pair( camera->getViewMatrix(), camera->getProjectionMatrix() );
-        }
-        return std::make_pair( Matrix4::Constants::IDENTITY, Matrix4::Constants::IDENTITY );
-    }();
+    const auto view = camera->getViewMatrix();
+    const auto proj = camera->getProjectionMatrix();
 
     // TODO: Snapping
     bool snap = false;
@@ -110,11 +107,6 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
     m_cameraTranslation = translation( 10, 10, 10 );
     m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
-
-    if ( Camera::getMainCamera() == m_editorCamera.get() ) {
-        // Make sure the main camera is NOT set to the editor camera.
-        Camera::setMainCamera( nullptr );
-    }
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
@@ -226,8 +218,6 @@ void ScenePanel::render( void ) noexcept
             };
         }
 
-        m_editorCamera->setAspectRatio( actualSize.x / actualSize.y );
-
         if ( m_lastResizeEvent.type != Event::Type::NONE ) {
             m_scenePass.handle( m_lastResizeEvent );
             m_sceneDebugPass.handle( m_lastResizeEvent );
@@ -256,13 +246,9 @@ void ScenePanel::render( void ) noexcept
         return;
     }
 
-    // TODO: Pass camera as argument instead of overriding the main camera
-    auto tempCamera = Camera::getMainCamera();
-    Camera::setMainCamera( m_editorCamera.get() );
-
     if ( auto editor = EditorLayer::getInstance() ) {
         // TODO: Fix gizmo position
-        drawGizmo( editor->getSelectedNode(), m_pos.x, m_pos.y, m_extent.width, m_extent.height );
+        drawGizmo( editor->getSelectedNode(), m_editorCamera.get(), m_pos.x, m_pos.y, m_extent.width, m_extent.height );
     }
 
     Layer::render();
@@ -284,13 +270,13 @@ void ScenePanel::render( void ) noexcept
             att->layerCount );
     };
 
-    m_scenePass.render();
+    auto scene = Simulation::getInstance()->getScene();
 
-    m_sceneDebugPass.render();
+    m_scenePass.render( scene, m_editorCamera.get() );
+
+    m_sceneDebugPass.render( scene, m_editorCamera.get() );
     transitionAttachment( m_sceneDebugPass.getColorAttachment() );
 
     m_sceneDebugOverlayPass.render();
     transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
-
-    Camera::setMainCamera( tempCamera );
 }

@@ -157,34 +157,8 @@ Event SceneDebugPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void SceneDebugPass::render( void ) noexcept
+void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
 {
-    auto scene = Simulation::getInstance()->getScene();
-    if ( scene == nullptr ) {
-        return;
-    }
-
-    RenderableSet renderables;
-
-    std::vector< Node * > lights;
-
-    scene->perform(
-        Apply(
-            [ & ]( auto node ) {
-                if ( node->getClassName() == Light::__CLASS_NAME ) {
-                    lights.push_back( node );
-                }
-            } ) );
-
-    auto camera = Camera::getMainCamera();
-    if ( m_renderPassObjects.uniforms != nullptr ) {
-        m_renderPassObjects.uniforms->setValue(
-            RenderPassObjects::Uniforms {
-                .view = camera->getViewMatrix(),
-                .proj = camera->getProjectionMatrix() } );
-        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-    }
-
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
@@ -218,25 +192,47 @@ void SceneDebugPass::render( void ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    for ( auto node : lights ) {
-        vkCmdBindPipeline(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pipeline->getHandle() );
+    if ( scene != nullptr && camera != nullptr ) {
+        std::vector< Node * > lights;
+        scene->perform(
+            Apply(
+                [ & ]( auto node ) {
+                    if ( node->getClassName() == Light::__CLASS_NAME ) {
+                        lights.push_back( node );
+                    }
+                } ) );
 
-        vkCmdBindDescriptorSets(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pipeline->getPipelineLayout(),
-            0,
-            1,
-            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-            0,
-            nullptr );
+        // Set correct aspect ratio for camera before rendering
+        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
 
-        bindMaterialDescriptors( commandBuffer, currentFrameIndex, m_material.get() );
-        bindNodeDescriptors( commandBuffer, currentFrameIndex, node );
-        drawPrimitive( commandBuffer, currentFrameIndex, m_pointLightPrimitive.get() );
+        if ( m_renderPassObjects.uniforms != nullptr ) {
+            m_renderPassObjects.uniforms->setValue(
+                RenderPassObjects::Uniforms {
+                    .view = camera->getViewMatrix(),
+                    .proj = camera->getProjectionMatrix() } );
+            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+        }
+
+        for ( auto node : lights ) {
+            vkCmdBindPipeline(
+                commandBuffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                m_pipeline->getHandle() );
+
+            vkCmdBindDescriptorSets(
+                commandBuffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                m_pipeline->getPipelineLayout(),
+                0,
+                1,
+                &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                0,
+                nullptr );
+
+            bindMaterialDescriptors( commandBuffer, currentFrameIndex, m_material.get() );
+            bindNodeDescriptors( commandBuffer, currentFrameIndex, node );
+            drawPrimitive( commandBuffer, currentFrameIndex, m_pointLightPrimitive.get() );
+        }
     }
 
     vkCmdEndRenderPass( commandBuffer );

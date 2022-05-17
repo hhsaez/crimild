@@ -38,6 +38,8 @@ namespace crimild {
     class Simulation;
     class Light;
     class Primitive;
+    class Node;
+    class Camera;
 
     namespace materials {
 
@@ -62,7 +64,7 @@ namespace crimild {
             virtual ~LocalLightingPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            void render( Node *scene, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return &m_colorAttachment; }
 

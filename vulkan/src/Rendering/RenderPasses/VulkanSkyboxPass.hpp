@@ -38,6 +38,7 @@ namespace crimild {
     class Material;
     class Node;
     class Primitive;
+    class Camera;
 
     namespace vulkan {
 
@@ -50,7 +51,7 @@ namespace crimild {
             virtual ~SkyboxPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            void render( Node *scene, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return m_colorAttachment; }
 

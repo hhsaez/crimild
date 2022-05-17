@@ -43,8 +43,6 @@
 
 using namespace crimild;
 
-Camera *Camera::_mainCamera = nullptr;
-
 Camera::Camera( void )
     : Camera(
         45.0,
@@ -72,18 +70,6 @@ Camera::Camera( float fov, float aspect, float near, float far )
       _viewMatrixIsCurrent( false )
 {
     updateProjectionMatrix();
-
-    if ( getMainCamera() == nullptr ) {
-        // Set itself as the main camera if there isn't one already set
-        setMainCamera( this );
-    }
-}
-
-Camera::~Camera( void )
-{
-    if ( getMainCamera() == this ) {
-        setMainCamera( nullptr );
-    }
 }
 
 void Camera::accept( NodeVisitor &visitor )

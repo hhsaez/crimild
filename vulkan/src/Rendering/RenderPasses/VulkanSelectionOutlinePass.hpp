@@ -52,7 +52,7 @@ namespace crimild {
             ~SelectionOutlinePass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( Node *selectedScene ) noexcept;
+            void render( Node *selectedScene, Camera *camera ) noexcept;
 
         private:
             void init( void ) noexcept;

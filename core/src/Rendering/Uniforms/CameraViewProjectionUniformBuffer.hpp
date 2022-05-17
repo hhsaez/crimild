@@ -36,7 +36,8 @@ namespace crimild {
 
     class Camera;
 
-    class CameraViewProjectionUniform : public UniformBuffer {
+    class [[deprecated]] CameraViewProjectionUniform : public UniformBuffer
+    {
     private:
         struct Props {
             alignas( 16 ) Matrix4f view;
@@ -45,7 +46,7 @@ namespace crimild {
         };
 
     public:
-        explicit CameraViewProjectionUniform( Camera *camera ) noexcept;
+        explicit CameraViewProjectionUniform( Camera * camera ) noexcept;
         ~CameraViewProjectionUniform( void ) = default;
 
         void onPreRender( void ) noexcept override;

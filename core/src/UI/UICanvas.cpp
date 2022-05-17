@@ -59,9 +59,9 @@ void UICanvas::update( const Clock & )
     node->setWorldIsCurrent( false );
 
     if ( getRenderSpace() == RenderSpace::CAMERA ) {
+#if 0
         if ( auto camera = Camera::getMainCamera() ) {
 
-#if 0
             // Scale the UI so its height is 1.0
             // Then, translate it back based on Near/Up planes in camera's frustum
             auto cWorld = camera->getWorld();
@@ -72,8 +72,8 @@ void UICanvas::update( const Clock & )
             t.setScale( 2.0f / size );
             t.setTranslate( 0.0f, 0.0f, -near / up );
             node->setLocal( t );
-#endif
         }
+#endif
     }
 }
 

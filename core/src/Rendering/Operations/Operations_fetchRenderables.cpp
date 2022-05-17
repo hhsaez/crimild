@@ -54,9 +54,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::fetchRenderables( void
         litRenderables->reset();
         unlitRenderables->reset();
 
-        envRenderables->setCamera( Camera::getMainCamera() );
-        litRenderables->setCamera( Camera::getMainCamera() );
-        unlitRenderables->setCamera( Camera::getMainCamera() );
+        // envRenderables->setCamera( Camera::getMainCamera() );
+        // litRenderables->setCamera( Camera::getMainCamera() );
+        // unlitRenderables->setCamera( Camera::getMainCamera() );
 
         auto scene = Simulation::getInstance()->getScene();
         if ( scene == nullptr ) {

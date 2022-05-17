@@ -54,23 +54,23 @@
 using namespace crimild;
 
 /**
- * TODO: 
- * There's a problem now based on how threads are grouped. Since they're tiled, 
+ * TODO:
+ * There's a problem now based on how threads are grouped. Since they're tiled,
  * some threads might do less jobs than others. If one tile is too complex, it's still
- * handled by the same thread. 
- * 
+ * handled by the same thread.
+ *
  * Instead, each thread (gl_GlobalInvocationID.x) processes pixels using the following formula:
  * thread_id = mod( gl_GlobalInvocationID.x + R * N, M ), where:
  * R = random value
  * N = thread pool size (gl_WorkGroupSize * gl_WorkGroupCount )
  * M = Buffer size
  * (this formula might not be correct. I'll verify it when implementing it).
- * 
- * Also, make the buffer linear instead of two-dimensional. That reduces the number of 
+ *
+ * Also, make the buffer linear instead of two-dimensional. That reduces the number of
  * computation needed to calculate the thread_id.
- * 
+ *
  * This should make all threads to process both complex and simpler parts of the scene.
- * 
+ *
  * I'm not sure if this is cache efficient, though.
  */
 
@@ -78,8 +78,8 @@ const std::string PRELUDE_SRC = R"(
     layout( local_size_x = 32, local_size_y = 32 ) in;
     layout( set = 0, binding = 0, rgba32f ) uniform image2D resultImage;
 
-    #include <random>
     #include <isZero>
+    #include <random>
     #include <reflectance>
 
     struct RayData {
@@ -372,7 +372,7 @@ const auto HIT_SCENE_SRC = R"(
         if ( checkCylinderCap( R, t ) ) {
             if ( t < tMin ) {
                 tMax = tMin;
-                tMin = t;                
+                tMin = t;
             } else if ( t < tMax ) {
                 tMax = t;
             }
@@ -382,7 +382,7 @@ const auto HIT_SCENE_SRC = R"(
         return hasResult;
     }
 
-    bool hitCylinder( Cylinder cylinder, Ray worldRay, inout float tMin, inout float tMax ) 
+    bool hitCylinder( Cylinder cylinder, Ray worldRay, inout float tMin, inout float tMax )
     {
         Ray ray;
         ray.origin = ( cylinder.invWorld * vec4( worldRay.origin, 1 ) ).xyz;
@@ -1003,7 +1003,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         auto cameraRight = Vector3::Constants::RIGHT;
                         auto cameraUp = Vector3::Constants::UP;
 
-                        auto camera = Camera::getMainCamera();
+                        // auto camera = Camera::getMainCamera();
+                        Camera *camera = nullptr;
                         if ( camera != nullptr ) {
                             const auto invProj = inverse( camera->getProjectionMatrix() );
                             if ( invProj != cameraInvProj ) {

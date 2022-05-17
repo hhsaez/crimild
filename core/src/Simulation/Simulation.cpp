@@ -158,16 +158,16 @@ bool Simulation::step( void ) noexcept
 
     auto scene = getScene();
 
-    if ( scene != nullptr && Camera::getMainCamera() == nullptr ) {
-        // fetch all cameras from the scene
-        FetchCameras fetchCameras;
-        _scene->perform( fetchCameras );
-        fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
-            if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
-                Camera::setMainCamera( camera );
-            }
-        } );
-    }
+    // if ( scene != nullptr && Camera::getMainCamera() == nullptr ) {
+    //     // fetch all cameras from the scene
+    //     FetchCameras fetchCameras;
+    //     _scene->perform( fetchCameras );
+    //     fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
+    //         if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
+    //             Camera::setMainCamera( camera );
+    //         }
+    //     } );
+    // }
 
     // broadcastMessage( messaging::SimulationWillUpdate { scene } );
 
@@ -262,30 +262,30 @@ Event Simulation::handle( const Event &e ) noexcept
         }
 
         case Event::Type::MOUSE_CLICK: {
-            if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
-                if ( auto scene = getScene() ) {
-                    if ( auto camera = Camera::getMainCamera() ) {
-                        auto x = e.button.npos.x;
-                        auto y = e.button.npos.y;
-                        Ray3 R;
-                        if ( camera->getPickRay( x, y, R ) ) {
-                            Picking::Results res;
-                            scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
-                            if ( res.hasResults() ) {
-                                auto node = res.getBestCandidate();
-                                return Event {
-                                    .type = Event::Type::NODE_SELECTED,
-                                    .node = node,
-                                };
-                            }
-                        }
-                    }
-                }
-                return Event {
-                    .type = Event::Type::NODE_SELECTED,
-                    .node = nullptr,
-                };
-            }
+            // if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
+            //     if ( auto scene = getScene() ) {
+            //         if ( auto camera = Camera::getMainCamera() ) {
+            //             auto x = e.button.npos.x;
+            //             auto y = e.button.npos.y;
+            //             Ray3 R;
+            //             if ( camera->getPickRay( x, y, R ) ) {
+            //                 Picking::Results res;
+            //                 scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
+            //                 if ( res.hasResults() ) {
+            //                     auto node = res.getBestCandidate();
+            //                     return Event {
+            //                         .type = Event::Type::NODE_SELECTED,
+            //                         .node = node,
+            //                     };
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     return Event {
+            //         .type = Event::Type::NODE_SELECTED,
+            //         .node = nullptr,
+            //     };
+            // }
             break;
         }
 
@@ -333,7 +333,29 @@ Event Simulation::handle( const Event &e ) noexcept
 
 void Simulation::setScene( SharedPointer< Node > const &scene )
 {
+    // TODO: Ensure that we always have a valid scene
+    // If input scene is null, create a NullNode
+    // This way we avoid a lot of checks of wheter the scene is valid or not
+    // (same for main camera?)
     _scene = scene;
+
+    m_cameras.clear();
+    m_mainCamera = nullptr;
+
+    if ( _scene != nullptr ) {
+        // TODO: start components?
+
+        // fetch all cameras from the scene
+        FetchCameras fetchCameras;
+        _scene->perform( fetchCameras );
+        fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
+            if ( m_mainCamera == nullptr || camera->isMainCamera() ) {
+                m_mainCamera = camera;
+            }
+            m_cameras.push_back( camera );
+        } );
+    }
+
     /*
 	_scene = scene;
 	_cameras.clear();
@@ -384,14 +406,9 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
     */
 }
 
-void Simulation::loadScene( std::string filename )
-{
-    // broadcastMessage( messaging::LoadScene { filename } );
-}
-
 void Simulation::forEachCamera( std::function< void( Camera * ) > callback )
 {
-    for ( auto camera : _cameras ) {
+    for ( auto camera : m_cameras ) {
         callback( camera );
     }
 }
