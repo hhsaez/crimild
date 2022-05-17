@@ -80,31 +80,8 @@ Event ShadowPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void ShadowPass::render( void ) noexcept
+void ShadowPass::render( Node *scene, Camera *camera ) noexcept
 {
-    auto scene = Simulation::getInstance()->getScene();
-    if ( scene == nullptr ) {
-        return;
-    }
-
-    RenderableSet renderables;
-    scene->perform(
-        ApplyToGeometries(
-            [ & ]( Geometry *geometry ) {
-                if ( geometry->getLayer() == Node::Layer::DEFAULT ) {
-                    renderables.addGeometry( geometry );
-                }
-            } ) );
-
-    FetchLights fetch;
-    scene->perform( fetch );
-    Light *light = nullptr;
-    fetch.forEachLight(
-        [ & ]( auto l ) {
-            if ( light == nullptr && l->getType() == Light::Type::DIRECTIONAL && l->castShadows() ) {
-                light = l;
-            }
-        } );
 
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
@@ -158,6 +135,27 @@ void ShadowPass::render( void ) noexcept
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         m_pipeline->getHandle() );
+
+    RenderableSet renderables;
+    Light *light = nullptr;
+    if ( scene != nullptr && camera != nullptr ) {
+        scene->perform(
+            ApplyToGeometries(
+                [ & ]( Geometry *geometry ) {
+                    if ( geometry->getLayer() == Node::Layer::DEFAULT ) {
+                        renderables.addGeometry( geometry );
+                    }
+                } ) );
+
+        FetchLights fetch;
+        scene->perform( fetch );
+        fetch.forEachLight(
+            [ & ]( auto l ) {
+                if ( light == nullptr && l->getType() == Light::Type::DIRECTIONAL && l->castShadows() ) {
+                    light = l;
+                }
+            } );
+    }
 
     if ( light != nullptr ) {
         light->getShadowMap()->setLightProjectionMatrix( 0, perspective( 45.0f, 1.0f, 1.0f, 100.0f ) * light->getWorld().invMat );

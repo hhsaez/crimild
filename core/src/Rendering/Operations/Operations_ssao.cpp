@@ -197,11 +197,11 @@ vec3 color = vec3( occlusion );
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
         descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                // TODO: get camera that was used for rendering
-                .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
-            },
+            // Descriptor {
+            //     .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            //     // TODO: get camera that was used for rendering
+            //     .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
+            // },
             Descriptor {
                 .descriptorType = DescriptorType::TEXTURE,
                 .obj = withResource( crimild::alloc< Texture >(), positions ),

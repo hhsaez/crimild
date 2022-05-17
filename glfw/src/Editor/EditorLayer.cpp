@@ -51,9 +51,6 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     attach< SceneHierarchyPanel >( Point2 { 1280, 50 }, Extent2D { .width = 320, .height = 1030 } );
     attach< NodeInspectorPanel >( Point2 { 1600, 50 }, Extent2D { .width = 320, .height = 1030 } );
 
-    // Reset main camera before creating new scene
-    Camera::setMainCamera( nullptr );
-
     if ( auto sim = Simulation::getInstance() ) {
         if ( sim->getScene() == nullptr ) {
             if ( auto settings = Settings::getInstance() ) {

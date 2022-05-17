@@ -35,11 +35,10 @@ namespace crimild {
     /**
 	   \brief Makes sure the target node always faces the camera
 	 */
-    class BillboardComponent : public NodeComponent {
+    class [[deprecated]] BillboardComponent : public NodeComponent
+    {
+        CRIMILD_IMPLEMENT_RTTI( crimild::BillboardComponent )
     public:
-        BillboardComponent( void );
-        virtual ~BillboardComponent( void );
-
         virtual void update( const Clock &c ) override;
     };
 

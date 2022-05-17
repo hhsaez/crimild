@@ -42,30 +42,21 @@ namespace crimild {
         CRIMILD_IMPLEMENT_RTTI( crimild::Camera )
 
     public:
-        static Camera *getMainCamera( void ) { return _mainCamera; }
-
-        /**
-		   \remarks Internal use only
-		 */
-        static void setMainCamera( Camera *camera ) { _mainCamera = camera; }
-
-        /**
-		   remarks Internal use only
-		 */
-        static void setMainCamera( SharedPointer< Camera > const &camera ) { _mainCamera = crimild::get_ptr( camera ); }
-
-    private:
-        static Camera *_mainCamera;
-
-    public:
-        explicit Camera( void );
+        Camera( void );
         Camera( float fov, float aspect, float near, float far );
-        virtual ~Camera( void );
+        virtual ~Camera( void ) = default;
 
         bool isMainCamera( void ) const { return _isMainCamera; }
         void setIsMainCamera( bool value ) { _isMainCamera = value; }
 
     private:
+        /**
+         * \brief Indicates if a camera is the main camera for a given scene
+         *
+         * By default, a scene will be rendered with the first camera found when traversing the scene.
+         * If more than once camera is found, you can use this flag to tell which one is the main
+         * camera.
+         */
         bool _isMainCamera = false;
 
     public:

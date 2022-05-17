@@ -232,10 +232,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debugLightCascades(
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
         descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
-            },
+            // Descriptor {
+            //     .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            //     .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
+            // },
             Descriptor {
                 .descriptorType = DescriptorType::TEXTURE,
                 .obj = withResource( crimild::alloc< Texture >(), albedo ),

@@ -40,6 +40,8 @@ namespace crimild {
     class Material;
     class Geometry;
     class Primitive;
+    class Node;
+    class Camera;
 
     namespace vulkan {
 
@@ -52,7 +54,7 @@ namespace crimild {
             virtual ~ScenePass( void ) noexcept = default;
 
             Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            void render( Node *scene, Camera *camera ) noexcept;
 
             inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 

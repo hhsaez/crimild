@@ -129,9 +129,6 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
 
 bool crimild::editor::loadNewScene( void )
 {
-    // Reset main camera before creating new scene
-    Camera::setMainCamera( nullptr );
-
     auto scene = createDefaultScene();
     Simulation::getInstance()->setScene( scene );
 }
@@ -163,9 +160,6 @@ bool crimild::editor::saveSceneAs( std::string fileName )
 
 bool crimild::editor::loadScene( std::string fileName )
 {
-    // Reset main camera before creating new scene
-    Camera::setMainCamera( nullptr );
-
     coding::JSONDecoder decoder;
     CRIMILD_LOG_DEBUG( "Before decode" );
     if ( !decoder.fromFile( fileName ) ) {

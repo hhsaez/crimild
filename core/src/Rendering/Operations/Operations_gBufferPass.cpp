@@ -56,12 +56,12 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
 
     auto descriptors = [ & ] {
         auto descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
-            },
-        };
+        // descriptorSet->descriptors = {
+        //     Descriptor {
+        //         .descriptorType = DescriptorType::UNIFORM_BUFFER,
+        //         .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
+        //     },
+        // };
         return descriptorSet;
     }();
 

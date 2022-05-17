@@ -93,30 +93,8 @@ Event SkyboxPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void SkyboxPass::render( void ) noexcept
+void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
 {
-    auto scene = Simulation::getInstance()->getScene();
-    if ( scene == nullptr ) {
-        return;
-    }
-
-    RenderableSet renderables;
-    scene->perform(
-        ApplyToGeometries(
-            [ & ]( Geometry *geometry ) {
-                if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-                    renderables.addGeometry( geometry );
-                }
-            } ) );
-
-    auto camera = Camera::getMainCamera();
-    if ( m_renderPassObjects.uniforms != nullptr ) {
-        m_renderPassObjects.uniforms->setValue(
-            RenderPassObjects::Uniforms {
-                .view = camera->getViewMatrix(),
-                .proj = camera->getProjectionMatrix() } );
-        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-    }
 
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
@@ -145,57 +123,79 @@ void SkyboxPass::render( void ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    renderables.eachGeometry(
-        [ & ]( Geometry *geometry ) {
-            if ( geometry == nullptr ) {
-                return;
-            }
-            bind( geometry );
+    if ( scene != nullptr && camera != nullptr ) {
+        RenderableSet renderables;
+        scene->perform(
+            ApplyToGeometries(
+                [ & ]( Geometry *geometry ) {
+                    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                        renderables.addGeometry( geometry );
+                    }
+                } ) );
 
-            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
-                if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
-                    bind( material );
+        // Set correct aspect ratio for camera before rendering
+        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
 
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getHandle() );
+        if ( m_renderPassObjects.uniforms != nullptr ) {
+            m_renderPassObjects.uniforms->setValue(
+                RenderPassObjects::Uniforms {
+                    .view = camera->getViewMatrix(),
+                    .proj = camera->getProjectionMatrix() } );
+            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+        }
 
-                    vkCmdBindDescriptorSets(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        0,
-                        1,
-                        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                        0,
-                        nullptr );
-
-                    vkCmdBindDescriptorSets(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        1,
-                        1,
-                        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
-                        0,
-                        nullptr );
-
-                    vkCmdBindDescriptorSets(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        2,
-                        1,
-                        &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
-                        0,
-                        nullptr );
-
-                    drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+        renderables.eachGeometry(
+            [ & ]( Geometry *geometry ) {
+                if ( geometry == nullptr ) {
+                    return;
                 }
-            }
-        } );
+                bind( geometry );
+
+                if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+                    // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
+                    if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
+                        bind( material );
+
+                        vkCmdBindPipeline(
+                            commandBuffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_materialObjects.pipelines[ material ]->getHandle() );
+
+                        vkCmdBindDescriptorSets(
+                            commandBuffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                            0,
+                            1,
+                            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                            0,
+                            nullptr );
+
+                        vkCmdBindDescriptorSets(
+                            commandBuffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                            1,
+                            1,
+                            &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+                            0,
+                            nullptr );
+
+                        vkCmdBindDescriptorSets(
+                            commandBuffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                            2,
+                            1,
+                            &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
+                            0,
+                            nullptr );
+
+                        drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+                    }
+                }
+            } );
+    }
 
     vkCmdEndRenderPass( commandBuffer );
 }

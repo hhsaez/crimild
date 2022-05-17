@@ -57,7 +57,8 @@ void DebugSystem::update( void ) noexcept
 {
     auto renderer = Simulation::getInstance()->getRenderer();
     auto scene = Simulation::getInstance()->getScene();
-    auto camera = Simulation::getInstance()->getMainCamera();
+    // auto camera = Simulation::getInstance()->getMainCamera();
+    Camera *camera = nullptr; // TODO
 
     if ( renderer == nullptr ) {
         return;

@@ -39,6 +39,8 @@ namespace crimild {
     class Light;
     class Primitive;
     class Geometry;
+    class Node;
+    class Camera;
 
     namespace vulkan {
 
@@ -51,7 +53,7 @@ namespace crimild {
             virtual ~ShadowPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            void render( Node *scene, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getShadowAttachment( void ) const noexcept { return &m_shadowAttachment; }
 

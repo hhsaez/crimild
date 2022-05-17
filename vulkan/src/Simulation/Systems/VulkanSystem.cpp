@@ -250,9 +250,9 @@ crimild::Bool VulkanSystem::createSwapchain( void ) noexcept
     settings->set( "video.width", m_swapchain->extent.width );
     settings->set( "video.height", m_swapchain->extent.height );
 
-    if ( auto mainCamera = Camera::getMainCamera() ) {
-        // mainCamera->setAspectRatio( ( crimild::Real32 ) m_swapchain->extent.width / ( crimild::Real32 ) m_swapchain->extent.height );
-    }
+    // if ( auto mainCamera = Camera::getMainCamera() ) {
+    //     mainCamera->setAspectRatio( ( crimild::Real32 ) m_swapchain->extent.width / ( crimild::Real32 ) m_swapchain->extent.height );
+    // }
 
     // Reset existing command buffers
     m_recordWithNonConditionalPasses = true;

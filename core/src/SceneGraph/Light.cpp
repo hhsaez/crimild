@@ -147,7 +147,8 @@ struct ShadowAtlasLightUniform {
 };
 
 auto updateCascade = []( auto cascadeId, auto light ) {
-    auto camera = Camera::getMainCamera();
+    // auto camera = Camera::getMainCamera();
+    Camera *camera = nullptr; // TODO
     if ( camera == nullptr ) {
         CRIMILD_LOG_ERROR( "Cannot fetch camera from scene" );
         return;

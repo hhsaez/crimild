@@ -159,7 +159,7 @@ Event SelectionOutlinePass::handle( const Event &e ) noexcept
     return e;
 }
 
-void SelectionOutlinePass::render( Node *selectedScene ) noexcept
+void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcept
 {
     if ( selectedScene == nullptr ) {
         return;
@@ -173,7 +173,9 @@ void SelectionOutlinePass::render( Node *selectedScene ) noexcept
                 renderables.addGeometry( geometry );
             } ) );
 
-    auto camera = Camera::getMainCamera();
+    // Set correct aspect ratio for camera before rendering
+    camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+
     if ( m_renderPassObjects.uniforms != nullptr ) {
         m_renderPassObjects.uniforms->setValue(
             RenderPassObjects::Uniforms {

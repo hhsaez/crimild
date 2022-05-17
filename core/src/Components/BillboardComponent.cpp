@@ -33,20 +33,12 @@
 
 using namespace crimild;
 
-BillboardComponent::BillboardComponent( void )
-{
-}
-
-BillboardComponent::~BillboardComponent( void )
-{
-}
-
 void BillboardComponent::update( const Clock &c )
 {
-    auto camera = Simulation::getInstance()->getMainCamera();
-    if ( camera == nullptr ) {
-        return;
-    }
+    // auto camera = Simulation::getInstance()->getMainCamera();
+    // if ( camera == nullptr ) {
+    //     return;
+    // }
 
     if ( getNode()->hasParent() ) {
         assert( false );

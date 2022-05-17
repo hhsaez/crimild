@@ -48,10 +48,10 @@ void CameraViewProjectionUniform::onPreRender( void ) noexcept
                     return m_camera->getViewMatrix();
                 }
 
-                if ( auto camera = Camera::getMainCamera() ) {
-                    // if no camera has been set, let's use whatever's the main one
-                    return camera->getViewMatrix();
-                }
+                // if ( auto camera = Camera::getMainCamera() ) {
+                //     // if no camera has been set, let's use whatever's the main one
+                //     return camera->getViewMatrix();
+                // }
 
                 // no camera
                 return Matrix4f::Constants::IDENTITY;
@@ -60,8 +60,8 @@ void CameraViewProjectionUniform::onPreRender( void ) noexcept
                 auto proj = Matrix4f::Constants::IDENTITY;
                 if ( m_camera != nullptr ) {
                     proj = m_camera->getProjectionMatrix();
-                } else if ( auto camera = Camera::getMainCamera() ) {
-                    proj = camera->getProjectionMatrix();
+                    // } else if ( auto camera = Camera::getMainCamera() ) {
+                    //     proj = camera->getProjectionMatrix();
                 }
                 return proj;
             }(),

@@ -61,15 +61,18 @@ Event ScenePass::handle( const Event &e ) noexcept
     return e;
 }
 
-void ScenePass::render( void ) noexcept
+void ScenePass::render( Node *scene, Camera *camera ) noexcept
 {
     // TODO: maybe we should use the ClearPass and have ScenePass create its own color/depth attachments
     // instead of relying on inner passes to do that.
 
+    // TODO: Fetch renderables here so the scene is traverse only once and not multiple times (one
+    // for each render pass below).
+
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    m_shadowPass.render();
-    m_gBufferPass.render();
+    m_shadowPass.render( scene, camera );
+    m_gBufferPass.render( scene, camera );
 
     auto transitionAttachment = [ & ]( const auto att ) {
         getRenderDevice()->transitionImageLayout(
@@ -97,8 +100,8 @@ void ScenePass::render( void ) noexcept
         transitionAttachment( att );
     }
 
-    m_localLightingPass.render();
-    m_skyboxPass.render();
+    m_localLightingPass.render( scene, camera );
+    m_skyboxPass.render( scene, camera );
 
     // Accumulated color buffer can be transitioned now
     transitionAttachment( m_localLightingPass.getColorAttachment() );

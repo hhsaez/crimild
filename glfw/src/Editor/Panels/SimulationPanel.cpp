@@ -28,6 +28,7 @@
 #include "Editor/Panels/SimulationPanel.hpp"
 
 #include "Foundation/ImGUIUtils.hpp"
+#include "Simulation/Simulation.hpp"
 
 #include <sstream>
 
@@ -106,5 +107,5 @@ void SimulationPanel::render( void ) noexcept
 
     Layer::render();
 
-    m_scenePass.render();
+    m_scenePass.render( Simulation::getInstance()->getScene(), Simulation::getInstance()->getMainCamera() );
 }

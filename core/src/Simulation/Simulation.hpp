@@ -180,14 +180,18 @@ namespace crimild {
         void setScene( SharedPointer< Node > const &scene );
         Node *getScene( void ) { return crimild::get_ptr( _scene ); }
 
-        void loadScene( std::string filename );
+        /**
+         * \brief Get the main camera for the current scene
+         */
+        inline const Camera *getMainCamera( void ) const noexcept { return m_mainCamera; }
+        inline Camera *getMainCamera( void ) noexcept { return m_mainCamera; }
 
-        Camera *getMainCamera( void ) { return Camera::getMainCamera(); }
         void forEachCamera( std::function< void( Camera * ) > callback );
 
     private:
         SharedPointer< Node > _scene;
-        std::list< Camera * > _cameras;
+        std::vector< Camera * > m_cameras;
+        Camera *m_mainCamera = nullptr;
     };
 
 }

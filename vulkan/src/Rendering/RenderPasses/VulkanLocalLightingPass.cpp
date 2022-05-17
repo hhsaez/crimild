@@ -111,29 +111,8 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void LocalLightingPass::render( void ) noexcept
+void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
 {
-    auto scene = Simulation::getInstance()->getScene();
-    if ( scene == nullptr ) {
-        return;
-    }
-
-    FetchLights fetchLights;
-    scene->perform( fetchLights );
-
-    auto camera = Camera::getMainCamera();
-    if ( m_renderPassObjects.uniforms != nullptr ) {
-        m_renderPassObjects.uniforms->setValue(
-            RenderPassObjects::Uniforms {
-                .view = camera->getViewMatrix(),
-                .proj = camera->getProjectionMatrix(),
-                .viewport = Vector2 {
-                    Real( m_renderArea.extent.width ),
-                    Real( m_renderArea.extent.height ),
-                } } );
-        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-    }
-
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
@@ -162,27 +141,47 @@ void LocalLightingPass::render( void ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    fetchLights.forEachLight(
-        [ & ]( auto light ) {
-            if ( light->getType() == Light::Type::DIRECTIONAL ) {
-                vkCmdBindPipeline(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_directionalLightPipeline->getHandle() );
-                vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_directionalLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
-                bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
-                vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
-            } else {
-                // TODO: Use instancing to render all lights in one call
-                vkCmdBindPipeline(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_pointLightPipeline->getHandle() );
-                vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pointLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
-                bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
-                drawPrimitive( commandBuffer, currentFrameIndex, m_lightVolume.get() );
-            }
-        } );
+    if ( scene != nullptr && camera != nullptr ) {
+        FetchLights fetchLights;
+        scene->perform( fetchLights );
+
+        // Set correct aspect ratio for camera before rendering
+        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+
+        if ( m_renderPassObjects.uniforms != nullptr ) {
+            m_renderPassObjects.uniforms->setValue(
+                RenderPassObjects::Uniforms {
+                    .view = camera->getViewMatrix(),
+                    .proj = camera->getProjectionMatrix(),
+                    .viewport = Vector2 {
+                        Real( m_renderArea.extent.width ),
+                        Real( m_renderArea.extent.height ),
+                    } } );
+            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+        }
+
+        fetchLights.forEachLight(
+            [ & ]( auto light ) {
+                if ( light->getType() == Light::Type::DIRECTIONAL ) {
+                    vkCmdBindPipeline(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_directionalLightPipeline->getHandle() );
+                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_directionalLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
+                    bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
+                    vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
+                } else {
+                    // TODO: Use instancing to render all lights in one call
+                    vkCmdBindPipeline(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_pointLightPipeline->getHandle() );
+                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pointLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
+                    bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
+                    drawPrimitive( commandBuffer, currentFrameIndex, m_lightVolume.get() );
+                }
+            } );
+    }
 
     vkCmdEndRenderPass( commandBuffer );
 }

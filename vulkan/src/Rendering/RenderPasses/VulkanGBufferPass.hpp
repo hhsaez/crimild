@@ -37,6 +37,8 @@ namespace crimild {
     class Simulation;
     class Geometry;
     class Primitive;
+    class Camera;
+    class Node;
 
     namespace materials {
 
@@ -55,7 +57,7 @@ namespace crimild {
             virtual ~GBufferPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( void ) noexcept;
+            void render( Node *scene, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getAlbedoAttachment( void ) const noexcept { return &m_albedoAttachment; }
             [[nodiscard]] inline const FramebufferAttachment *getPositionAttachment( void ) const noexcept { return &m_positionAttachment; }
