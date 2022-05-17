@@ -151,6 +151,7 @@ Event ScenePanel::handle( const Event &e ) noexcept
                 m_editorCameraEnabled = false;
                 return Event {};
             }
+            break;
 
         case Event::Type::KEY_DOWN:
         case Event::Type::KEY_REPEAT: {

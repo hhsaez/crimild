@@ -42,7 +42,7 @@ void crimild::editor::fileMenu( void ) noexcept
         }
 
         if ( ImGui::MenuItem( "Open Scene..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "LoadSceneDlgKey", "Open Scene...", ".json", "." );
+            ImGuiFileDialog::Instance()->OpenDialog( "LoadSceneDlgKey", "Open Scene...", ".crimild,.json", "." );
         }
 
         if ( ImGui::BeginMenu( "Open Recent" ) ) {
@@ -58,7 +58,7 @@ void crimild::editor::fileMenu( void ) noexcept
             // TODO
         }
         if ( ImGui::MenuItem( "Save Scene As..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "SaveSceneDlgKey", "Save Scene As...", ".json", "." );
+            ImGuiFileDialog::Instance()->OpenDialog( "SaveSceneDlgKey", "Save Scene As...", ".crimild,.json", "." );
         }
 
         ImGui::Separator();

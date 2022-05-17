@@ -55,6 +55,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Material );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::UnlitMaterial );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::materials::PrincipledBSDF );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::materials::WorldGrid );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::FreeLookCameraComponent );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::MaterialComponent );

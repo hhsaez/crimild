@@ -150,34 +150,57 @@ bool crimild::editor::addToScene( SharedPointer< Node > const &node ) noexcept
 
 bool crimild::editor::saveSceneAs( std::string fileName )
 {
+    auto path = FilePath {
+        .path = fileName,
+        .pathType = FilePath::PathType::ABSOLUTE,
+        .fileType = FilePath::FileType::DOCUMENT,
+    };
+
     auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
-    coding::JSONEncoder encoder;
-    encoder.encode( crimild::retain( scene ) );
-    encoder.write( fileName );
+    if ( path.getExtension() == "crimild" ) {
+        coding::FileEncoder encoder;
+        encoder.encode( crimild::retain( scene ) );
+        encoder.write( fileName );
+    } else {
+        coding::JSONEncoder encoder;
+        encoder.encode( crimild::retain( scene ) );
+        encoder.write( fileName );
+    }
 
     return true;
 }
 
 bool crimild::editor::loadScene( std::string fileName )
 {
-    coding::JSONDecoder decoder;
-    CRIMILD_LOG_DEBUG( "Before decode" );
-    if ( !decoder.fromFile( fileName ) ) {
-        return false;
+    auto path = FilePath {
+        .path = fileName,
+        .pathType = FilePath::PathType::ABSOLUTE,
+        .fileType = FilePath::FileType::DOCUMENT,
+    };
+
+    if ( path.getExtension() == "crimild" ) {
+        coding::FileDecoder decoder;
+        decoder.read( fileName );
+        if ( decoder.getObjectCount() == 0 ) {
+            CRIMILD_LOG_ERROR( "Cannot read file ", fileName );
+            return false;
+        }
+        auto scene = decoder.getObjectAt< Node >( 0 );
+        Simulation::getInstance()->setScene( scene );
+    } else {
+        coding::JSONDecoder decoder;
+        if ( !decoder.fromFile( fileName ) ) {
+            return false;
+        }
+
+        if ( decoder.getObjectCount() == 0 ) {
+            return false;
+        }
+
+        auto scene = decoder.getObjectAt< Group >( 0 );
+        Simulation::getInstance()->setScene( scene );
     }
 
-    CRIMILD_LOG_DEBUG( "Adfter decode" );
-
-    if ( decoder.getObjectCount() == 0 ) {
-        return false;
-    }
-
-    CRIMILD_LOG_DEBUG( "Loaded" );
-
-    auto scene = decoder.getObjectAt< Group >( 0 );
-    Simulation::getInstance()->setScene( scene );
-
-    CRIMILD_LOG_DEBUG( "Added" );
     return true;
 }
 
