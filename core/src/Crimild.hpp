@@ -249,6 +249,7 @@
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "Rendering/Materials/SkyboxMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
+#include "Rendering/Materials/WorldGridMaterial.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Operations/Operations.hpp"
 #include "Rendering/Operations/Operations_computeImage.hpp"
