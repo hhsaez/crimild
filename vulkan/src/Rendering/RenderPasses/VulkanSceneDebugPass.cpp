@@ -107,6 +107,17 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
               return program;
           }() )
 {
+    m_renderArea = VkRect2D {
+        .offset = {
+            0,
+            0,
+        },
+        .extent = {
+            .width = 1024,
+            .height = 1024,
+        },
+    };
+
     m_material = [] {
         auto material = std::make_unique< UnlitMaterial >();
         material->setColor( ColorRGBA { 1, 0, 1, 1 } );
@@ -130,6 +141,10 @@ Event SceneDebugPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
+            m_renderArea.extent = {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
             clear();
             init();
             break;
@@ -160,12 +175,6 @@ void SceneDebugPass::render( void ) noexcept
                     lights.push_back( node );
                 }
             } ) );
-
-    // scene->perform(
-    //     ApplyToGeometries(
-    //         [ & ]( Geometry *geometry ) {
-    //             renderables.addGeometry( geometry );
-    //         } ) );
 
     auto camera = Camera::getMainCamera();
     if ( m_renderPassObjects.uniforms != nullptr ) {
@@ -239,15 +248,8 @@ void SceneDebugPass::init( void ) noexcept
 
     const auto colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
     const auto depthFormat = VK_FORMAT_D32_SFLOAT;
-    const auto extent = getRenderDevice()->getSwapchainExtent();
 
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = extent,
-    };
+    const auto extent = m_renderArea.extent;
 
     auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
@@ -371,6 +373,8 @@ void SceneDebugPass::init( void ) noexcept
     createMaterialObjects();
     createNodeObjects();
 
+    const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+
     m_pipeline = std::make_unique< GraphicsPipeline >(
         getRenderDevice(),
         m_renderPass,
@@ -383,6 +387,8 @@ void SceneDebugPass::init( void ) noexcept
             },
             .program = m_program.get(),
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .viewport = viewport,
+            .scissor = viewport,
         } );
 }
 

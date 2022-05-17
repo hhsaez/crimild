@@ -29,35 +29,34 @@
 #define CRIMILD_EDITOR_PANELS_SIMULATION_
 
 #include "Mathematics/Point2.hpp"
-#include "Rendering/Extent.hpp"
+#include "Rendering/Layer.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 namespace crimild {
 
-    class EditorLayer;
+    namespace vulkan {
+
+        class RenderDevice;
+
+    }
 
     namespace editor {
 
-        class SimulationPanel : public vulkan::RenderPass {
-        private:
-            static bool s_visible;
-
+        class SimulationPanel : public Layer {
         public:
-            inline static void setVisible( bool visible ) { s_visible = visible; }
-            inline static bool isVibisle( void ) { return s_visible; }
-
-        public:
-            explicit SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept;
+            SimulationPanel(
+                vulkan::RenderDevice *renderDevice,
+                const Point2 &position = { 310, 50 },
+                const Extent2D &extent = { .width = 1280.0, .height = 695.0 } ) noexcept;
             virtual ~SimulationPanel( void ) = default;
 
-            void updateUI( EditorLayer *editor, bool embedded ) noexcept;
-
-            Event handle( const Event &e ) noexcept override;
-            void render( void ) noexcept override;
+            virtual Event handle( const Event &e ) noexcept override;
+            virtual void render( void ) noexcept override;
 
         private:
-            Point2 m_pos = Point2 { 310, 25 };
-            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 720.0 };
+            Point2 m_pos = Point2 { 310, 50 };
+            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+            Event m_lastResizeEvent = Event {};
             vulkan::ScenePass m_scenePass;
         };
 

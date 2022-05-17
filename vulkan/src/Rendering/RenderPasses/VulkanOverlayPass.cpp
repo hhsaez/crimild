@@ -44,6 +44,17 @@ OverlayPass::OverlayPass( RenderDevice *renderDevice, std::string name, const st
       NamedObject( name ),
       m_inputs( inputs )
 {
+    m_renderArea = VkRect2D {
+        .offset = {
+            0,
+            0,
+        },
+        .extent = {
+            .width = 1024,
+            .height = 1024,
+        },
+    };
+
     init();
 }
 
@@ -56,6 +67,10 @@ Event OverlayPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
+            m_renderArea.extent = {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
             clear();
             init();
             break;
@@ -123,15 +138,7 @@ void OverlayPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto extent = m_inputs[ 0 ]->extent;
-
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = extent,
-    };
+    const auto extent = m_renderArea.extent;
 
     createFramebufferAttachment( "Overlay", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
 
@@ -268,18 +275,21 @@ void OverlayPass::init( void ) noexcept
                     )" ),
             } );
 
+        const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             m_renderPass,
-            std::vector< VkDescriptorSetLayout > {
-                m_inputs[ 0 ]->descriptorSetLayout,
-            },
-            program.get(),
-            std::vector< VertexLayout > {},
-            DepthStencilState {},
-            RasterizationState {},
-            ColorBlendState {},
-            colorReferences.size() );
+            GraphicsPipeline::Descriptor {
+                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
+                    m_inputs[ 0 ]->descriptorSetLayout,
+                },
+                .program = program.get(),
+                std::vector< VertexLayout > {},
+                .colorAttachmentCount = 1,
+                .viewport = viewport,
+                .scissor = viewport,
+            } );
     }();
 }
 

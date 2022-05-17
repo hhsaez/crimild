@@ -28,91 +28,35 @@
 #ifndef CRIMILD_GLFW_EDITOR_LAYER_
 #define CRIMILD_GLFW_EDITOR_LAYER_
 
-#include "Editor/Panels/ScenePanel.hpp"
-#include "Editor/Panels/SimulationPanel.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Mathematics/Vector4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Foundation/Singleton.hpp"
+#include "Rendering/Layer.hpp"
 
 namespace crimild {
 
     class Node;
-    class UniformBuffer;
-    class Texture;
-    class VertexBuffer;
-    class IndexBuffer;
 
     namespace vulkan {
 
-        class GraphicsPipeline;
+        class RenderDevice;
 
     }
 
-    class EditorLayer {
+    class EditorLayer : public Layer, public DynamicSingleton< EditorLayer > {
     public:
         EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept;
         ~EditorLayer( void ) noexcept;
 
-        Event handle( const Event &e ) noexcept;
-        void render( void ) noexcept;
+        virtual Event handle( const Event &e ) noexcept override;
+        virtual void render( void ) noexcept override;
+
+        inline vulkan::RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
 
         inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
         inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
 
     private:
-        void updateDisplaySize( void ) const noexcept;
-
-        void init( void ) noexcept;
-        void clean( void ) noexcept;
-
-        void updateUI( void ) noexcept;
-
-        void createRenderPassObjects( void ) noexcept;
-        void destroyRenderPassObjects( void ) noexcept;
-
-        void createFontAtlas( void ) noexcept;
-        void destroyFontAtlas( void ) noexcept;
-
-    private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
-        VkRenderPass m_renderPass = VK_NULL_HANDLE;
-        std::vector< VkFramebuffer > m_framebuffers;
-        VkRect2D m_renderArea;
-
-        std::unique_ptr< vulkan::GraphicsPipeline > m_pipeline;
-
-        std::unique_ptr< ShaderProgram > m_program;
-
-        struct RenderPassObjects {
-            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-            std::vector< VkDescriptorSet > descriptorSets;
-
-            struct Uniforms {
-                Vector4 scale = Vector4::Constants::ONE;
-                Vector4 translate = Vector4::Constants::ZERO;
-            };
-
-            std::unique_ptr< UniformBuffer > uniforms;
-        } m_renderPassObjects;
-
-        std::unique_ptr< VertexBuffer > m_vertices;
-        std::unique_ptr< IndexBuffer > m_indices;
-
-        struct FontAtlas {
-            VkImage image = VK_NULL_HANDLE;
-            VkDeviceMemory memory = VK_NULL_HANDLE;
-            VkImageView imageView = VK_NULL_HANDLE;
-            VkSampler sampler = VK_NULL_HANDLE;
-            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-            std::vector< VkDescriptorSet > descriptorSets;
-        } m_fontAtlas;
-
         Node *m_selectedNode = nullptr;
-
-        editor::ScenePanel m_scenePanel;
-        editor::SimulationPanel m_simulationPanel;
     };
 }
 

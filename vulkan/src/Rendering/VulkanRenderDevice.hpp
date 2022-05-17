@@ -131,6 +131,9 @@ namespace crimild {
                 crimild::UInt32 mipLevels,
                 crimild::UInt32 layerCount ) const noexcept;
 
+            VkViewport getViewport( const ViewportDimensions &viewport ) const noexcept;
+            VkRect2D getScissor( const ViewportDimensions &scissor ) const noexcept;
+
         private:
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;

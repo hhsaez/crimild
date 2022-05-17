@@ -242,78 +242,6 @@ namespace crimild {
             };
         }
 
-        VkViewport createViewport( RenderDevice *renderDevice, const ViewportDimensions &viewport ) noexcept
-        {
-            CRIMILD_LOG_TRACE();
-
-            auto x = viewport.dimensions.origin.x;
-            auto y = viewport.dimensions.origin.y;
-            auto w = viewport.dimensions.size.width;
-            auto h = viewport.dimensions.size.height;
-            auto minD = viewport.depthRange.x;
-            auto maxD = viewport.depthRange.y;
-
-            if ( viewport.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-                const auto extent = renderDevice->getSwapchainExtent();
-                x *= extent.width;
-                y *= extent.height;
-                w *= extent.width;
-                h *= extent.height;
-            }
-
-            // Because Vulkan's coordinate system is different from Crimild's one,
-            // we need to specify the viewport in a different way than usual.
-            // WARNING: This trick requires VK_KHR_maintenance1 support (which should
-            // be part of the core spec at the time of this writing).
-            // See: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
-            //
-            // Hernan: I tried the trick specified here:
-            // https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
-            // but didn't really worked for me. On one hand, things like computing
-            // reflection or refraction required me to reverse the resulting vector
-            // which is very error prone. On the other, the view is zoomed with respect
-            // to other platforms like OpenGL (this might be a bug, though).
-            // Also, don't forget to reverse face culling (see createRasterizer below)
-
-            return VkViewport {
-                .x = x,
-                .y = h + y,
-                .width = w,
-                .height = -h,
-                .minDepth = minD,
-                .maxDepth = maxD,
-            };
-        }
-
-        VkRect2D createScissor( RenderDevice *renderDevice, const ViewportDimensions &scissor ) noexcept
-        {
-            CRIMILD_LOG_TRACE();
-
-            auto x = scissor.dimensions.origin.x;
-            auto y = scissor.dimensions.origin.y;
-            auto w = scissor.dimensions.size.width;
-            auto h = scissor.dimensions.size.height;
-
-            if ( scissor.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-                const auto extent = renderDevice->getSwapchainExtent();
-                x *= extent.width;
-                y *= extent.height;
-                w *= extent.width;
-                h *= extent.height;
-            }
-
-            return VkRect2D {
-                .offset = {
-                    static_cast< crimild::Int32 >( x ),
-                    static_cast< crimild::Int32 >( y ),
-                },
-                .extent = VkExtent2D {
-                    static_cast< crimild::UInt32 >( w ),
-                    static_cast< crimild::UInt32 >( h ),
-                },
-            };
-        }
-
         VkPipelineViewportStateCreateInfo createViewportState( const VkViewport &viewport, const VkRect2D &scissor ) noexcept
         {
             CRIMILD_LOG_TRACE();
@@ -610,9 +538,9 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts,
     const ShaderProgram *program,
     const std::vector< VertexLayout > &vertexLayouts,
-    const DepthStencilState &pipelineDepthStencilState,
-    const RasterizationState &pipelineRasterizationState,
-    const ColorBlendState &pipelineColorBlendState,
+    const DepthStencilState &depthStencilState,
+    const RasterizationState &rasterizationState,
+    const ColorBlendState &colorBlendState,
     size_t colorAttachmentCount,
     std::vector< VkDynamicState > dynamicStates ) noexcept
     : vulkan::GraphicsPipeline(
@@ -622,9 +550,9 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
             .descriptorSetLayouts = descriptorSetLayouts,
             .program = program,
             .vertexLayouts = vertexLayouts,
-            .pipelineDepthStencilState = pipelineDepthStencilState,
-            .pipelineRasterizationState = pipelineRasterizationState,
-            .pipelineColorBlendState = pipelineColorBlendState,
+            .depthStencilState = depthStencilState,
+            .rasterizationState = rasterizationState,
+            .colorBlendState = colorBlendState,
             .colorAttachmentCount = colorAttachmentCount,
             .dynamicStates = dynamicStates,
         } )
@@ -640,9 +568,6 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
 {
     CRIMILD_LOG_TRACE();
 
-    const auto pipelineViewport = ViewportDimensions {};
-    const auto pipelineScissor = ViewportDimensions {};
-
     // WARNING: all of these config params are used when creating the graphicsPipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
     auto shaderModules = createShaderModules( renderDevice, descriptor.program );
@@ -651,18 +576,18 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, descriptor.vertexLayouts );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
     auto inputAssembly = createInputAssemby( descriptor.primitiveType );
-    auto viewport = createViewport( renderDevice, pipelineViewport );
-    auto scissor = createScissor( renderDevice, pipelineScissor );
-    auto viewportState = pipelineViewport.scalingMode != ScalingMode::DYNAMIC
+    auto viewport = renderDevice->getViewport( descriptor.viewport );
+    auto scissor = renderDevice->getScissor( descriptor.scissor );
+    auto viewportState = descriptor.viewport.scalingMode != ScalingMode::DYNAMIC
                              ? createViewportState( viewport, scissor )
                              : createDynamicViewportState( true, true );
-    auto rasterizer = createRasterizer( descriptor.pipelineRasterizationState );
+    auto rasterizer = createRasterizer( descriptor.rasterizationState );
     auto multisampleState = createMultiplesampleState();
-    auto depthStencilState = createDepthStencilState( descriptor.pipelineDepthStencilState );
+    auto depthStencilState = createDepthStencilState( descriptor.depthStencilState );
 
     std::vector< VkPipelineColorBlendAttachmentState > colorBlendAttachments( descriptor.colorAttachmentCount );
     for ( size_t i = 0; i < descriptor.colorAttachmentCount; ++i ) {
-        colorBlendAttachments[ i ] = createColorBlendAttachment( descriptor.pipelineColorBlendState );
+        colorBlendAttachments[ i ] = createColorBlendAttachment( descriptor.colorBlendState );
     };
     auto colorBlending = createColorBlending( colorBlendAttachments );
 

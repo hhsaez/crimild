@@ -41,6 +41,14 @@ namespace crimild {
         Rectf dimensions = Rectf { { 0, 0 }, { 1, 1 } };
         Vector2f depthRange = Vector2f { 0.0f, 1.0f };
 
+        static ViewportDimensions fromExtent( Real width, Real height ) noexcept
+        {
+            return ViewportDimensions {
+                .scalingMode = ScalingMode::FIXED,
+                .dimensions = Rectf { { 0, 0 }, { width, height } },
+            };
+        }
+
         static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
         {
             const auto &pd = parent.dimensions;

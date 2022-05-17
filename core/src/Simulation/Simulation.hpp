@@ -126,7 +126,7 @@ namespace crimild {
         // int run( void ) noexcept;
 
     private:
-        concurrency::JobScheduler _jobScheduler;
+        // concurrency::JobScheduler _jobScheduler;
 
     public:
         inline void setSettings( SettingsPtr const &settings ) noexcept { _settings = settings; }

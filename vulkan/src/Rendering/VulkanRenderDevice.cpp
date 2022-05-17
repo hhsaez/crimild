@@ -1750,3 +1750,75 @@ bool RenderDevice::formatIsDepthStencil( VkFormat format ) const
             return false;
     }
 }
+
+VkViewport RenderDevice::getViewport( const ViewportDimensions &viewport ) const noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    auto x = viewport.dimensions.origin.x;
+    auto y = viewport.dimensions.origin.y;
+    auto w = viewport.dimensions.size.width;
+    auto h = viewport.dimensions.size.height;
+    auto minD = viewport.depthRange.x;
+    auto maxD = viewport.depthRange.y;
+
+    if ( viewport.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+        const auto extent = getSwapchainExtent();
+        x *= extent.width;
+        y *= extent.height;
+        w *= extent.width;
+        h *= extent.height;
+    }
+
+    // Because Vulkan's coordinate system is different from Crimild's one,
+    // we need to specify the viewport in a different way than usual.
+    // WARNING: This trick requires VK_KHR_maintenance1 support (which should
+    // be part of the core spec at the time of this writing).
+    // See: https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
+    //
+    // Hernan: I tried the trick specified here:
+    // https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+    // but didn't really worked for me. On one hand, things like computing
+    // reflection or refraction required me to reverse the resulting vector
+    // which is very error prone. On the other, the view is zoomed with respect
+    // to other platforms like OpenGL (this might be a bug, though).
+    // Also, don't forget to reverse face culling (see createRasterizer below)
+
+    return VkViewport {
+        .x = x,
+        .y = h + y,
+        .width = w,
+        .height = -h,
+        .minDepth = minD,
+        .maxDepth = maxD,
+    };
+}
+
+VkRect2D RenderDevice::getScissor( const ViewportDimensions &scissor ) const noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    auto x = scissor.dimensions.origin.x;
+    auto y = scissor.dimensions.origin.y;
+    auto w = scissor.dimensions.size.width;
+    auto h = scissor.dimensions.size.height;
+
+    if ( scissor.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+        const auto extent = getSwapchainExtent();
+        x *= extent.width;
+        y *= extent.height;
+        w *= extent.width;
+        h *= extent.height;
+    }
+
+    return VkRect2D {
+        .offset = {
+            static_cast< crimild::Int32 >( x ),
+            static_cast< crimild::Int32 >( y ),
+        },
+        .extent = VkExtent2D {
+            static_cast< crimild::UInt32 >( w ),
+            static_cast< crimild::UInt32 >( h ),
+        },
+    };
+}

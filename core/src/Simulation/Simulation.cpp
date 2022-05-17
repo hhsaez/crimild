@@ -73,14 +73,14 @@ void Simulation::start( void ) noexcept
     Version version;
     Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
-    // enable some threads if not already specified
-    if ( getSettings() != nullptr ) {
-        auto workerCount = getSettings()->get< crimild::Int32 >( "simulation.threading.workers", 0 );
-        _jobScheduler.configure( workerCount );
-    } else {
-        // Disable worker threads
-        _jobScheduler.configure( 0 );
-    }
+    // // enable some threads if not already specified
+    // if ( getSettings() != nullptr ) {
+    //     auto workerCount = getSettings()->get< crimild::Int32 >( "simulation.threading.workers", 0 );
+    //     _jobScheduler.configure( workerCount );
+    // } else {
+    //     // Disable worker threads
+    //     _jobScheduler.configure( 0 );
+    // }
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
     if ( getSettings() == nullptr ) {
@@ -145,7 +145,7 @@ void Simulation::start( void ) noexcept
     // Finalize startup
     // m_systems.each( []( auto system ) { system->lateStart(); } );
 
-    _jobScheduler.start();
+    // _jobScheduler.start();
 }
 
 bool Simulation::step( void ) noexcept
@@ -173,9 +173,9 @@ bool Simulation::step( void ) noexcept
 
     _simulationClock.tick();
 
-    _jobScheduler.executeDelayedJobs();
+    // _jobScheduler.executeDelayedJobs();
 
-    MessageQueue::getInstance()->dispatchDeferredMessages();
+    // MessageQueue::getInstance()->dispatchDeferredMessages();
 
     if ( handle( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
         return false;
@@ -203,9 +203,9 @@ bool Simulation::step( void ) noexcept
         scene->perform( UpdateWorldState() );
     }
 
-    if ( !_jobScheduler.isRunning() ) {
-        return false;
-    }
+    // if ( !_jobScheduler.isRunning() ) {
+    //     return false;
+    // }
 
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
     auto frameEndTime = clock::now();
@@ -222,10 +222,10 @@ bool Simulation::step( void ) noexcept
 void Simulation::stop( void ) noexcept
 {
     // stop all unfinished tasks first
-    _jobScheduler.stop();
+    // _jobScheduler.stop();
 
     // clear all messages
-    MessageQueue::getInstance()->clear();
+    // MessageQueue::getInstance()->clear();
 
     setScene( nullptr );
 
@@ -247,10 +247,10 @@ Event Simulation::handle( const Event &e ) noexcept
 
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
-            Real aspect = e.extent.width / e.extent.height;
-            if ( getMainCamera() != nullptr ) {
-                getMainCamera()->setAspectRatio( aspect );
-            }
+            // Real aspect = e.extent.width / e.extent.height;
+            // if ( getMainCamera() != nullptr ) {
+            //     getMainCamera()->setAspectRatio( aspect );
+            // }
             break;
         }
 

@@ -43,9 +43,11 @@ namespace crimild {
     namespace vulkan {
 
         class RenderDevice;
-        class RenderPass;
+        // class RenderPass;
 
     }
+
+    class Layer;
 
     namespace glfw {
 
@@ -85,7 +87,7 @@ namespace crimild {
 
             std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
 
-            std::unique_ptr< vulkan::RenderPass > m_renderPass;
+            // std::unique_ptr< vulkan::RenderPass > m_renderPass;
 
             Event m_lastResizeEvent = Event {};
             Event m_lastMouseButtonDownEvent = Event {};
@@ -93,6 +95,8 @@ namespace crimild {
             Clock m_clock;
 
             Extent2D m_extent;
+
+            std::unique_ptr< Layer > m_mainLayer;
         };
 
     }

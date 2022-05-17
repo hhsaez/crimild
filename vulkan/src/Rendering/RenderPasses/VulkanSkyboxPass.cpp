@@ -54,6 +54,17 @@ SkyboxPass::SkyboxPass( RenderDevice *renderDevice, const FramebufferAttachment 
       m_colorAttachment( colorAttachment ),
       m_depthAttachment( depthAttachment )
 {
+    m_renderArea = VkRect2D {
+        .offset = {
+            0,
+            0,
+        },
+        .extent = {
+            .width = 1024,
+            .height = 1024,
+        },
+    };
+
     init();
 }
 
@@ -66,6 +77,10 @@ Event SkyboxPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
+            m_renderArea.extent = {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
             clear();
             init();
             break;
@@ -189,18 +204,7 @@ void SkyboxPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto extent = getRenderDevice()->getSwapchainExtent();
-
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = extent,
-    };
-
-    // createFramebufferAttachment( "Scene/Skybox/Color", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
-    // createFramebufferAttachment( "Scene/Skybox/Depth", extent, VK_FORMAT_D32_SFLOAT, m_depthAttachment );
+    const auto extent = m_renderArea.extent;
 
     auto attachments = std::array< VkAttachmentDescription, 2 > {
         VkAttachmentDescription {
@@ -338,12 +342,6 @@ void SkyboxPass::clear( void ) noexcept
         vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
-
-    // destroyFramebufferAttachment( m_colorAttachment );
-    // destroyFramebufferAttachment( m_depthAttachment );
-
-    m_colorAttachment = nullptr;
-    m_depthAttachment = nullptr;
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -560,6 +558,8 @@ void SkyboxPass::bind( Material *aMaterial ) noexcept
         getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
     }
 
+    const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+
     auto pipeline = std::make_unique< GraphicsPipeline >(
         getRenderDevice(),
         m_renderPass,
@@ -571,6 +571,8 @@ void SkyboxPass::bind( Material *aMaterial ) noexcept
             },
             .program = program.get(),
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .viewport = viewport,
+            .scissor = viewport,
         } );
 
     m_materialObjects.pipelines[ material ] = std::move( pipeline );

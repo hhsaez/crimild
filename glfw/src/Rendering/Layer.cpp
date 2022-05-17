@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,45 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/viewMenu.hpp"
+#include "Rendering/Layer.hpp"
 
-#include "Editor/EditorLayer.hpp"
-#include "Editor/Panels/BehaviorEditorPanel.hpp"
-#include "Editor/Panels/NodeInspectorPanel.hpp"
-#include "Editor/Panels/SceneHierarchyPanel.hpp"
-#include "Editor/Panels/ScenePanel.hpp"
-#include "Editor/Panels/SimulationPanel.hpp"
-#include "Foundation/ImGUIUtils.hpp"
+#include "Concurrency/Async.hpp"
 
 using namespace crimild;
 
-void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
+Event Layer::handle( const Event &e ) noexcept
 {
-    if ( ImGui::BeginMenu( "View" ) ) {
-        if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
-            editor->attach< SceneHierarchyPanel >();
-        }
-
-        if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            editor->attach< NodeInspectorPanel >();
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Scene..." ) ) {
-            editor->attach< ScenePanel >( editor->getRenderDevice() );
-        }
-
-        if ( ImGui::MenuItem( "Simulation..." ) ) {
-            editor->attach< SimulationPanel >( editor->getRenderDevice() );
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
-            editor->attach< BehaviorEditorPanel >();
-        }
-
-        ImGui::EndMenu();
+    Event ret = e;
+    for ( auto &sublayer : m_sublayers ) {
+        ret = sublayer->handle( ret );
     }
+    return ret;
+}
+
+void Layer::render( void ) noexcept
+{
+    for ( auto &sublayer : m_sublayers ) {
+        if ( sublayer != nullptr ) {
+            sublayer->render();
+        }
+    }
+}
+
+void Layer::detach( Layer *layer ) noexcept
+{
+    auto it = std::find_if(
+        m_sublayers.begin(),
+        m_sublayers.end(),
+        [ & ]( auto &l ) {
+            return l.get() == layer;
+        } );
+    if ( it != m_sublayers.end() ) {
+        m_sublayers.erase( it );
+    }
+}
+
+void Layer::detachFromParent( void ) noexcept
+{
+    crimild::concurrency::sync_frame(
+        [ this ] {
+            if ( m_parent != nullptr ) {
+                m_parent->detach( this );
+            }
+        } );
 }

@@ -36,15 +36,12 @@
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
-#include "Mathematics/swizzle.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
-
-bool ScenePanel::s_visible = true;
 
 void drawGizmo( Node *selectedNode, float x, float y, float width, float height )
 {
@@ -95,43 +92,37 @@ void drawGizmo( Node *selectedNode, float x, float y, float width, float height 
     selectedNode->perform( UpdateWorldState() );
 }
 
-ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice ),
-      m_shadowPass( renderDevice ),
-      m_shadowDebugPass( renderDevice, "Scene/Shadow (Debug)", m_shadowPass.getShadowAttachment() ),
-      m_gBufferPass( renderDevice ),
-      m_depthDebugPass( renderDevice, "Scene/Depth (Debug)", m_gBufferPass.getDepthStencilAttachment() ),
-      m_localLightingPass(
-          renderDevice,
-          m_gBufferPass.getAlbedoAttachment(),
-          m_gBufferPass.getPositionAttachment(),
-          m_gBufferPass.getNormalAttachment(),
-          m_gBufferPass.getMaterialAttachment(),
-          m_shadowPass.getShadowAttachment() ),
-      m_skyboxPass(
-          renderDevice,
-          m_localLightingPass.getColorAttachment(),
-          m_gBufferPass.getDepthStencilAttachment() ),
+ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
+    : m_renderDevice( renderDevice ),
+      m_pos( position ),
+      m_extent( extent ),
+      m_scenePass( renderDevice ),
       m_sceneDebugPass( renderDevice ),
       m_sceneDebugOverlayPass(
           renderDevice,
           "Scene/Debug/Overlay",
           {
-              m_localLightingPass.getColorAttachment(),
+              m_scenePass.getColorAttachment(),
               m_sceneDebugPass.getColorAttachment(),
           } )
 {
     m_editorCamera = std::make_unique< Camera >();
     m_cameraTranslation = translation( 10, 10, 10 );
-    m_cameraRotation = euler( radians( 45 ), radians( -30 ), 0 );
+    m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+
+    if ( Camera::getMainCamera() == m_editorCamera.get() ) {
+        // Make sure the main camera is NOT set to the editor camera.
+        Camera::setMainCamera( nullptr );
+    }
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE:
-            m_editorCamera->setAspectRatio( e.extent.width / e.extent.height );
+            // Don't forward resize to scene pass since it will be handled
+            // during update.
             break;
 
         case Event::Type::MOUSE_BUTTON_DOWN:
@@ -202,29 +193,81 @@ Event ScenePanel::handle( const Event &e ) noexcept
         }
 
         default:
+            m_scenePass.handle( e );
+            m_sceneDebugPass.handle( e );
+            m_sceneDebugOverlayPass.handle( e );
             break;
     }
 
-    m_shadowPass.handle( e );
-    m_shadowDebugPass.handle( e );
-    m_gBufferPass.handle( e );
-    m_depthDebugPass.handle( e );
-    m_localLightingPass.handle( e );
-    m_skyboxPass.handle( e );
-    m_sceneDebugPass.handle( e );
-    m_sceneDebugOverlayPass.handle( e );
-    return e;
+    return Layer::handle( e );
 }
 
 void ScenePanel::render( void ) noexcept
 {
+    ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_FirstUseEver );
+    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
+
+    // Allow opening multiple panels with the same name
+    std::stringstream ss;
+    ss << "Scene##" << ( size_t ) this;
+
+    bool open = true;
+    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
+        ImVec2 windowPos = ImGui::GetWindowPos();
+        m_pos = Point2 { windowPos.x, windowPos.y };
+
+        ImVec2 actualSize = ImGui::GetContentRegionAvail();
+        if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
+            m_extent.width = actualSize.x;
+            m_extent.height = actualSize.y;
+            m_lastResizeEvent = Event {
+                .type = Event::Type::WINDOW_RESIZE,
+                .extent = m_extent,
+            };
+        }
+
+        m_editorCamera->setAspectRatio( actualSize.x / actualSize.y );
+
+        if ( m_lastResizeEvent.type != Event::Type::NONE ) {
+            m_scenePass.handle( m_lastResizeEvent );
+            m_sceneDebugPass.handle( m_lastResizeEvent );
+            m_sceneDebugOverlayPass.handle( m_lastResizeEvent );
+            m_lastResizeEvent = Event {};
+        }
+
+        const auto att = m_sceneDebugOverlayPass.getColorAttachment();
+        // const auto att = m_sceneDebugPass.getColorAttachment();
+        if ( !att->descriptorSets.empty() ) {
+            ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
+            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+        } else {
+            ImGui::Text( "No scene attachments found" );
+        }
+
+        ImGui::End();
+    }
+
+    if ( !open ) {
+        detachFromParent();
+        return;
+    }
+
+    // TODO: Pass camera as argument instead of overriding the main camera
+    auto tempCamera = Camera::getMainCamera();
     Camera::setMainCamera( m_editorCamera.get() );
 
+    if ( auto editor = EditorLayer::getInstance() ) {
+        // TODO: Fix gizmo position
+        drawGizmo( editor->getSelectedNode(), m_pos.x, m_pos.y, m_extent.width, m_extent.height );
+    }
+
+    Layer::render();
+
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    m_shadowPass.render();
-
-    m_gBufferPass.render();
 
     auto transitionAttachment = [ & ]( const auto att ) {
         getRenderDevice()->transitionImageLayout(
@@ -241,85 +284,13 @@ void ScenePanel::render( void ) noexcept
             att->layerCount );
     };
 
-    const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
-        m_gBufferPass.getAlbedoAttachment(),
-        m_gBufferPass.getPositionAttachment(),
-        m_gBufferPass.getNormalAttachment(),
-        m_gBufferPass.getMaterialAttachment(),
-    };
-
-    for ( const auto att : attachments ) {
-        transitionAttachment( att );
-    }
-
-    m_localLightingPass.render();
-    m_skyboxPass.render();
-
-    // transitionAttachment( m_skyboxPass.getColorAttachment() );
-
-    // Accumulated color buffer can be transitioned now
-    transitionAttachment( m_localLightingPass.getColorAttachment() );
-
-    // Depth buffer can be transition now
-    transitionAttachment( m_gBufferPass.getDepthStencilAttachment() );
-
-    if ( auto camera = Camera::getMainCamera() ) {
-        m_depthDebugPass.setNear( camera->getNear() );
-        m_depthDebugPass.setFar( camera->getFar() );
-    }
-    m_depthDebugPass.render();
-    transitionAttachment( m_depthDebugPass.getColorAttachment() );
-
-    m_shadowDebugPass.render();
-    transitionAttachment( m_shadowDebugPass.getColorAttachment() );
+    m_scenePass.render();
 
     m_sceneDebugPass.render();
     transitionAttachment( m_sceneDebugPass.getColorAttachment() );
 
     m_sceneDebugOverlayPass.render();
     transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
-}
 
-void ScenePanel::updateUI( EditorLayer *editor, bool ) noexcept
-{
-    if ( !isVibisle() ) {
-        return;
-    }
-
-    const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
-        m_skyboxPass.getColorAttachment(),
-        m_localLightingPass.getColorAttachment(),
-        m_gBufferPass.getAlbedoAttachment(),
-        m_gBufferPass.getPositionAttachment(),
-        m_gBufferPass.getNormalAttachment(),
-        m_gBufferPass.getMaterialAttachment(),
-        m_depthDebugPass.getColorAttachment(),
-        m_shadowDebugPass.getColorAttachment(),
-        m_sceneDebugPass.getColorAttachment(),
-        m_sceneDebugOverlayPass.getColorAttachment(),
-    };
-
-    static size_t selectedRenderMode = 0;
-    if ( ImGui::BeginCombo( "Select render mode", attachments[ selectedRenderMode ]->name.c_str(), 0 ) ) {
-        for ( size_t i = 0; i < attachments.size(); ++i ) {
-            if ( ImGui::Selectable( attachments[ i ]->name.c_str(), selectedRenderMode == i ) ) {
-                selectedRenderMode = i;
-            }
-        }
-        ImGui::EndCombo();
-    }
-
-    const auto att = attachments[ selectedRenderMode ];
-    if ( !att->descriptorSets.empty() ) {
-        ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
-        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-    } else {
-        ImGui::Text( "No scene attachments found" );
-    }
-
-    drawGizmo( editor->getSelectedNode(), 310, 25, 1280, 720 );
+    Camera::setMainCamera( tempCamera );
 }
