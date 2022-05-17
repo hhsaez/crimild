@@ -48,7 +48,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 SelectionOutlinePass::SelectionOutlinePass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice )
+    : RenderPassBase( renderDevice )
 {
     m_stencilPipeline.program = [ & ] {
         auto program = std::make_unique< ShaderProgram >();
@@ -156,7 +156,7 @@ Event SelectionOutlinePass::handle( const Event &e ) noexcept
         }
     }
 
-    return RenderPass::handle( e );
+    return e;
 }
 
 void SelectionOutlinePass::render( Node *selectedScene ) noexcept

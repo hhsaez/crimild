@@ -36,7 +36,7 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 PresentPass::PresentPass( RenderDevice *renderDevice ) noexcept
-    : RenderPass( renderDevice )
+    : RenderPassBase( renderDevice )
 {
     init();
 }
@@ -59,7 +59,7 @@ Event PresentPass::handle( const Event &e ) noexcept
             break;
     }
 
-    return RenderPass::handle( e );
+    return e;
 }
 
 void PresentPass::render( void ) noexcept

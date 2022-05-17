@@ -30,7 +30,7 @@
 
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -42,14 +42,14 @@ namespace crimild {
         class RenderDevice;
 
         class OverlayPass
-            : public RenderPass,
+            : public RenderPassBase,
               public NamedObject {
         public:
             explicit OverlayPass( RenderDevice *renderDevice, std::string name, const std::vector< const FramebufferAttachment * > &inputs ) noexcept;
             virtual ~OverlayPass( void ) noexcept;
 
-            virtual Event handle( const Event & ) noexcept override;
-            virtual void render( void ) noexcept override;
+            virtual Event handle( const Event & ) noexcept;
+            virtual void render( void ) noexcept;
 
             const FramebufferAttachment *getColorAttachment( void ) const { return &m_colorAttachment; }
 

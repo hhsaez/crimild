@@ -30,7 +30,7 @@
 
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -41,7 +41,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class DepthDebugPass : public RenderPass {
+        class DepthDebugPass : public RenderPassBase {
         public:
             DepthDebugPass( RenderDevice *renderDevice, std::string name, const FramebufferAttachment *depthInput ) noexcept;
             virtual ~DepthDebugPass( void ) noexcept;

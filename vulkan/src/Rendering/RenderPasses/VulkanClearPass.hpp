@@ -28,7 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_CLEAR_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_CLEAR_
 
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -36,13 +36,13 @@ namespace crimild {
 
         class RenderDevice;
 
-        class ClearPass : public RenderPass {
+        class ClearPass : public RenderPassBase {
         public:
             explicit ClearPass( RenderDevice *renderDevice ) noexcept;
             virtual ~ClearPass( void ) noexcept;
 
-            virtual Event handle( const Event & ) noexcept override;
-            virtual void render( void ) noexcept override;
+            virtual Event handle( const Event & ) noexcept;
+            virtual void render( void ) noexcept;
 
         private:
             void init( void ) noexcept;

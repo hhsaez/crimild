@@ -30,7 +30,7 @@
 
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -46,12 +46,12 @@ namespace crimild {
         class GraphicsPipeline;
         class RenderDevice;
 
-        class SelectionOutlinePass : public RenderPass {
+        class SelectionOutlinePass : public RenderPassBase {
         public:
             explicit SelectionOutlinePass( RenderDevice *renderDevice ) noexcept;
             ~SelectionOutlinePass( void ) noexcept;
 
-            Event handle( const Event & ) noexcept override;
+            Event handle( const Event & ) noexcept;
             void render( Node *selectedScene ) noexcept;
 
         private:

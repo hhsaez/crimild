@@ -58,7 +58,7 @@ LocalLightingPass::LocalLightingPass(
     const FramebufferAttachment *normalInput,
     const FramebufferAttachment *materialInput,
     const FramebufferAttachment *shadowInput ) noexcept
-    : RenderPass( renderDevice ),
+    : RenderPassBase( renderDevice ),
       m_albedoInput( albedoInput ),
       m_positionInput( positionInput ),
       m_normalInput( normalInput ),

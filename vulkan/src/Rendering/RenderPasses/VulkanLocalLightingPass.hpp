@@ -30,7 +30,7 @@
 
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Rendering/RenderPasses/VulkanRenderPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 
 namespace crimild {
 
@@ -50,7 +50,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class LocalLightingPass : public RenderPass {
+        class LocalLightingPass : public RenderPassBase {
         public:
             LocalLightingPass(
                 RenderDevice *renderDevice,

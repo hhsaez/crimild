@@ -54,19 +54,15 @@ namespace crimild {
             std::vector< VkDescriptorSet > descriptorSets;
         };
 
-        class RenderPass {
+        class RenderPassBase {
         protected:
-            explicit RenderPass( RenderDevice *renderDevice ) noexcept;
+            explicit RenderPassBase( RenderDevice *renderDevice ) noexcept;
 
         public:
-            virtual ~RenderPass( void ) = default;
+            virtual ~RenderPassBase( void ) = default;
 
             inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
             inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-            virtual Event handle( const Event &e ) noexcept { return e; };
-
-            virtual void render( void ) noexcept = 0;
 
         protected:
             void createFramebufferAttachment(
