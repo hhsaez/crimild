@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_UNIFORM_BUFFER_
 #define CRIMILD_RENDERING_UNIFORM_BUFFER_
 
+#include "Foundation/Observable.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferView.hpp"
 
@@ -35,6 +36,7 @@ namespace crimild {
 
     class UniformBuffer
         : public coding::Codable,
+          public Observable< UniformBuffer >,
           public RenderResourceImpl< UniformBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer )
 

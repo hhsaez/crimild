@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_VERTEX_BUFFER_
 #define CRIMILD_RENDERING_VERTEX_BUFFER_
 
+#include "Foundation/Observable.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
@@ -38,6 +39,7 @@ namespace crimild {
 
     class VertexBuffer
         : public coding::Codable,
+          public Observable< VertexBuffer >,
           public RenderResourceImpl< VertexBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::VertexBuffer )
 

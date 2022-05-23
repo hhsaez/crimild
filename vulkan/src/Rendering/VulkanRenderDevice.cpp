@@ -712,7 +712,7 @@ void RenderDevice::copyToBuffer( VkDeviceMemory &memory, const void *data, VkDev
     vkUnmapMemory( m_handle, memory );
 }
 
-bool RenderDevice::bind( UniformBuffer *uniformBuffer ) noexcept
+bool RenderDevice::bind( const UniformBuffer *uniformBuffer ) noexcept
 {
     // TODO(hernan): this is assuming buffers are static. For dynamic buffers,
     // we want to create one handle/memory pair per swapchain image
@@ -751,10 +751,12 @@ bool RenderDevice::bind( UniformBuffer *uniformBuffer ) noexcept
         m_memories[ id ].push_back( bufferMemory );
     }
 
+    observe( uniformBuffer );
+
     return true;
 }
 
-void RenderDevice::unbind( UniformBuffer *uniformBuffer ) noexcept
+void RenderDevice::unbind( const UniformBuffer *uniformBuffer ) noexcept
 {
     const auto id = uniformBuffer->getUniqueID();
     if ( !m_buffers.contains( id ) ) {
@@ -775,6 +777,8 @@ void RenderDevice::unbind( UniformBuffer *uniformBuffer ) noexcept
 
     m_buffers.erase( id );
     m_memories.erase( id );
+
+    ignore( uniformBuffer );
 }
 
 VkBuffer RenderDevice::getHandle( UniformBuffer *uniformBuffer, Index imageIndex ) const noexcept
@@ -808,7 +812,7 @@ void RenderDevice::update( UniformBuffer *uniformBuffer ) const noexcept
     }
 }
 
-VkBuffer RenderDevice::bind( VertexBuffer *vertexBuffer ) noexcept
+VkBuffer RenderDevice::bind( const VertexBuffer *vertexBuffer ) noexcept
 {
     const auto id = vertexBuffer->getUniqueID();
     if ( m_buffers.contains( id ) ) {
@@ -853,10 +857,12 @@ VkBuffer RenderDevice::bind( VertexBuffer *vertexBuffer ) noexcept
         m_memories[ id ].push_back( bufferMemory );
     }
 
+    observe( vertexBuffer );
+
     return m_buffers[ id ][ getCurrentFrameIndex() ];
 }
 
-void RenderDevice::unbind( VertexBuffer *vertexBuffer ) noexcept
+void RenderDevice::unbind( const VertexBuffer *vertexBuffer ) noexcept
 {
     const auto id = vertexBuffer->getUniqueID();
     if ( !m_buffers.contains( id ) ) {
@@ -877,9 +883,11 @@ void RenderDevice::unbind( VertexBuffer *vertexBuffer ) noexcept
 
     m_buffers.erase( id );
     m_memories.erase( id );
+
+    ignore( vertexBuffer );
 }
 
-VkBuffer RenderDevice::bind( IndexBuffer *indexBuffer ) noexcept
+VkBuffer RenderDevice::bind( const IndexBuffer *indexBuffer ) noexcept
 {
     const auto id = indexBuffer->getUniqueID();
     if ( m_buffers.contains( id ) ) {
@@ -923,10 +931,12 @@ VkBuffer RenderDevice::bind( IndexBuffer *indexBuffer ) noexcept
         m_memories[ id ].push_back( bufferMemory );
     }
 
+    observe( indexBuffer );
+
     return m_buffers[ id ][ getCurrentFrameIndex() ];
 }
 
-void RenderDevice::unbind( IndexBuffer *indexBuffer ) noexcept
+void RenderDevice::unbind( const IndexBuffer *indexBuffer ) noexcept
 {
     const auto id = indexBuffer->getUniqueID();
     if ( !m_buffers.contains( id ) ) {
@@ -947,6 +957,8 @@ void RenderDevice::unbind( IndexBuffer *indexBuffer ) noexcept
 
     m_buffers.erase( id );
     m_memories.erase( id );
+
+    ignore( indexBuffer );
 }
 
 VkCommandBuffer RenderDevice::beginSingleTimeCommands( void ) const noexcept
