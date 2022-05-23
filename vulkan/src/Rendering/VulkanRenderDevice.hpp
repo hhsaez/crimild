@@ -29,6 +29,9 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/IndexBuffer.hpp"
+#include "Rendering/UniformBuffer.hpp"
+#include "Rendering/VertexBuffer.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
 
 #include <unordered_map>
@@ -45,7 +48,10 @@ namespace crimild {
         class PhysicalDevice;
         class VulkanSurface;
 
-        class RenderDevice {
+        class RenderDevice
+            : public UniformBuffer::Observer,
+              public VertexBuffer::Observer,
+              public IndexBuffer::Observer {
         public:
             RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface, const Extent2D &extent ) noexcept;
             virtual ~RenderDevice( void ) noexcept;
@@ -75,16 +81,34 @@ namespace crimild {
 
             inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
 
-            bool bind( UniformBuffer *uniformBuffer ) noexcept;
-            void unbind( UniformBuffer *uniformBuffer ) noexcept;
+            using UniformBuffer::Observer::ignore;
+            using UniformBuffer::Observer::observe;
+            bool bind( const UniformBuffer *uniformBuffer ) noexcept;
+            void unbind( const UniformBuffer *uniformBuffer ) noexcept;
+            virtual void onDestroy( const UniformBuffer *uniformBuffer ) noexcept override
+            {
+                unbind( uniformBuffer );
+            }
             VkBuffer getHandle( UniformBuffer *uniformBuffer, Index imageIndex ) const noexcept;
             void update( UniformBuffer *uniformBuffer ) const noexcept;
 
-            VkBuffer bind( VertexBuffer *vertexBuffer ) noexcept;
-            void unbind( VertexBuffer *vertexBuffer ) noexcept;
+            using VertexBuffer::Observer::ignore;
+            using VertexBuffer::Observer::observe;
+            VkBuffer bind( const VertexBuffer *vertexBuffer ) noexcept;
+            void unbind( const VertexBuffer *vertexBuffer ) noexcept;
+            virtual void onDestroy( const VertexBuffer *vertexBuffer ) noexcept override
+            {
+                unbind( vertexBuffer );
+            }
 
-            VkBuffer bind( IndexBuffer *indexBuffer ) noexcept;
-            void unbind( IndexBuffer *indexBuffer ) noexcept;
+            using IndexBuffer::Observer::ignore;
+            using IndexBuffer::Observer::observe;
+            VkBuffer bind( const IndexBuffer *indexBuffer ) noexcept;
+            void unbind( const IndexBuffer *indexBuffer ) noexcept;
+            virtual void onDestroy( const IndexBuffer *indexBuffer ) noexcept override
+            {
+                unbind( indexBuffer );
+            }
 
             VkImage bind( const Image *image ) noexcept;
             void unbind( const Image *image ) noexcept;

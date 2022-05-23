@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_INDEX_BUFFER_
 #define CRIMILD_RENDERING_INDEX_BUFFER_
 
+#include "Foundation/Observable.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
@@ -37,6 +38,7 @@ namespace crimild {
 
     class IndexBuffer
         : public coding::Codable,
+          public Observable< IndexBuffer >,
           public RenderResourceImpl< IndexBuffer > {
         CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
 
