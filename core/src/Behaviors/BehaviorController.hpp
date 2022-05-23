@@ -87,7 +87,16 @@ namespace crimild {
             SharedPointer< crimild::behaviors::BehaviorContext > _context;
 
             /**
-			 \name Coding support
+                \name Clonning
+            */
+            //@{
+        public:
+            virtual SharedPointer< NodeComponent > clone( void ) override;
+
+            //@}
+
+            /**
+			    \name Coding support
 			*/
             //@{
 
