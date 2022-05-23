@@ -137,3 +137,11 @@ void BehaviorController::decode( coding::Decoder &decoder )
         }
     } );
 }
+
+SharedPointer< NodeComponent > BehaviorController::clone( void )
+{
+    auto other = crimild::alloc< BehaviorController >();
+    other->_context = _context;
+    other->_behaviors = _behaviors;
+    return other;
+}
