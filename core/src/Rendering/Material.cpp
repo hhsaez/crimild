@@ -49,6 +49,8 @@ void Material::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
+    encoder.encode( "program", _program );
+
     // encoder.encode( "ambient", _ambient );
     // encoder.encode( "diffuse", _diffuse );
     // encoder.encode( "specular", _specular );
@@ -63,6 +65,8 @@ void Material::encode( coding::Encoder &encoder )
 void Material::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
+
+    decoder.decode( "program", _program );
 
     // decoder.decode( "ambient", _ambient );
     // decoder.decode( "diffuse", _diffuse );

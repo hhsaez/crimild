@@ -121,6 +121,8 @@ namespace crimild {
                 decode( key + "_depth", extent.depth );
             }
 
+            virtual bool decode( std::string_view key, std::vector< std::byte > & ) = 0;
+
             virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
             virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) = 0;

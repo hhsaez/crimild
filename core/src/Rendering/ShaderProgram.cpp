@@ -27,13 +27,27 @@
 
 #include "ShaderProgram.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Shader.hpp"
-#include "ShaderUniformImpl.hpp"
 
 using namespace crimild;
-using namespace crimild::shadergraph;
 
 ShaderProgram::ShaderProgram( const ShaderArray &shaders ) noexcept
     : m_shaders( shaders )
 {
+}
+
+void ShaderProgram::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    encoder.encode( "shaders", m_shaders );
+}
+
+void ShaderProgram::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    decoder.decode( "shaders", m_shaders );
 }

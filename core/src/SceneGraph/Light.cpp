@@ -401,6 +401,14 @@ void Light::encode( coding::Encoder &encoder )
     encoder.encode( "attenuation", _attenuation );
     encoder.encode( "color", _color );
     encoder.encode( "ambient", _ambient );
+
+    encoder.encode( "innerCutoff", _innerCutoff );
+    encoder.encode( "outerCutoff", _outerCutoff );
+
+    encoder.encode( "energy", m_energy );
+    encoder.encode( "radius", m_radius );
+
+    encoder.encode( "castShadows", castShadows() );
 }
 
 void Light::decode( coding::Decoder &decoder )
@@ -423,7 +431,13 @@ void Light::decode( coding::Decoder &decoder )
     decoder.decode( "color", _color );
     decoder.decode( "ambient", _ambient );
 
+    decoder.decode( "innerCutoff", _innerCutoff );
+    decoder.decode( "outerCutoff", _outerCutoff );
+
+    decoder.decode( "energy", m_energy );
+    decoder.decode( "radius", m_radius );
+
     crimild::Bool shadows = false;
-    decoder.decode( "shadows", shadows );
+    decoder.decode( "castShadows", shadows );
     setCastShadows( shadows );
 }

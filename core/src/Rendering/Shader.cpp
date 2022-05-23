@@ -27,7 +27,11 @@
 
 #include "Rendering/Shader.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
 #include "Simulation/FileSystem.hpp"
+
+#include <span>
 
 using namespace crimild;
 
@@ -79,13 +83,14 @@ Shader::Shader( Stage stage, const std::string &source, const std::string &entry
       m_dataType( DataType::INLINE ),
       m_entryPointName( entryPointName )
 {
-    std::copy( std::begin( source ), std::end( source ), std::back_inserter( m_data ) );
+    const auto bytes = std::as_bytes( std::span { source.data(), source.size() } );
+    std::copy( std::begin( bytes ), std::end( bytes ), std::back_inserter( m_data ) );
 }
 
 Shader::Shader( Stage stage, const Data &data, DataType dataType, std::string entryPointName ) noexcept
     : m_stage( stage ),
-      m_data( data ),
       m_dataType( dataType ),
+      m_data( data ),
       m_entryPointName( entryPointName )
 {
 }
@@ -93,4 +98,24 @@ Shader::Shader( Stage stage, const Data &data, DataType dataType, std::string en
 Shader::Shader( std::string source )
     : m_source( source )
 {
+}
+
+void Shader::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    encoder.encodeEnum( "stage", m_stage );
+    encoder.encode( "data", m_data );
+    encoder.encodeEnum( "data_type", m_dataType );
+    encoder.encode( "entry_point_name", m_entryPointName );
+}
+
+void Shader::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    decoder.decodeEnum( "stage", m_stage );
+    decoder.decode( "data", m_data );
+    decoder.decodeEnum( "data_type", m_dataType );
+    decoder.decode( "entry_point_name", m_entryPointName );
 }

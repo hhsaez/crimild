@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,60 +33,58 @@
 
 namespace crimild {
 
-	class FileSystem {
-	public:
-		static FileSystem &getInstance( void );
+    class FileSystem {
+    public:
+        static FileSystem &getInstance( void );
 
-	private:
-		FileSystem( void );
-		~FileSystem( void );
+    private:
+        FileSystem( void );
+        ~FileSystem( void );
 
-	public:
-		void init( int argc, char **argv );
+    public:
+        void init( int argc, char **argv );
 
         /**
             \brief Sets the base directory
-         
+
             As a side effect, this also sets the documents directory to
             the same path. It can be changed later
          */
-		void setBaseDirectory( std::string baseDirectory );
-		std::string getBaseDirectory( void ) const { return _baseDirectory; }
+        void setBaseDirectory( std::string baseDirectory );
+        std::string getBaseDirectory( void ) const { return _baseDirectory; }
 
-		void setDocumentsDirectory( std::string documentsDirectory ) { _documentsDirectory = documentsDirectory; }
-		std::string getDocumentsDirectory( void ) const { return _documentsDirectory; }
+        void setDocumentsDirectory( std::string documentsDirectory ) { _documentsDirectory = documentsDirectory; }
+        std::string getDocumentsDirectory( void ) const { return _documentsDirectory; }
 
-		std::string extractDirectory( std::string input );
+        std::string extractDirectory( std::string input );
 
-		/**
+        /**
 			\brief Gets the full path for a resources
 
 			Resources are usually bundled with the application and
 			are supposed to be stored in a read-only directory.
 		*/
-		std::string pathForResource( std::string relativePath ) const;
+        std::string pathForResource( std::string relativePath ) const;
 
-		/**
+        /**
 			\brief Gets the full path for a document
 
-			Documents are stored in writable directories. 
+			Documents are stored in writable directories.
 		*/
-		std::string pathForDocument( std::string relativePath ) const;
-        
+        std::string pathForDocument( std::string relativePath ) const;
+
         std::string getRelativePath( std::string absolutePath ) const;
 
         std::string getFileName( std::string path, bool includeExtension = true );
 
-		std::vector< char > readResourceFile( std::string relativePath ) const;
-		std::vector< char > readFile( std::string absolutePath ) const;
+        std::vector< std::byte > readResourceFile( std::string relativePath ) const;
+        std::vector< std::byte > readFile( std::string absolutePath ) const;
 
-	private:
-		std::string _baseDirectory;
+    private:
+        std::string _baseDirectory;
         std::string _documentsDirectory;
-
-	};
+    };
 
 }
 
 #endif
-

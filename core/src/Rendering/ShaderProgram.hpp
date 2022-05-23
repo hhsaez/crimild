@@ -28,35 +28,17 @@
 #ifndef CRIMILD_RENDERING_SHADER_PROGRAM_
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
+#include "Coding/Codable.hpp"
 #include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/RTTI.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/Shader.hpp"
-#include "Rendering/ShaderLocation.hpp"
-#include "Rendering/ShaderUniform.hpp"
-#include "Rendering/VertexBuffer.hpp"
-
-#include <functional>
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
+#include "Rendering/VertexLayout.hpp"
 
 namespace crimild {
 
     class DescriptorSetLayout;
-    class Light;
-    class Texture;
 
-    namespace shadergraph {
-
-        class ShaderGraph;
-
-    }
-
-    class ShaderProgram : public SharedObject,
-                          public RTTI,
+    class ShaderProgram : public coding::Codable,
                           public Catalog< ShaderProgram >::Resource {
         CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
 
@@ -78,6 +60,17 @@ namespace crimild {
 
     private:
         ShaderArray m_shaders;
+
+        /**
+            \name Coding support
+        */
+        //@{
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
     };
 
 }

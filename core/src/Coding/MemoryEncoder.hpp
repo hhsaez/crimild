@@ -72,6 +72,16 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, crimild::Bool value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, const Format &value ) override { return encodeData( key, value ); }
 
+            virtual bool encode( std::string_view key, std::vector< std::byte > &value ) override
+            {
+                // TODO: Use std::vector< std::byte > directly instead of converting it to encoded data
+                Array< Byte > data;
+                data.resize( value.size() );
+                memcpy( data.getData(), value.data(), value.size() );
+                auto encoded = crimild::alloc< EncodedData >( data );
+                return encode( std::string( key ), encoded );
+            }
+
             virtual crimild::Bool encode( std::string key, ByteArray &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, Array< crimild::Real32 > &value ) override { return encodeData( key, value ); }
             virtual crimild::Bool encode( std::string key, Array< Vector3f > &value ) override { return encodeData( key, value ); }

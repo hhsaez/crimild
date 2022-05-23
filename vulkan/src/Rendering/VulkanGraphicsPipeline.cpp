@@ -50,7 +50,7 @@ namespace crimild {
 
                 auto code = shader->getData();
                 if ( shader->getDataType() == Shader::DataType::INLINE ) {
-                    auto source = std::string( code.data(), code.size() );
+                    auto source = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
                     if ( !renderDevice->getShaderCompiler().compile( shader->getStage(), source, code ) ) {
                         CRIMILD_LOG_FATAL( "Failed to create shader module" );
                         exit( EXIT_FAILURE );

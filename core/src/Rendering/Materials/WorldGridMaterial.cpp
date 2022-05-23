@@ -159,8 +159,18 @@ WorldGrid::WorldGrid( void ) noexcept
                             color = clamp( color, 0.0, 1.0 );
                             color = color + secondaryChecker;
 
-                            frag.albedo = color;
+                            frag.albedo *= color;
                         }
                     )" ),
             } ) );
+}
+
+void WorldGrid::encode( coding::Encoder &encoder )
+{
+    PrincipledBSDF::encode( encoder );
+}
+
+void WorldGrid::decode( coding::Decoder &decoder )
+{
+    PrincipledBSDF::decode( decoder );
 }
