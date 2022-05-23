@@ -52,15 +52,16 @@ static void materialComponentDetails( MaterialComponent *materials )
     }
 
     if ( ImGui::CollapsingHeader( material->getClassName(), ImGuiTreeNodeFlags_None ) ) {
-        if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-            const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
+        if ( auto bsdf = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
             auto albedo = bsdf->getAlbedo();
             ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
             bsdf->setAlbedo( albedo );
-        } else {
-            const auto unlit = static_cast< UnlitMaterial * >( material );
+        } else if ( auto unlit = dynamic_cast< UnlitMaterial * >( material ) ) {
             auto color = rgb( unlit->getColor() );
             ImGui::ColorEdit3( "Color", get_ptr( color ) );
+            unlit->setColor( rgba( color ) );
+        } else {
+            ImGui::Text( "Unknown material class: %s", material->getClassName() );
         }
     }
 }
@@ -168,7 +169,7 @@ void NodeInspectorPanel::render( void ) noexcept
             Point3 nodeTranslation;
             Vector3 nodeRotation;
             Vector3 nodeScale;
-            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
+            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getWorld().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
 
             bool changed = false;
             changed = changed || ImGui::InputFloat3( "Tr", get_ptr( nodeTranslation ) );

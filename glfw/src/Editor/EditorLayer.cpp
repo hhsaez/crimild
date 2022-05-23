@@ -27,15 +27,20 @@
 
 #include "Editor/EditorLayer.hpp"
 
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Editor/Menus/mainMenu.hpp"
 #include "Editor/Panels/NodeInspectorPanel.hpp"
 #include "Editor/Panels/SceneHierarchyPanel.hpp"
 #include "Editor/Panels/ScenePanel.hpp"
 #include "Editor/Panels/SimulationPanel.hpp"
+#include "Editor/Panels/ToolbarPanel.hpp"
 #include "Foundation/Log.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
+#include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 #include <array>
 
@@ -46,6 +51,7 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
+    attach< editor::ToolbarPanel >();
     attach< editor::ScenePanel >( renderDevice, Point2 { 0, 50 }, Extent2D { .width = 1280, .height = 515 } );
     attach< editor::SimulationPanel >( renderDevice, Point2 { 0, 565 }, Extent2D { .width = 1280, .height = 515 } );
     attach< SceneHierarchyPanel >( Point2 { 1280, 50 }, Extent2D { .width = 320, .height = 1030 } );
@@ -84,6 +90,11 @@ Event EditorLayer::handle( const Event &e ) noexcept
         }
     }
 
+    if ( getSimulationState() == SimulationState::PLAYING ) {
+        // TODO: Handle return event
+        Simulation::getInstance()->handle( e );
+    }
+
     return Layer::handle( e );
 }
 
@@ -92,24 +103,37 @@ void EditorLayer::render( void ) noexcept
     editor::mainMenu( this );
 
     Layer::render();
+}
 
-    // {
-    //     ImGui::SetNextWindowPos( ImVec2( 0, 15 ), ImGuiCond_Always );
-    //     ImGui::SetNextWindowSize( ImVec2( 1920, 10 ), ImGuiCond_Always );
-    //     bool open = true;
+void EditorLayer::setSimulationState( SimulationState newState ) noexcept
+{
+    if ( m_simulationState == newState ) {
+        return;
+    }
 
-    //     if ( ImGui::Begin( "Top Bar", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar ) ) {
-    //         ImGui::Button( "Play" );
+    if ( m_simulationState == SimulationState::STOPPED && newState == SimulationState::PLAYING ) {
+        m_selectedNode = nullptr;
+        m_edittableScene = crimild::retain( Simulation::getInstance()->getScene() );
 
-    //         ImGui::SameLine();
-    //         ImGui::BeginDisabled( true );
-    //         ImGui::Button( "Pause" );
-    //         ImGui::EndDisabled();
+        // Using encoders to clone the scene is overkill since it copies buffers
+        // and textures, which should not change during playback. And this is a
+        // slow operation. But it also guarrantees that the scene is a full clone,
+        // as well as providing a visual representation of what is actually saved
+        // in the file system.
+        // TODO: consider using a shallow copy (or implement shallow encoder).
+        auto encoder = crimild::alloc< coding::MemoryEncoder >();
+        encoder->encode( m_edittableScene );
+        auto bytes = encoder->getBytes();
+        auto decoder = crimild::alloc< coding::MemoryDecoder >();
+        decoder->fromBytes( bytes );
+        auto simScene = decoder->getObjectAt< Node >( 0 );
+        Simulation::getInstance()->setScene( simScene );
+        handle( Event { Event::Type::SCENE_CHANGED } );
+    } else if ( newState == SimulationState::STOPPED ) {
+        m_selectedNode = nullptr;
+        Simulation::getInstance()->setScene( m_edittableScene );
+        handle( Event { Event::Type::SCENE_CHANGED } );
+    }
 
-    //         ImGui::SameLine();
-    //         ImGui::Button( "Stop" );
-
-    //         ImGui::End();
-    //     }
-    // }
+    m_simulationState = newState;
 }
