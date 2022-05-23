@@ -337,35 +337,35 @@ void VulkanSystem::updateUniformBuffers( void ) noexcept
 
 void VulkanSystem::initShaders( void ) noexcept
 {
-    auto createShader = []( Shader::Stage stage, const unsigned char *rawData, crimild::Size size ) {
-        std::vector< char > data( size + ( size % 4 ) );
-        memcpy( &data[ 0 ], rawData, size );
-        return crimild::alloc< Shader >( stage, data );
-    };
+    //     auto createShader = []( Shader::Stage stage, const unsigned char *rawData, crimild::Size size ) {
+    //         std::vector< char > data( size + ( size % 4 ) );
+    //         memcpy( &data[ 0 ], rawData, size );
+    //         return crimild::alloc< Shader >( stage, data );
+    //     };
 
-    auto assets = AssetManager::getInstance();
+    //     auto assets = AssetManager::getInstance();
 
-    assets->get< UnlitShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/unlit/unlit.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/unlit/unlit.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
+    //     assets->get< UnlitShaderProgram >()->setShaders(
+    //         {
+    //             [ & ] {
+    // #include "Rendering/Shaders/unlit/unlit.vert.inl"
+    //                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+    //             }(),
+    //             [ & ] {
+    // #include "Rendering/Shaders/unlit/unlit.frag.inl"
+    //                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+    //             }(),
+    //         } );
 
-    assets->get< SkyboxShaderProgram >()->setShaders(
-        {
-            [ & ] {
-#include "Rendering/Shaders/unlit/skybox.vert.inl"
-                return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-            [ & ] {
-#include "Rendering/Shaders/unlit/skybox.frag.inl"
-                return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
-            }(),
-        } );
+    //     assets->get< SkyboxShaderProgram >()->setShaders(
+    //         {
+    //             [ & ] {
+    // #include "Rendering/Shaders/unlit/skybox.vert.inl"
+    //                 return createShader( Shader::Stage::VERTEX, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+    //             }(),
+    //             [ & ] {
+    // #include "Rendering/Shaders/unlit/skybox.frag.inl"
+    //                 return createShader( Shader::Stage::FRAGMENT, RESOURCE_BYTES, sizeof( RESOURCE_BYTES ) );
+    //             }(),
+    //         } );
 }

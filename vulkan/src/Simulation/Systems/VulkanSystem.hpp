@@ -61,14 +61,15 @@ namespace crimild {
            9. Allocate and record a command buffer with the draw commands for every possible swapchain image
            10. Draw frames by acquiring images, submitting the right draw command buffer and returing the images back to the swapchain
          */
-        class VulkanSystem
+        class [[deprecated]] VulkanSystem
             : public System,
               public VulkanInstanceManager,
               public VulkanSurfaceManager,
               public PhysicalDeviceManager,
               public RenderDeviceManager,
               public VulkanDebugMessengerManager,
-              public DynamicSingleton< VulkanSystem > {
+              public DynamicSingleton< VulkanSystem >
+        {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanSystem )
 
         public:

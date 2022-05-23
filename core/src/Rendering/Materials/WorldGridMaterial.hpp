@@ -42,6 +42,17 @@ namespace crimild {
 
             WorldGrid( void ) noexcept;
             virtual ~WorldGrid( void ) = default;
+
+            /**
+                \name Coding support
+            */
+            //@{
+
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
         };
 
     }

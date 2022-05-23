@@ -28,6 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_
 #define CRIMILD_RENDERING_SHADER_
 
+#include "Coding/Codable.hpp"
 #include "Foundation/FilePath.hpp"
 #include "Foundation/SharedObject.hpp"
 
@@ -39,7 +40,9 @@ namespace crimild {
 	   \todo There's no point in keeping the data after the shader has been used
 	   in a rendering pipeline. We should clean it.
 	 */
-    class Shader : public SharedObject {
+    class Shader : public coding::Codable {
+        CRIMILD_IMPLEMENT_RTTI( crimild::Shader )
+
     public:
         enum class Stage {
             VERTEX,
@@ -54,8 +57,7 @@ namespace crimild {
 
         static std::string getStageDescription( const Stage &stage ) noexcept;
 
-        // TODO: Make this an Array< char >
-        using Data = std::vector< char >;
+        using Data = std::vector< std::byte >;
 
         enum class DataType {
             INLINE,
@@ -66,6 +68,12 @@ namespace crimild {
         static SharedPointer< Shader > withBinary( Stage stage, const FilePath &filePath ) noexcept;
 
     public:
+        /**
+         * \brief Default constructor
+         *
+         * Only used by coding system
+         */
+        Shader( void ) = default;
         explicit Shader( Stage stage, const std::string &source, const std::string &entryPointName = "main" ) noexcept;
         explicit Shader( Stage stage, const Data &data = Data(), DataType dataType = DataType::BINARY, std::string entryPointName = "main" ) noexcept;
         virtual ~Shader( void ) = default;
@@ -93,6 +101,16 @@ namespace crimild {
         Data m_data;
         std::string m_entryPointName;
 
+        /**
+            \name Coding support
+        */
+        //@{
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
         /**
 		   \deprecated
 		 */

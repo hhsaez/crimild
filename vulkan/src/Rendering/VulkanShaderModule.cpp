@@ -54,7 +54,7 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
 
     auto code = shader->getData();
     if ( shader->getDataType() == Shader::DataType::INLINE ) {
-        auto source = std::string( code.data(), code.size() );
+        auto source = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
         if ( !getShaderCompiler().compile( shader->getStage(), source, code ) ) {
             CRIMILD_LOG_ERROR( "Failed to create shader module" );
             return nullptr;

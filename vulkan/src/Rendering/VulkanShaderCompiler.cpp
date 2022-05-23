@@ -610,7 +610,7 @@ void vulkan::ShaderCompiler::addChunks( const Array< SharedPointer< Shader > > &
                 return;
             }
             const auto &code = shader->getData();
-            auto src = std::string( code.data(), code.size() );
+            auto src = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
             switch ( shader->getStage() ) {
                 case Shader::Stage::FRAGMENT:
                     m_preprocessor.addChunk( "frag_main", src );

@@ -68,6 +68,21 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Format &value ) override { return decodeData( key, value ); }
 
+            virtual bool decode( std::string_view key, std::vector< std::byte > &value ) override
+            {
+                auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ std::string( key ) ] );
+                if ( obj == nullptr ) {
+                    return false;
+                }
+
+                const auto N = obj->getBytes().size();
+                value.resize( N );
+                if ( N > 0 ) {
+                    memcpy( value.data(), obj->getBytes().getData(), N );
+                }
+                return true;
+            }
+
             virtual crimild::Bool decode( std::string key, ByteArray &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return decodeDataArray( key, value ); }
             virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) override { return decodeDataArray( key, value ); }
