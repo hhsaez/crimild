@@ -118,6 +118,8 @@ namespace crimild {
 
             NODE_SELECTED,
 
+            SCENE_CHANGED,
+
             SIMULATION_START,
             SIMULATION_UPDATE,
             SIMULATION_RENDER,
