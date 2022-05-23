@@ -27,9 +27,6 @@
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/UniformBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Simulation/Event.hpp"

@@ -343,8 +343,6 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
     m_mainCamera = nullptr;
 
     if ( _scene != nullptr ) {
-        // TODO: start components?
-
         // fetch all cameras from the scene
         FetchCameras fetchCameras;
         _scene->perform( fetchCameras );
@@ -354,6 +352,9 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
             }
             m_cameras.push_back( camera );
         } );
+
+        _scene->perform( UpdateWorldState() );
+        _scene->perform( StartComponents() );
     }
 
     /*
@@ -362,7 +363,7 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
 
 	if ( _scene != nullptr ) {
 		_scene->perform( UpdateWorldState() );
-		_scene->perform( UpdateRenderState() );
+        _scene->perform( StartComponents() );
 
         // fetch all cameras from the scene
 		FetchCameras fetchCameras;
