@@ -123,8 +123,8 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
+    RenderableSet renderables;
     if ( scene != nullptr && camera != nullptr ) {
-        RenderableSet renderables;
         scene->perform(
             ApplyToGeometries(
                 [ & ]( Geometry *geometry ) {
@@ -143,59 +143,59 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                     .proj = camera->getProjectionMatrix() } );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
-
-        renderables.eachGeometry(
-            [ & ]( Geometry *geometry ) {
-                if ( geometry == nullptr ) {
-                    return;
-                }
-                bind( geometry );
-
-                if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                    // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
-                    if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
-                        bind( material );
-
-                        vkCmdBindPipeline(
-                            commandBuffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_materialObjects.pipelines[ material ]->getHandle() );
-
-                        vkCmdBindDescriptorSets(
-                            commandBuffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                            0,
-                            1,
-                            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                            0,
-                            nullptr );
-
-                        vkCmdBindDescriptorSets(
-                            commandBuffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                            1,
-                            1,
-                            &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
-                            0,
-                            nullptr );
-
-                        vkCmdBindDescriptorSets(
-                            commandBuffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                            2,
-                            1,
-                            &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
-                            0,
-                            nullptr );
-
-                        drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
-                    }
-                }
-            } );
     }
+
+    renderables.eachGeometry(
+        [ & ]( Geometry *geometry ) {
+            if ( geometry == nullptr ) {
+                return;
+            }
+            bind( geometry );
+
+            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+                // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
+                if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
+                    bind( material );
+
+                    vkCmdBindPipeline(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getHandle() );
+
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        0,
+                        1,
+                        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                        0,
+                        nullptr );
+
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        1,
+                        1,
+                        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+                        0,
+                        nullptr );
+
+                    vkCmdBindDescriptorSets(
+                        commandBuffer,
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                        2,
+                        1,
+                        &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
+                        0,
+                        nullptr );
+
+                    drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+                }
+            }
+        } );
 
     vkCmdEndRenderPass( commandBuffer );
 }

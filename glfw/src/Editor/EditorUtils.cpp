@@ -82,7 +82,6 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
                 behaviors::actions::rotate(
                     normalize( Vector3::Constants::UNIT_Y ),
                     0.1f ) );
-            ;
         }() );
 
     scene->attachNode(

@@ -188,22 +188,23 @@ Event Window::handle( const Event &e ) noexcept
                 m_renderDevice->endRender();
             }
 
-            if ( Settings::getInstance()->get( "video.show_frame_time", true ) ) {
-                auto name = Settings::getInstance()->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
-                std::stringstream ss;
+            auto name = Settings::getInstance()->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+            std::stringstream ss;
+            ss << name;
+            if ( Settings::getInstance()->get( "video.show_frame_time", false ) ) {
                 auto accum = m_clock.getAccumTime();
                 auto h = Int32( accum / 3600 );
                 auto m = Int32( ( accum - h * 3600 ) / 60 );
                 auto s = Int32( ( accum - h * 3600 - m * 60 ) );
-                ss << name << " ("
+                ss << " ("
                    << std::fixed
                    << std::setprecision( 3 )
                    << m_clock.getDeltaTime() << "ms - "
                    << ( h < 10 ? "0" : "" ) << h << ":"
                    << ( m < 10 ? "0" : "" ) << m << ":"
                    << ( s < 10 ? "0" : "" ) << s << ")";
-                glfwSetWindowTitle( m_window, ss.str().c_str() );
             }
+            glfwSetWindowTitle( m_window, ss.str().c_str() );
 
             m_clock.tick();
 

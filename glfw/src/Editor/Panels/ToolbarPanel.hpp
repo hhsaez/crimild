@@ -25,50 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_EDITOR_LAYER_
-#define CRIMILD_GLFW_EDITOR_LAYER_
+#ifndef CRIMILD_GLFW_EDITOR_PANELS_TOOLBAR_
+#define CRIMILD_GLFW_EDITOR_PANELS_TOOLBAR_
 
-#include "Foundation/Singleton.hpp"
 #include "Rendering/Layer.hpp"
 
 namespace crimild {
 
-    class Node;
+    namespace editor {
 
-    namespace vulkan {
-
-        class RenderDevice;
+        class ToolbarPanel : public Layer {
+        public:
+            virtual void render( void ) noexcept override;
+        };
 
     }
 
-    enum class SimulationState {
-        PLAYING,
-        PAUSED,
-        STOPPED,
-    };
-
-    class EditorLayer : public Layer, public DynamicSingleton< EditorLayer > {
-    public:
-        EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept;
-        ~EditorLayer( void ) noexcept;
-
-        virtual Event handle( const Event &e ) noexcept override;
-        virtual void render( void ) noexcept override;
-
-        inline vulkan::RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
-
-        inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
-        inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
-
-        inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
-        void setSimulationState( SimulationState state ) noexcept;
-
-    private:
-        vulkan::RenderDevice *m_renderDevice = nullptr;
-        Node *m_selectedNode = nullptr;
-        SimulationState m_simulationState = SimulationState::STOPPED;
-        std::shared_ptr< Node > m_edittableScene;
-    };
 }
 
 #endif
