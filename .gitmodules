@@ -25,9 +25,12 @@
 [submodule "third-party/imguizmo"]
 	path = third-party/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+	ignore = dirty
 [submodule "third-party/ImGuiFileDialog"]
 	path = third-party/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
+	ignore = dirty
 [submodule "third-party/json"]
 	path = third-party/json
 	url = https://github.com/nlohmann/json.git
+	ignore = dirty
