@@ -28,63 +28,75 @@
 #ifndef CRIMILD_FOUNDATION_OBJECT_FACTORY_
 #define CRIMILD_FOUNDATION_OBJECT_FACTORY_
 
-#include "RTTI.hpp"
-#include "Singleton.hpp"
 #include "Containers/Map.hpp"
 #include "Memory.hpp"
+#include "RTTI.hpp"
 #include "SharedObject.hpp"
+#include "Singleton.hpp"
+
+#include <set>
 
 namespace crimild {
 
-	class ObjectFactory : public StaticSingleton< ObjectFactory > {
-	public:
-		using Builder = std::function< SharedPointer< SharedObject >() >;
+    class ObjectFactory : public StaticSingleton< ObjectFactory > {
+    public:
+        using Builder = std::function< SharedPointer< SharedObject >() >;
 
-	public:
-		ObjectFactory( void );
-		~ObjectFactory( void );
+    public:
+        template< typename T >
+        void registerBuilder( std::string type )
+        {
+            _builders[ type ] = []() -> SharedPointer< SharedObject > {
+                return crimild::alloc< T >();
+            };
+        }
 
-		template< typename T >
-		void registerBuilder( std::string type )
-		{
-			_builders[ type ] = []() -> SharedPointer< SharedObject > {
-				return crimild::alloc< T >();
-			};
-		}
+        void registerCustomBuilder( std::string type, Builder builder )
+        {
+            _builders[ type ] = builder;
+        }
 
-		void registerCustomBuilder( std::string type, Builder builder )
-		{
-			_builders[ type ] = builder;
-		}
+        inline Builder getBuilder( std::string type )
+        {
+            if ( !_builders.contains( type ) ) {
+                return nullptr;
+            }
 
-		inline Builder getBuilder( std::string type )
-		{
-			if ( !_builders.contains( type ) ) {
-				return nullptr;
-			}
-			
-			return _builders[ type ];
-		}
-        
+            return _builders[ type ];
+        }
+
+        /**
+		 * \brief List class names starting with prefix
+		 *
+		 * Returns a std::set making keys ordering automatically
+		 */
+        std::set< std::string > filter( std::string_view prefix ) const noexcept;
+
+        /**
+		 * \brief List class names starting with any of the given prefixes
+		 *
+		 * Returns a std::set making keys ordering automatically
+		 */
+        std::set< std::string > filter( const std::set< std::string > &prefixes ) const noexcept;
+
         SharedPointer< SharedObject > build( std::string className );
-        
+
         template< typename T >
         SharedPointer< T > build( std::string className )
         {
             return crimild::cast_ptr< T >( build( className ) );
         }
 
-	private:
+    private:
         Map< std::string, Builder > _builders;
-	};
+    };
 
 }
 
 #define CRIMILD_REGISTER_OBJECT_BUILDER( X ) \
-		crimild::ObjectFactory::getInstance()->registerBuilder< X >( #X );
+    crimild::ObjectFactory::getInstance()->registerBuilder< X >( #X );
 
 #define CRIMILD_REGISTER_CUSTOM_OBJECT_BUILDER( X, BUILDER_FUNC ) \
-		crimild::ObjectFactory::getInstance()->registerCustomBuilder( #X, BUILDER_FUNC );
-        
-#endif
+    crimild::ObjectFactory::getInstance()->registerCustomBuilder( #X, BUILDER_FUNC );
 
+#endif

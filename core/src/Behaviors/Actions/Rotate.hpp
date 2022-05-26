@@ -45,7 +45,10 @@ namespace crimild {
                 virtual ~Rotate( void ) = default;
 
                 [[nodiscard]] inline const Vector3 &getAxis( void ) const { return m_axis; }
+                inline void setAxis( const Vector3 &axis ) noexcept { m_axis = axis; }
+
                 [[nodiscard]] inline Radians getAngle( void ) const { return m_angle; }
+                inline void setAngle( Radians angle ) noexcept { m_angle = angle; }
 
                 void init( BehaviorContext *context ) noexcept override;
                 Behavior::State step( BehaviorContext *context ) noexcept override;
