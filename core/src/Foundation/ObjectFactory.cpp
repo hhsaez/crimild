@@ -26,18 +26,33 @@
  */
 
 #include "ObjectFactory.hpp"
+
 #include "Log.hpp"
 
 using namespace crimild;
 
-ObjectFactory::ObjectFactory( void )
+std::set< std::string > ObjectFactory::filter( std::string_view prefix ) const noexcept
 {
-
+    std::set< std::string > ret;
+    _builders.eachKey( [ & ]( const auto &key ) {
+        if ( key.starts_with( prefix ) ) {
+            ret.insert( key );
+        }
+    } );
+    return ret;
 }
 
-ObjectFactory::~ObjectFactory( void )
+std::set< std::string > ObjectFactory::filter( const std::set< std::string > &prefixes ) const noexcept
 {
-	
+    std::set< std::string > ret;
+    _builders.eachKey( [ & ]( const auto &key ) {
+        for ( const auto &prefix : prefixes ) {
+            if ( key.starts_with( prefix ) ) {
+                ret.insert( key );
+            }
+        }
+    } );
+    return ret;
 }
 
 SharedPointer< SharedObject > ObjectFactory::build( std::string className )
@@ -47,7 +62,6 @@ SharedPointer< SharedObject > ObjectFactory::build( std::string className )
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot find builder for type: ", className );
         return nullptr;
     }
-    
+
     return builder();
 }
-
