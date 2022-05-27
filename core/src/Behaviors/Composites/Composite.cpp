@@ -17,6 +17,15 @@ void Composite::attachBehavior( BehaviorPtr const &behavior )
     _behaviors.add( behavior );
 }
 
+void Composite::setBehavior( BehaviorPtr const &behavior, size_t index ) noexcept
+{
+    if ( index >= _behaviors.size() ) {
+        attachBehavior( behavior );
+    } else {
+        _behaviors[ index ] = behavior;
+    }
+}
+
 void Composite::detachBehavior( BehaviorPtr const &behavior )
 {
     _behaviors.remove( behavior );

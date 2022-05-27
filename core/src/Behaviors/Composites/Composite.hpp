@@ -51,6 +51,7 @@ namespace crimild {
                 virtual void init( BehaviorContext *context ) override;
 
                 void attachBehavior( BehaviorPtr const &behavior );
+                void setBehavior( BehaviorPtr const &behavior, size_t index ) noexcept;
                 void detachBehavior( BehaviorPtr const &behavior );
                 size_t getBehaviorCount( void ) const;
                 Behavior *getBehaviorAt( size_t index );
