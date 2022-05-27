@@ -141,7 +141,7 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
         }
 
         size_t rootIdx;
-        if ( configure( root, offset + Vector2 { 300, 0 }, rootIdx ) ) {
+        if ( configure( root, offset + Vector2 { 400, 0 }, rootIdx ) ) {
             m_links.push_back( { 0, 0, rootIdx, 0 } );
         }
     }
@@ -167,12 +167,12 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
         if ( auto composite = dynamic_cast< behaviors::composites::Composite * >( behavior ) ) {
             m_nodes[ idx ].type = Node::Type::COMPOSITE;
             m_nodes[ idx ].composite = composite;
-            m_templates.push_back( getBehaviorCompositeTemplate() );
+            m_templates.push_back( getBehaviorCompositeTemplate( composite->getBehaviorCount() ) );
             const auto N = composite->getBehaviorCount();
-            for ( auto i = 0l; i < N; ++i ) {
+            for ( size_t i = 0; i < N; ++i ) {
                 size_t childIdx;
-                if ( configure( composite->getBehaviorAt( i ), offset + Vector2 { 300.0f, 300.0f * i }, childIdx ) ) {
-                    m_links.push_back( { idx, 0, childIdx, 0 } );
+                if ( configure( composite->getBehaviorAt( i ), offset + Vector2 { 400.0f, 300.0f * i }, childIdx ) ) {
+                    m_links.push_back( { idx, i, childIdx, 0 } );
                 }
             }
         } else if ( auto decorator = dynamic_cast< behaviors::decorators::Decorator * >( behavior ) ) {
@@ -181,7 +181,7 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
             m_templates.push_back( getBehaviorDecoratorTemplate() );
             if ( auto childBehavior = decorator->getBehavior() ) {
                 size_t childIdx;
-                if ( configure( childBehavior, offset + Vector2 { 300, 0 }, childIdx ) ) {
+                if ( configure( childBehavior, offset + Vector2 { 400, 0 }, childIdx ) ) {
                     m_links.push_back( { idx, 0, childIdx, 0 } );
                 }
             }
@@ -240,7 +240,8 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
         auto &in = m_nodes[ inputNodeIndex ];
         auto &out = m_nodes[ outputNodeIndex ];
 
-        auto getOutBehavior = [ & ]() -> SharedPointer< behaviors::Behavior > {
+        // Output behavior needs to be retained so it can be removed if needed.
+        auto outBehavior = [ & ]() -> SharedPointer< behaviors::Behavior > {
             if ( out.composite ) {
                 return crimild::retain( out.composite );
             } else if ( out.decorator ) {
@@ -248,29 +249,39 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
             } else {
                 return crimild::retain( out.action );
             }
-        };
+        }();
 
-        auto delCurrentLink = [ & ] {
-            // Remove existing links
-            auto it = std::find_if(
-                m_links.begin(),
-                m_links.end(),
-                [ & ]( auto l ) {
-                    return l.mInputNodeIndex == inputNodeIndex;
-                } );
-            if ( it != m_links.end() ) {
-                m_links.erase( it );
-            }
-        };
+        // Composite nodes allow multiple output connections, so they need special
+        // care when adding/removing links to other nodes
+        auto supportsMultipleConnections = in.type == Node::Type::COMPOSITE;
+
+        // Remove existing links
+        auto it = std::find_if(
+            m_links.begin(),
+            m_links.end(),
+            [ & ]( auto l ) {
+                if ( l.mInputNodeIndex != inputNodeIndex ) {
+                    // Not the node we're looking for
+                    return false;
+                }
+                // We found the node.
+                // Remove connections for simple nodes or if the connection is the output one.
+                return !supportsMultipleConnections || l.mOutputNodeIndex == outputNodeIndex;
+            } );
+        if ( it != m_links.end() ) {
+            m_links.erase( it );
+        }
 
         if ( in.type == Node::Type::TREE ) {
-            delCurrentLink();
-            in.tree->setRootBehavior( getOutBehavior() );
+            in.tree->setRootBehavior( outBehavior );
         } else if ( in.type == Node::Type::COMPOSITE ) {
-            in.composite->attachBehavior( getOutBehavior() );
+            // Detach behavior from composite. This handles the case where we're swapping with a different outlet.
+            in.composite->detachBehavior( outBehavior );
+            in.composite->setBehavior( outBehavior, inputSlotIndex );
+            // Update template to add one more outlet if possible
+            m_templates[ in.templateIndex ] = getBehaviorCompositeTemplate( in.composite->getBehaviorCount() );
         } else if ( in.type == Node::Type::DECORATOR ) {
-            delCurrentLink();
-            in.decorator->setBehavior( getOutBehavior() );
+            in.decorator->setBehavior( outBehavior );
         }
 
         m_links.push_back( { inputNodeIndex, inputSlotIndex, outputNodeIndex, outputSlotIndex } );
@@ -375,7 +386,7 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
         };
     }
 
-    GraphEditor::Template getBehaviorCompositeTemplate( void ) const
+    GraphEditor::Template getBehaviorCompositeTemplate( size_t N ) const
     {
         return {
             IM_COL32( 160, 160, 180, 255 ),
@@ -384,7 +395,7 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
             1,
             nullptr,
             nullptr,
-            1,
+            ImU8( N + 1 ),
             nullptr,
             nullptr,
         };
