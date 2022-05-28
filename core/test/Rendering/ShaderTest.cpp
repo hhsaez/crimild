@@ -44,11 +44,11 @@ TEST( Shader, basicConstruction )
 TEST( Shader, explicitConstruction )
 {
     auto data = Shader::Data {
-        0,
-        1,
-        2,
-        3,
-        4
+        std::byte { 0 },
+        std::byte { 1 },
+        std::byte { 2 },
+        std::byte { 3 },
+        std::byte { 4 },
     };
 
     auto shader = crimild::alloc< Shader >(

@@ -47,6 +47,7 @@
 #include "Mathematics/pow.hpp"
 #include "Mathematics/sqrt.hpp"
 
+#include <algorithm>
 #include <limits>
 
 namespace crimild {
