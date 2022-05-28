@@ -67,8 +67,11 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return decodeValue( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeValue( key, value ); }
 
+            virtual bool decode( std::string_view key, std::vector< std::byte > & ) override { return false; }
+
             virtual crimild::Bool decode( std::string key, ByteArray &value ) override
-            { /* no-op */
+            {
+                /* no-op */
                 return true;
             }
             virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) override { return true; };
