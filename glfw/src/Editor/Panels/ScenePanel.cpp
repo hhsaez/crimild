@@ -83,7 +83,8 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
         gizmoMode,
         static_cast< float * >( &res.c0.x ),
         nullptr,
-        snap ? static_cast< const float * >( &snapValues.x ) : nullptr );
+        snap ? static_cast< const float * >( &snapValues.x ) : nullptr
+    );
 
     selectedNode->setLocal( Transformation { res, inverse( res ) } );
     selectedNode->perform( UpdateWorldState() );
@@ -101,7 +102,8 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
           {
               m_scenePass.getColorAttachment(),
               m_sceneDebugPass.getColorAttachment(),
-          } )
+          }
+      )
 {
     m_editorCamera = std::make_unique< Camera >();
     m_cameraTranslation = translation( 10, 10, 10 );
@@ -229,7 +231,7 @@ void ScenePanel::render( void ) noexcept
         const auto att = m_sceneDebugOverlayPass.getColorAttachment();
         // const auto att = m_sceneDebugPass.getColorAttachment();
         if ( !att->descriptorSets.empty() ) {
-            ImTextureID tex_id = ( ImTextureID )( void * ) att->descriptorSets.data();
+            ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
             ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
             ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
             ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
@@ -268,7 +270,8 @@ void ScenePanel::render( void ) noexcept
                 ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
             att->mipLevels,
-            att->layerCount );
+            att->layerCount
+        );
     };
 
     auto scene = Simulation::getInstance()->getScene();

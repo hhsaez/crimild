@@ -34,7 +34,8 @@ using namespace crimild;
 TEST( Shader, basicConstruction )
 {
     auto shader = crimild::alloc< Shader >(
-        Shader::Stage::FRAGMENT );
+        Shader::Stage::FRAGMENT
+    );
 
     EXPECT_EQ( Shader::Stage::FRAGMENT, shader->getStage() );
     EXPECT_EQ( 0, shader->getData().size() );
@@ -55,7 +56,8 @@ TEST( Shader, explicitConstruction )
         Shader::Stage::VERTEX,
         data,
         Shader::DataType::BINARY,
-        "entry" );
+        "entry"
+    );
 
     EXPECT_EQ( Shader::Stage::VERTEX, shader->getStage() );
     EXPECT_EQ( data, shader->getData() );
