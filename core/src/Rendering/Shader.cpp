@@ -31,7 +31,7 @@
 #include "Coding/Encoder.hpp"
 #include "Simulation/FileSystem.hpp"
 
-#include <span>
+#include <cstring>
 
 using namespace crimild;
 
@@ -67,7 +67,8 @@ SharedPointer< Shader > Shader::withSource( Stage stage, const FilePath &filePat
     return crimild::alloc< Shader >(
         stage,
         FileSystem::getInstance().readFile( filePath.getAbsolutePath() ),
-        DataType::INLINE );
+        DataType::INLINE
+    );
 }
 
 SharedPointer< Shader > Shader::withBinary( Stage stage, const FilePath &filePath ) noexcept
@@ -75,7 +76,8 @@ SharedPointer< Shader > Shader::withBinary( Stage stage, const FilePath &filePat
     return crimild::alloc< Shader >(
         stage,
         FileSystem::getInstance().readFile( filePath.getAbsolutePath() ),
-        DataType::BINARY );
+        DataType::BINARY
+    );
 }
 
 Shader::Shader( Stage stage, const std::string &source, const std::string &entryPointName ) noexcept
@@ -83,8 +85,8 @@ Shader::Shader( Stage stage, const std::string &source, const std::string &entry
       m_dataType( DataType::INLINE ),
       m_entryPointName( entryPointName )
 {
-    const auto bytes = std::as_bytes( std::span { source.data(), source.size() } );
-    std::copy( std::begin( bytes ), std::end( bytes ), std::back_inserter( m_data ) );
+    m_data.resize( source.length() );
+    memcpy( m_data.data(), source.data(), source.length() );
 }
 
 Shader::Shader( Stage stage, const Data &data, DataType dataType, std::string entryPointName ) noexcept
