@@ -1,68 +1,48 @@
 #include "MotionReset.hpp"
 
+#include "Mathematics/Point3_constants.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Vector3_constants.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
-MotionReset::MotionReset( void )
-{
-}
-
-MotionReset::~MotionReset( void )
-{
-}
-
 void MotionReset::init( BehaviorContext *context )
 {
     Behavior::init( context );
 
-    if ( !context->hasValue( "motion.velocity.x" ) )
-        context->setValue( "motion.velocity.x", 0.0f );
-    if ( !context->hasValue( "motion.velocity.y" ) )
-        context->setValue( "motion.velocity.y", 0.0f );
-    if ( !context->hasValue( "motion.velocity.z" ) )
-        context->setValue( "motion.velocity.z", 0.0f );
-    if ( !context->hasValue( "motion.velocity.magnitude" ) )
-        context->setValue( "motion.velocity.magnitude", 0.0f );
+    m_velocity = context->getOrCreate( "motion.velocity", Vector3::Constants::ZERO );
+    m_position = context->getOrCreate( "motion.position", Point3::Constants::ZERO );
+    m_steering = context->getOrCreate( "motion.steering", Vector3::Constants::ZERO );
 
-    if ( !context->hasValue( "motion.steering.x" ) )
-        context->setValue( "motion.steering.x", 0.0f );
-    if ( !context->hasValue( "motion.steering.y" ) )
-        context->setValue( "motion.steering.y", 0.0f );
-    if ( !context->hasValue( "motion.steering.z" ) )
-        context->setValue( "motion.steering.z", -1.0f );
-
-    if ( !context->hasValue( "motion.max_velocity" ) )
-        context->setValue( "motion.max_velocity", 1.0f );
-    if ( !context->hasValue( "motion.max_force" ) )
-        context->setValue( "motion.max_force", 1.0f );
-    if ( !context->hasValue( "motion.mass" ) )
-        context->setValue( "motion.mass", 1.0f );
-    if ( !context->hasValue( "motion.slowing_radius" ) )
-        context->setValue( "motion.slowing_radius", 1.0f );
+    context->getOrCreate( "motion.velocity.magnitude", 0.0f );
+    context->getOrCreate( "motion.velocity.max", 1.0f );
+    context->getOrCreate( "motion.maxForce", 1.0f );
+    context->getOrCreate( "motion.mass", 1.0f );
+    context->getOrCreate( "motion.slowingRadius", 1.0f );
 }
 
 Behavior::State MotionReset::step( BehaviorContext *context )
 {
-    assert( false && "TODO" );
+    auto agent = context->getAgent();
+    if ( agent == nullptr ) {
+        CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
+        return Behavior::State::FAILURE;
+    }
 
-#if 0
-	auto agent = context->getAgent();
+    m_position->get< Point3 >() = location( agent->getLocal() );
+    m_steering->get< Vector3 >() = Vector3::Constants::ZERO;
 
-	context->setValue( "motion.position", agent->getLocal().getTranslate() );
-	context->setValue( "motion.steering", Vector3f::ZERO );
-
-	if ( context->hasTargets() ) {
-		auto target = context->getTargetAt( 0 );
-		context->setValue( "motion.target", target->getLocal().getTranslate() );
-	}
-	else {
-		// set target to self so no motion will be applied
-		context->setValue( "motion.target", agent->getLocal().getTranslate() );
-	}
-#endif
+    // if ( context->hasTargets() ) {
+    //     auto target = context->getTargetAt( 0 );
+    //     const auto targetLocation = location( target->getLocal() );
+    //     context->setValue( "motion.target", targetLocation );
+    // } else {
+    //     // set target to self so no motion will be applied
+    //     context->setValue( "motion.target", agentLocation );
+    // }
 
     return Behavior::State::SUCCESS;
 }
