@@ -138,6 +138,7 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Foundation/StringUtils.hpp"
+#include "Foundation/Variant.hpp"
 #include "Foundation/Version.hpp"
 #include "Loaders/OBJLoader.hpp"
 #include "Mathematics/Clock.hpp"
