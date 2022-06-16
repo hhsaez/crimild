@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,71 +26,261 @@
  */
 
 #include "Behaviors/BehaviorController.hpp"
-#include "Behaviors/BehaviorTree.hpp"
+
 #include "Behaviors/Actions/SetContextValue.hpp"
-#include "SceneGraph/Node.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Simulation/Settings.hpp"
-#include "Coding/MemoryEncoder.hpp"
+#include "Behaviors/BehaviorTree.hpp"
+#include "Behaviors/Decorators/Repeat.hpp"
 #include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
+#include "Foundation/ObjectFactory.hpp"
+#include "SceneGraph/Node.hpp"
+#include "Simulation/Settings.hpp"
+#include "Simulation/Simulation.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
+using namespace crimild::behaviors::decorators;
 
-TEST( BehaviorControllerTest, setContextValue )
-{
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
-    auto context = controller->getContext();
-    context->setValue( "input.x", 100 );
-    controller->attachBehaviorTree( crimild::alloc< BehaviorTree >( "initInputX", crimild::alloc< SetContextValue >( "input.x", "20" ) ) );
-    controller->attachBehaviorTree( crimild::alloc< BehaviorTree >( "updateInputX", crimild::alloc< SetContextValue >( "input.x", "30" ) ) );
+namespace crimild {
 
-    EXPECT_EQ( 100, context->getValue< crimild::Int32 >( "input.x" ) );
+    namespace behaviors {
 
-    controller->getBehaviorTree( "initInputX" )->getRootBehavior()->step( controller->getContext() );
-    EXPECT_EQ( 20, context->getValue< crimild::Int32 >( "input.x" ) );
+        class MockBehavior : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::MockBehavior )
 
-    controller->getBehaviorTree( "updateInputX" )->getRootBehavior()->step( controller->getContext() );
-    EXPECT_EQ( 30, context->getValue< crimild::Int32 >( "input.x" ) );
+        public:
+            virtual void init( BehaviorContext *context ) noexcept override
+            {
+                if ( !context->has( "initCount" ) ) {
+                    m_initCount = context->set( "initCount", uint32_t( 1 ) );
+                } else {
+                    m_initCount = context->get( "initCount" );
+                    m_initCount->get< uint32_t >() += 1;
+                }
+
+                if ( !context->has( "executeCount" ) ) {
+                    m_executeCount = context->set( "executeCount", uint32_t( 0 ) );
+                } else {
+                    m_executeCount = context->get( "executeCount" );
+                }
+            }
+
+            virtual Behavior::State step( BehaviorContext * ) noexcept override
+            {
+                m_executeCount->get< uint32_t >() += 1;
+                return Behavior::State::SUCCESS;
+            }
+
+            void reset( void ) noexcept
+            {
+                m_initCount->get< uint32_t >() = 0;
+                m_executeCount->get< uint32_t >() = 0;
+            }
+
+        private:
+            SharedPointer< Variant > m_initCount;
+            SharedPointer< Variant > m_executeCount;
+        };
+    }
+
 }
 
-TEST( BehaviorControllerTest, coding )
+TEST( BehaviorController, construction )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
-    auto context = controller->getContext();
-    context->setValue( "input.x", 100 );
-    controller->attachBehaviorTree( crimild::alloc< BehaviorTree >( "initInputX", crimild::alloc< SetContextValue >( "input.x", "20" ) ) );
-    controller->attachBehaviorTree( crimild::alloc< BehaviorTree >( "updateInputX", crimild::alloc< SetContextValue >( "input.x", "30" ) ) );
+    auto controller = crimild::alloc< BehaviorController >();
 
-    EXPECT_EQ( 100, context->getValue< crimild::Int32 >( "input.x" ) );
+    ASSERT_NE( nullptr, controller->getContext() );
 
-    controller->getBehaviorTree( "initInputX" )->getRootBehavior()->step( controller->getContext() );
-    EXPECT_EQ( 20, context->getValue< crimild::Int32 >( "input.x" ) );
+    std::cout << controller->getBehavior( BehaviorController::SCENE_STARTED_BEHAVIOR_NAME )->getClassName() << "\n";
 
-    controller->getBehaviorTree( "updateInputX" )->getRootBehavior()->step( controller->getContext() );
-    EXPECT_EQ( 30, context->getValue< crimild::Int32 >( "input.x" ) );
+    ASSERT_EQ(
+        "crimild::behaviors::actions::Success",
+        controller->getBehavior( BehaviorController::SCENE_STARTED_BEHAVIOR_NAME )->getClassName()
+    );
 
-	auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( node );
-	auto bytes = encoder->getBytes();
-	auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
+    ASSERT_EQ(
+        "crimild::behaviors::actions::Success",
+        controller->getBehavior( BehaviorController::DEFAULT_BEHAVIOR_NAME )->getClassName()
+    );
 
-	auto decodedNode = decoder->getObjectAt< Node >( 0 );
-	EXPECT_TRUE( decodedNode != nullptr );
-    auto decodedBehaviors = decodedNode->getComponent< BehaviorController >();
-    EXPECT_TRUE( decodedBehaviors != nullptr );
-    auto decodedContext = decodedBehaviors->getContext();
-    EXPECT_TRUE( decodedContext != nullptr );
-    EXPECT_EQ( 30, decodedContext->getValue< crimild::Int32 >( "input.x" ) );
-    decodedBehaviors->getBehaviorTree( "initInputX" )->getRootBehavior()->step( decodedContext );
-    EXPECT_EQ( 20, decodedContext->getValue< crimild::Int32 >( "input.x" ) );
-    decodedBehaviors->getBehaviorTree( "updateInputX" )->getRootBehavior()->step( decodedContext );
-    EXPECT_EQ( 30, decodedContext->getValue< crimild::Int32 >( "input.x" ) );
+    Clock c;
+    controller->update( c ); // Just works
 }
 
+TEST( BehaviorController, it_intializes_behavior_when_calling_executeBehavior )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_does_not_intializes_behavior_twice_if_active )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+
+    // Not reinitialized since it's still active
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_deyals_behavior_execution_until_update )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_executes_behavior_only_once )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    // No longer executed since it already terminated
+    controller->update( Clock {} );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_calls_init_again_after_execution )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    // Re-initialized since it's no longer active
+    controller->execute( behavior );
+    EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_executes_again_after_reinit )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    // Reinit
+    controller->execute( behavior );
+    EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+
+    // Executes again
+    controller->update( Clock {} );
+    EXPECT_EQ( 2, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_executes_multiple_times_with_repeat )
+{
+    auto controller = crimild::alloc< BehaviorController >();
+    auto mock = crimild::alloc< MockBehavior >();
+    auto repeat = crimild::alloc< Repeat >();
+    repeat->setBehavior( mock );
+
+    controller->execute( repeat );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    // MockBehavior is always reinit-ed in each loop of Repeat
+    controller->update( Clock {} );
+    EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 3, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 2, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 4, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 3, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+    controller->update( Clock {} );
+    EXPECT_EQ( 5, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+    EXPECT_EQ( 4, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, coding )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::MockBehavior );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+
+    {
+        // Create a controller and execute it a couple of times
+        auto controller = crimild::alloc< BehaviorController >();
+        auto mock = crimild::alloc< MockBehavior >();
+        auto repeat = crimild::alloc< Repeat >();
+        repeat->setBehavior( mock );
+
+        controller->execute( repeat );
+        EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        EXPECT_EQ( 0, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+        controller->update( Clock {} );
+        EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        EXPECT_EQ( 1, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+        controller->update( Clock {} );
+        EXPECT_EQ( 3, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        EXPECT_EQ( 2, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+        // Encoding
+        encoder->encode( controller );
+    }
+
+    {
+        // Decoding
+        decoder->fromBytes( encoder->getBytes() );
+
+        auto controller = decoder->getObjectAt< BehaviorController >( 0 );
+        ASSERT_NE( nullptr, controller );
+
+        // Check initial values
+        ASSERT_TRUE( controller->getContext()->has( "initCount" ) );
+        // Init is called again during controller decoding. So the counter is incremented.
+        EXPECT_EQ( 4, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        // But execute counter remains the same
+        ASSERT_TRUE( controller->getContext()->has( "executeCount" ) );
+        EXPECT_EQ( 2, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+        // Execute again
+        controller->update( Clock {} );
+        EXPECT_EQ( 5, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        EXPECT_EQ( 3, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+
+        controller->update( Clock {} );
+        EXPECT_EQ( 6, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+        EXPECT_EQ( 4, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+    }
+}
