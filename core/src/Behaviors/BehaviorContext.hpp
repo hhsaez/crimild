@@ -33,9 +33,11 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/RTTI.hpp"
 #include "Foundation/Types.hpp"
+#include "Foundation/Variant.hpp"
 #include "Mathematics/Clock.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
+#include "Mathematics/io.hpp"
 
 #include <functional>
 #include <string>
@@ -48,8 +50,8 @@ namespace crimild {
     namespace behaviors {
 
         /**
-			 \brief Stores an inmutable value for the context
-		*/
+                         \brief Stores an inmutable value for the context
+                */
         class BehaviorContextValue : public coding::Codable {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContextValue )
         public:
@@ -65,8 +67,8 @@ namespace crimild {
             std::string _value;
 
             /**
-				\name Coding support
-			*/
+                                \name Coding support
+                        */
             //@{
 
         public:
@@ -77,10 +79,10 @@ namespace crimild {
         };
 
         /**
-		   \brief Execution context
+                   \brief Execution context
 
-		   \todo Add support for value observers
-		*/
+                   \todo Add support for value observers
+                */
         class BehaviorContext : public coding::Codable {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContext )
 
@@ -120,13 +122,64 @@ namespace crimild {
             crimild::Clock _clock;
 
         public:
-            bool hasValue( std::string key )
+            inline bool has( std::string_view key ) const noexcept
+            {
+                return m_values.count( std::string( key ) ) != 0;
+            }
+
+            inline void set( std::string_view key, std::shared_ptr< Variant > const &var ) noexcept
+            {
+                m_values[ std::string( key ) ] = var;
+            }
+
+            /**
+             * @brief Set a value in the context
+             *
+             * If a value already exists with the given key, it will be overriden with
+             * the new one.
+             */
+            template< typename T >
+            inline SharedPointer< Variant > set( std::string_view key, const T &value ) noexcept
+            {
+                auto var = crimild::alloc< Variant >( value );
+                set( key, var );
+                return var;
+            }
+
+            std::shared_ptr< Variant > &get( std::string_view key ) noexcept
+            {
+                assert( has( key ) );
+                return m_values.at( std::string( key ) );
+            }
+
+            /**
+             * @brief Get an existing value or create a new entry with the default one
+             *
+             * This is different than using set(), since we only create a new entry if
+             * one does not already exists (in which case we return the existing one
+             * without overriding).
+             */
+            template< typename T >
+            inline SharedPointer< Variant > getOrCreate( std::string_view key, const T &defaultValue ) noexcept
+            {
+                if ( has( key ) ) {
+                    return get( key );
+                } else {
+                    return set( key, defaultValue );
+                }
+            }
+
+        private:
+            std::unordered_map< std::string, std::shared_ptr< Variant > > m_values;
+
+        public:
+            [[deprecated]] bool hasValue( std::string key )
             {
                 return _values.contains( key );
             }
 
             template< typename T >
-            void setValue( std::string key, T value )
+            [[deprecated]] void setValue( std::string key, T value )
             {
                 std::stringstream ss;
                 ss << value;
@@ -134,7 +187,7 @@ namespace crimild {
             }
 
             template< typename T >
-            T getValue( std::string key )
+            [[deprecated]] T getValue( std::string key )
             {
                 if ( !hasValue( key ) ) {
                     crimild::Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No context value set for key ", key );
@@ -149,11 +202,11 @@ namespace crimild {
             }
 
         private:
-            Map< std::string, SharedPointer< BehaviorContextValue > > _values;
+            [[deprecated]] Map< std::string, SharedPointer< BehaviorContextValue > > _values;
 
             /**
-			   \name Coding support
-			*/
+                           \name Coding support
+                        */
             //@{
 
         public:
