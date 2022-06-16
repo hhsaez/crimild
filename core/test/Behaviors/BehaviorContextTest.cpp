@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,29 +26,64 @@
  */
 
 #include "Behaviors/BehaviorContext.hpp"
-#include "Coding/MemoryEncoder.hpp"
+
 #include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 using namespace crimild::behaviors;
 
-TEST( BehaviorContextTest, coding )
+TEST( BehaviorContext, can_set_values )
 {
     auto context = crimild::alloc< BehaviorContext >();
-    context->setValue( "input.x", 10 );
-    context->setValue( "input.y", 20 );
 
-	auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( context );
-	auto bytes = encoder->getBytes();
-	auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
+    EXPECT_FALSE( context->has( "value" ) );
 
-	auto decodedContext = decoder->getObjectAt< BehaviorContext >( 0 );
-	EXPECT_TRUE( decodedContext != nullptr );
-    EXPECT_EQ( 10, decodedContext->getValue< crimild::Int32 >( "input.x" ) );
-    EXPECT_EQ( 20, decodedContext->getValue< crimild::Int32 >( "input.y" ) );
+    context->set( "value", Int32( 20 ) );
+    EXPECT_TRUE( context->has( "value" ) );
+    EXPECT_TRUE( context->get( "value" )->isValid() );
+    EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
 }
 
+TEST( BehaviorContext, works_with_variants )
+{
+    auto context = crimild::alloc< BehaviorContext >();
+
+    EXPECT_FALSE( context->has( "value" ) );
+
+    context->set( "value", crimild::alloc< Variant >( Int32( 20 ) ) );
+    EXPECT_TRUE( context->has( "value" ) );
+    EXPECT_TRUE( context->get( "value" )->isValid() );
+    EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
+}
+
+TEST( BehaviorContext, get_or_default )
+{
+    auto context = crimild::alloc< BehaviorContext >();
+
+    auto var = context->getOrCreate( "value", Int32( 42 ) );
+    EXPECT_TRUE( context->has( "value" ) );
+    EXPECT_TRUE( context->get( "value" )->isValid() );
+    EXPECT_EQ( 42, context->get( "value" )->get< Int32 >() );
+    EXPECT_EQ( 42, var->get< Int32 >() );
+}
+
+TEST( BehaviorContext, coding )
+{
+    auto context = crimild::alloc< BehaviorContext >();
+    context->set( "input.x", crimild::alloc< Variant >( Int32( 10 ) ) );
+    context->set( "input.y", crimild::alloc< Variant >( Int32( 20 ) ) );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( context );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+
+    auto decodedContext = decoder->getObjectAt< BehaviorContext >( 0 );
+    EXPECT_TRUE( decodedContext != nullptr );
+    EXPECT_EQ( 10, decodedContext->get( "input.x" )->get< crimild::Int32 >() );
+    EXPECT_EQ( 20, decodedContext->get( "input.y" )->get< crimild::Int32 >() );
+}
