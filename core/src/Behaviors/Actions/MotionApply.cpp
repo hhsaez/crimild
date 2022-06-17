@@ -1,5 +1,11 @@
 #include "MotionApply.hpp"
 
+#include "Components/MotionStateComponent.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/length.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Navigation/NavigationController.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -8,27 +14,70 @@ using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 using namespace crimild::navigation;
 
-/*
-Vector3f truncate( Vector3f v, float max )
+Vector3 clamp( Vector3 v, Real lo, Real hi ) noexcept
 {
-    auto i = max / ( Numericf::ZERO_TOLERANCE + v.getMagnitude() );
+    const auto L = length( v );
+    if ( isZero( L ) ) {
+        return v;
+    }
+    auto i = abs( hi - lo ) / L;
     i = i > 0 && i < 1.0 ? i : 1.0;
     return v * i;
 }
-*/
 
-MotionApply::MotionApply( void )
+void MotionApply::init( BehaviorContext *context )
 {
-}
+    Behavior::init( context );
 
-MotionApply::~MotionApply( void )
-{
+    auto agent = context->getAgent();
+    if ( agent == nullptr ) {
+        return;
+    }
+
+    m_motion = agent->getComponent< MotionState >();
+    if ( m_motion == nullptr ) {
+        m_motion = agent->attachComponent< MotionState >();
+    }
 }
 
 Behavior::State MotionApply::step( BehaviorContext *context )
 {
-    assert( false && "TODO" );
+    auto agent = context->getAgent();
+    if ( agent == nullptr ) {
+        CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
+        return Behavior::State::FAILURE;
+    }
 
+    if ( m_motion == nullptr ) {
+        CRIMILD_LOG_WARNING( "MotionState not initialized" );
+        return Behavior::State::FAILURE;
+    }
+
+    const auto dt = context->getClock().getDeltaTime();
+
+    // Use references to simplify code
+    auto &position = m_motion->position;
+    auto &velocity = m_motion->velocity;
+    auto &steering = m_motion->steering;
+    auto &maxVelocity = m_motion->maxVelocity;
+
+    const auto mass = m_motion->mass;
+    const auto maxForce = m_motion->maxForce;
+
+    steering = clamp( steering, 0, maxForce );
+
+    if ( isZero( mass ) ) {
+        // If there is no mass, then motion is instantaneus and no inertia is applied
+        velocity = steering;
+    } else {
+        // Agent has a mass, so movement should account for some inertia.
+        steering = steering / mass;
+        velocity = clamp( velocity + steering, 0, maxVelocity );
+    }
+
+    position = position + dt * velocity;
+
+    agent->setLocal( translation( vector3( position ) ) );
 #if 0
 	auto velocity = context->getValue< Vector3f >( "motion.velocity" );
 	auto steering = context->getValue< Vector3f >( "motion.steering" );

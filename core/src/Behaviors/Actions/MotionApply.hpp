@@ -5,36 +5,44 @@
 
 namespace crimild {
 
-	namespace behaviors {
+    class MotionState;
 
-		namespace actions {
+    namespace behaviors {
 
-			class MotionApply : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionApply )
-				
-			public:
-				explicit MotionApply( void );
-				virtual ~MotionApply( void );
-				
-				virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+        namespace actions {
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+            /**
+             * \brief Transforms agent based on current motion state
+             *
+             * This is usually the last one in a sequence of motion behaviors. It should be
+             * used alognside MotionReset
+             */
+            class MotionApply : public Behavior {
+                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionApply )
 
-		}
+            public:
+                virtual void init( crimild::behaviors::BehaviorContext *context ) override;
+                virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-	}
+            private:
+                MotionState *m_motion = nullptr;
+
+                /**
+                   \name Coding support
+                */
+                //@{
+
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+
+                //@}
+            };
+
+        }
+
+    }
 
 }
 
 #endif
-
