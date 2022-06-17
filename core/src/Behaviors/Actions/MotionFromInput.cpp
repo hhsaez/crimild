@@ -27,6 +27,8 @@
 
 #include "Behaviors/Actions/MotionFromInput.hpp"
 
+#include "Coding/Decoder.cpp"
+#include "Coding/Encoder.hpp"
 #include "Components/MotionStateComponent.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Input.hpp"
@@ -65,9 +67,25 @@ Behavior::State MotionFromInput::step( BehaviorContext *context )
     auto &steering = m_motion->steering;
 
     if ( auto input = Input::getInstance() ) {
-        steering.x = input->getAxis( Input::AXIS_HORIZONTAL );
-        steering.y = input->getAxis( Input::AXIS_VERTICAL );
+        steering.x = m_speed * input->getAxis( Input::AXIS_HORIZONTAL );
+        steering.y = m_speed * input->getAxis( Input::AXIS_VERTICAL );
     }
 
+    m_motion->maxForce = m_speed;
+
     return Behavior::State::SUCCESS;
+}
+
+void MotionFromInput::encode( coding::Encoder &encoder )
+{
+    Behavior::encode( encoder );
+
+    encoder.encode( "speed", m_speed );
+}
+
+void MotionFromInput::decode( coding::Decoder &decoder )
+{
+    Behavior::decode( decoder );
+
+    decoder.decode( "speed", m_speed );
 }

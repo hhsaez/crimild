@@ -45,8 +45,23 @@ namespace crimild {
                 virtual void init( BehaviorContext *context ) override;
                 virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
+                inline float getSpeed( void ) const noexcept { return m_speed; }
+                inline void setSpeed( float value ) noexcept { m_speed = value; }
+
             private:
                 MotionState *m_motion = nullptr;
+                float m_speed = 1.0f;
+
+                /**
+                     \name Coding support
+                */
+                //@{
+
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+
+                //@}
             };
 
         }
