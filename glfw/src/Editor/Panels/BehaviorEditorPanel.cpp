@@ -52,7 +52,8 @@ const std::set< std::string > &getBehaviorList( void ) noexcept
             "crimild::behaviors::composites",
             "crimild::behaviors::conditions",
             "crimild::behaviors::decorators",
-        } );
+        }
+    );
     return behaviors;
 }
 
@@ -77,7 +78,6 @@ static void showActionDetails( behaviors::Behavior *action ) noexcept
 struct GraphEditorDelegate : public GraphEditor::Delegate {
     struct Node {
         enum Type {
-            TREE,
             DECORATOR,
             ACTION,
             COMPOSITE,
@@ -87,7 +87,6 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
         Type type;
 
         union {
-            behaviors::BehaviorTree *tree = nullptr;
             behaviors::composites::Composite *composite;
             behaviors::decorators::Decorator *decorator;
             behaviors::Behavior *action;
@@ -118,32 +117,8 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
             return;
         }
 
-        configure( behaviors->getBehaviorTree(), Vector2 { 0, 300 } );
-    }
-
-    void configure( behaviors::BehaviorTree *tree, const Vector2 &offset )
-    {
-        m_index[ tree->getUniqueID() ] = m_nodes.size();
-        m_nodes.push_back(
-            Node {
-                .type = Node::Type::TREE,
-                .name = tree->getName(),
-                .tree = tree,
-                .x = offset.x,
-                .y = offset.y,
-                .templateIndex = m_templates.size(),
-            } );
-        m_templates.emplace_back( getBehaviorTreeTemplate() );
-
-        auto root = tree->getRootBehavior();
-        if ( root == nullptr ) {
-            return;
-        }
-
-        size_t rootIdx;
-        if ( configure( root, offset + Vector2 { 400, 0 }, rootIdx ) ) {
-            m_links.push_back( { 0, 0, rootIdx, 0 } );
-        }
+        size_t rootId;
+        configure( behaviors->getCurrentBehavior().get(), Vector2 { 0, 300 }, rootId );
     }
 
     bool configure( behaviors::Behavior *behavior, const Vector2 offset, size_t &idx )
@@ -162,7 +137,8 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
                 .templateIndex = m_templates.size(),
                 .x = offset.x,
                 .y = offset.y,
-            } );
+            }
+        );
 
         if ( auto composite = dynamic_cast< behaviors::composites::Composite * >( behavior ) ) {
             m_nodes[ idx ].type = Node::Type::COMPOSITE;
@@ -267,14 +243,13 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
                 // We found the node.
                 // Remove connections for simple nodes or if the connection is the output one.
                 return !supportsMultipleConnections || l.mOutputNodeIndex == outputNodeIndex;
-            } );
+            }
+        );
         if ( it != m_links.end() ) {
             m_links.erase( it );
         }
 
-        if ( in.type == Node::Type::TREE ) {
-            in.tree->setRootBehavior( outBehavior );
-        } else if ( in.type == Node::Type::COMPOSITE ) {
+        if ( in.type == Node::Type::COMPOSITE ) {
             // Detach behavior from composite. This handles the case where we're swapping with a different outlet.
             in.composite->detachBehavior( outBehavior );
             in.composite->setBehavior( outBehavior, inputSlotIndex );
@@ -303,9 +278,7 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
             }
         };
 
-        if ( in.type == Node::Type::TREE ) {
-            in.tree->setRootBehavior( nullptr );
-        } else if ( in.type == Node::Type::COMPOSITE ) {
+        if ( in.type == Node::Type::COMPOSITE ) {
             in.composite->detachBehavior( getOutBehavior() );
         } else if ( in.type == Node::Type::DECORATOR ) {
             in.decorator->setBehavior( nullptr );
@@ -339,21 +312,6 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
     const GraphEditor::Template GetTemplate( GraphEditor::TemplateIndex index ) override
     {
         return m_templates[ index ];
-    }
-
-    GraphEditor::Template getBehaviorTreeTemplate( void ) const
-    {
-        return {
-            IM_COL32( 160, 160, 180, 255 ),
-            IM_COL32( 140, 140, 100, 255 ),
-            IM_COL32( 150, 150, 110, 255 ),
-            0,
-            nullptr,
-            nullptr,
-            1,
-            nullptr,
-            nullptr,
-        };
     }
 
     GraphEditor::Template getBehaviorActionTemplate( void ) const

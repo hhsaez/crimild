@@ -102,6 +102,7 @@
 #include "Components/FreeLookCameraComponent.hpp"
 #include "Components/LambdaComponent.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Components/MotionStateComponent.hpp"
 #include "Components/NodeComponent.hpp"
 #include "Components/NodeComponentCatalog.hpp"
 #include "Components/OrbitComponent.hpp"

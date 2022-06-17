@@ -28,6 +28,7 @@
 #include "Editor/EditorUtils.hpp"
 
 #include "Behaviors/Actions/Rotate.hpp"
+#include "Behaviors/Decorators/Repeat.hpp"
 #include "Behaviors/withBehavior.hpp"
 #include "Coding/FileDecoder.hpp"
 #include "Coding/FileEncoder.hpp"
@@ -79,17 +80,27 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
             box->setLocal( translation( 0, 1, 0 ) );
             return behaviors::withBehavior(
                 box,
-                behaviors::actions::rotate(
-                    normalize( Vector3::Constants::UNIT_Y ),
-                    0.1f ) );
-        }() );
+                [] {
+                    auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
+                    repeat->setBehavior(
+                        behaviors::actions::rotate(
+                            normalize( Vector3::Constants::UNIT_Y ),
+                            0.1f
+                        )
+                    );
+                    return repeat;
+                }()
+            );
+        }()
+    );
 
     scene->attachNode(
         [ & ] {
             auto plane = geometry( crimild::alloc< QuadPrimitive >(), ColorRGB { 0.75f, 0.75f, 0.75f } );
             plane->setLocal( rotationX( -numbers::PI_DIV_2 ) * scale( 10.0f ) );
             return plane;
-        }() );
+        }()
+    );
 
     scene->attachNode(
         [ & ] {
@@ -99,10 +110,13 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
                 lookAt(
                     Point3 { 0, 10, 10 },
                     Point3 { 0, 0, 0 },
-                    Vector3 { 0, 1, 0 } ) );
+                    Vector3 { 0, 1, 0 }
+                )
+            );
             light->setCastShadows( true );
             return light;
-        }() );
+        }()
+    );
 
     scene->attachNode( [] {
         auto camera = crimild::alloc< Camera >();
@@ -110,7 +124,9 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
             lookAt(
                 Point3 { 10, 10, 10 },
                 Point3 { 0, 0, 0 },
-                Vector3::Constants::UP ) );
+                Vector3::Constants::UP
+            )
+        );
         return camera;
     }() );
 
@@ -118,7 +134,8 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
         [] {
             auto skybox = crimild::alloc< Skybox >( ColorRGB { 0.28, 0.63, 0.72 } );
             return skybox;
-        }() );
+        }()
+    );
 
     scene->perform( StartComponents() );
     scene->perform( UpdateWorldState() );

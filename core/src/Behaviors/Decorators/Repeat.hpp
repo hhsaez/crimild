@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,45 +32,44 @@
 
 namespace crimild {
 
-	namespace behaviors {
+    namespace behaviors {
 
-		namespace decorators {
+        namespace decorators {
 
-			/**
-			   \brief A behavior that repeats its child behavior a number of times
-			 */
-			class Repeat : public Decorator {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
-				
-			public:
-				Repeat( void );
-				explicit Repeat( crimild::Int16 times );
-				virtual ~Repeat( void );
+            /**
+               \brief A behavior that repeats its child behavior a number of times
+             */
+            class Repeat : public Decorator {
+                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
 
-				virtual void init( BehaviorContext *context ) override;
-				virtual Behavior::State step( BehaviorContext *context ) override;
+            public:
+                Repeat( void ) noexcept = default;
+                explicit Repeat( crimild::Int16 times ) noexcept;
+                virtual ~Repeat( void ) noexcept = default;
 
-			private:
-				crimild::Int16 _times = -1;
-				crimild::Int16 _loopCount = 0;
-                
+                virtual void init( BehaviorContext *context ) override;
+                virtual Behavior::State step( BehaviorContext *context ) override;
+
+            private:
+                crimild::Int16 _times = -1;
+                crimild::Int16 _loopCount = 0;
+
                 /**
                     \name Coding support
                  */
                 //@{
-                
+
             public:
                 virtual void encode( coding::Encoder &encoder ) override;
                 virtual void decode( coding::Decoder &decoder ) override;
-                
+
                 //@}
-			};
+            };
 
-		}
+        }
 
-	}
-	
+    }
+
 }
 
 #endif
-

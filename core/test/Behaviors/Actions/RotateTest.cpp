@@ -54,28 +54,3 @@ TEST( Rotate, coding )
     EXPECT_EQ( rotate->getAxis(), decoded->getAxis() );
     EXPECT_EQ( rotate->getAngle(), decoded->getAngle() );
 }
-
-TEST( Rotate, coding_with_rotate )
-{
-    auto node = behaviors::withBehavior(
-        crimild::alloc< Node >(),
-        behaviors::actions::rotate(
-            Vector3::Constants::UNIT_Y,
-            0.1f ) );
-
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( node );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
-
-    auto decoded = decoder->getObjectAt< Node >( 0 );
-    ASSERT_NE( nullptr, decoded );
-    ASSERT_NE( nullptr, decoded->getComponent< BehaviorController >() );
-    ASSERT_NE( nullptr, decoded->getComponent< BehaviorController >()->getBehaviorTree() );
-    ASSERT_NE( nullptr, decoded->getComponent< BehaviorController >()->getBehaviorTree()->getRootBehavior() );
-
-    auto rotate = static_cast< behaviors::actions::Rotate * >( decoded->getComponent< BehaviorController >()->getBehaviorTree()->getRootBehavior() );
-    EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), rotate->getAxis() );
-    EXPECT_EQ( 0.1f, rotate->getAngle() );
-}

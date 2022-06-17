@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,35 +32,42 @@
 
 namespace crimild {
 
-	namespace behaviors {
+    namespace behaviors {
 
-		namespace composites {
+        namespace composites {
 
-			/**
-			   \brief Execute all children sequentially
-			   
-			   This behavior succeedes only if all of its children do.
-			*/
-			class Sequence : public Composite {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Sequence )
-				
-			public:
-				explicit Sequence( void );
-				virtual ~Sequence( void );
-				
-				virtual void init( BehaviorContext *context ) override;
-				
-				virtual Behavior::State step( BehaviorContext *context ) override;
-				
-			private:
-				int _currentBehavior = 0;
-			};
+            /**
+               \brief Execute all children sequentially
 
-		}
+               This behavior succeedes only if all of its children do.
+            */
+            class Sequence : public Composite {
+                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Sequence )
 
-	}
-	
+            public:
+                Sequence( void ) = default;
+
+                explicit Sequence( std::vector< SharedPointer< Behavior > > const &bs ) noexcept
+                {
+                    for ( auto &b : bs ) {
+                        attachBehavior( b );
+                    }
+                }
+
+                virtual ~Sequence( void ) = default;
+
+                virtual void init( BehaviorContext *context ) override;
+
+                virtual Behavior::State step( BehaviorContext *context ) override;
+
+            private:
+                int _currentBehavior = 0;
+            };
+
+        }
+
+    }
+
 }
 
 #endif
-

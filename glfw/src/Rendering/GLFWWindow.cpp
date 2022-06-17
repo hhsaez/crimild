@@ -75,7 +75,8 @@ public:
 
                     outColor = vec4( color, 1.0 );
                 }
-            )" ),
+            )"
+          ),
           m_present( renderDevice )
     {
         // no-op
@@ -441,7 +442,8 @@ bool Window::createWindow( void )
         height,
         simName.c_str(),
         fullscreen ? glfwGetPrimaryMonitor() : NULL,
-        NULL );
+        NULL
+    );
     if ( m_window == nullptr ) {
         CRIMILD_LOG_FATAL( "Failed to create window" );
         exit( 1 );
@@ -464,11 +466,13 @@ bool Window::createWindow( void )
                         .extent = {
                             .width = Real32( width ),
                             .height = Real32( height ),
-                        } } );
+                        } }
+                );
             } else {
                 CRIMILD_LOG_WARNING( "glfwSetWindowSizeCallback: GLFW window user pointer not set" );
             }
-        } );
+        }
+    );
 
 #if !defined( CRIMILD_ENABLE_VULKAN )
     glfwMakeContextCurrent( _window );
@@ -545,9 +549,11 @@ void Window::registerEventCallbacks( void ) noexcept
                             .scancode = UInt32( scancode ),
                             .mod = UInt32( mod ),
                         },
-                    } );
+                    }
+                );
             }
-        } );
+        }
+    );
 
     glfwSetCharCallback(
         m_window,
@@ -561,9 +567,11 @@ void Window::registerEventCallbacks( void ) noexcept
                         .text = {
                             .codepoint = codepoint,
                         },
-                    } );
+                    }
+                );
             }
-        } );
+        }
+    );
 
     glfwSetMouseButtonCallback(
         m_window,
@@ -614,11 +622,13 @@ void Window::registerEventCallbacks( void ) noexcept
                                         Real( y / window->m_extent.height ),
                                     },
                                 },
-                            } );
+                            }
+                        );
                     }
                 }
             }
-        } );
+        }
+    );
 
     // Required in order to receive mouse motion events when cursor is disabled
     if ( glfwRawMouseMotionSupported() ) {
@@ -644,9 +654,11 @@ void Window::registerEventCallbacks( void ) noexcept
                                 Real( ypos / window->m_extent.height ),
                             },
                         },
-                    } );
+                    }
+                );
             }
-        } );
+        }
+    );
 
     glfwSetScrollCallback(
         m_window,
@@ -660,9 +672,11 @@ void Window::registerEventCallbacks( void ) noexcept
                         .wheel = MouseWheel {
                             .x = Int32( std::floor( xoffset ) ),
                             .y = Int32( std::floor( yoffset ) ),
-                        } } );
+                        } }
+                );
             }
-        } );
+        }
+    );
 }
 
 void Window::destroyWindow( void )

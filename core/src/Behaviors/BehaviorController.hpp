@@ -37,18 +37,16 @@ namespace crimild {
     namespace behaviors {
 
         class Behavior;
-        class BehaviorTree;
         class BehaviorContext;
 
-        class BehaviorController : public crimild::NodeComponent,
-                                   public crimild::Messenger {
+        class BehaviorController
+            : public crimild::NodeComponent,
+              public crimild::Messenger {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
 
         public:
             static constexpr const crimild::Char *DEFAULT_BEHAVIOR_NAME = "__default__";
             static constexpr const crimild::Char *SCENE_STARTED_BEHAVIOR_NAME = "__scene_started__";
-
-            static constexpr const crimild::Char *SETTINGS_EXECUTE_BEHAVIORS = "execute_behaviors";
 
         public:
             BehaviorController( void );
@@ -62,6 +60,8 @@ namespace crimild {
         public:
             crimild::behaviors::BehaviorContext *getContext( void ) { return crimild::get_ptr( _context ); }
 
+            inline SharedPointer< Behavior > &getCurrentBehavior( void ) noexcept { return m_currentBehavior; }
+
             Behavior *getBehavior( std::string_view eventName ) noexcept;
             void attachBehavior( std::string_view eventName, SharedPointer< Behavior > const &behavior ) noexcept;
 
@@ -71,36 +71,19 @@ namespace crimild {
              * If the behavior is not already active, this method will automatically call Behavior::init()
              * and set it as active. Behavior::step() will be delayed until the call to update() in this
              * component.
+             *
+             * If forced, the behavior will be executed anyways regardless of whether it is active or not.
+             * This is used internally.
              */
-            void execute( SharedPointer< Behavior > const &behavior ) noexcept;
-
-            [[deprecated]] void attachBehaviorTree( SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
-            [[deprecated]] void attachBehaviorTree( std::string eventName, SharedPointer< behaviors::BehaviorTree > const &behaviorTree );
-
-            /**
-                         \brief Executes the behavior tree matching the given name
-
-                        \remarks If no behavior is found, the current behavior is not modified
-                        */
-            [[deprecated]] bool executeBehaviorTree( std::string name );
-
-            [[deprecated]] inline crimild::behaviors::BehaviorTree *getBehaviorTree( std::string name = DEFAULT_BEHAVIOR_NAME ) { return crimild::get_ptr( _behaviors[ name ] ); }
+            void execute( SharedPointer< Behavior > const &behavior, bool force = false ) noexcept;
 
         private:
-            inline SharedPointer< Behavior > &getCurrentBehavior( void ) noexcept { return m_currentBehavior; }
             inline void setCurrentBehavior( SharedPointer< Behavior > const &behavior ) noexcept { m_currentBehavior = behavior; }
-
-            [[deprecated]] crimild::behaviors::BehaviorTree *getCurrentBehaviorTree( void ) { return _currentBehaviorTree; }
-            [[deprecated]] void setCurrentBehaviorTree( crimild::behaviors::BehaviorTree *behaviorTree ) { _currentBehaviorTree = behaviorTree; }
 
         private:
             SharedPointer< crimild::behaviors::BehaviorContext > _context;
             std::map< std::string, SharedPointer< Behavior > > m_behaviors;
             SharedPointer< Behavior > m_currentBehavior;
-
-            [[deprecated]] Map< std::string, SharedPointer< crimild::behaviors::BehaviorTree > > _behaviors;
-            [[deprecated]] crimild::behaviors::BehaviorTree *_currentBehaviorTree = nullptr;
-            std::string _currentEvent;
 
             /**
                 \name Clonning
@@ -112,8 +95,8 @@ namespace crimild {
             //@}
 
             /**
-                            \name Coding support
-                        */
+                \name Coding support
+            */
             //@{
 
         public:

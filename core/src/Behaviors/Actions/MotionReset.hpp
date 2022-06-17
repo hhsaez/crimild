@@ -42,11 +42,11 @@ namespace crimild {
              * \brief Resets motion state and create default values if needed.
              *
              * During initialization, this behavior will fetch the current motion
-             * state (position, velocity and steering) from the context or define
-             * default values for each of the variables. Therefore, this behavior
-             * is usually the first one in the a sequence of motion behaviors.
+             * state (position, velocity and steering) from the agent or attach one
+             * if none is present. Therefore, this behavior is usually the first
+             * one in the a sequence of motion behaviors.
              *
-             * During each step, the agent position is copied to the corresponding
+             * During each step, the agent's position is copied to the corresponding
              * field in motion state. Steering is reset too. Velocity is **not**
              * changed, though.
              */
