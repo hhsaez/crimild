@@ -28,6 +28,7 @@
 #include "Behaviors/Actions/MotionReset.hpp"
 
 #include "Behaviors/withBehavior.hpp"
+#include "Components/MotionStateComponent.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -37,77 +38,34 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
-TEST( MotionReset, it_set_default_values_to_context_on_init )
+TEST( MotionReset, it_attaches_motion_state_component_on_init_if_not_present )
 {
     auto node = crimild::alloc< Node >();
     auto controller = node->attachComponent< BehaviorController >();
 
-    EXPECT_FALSE( controller->getContext()->has( "motion.velocity" ) );
-    EXPECT_FALSE( controller->getContext()->has( "motion.position" ) );
-    EXPECT_FALSE( controller->getContext()->has( "motion.steering" ) );
+    ASSERT_EQ( nullptr, node->getComponent< MotionState >() );
 
     controller->execute( crimild::alloc< MotionReset >() );
 
-    EXPECT_TRUE( controller->getContext()->has( "motion.velocity" ) );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), controller->getContext()->get( "motion.velocity" )->get< Vector3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.position" ) );
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), controller->getContext()->get( "motion.position" )->get< Point3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.steering" ) );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), controller->getContext()->get( "motion.steering" )->get< Vector3 >() );
+    ASSERT_NE( nullptr, node->getComponent< MotionState >() );
 }
 
-TEST( MotionReset, it_does_not_modify_existing_values_on_init )
+TEST( MotionReset, it_does_not_modify_existing_state_on_init_if_already_present )
 {
     auto node = crimild::alloc< Node >();
     auto controller = node->attachComponent< BehaviorController >();
 
-    controller->getContext()->set( "motion.velocity", Vector3 { 1, 2, 3 } );
-    controller->getContext()->set( "motion.position", Point3 { 4, 5, 6 } );
-    controller->getContext()->set( "motion.steering", Vector3 { 7, 8, 9 } );
+    auto motion = node->attachComponent< MotionState >();
+    motion->velocity = Vector3 { 1, 2, 3 };
+    motion->position = Point3 { 4, 5, 6 };
+    motion->steering = Vector3 { 7, 8, 9 };
 
     controller->execute( crimild::alloc< MotionReset >() );
 
-    EXPECT_TRUE( controller->getContext()->has( "motion.velocity" ) );
-    EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), controller->getContext()->get( "motion.velocity" )->get< Vector3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.position" ) );
-    EXPECT_EQ( ( Point3 { 4, 5, 6 } ), controller->getContext()->get( "motion.position" )->get< Point3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.steering" ) );
-    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), controller->getContext()->get( "motion.steering" )->get< Vector3 >() );
-}
-
-TEST( MotionReset, it_reset_motion_state_on_step )
-{
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
-
-    node->setLocal( translation( 10, 20, 30 ) );
-    controller->getContext()->set( "motion.steering", Vector3 { 7, 8, 9 } );
-
-    controller->execute( crimild::alloc< MotionReset >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.velocity" ) );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), controller->getContext()->get( "motion.velocity" )->get< Vector3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.position" ) );
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), controller->getContext()->get( "motion.position" )->get< Point3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.steering" ) );
-    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), controller->getContext()->get( "motion.steering" )->get< Vector3 >() );
-
-    controller->update( Clock {} );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.velocity" ) );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), controller->getContext()->get( "motion.velocity" )->get< Vector3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.position" ) );
-    EXPECT_EQ( ( Point3 { 10, 20, 30 } ), controller->getContext()->get( "motion.position" )->get< Point3 >() );
-
-    EXPECT_TRUE( controller->getContext()->has( "motion.steering" ) );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), controller->getContext()->get( "motion.steering" )->get< Vector3 >() );
+    ASSERT_NE( nullptr, node->getComponent< MotionState >() );
+    EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
+    EXPECT_EQ( ( Point3 { 4, 5, 6 } ), motion->position );
+    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
 }
 
 TEST( MotionReset, it_fails_if_no_agent_exists )
@@ -116,4 +74,47 @@ TEST( MotionReset, it_fails_if_no_agent_exists )
     auto behavior = crimild::alloc< MotionReset >();
 
     EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
+}
+
+TEST( MotionReset, it_fails_if_executed_without_init )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+    auto behavior = crimild::alloc< MotionReset >();
+
+    EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
+}
+
+TEST( MotionReset, it_succeeds )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+    auto behavior = crimild::alloc< MotionReset >();
+
+    controller->execute( behavior );
+
+    EXPECT_EQ( Behavior::State::SUCCESS, behavior->step( controller->getContext() ) );
+}
+
+TEST( MotionReset, it_resets_motion_state_on_step )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+
+    node->setLocal( translation( 10, 20, 30 ) );
+
+    auto motion = node->attachComponent< MotionState >();
+    motion->steering = Vector3 { 7, 8, 9 };
+
+    controller->execute( crimild::alloc< MotionReset >() );
+
+    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), motion->position );
+    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
+
+    controller->update( Clock {} );
+
+    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+    EXPECT_EQ( ( Point3 { 10, 20, 30 } ), motion->position );
+    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
 }
