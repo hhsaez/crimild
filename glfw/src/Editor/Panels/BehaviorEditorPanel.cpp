@@ -27,6 +27,7 @@
 
 #include "Editor/Panels/BehaviorEditorPanel.hpp"
 
+#include "Behaviors/Actions/MotionFromInput.hpp"
 #include "Behaviors/Actions/PrintMessage.hpp"
 #include "Behaviors/Actions/Rotate.hpp"
 #include "Behaviors/BehaviorController.hpp"
@@ -72,6 +73,10 @@ static void showActionDetails( behaviors::Behavior *action ) noexcept
         strcpy( str, print->getMessage().c_str() );
         ImGui::InputText( "Message", str, 1024 );
         print->setMessage( str );
+    } else if ( auto motionFromInput = dynamic_cast< behaviors::actions::MotionFromInput * >( action ) ) {
+        float speed = motionFromInput->getSpeed();
+        ImGui::InputFloat( "Speed", &speed );
+        motionFromInput->setSpeed( speed );
     }
 }
 
