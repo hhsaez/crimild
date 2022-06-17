@@ -49,6 +49,7 @@
 #include "Behaviors/Actions/MotionAvoidOthers.hpp"
 #include "Behaviors/Actions/MotionAvoidWalls.hpp"
 #include "Behaviors/Actions/MotionComputePathToTarget.hpp"
+#include "Behaviors/Actions/MotionFromInput.hpp"
 #include "Behaviors/Actions/MotionReset.hpp"
 #include "Behaviors/Actions/MotionSeek.hpp"
 #include "Behaviors/Actions/PrintMessage.hpp"
