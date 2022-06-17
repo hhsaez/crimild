@@ -70,6 +70,11 @@ namespace crimild {
 
             virtual Behavior::State step( BehaviorContext * ) noexcept override
             {
+                if ( m_executeCount == nullptr ) {
+                    CRIMILD_LOG_WARNING( "Not initialized" );
+                    return Behavior::State::FAILURE;
+                }
+
                 m_executeCount->get< uint32_t >() += 1;
                 return Behavior::State::SUCCESS;
             }
@@ -110,18 +115,60 @@ TEST( BehaviorController, construction )
     controller->update( c ); // Just works
 }
 
-TEST( BehaviorController, it_intializes_behavior_when_calling_executeBehavior )
+TEST( BehaviorController, it_does_not_intializes_behavior_when_if_not_attached )
 {
     auto controller = crimild::alloc< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
+
+    ASSERT_FALSE( controller->getContext()->has( "initCount" ) );
+}
+
+TEST( BehaviorController, it_intializes_behavior_when_calling_execute_if_started )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior );
+
+    ASSERT_TRUE( controller->getContext()->has( "initCount" ) );
     EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_intializes_behavior_twice_if_forced )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior, true );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+
+    // Initialized again
+    controller->execute( behavior, true );
+    EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+}
+
+TEST( BehaviorController, it_may_intialize_behavior_twice_during_start )
+{
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
+    auto behavior = crimild::alloc< MockBehavior >();
+
+    controller->execute( behavior, true );
+    EXPECT_EQ( 1, controller->getContext()->get( "initCount" )->get< uint32_t >() );
+
+    // Initialized again
+    controller->start();
+    EXPECT_EQ( 2, controller->getContext()->get( "initCount" )->get< uint32_t >() );
 }
 
 TEST( BehaviorController, it_does_not_intializes_behavior_twice_if_active )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
@@ -134,7 +181,8 @@ TEST( BehaviorController, it_does_not_intializes_behavior_twice_if_active )
 
 TEST( BehaviorController, it_deyals_behavior_execution_until_update )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
@@ -147,7 +195,8 @@ TEST( BehaviorController, it_deyals_behavior_execution_until_update )
 
 TEST( BehaviorController, it_executes_behavior_only_once )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
@@ -164,7 +213,8 @@ TEST( BehaviorController, it_executes_behavior_only_once )
 
 TEST( BehaviorController, it_calls_init_again_after_execution )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
@@ -181,7 +231,8 @@ TEST( BehaviorController, it_calls_init_again_after_execution )
 
 TEST( BehaviorController, it_executes_again_after_reinit )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto behavior = crimild::alloc< MockBehavior >();
 
     controller->execute( behavior );
@@ -202,7 +253,8 @@ TEST( BehaviorController, it_executes_again_after_reinit )
 
 TEST( BehaviorController, it_executes_multiple_times_with_repeat )
 {
-    auto controller = crimild::alloc< BehaviorController >();
+    auto node = crimild::alloc< Node >();
+    auto controller = node->attachComponent< BehaviorController >();
     auto mock = crimild::alloc< MockBehavior >();
     auto repeat = crimild::alloc< Repeat >();
     repeat->setBehavior( mock );
@@ -238,7 +290,8 @@ TEST( BehaviorController, coding )
 
     {
         // Create a controller and execute it a couple of times
-        auto controller = crimild::alloc< BehaviorController >();
+        auto node = crimild::alloc< Node >();
+        auto controller = node->attachComponent< BehaviorController >();
         auto mock = crimild::alloc< MockBehavior >();
         auto repeat = crimild::alloc< Repeat >();
         repeat->setBehavior( mock );
@@ -256,15 +309,21 @@ TEST( BehaviorController, coding )
         EXPECT_EQ( 2, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
 
         // Encoding
-        encoder->encode( controller );
+        encoder->encode( node );
     }
 
     {
         // Decoding
         decoder->fromBytes( encoder->getBytes() );
 
-        auto controller = decoder->getObjectAt< BehaviorController >( 0 );
+        auto node = decoder->getObjectAt< Node >( 0 );
+        ASSERT_NE( nullptr, node );
+
+        auto controller = node->getComponent< BehaviorController >();
         ASSERT_NE( nullptr, controller );
+
+        // Don't forget to start controller
+        controller->start();
 
         // Check initial values
         ASSERT_TRUE( controller->getContext()->has( "initCount" ) );

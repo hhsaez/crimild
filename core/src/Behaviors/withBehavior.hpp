@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_BEHAVIORS_WITH_BEHAVIOR_
 
 #include "Behaviors/BehaviorController.hpp"
-#include "Behaviors/BehaviorTree.hpp"
 #include "SceneGraph/Node.hpp"
 
 namespace crimild {
@@ -38,8 +37,7 @@ namespace crimild {
 
         [[nodiscard]] inline SharedPointer< Node > withBehavior( SharedPointer< Node > const &node, SharedPointer< Behavior > const &behavior ) noexcept
         {
-            auto behaviorTree = crimild::alloc< BehaviorTree >( BehaviorController::DEFAULT_BEHAVIOR_NAME, behavior );
-            node->attachComponent< BehaviorController >()->attachBehaviorTree( behaviorTree );
+            node->attachComponent< BehaviorController >()->execute( behavior );
             return node;
         }
 
