@@ -29,6 +29,7 @@
 
 #include "Behaviors/Actions/Rotate.hpp"
 #include "Behaviors/BehaviorController.hpp"
+#include "Behaviors/Decorators/Repeat.hpp"
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Editor/EditorLayer.hpp"
@@ -77,7 +78,7 @@ static void behaviorControllerDetails( behaviors::BehaviorController *controller
     }
 
     // TODO: open behavior editor
-    //behaviorEditor( showBehaviorEditor, controller );
+    // behaviorEditor( showBehaviorEditor, controller );
 }
 
 static void nodeComponentsSection( Node *node )
@@ -91,11 +92,19 @@ static void nodeComponentsSection( Node *node )
                 } else if ( cmp->getClassName() == behaviors::BehaviorController::__CLASS_NAME ) {
                     behaviorControllerDetails( static_cast< behaviors::BehaviorController * >( cmp ) );
                 }
-            } );
+            }
+        );
 
         if ( node->getComponent< behaviors::BehaviorController >() == nullptr ) {
             if ( ImGui::Button( "Add Behaviors..." ) ) {
-                withBehavior( retain( node ), behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
+                withBehavior(
+                    retain( node ),
+                    [] {
+                        auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
+                        repeat->setBehavior( behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
+                        return repeat;
+                    }()
+                );
             }
         }
     }
@@ -123,7 +132,8 @@ static void lightPropertiesSection( Node *node )
                     case Light::Type::SPOT:
                         return "Spot";
                 }
-            }() );
+            }()
+        );
 
         auto energy = light->getEnergy();
         ImGui::InputFloat( "Energy", &energy );
