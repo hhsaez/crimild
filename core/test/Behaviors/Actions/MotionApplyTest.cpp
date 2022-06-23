@@ -32,9 +32,11 @@
 #include "Behaviors/Composites/Sequence.hpp"
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Components/MotionStateComponent.hpp"
+#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <gtest/gtest.h>

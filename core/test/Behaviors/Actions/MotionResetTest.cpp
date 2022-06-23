@@ -29,7 +29,9 @@
 
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
+#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_translation.hpp"
+#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <gtest/gtest.h>
