@@ -75,6 +75,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateContextValue );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateParticleSystem );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::AnimateSettingValue );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ClampPositionToView );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ClearTargets );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::CopyTransformFromTarget );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ResetNavigation );
