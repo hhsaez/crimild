@@ -139,7 +139,8 @@ namespace crimild {
                 crimild::UInt32 flags,
                 VkImage &image,
                 VkDeviceMemory &imageMemory,
-                void *imageData = nullptr ) const noexcept;
+                void *imageData = nullptr
+            ) const noexcept;
 
             void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept;
 
@@ -153,10 +154,34 @@ namespace crimild {
                 VkImageLayout oldLayout,
                 VkImageLayout newLayout,
                 crimild::UInt32 mipLevels,
-                crimild::UInt32 layerCount ) const noexcept;
+                crimild::UInt32 layerCount
+            ) const noexcept;
 
             VkViewport getViewport( const ViewportDimensions &viewport ) const noexcept;
             VkRect2D getScissor( const ViewportDimensions &scissor ) const noexcept;
+
+            void createBuffer(
+                VkDeviceSize size,
+                VkBufferUsageFlags usage,
+                VkMemoryPropertyFlags properties,
+                VkBuffer &bufferHandler,
+                VkDeviceMemory &bufferMemory
+            ) const noexcept;
+
+            void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
+
+            void copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept;
+
+            void transitionImageLayout(
+                VkImage image,
+                VkFormat format,
+                VkImageLayout oldLayout,
+                VkImageLayout newLayout,
+                crimild::UInt32 mipLevels,
+                crimild::UInt32 layerCount
+            ) const noexcept;
+
+            void generateMipmaps( VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) const noexcept;
 
         private:
             void createSwapchain( void ) noexcept;
@@ -178,27 +203,6 @@ namespace crimild {
 
             VkCommandBuffer beginSingleTimeCommands( void ) const noexcept;
             void endSingleTimeCommands( VkCommandBuffer commandBuffer ) const noexcept;
-
-            void createBuffer(
-                VkDeviceSize size,
-                VkBufferUsageFlags usage,
-                VkMemoryPropertyFlags properties,
-                VkBuffer &bufferHandler,
-                VkDeviceMemory &bufferMemory ) const noexcept;
-
-            void copyToBuffer( VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) const noexcept;
-
-            void copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept;
-
-            void transitionImageLayout(
-                VkImage image,
-                VkFormat format,
-                VkImageLayout oldLayout,
-                VkImageLayout newLayout,
-                crimild::UInt32 mipLevels,
-                crimild::UInt32 layerCount ) const noexcept;
-
-            void generateMipmaps( VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) const noexcept;
 
         private:
             // TODO(hernan): rename to m_device

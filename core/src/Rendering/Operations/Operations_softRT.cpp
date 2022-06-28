@@ -66,7 +66,7 @@ using namespace crimild;
 
 #define CRIMILD_RT_SAMPLES_PER_FRAME 1
 
-[[nodiscard]] Real reflectance( Real cosTheta, Real refIdx ) noexcept
+[[nodiscard]] static Real reflectance( Real cosTheta, Real refIdx ) noexcept
 {
     // Use Schlick's approximation for reflectance
     const auto r0 = ( 1 - refIdx ) / ( 1 + refIdx );
@@ -493,7 +493,7 @@ namespace crimild {
 
     /**
      * \brief Renders a scene using ray tracing in CPU
-     * 
+     *
      * How does it works:
      * - Convert the scene to a binary tree
      * - Accelerate the binary tree and transform it into a linear tree
@@ -541,7 +541,8 @@ namespace crimild {
                     auto bufferView = crimild::alloc< BufferView >( BufferView::Target::IMAGE, buffer, 0, sizeof( ColorRGBA ) );
                     bufferView->setUsage( BufferView::Usage::DYNAMIC );
                     return bufferView;
-                }() );
+                }()
+            );
 
             m_imageAaccessor = crimild::alloc< BufferAccessor >( m_image->getBufferView(), 0, sizeof( ColorRGBA ) );
 
@@ -596,7 +597,8 @@ namespace crimild {
                             .uv = Vector2 { x, y },
                             .bounces = 0,
                             .samples = 0,
-                        } );
+                        }
+                    );
                 }
             }
 
@@ -873,7 +875,9 @@ namespace crimild {
                                     self->doSampleBounce( ray, self->m_acceleratedScene );
                                 }
                             }
-                        } ) );
+                        }
+                    )
+                );
             }
 
 #else
@@ -890,8 +894,8 @@ namespace crimild {
             };
             auto useScanline = settings->get< Bool >( "rt.use_scanline", true );
 
-            const auto cameraFocusDistance = focusDist; //camera->getFocusDistance();
-            const auto cameraAperture = aperture;       //camera->getAperture();
+            const auto cameraFocusDistance = focusDist; // camera->getFocusDistance();
+            const auto cameraAperture = aperture;       // camera->getAperture();
             const auto cameraLensRadius = 0.5f * cameraAperture;
             const auto cameraRight = right( camera->getWorld() );
             const auto cameraUp = up( camera->getWorld() );
@@ -994,7 +998,10 @@ namespace crimild {
                                     job();
                                 }
                                 reportProgress();
-                            } ) ) );
+                            }
+                        )
+                    )
+                );
             }
 
             CRIMILD_LOG_INFO( "RT Samples: ", sampleCount );

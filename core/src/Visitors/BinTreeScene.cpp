@@ -78,7 +78,8 @@ void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, S
                     group->attachNode( nodes[ start + 0 ] );
                 }
                 return group;
-            }() );
+            }()
+        );
         parent->attachNode( nodes[ start + 2 ] );
         return;
     } else if ( span == 2 ) {
@@ -119,14 +120,16 @@ void splitByAxis( Array< SharedPointer< Node > > &nodes, Size start, Size end, S
             auto group = crimild::alloc< Group >();
             splitByAxis( left, 0, left.size(), group, axisSplitter );
             return group;
-        }() );
+        }()
+    );
 
     parent->attachNode(
         [ & ] {
             auto group = crimild::alloc< Group >();
             splitByAxis( right, 0, right.size(), group, axisSplitter );
             return group;
-        }() );
+        }()
+    );
 }
 
 void split( Array< SharedPointer< Node > > &nodes, Size start, Size end, SharedPointer< Group > const &parent ) noexcept
@@ -140,7 +143,8 @@ void split( Array< SharedPointer< Node > > &nodes, Size start, Size end, SharedP
                 group->attachNode( nodes[ start + 0 ] );
                 group->attachNode( nodes[ start + 1 ] );
                 return group;
-            }() );
+            }()
+        );
         parent->attachNode( nodes[ start + 2 ] );
         return;
     } else if ( span == 2 ) {
@@ -159,13 +163,15 @@ void split( Array< SharedPointer< Node > > &nodes, Size start, Size end, SharedP
             auto group = crimild::alloc< Group >();
             split( nodes, start, mid, group );
             return group;
-        }() );
+        }()
+    );
     parent->attachNode(
         [ & ] {
             auto group = crimild::alloc< Group >();
             split( nodes, mid, end, group );
             return group;
-        }() );
+        }()
+    );
 }
 
 void BinTreeScene::traverse( Node *node ) noexcept
@@ -245,7 +251,8 @@ void BinTreeScene::visitGroup( Group *other ) noexcept
     group->forEachNode(
         [ & ]( auto node ) {
             children.add( retain( node ) );
-        } );
+        }
+    );
     group->detachAllNodes();
 
     auto splitStrategy = getSplitStrategy();
@@ -269,7 +276,8 @@ void BinTreeScene::visitGroup( Group *other ) noexcept
                     default:
                         return Random::generate< Int >( 0, 3 );
                 }
-            } );
+            }
+        );
     }
 }
 
@@ -279,14 +287,16 @@ void BinTreeScene::visitGeometry( Geometry *other ) noexcept
     other->forEachPrimitive(
         [ & ]( auto primitive ) {
             node->attachPrimitive( primitive );
-        } );
+        }
+    );
 
     if ( auto ms = other->getComponent< MaterialComponent >() ) {
         auto materials = node->attachComponent< MaterialComponent >();
         ms->forEachMaterial(
             [ & ]( auto material ) {
                 materials->attachMaterial( material );
-            } );
+            }
+        );
     }
 
     cloneAndAdd( node, other );

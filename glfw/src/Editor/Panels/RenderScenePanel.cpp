@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Panels/SimulationPanel.hpp"
+#include "Editor/Panels/RenderScenePanel.hpp"
 
 #include "Foundation/ImGUIUtils.hpp"
 #include "Simulation/Simulation.hpp"
@@ -35,7 +35,7 @@
 using namespace crimild;
 using namespace crimild::editor;
 
-SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
+RenderScenePanel::RenderScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
     : m_pos( position ),
       m_extent( extent ),
       m_scenePass( renderDevice )
@@ -43,7 +43,7 @@ SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice, const Poin
     // no-op
 }
 
-Event SimulationPanel::handle( const Event &e ) noexcept
+Event RenderScenePanel::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE:
@@ -59,14 +59,14 @@ Event SimulationPanel::handle( const Event &e ) noexcept
     return Layer::handle( e );
 }
 
-void SimulationPanel::render( void ) noexcept
+void RenderScenePanel::render( void ) noexcept
 {
     ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_FirstUseEver );
     ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
 
     // Allow opening multiple panels with the same name
     std::stringstream ss;
-    ss << "Simulation##" << ( size_t ) this;
+    ss << "Render##" << ( size_t ) this;
 
     bool open = true;
     if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
@@ -107,10 +107,5 @@ void SimulationPanel::render( void ) noexcept
 
     Layer::render();
 
-    auto camera = Simulation::getInstance()->getMainCamera();
-    if ( camera != nullptr ) {
-        camera->setAspectRatio( m_extent.width / m_extent.height );
-    }
-
-    m_scenePass.render( Simulation::getInstance()->getScene(), camera );
+    m_scenePass.render( Simulation::getInstance()->getScene(), Simulation::getInstance()->getMainCamera() );
 }

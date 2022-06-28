@@ -58,7 +58,8 @@ static void splitPrimitives(
     const std::vector< Bounds3 > &primBounds,
     Array< Int > &indexOffsets,
     Array< RTPrimAccelNode > &primTree,
-    Int depth ) noexcept
+    Int depth
+) noexcept
 {
     const Int32 N = offsets.size();
 
@@ -70,7 +71,9 @@ static void splitPrimitives(
         primTree.add(
             RTPrimAccelNode::createLeafNode(
                 N,
-                indexOffset ) );
+                indexOffset
+            )
+        );
     };
 
     if ( N <= 4 || depth == 0 ) {
@@ -142,7 +145,8 @@ static void optimizePrimitive(
     Array< VertexP3N3TC2 > &triangles,
     Array< Int > &indices,
     Array< Int > &indexOffsets,
-    Array< RTPrimAccelNode > &primTree ) noexcept
+    Array< RTPrimAccelNode > &primTree
+) noexcept
 {
     auto vbo = primitive->getVertexData()[ 0 ];
     auto ibo = primitive->getIndices();
@@ -204,7 +208,8 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
         RTAcceleratedNode {
             .type = RTAcceleratedNode::Type::GROUP,
             .world = boundingTransform,
-        } );
+        }
+    );
 
     if ( auto left = group->getNodeAt( 0 ) ) {
         left->accept( *this );
@@ -279,8 +284,7 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
 
         if ( !m_materialIDs.contains( material ) ) {
             const UInt32 materialID = m_result.materials.size();
-            if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-                const auto pbr = static_cast< const materials::PrincipledBSDF * >( material );
+            if ( auto pbr = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
                 const auto &props = pbr->getProps();
                 m_result.materials.add(
                     RTAcceleratedMaterial {
@@ -291,15 +295,16 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                         .transmission = props.transmission,
                         .indexOfRefraction = props.indexOfRefraction,
                         .emissive = props.emissive,
-                    } );
-            } else if ( material->getClassName() == materials::PrincipledVolume::__CLASS_NAME ) {
-                const auto volume = static_cast< const materials::PrincipledVolume * >( material );
+                    }
+                );
+            } else if ( auto volume = dynamic_cast< materials::PrincipledVolume * >( material ) ) {
                 const auto &props = volume->getProps();
                 m_result.materials.add(
                     RTAcceleratedMaterial {
                         .albedo = props.albedo,
                         .density = props.density,
-                    } );
+                    }
+                );
             } else {
                 return -1;
             }
@@ -343,7 +348,8 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                 m_result.primitives.triangles,
                 m_result.primitives.indices,
                 m_result.primitives.indexOffsets,
-                m_result.primitives.primTree );
+                m_result.primitives.primTree
+            );
 
             m_primitiveIDs.insert( primitive, primID );
 
@@ -361,7 +367,8 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                 const auto size = Real( 0.5 ) * ( geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin() );
                 return translation( vector3( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
             }(),
-        } );
+        }
+    );
 
     m_result.nodes.add( RTAcceleratedNode {
         .type = primitiveType,
@@ -399,7 +406,8 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
         RTAcceleratedNode {
             .type = nodeType,
             .world = boundingTransform,
-        } );
+        }
+    );
 
     if ( auto left = csg->getLeft() ) {
         left->accept( *this );
