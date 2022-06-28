@@ -25,52 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/viewMenu.hpp"
+#ifndef CRIMILD_EDITOR_PANELS_RENDER_SCENE_
+#define CRIMILD_EDITOR_PANELS_RENDER_SCENE_
 
-#include "Editor/EditorLayer.hpp"
-#include "Editor/Panels/BehaviorEditorPanel.hpp"
-#include "Editor/Panels/NodeInspectorPanel.hpp"
-#include "Editor/Panels/RenderScenePanel.hpp"
-#include "Editor/Panels/SceneHierarchyPanel.hpp"
-#include "Editor/Panels/ScenePanel.hpp"
-#include "Editor/Panels/SimulationPanel.hpp"
-#include "Foundation/ImGUIUtils.hpp"
+#include "Mathematics/Point2.hpp"
+#include "Rendering/Layer.hpp"
+#include "Rendering/RenderPasses/VulkanSoftRTPass.hpp"
 
-using namespace crimild;
+namespace crimild {
 
-void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
-{
-    if ( ImGui::BeginMenu( "View" ) ) {
-        if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
-            editor->attach< SceneHierarchyPanel >();
-        }
+    namespace vulkan {
 
-        if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            editor->attach< NodeInspectorPanel >();
-        }
+        class RenderDevice;
 
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Scene..." ) ) {
-            editor->attach< ScenePanel >( editor->getRenderDevice() );
-        }
-
-        if ( ImGui::MenuItem( "Simulation..." ) ) {
-            editor->attach< SimulationPanel >( editor->getRenderDevice() );
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
-            editor->attach< BehaviorEditorPanel >();
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Render..." ) ) {
-            editor->attach< RenderScenePanel >( editor->getRenderDevice() );
-        }
-
-        ImGui::EndMenu();
     }
+
+    namespace editor {
+
+        class RenderScenePanel : public Layer {
+        public:
+            RenderScenePanel(
+                vulkan::RenderDevice *renderDevice,
+                const Point2 &position = { 310, 50 },
+                const Extent2D &extent = { .width = 800.0, .height = 600.0 }
+            ) noexcept;
+            virtual ~RenderScenePanel( void ) = default;
+
+            virtual Event handle( const Event &e ) noexcept override;
+            virtual void render( void ) noexcept override;
+
+        private:
+            Point2 m_pos = Point2 { 310, 50 };
+            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+            Event m_lastResizeEvent = Event {};
+            vulkan::SoftRTPass m_scenePass;
+        };
+
+    }
+
 }
+
+#endif
