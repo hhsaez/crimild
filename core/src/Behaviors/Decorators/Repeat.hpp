@@ -43,9 +43,9 @@ namespace crimild {
                 CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
 
             public:
-                Repeat( void ) noexcept = default;
+                Repeat( void ) = default;
                 explicit Repeat( crimild::Int16 times ) noexcept;
-                virtual ~Repeat( void ) noexcept = default;
+                virtual ~Repeat( void ) = default;
 
                 virtual void init( BehaviorContext *context ) override;
                 virtual Behavior::State step( BehaviorContext *context ) override;
