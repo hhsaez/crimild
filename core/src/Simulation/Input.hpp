@@ -211,8 +211,8 @@ namespace crimild {
         void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
 
     private:
-        std::array< Int8, CRIMILD_INPUT_KEY_LAST > _keys;
-        std::array< Int8, CRIMILD_INPUT_MOUSE_BUTTON_LAST > _mouseButtons;
+        std::array< Int8, CRIMILD_INPUT_KEY_LAST > _keys = { 0 };
+        std::array< Int8, CRIMILD_INPUT_MOUSE_BUTTON_LAST > _mouseButtons = { 0 };
 
         Vector2f _mousePos;
         Vector2f _mouseDelta;
