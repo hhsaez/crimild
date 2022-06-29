@@ -103,6 +103,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) = 0;
             virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
             virtual crimild::Bool decode( std::string key, Format &value ) = 0;
+            virtual crimild::Bool decode( std::string key, Extent3D &value ) = 0;
 
             virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
             {
@@ -112,13 +113,7 @@ namespace crimild {
 
                 decode( key + "_format", attr.format );
                 decode( key + "_offset", attr.offset );
-            }
-
-            virtual crimild::Bool decode( std::string key, Extent3D &extent )
-            {
-                decode( key + "_width", extent.width );
-                decode( key + "_height", extent.height );
-                decode( key + "_depth", extent.depth );
+                return true;
             }
 
             virtual bool decode( std::string_view key, std::vector< std::byte > & ) = 0;

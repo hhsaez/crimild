@@ -65,6 +65,12 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Transformation &value ) override;
             virtual crimild::Bool encode( std::string key, const Format &value ) override { return encodeValue( key, value ); }
 
+            virtual crimild::Bool encode( std::string key, const Extent3D &value ) override
+            {
+                // TODO
+                return false;
+            }
+
             virtual bool encode( std::string_view key, std::vector< std::byte > &value ) override
             {
                 // TODO

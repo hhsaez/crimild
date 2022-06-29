@@ -63,9 +63,15 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) override { return decodeData( key, 4, static_cast< float * >( &value.x ) ); }
             virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) override { return decodeData( key, 9, static_cast< float * >( &value.c0.x ) ); }
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) override { return decodeData( key, 16, static_cast< float * >( &value.c0.x ) ); }
-            virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return false; } //decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return false; } // decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override;
             virtual crimild::Bool decode( std::string key, Format &value ) override { return decodeData( key, value ); }
+
+            virtual crimild::Bool decode( std::string key, Extent3D &value ) override
+            {
+                // TODO
+                return false;
+            }
 
             virtual bool decode( std::string_view key, std::vector< std::byte > &value ) override
             {
@@ -79,7 +85,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) override { return decodeDataArray< Real >( key, value, 4 ); }
             virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) override { return decodeDataArray< Real >( key, value, 9 ); }
             virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) override { return decodeDataArray< Real >( key, value, 16 ); }
-            virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) override { return false; } //decodeDataArray( key, value ); }
+            virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) override { return false; } // decodeDataArray( key, value ); }
 
         private:
             template< typename T >
