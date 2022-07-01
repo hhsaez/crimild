@@ -37,13 +37,14 @@ namespace crimild {
 
     namespace framegraph {
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > debugLightCascades(
+        [[deprecated]] [[deprecated]] SharedPointer< FrameGraphOperation > debugLightCascades(
             SharedPointer< FrameGraphResource > const &albedo,
             SharedPointer< FrameGraphResource > const &positions,
             SharedPointer< FrameGraphResource > const &normals,
             SharedPointer< FrameGraphResource > const &materials,
             SharedPointer< FrameGraphResource > const &depth,
-            SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
+            SharedPointer< FrameGraphResource > const &shadowAtlas
+        ) noexcept;
 
     }
 

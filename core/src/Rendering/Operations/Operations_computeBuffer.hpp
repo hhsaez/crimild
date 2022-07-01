@@ -42,16 +42,18 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > computeBuffer(
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
             SharedPointer< StorageBuffer > const &storageBuffer,
             SharedPointer< Shader > shader,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {} ) noexcept;
+            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+        ) noexcept;
 
-        SharedPointer< FrameGraphOperation > computeBuffer(
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
             SharedPointer< StorageBuffer > const &storageBuffer,
             SharedPointer< Shader > shader,
             const DispatchWorkgroup &workgroup,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {} ) noexcept;
+            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+        ) noexcept;
     }
 
 }

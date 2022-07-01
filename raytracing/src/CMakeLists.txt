@@ -1,8 +1,0 @@
-SET( CRIMILD_INCLUDE_DIRECTORIES 
-	${CRIMILD_SOURCE_DIR}/core/src )
-
-SET( CRIMILD_LIBRARY_LINK_LIBRARIES 
-	crimild_core )
-
-INCLUDE( ModuleBuildLibrary )
-

@@ -35,7 +35,7 @@
 
 namespace crimild {
 
-    class ComputePass
+    class [[deprecated]] ComputePass
         : public FrameGraphOperation,
           public RenderResourceImpl< ComputePass > {
 

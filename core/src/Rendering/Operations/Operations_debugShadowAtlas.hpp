@@ -37,7 +37,7 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > debugShadowAtlas( SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > debugShadowAtlas( SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
 
     }
 
