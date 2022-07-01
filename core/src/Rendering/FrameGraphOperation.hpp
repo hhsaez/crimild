@@ -40,7 +40,7 @@ namespace crimild {
     /**
      * \brief Executes a single frame operation
      */
-    class FrameGraphOperation
+    class [[deprecated]] FrameGraphOperation
         : public SharedObject,
           public NamedObject {
     public:

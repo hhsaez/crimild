@@ -35,7 +35,7 @@ namespace crimild {
     /**
        \brief A PBR-based lit shader program
      */
-    class LitShaderProgram : public ShaderProgram {
+    class [[deprecated]] LitShaderProgram : public ShaderProgram {
         CRIMILD_IMPLEMENT_RTTI( crimild::LitShaderProgram )
 
     public:

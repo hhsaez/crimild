@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,45 +29,44 @@
 #define CRIMILD_RENDERING_SHADER_LOCATION_
 
 #include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/NamedObject.hpp"
+#include "Foundation/SharedObject.hpp"
 
 namespace crimild {
 
-	class ShaderProgram;
-    
-	class ShaderLocation : public NamedObject, public SharedObject {
-	public:
-		enum class Type {
-			ATTRIBUTE,
-			UNIFORM,
+    class ShaderProgram;
+
+    class [[deprecated]] ShaderLocation : public NamedObject, public SharedObject {
+    public:
+        enum class Type {
+            ATTRIBUTE,
+            UNIFORM,
             UNIFORM_BLOCK,
-			MAX
-		};
+            MAX
+        };
 
-	public:
-		explicit ShaderLocation( Type type, std::string name );
-		virtual ~ShaderLocation( void );
+    public:
+        explicit ShaderLocation( Type type, std::string name );
+        virtual ~ShaderLocation( void );
 
-		Type getType( void ) const { return _type; }
+        Type getType( void ) const { return _type; }
 
-		void reset( void ) { _location = -1; }
+        void reset( void ) { _location = -1; }
 
-		bool isValid( void ) const { return _location >= 0; }
+        bool isValid( void ) const { return _location >= 0; }
 
-		int getLocation( void ) const { return _location; }
-		void setLocation( int location ) { _location = location; }
+        int getLocation( void ) const { return _location; }
+        void setLocation( int location ) { _location = location; }
 
-		void setProgram( ShaderProgram *program ) { _program = program; }
-		ShaderProgram *getProgram( void ) { return _program; }
+        void setProgram( ShaderProgram *program ) { _program = program; }
+        ShaderProgram *getProgram( void ) { return _program; }
 
-	private:
-		Type _type;
-		int _location;
-		ShaderProgram *_program = nullptr;
-	};
-    
+    private:
+        Type _type;
+        int _location;
+        ShaderProgram *_program = nullptr;
+    };
+
 }
 
 #endif
-

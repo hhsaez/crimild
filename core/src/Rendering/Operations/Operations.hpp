@@ -40,31 +40,32 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > fetchRenderables( void ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > fetchRenderables( void ) noexcept;
 
-        SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphOperation > op ) noexcept;
-        SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphResource > resource ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphOperation > op ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > present( SharedPointer< FrameGraphResource > resource ) noexcept;
 
-        SharedPointer< FrameGraphOperation > shader( std::string source ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > shader( std::string source ) noexcept;
 
-        SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
-        SharedPointer< FrameGraphOperation > renderShadowAtlas( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > renderShadowAtlas( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
-        SharedPointer< FrameGraphOperation > computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
-        SharedPointer< FrameGraphOperation > computeIrradianceMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
-        SharedPointer< FrameGraphOperation > computePrefilterMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
-        SharedPointer< FrameGraphOperation > computeBRDFLUT( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeIrradianceMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > computePrefilterMap( SharedPointer< FrameGraphResource > const renderables ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeBRDFLUT( SharedPointer< FrameGraphResource > const renderables ) noexcept;
 
-        SharedPointer< FrameGraphOperation > lightingPass(
+        [[deprecated]] SharedPointer< FrameGraphOperation > lightingPass(
             SharedPointer< FrameGraphResource > const &albedo,
             SharedPointer< FrameGraphResource > const &positions,
             SharedPointer< FrameGraphResource > const &normals,
             SharedPointer< FrameGraphResource > const &materials,
             SharedPointer< FrameGraphResource > const &depth,
-            SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
+            SharedPointer< FrameGraphResource > const &shadowAtlas
+        ) noexcept;
 
-        SharedPointer< FrameGraphOperation > iblPass(
+        [[deprecated]] SharedPointer< FrameGraphOperation > iblPass(
             SharedPointer< FrameGraphResource > const &albedo,
             SharedPointer< FrameGraphResource > const &positions,
             SharedPointer< FrameGraphResource > const &normals,
@@ -73,32 +74,34 @@ namespace crimild {
             SharedPointer< FrameGraphResource > const &reflectionAtlas,
             SharedPointer< FrameGraphResource > const &irradianceAtlas,
             SharedPointer< FrameGraphResource > const &prefilterAtlas,
-            SharedPointer< FrameGraphResource > const &brdfLUT ) noexcept;
+            SharedPointer< FrameGraphResource > const &brdfLUT
+        ) noexcept;
 
-        SharedPointer< FrameGraphOperation > forwardUnlitPass(
+        [[deprecated]] SharedPointer< FrameGraphOperation > forwardUnlitPass(
             SharedPointer< FrameGraphResource > const &renderables,
             SharedPointer< FrameGraphResource > const &colorAttachment = nullptr,
-            SharedPointer< FrameGraphResource > const &depthAttachment = nullptr ) noexcept;
+            SharedPointer< FrameGraphResource > const &depthAttachment = nullptr
+        ) noexcept;
 
-        SharedPointer< FrameGraphOperation > brightPassFilter( SharedPointer< FrameGraphResource > const &image, const Vector3f &filter ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > brightPassFilter( SharedPointer< FrameGraphResource > const &image, const Vector3f &filter ) noexcept;
 
-        SharedPointer< FrameGraphOperation > gaussianBlur( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > gaussianBlur( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
-        SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > tonemapping( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
-        SharedPointer< FrameGraphOperation > invert( SharedPointer< FrameGraphResource > const &image ) noexcept;
-        SharedPointer< FrameGraphOperation > grayscale( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > invert( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > grayscale( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
-        SharedPointer< FrameGraphOperation > convolution( std::string name, SharedPointer< FrameGraphResource > const &image, const Matrix3f &kernel ) noexcept;
-        SharedPointer< FrameGraphOperation > blur( SharedPointer< FrameGraphResource > const &image ) noexcept;
-        SharedPointer< FrameGraphOperation > sharpen( SharedPointer< FrameGraphResource > const &image ) noexcept;
-        SharedPointer< FrameGraphOperation > edges( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > convolution( std::string name, SharedPointer< FrameGraphResource > const &image, const Matrix3f &kernel ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > blur( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > sharpen( SharedPointer< FrameGraphResource > const &image ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > edges( SharedPointer< FrameGraphResource > const &image ) noexcept;
 
-        SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources, std::string mode = "additive" ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > blend( Array< SharedPointer< FrameGraphResource > > const &resources, std::string mode = "additive" ) noexcept;
 
-        SharedPointer< FrameGraphOperation > channel( std::string name, SharedPointer< FrameGraphResource > input, Size channelId ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > channel( std::string name, SharedPointer< FrameGraphResource > input, Size channelId ) noexcept;
 
-        SharedPointer< FrameGraphOperation > debug( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > debug( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
     }
 
 }

@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    class UnlitShaderProgram : public ShaderProgram {
+    class [[deprecated]] UnlitShaderProgram : public ShaderProgram {
         CRIMILD_IMPLEMENT_RTTI( crimild::UnlitShaderProgram )
 
     public:

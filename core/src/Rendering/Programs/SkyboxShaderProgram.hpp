@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    class SkyboxShaderProgram : public ShaderProgram {
+    class [[deprecated]] SkyboxShaderProgram : public ShaderProgram {
         CRIMILD_IMPLEMENT_RTTI( crimild::SkyboxShaderProgram )
 
     public:

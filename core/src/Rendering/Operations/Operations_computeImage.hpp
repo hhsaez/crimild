@@ -44,18 +44,20 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > computeImage(
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
             Extent2D extent,
             SharedPointer< Shader > shader,
             Format format = Format::R8G8B8A8_UNORM,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {} ) noexcept;
+            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+        ) noexcept;
 
-        SharedPointer< FrameGraphOperation > computeImage(
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
             Extent2D extent,
             SharedPointer< Shader > shader,
             Format format,
             const DispatchWorkgroup &workgroup,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {} ) noexcept;
+            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+        ) noexcept;
     }
 
 }

@@ -41,13 +41,13 @@ namespace crimild {
 
     namespace framegraph {
 
-        Format useFormat( SharedPointer< FrameGraphResource > const &resource ) noexcept;
+        [[deprecated]] Format useFormat( SharedPointer< FrameGraphResource > const &resource ) noexcept;
 
-        SharedPointer< Attachment > useColorAttachment( std::string name = "", Format format = Format::COLOR_SWAPCHAIN_OPTIMAL ) noexcept;
-        SharedPointer< Attachment > useDepthAttachment( std::string name = "" ) noexcept;
+        [[deprecated]] SharedPointer< Attachment > useColorAttachment( std::string name = "", Format format = Format::COLOR_SWAPCHAIN_OPTIMAL ) noexcept;
+        [[deprecated]] SharedPointer< Attachment > useDepthAttachment( std::string name = "" ) noexcept;
 
-        SharedPointer< FrameGraphResource > useResource( SharedPointer< FrameGraphOperation > const &op, Size index = 0 ) noexcept;
-        SharedPointer< Texture > withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphResource > useResource( SharedPointer< FrameGraphOperation > const &op, Size index = 0 ) noexcept;
+        [[deprecated]] SharedPointer< Texture > withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept;
 
         template< typename CommandRecorder >
         static SharedPointer< RenderPass > withGraphicsCommands( SharedPointer< RenderPass > const &renderPass, CommandRecorder recorder ) noexcept
@@ -73,7 +73,8 @@ namespace crimild {
                         commandBuffer->endRenderPass( crimild::get_ptr( renderPass ) );
                         commandBuffer->end();
                         return commandBuffer;
-                    } );
+                    }
+                );
 
             return renderPass;
         }
@@ -99,7 +100,8 @@ namespace crimild {
                         commandBuffer->setName( ss.str() );
                         commandBuffer->setFrameIndex( frameIndex );
                         return commandBuffer;
-                    } );
+                    }
+                );
 
             renderPass->apply =
                 [ recorder,
@@ -142,7 +144,8 @@ namespace crimild {
                         commandBuffer->setName( ss.str() );
                         commandBuffer->setFrameIndex( frameIndex );
                         return commandBuffer;
-                    } );
+                    }
+                );
 
             renderPass->apply =
                 [ recorder,
@@ -191,7 +194,8 @@ namespace crimild {
 
                         commandBuffer->end();
                         return commandBuffer;
-                    } );
+                    }
+                );
 
             return computePass;
         }

@@ -37,7 +37,7 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > computeRT( void ) noexcept;
+        [[deprecated]] SharedPointer< FrameGraphOperation > computeRT( void ) noexcept;
 
     }
 

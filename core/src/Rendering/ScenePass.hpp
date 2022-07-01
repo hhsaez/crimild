@@ -35,7 +35,7 @@
 
 namespace crimild {
 
-    class ScenePass : public FrameGraphOperation {
+    class [[deprecated]] ScenePass : public FrameGraphOperation {
     public:
         virtual ~ScenePass( void ) = default;
 

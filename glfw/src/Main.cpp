@@ -98,6 +98,8 @@ namespace crimild {
                 Settings settings;
                 settings.parseCommandLine( argc, argv );
 
+                // This should not be needed anymore.
+                // TODO: Deprecate JobScheduler?
                 concurrency::JobScheduler jobScheduler;
                 jobScheduler.configure( 0 );
                 jobScheduler.start();
@@ -113,6 +115,10 @@ namespace crimild {
 
                 // Create the window and all of its layers
                 // TODO: Add editor/sim layers here based on settings/environment flags
+                // Alternative: create two windows (instead of having Editor/Sim layers):
+                // 1 - Simulation window
+                // 2 - Editor window
+                // Or use docked panels
                 Window window;
 
                 simulation->start();

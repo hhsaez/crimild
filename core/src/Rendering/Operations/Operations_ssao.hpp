@@ -39,9 +39,10 @@ namespace crimild {
 
     namespace framegraph {
 
-        SharedPointer< FrameGraphOperation > ssao(
+        [[deprecated]] SharedPointer< FrameGraphOperation > ssao(
             SharedPointer< FrameGraphResource > positions,
-            SharedPointer< FrameGraphResource > normals ) noexcept;
+            SharedPointer< FrameGraphResource > normals
+        ) noexcept;
 
     }
 

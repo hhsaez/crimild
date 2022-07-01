@@ -47,7 +47,7 @@ namespace crimild {
     class DescriptorSet;
     class GraphicsPipeline;
 
-    class Attachment
+    class [[deprecated]] Attachment
         : public SharedObject,
           public NamedObject,
           public FrameGraphResource {
@@ -113,7 +113,7 @@ namespace crimild {
         }
     };
 
-    class RenderPass
+    class [[deprecated]] RenderPass
         : public RenderResourceImpl< RenderPass >,
           public FrameGraphOperation {
 
@@ -158,12 +158,14 @@ namespace crimild {
                     auto commandBuffer = builder();
                     commandBuffer->setFrameIndex( imageIndex++ );
                     return commandBuffer;
-                } );
+                }
+            );
 
             setCommandRecorder(
                 [ commandBuffers ]( Size imageIndex ) {
                     return commandBuffers[ imageIndex ];
-                } );
+                }
+            );
         }
 
         inline CommandBuffer *execute( Size imageIndex ) noexcept
