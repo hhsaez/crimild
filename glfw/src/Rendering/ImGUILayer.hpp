@@ -44,7 +44,11 @@ namespace crimild {
 
     class ImGUILayer : public Layer {
     public:
-        explicit ImGUILayer( vulkan::RenderDevice *renderDevice ) noexcept;
+        ImGUILayer(
+            vulkan::RenderDevice *renderDevice,
+            const Extent2D &extent,
+            float framebufferScale
+        ) noexcept;
         virtual ~ImGUILayer( void );
 
         virtual Event handle( const Event & ) noexcept override;
@@ -67,6 +71,7 @@ namespace crimild {
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
         std::vector< VkFramebuffer > m_framebuffers;
         VkRect2D m_renderArea;
+        float m_framebufferScale = 1.0f;
 
         std::unique_ptr< vulkan::GraphicsPipeline > m_pipeline;
 

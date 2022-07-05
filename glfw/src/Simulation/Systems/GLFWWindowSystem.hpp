@@ -67,9 +67,9 @@ namespace crimild {
         // }
 
         /**
-		   \brief Handle window creation
-		 */
-        class WindowSystem : public System {
+                   \brief Handle window creation
+                 */
+        class [[deprecated]] WindowSystem : public System {
             CRIMILD_IMPLEMENT_RTTI( crimild::WindowSystem )
 
         public:

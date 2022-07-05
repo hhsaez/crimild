@@ -25,24 +25,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
+#include "Simulation/SimulationLayer.hpp"
 
-#include "Simulation/Systems/System.hpp"
+#include "Foundation/Log.hpp"
+#include "Simulation/Settings.hpp"
+#include "Simulation/Simulation.hpp"
 
-namespace crimild {
+#include <array>
 
-    namespace glfw {
+using namespace crimild;
 
-        class [[deprecated]] GLFWSystem : public System {
-            CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWSystem )
-
-        public:
-            Event handle( const Event &e ) noexcept override;
-        };
-
-    }
-
+SimulationLayer::SimulationLayer( vulkan::RenderDevice *renderDevice ) noexcept
+    : m_renderDevice( renderDevice ),
+      m_scenePass( renderDevice ),
+      m_blitPass(
+          renderDevice,
+          m_scenePass.getColorAttachment()
+      )
+{
+    CRIMILD_LOG_TRACE();
 }
 
-#endif
+Event SimulationLayer::handle( const Event &e ) noexcept
+{
+    m_scenePass.handle( e );
+    m_blitPass.handle( e );
+
+    if ( e.type != Event::Type::TICK ) {
+        // TODO: Handle return event
+        Simulation::getInstance()->handle( e );
+    }
+
+    return Layer::handle( e );
+}
+
+void SimulationLayer::render( void ) noexcept
+{
+    Layer::render();
+
+    m_scenePass.render(
+        Simulation::getInstance()->getScene(),
+        Simulation::getInstance()->getMainCamera()
+    );
+
+    m_blitPass.render();
+}

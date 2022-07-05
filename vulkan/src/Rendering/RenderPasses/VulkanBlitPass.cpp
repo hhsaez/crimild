@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
+#include "Rendering/RenderPasses/VulkanBlitPass.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -39,38 +39,22 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-OverlayPass::OverlayPass( RenderDevice *renderDevice, std::string name, const std::vector< const FramebufferAttachment * > &inputs ) noexcept
+BlitPass::BlitPass( RenderDevice *renderDevice, const FramebufferAttachment *input ) noexcept
     : RenderPassBase( renderDevice ),
-      NamedObject( name ),
-      m_inputs( inputs )
+      m_input( input )
 {
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = {
-            .width = 1024,
-            .height = 1024,
-        },
-    };
-
     init();
 }
 
-OverlayPass::~OverlayPass( void ) noexcept
+BlitPass::~BlitPass( void ) noexcept
 {
     clear();
 }
 
-Event OverlayPass::handle( const Event &e ) noexcept
+Event BlitPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
-            m_renderArea.extent = {
-                .width = uint32_t( e.extent.width ),
-                .height = uint32_t( e.extent.height ),
-            };
             clear();
             init();
             break;
@@ -83,32 +67,18 @@ Event OverlayPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void OverlayPass::render( void ) noexcept
+void BlitPass::render( void ) noexcept
 {
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    const auto clearValues = std::array< VkClearValue, 1 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    1.0f,
-                    0.0f,
-                    // Set alpha to 1 since the resulting image should not be transparent.
-                    1.0f,
-                },
-            },
-        },
-    };
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,
         .framebuffer = m_framebuffers[ currentFrameIndex ],
         .renderArea = m_renderArea,
-        .clearValueCount = clearValues.size(),
-        .pClearValues = clearValues.data(),
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
     };
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -119,40 +89,44 @@ void OverlayPass::render( void ) noexcept
         m_pipeline->getHandle()
     );
 
-    for ( const auto &att : m_inputs ) {
-        vkCmdBindDescriptorSets(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pipeline->getPipelineLayout(),
-            0,
-            1,
-            &att->descriptorSets[ currentFrameIndex ],
-            0,
-            nullptr
-        );
-        vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
-    }
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getPipelineLayout(),
+        0,
+        1,
+        &m_input->descriptorSets[ currentFrameIndex ],
+        0,
+        nullptr
+    );
+
+    vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
 
     vkCmdEndRenderPass( commandBuffer );
 }
 
-void OverlayPass::init( void ) noexcept
+void BlitPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto extent = m_renderArea.extent;
-
-    createFramebufferAttachment( "Overlay", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
+    m_renderArea = VkRect2D {
+        .offset = {
+            0,
+            0,
+        },
+        .extent = getRenderDevice()->getSwapchainExtent(),
+    };
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
-            .format = m_colorAttachment.format,
+            .format = getRenderDevice()->getSwapchainFormat(),
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            // Don't clear input. Just load it as it is
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         }
     };
@@ -219,8 +193,10 @@ void OverlayPass::init( void ) noexcept
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
+
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageView,
+            imageView,
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -229,8 +205,8 @@ void OverlayPass::init( void ) noexcept
             .renderPass = m_renderPass,
             .attachmentCount = uint32_t( attachments.size() ),
             .pAttachments = attachments.data(),
-            .width = extent.width,
-            .height = extent.height,
+            .width = getRenderDevice()->getSwapchainExtent().width,
+            .height = getRenderDevice()->getSwapchainExtent().height,
             .layers = 1,
         };
 
@@ -244,8 +220,12 @@ void OverlayPass::init( void ) noexcept
         );
     }
 
-    m_pipeline = [ & ] {
-        auto program = crimild::alloc< ShaderProgram >();
+    // createDescriptorPool();
+    // createDescriptorSetLayout();
+    // createDescriptorSets();
+
+    auto program = [ & ] {
+        auto program = std::make_unique< ShaderProgram >();
         program->setShaders(
             Array< SharedPointer< Shader > > {
                 crimild::alloc< Shader >(
@@ -272,37 +252,26 @@ void OverlayPass::init( void ) noexcept
 
                         void main()
                         {
-                            vec4 color = texture( samplerColor, inUV );
-                            if (color.a < 0.01 ) {
-                                discard;
-                            }
-                            outFragColor = color;
+                            outFragColor = texture( samplerColor, inUV );
                         }
                     )"
-                ),
-            }
+                ) }
         );
-
-        const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
-
-        return std::make_unique< GraphicsPipeline >(
-            getRenderDevice(),
-            m_renderPass,
-            GraphicsPipeline::Descriptor {
-                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
-                    m_inputs[ 0 ]->descriptorSetLayout,
-                },
-                .program = program.get(),
-                std::vector< VertexLayout > {},
-                .colorAttachmentCount = 1,
-                .viewport = viewport,
-                .scissor = viewport,
-            }
-        );
+        return program;
     }();
+
+    m_pipeline = std::make_unique< GraphicsPipeline >(
+        getRenderDevice(),
+        m_renderPass,
+        std::vector< VkDescriptorSetLayout > {
+            m_input->descriptorSetLayout,
+        },
+        program.get(),
+        std::vector< VertexLayout > {}
+    );
 }
 
-void OverlayPass::clear( void ) noexcept
+void BlitPass::clear( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -310,13 +279,117 @@ void OverlayPass::clear( void ) noexcept
 
     m_pipeline = nullptr;
 
+    // destroyDescriptorSets();
+    // destroyDescriptorSetLayout();
+    // destroyDescriptorPool();
+
     for ( auto &fb : m_framebuffers ) {
         vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( m_colorAttachment );
-
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
 }
+
+// void BlitPass::createDescriptorPool( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     VkDescriptorPoolSize poolSize {
+//         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//         .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+//     };
+
+//     auto createInfo = VkDescriptorPoolCreateInfo {
+//         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+//         .poolSizeCount = 1,
+//         .pPoolSizes = &poolSize,
+//         .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+//     };
+
+//     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
+// }
+
+// void BlitPass::destroyDescriptorPool( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     vkDestroyDescriptorPool( getRenderDevice()->getHandle(), m_descriptorPool, nullptr );
+//     m_descriptorPool = VK_NULL_HANDLE;
+// }
+
+// void BlitPass::createDescriptorSetLayout( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     const auto layoutBinding = VkDescriptorSetLayoutBinding {
+//         .binding = 0,
+//         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//         .descriptorCount = 1,
+//         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+//         .pImmutableSamplers = nullptr,
+//     };
+
+//     auto createInfo = VkDescriptorSetLayoutCreateInfo {
+//         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+//         .bindingCount = 1,
+//         .pBindings = &layoutBinding,
+//     };
+
+//     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &createInfo, nullptr, &m_descriptorSetLayout ) );
+// }
+
+// void BlitPass::destroyDescriptorSetLayout( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_descriptorSetLayout, nullptr );
+//     m_descriptorSetLayout = VK_NULL_HANDLE;
+// }
+
+// void BlitPass::createDescriptorSets( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_descriptorSetLayout );
+
+//     const auto allocInfo = VkDescriptorSetAllocateInfo {
+//         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+//         .descriptorPool = m_descriptorPool,
+//         .descriptorSetCount = uint32_t( layouts.size() ),
+//         .pSetLayouts = layouts.data(),
+//     };
+
+//     m_descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+//     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_descriptorSets.data() ) );
+
+//     for ( size_t i = 0; i < m_descriptorSets.size(); ++i ) {
+//         // const auto bufferInfo = VkDescriptorBufferInfo {
+//         //     .buffer = getRenderDevice()->getHandle( m_uniforms.get(), i ),
+//         //     .offset = 0,
+//         //     .range = m_uniforms->getBufferView()->getLength(),
+//         // };
+
+//         // const auto descriptorWrite = VkWriteDescriptorSet {
+//         //     .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//         //     .dstSet = m_descriptorSets[ i ],
+//         //     .dstBinding = 0,
+//         //     .dstArrayElement = 0,
+//         //     .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//         //     .descriptorCount = 1,
+//         //     .pBufferInfo = &bufferInfo,
+//         //     .pImageInfo = nullptr,
+//         //     .pTexelBufferView = nullptr,
+//         // };
+
+//         // vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
+//     }
+// }
+
+// void BlitPass::destroyDescriptorSets( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
+
+//     // Don't need to destroy descriptor sets since they will be freed when the pool is destroyed.
+// }
