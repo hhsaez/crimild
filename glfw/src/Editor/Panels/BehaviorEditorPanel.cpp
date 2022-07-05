@@ -27,6 +27,7 @@
 
 #include "Editor/Panels/BehaviorEditorPanel.hpp"
 
+#include "Behaviors/Actions/ClampPosition.hpp"
 #include "Behaviors/Actions/MotionFromInput.hpp"
 #include "Behaviors/Actions/PrintMessage.hpp"
 #include "Behaviors/Actions/Rotate.hpp"
@@ -77,6 +78,11 @@ static void showActionDetails( behaviors::Behavior *action ) noexcept
         float speed = motionFromInput->getSpeed();
         ImGui::InputFloat( "Speed", &speed );
         motionFromInput->setSpeed( speed );
+    } else if ( auto clamp = dynamic_cast< behaviors::actions::ClampPosition * >( action ) ) {
+        auto limits = clamp->getLimits();
+        ImGui::InputFloat3( "Min", get_ptr( limits.min ) );
+        ImGui::InputFloat3( "Max", get_ptr( limits.max ) );
+        clamp->setLimits( limits );
     }
 }
 

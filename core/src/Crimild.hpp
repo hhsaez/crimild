@@ -37,6 +37,7 @@
 #include "Behaviors/Actions/AnimateContextValue.hpp"
 #include "Behaviors/Actions/AnimateParticleSystem.hpp"
 #include "Behaviors/Actions/AnimateSettingValue.hpp"
+#include "Behaviors/Actions/ClampPosition.hpp"
 #include "Behaviors/Actions/ClampPositionToView.hpp"
 #include "Behaviors/Actions/ClearTargets.hpp"
 #include "Behaviors/Actions/CopyTransformFromTarget.hpp"
