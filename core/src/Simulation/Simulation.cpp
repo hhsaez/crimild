@@ -50,18 +50,6 @@
 
 using namespace crimild;
 
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-
-    #include <emscripten.h>
-    #include <emscripten/html5.h>
-
-void simulation_step( void )
-{
-    crimild::Simulation::getInstance()->update();
-}
-
-#endif
-
 #ifndef CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
     #define CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE 1
 #endif
@@ -73,83 +61,20 @@ void Simulation::start( void ) noexcept
     Version version;
     Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
-    // // enable some threads if not already specified
-    // if ( getSettings() != nullptr ) {
-    //     auto workerCount = getSettings()->get< crimild::Int32 >( "simulation.threading.workers", 0 );
-    //     _jobScheduler.configure( workerCount );
-    // } else {
-    //     // Disable worker threads
-    //     _jobScheduler.configure( 0 );
-    // }
-
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-    if ( getSettings() == nullptr ) {
-        _settings = crimild::alloc< Settings >();
-    }
-
-    // override window size based on canvas
-    int width, height;
-    if ( emscripten_get_canvas_element_size( "crimild_canvas", &width, &height ) != EMSCRIPTEN_RESULT_SUCCESS ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot obtain canvas size" );
-    }
-
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Canvas size = (", width, "x", height, ")" );
-
-    getSettings()->set( "video.width", width );
-    getSettings()->set( "video.height", height );
-    getSettings()->set( "video.fullscreen", false );
-#endif
-
-    //    addSystem( crimild::alloc< ConsoleSystem >() );
-    //addSystem( crimild::alloc< UpdateSystem >() );
-    /*
-    addSystem( crimild::alloc< RenderSystem >() );
-    addSystem( crimild::alloc< DebugSystem >() );
-    addSystem( crimild::alloc< StreamingSystem >() );
-    addSystem( crimild::alloc< UISystem >() );
-	*/
-
-    //    Console::getInstance()->registerCommand( crimild::alloc< SimpleConsoleCommand >( "quit", []( Console *console, ConsoleCommand::ConsoleCommandArgs const & ) {
-    //        // we need to disable the console so no further commands are triggered
-    //        console->setEnabled( false );
-    //
-    //        crimild::concurrency::sync_frame( [] {
-    //            Simulation::getInstance()->stop();
-    //        } );
-    //    } ) );
-
-#ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-    // disable threads in web
-    _jobScheduler.configure( 0 );
-
-    emscripten_set_main_loop( simulation_step, 0, false );
-#endif
-
     const auto ret = handle( Event { .type = Event::Type::SIMULATION_START } );
     if ( ret.type == Event::Type::TERMINATE ) {
         return;
     }
 
-    // Call `onAwake` before starting any system
-    // onAwake();
-
-    // Invoke onInit before starting systems
-    // m_systems.each( []( auto system ) { system->onInit(); } );
-
-    // Start all systems
-    // m_systems.each( []( auto system ) { system->start(); } );
-
-    // Call `onStarted` here to load scenes if needed
-    // onStarted();
-
-    // Finalize startup
-    // m_systems.each( []( auto system ) { system->lateStart(); } );
-
-    // _jobScheduler.start();
+    m_running = true;
 }
 
 bool Simulation::step( void ) noexcept
 {
+    if ( !m_running ) {
+        return true;
+    }
+
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
     constexpr auto MIN_FRAME_TIME = std::chrono::milliseconds( 16 );
     using clock = std::chrono::high_resolution_clock;
@@ -158,24 +83,7 @@ bool Simulation::step( void ) noexcept
 
     auto scene = getScene();
 
-    // if ( scene != nullptr && Camera::getMainCamera() == nullptr ) {
-    //     // fetch all cameras from the scene
-    //     FetchCameras fetchCameras;
-    //     _scene->perform( fetchCameras );
-    //     fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
-    //         if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
-    //             Camera::setMainCamera( camera );
-    //         }
-    //     } );
-    // }
-
-    // broadcastMessage( messaging::SimulationWillUpdate { scene } );
-
     _simulationClock.tick();
-
-    // _jobScheduler.executeDelayedJobs();
-
-    // MessageQueue::getInstance()->dispatchDeferredMessages();
 
     if ( handle( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
         return false;
@@ -185,34 +93,18 @@ bool Simulation::step( void ) noexcept
         return false;
     }
 
-    // update
-    // m_systems.each( []( auto system ) { system->earlyUpdate(); } );
-    // m_systems.each( []( auto system ) { system->fixedUpdate(); } ); // TODO: this has to be called at fixed intervals
-    // m_systems.each( []( auto system ) { system->update(); } );
-    // m_systems.each( []( auto system ) { system->lateUpdate(); } );
-
-    // render
-    // m_systems.each( []( auto system ) { system->onPreRender(); } );
-    // m_systems.each( []( auto system ) { system->onRender(); } );
-    // m_systems.each( []( auto system ) { system->onPostRender(); } );
-
-    // broadcastMessage( messaging::SimulationDidUpdate { scene } );
-
     if ( scene != nullptr ) {
         scene->perform( UpdateComponents( _simulationClock ) );
         scene->perform( UpdateWorldState() );
     }
-
-    // if ( !_jobScheduler.isRunning() ) {
-    //     return false;
-    // }
 
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
     auto frameEndTime = clock::now();
     auto delta = frameEndTime - frameStartTime;
     auto t = std::max(
         Int64( 1 ),
-        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() ) );
+        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() )
+    );
     std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
 #endif
 
@@ -221,12 +113,6 @@ bool Simulation::step( void ) noexcept
 
 void Simulation::stop( void ) noexcept
 {
-    // stop all unfinished tasks first
-    // _jobScheduler.stop();
-
-    // clear all messages
-    // MessageQueue::getInstance()->clear();
-
     setScene( nullptr );
 
     _assetManager.clear( true );
@@ -236,9 +122,8 @@ void Simulation::stop( void ) noexcept
 #endif
 
     handle( Event { .type = Event::Type::SIMULATION_STOP } );
-    // m_systems.each( []( auto system ) { system->onBeforeStop(); } );
 
-    // m_systems.each( []( auto system ) { system->stop(); } );
+    m_running = false;
 }
 
 Event Simulation::handle( const Event &e ) noexcept
@@ -296,41 +181,6 @@ Event Simulation::handle( const Event &e ) noexcept
     return e;
 }
 
-// int Simulation::run( void ) noexcept
-// {
-//     start();
-
-// #if !defined( CRIMILD_PLATFORM_EMSCRIPTEN )
-//     bool done = false;
-
-//     while ( !done ) {
-//         done = !step();
-//     }
-// #endif
-
-//     stop();
-
-//     // m_systems.each( []( auto system ) { system->onTerminate(); } );
-
-//     CRIMILD_LOG_INFO( "Simulation terminated" );
-
-//     return 0;
-// }
-
-// void Simulation::attachSystem( SharedPointer< System > const &system ) noexcept
-// {
-//     Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Adding system ", system->getClassName() );
-
-//     m_systems.add( system );
-//     system->onAttach();
-// }
-
-// void Simulation::detachAllSystems( void ) noexcept
-// {
-//     m_systems.each( []( auto system ) { system->onDetach(); } );
-//     m_systems.clear();
-// }
-
 void Simulation::setScene( SharedPointer< Node > const &scene )
 {
     // TODO: Ensure that we always have a valid scene
@@ -356,55 +206,6 @@ void Simulation::setScene( SharedPointer< Node > const &scene )
         _scene->perform( UpdateWorldState() );
         _scene->perform( StartComponents() );
     }
-
-    /*
-	_scene = scene;
-	_cameras.clear();
-
-	if ( _scene != nullptr ) {
-		_scene->perform( UpdateWorldState() );
-        _scene->perform( StartComponents() );
-
-        // fetch all cameras from the scene
-		FetchCameras fetchCameras;
-		_scene->perform( fetchCameras );
-        fetchCameras.forEachCamera( [&]( Camera *camera ) {
-			if ( Camera::getMainCamera() == nullptr || camera->isMainCamera() ) {
-				Camera::setMainCamera( camera );
-			}
-
-            _cameras.push_back( camera );
-        });
-
-        // compute actual aspect ratio for main camera
-        auto renderer = Simulation::getInstance()->getRenderer();
-        if ( getMainCamera() != nullptr && renderer != nullptr && renderer->getScreenBuffer() != nullptr ) {
-            auto screen = renderer->getScreenBuffer();
-            auto aspect = ( float ) screen->getWidth() / ( float ) screen->getHeight();
-
-            if ( getMainCamera() != nullptr ) {
-                getMainCamera()->setAspectRatio( aspect );
-            }
-        }
-
-        // start all components
-        _scene->perform( StartComponents() );
-
-		// update state one more time after starting components
-		_scene->perform( UpdateWorldState() );
-		_scene->perform( UpdateRenderState() );
-    }
-	else {
-		// invalid scene. reset camera
-		Camera::setMainCamera( nullptr );
-	}
-
-    MessageQueue::getInstance()->clear();
-
-    _simulationClock.reset();
-
-    broadcastMessage( messaging::SceneChanged { crimild::get_ptr( _scene ) } );
-    */
 }
 
 void Simulation::forEachCamera( std::function< void( Camera * ) > callback )

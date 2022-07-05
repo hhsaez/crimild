@@ -25,23 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
-#define CRIMILD_GLFW_SIMULATION_SYSTEMS_GLFW_
+#ifndef CRIMILD_GLFW_SIMULATION_LAYER_
+#define CRIMILD_GLFW_SIMULATION_LAYER_
 
-#include "Simulation/Systems/System.hpp"
+#include "Rendering/Layer.hpp"
+#include "Rendering/RenderPasses/VulkanBlitPass.hpp"
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 namespace crimild {
 
-    namespace glfw {
+    namespace vulkan {
 
-        class [[deprecated]] GLFWSystem : public System {
-            CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWSystem )
-
-        public:
-            Event handle( const Event &e ) noexcept override;
-        };
+        class RenderDevice;
 
     }
+
+    /**
+     * \brief A standalone layer for running Simulations
+     *
+     * This should be the default layer for non-editable simulations (i.e. published games).
+     */
+    class SimulationLayer : public Layer {
+    public:
+        SimulationLayer( vulkan::RenderDevice *renderDevice ) noexcept;
+        ~SimulationLayer( void ) = default;
+
+        virtual Event handle( const Event &e ) noexcept override;
+        virtual void render( void ) noexcept override;
+
+    private:
+        vulkan::RenderDevice *m_renderDevice = nullptr;
+        vulkan::ScenePass m_scenePass;
+        vulkan::BlitPass m_blitPass;
+    };
 
 }
 

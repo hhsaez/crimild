@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    class InputSystem : public System {
+    class [[deprecated]] InputSystem : public System {
         CRIMILD_IMPLEMENT_RTTI( crimild::InputSystem )
 
     public:

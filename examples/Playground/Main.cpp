@@ -29,4 +29,35 @@
 
 using namespace crimild;
 
-CRIMILD_CREATE_SIMULATION( Simulation, "Playground" );
+class Example : public Simulation {
+public:
+    virtual Event handle( const Event &e ) noexcept override
+    {
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            if ( auto settings = Settings::getInstance() ) {
+                if ( settings->hasKey( "scene" ) ) {
+                    auto fileName = settings->get< std::string >( "scene", "" );
+                    auto path = FilePath {
+                        .path = fileName,
+                        .pathType = FilePath::PathType::ABSOLUTE,
+                        .fileType = FilePath::FileType::DOCUMENT,
+                    };
+                    if ( path.getExtension() == "crimild" ) {
+                        coding::FileDecoder decoder;
+                        decoder.read( fileName );
+                        if ( decoder.getObjectCount() == 0 ) {
+                            CRIMILD_LOG_FATAL( "Cannot read file ", fileName );
+                            exit( -1 );
+                        }
+                        auto scene = decoder.getObjectAt< Node >( 0 );
+                        setScene( scene );
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+};
+
+CRIMILD_CREATE_SIMULATION( Example, "Playground" );

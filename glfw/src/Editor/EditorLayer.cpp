@@ -56,19 +56,6 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     attach< editor::SimulationPanel >( renderDevice, Point2 { 0, 565 }, Extent2D { .width = 1280, .height = 515 } );
     attach< SceneHierarchyPanel >( Point2 { 1280, 50 }, Extent2D { .width = 320, .height = 1030 } );
     attach< NodeInspectorPanel >( Point2 { 1600, 50 }, Extent2D { .width = 320, .height = 1030 } );
-
-    if ( auto sim = Simulation::getInstance() ) {
-        if ( sim->getScene() == nullptr ) {
-            if ( auto settings = Settings::getInstance() ) {
-                if ( settings->hasKey( "scene" ) ) {
-                    editor::loadScene( settings->get< std::string >( "scene", "" ) );
-                }
-            }
-        }
-        if ( sim->getScene() == nullptr ) {
-            sim->setScene( editor::createDefaultScene() );
-        }
-    }
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
@@ -80,6 +67,25 @@ EditorLayer::~EditorLayer( void ) noexcept
 Event EditorLayer::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
+        case Event::Type::SIMULATION_START: {
+            if ( auto sim = Simulation::getInstance() ) {
+                if ( sim->getScene() == nullptr ) {
+                    if ( auto settings = Settings::getInstance() ) {
+                        if ( settings->hasKey( "scene" ) ) {
+                            editor::loadScene( settings->get< std::string >( "scene", "" ) );
+                        }
+                    }
+                }
+                if ( sim->getScene() == nullptr ) {
+                    sim->setScene( editor::createDefaultScene() );
+                }
+
+                // Start simulation paused when using editor
+                sim->pause();
+            }
+            break;
+        }
+
         case Event::Type::NODE_SELECTED: {
             setSelectedNode( e.node );
             break;
@@ -90,7 +96,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
         }
     }
 
-    if ( getSimulationState() == SimulationState::PLAYING ) {
+    if ( e.type != Event::Type::TICK ) {
         // TODO: Handle return event
         Simulation::getInstance()->handle( e );
     }
@@ -136,4 +142,10 @@ void EditorLayer::setSimulationState( SimulationState newState ) noexcept
     }
 
     m_simulationState = newState;
+
+    if ( newState == SimulationState::PLAYING ) {
+        Simulation::getInstance()->resume();
+    } else {
+        Simulation::getInstance()->pause();
+    }
 }

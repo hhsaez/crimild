@@ -34,7 +34,6 @@
 #include "Rendering/Vertex.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
-#include "Simulation/Settings.hpp"
 
 #define MAX_VERTEX_COUNT 100000
 #define MAX_INDEX_COUNT 100000
@@ -42,7 +41,7 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-ImGUILayer::ImGUILayer( vulkan::RenderDevice *renderDevice ) noexcept
+ImGUILayer::ImGUILayer( vulkan::RenderDevice *renderDevice, const Extent2D &extent, float framebufferScale ) noexcept
     : m_renderDevice( renderDevice ),
       m_program(
           [ & ] {
@@ -70,7 +69,8 @@ ImGUILayer::ImGUILayer( vulkan::RenderDevice *renderDevice ) noexcept
                                 vColor = aColor;
                                 vTexCoord = aTexCoord;
                             }
-                        )" ),
+                        )"
+                      ),
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
@@ -86,21 +86,26 @@ ImGUILayer::ImGUILayer( vulkan::RenderDevice *renderDevice ) noexcept
                                 vec2 uv = vTexCoord;
                                 FragColor = vColor * texture( uTexture, uv );
                             }
-                        )" ) } );
+                        )"
+                      ) }
+              );
               return program;
-          }() ),
+          }()
+      ),
       m_vertices(
           [] {
               auto vbo = std::make_unique< VertexBuffer >( VertexP2TC2C4::getLayout(), MAX_VERTEX_COUNT );
               vbo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
               return vbo;
-          }() ),
+          }()
+      ),
       m_indices(
           [] {
               auto ibo = std::make_unique< IndexBuffer >( Format::INDEX_16_UINT, MAX_INDEX_COUNT );
               ibo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
               return ibo;
-          }() )
+          }()
+      )
 {
     CRIMILD_LOG_TRACE();
 
@@ -142,6 +147,12 @@ ImGUILayer::ImGUILayer( vulkan::RenderDevice *renderDevice ) noexcept
     io.KeyMap[ ImGuiKey_Y ] = CRIMILD_INPUT_KEY_Y;
     io.KeyMap[ ImGuiKey_Z ] = CRIMILD_INPUT_KEY_Z;
 
+    m_renderArea.extent = VkExtent2D {
+        .width = uint32_t( extent.width ),
+        .height = uint32_t( extent.height ),
+    };
+    m_framebufferScale = framebufferScale;
+
     updateDisplaySize();
     init();
 }
@@ -159,6 +170,10 @@ Event ImGUILayer::handle( const Event &e ) noexcept
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             clean();
+            m_renderArea.extent = VkExtent2D {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
             updateDisplaySize();
             init();
             break;
@@ -317,7 +332,8 @@ void ImGUILayer::render( void ) noexcept
                 .scale = scale,
                 .translate = translate,
             };
-        }() );
+        }()
+    );
     m_renderDevice->update( m_renderPassObjects.uniforms.get() );
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -325,7 +341,8 @@ void ImGUILayer::render( void ) noexcept
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle() );
+        m_pipeline->getHandle()
+    );
 
     {
         VkBuffer buffers[] = { m_renderDevice->bind( m_vertices.get() ) };
@@ -337,7 +354,8 @@ void ImGUILayer::render( void ) noexcept
         commandBuffer,
         m_renderDevice->bind( m_indices.get() ),
         0,
-        vulkan::utils::getIndexType( m_indices.get() ) );
+        vulkan::utils::getIndexType( m_indices.get() )
+    );
 
     vkCmdBindDescriptorSets(
         commandBuffer,
@@ -347,7 +365,8 @@ void ImGUILayer::render( void ) noexcept
         1,
         &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 
     crimild::Size vertexOffset = 0;
     crimild::Size indexOffset = 0;
@@ -372,7 +391,8 @@ void ImGUILayer::render( void ) noexcept
                     1,
                     &descriptors,
                     0,
-                    nullptr );
+                    nullptr
+                );
 
                 vkCmdDrawIndexed( commandBuffer, cmd->ElemCount, 1, cmd->IdxOffset + indexOffset, cmd->VtxOffset + vertexOffset, 0 );
             }
@@ -387,12 +407,11 @@ void ImGUILayer::render( void ) noexcept
 void ImGUILayer::updateDisplaySize( void ) const noexcept
 {
     auto &io = ImGui::GetIO();
-    // TODO: use extents from resize event
-    auto width = Settings::getInstance()->get< float >( "video.width", 0 );
-    auto height = Settings::getInstance()->get< float >( "video.height", 1 );
-    auto framebufferScale = Settings::getInstance()->get< float >( "video.framebufferScale", 1 );
-    auto displaySizeScale = 2.0f / framebufferScale;
-    io.DisplaySize = ImVec2( width * displaySizeScale, height * displaySizeScale );
+    auto displaySizeScale = 2.0f / m_framebufferScale;
+    io.DisplaySize = ImVec2(
+        m_renderArea.extent.width * displaySizeScale,
+        m_renderArea.extent.height * displaySizeScale
+    );
     io.DisplayFramebufferScale = ImVec2( displaySizeScale, displaySizeScale );
 }
 
@@ -478,7 +497,9 @@ void ImGUILayer::init( void ) noexcept
             m_renderDevice->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     m_framebuffers.resize( m_renderDevice->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
@@ -505,7 +526,9 @@ void ImGUILayer::init( void ) noexcept
                 m_renderDevice->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -533,7 +556,8 @@ void ImGUILayer::init( void ) noexcept
             .srcAlphaBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
             .dstAlphaBlendFactor = BlendFactor::ZERO,
             .alphaBlendOp = BlendOp::ADD,
-        } );
+        }
+    );
 }
 
 void ImGUILayer::clean( void ) noexcept
@@ -588,7 +612,9 @@ void ImGUILayer::createRenderPassObjects( void ) noexcept
             m_renderDevice->getHandle(),
             &layoutCreateInfo,
             nullptr,
-            &m_renderPassObjects.descriptorSetLayout ) );
+            &m_renderPassObjects.descriptorSetLayout
+        )
+    );
 
     const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
         VkDescriptorPoolSize {
@@ -609,7 +635,9 @@ void ImGUILayer::createRenderPassObjects( void ) noexcept
             m_renderDevice->getHandle(),
             &poolCreateInfo,
             nullptr,
-            &m_renderPassObjects.descriptorPool ) );
+            &m_renderPassObjects.descriptorPool
+        )
+    );
 
     m_renderPassObjects.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
 
@@ -626,7 +654,9 @@ void ImGUILayer::createRenderPassObjects( void ) noexcept
         vkAllocateDescriptorSets(
             m_renderDevice->getHandle(),
             &allocInfo,
-            m_renderPassObjects.descriptorSets.data() ) );
+            m_renderPassObjects.descriptorSets.data()
+        )
+    );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
         const auto bufferInfo = VkDescriptorBufferInfo {
@@ -693,13 +723,15 @@ void ImGUILayer::createFontAtlas( void ) noexcept
         0,
         m_fontAtlas.image,
         m_fontAtlas.memory,
-        pixels );
+        pixels
+    );
 
     m_renderDevice->createImageView(
         m_fontAtlas.image,
         VK_FORMAT_R8G8B8A8_UNORM,
         VK_IMAGE_ASPECT_COLOR_BIT,
-        m_fontAtlas.imageView );
+        m_fontAtlas.imageView
+    );
 
     auto samplerInfo = VkSamplerCreateInfo {
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -725,7 +757,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
             m_renderDevice->getHandle(),
             &samplerInfo,
             nullptr,
-            &m_fontAtlas.sampler ) );
+            &m_fontAtlas.sampler
+        )
+    );
 
     const auto bindings = std::array< VkDescriptorSetLayoutBinding, 1 > {
         VkDescriptorSetLayoutBinding {
@@ -748,7 +782,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
             m_renderDevice->getHandle(),
             &layoutCreateInfo,
             nullptr,
-            &m_fontAtlas.descriptorSetLayout ) );
+            &m_fontAtlas.descriptorSetLayout
+        )
+    );
 
     const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
         VkDescriptorPoolSize {
@@ -769,7 +805,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
             m_renderDevice->getHandle(),
             &poolCreateInfo,
             nullptr,
-            &m_fontAtlas.descriptorPool ) );
+            &m_fontAtlas.descriptorPool
+        )
+    );
 
     m_fontAtlas.descriptorSets.resize( m_renderDevice->getSwapchainImageCount() );
 
@@ -786,7 +824,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
         vkAllocateDescriptorSets(
             m_renderDevice->getHandle(),
             &allocInfo,
-            m_fontAtlas.descriptorSets.data() ) );
+            m_fontAtlas.descriptorSets.data()
+        )
+    );
 
     for ( size_t i = 0; i < m_fontAtlas.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {

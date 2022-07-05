@@ -123,10 +123,11 @@ namespace crimild {
         bool step( void ) noexcept;
         void stop( void ) noexcept;
 
-        // int run( void ) noexcept;
+        void pause( void ) noexcept { m_running = false; }
+        void resume( void ) noexcept { m_running = true; }
 
     private:
-        // concurrency::JobScheduler _jobScheduler;
+        bool m_running = false;
 
     public:
         inline void setSettings( SettingsPtr const &settings ) noexcept { _settings = settings; }

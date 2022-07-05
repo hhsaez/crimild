@@ -52,11 +52,23 @@ namespace crimild {
     namespace glfw {
 
         /**
-		   \brief Handle window creation
-		 */
+            \brief Handle window creation
+        */
         class Window {
         public:
-            Window( void ) noexcept;
+            struct Options {
+                std::string title;
+                Extent2D extent = { .width = 800, .height = 600 };
+                bool showEditor = false;
+                bool fullscreen = false;
+                bool enableHDPI = false;
+                bool vsync = true;
+                bool enableGraphicsSwitching = false;
+                float framebufferScale = 1.0f;
+            };
+
+        public:
+            Window( const Options &options ) noexcept;
             ~Window( void ) noexcept;
 
             [[nodiscard]] inline GLFWwindow *getHandle( void ) noexcept { return m_window; }
@@ -87,14 +99,12 @@ namespace crimild {
 
             std::unique_ptr< vulkan::RenderDevice > m_renderDevice;
 
-            // std::unique_ptr< vulkan::RenderPass > m_renderPass;
-
             Event m_lastResizeEvent = Event {};
             Event m_lastMouseButtonDownEvent = Event {};
 
             Clock m_clock;
 
-            Extent2D m_extent;
+            Options m_options;
 
             std::unique_ptr< Layer > m_mainLayer;
         };

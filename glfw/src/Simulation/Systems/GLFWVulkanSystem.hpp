@@ -38,9 +38,9 @@ namespace crimild {
     namespace glfw {
 
         /**
-         	Implmements Vulkan system for GLFW
-		 */
-        class GLFWVulkanSystem : public vulkan::VulkanSystem {
+                Implmements Vulkan system for GLFW
+                 */
+        class [[deprecated]] GLFWVulkanSystem : public vulkan::VulkanSystem {
             CRIMILD_IMPLEMENT_RTTI( crimild::glfw::GLFWVulkanSystem )
 
         public:

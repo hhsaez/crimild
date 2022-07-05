@@ -45,21 +45,6 @@
     #include <Crimild_ImGUI.hpp>
 #endif
 
-/**
- * GLFWApp (glfw)
- *  VulkamSystem (instance, debug callback, physical device)
- *  AudioSystem (openal)
- *  ImageSystem (stb-image)
- *  ImGuiSystem
- *  WindowSystem (glfw)
- *      Window (glfw, vulkan surface)
- *          VulkanPresentantionLayer (render device, swapchain)
- *              Editor (imgui)
- *                  Simulation (core)
- *                      Scene
- *
- */
-
 void errorCallback( int error, const char *description )
 {
     CRIMILD_LOG_FATAL( "GLFW Error: (", error, ") ", description );
@@ -113,17 +98,76 @@ namespace crimild {
                 // created
                 auto simulation = Simulation::create();
 
-                // Create the window and all of its layers
-                // TODO: Add editor/sim layers here based on settings/environment flags
-                // Alternative: create two windows (instead of having Editor/Sim layers):
-                // 1 - Simulation window
-                // 2 - Editor window
-                // Or use docked panels
-                Window window;
+                auto options = [] {
+                    auto settings = Settings::getInstance();
 
+                    Window::Options ret;
+                    ret.extent.width = settings->get< crimild::Int32 >( "video.width", 1920 );
+                    ret.extent.height = settings->get< crimild::Int32 >( "video.height", 1080 );
+                    ret.fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
+                    if ( settings->hasKey( "video.resolution" ) ) {
+                        auto resolution = settings->get< std::string >( "video.resolution", "1080p" );
+                        if ( resolution == "480p" ) {
+                            ret.extent.width = 640;
+                            ret.extent.height = 480;
+                        } else if ( resolution == "sd" ) {
+                            ret.extent.width = 720;
+                            ret.extent.height = 576;
+                        } else if ( resolution == "hd" || resolution == "720p" ) {
+                            ret.extent.width = 1280;
+                            ret.extent.height = 720;
+                        } else if ( resolution == "fullHD" || resolution == "2k" || resolution == "1080p" ) {
+                            ret.extent.width = 1920;
+                            ret.extent.height = 1080;
+                        } else if ( resolution == "uhd" ) {
+                            ret.extent.width = 3840;
+                            ret.extent.height = 2160;
+                        } else if ( resolution == "4k" ) {
+                            ret.extent.width = 4096;
+                            ret.extent.height = 2160;
+                        } else if ( resolution == "8k" ) {
+                            ret.extent.width = 7680;
+                            ret.extent.height = 4230;
+                        }
+                    }
+
+                    // disable Retina by default
+                    ret.enableHDPI = settings->get< crimild::Bool >( "video.hdpi", false );
+
+                    // use discrete GPU by default, by disabling automatic graphics switching
+                    ret.enableGraphicsSwitching = settings->get< crimild::Bool >( "video.graphicsSwitching", false );
+
+                    ret.title = settings->get< std::string >( Settings::SETTINGS_APP_NAME, "Crimild" );
+
+                    return ret;
+                }();
+
+                // Create the window and all of its layers
+                // TODO: Is this creating two Vulkan instances when multiple windows are available?
+                std::vector< std::shared_ptr< Window > > windows;
+
+                if ( settings.get< bool >( "editor.show", true ) ) {
+                    // Push editor window
+                    windows.push_back(
+                        [ & ] {
+                            options.showEditor = true;
+                            return crimild::alloc< Window >( options );
+                        }()
+                    );
+                } else {
+                    // Push simulation window
+                    windows.push_back( crimild::alloc< Window >( options ) );
+                }
+
+                // Start simulation
                 simulation->start();
 
-                while ( true ) {
+                // Notify simulation started to windows
+                for ( auto &w : windows ) {
+                    w->handle( Event { .type = Event::Type::SIMULATION_START } );
+                }
+
+                while ( !windows.empty() ) {
                     glfwPollEvents();
 
                     // This also dispatch any sync_frame calls
@@ -132,11 +176,26 @@ namespace crimild {
                     // Dispatch deferred messages
                     MessageQueue::getInstance()->dispatchDeferredMessages();
 
-                    const auto ret = window.handle( Event { .type = Event::Type::TICK } );
-                    if ( ret.type == Event::Type::TERMINATE ) {
+                    const auto tick = Event {
+                        .type = Event::Type::TICK,
+                    };
+
+                    auto it = windows.begin();
+                    while ( it != windows.end() ) {
+                        const auto ret = ( *it )->handle( tick );
+                        if ( ret.type == Event::Type::TERMINATE ) {
+                            it = windows.erase( it );
+                        } else {
+                            ++it;
+                        }
+                    }
+
+                    if ( !windows.empty() && simulation->handle( tick ).type == Event::Type::TERMINATE ) {
                         break;
                     }
                 }
+
+                windows.clear();
 
                 jobScheduler.stop();
                 MessageQueue::getInstance()->clear();
@@ -150,7 +209,6 @@ namespace crimild {
 }
 
 using namespace crimild;
-// using namespace crimild::glfw;
 
 int main( int argc, char **argv )
 {
@@ -161,40 +219,4 @@ int main( int argc, char **argv )
 
     crimild::glfw::GLFWApp app;
     return app.run( argc, argv );
-
-    //     CRIMILD_SIMULATION_LIFETIME auto sim = Simulation::create();
-
-    //     sim->setSettings( crimild::alloc< Settings >( argc, argv ) );
-
-    //     SharedPointer< ImageManager > imageManager = crimild::alloc< crimild::stb::ImageManager >();
-
-    //     sim->attachSystem(
-    //         [] {
-    //             auto sys = std::make_unique< GLFWSystem >();
-    //             sys->attachSystem(
-    //                 [] {
-    //                     auto sys = std::make_unique< WindowSystem >();
-    //                     return sys;
-    //                 }() );
-    //             return sys;
-    //         }() );
-
-    //     // sim->attachSystem< GLFWSystem >();
-    //     // sim->attachSystem< WindowSystem >();
-    //     // sim->attachSystem< GLFWVulkanSystem >();
-    //     // sim->attachSystem< vulkan::CaptureSystem >();
-    //     // sim->attachSystem< EventSystem >();
-    //     // sim->attachSystem< InputSystem >();
-    //     // sim->attachSystem< UpdateSystem >();
-    //     // sim->attachSystem< RenderSystem >();
-
-    // #ifdef CRIMILD_ENABLE_OPENAL
-    //     // sim->attachSystem< audio::OpenALAudioSystem >();
-    // #endif
-
-    // #ifdef CRIMILD_ENABLE_IMGUI
-    //     // sim->attachSystem< imgui::ImGUISystem >();
-    // #endif
-
-    //     return sim->run();
 }
