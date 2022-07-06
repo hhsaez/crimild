@@ -36,6 +36,7 @@
 #include "Coding/JSONEncoder.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Concurrency/Async.hpp"
+#include "Editor/EditorLayer.hpp"
 #include "Importers/SceneImporter.hpp"
 #include "Loaders/OBJLoader.hpp"
 #include "Mathematics/Transformation_euler.hpp"
@@ -266,4 +267,46 @@ bool crimild::editor::importFile( std::string fileName ) noexcept
     }
 
     return addToScene( model );
+}
+
+bool crimild::editor::cloneSelected( void ) noexcept
+{
+    auto editor = EditorLayer::getInstance();
+    if ( editor == nullptr ) {
+        return false;
+    }
+
+    auto selected = editor->getSelectedNode();
+    if ( selected == nullptr ) {
+        return false;
+    }
+
+    auto copy = selected->perform< ShallowCopy >();
+    if ( auto parent = dynamic_cast< Group * >( selected->getParent() ) ) {
+        parent->attachNode( copy );
+    } else {
+        return false;
+    }
+
+    editor->setSelectedNode( get_ptr( copy ) );
+
+    return true;
+}
+
+bool crimild::editor::deleteSelected( void ) noexcept
+{
+    auto editor = EditorLayer::getInstance();
+    if ( editor == nullptr ) {
+        return false;
+    }
+
+    auto selected = editor->getSelectedNode();
+    if ( selected == nullptr ) {
+        return false;
+    }
+
+    selected->detachFromParent();
+    editor->setSelectedNode( nullptr );
+
+    return true;
 }

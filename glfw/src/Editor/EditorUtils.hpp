@@ -48,6 +48,9 @@ namespace crimild {
         bool exportScene( std::string filePath );
         bool importFile( std::string filePath ) noexcept;
 
+        bool cloneSelected( void ) noexcept;
+        bool deleteSelected( void ) noexcept;
+
     }
 
 }
