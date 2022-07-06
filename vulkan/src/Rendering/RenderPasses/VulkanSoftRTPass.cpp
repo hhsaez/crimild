@@ -573,9 +573,7 @@ void SoftRTPass::setup( Node *scene, Camera *camera ) noexcept
 
         scene->perform( UpdateWorldState() );
 
-        ShallowCopy copy;
-        scene->perform( copy );
-        m_scene = copy.getResult< Node >();
+        m_scene = scene->perform< ShallowCopy >();
         m_scene->perform( UpdateWorldState() );
 
         auto splitStrategy = [ & ] {

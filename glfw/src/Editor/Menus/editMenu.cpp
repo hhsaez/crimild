@@ -25,24 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Editor/Menus/mainMenu.hpp"
-
 #include "Editor/Menus/editMenu.hpp"
-#include "Editor/Menus/fileMenu.hpp"
-#include "Editor/Menus/helpMenu.hpp"
-#include "Editor/Menus/sceneMenu.hpp"
-#include "Editor/Menus/viewMenu.hpp"
-#include "imgui.h"
 
-void crimild::editor::mainMenu( EditorLayer *editor ) noexcept
+#include "Editor/EditorUtils.hpp"
+#include "Foundation/ImGUIUtils.hpp"
+
+#include <iostream>
+
+void crimild::editor::editMenu( void ) noexcept
 {
-    if ( ImGui::BeginMainMenuBar() ) {
-        fileMenu();
-        editMenu();
-        sceneMenu();
-        viewMenu( editor );
-        helpMenu();
+    if ( ImGui::BeginMenu( "Edit" ) ) {
+        if ( ImGui::MenuItem( "Clone" ) ) {
+            crimild::editor::cloneSelected();
+        }
 
-        ImGui::EndMainMenuBar();
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Delete" ) ) {
+            crimild::editor::deleteSelected();
+        }
+
+        ImGui::EndMenu();
     }
 }

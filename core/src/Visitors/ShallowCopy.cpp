@@ -36,14 +36,6 @@
 
 using namespace crimild;
 
-ShallowCopy::ShallowCopy( void )
-{
-}
-
-ShallowCopy::~ShallowCopy( void )
-{
-}
-
 void ShallowCopy::traverse( Node *node )
 {
     NodeVisitor::traverse( node );
