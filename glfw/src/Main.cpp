@@ -34,6 +34,7 @@
 #include "Rendering/GLFWWindow.hpp"
 
 #include <Crimild.hpp>
+#include <Crimild_GLFW.hpp>
 #include <Crimild_STB.hpp>
 #include <Crimild_Vulkan.hpp>
 
@@ -213,6 +214,7 @@ using namespace crimild;
 int main( int argc, char **argv )
 {
     crimild::init();
+    crimild::glfw::init();
     crimild::vulkan::init();
 
     Log::setLevel( Log::Level::LOG_LEVEL_ALL );

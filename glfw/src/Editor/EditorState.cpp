@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,12 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Crimild_GLFW.hpp"
-
 #include "Editor/EditorState.hpp"
-#include "Foundation/ObjectFactory.hpp"
 
-void crimild::glfw::init( void )
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "SceneGraph/Node.hpp"
+
+using namespace crimild;
+
+void EditorState::encode( coding::Encoder &encoder )
 {
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::EditorState );
+    Codable::encode( encoder );
+
+    encoder.encode( "selectedNode", selectedNode );
+}
+
+void EditorState::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    SharedPointer< Node > selected;
+    decoder.decode( "selectedNode", selected );
+    selectedNode = get_ptr( selected );
 }

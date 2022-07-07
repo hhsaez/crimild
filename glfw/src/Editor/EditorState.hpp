@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,12 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Crimild_GLFW.hpp"
+#ifndef CRIMILD_PLATFORMS_DESKTOP_EDITOR_STATE_
+#define CRIMILD_PLATFORMS_DESKTOP_EDITOR_STATE_
 
-#include "Editor/EditorState.hpp"
-#include "Foundation/ObjectFactory.hpp"
+#include "Coding/Codable.hpp"
 
-void crimild::glfw::init( void )
-{
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::EditorState );
+namespace crimild {
+
+    class Node;
+
+    class EditorState : public coding::Codable {
+        CRIMILD_IMPLEMENT_RTTI( crimild::EditorState )
+
+    public:
+        Node *selectedNode = nullptr;
+
+        /**
+            \name Coding
+         */
+        //@{
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
+    };
+
 }
+
+#endif

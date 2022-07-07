@@ -28,6 +28,7 @@
 #ifndef CRIMILD_GLFW_EDITOR_LAYER_
 #define CRIMILD_GLFW_EDITOR_LAYER_
 
+#include "Editor/EditorState.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Rendering/Layer.hpp"
 
@@ -57,17 +58,28 @@ namespace crimild {
 
         inline vulkan::RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
 
-        inline void setSelectedNode( Node *node ) noexcept { m_selectedNode = node; }
-        inline Node *getSelectedNode( void ) noexcept { return m_selectedNode; }
+        inline void setSelectedNode( Node *node ) noexcept
+        {
+            if ( m_state != nullptr ) {
+                m_state->selectedNode = node;
+            }
+        }
+
+        inline Node *getSelectedNode( void ) noexcept
+        {
+            return m_state != nullptr ? m_state->selectedNode : nullptr;
+        }
 
         inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
         void setSimulationState( SimulationState state ) noexcept;
 
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
-        Node *m_selectedNode = nullptr;
         SimulationState m_simulationState = SimulationState::STOPPED;
         std::shared_ptr< Node > m_edittableScene;
+
+        std::shared_ptr< EditorState > m_state;
+        std::shared_ptr< EditorState > m_previousState;
     };
 }
 
