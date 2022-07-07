@@ -47,7 +47,8 @@
 using namespace crimild;
 
 EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice )
+    : m_renderDevice( renderDevice ),
+      m_state( crimild::alloc< EditorState >() )
 {
     CRIMILD_LOG_TRACE();
 
@@ -60,7 +61,8 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
 
 EditorLayer::~EditorLayer( void ) noexcept
 {
-    m_selectedNode = nullptr;
+    m_state = nullptr;
+    m_previousState = nullptr;
     m_renderDevice = nullptr;
 }
 
@@ -118,8 +120,8 @@ void EditorLayer::setSimulationState( SimulationState newState ) noexcept
     }
 
     if ( m_simulationState == SimulationState::STOPPED && newState == SimulationState::PLAYING ) {
-        m_selectedNode = nullptr;
         m_edittableScene = crimild::retain( Simulation::getInstance()->getScene() );
+        m_previousState = m_state;
 
         // Using encoders to clone the scene is overkill since it copies buffers
         // and textures, which should not change during playback. And this is a
@@ -129,16 +131,26 @@ void EditorLayer::setSimulationState( SimulationState newState ) noexcept
         // TODO: consider using a shallow copy (or implement shallow encoder).
         auto encoder = crimild::alloc< coding::MemoryEncoder >();
         encoder->encode( m_edittableScene );
+        encoder->encode( m_state );
+
         auto bytes = encoder->getBytes();
         auto decoder = crimild::alloc< coding::MemoryDecoder >();
         decoder->fromBytes( bytes );
+
         auto simScene = decoder->getObjectAt< Node >( 0 );
+        m_state = decoder->getObjectAt< EditorState >( 1 );
+
         Simulation::getInstance()->setScene( simScene );
         handle( Event { Event::Type::SCENE_CHANGED } );
     } else if ( newState == SimulationState::STOPPED ) {
-        m_selectedNode = nullptr;
         Simulation::getInstance()->setScene( m_edittableScene );
+        m_state = m_previousState;
+        m_previousState = nullptr;
         handle( Event { Event::Type::SCENE_CHANGED } );
+    }
+
+    if ( auto selected = getSelectedNode() ) {
+        std::cout << "Selected " << selected->getName() << std::endl;
     }
 
     m_simulationState = newState;
