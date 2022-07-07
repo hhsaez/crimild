@@ -56,6 +56,18 @@ namespace crimild {
             _builders[ type ] = builder;
         }
 
+        inline bool hasBuilder( std::string type ) const noexcept
+        {
+            return _builders.contains( type );
+        }
+
+        inline void unregisterBuilder( std::string type ) noexcept
+        {
+            if ( hasBuilder( type ) ) {
+                _builders.remove( type );
+            }
+        }
+
         inline Builder getBuilder( std::string type )
         {
             if ( !_builders.contains( type ) ) {
@@ -66,17 +78,17 @@ namespace crimild {
         }
 
         /**
-		 * \brief List class names starting with prefix
-		 *
-		 * Returns a std::set making keys ordering automatically
-		 */
+         * \brief List class names starting with prefix
+         *
+         * Returns a std::set making keys ordering automatically
+         */
         std::set< std::string > filter( std::string_view prefix ) const noexcept;
 
         /**
-		 * \brief List class names starting with any of the given prefixes
-		 *
-		 * Returns a std::set making keys ordering automatically
-		 */
+         * \brief List class names starting with any of the given prefixes
+         *
+         * Returns a std::set making keys ordering automatically
+         */
         std::set< std::string > filter( const std::set< std::string > &prefixes ) const noexcept;
 
         SharedPointer< SharedObject > build( std::string className );
