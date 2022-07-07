@@ -107,8 +107,8 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const VertexAttribute &attr )
             {
                 return encode( key + "_name", Int32( attr.name ) )
-                    && encode( key + "_format", attr.format )
-                    && encode( key + "_offset", attr.offset );
+                       && encode( key + "_format", attr.format )
+                       && encode( key + "_offset", attr.offset );
             }
 
             virtual bool encode( std::string_view key, std::vector< std::byte > & ) = 0;

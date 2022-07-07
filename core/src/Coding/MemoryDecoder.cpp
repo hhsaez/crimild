@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,11 +26,11 @@
  */
 
 #include "MemoryDecoder.hpp"
-#include "EncodedData.hpp"
-#include "Tags.hpp"
 
+#include "EncodedData.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/ObjectFactory.hpp"
+#include "Tags.hpp"
 
 #include <sstream>
 
@@ -39,39 +39,37 @@ using namespace crimild::coding;
 
 MemoryDecoder::MemoryDecoder( void )
 {
-
 }
 
 MemoryDecoder::~MemoryDecoder( void )
 {
-
 }
 
 crimild::Bool MemoryDecoder::decode( std::string key, SharedPointer< coding::Codable > &codable )
 {
-	codable = _links[ _currentObj->getUniqueID() ][ key ];
+    codable = _links[ _currentObj->getUniqueID() ][ key ];
     if ( codable == nullptr ) {
         return false;
     }
-	
-	auto temp = _currentObj;
-	_currentObj = codable;
+
+    auto temp = _currentObj;
+    _currentObj = codable;
 
     auto &self = *this;
-	codable->decode( self );
+    codable->decode( self );
 
-	_currentObj = temp;
+    _currentObj = temp;
 
-	return true;
+    return true;
 }
 
 crimild::Bool MemoryDecoder::decode( std::string key, std::string &value )
 {
     crimild::Size l = 0;
     if ( !decode( key + "_length", l ) ) {
-		return false;
-	}
-    
+        return false;
+    }
+
     if ( l > 0 ) {
         auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
 
@@ -81,141 +79,135 @@ crimild::Bool MemoryDecoder::decode( std::string key, std::string &value )
         value = std::string( ( char * ) data.getData() );
     }
 
-	return true;
+    return true;
 }
 
 crimild::Size MemoryDecoder::beginDecodingArray( std::string key )
 {
-	crimild::Size count;
-	decode( key + "_size", count );
-	return count;
+    crimild::Size count;
+    decode( key + "_size", count );
+    return count;
 }
 
 std::string MemoryDecoder::beginDecodingArrayElement( std::string key, crimild::Size index )
 {
-	std::stringstream ss;
-	ss << key << "_" << index;
-	return ss.str();
+    std::stringstream ss;
+    ss << key << "_" << index;
+    return ss.str();
 }
 
 void MemoryDecoder::endDecodingArrayElement( std::string key, crimild::Size index )
 {
-	// no-op
+    // no-op
 }
 
 void MemoryDecoder::endDecodingArray( std::string key )
 {
-	// no-op
+    // no-op
 }
 
 crimild::Bool MemoryDecoder::fromBytes( const ByteArray &bytes )
 {
     crimild::Size offset = 0;
 
-	crimild::Int8 flag;
-	offset += read( bytes, flag, offset );
+    crimild::Int8 flag;
+    offset += read( bytes, flag, offset );
 
-	if ( flag != Tags::TAG_DATA_START ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format" );
-		return false;
-	}
+    if ( flag != Tags::TAG_DATA_START ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format" );
+        return false;
+    }
 
     offset += read( bytes, flag, offset );
     if ( flag != Tags::TAG_DATA_VERSION ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. FLAG_VERSION expected" );
         return false;
     }
-    
-	std::string versionStr;
-	offset += read( bytes, versionStr, offset );
-	setVersion( Version( versionStr ) );
 
-	while ( true ) {
-		offset += read( bytes, flag, offset );
+    std::string versionStr;
+    offset += read( bytes, versionStr, offset );
+    setVersion( Version( versionStr ) );
+
+    while ( true ) {
+        offset += read( bytes, flag, offset );
         if ( flag == Tags::TAG_DATA_END ) {
-			break;
-		}
+            break;
+        }
 
-		if ( flag == Tags::TAG_OBJECT_BEGIN ) {
-			Codable::UniqueID objID;
-			offset += read( bytes, objID, offset );
+        if ( flag == Tags::TAG_OBJECT_BEGIN ) {
+            Codable::UniqueID objID;
+            offset += read( bytes, objID, offset );
 
-			std::string className;
-			offset += read( bytes, className, offset );
+            std::string className;
+            offset += read( bytes, className, offset );
 
             auto obj = crimild::dynamic_cast_ptr< Codable >( ObjectFactory::getInstance()->build( className ) );
-			if ( obj == nullptr ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type ", className );
-				return false;
-			}
+            if ( obj != nullptr ) {
+                _objects[ objID ] = obj;
+                if ( auto encoded = crimild::dynamic_cast_ptr< EncodedData >( obj ) ) {
+                    ByteArray data;
+                    offset += read( bytes, data, offset );
+                    encoded->setBytes( data );
+                }
+            } else {
+                Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Cannot build object of type ", className );
+            }
 
-			_objects[ objID ] = obj;
+            offset += read( bytes, flag, offset );
+            if ( flag != Tags::TAG_OBJECT_END ) {
+                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_OBJECT_END );
+                return false;
+            }
+        } else if ( flag == Tags::TAG_LINK_BEGIN ) {
+            Codable::UniqueID parentObjID;
+            offset += read( bytes, parentObjID, offset );
 
-			if ( auto encoded = crimild::dynamic_cast_ptr< EncodedData >( obj ) ) {
-				ByteArray data;
-				offset += read( bytes, data, offset );
-				encoded->setBytes( data );
-			}
+            std::string linkName;
+            offset += read( bytes, linkName, offset );
 
-			offset += read( bytes, flag, offset );
-			if ( flag != Tags::TAG_OBJECT_END ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_OBJECT_END );
-				return false;
-			}
-		}
-		else if ( flag == Tags::TAG_LINK_BEGIN ) {
-			Codable::UniqueID parentObjID;
-			offset += read( bytes, parentObjID, offset );
+            Codable::UniqueID objID;
+            offset += read( bytes, objID, offset );
+            auto obj = _objects[ objID ];
+            if ( obj != nullptr ) {
+                auto parent = _objects[ parentObjID ];
+                if ( parent != nullptr ) {
+                    _links[ parent->getUniqueID() ][ linkName ] = obj;
+                } else {
+                    Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Cannot find parent with id ", objID, " (", linkName, ")" );
+                }
+            } else {
+                Log::warning( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Cannot find object with id ", objID, " (", linkName, ")" );
+            }
 
-			std::string linkName;
-			offset += read( bytes, linkName, offset );
+            offset += read( bytes, flag, offset );
+            if ( flag != Tags::TAG_LINK_END ) {
+                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_LINK_END );
+                return false;
+            }
+        } else if ( flag == Tags::TAG_ROOT_OBJECT_BEGIN ) {
+            Codable::UniqueID objID;
+            offset += read( bytes, objID, offset );
 
-			Codable::UniqueID objID;
-			offset += read( bytes, objID, offset );
-			auto obj = _objects[ objID ];
-			if ( obj == nullptr ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Cannot find object with id ", objID );
-				return false;
-			}
-
-            auto parent = _objects[ parentObjID ];
-            if ( parent == nullptr ) {
+            auto obj = _objects[ objID ];
+            if ( obj == nullptr ) {
                 Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Cannot find object with id ", objID );
                 return false;
             }
-			_links[ parent->getUniqueID() ][ linkName ] = obj;
 
-			offset += read( bytes, flag, offset );
-			if ( flag != Tags::TAG_LINK_END ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_LINK_END );
-				return false;
-			}
-		}
-		else if ( flag == Tags::TAG_ROOT_OBJECT_BEGIN ) {
-			Codable::UniqueID objID;
-			offset += read( bytes, objID, offset );
-
-			auto obj = _objects[ objID ];
-			if ( obj == nullptr ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Cannot find object with id ", objID );
-				return false;
-			}
-            
             addRootObject( crimild::dynamic_cast_ptr< SharedObject >( obj ) );
 
-			offset += read( bytes, flag, offset );
-			if ( flag != Tags::TAG_ROOT_OBJECT_END ) {
-				Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_ROOT_OBJECT_END );
-				return false;
-			}
-		}
-		else {
-			Log::error( CRIMILD_CURRENT_CLASS_NAME, "Unknown flag ", flag );
-			return false;
-		}
-	}
-    
-	auto rootCount = getObjectCount();
+            offset += read( bytes, flag, offset );
+            if ( flag != Tags::TAG_ROOT_OBJECT_END ) {
+                Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid data format. Expected ", Tags::TAG_ROOT_OBJECT_END );
+                return false;
+            }
+        } else {
+            Log::error( CRIMILD_CURRENT_CLASS_NAME, "Unknown flag ", flag );
+            return false;
+        }
+    }
+
+    auto rootCount = getObjectCount();
     for ( crimild::Size i = 0; i < rootCount; i++ ) {
         auto obj = crimild::dynamic_cast_ptr< Codable >( getObjectAt< SharedObject >( i ) );
         _currentObj = obj;
@@ -223,7 +215,7 @@ crimild::Bool MemoryDecoder::fromBytes( const ByteArray &bytes )
         _currentObj = nullptr;
     }
 
-	return true;
+    return true;
 }
 
 crimild::Size MemoryDecoder::read( const ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset )
@@ -258,4 +250,3 @@ crimild::Size MemoryDecoder::readRawBytes( const ByteArray &bytes, void *data, c
     memcpy( data, bytes.getData() + offset, sizeof( crimild::Byte ) * count );
     return count;
 }
-

@@ -77,11 +77,32 @@ namespace crimild {
         }
     };
 
+    class CodableComponent : public NodeComponent {
+        CRIMILD_IMPLEMENT_RTTI( crimild::CodableComponent )
+
+    public:
+        int someValue = 0;
+
+        virtual void encode( coding::Encoder &encoder ) override
+        {
+            NodeComponent::encode( encoder );
+
+            encoder.encode( "someValue", someValue );
+        }
+
+        virtual void decode( coding::Decoder &decoder ) override
+        {
+            NodeComponent::decode( decoder );
+
+            decoder.decode( "someValue", someValue );
+        }
+    };
+
 }
 
 using namespace crimild;
 
-TEST( CodableTest, codingEncoding )
+TEST( Codable, codingEncoding )
 {
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
 
@@ -109,7 +130,7 @@ TEST( CodableTest, codingEncoding )
     EXPECT_EQ( n->worldIsCurrent(), n2->worldIsCurrent() );
 }
 
-TEST( CodableTest, codingArray )
+TEST( Codable, codingArray )
 {
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
 
@@ -133,4 +154,89 @@ TEST( CodableTest, codingArray )
     EXPECT_EQ( n->getChildren()[ 0 ]->getName(), n2->getChildren()[ 0 ]->getName() );
     EXPECT_EQ( n->getChildren()[ 1 ]->getName(), n2->getChildren()[ 1 ]->getName() );
     EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );
+}
+
+TEST( Codable, it_ignores_unknown_types_when_encoding )
+{
+    auto n = crimild::alloc< crimild::CodableNode >( "a node" );
+    n->attachComponent< crimild::CodableComponent >()->someValue = 10;
+
+    auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
+    ASSERT_FALSE( encoder->encode( n ) );
+    auto bytes = encoder->getBytes();
+    ASSERT_FALSE( bytes.empty() );
+
+    auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    ASSERT_EQ( 0, decoder->getObjectCount() );
+}
+
+TEST( Codable, it_ignores_unknown_types_for_children_when_encoding )
+{
+    // Register only CodableNode type
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
+
+    auto n = crimild::alloc< crimild::CodableNode >( "a node" );
+    n->attachComponent< crimild::CodableComponent >()->someValue = 10;
+
+    auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
+    ASSERT_TRUE( encoder->encode( n ) );
+    auto bytes = encoder->getBytes();
+    ASSERT_FALSE( bytes.empty() );
+
+    auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    ASSERT_EQ( 1, decoder->getObjectCount() );
+    auto decoded = decoder->getObjectAt< crimild::CodableNode >( 0 );
+    ASSERT_TRUE( decoded != nullptr );
+
+    EXPECT_EQ( n->getName(), decoded->getName() );
+    EXPECT_EQ( nullptr, decoded->getComponent< crimild::CodableComponent >() );
+}
+
+TEST( Codable, it_fails_decoding_for_unknown_types )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableComponent )
+
+    auto n = crimild::alloc< crimild::CodableNode >( "a node" );
+    n->attachComponent< crimild::CodableComponent >()->someValue = 10;
+
+    auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
+    ASSERT_TRUE( encoder->encode( n ) );
+    auto bytes = encoder->getBytes();
+
+    // Remove component from object factory before decoding
+    ObjectFactory::getInstance()->unregisterBuilder( crimild::CodableNode::__CLASS_NAME );
+    ASSERT_FALSE( ObjectFactory::getInstance()->hasBuilder( crimild::CodableNode::__CLASS_NAME ) );
+
+    auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    ASSERT_EQ( 0, decoder->getObjectCount() );
+}
+
+TEST( Codable, it_fails_decoding_for_children_with_unknown_types )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode )
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableComponent )
+
+    auto n = crimild::alloc< crimild::CodableNode >( "a node" );
+    n->attachComponent< crimild::CodableComponent >()->someValue = 10;
+
+    auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
+    ASSERT_TRUE( encoder->encode( n ) );
+    auto bytes = encoder->getBytes();
+
+    // Remove component from object factory before decoding
+    ObjectFactory::getInstance()->unregisterBuilder( crimild::CodableComponent::__CLASS_NAME );
+    ASSERT_FALSE( ObjectFactory::getInstance()->hasBuilder( crimild::CodableComponent::__CLASS_NAME ) );
+
+    auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
+    auto decoded = decoder->getObjectAt< crimild::CodableNode >( 0 );
+
+    ASSERT_TRUE( decoded != nullptr );
+
+    EXPECT_EQ( n->getName(), decoded->getName() );
+    EXPECT_EQ( nullptr, decoded->getComponent< crimild::CodableComponent >() );
 }

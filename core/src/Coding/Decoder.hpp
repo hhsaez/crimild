@@ -131,13 +131,14 @@ namespace crimild {
             {
                 auto count = beginDecodingArray( key );
 
-                value.resize( count );
+                value.clear();
                 for ( crimild::Size i = 0; i < count; i++ ) {
                     auto v = SharedPointer< Codable >();
                     auto itemKey = beginDecodingArrayElement( key, i );
-                    decode( itemKey, v );
+                    if ( decode( itemKey, v ) ) {
+                        value.add( crimild::cast_ptr< T >( v ) );
+                    }
                     endDecodingArrayElement( key, i );
-                    value[ i ] = crimild::cast_ptr< T >( v );
                 }
 
                 endDecodingArray( key );
