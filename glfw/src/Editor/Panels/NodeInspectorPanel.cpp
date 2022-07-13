@@ -69,12 +69,44 @@ static void materialComponentDetails( MaterialComponent *materials )
 
 static void behaviorControllerDetails( behaviors::BehaviorController *controller )
 {
+    if ( controller == nullptr ) {
+        return;
+    }
+
+    auto context = controller->getContext();
+
     static bool showBehaviorEditor = false;
     ImGui::SetNextItemOpen( true );
     if ( ImGui::CollapsingHeader( controller->getClassName(), ImGuiTreeNodeFlags_None ) ) {
         if ( ImGui::Button( "Edit Behaviors..." ) ) {
             showBehaviorEditor = true;
         }
+    }
+
+    auto targetName = [ & ] {
+        std::string name = "N/A";
+        context->foreachTarget(
+            [ & ]( auto target ) {
+                std::stringstream ss;
+                ss << ( target->getName().empty() ? target->getClassName() : target->getName() );
+                ss << " (" << target->getUniqueID() << ")";
+                name = ss.str();
+            }
+        );
+        return name;
+    }();
+
+    ImGui::Text( "Target: %s", targetName.c_str() );
+    if ( ImGui::BeginDragDropTarget() ) {
+        if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+            size_t nodeAddr = *( ( size_t * ) payload->Data );
+            Node *target = reinterpret_cast< Node * >( nodeAddr );
+            if ( target ) {
+                context->removeAllTargets();
+                context->addTarget( target );
+            }
+        }
+        ImGui::EndDragDropTarget();
     }
 
     // TODO: open behavior editor

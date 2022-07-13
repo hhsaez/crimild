@@ -53,7 +53,8 @@ public:
             node,
             [] {},
             true,
-            false );
+            false
+        );
     }
 
     void visitGroup( Group *group ) override
@@ -62,7 +63,8 @@ public:
             group,
             [ & ] { NodeVisitor::visitGroup( group ); },
             group->getNodeCount() == 0,
-            true );
+            true
+        );
     }
 
     void visitCSGNode( CSGNode *csg ) override
@@ -71,7 +73,8 @@ public:
             csg,
             [ & ] { NodeVisitor::visitCSGNode( csg ); },
             csg->getLeft() == nullptr && csg->getRight() == nullptr,
-            false );
+            false
+        );
     }
 
 private:
@@ -94,43 +97,56 @@ private:
 
         if ( isLeaf ) {
             flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+        } else {
+            flags |= ImGuiTreeNodeFlags_OpenOnArrow;
         }
 
         ImGui::PushID( node->getUniqueID() );
-        if ( ImGui::TreeNodeEx( getNodeName( node ).c_str(), flags ) ) {
-            if ( ImGui::IsItemClicked() ) {
-                editor->setSelectedNode( node );
-            }
-            if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
-                ImGui::SetDragDropPayload( "DND_NODE", node, sizeof( Node ) );
-                ImGui::Text( "%s", getNodeName( node ).c_str() );
-                ImGui::EndDragDropSource();
-            }
+        const auto isOpen = ImGui::TreeNodeEx( getNodeName( node ).c_str(), flags );
+        ImGui::PopID();
 
-            if ( isDropTarget ) {
-                if ( ImGui::BeginDragDropTarget() ) {
-                    if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
-                        auto other = ( Node * ) payload->Data;
-                        if ( other != nullptr ) {
-                            auto child = other->detachFromParent();
-                            if ( auto group = dynamic_cast< Group * >( node ) ) {
-                                group->attachNode( child );
-                            } else {
-                                CRIMILD_LOG_WARNING( "Drop target node is not a group" );
-                            }
+        if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
+            // Set payload as node address since sending pointers directly is buggy
+            auto nodeAddr = size_t( node );
+            ImGui::SetDragDropPayload( "DND_NODE", &nodeAddr, sizeof( nodeAddr ) );
+            // DragDrop tooltip
+            ImGui::Text( "%s", getNodeName( node ).c_str() );
+            ImGui::EndDragDropSource();
+        }
+
+        if ( isDropTarget ) {
+            if ( ImGui::BeginDragDropTarget() ) {
+                if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+                    auto nodeAddr = *( ( size_t * ) payload->Data );
+                    Node *other = reinterpret_cast< Node * >( nodeAddr );
+                    if ( other != nullptr ) {
+                        auto child = other->detachFromParent();
+                        if ( auto group = dynamic_cast< Group * >( node ) ) {
+                            group->attachNode( child );
+                        } else {
+                            CRIMILD_LOG_WARNING( "Drop target node is not a group" );
                         }
                     }
-                    ImGui::EndDragDropTarget();
                 }
+                ImGui::EndDragDropTarget();
             }
+        }
 
+        // Handles selection by using mouse hover+released instead of click
+        // because click is triggered on mouse down and will conflict with
+        // drag/drop events.
+        if ( ImGui::IsItemHovered() ) {
+            if ( ImGui::IsMouseReleased( 0 ) ) {
+                editor->setSelectedNode( node );
+            }
+        }
+
+        if ( isOpen ) {
             fn();
-
             if ( !isLeaf ) {
                 ImGui::TreePop();
             }
         }
-        ImGui::PopID();
     }
 
 private:
