@@ -112,8 +112,7 @@ namespace crimild {
             void foreachTarget( TargetCallback const &callback );
 
         private:
-            std::vector< crimild::Node * > _targets;
-            crimild::Size _targetCount = 0;
+            Array< Node * > _targets;
 
         public:
             const crimild::Clock &getClock( void ) const { return _clock; }

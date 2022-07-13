@@ -33,6 +33,7 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Foundation/ObjectFactory.hpp"
+#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
@@ -341,5 +342,56 @@ TEST( BehaviorController, coding )
         controller->update( Clock {} );
         EXPECT_EQ( 6, controller->getContext()->get( "initCount" )->get< uint32_t >() );
         EXPECT_EQ( 4, controller->getContext()->get( "executeCount" )->get< uint32_t >() );
+    }
+}
+
+TEST( BehaviorController, coding_with_target )
+{
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::MockBehavior );
+
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+
+    {
+        auto group = crimild::alloc< Group >();
+
+        // Create a controller and execute it a couple of times
+        auto node = crimild::alloc< Node >();
+        auto controller = node->attachComponent< BehaviorController >();
+        group->attachNode( node );
+
+        auto target = crimild::alloc< Node >( "a target" );
+        controller->getContext()->addTarget( get_ptr( target ) );
+        group->attachNode( target );
+
+        encoder->encode( group );
+    }
+
+    {
+        // Decoding
+        decoder->fromBytes( encoder->getBytes() );
+
+        ASSERT_EQ( 1, decoder->getObjectCount() );
+
+        auto group = decoder->getObjectAt< Group >( 0 );
+        ASSERT_NE( nullptr, group );
+
+        auto node = group->getNodeAt( 0 );
+        ASSERT_NE( nullptr, node );
+
+        auto controller = node->getComponent< BehaviorController >();
+        ASSERT_NE( nullptr, controller );
+
+        auto context = controller->getContext();
+        ASSERT_NE( nullptr, context );
+
+        auto target = group->getNodeAt( 1 );
+        ASSERT_NE( nullptr, target );
+        ASSERT_EQ( "a target", target->getName() );
+
+        ASSERT_TRUE( context->hasTargets() );
+        ASSERT_EQ( 1, context->getTargetCount() );
+        ASSERT_EQ( get_ptr( target ), context->getTargetAt( 0 ) );
+        ASSERT_EQ( "a target", context->getTargetAt( 0 )->getName() );
     }
 }
