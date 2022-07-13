@@ -2,6 +2,8 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -37,20 +39,17 @@ Behavior::State LookAt::step( BehaviorContext *context )
         return Behavior::State::FAILURE;
     }
 
-    /*
-
-    const auto targetPos = target->getLocal().getPosition();
-    const auto agentPos = agent->getLocal().getPosition();
-
     auto target = context->getTargetAt( 0 );
-    auto dir = targetPos - agentPos;
-    dir[ 1 ] = 0.0f;
-    dir.normalize();
-    agent->local().setRotate( Quaternion4f::createFromDirection( dir ) );
+    auto targetPos = location( target->getLocal() );
+    auto agentPos = location( agent->getLocal() );
 
-    */
-
-    assert( false && "TODO" );
+    agent->setLocal(
+        lookAt(
+            agentPos,
+            targetPos,
+            Vector3 { 0, 1, 0 }
+        )
+    );
 
     return Behavior::State::SUCCESS;
 }
