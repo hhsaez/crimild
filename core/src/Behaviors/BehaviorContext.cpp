@@ -28,6 +28,7 @@
 #include "Behavior.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -85,14 +86,18 @@ void BehaviorContext::update( const crimild::Clock &c )
 
 void BehaviorContext::addTarget( crimild::Node *target )
 {
+    if ( target == getAgent() ) {
+        CRIMILD_LOG_WARNING( "Target cannot be equal to agent" );
+        return;
+    }
+
     // TODO: check repetitions? use set?
-    _targets.push_back( target );
-    ++_targetCount;
+    _targets.add( target );
 }
 
 crimild::Size BehaviorContext::getTargetCount( void ) const
 {
-    return _targetCount;
+    return _targets.size();
 }
 
 crimild::Node *BehaviorContext::getTargetAt( crimild::Size index )
@@ -107,16 +112,17 @@ crimild::Node *BehaviorContext::getTargetAt( crimild::Size index )
 void BehaviorContext::removeAllTargets( void )
 {
     _targets.clear();
-    _targetCount = 0;
 }
 
 void BehaviorContext::foreachTarget( BehaviorContext::TargetCallback const &callback )
 {
-    for ( auto &t : _targets ) {
-        if ( t != nullptr ) {
-            callback( t );
+    _targets.each(
+        [ & ]( auto target ) {
+            if ( target != nullptr ) {
+                callback( target );
+            }
         }
-    }
+    );
 }
 
 void BehaviorContext::encode( coding::Encoder &encoder )
@@ -131,6 +137,13 @@ void BehaviorContext::encode( coding::Encoder &encoder )
     }
     encoder.encode( "keys", keys );
     encoder.encode( "values", values );
+
+    auto targetsToEncode = _targets.map(
+        []( auto target ) {
+            return retain( target );
+        }
+    );
+    encoder.encode( "targets", targetsToEncode );
 }
 
 void BehaviorContext::decode( coding::Decoder &decoder )
@@ -149,6 +162,14 @@ void BehaviorContext::decode( coding::Decoder &decoder )
         auto value = values[ i ];
         m_values[ key ] = value;
     }
+
+    Array< SharedPointer< Node > > decodedTargets;
+    decoder.decode( "targets", decodedTargets );
+    _targets = decodedTargets.map(
+        []( auto target ) {
+            return get_ptr( target );
+        }
+    );
 }
 
 void BehaviorContext::dump( void ) const
