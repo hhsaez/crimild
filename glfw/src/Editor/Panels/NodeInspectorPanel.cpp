@@ -211,7 +211,7 @@ void NodeInspectorPanel::render( void ) noexcept
             Point3 nodeTranslation;
             Vector3 nodeRotation;
             Vector3 nodeScale;
-            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getWorld().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
+            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
 
             bool changed = false;
             changed = changed || ImGui::InputFloat3( "Tr", get_ptr( nodeTranslation ) );
