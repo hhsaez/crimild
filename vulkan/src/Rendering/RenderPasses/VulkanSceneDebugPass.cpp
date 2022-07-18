@@ -81,7 +81,8 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
                                 outTexCoord = inTexCoord;
                             }
 
-                        )" ),
+                        )"
+                      ),
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
@@ -103,9 +104,12 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
                                     discard;
                                 }
                             }
-                        )" ) } );
+                        )"
+                      ) }
+              );
               return program;
-          }() )
+          }()
+      )
 {
     m_renderArea = VkRect2D {
         .offset = {
@@ -127,7 +131,8 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
     m_pointLightPrimitive = crimild::alloc< SpherePrimitive >(
         SpherePrimitive::Params {
             .type = Primitive::Type::LINES,
-        } );
+        }
+    );
 
     init();
 }
@@ -200,16 +205,19 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
                     if ( node->getClassName() == Light::__CLASS_NAME ) {
                         lights.push_back( node );
                     }
-                } ) );
+                }
+            )
+        );
 
         // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
                     .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() } );
+                    .proj = camera->getProjectionMatrix() }
+            );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
@@ -217,7 +225,8 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
             vkCmdBindPipeline(
                 commandBuffer,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                m_pipeline->getHandle() );
+                m_pipeline->getHandle()
+            );
 
             vkCmdBindDescriptorSets(
                 commandBuffer,
@@ -227,7 +236,8 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
                 1,
                 &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
                 0,
-                nullptr );
+                nullptr
+            );
 
             bindMaterialDescriptors( commandBuffer, currentFrameIndex, m_material.get() );
             bindNodeDescriptors( commandBuffer, currentFrameIndex, node );
@@ -333,7 +343,9 @@ void SceneDebugPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     createFramebufferAttachment( "Scene/Debug", extent, colorFormat, m_colorAttachment );
     createFramebufferAttachment( "Scene/Debug/Depth", extent, depthFormat, m_depthAttachment );
@@ -362,7 +374,9 @@ void SceneDebugPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -385,7 +399,8 @@ void SceneDebugPass::init( void ) noexcept
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
             .viewport = viewport,
             .scissor = viewport,
-        } );
+        }
+    );
 }
 
 void SceneDebugPass::clear( void ) noexcept
@@ -577,7 +592,8 @@ void SceneDebugPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index curren
         m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
             MaterialUniforms {
                 .color = color,
-            } );
+            }
+        );
         getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
         std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
@@ -649,7 +665,8 @@ void SceneDebugPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index curren
         1,
         &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 }
 
 void SceneDebugPass::destroyMaterialObjects( void ) noexcept
@@ -760,7 +777,8 @@ void SceneDebugPass::bindNodeDescriptors( VkCommandBuffer cmds, Index currentFra
         1,
         &m_nodeObjects.descriptorSets[ node ][ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 }
 
 void SceneDebugPass::destroyNodeObjects( void ) noexcept
@@ -793,7 +811,8 @@ void SceneDebugPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameInde
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     auto indices = primitive->getIndices();
     if ( indices != nullptr ) {
@@ -801,7 +820,8 @@ void SceneDebugPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameInde
             cmds,
             getRenderDevice()->bind( indices ),
             0,
-            utils::getIndexType( crimild::get_ptr( indices ) ) );
+            utils::getIndexType( crimild::get_ptr( indices ) )
+        );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), 1, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];

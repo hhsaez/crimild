@@ -32,6 +32,7 @@
 #include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
 #include "Rendering/RenderPasses/VulkanShadowPass.hpp"
 #include "Rendering/RenderPasses/VulkanSkyboxPass.hpp"
+#include "Rendering/RenderPasses/VulkanUnlitPass.hpp"
 
 namespace crimild {
 
@@ -65,6 +66,7 @@ namespace crimild {
             ShadowPass m_shadowPass;
             GBufferPass m_gBufferPass;
             LocalLightingPass m_localLightingPass;
+            UnlitPass m_unlitPass;
             SkyboxPass m_skyboxPass;
         };
 

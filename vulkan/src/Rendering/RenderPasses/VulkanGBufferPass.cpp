@@ -145,16 +145,19 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                             renderables.addGeometry( geometry );
                         }
                     }
-                } ) );
+                }
+            )
+        );
 
         // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
                     .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() } );
+                    .proj = camera->getProjectionMatrix() }
+            );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
@@ -172,7 +175,8 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                         vkCmdBindPipeline(
                             commandBuffer,
                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_materialObjects.pipelines[ material ]->getHandle() );
+                            m_materialObjects.pipelines[ material ]->getHandle()
+                        );
 
                         vkCmdBindDescriptorSets(
                             commandBuffer,
@@ -182,7 +186,8 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                             1,
                             &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
                             0,
-                            nullptr );
+                            nullptr
+                        );
 
                         vkCmdBindDescriptorSets(
                             commandBuffer,
@@ -192,7 +197,8 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                             1,
                             &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
                             0,
-                            nullptr );
+                            nullptr
+                        );
 
                         vkCmdBindDescriptorSets(
                             commandBuffer,
@@ -202,12 +208,14 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                             1,
                             &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
                             0,
-                            nullptr );
+                            nullptr
+                        );
 
                         drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                     }
                 }
-            } );
+            }
+        );
     }
 
     vkCmdEndRenderPass( commandBuffer );
@@ -317,7 +325,9 @@ void GBufferPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
@@ -345,7 +355,9 @@ void GBufferPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -552,7 +564,8 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                         outModelPosition = inPosition;
                         outModelNormal = inNormal;
                     }
-                )" ),
+                )"
+            ),
             crimild::alloc< Shader >(
                 Shader::Stage::FRAGMENT,
                 R"(
@@ -625,7 +638,9 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                         outNormal = vec4( frag.normal, 1.0 );
                         outMaterial = vec4( frag.metallic, frag.roughness, frag.ambientOcclusion, 1.0 );
                     }
-                )" ) } );
+                )"
+            ) }
+    );
 
     if ( auto program = material->getProgram() ) {
         getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
@@ -647,7 +662,8 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
             .colorAttachmentCount = 4,
             .viewport = viewport,
             .scissor = viewport,
-        } );
+        }
+    );
 
     // m_materialObjects.pipelines.insert( material, std::move( pipeline ) );
     m_materialObjects.pipelines[ material ] = std::move( pipeline );
@@ -867,7 +883,8 @@ void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, 
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     UInt32 instanceCount = 1;
     // if ( instanceData != nullptr ) {
@@ -886,7 +903,8 @@ void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, 
             cmds,
             getRenderDevice()->bind( indices ),
             0,
-            utils::getIndexType( crimild::get_ptr( indices ) ) );
+            utils::getIndexType( crimild::get_ptr( indices ) )
+        );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];

@@ -131,16 +131,19 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                     if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
                         renderables.addGeometry( geometry );
                     }
-                } ) );
+                }
+            )
+        );
 
         // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
                     .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() } );
+                    .proj = camera->getProjectionMatrix() }
+            );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
     }
@@ -160,7 +163,8 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getHandle() );
+                        m_materialObjects.pipelines[ material ]->getHandle()
+                    );
 
                     vkCmdBindDescriptorSets(
                         commandBuffer,
@@ -170,7 +174,8 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                         1,
                         &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
                         0,
-                        nullptr );
+                        nullptr
+                    );
 
                     vkCmdBindDescriptorSets(
                         commandBuffer,
@@ -180,7 +185,8 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                         1,
                         &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
                         0,
-                        nullptr );
+                        nullptr
+                    );
 
                     vkCmdBindDescriptorSets(
                         commandBuffer,
@@ -190,12 +196,14 @@ void SkyboxPass::render( Node *scene, Camera *camera ) noexcept
                         1,
                         &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
                         0,
-                        nullptr );
+                        nullptr
+                    );
 
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
             }
-        } );
+        }
+    );
 
     vkCmdEndRenderPass( commandBuffer );
 }
@@ -294,7 +302,9 @@ void SkyboxPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     // We won't be swapping framebuffers, so create only one
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
@@ -320,7 +330,9 @@ void SkyboxPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -515,7 +527,8 @@ void SkyboxPass::bind( Material *aMaterial ) noexcept
                         outWorldPosition = worldPosition.xyz;
                         outTexCoord = inTexCoord;
                     }
-                )" ),
+                )"
+            ),
             crimild::alloc< Shader >(
                 Shader::Stage::FRAGMENT,
                 R"(
@@ -552,7 +565,9 @@ void SkyboxPass::bind( Material *aMaterial ) noexcept
 
                         outFragColor = vec4( frag.color, frag.opacity );
                     }
-                )" ) } );
+                )"
+            ) }
+    );
 
     if ( auto program = material->getProgram() ) {
         getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
@@ -573,7 +588,8 @@ void SkyboxPass::bind( Material *aMaterial ) noexcept
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
             .viewport = viewport,
             .scissor = viewport,
-        } );
+        }
+    );
 
     m_materialObjects.pipelines[ material ] = std::move( pipeline );
 
@@ -792,7 +808,8 @@ void SkyboxPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, P
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     auto indices = primitive->getIndices();
     if ( indices != nullptr ) {
@@ -800,7 +817,8 @@ void SkyboxPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, P
             cmds,
             getRenderDevice()->bind( indices ),
             0,
-            utils::getIndexType( crimild::get_ptr( indices ) ) );
+            utils::getIndexType( crimild::get_ptr( indices ) )
+        );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), 1, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];
