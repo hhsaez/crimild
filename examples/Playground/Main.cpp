@@ -31,6 +31,15 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
+    Example( void ) noexcept
+    {
+        if ( auto settings = Settings::getInstance() ) {
+            settings->set( "editor.show", 1 );
+        }
+    }
+
+    ~Example( void ) = default;
+
     virtual Event handle( const Event &e ) noexcept override
     {
         const auto ret = Simulation::handle( e );
