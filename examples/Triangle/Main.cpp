@@ -59,21 +59,27 @@ public:
                                                     {
                                                         .position = Vector3f { 0.0f, 0.5f, 0.0f },
                                                     },
-                                                } );
+                                                }
+                                            );
                                         }(),
-                                    } );
+                                    }
+                                );
                                 primitive->setIndices(
                                     crimild::alloc< IndexBuffer >(
                                         Format::INDEX_32_UINT,
-                                        Array< crimild::UInt32 > { 0, 1, 2 } ) );
+                                        Array< crimild::UInt32 > { 0, 1, 2 }
+                                    )
+                                );
                                 return primitive;
-                            }() );
+                            }()
+                        );
                         geometry->attachComponent< MaterialComponent >(
                             [] {
                                 auto material = crimild::alloc< UnlitMaterial >();
                                 material->setColor( ColorRGBA { 0, 1, 0, 1 } );
                                 return material;
-                            }() );
+                            }()
+                        );
                         return geometry;
                     }() );
 
@@ -83,11 +89,14 @@ public:
                             lookAt(
                                 Point3 { 0, 0, 3 },
                                 Point3 { 0, 0, 0 },
-                                Vector3::Constants::UP ) );
+                                Vector3::Constants::UP
+                            )
+                        );
                         return camera;
                     }() );
                     return scene;
-                }() );
+                }()
+            );
         }
         return ret;
     }
