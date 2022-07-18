@@ -57,7 +57,8 @@ LocalLightingPass::LocalLightingPass(
     const FramebufferAttachment *positionInput,
     const FramebufferAttachment *normalInput,
     const FramebufferAttachment *materialInput,
-    const FramebufferAttachment *shadowInput ) noexcept
+    const FramebufferAttachment *shadowInput
+) noexcept
     : RenderPassBase( renderDevice ),
       m_albedoInput( albedoInput ),
       m_positionInput( positionInput ),
@@ -81,7 +82,8 @@ LocalLightingPass::LocalLightingPass(
             .type = Primitive::Type::TRIANGLES,
             .radius = 1.0,
             .layout = VertexP3::getLayout(),
-        } );
+        }
+    );
 
     init();
 }
@@ -146,7 +148,7 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
         scene->perform( fetchLights );
 
         // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
@@ -156,7 +158,8 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
                     .viewport = Vector2 {
                         Real( m_renderArea.extent.width ),
                         Real( m_renderArea.extent.height ),
-                    } } );
+                    } }
+            );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
@@ -166,7 +169,8 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_directionalLightPipeline->getHandle() );
+                        m_directionalLightPipeline->getHandle()
+                    );
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_directionalLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
                     bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
                     vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
@@ -175,12 +179,14 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_pointLightPipeline->getHandle() );
+                        m_pointLightPipeline->getHandle()
+                    );
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pointLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
                     bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
                     drawPrimitive( commandBuffer, currentFrameIndex, m_lightVolume.get() );
                 }
-            } );
+            }
+        );
     }
 
     vkCmdEndRenderPass( commandBuffer );
@@ -263,7 +269,9 @@ void LocalLightingPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
@@ -287,7 +295,9 @@ void LocalLightingPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -376,7 +386,8 @@ void LocalLightingPass::init( void ) noexcept
                                 {
                                     gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
                                 }
-                            )" ),
+                            )"
+                ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
                     R"(
@@ -690,8 +701,10 @@ void LocalLightingPass::init( void ) noexcept
 
                                     outColor = vec4( Lo, 1.0 );
                                 }
-                            )" ),
-            } );
+                            )"
+                ),
+            }
+        );
 
         const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
 
@@ -722,7 +735,8 @@ void LocalLightingPass::init( void ) noexcept
                 .colorAttachmentCount = colorReferences.size(),
                 .viewport = viewport,
                 .scissor = viewport,
-            } );
+            }
+        );
     };
 
     m_pointLightPipeline = createPipeline( Light::Type::POINT );
@@ -1116,7 +1130,8 @@ void LocalLightingPass::bindLightDescriptors( VkCommandBuffer cmds, VkPipelineLa
         1,
         &m_lightObjects.descriptorSets[ light ][ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 }
 
 void LocalLightingPass::destroyLightObjects( void ) noexcept
@@ -1149,7 +1164,8 @@ void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameI
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     auto indices = primitive->getIndices();
 
@@ -1157,7 +1173,8 @@ void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameI
         cmds,
         getRenderDevice()->bind( indices ),
         0,
-        utils::getIndexType( crimild::get_ptr( indices ) ) );
+        utils::getIndexType( crimild::get_ptr( indices ) )
+    );
 
     vkCmdDrawIndexed( cmds, indices->getIndexCount(), 1, 0, 0, 0 );
 }

@@ -141,6 +141,15 @@ Window::Window( const Options &options ) noexcept
     } else {
         m_mainLayer->attach< SimulationLayer >( m_renderDevice.get() );
     }
+
+    // Set last resize event to the initial window's size so it will be forwarded
+    // to render passes during the next update.
+    // TODO: This re-creates many rendering objects in many passes. It would be ideal
+    // to avoid it and just initialize all passes correctly
+    m_lastResizeEvent = Event {
+        .type = Event::Type::WINDOW_RESIZE,
+        .extent = options.extent,
+    };
 }
 
 Window::~Window( void ) noexcept

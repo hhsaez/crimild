@@ -75,7 +75,8 @@ SelectionOutlinePass::SelectionOutlinePass( RenderDevice *renderDevice ) noexcep
                             gl_Position = proj * view * model * vec4( inPosition, 1.0 );
                         }
 
-                    )" ),
+                    )"
+                ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
                     R"(
@@ -87,7 +88,9 @@ SelectionOutlinePass::SelectionOutlinePass( RenderDevice *renderDevice ) noexcep
                         {
                             outColor = vec4( 0 );
                         }
-                    )" ) } );
+                    )"
+                ) }
+        );
         return program;
     }();
 
@@ -118,7 +121,8 @@ SelectionOutlinePass::SelectionOutlinePass( RenderDevice *renderDevice ) noexcep
                             gl_Position = proj * view * model * vec4( outlineScale * inPosition, 1.0 );
                         }
 
-                    )" ),
+                    )"
+                ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
                     R"(
@@ -130,7 +134,9 @@ SelectionOutlinePass::SelectionOutlinePass( RenderDevice *renderDevice ) noexcep
                         {
                             outColor = vec4( 1, 0.75, 0, 1 );
                         }
-                    )" ) } );
+                    )"
+                ) }
+        );
         return program;
     }();
 
@@ -171,16 +177,19 @@ void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcep
         ApplyToGeometries(
             [ & ]( Geometry *geometry ) {
                 renderables.addGeometry( geometry );
-            } ) );
+            }
+        )
+    );
 
     // Set correct aspect ratio for camera before rendering
-    camera->setAspectRatio( m_renderArea.extent.width / m_renderArea.extent.height );
+    camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
     if ( m_renderPassObjects.uniforms != nullptr ) {
         m_renderPassObjects.uniforms->setValue(
             RenderPassObjects::Uniforms {
                 .view = camera->getViewMatrix(),
-                .proj = camera->getProjectionMatrix() } );
+                .proj = camera->getProjectionMatrix() }
+        );
         getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
     }
 
@@ -206,7 +215,8 @@ void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcep
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_stencilPipeline.pipeline->getHandle() );
+                        m_stencilPipeline.pipeline->getHandle()
+                    );
 
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_stencilPipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
@@ -214,7 +224,8 @@ void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcep
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
             }
-        } );
+        }
+    );
 
     // Render outline
     renderables.eachGeometry(
@@ -224,7 +235,8 @@ void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcep
                     vkCmdBindPipeline(
                         commandBuffer,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_outlinePipeline.pipeline->getHandle() );
+                        m_outlinePipeline.pipeline->getHandle()
+                    );
 
                     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_outlinePipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
@@ -232,7 +244,8 @@ void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcep
                     drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                 }
             }
-        } );
+        }
+    );
 
     vkCmdEndRenderPass( commandBuffer );
 }
@@ -340,7 +353,9 @@ void SelectionOutlinePass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
@@ -367,7 +382,9 @@ void SelectionOutlinePass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     m_stencilPipeline.pipeline = std::make_unique< GraphicsPipeline >(
@@ -403,7 +420,8 @@ void SelectionOutlinePass::init( void ) noexcept
         RasterizationState {},
         ColorBlendState {
             .enable = true,
-        } );
+        }
+    );
 
     m_outlinePipeline.pipeline = std::make_unique< GraphicsPipeline >(
         getRenderDevice(),
@@ -435,7 +453,8 @@ void SelectionOutlinePass::init( void ) noexcept
                 .writeMask = 0xff,
                 .reference = 1,
             },
-        } );
+        }
+    );
 }
 
 void SelectionOutlinePass::clear( void ) noexcept
@@ -636,7 +655,8 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
         1,
         &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 }
 
 void SelectionOutlinePass::destroyGeometryObjects( void ) noexcept
@@ -669,7 +689,8 @@ void SelectionOutlinePass::drawPrimitive( VkCommandBuffer cmds, Index currentFra
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     UInt32 instanceCount = 1;
     // if ( instanceData != nullptr ) {
@@ -688,7 +709,8 @@ void SelectionOutlinePass::drawPrimitive( VkCommandBuffer cmds, Index currentFra
             cmds,
             getRenderDevice()->bind( indices ),
             0,
-            utils::getIndexType( crimild::get_ptr( indices ) ) );
+            utils::getIndexType( crimild::get_ptr( indices ) )
+        );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];

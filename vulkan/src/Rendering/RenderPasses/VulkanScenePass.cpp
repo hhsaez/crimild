@@ -42,11 +42,18 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
           m_gBufferPass.getPositionAttachment(),
           m_gBufferPass.getNormalAttachment(),
           m_gBufferPass.getMaterialAttachment(),
-          m_shadowPass.getShadowAttachment() ),
-      m_skyboxPass(
+          m_shadowPass.getShadowAttachment()
+      ),
+      m_unlitPass(
           renderDevice,
           m_localLightingPass.getColorAttachment(),
-          m_gBufferPass.getDepthStencilAttachment() )
+          m_gBufferPass.getDepthStencilAttachment()
+      ),
+      m_skyboxPass(
+          renderDevice,
+          m_unlitPass.getColorAttachment(),
+          m_gBufferPass.getDepthStencilAttachment()
+      )
 {
     // no-op
 }
@@ -56,6 +63,7 @@ Event ScenePass::handle( const Event &e ) noexcept
     m_shadowPass.handle( e );
     m_gBufferPass.handle( e );
     m_localLightingPass.handle( e );
+    m_unlitPass.handle( e );
     m_skyboxPass.handle( e );
 
     return e;
@@ -86,7 +94,8 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
                 ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
             att->mipLevels,
-            att->layerCount );
+            att->layerCount
+        );
     };
 
     const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
@@ -101,10 +110,14 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
     }
 
     m_localLightingPass.render( scene, camera );
+    m_unlitPass.render( scene, camera );
     m_skyboxPass.render( scene, camera );
 
     // Accumulated color buffer can be transitioned now
     transitionAttachment( m_localLightingPass.getColorAttachment() );
+
+    // // Accumulated color buffer can be transitioned now
+    // transitionAttachment( m_unlitPass.getColorAttachment() );
 
     // Depth buffer can be transition now
     transitionAttachment( m_gBufferPass.getDepthStencilAttachment() );

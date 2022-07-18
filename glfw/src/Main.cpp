@@ -147,7 +147,7 @@ namespace crimild {
                 // TODO: Is this creating two Vulkan instances when multiple windows are available?
                 std::vector< std::shared_ptr< Window > > windows;
 
-                if ( settings.get< bool >( "editor.show", true ) ) {
+                if ( settings.get< bool >( "editor.show", false ) ) {
                     // Push editor window
                     windows.push_back(
                         [ & ] {
