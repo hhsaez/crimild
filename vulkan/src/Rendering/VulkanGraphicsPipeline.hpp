@@ -58,13 +58,15 @@ namespace crimild {
                 std::vector< VkDynamicState > dynamicStates;
                 ViewportDimensions viewport;
                 ViewportDimensions scissor;
+                std::vector< VkPushConstantRange > pushConstantRanges;
             };
 
         public:
             GraphicsPipeline(
                 RenderDevice *renderDevice,
                 VkRenderPass renderPass,
-                const Descriptor &descriptor ) noexcept;
+                const Descriptor &descriptor
+            ) noexcept;
             GraphicsPipeline(
                 RenderDevice *renderDevice,
                 VkRenderPass renderPass,
@@ -75,7 +77,8 @@ namespace crimild {
                 const RasterizationState &pipelineRasterizationState = RasterizationState {},
                 const ColorBlendState &pipelineColorBlendState = ColorBlendState {},
                 size_t colorAttachmentCount = 1,
-                std::vector< VkDynamicState > dynamicStates = {} ) noexcept;
+                std::vector< VkDynamicState > dynamicStates = {}
+            ) noexcept;
             ~GraphicsPipeline( void ) noexcept;
 
             inline VkPipeline getHandle( void ) const noexcept { return m_pipeline; }

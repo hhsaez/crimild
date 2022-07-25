@@ -35,7 +35,6 @@
 namespace crimild {
 
     class UniformBuffer;
-    class Simulation;
     class Material;
     class Node;
     class Primitive;
@@ -64,14 +63,6 @@ namespace crimild {
             void createRenderPassObjects( void ) noexcept;
             void destroyRenderPassObjects( void ) noexcept;
 
-            void createMaterialObjects( void ) noexcept;
-            void bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept;
-            void destroyMaterialObjects( void ) noexcept;
-
-            void createNodeObjects( void ) noexcept;
-            void bindNodeDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Node *node ) noexcept;
-            void destroyNodeObjects( void ) noexcept;
-
             void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
 
         private:
@@ -98,25 +89,7 @@ namespace crimild {
                 std::unique_ptr< UniformBuffer > uniforms;
             } m_renderPassObjects;
 
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct MaterialObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Material *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_materialObjects;
-
-            std::unique_ptr< Material > m_material;
-
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct NodeObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Node *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Node *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Node *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_nodeObjects;
-
-            SharedPointer< Primitive > m_pointLightPrimitive;
+            std::vector< std::unordered_set< SharedPointer< Primitive > > > m_inFlightPrimitives;
         };
 
     }

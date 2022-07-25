@@ -28,6 +28,9 @@
 #include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Debug/DebugDrawManager.hpp"
+#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
@@ -50,6 +53,86 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
+class DebugVisitor : public NodeVisitor {
+public:
+    explicit DebugVisitor( Camera *camera ) noexcept
+        : m_camera( camera )
+    {
+        // no-op
+    }
+
+    ~DebugVisitor( void ) = default;
+
+    virtual void visitCamera( Camera *camera ) override
+    {
+        const auto P = location( camera->getWorld() );
+        const auto D = forward( camera->getWorld() );
+        const auto R = right( camera->getWorld() );
+        const auto U = up( camera->getWorld() );
+        const auto F = camera->getFrustum();
+
+        const auto N0 = P + normalize( F.getDMin() * D + F.getRMin() * R + F.getUMax() * U );
+        const auto N1 = P + normalize( F.getDMin() * D + F.getRMin() * R + F.getUMin() * U );
+        const auto N2 = P + normalize( F.getDMin() * D + F.getRMax() * R + F.getUMin() * U );
+        const auto N3 = P + normalize( F.getDMin() * D + F.getRMax() * R + F.getUMax() * U );
+
+        const auto color = ColorRGB { 0, 1, 1 };
+        DebugDrawManager::addLine( P, N0, color );
+        DebugDrawManager::addLine( P, N1, color );
+        DebugDrawManager::addLine( P, N2, color );
+        DebugDrawManager::addLine( P, N3, color );
+        DebugDrawManager::addLine( N0, N1, color );
+        DebugDrawManager::addLine( N1, N2, color );
+        DebugDrawManager::addLine( N2, N3, color );
+        DebugDrawManager::addLine( N3, N0, color );
+    }
+
+    virtual void visitLight( Light *light ) override
+    {
+        switch ( light->getType() ) {
+            case Light::Type::POINT: {
+                const auto P = location( light->getWorld() );
+                DebugDrawManager::addCircle(
+                    P,
+                    forward( m_camera->getWorld() ),
+                    light->getRadius(),
+                    ColorRGB { 1, 1, 0 }
+                );
+                break;
+            }
+
+            case Light::Type::DIRECTIONAL: {
+                const auto P = location( light->getWorld() );
+                DebugDrawManager::addCircle(
+                    P,
+                    forward( m_camera->getWorld() ),
+                    0.25f,
+                    ColorRGB { 1, 1, 0 }
+                );
+                DebugDrawManager::addLine(
+                    P,
+                    P + 3.0 * forward( light->getWorld() ),
+                    ColorRGB { 1, 1, 0 }
+                );
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+private:
+    Camera *m_camera = nullptr;
+};
+
+// Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+// use normal uniforms instead.
+struct PerModelUniforms {
+    alignas( 16 ) ColorRGB color;
+    alignas( 16 ) Matrix4 world;
+};
+
 SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
     : RenderPassBase( renderDevice ),
       m_program(
@@ -69,40 +152,33 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
                                 mat4 proj;
                             };
 
-                            layout ( set = 2, binding = 0 ) uniform NodeUniforms {
+                            layout ( push_constant ) uniform PerModelUniforms {
+                                vec3 color;
                                 mat4 model;
                             };
 
                             layout ( location = 0 ) out vec2 outTexCoord;
+                            layout ( location = 1 ) out vec3 outColor;
 
                             void main()
                             {
                                 gl_Position = proj * view * model * vec4( inPosition, 1.0 );
                                 outTexCoord = inTexCoord;
+                                outColor = color;
                             }
-
                         )"
                       ),
                       crimild::alloc< Shader >(
                           Shader::Stage::FRAGMENT,
                           R"(
                             layout( location = 0 ) in vec2 inTexCoord;
-
-                            layout( set = 1, binding = 0 ) uniform MaterialUniform
-                            {
-                                vec4 color;
-                            };
-
-                            layout( set = 1, binding = 1 ) uniform sampler2D uSampler;
+                            layout( location = 1 ) in vec3 inColor;
 
                             layout( location = 0 ) out vec4 outColor;
 
                             void main()
                             {
-                                outColor = color * texture( uSampler, inTexCoord );
-                                if ( outColor.a <= 0.01 ) {
-                                    discard;
-                                }
+                                outColor = vec4( inColor, 1.0 );
                             }
                         )"
                       ) }
@@ -121,18 +197,6 @@ SceneDebugPass::SceneDebugPass( RenderDevice *renderDevice ) noexcept
             .height = 1024,
         },
     };
-
-    m_material = [] {
-        auto material = std::make_unique< UnlitMaterial >();
-        material->setColor( ColorRGBA { 1, 0, 1, 1 } );
-        return material;
-    }();
-
-    m_pointLightPrimitive = crimild::alloc< SpherePrimitive >(
-        SpherePrimitive::Params {
-            .type = Primitive::Type::LINES,
-        }
-    );
 
     init();
 }
@@ -198,17 +262,6 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
     if ( scene != nullptr && camera != nullptr ) {
-        std::vector< Node * > lights;
-        scene->perform(
-            Apply(
-                [ & ]( auto node ) {
-                    if ( node->getClassName() == Light::__CLASS_NAME ) {
-                        lights.push_back( node );
-                    }
-                }
-            )
-        );
-
         // Set correct aspect ratio for camera before rendering
         camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
@@ -221,28 +274,50 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
-        for ( auto node : lights ) {
-            vkCmdBindPipeline(
-                commandBuffer,
-                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                m_pipeline->getHandle()
-            );
+        scene->perform( DebugVisitor( camera ) );
 
-            vkCmdBindDescriptorSets(
-                commandBuffer,
-                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                m_pipeline->getPipelineLayout(),
-                0,
-                1,
-                &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                0,
-                nullptr
-            );
+        m_inFlightPrimitives[ currentFrameIndex ].clear();
 
-            bindMaterialDescriptors( commandBuffer, currentFrameIndex, m_material.get() );
-            bindNodeDescriptors( commandBuffer, currentFrameIndex, node );
-            drawPrimitive( commandBuffer, currentFrameIndex, m_pointLightPrimitive.get() );
-        }
+        DebugDrawManager::eachRenderable(
+            [ & ]( auto renderable ) {
+                vkCmdBindPipeline(
+                    commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_pipeline->getHandle()
+                );
+
+                vkCmdBindDescriptorSets(
+                    commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_pipeline->getPipelineLayout(),
+                    0,
+                    1,
+                    &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                    0,
+                    nullptr
+                );
+
+                PerModelUniforms model;
+                model.world = renderable.world.mat;
+                model.color = renderable.color;
+                vkCmdPushConstants(
+                    commandBuffer,
+                    m_pipeline->getPipelineLayout(),
+                    VK_SHADER_STAGE_VERTEX_BIT,
+                    0,
+                    sizeof( PerModelUniforms ),
+                    &model
+                );
+
+                auto primitive = renderable.primitive;
+                drawPrimitive( commandBuffer, currentFrameIndex, primitive.get() );
+
+                // Keep track of primitive, since DebugDrawManager might destroy it when resetting
+                m_inFlightPrimitives[ currentFrameIndex ].insert( primitive );
+            }
+        );
+
+        DebugDrawManager::reset();
     }
 
     vkCmdEndRenderPass( commandBuffer );
@@ -380,8 +455,6 @@ void SceneDebugPass::init( void ) noexcept
     }
 
     createRenderPassObjects();
-    createMaterialObjects();
-    createNodeObjects();
 
     const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
 
@@ -392,15 +465,22 @@ void SceneDebugPass::init( void ) noexcept
             .primitiveType = Primitive::Type::LINES,
             .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
                 m_renderPassObjects.layout,
-                m_materialObjects.descriptorSetLayout,
-                m_nodeObjects.descriptorSetLayout,
             },
             .program = m_program.get(),
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
             .viewport = viewport,
             .scissor = viewport,
+            .pushConstantRanges = {
+                VkPushConstantRange {
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                    .offset = 0,
+                    .size = sizeof( PerModelUniforms ),
+                },
+            },
         }
     );
+
+    m_inFlightPrimitives.resize( getRenderDevice()->getSwapchainImageCount() );
 }
 
 void SceneDebugPass::clear( void ) noexcept
@@ -411,8 +491,6 @@ void SceneDebugPass::clear( void ) noexcept
 
     m_pipeline = nullptr;
 
-    destroyNodeObjects();
-    destroyMaterialObjects();
     destroyRenderPassObjects();
 
     for ( auto &fb : m_framebuffers ) {
@@ -515,291 +593,6 @@ void SceneDebugPass::destroyRenderPassObjects( void ) noexcept
 
     getRenderDevice()->unbind( m_renderPassObjects.uniforms.get() );
     m_renderPassObjects.uniforms = nullptr;
-}
-
-void SceneDebugPass::createMaterialObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 2 > {
-        VkDescriptorSetLayoutBinding {
-            .binding = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-    };
-
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = uint32_t( bindings.size() ),
-        .pBindings = bindings.data(),
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
-}
-
-void SceneDebugPass::bindMaterialDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Material *material ) noexcept
-{
-    auto [ color, texture ] = [ & ]() {
-        if ( material == nullptr ) {
-            CRIMILD_LOG_WARNING( "Material is null" );
-            return std::make_tuple( ColorRGBA { 1, 0, 1, 1 }, crimild::get_ptr( Texture::ONE ) );
-        }
-
-        if ( material->getClassName() == materials::PrincipledBSDF::__CLASS_NAME ) {
-            const auto bsdf = static_cast< materials::PrincipledBSDF * >( material );
-            return std::make_tuple( rgba( bsdf->getAlbedo() ), bsdf->getAlbedoMap() );
-        } else {
-            const auto unlit = static_cast< UnlitMaterial * >( material );
-            return std::make_tuple( unlit->getColor(), unlit->getTexture() );
-        }
-    }();
-
-    struct MaterialUniforms {
-        alignas( 16 ) ColorRGBA color = ColorRGBA { 1, 1, 1, 1 };
-    };
-
-    if ( !m_materialObjects.descriptorSets.contains( material ) ) {
-        const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
-            VkDescriptorPoolSize {
-                .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-            },
-            VkDescriptorPoolSize {
-                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-            },
-        };
-
-        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .poolSizeCount = uint32_t( poolSizes.size() ),
-            .pPoolSizes = poolSizes.data(),
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
-
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
-
-        m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >(
-            MaterialUniforms {
-                .color = color,
-            }
-        );
-        getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
-
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
-
-        const auto allocInfo = VkDescriptorSetAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_materialObjects.descriptorPools[ material ],
-            .descriptorSetCount = uint32_t( layouts.size() ),
-            .pSetLayouts = layouts.data(),
-        };
-
-        m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
-
-        auto imageView = getRenderDevice()->bind( texture->imageView.get() );
-        auto sampler = getRenderDevice()->bind( texture->sampler.get() );
-
-        for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
-            const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
-                .offset = 0,
-                .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
-            };
-
-            const auto imageInfo = VkDescriptorImageInfo {
-                .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                .imageView = imageView,
-                .sampler = sampler,
-            };
-
-            const auto writes = std::array< VkWriteDescriptorSet, 2 > {
-                VkWriteDescriptorSet {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                    .dstBinding = 0,
-                    .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .descriptorCount = 1,
-                    .pBufferInfo = &bufferInfo,
-                    .pImageInfo = nullptr,
-                    .pTexelBufferView = nullptr,
-                },
-                VkWriteDescriptorSet {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                    .dstBinding = 1,
-                    .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    .descriptorCount = 1,
-                    .pBufferInfo = nullptr,
-                    .pImageInfo = &imageInfo,
-                    .pTexelBufferView = nullptr,
-                },
-            };
-            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
-        }
-    }
-
-    // TODO: This should be handled in a different way. What if texture changes?
-    // Also, update only when material changes.
-    m_materialObjects.uniforms[ material ]->setValue( color );
-    getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
-
-    vkCmdBindDescriptorSets(
-        cmds,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        1,
-        1,
-        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
-        0,
-        nullptr
-    );
-}
-
-void SceneDebugPass::destroyMaterialObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    // no need to destroy sets
-    m_materialObjects.descriptorSets.clear();
-
-    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_materialObjects.descriptorSetLayout, nullptr );
-    m_materialObjects.descriptorSetLayout = VK_NULL_HANDLE;
-
-    for ( auto &it : m_materialObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
-    }
-    m_materialObjects.descriptorPools.clear();
-
-    for ( auto &it : m_materialObjects.uniforms ) {
-        getRenderDevice()->unbind( it.second.get() );
-    }
-    m_materialObjects.uniforms.clear();
-}
-
-void SceneDebugPass::createNodeObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr,
-    };
-
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_nodeObjects.descriptorSetLayout ) );
-}
-
-void SceneDebugPass::bindNodeDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Node *node ) noexcept
-{
-    if ( !m_nodeObjects.descriptorSets.contains( node ) ) {
-        VkDescriptorPoolSize poolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
-
-        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .poolSizeCount = 1,
-            .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        };
-
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_nodeObjects.descriptorPools[ node ] ) );
-
-        m_nodeObjects.uniforms[ node ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-        getRenderDevice()->bind( m_nodeObjects.uniforms[ node ].get() );
-
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_nodeObjects.descriptorSetLayout );
-
-        const auto allocInfo = VkDescriptorSetAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_nodeObjects.descriptorPools[ node ],
-            .descriptorSetCount = uint32_t( layouts.size() ),
-            .pSetLayouts = layouts.data(),
-        };
-
-        m_nodeObjects.descriptorSets[ node ].resize( getRenderDevice()->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_nodeObjects.descriptorSets[ node ].data() ) );
-
-        for ( size_t i = 0; i < m_nodeObjects.descriptorSets[ node ].size(); ++i ) {
-            const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = getRenderDevice()->getHandle( m_nodeObjects.uniforms[ node ].get(), i ),
-                .offset = 0,
-                .range = m_nodeObjects.uniforms[ node ]->getBufferView()->getLength(),
-            };
-
-            const auto descriptorWrite = VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_nodeObjects.descriptorSets[ node ][ i ],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
-                .pImageInfo = nullptr,
-                .pTexelBufferView = nullptr,
-            };
-
-            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-        }
-    }
-
-    m_nodeObjects.uniforms[ node ]->setValue( node->getWorld().mat );
-    getRenderDevice()->update( m_nodeObjects.uniforms[ node ].get() );
-
-    vkCmdBindDescriptorSets(
-        cmds,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        2,
-        1,
-        &m_nodeObjects.descriptorSets[ node ][ currentFrameIndex ],
-        0,
-        nullptr
-    );
-}
-
-void SceneDebugPass::destroyNodeObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    // no need to destroy sets
-    m_nodeObjects.descriptorSets.clear();
-
-    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_nodeObjects.descriptorSetLayout, nullptr );
-    m_nodeObjects.descriptorSetLayout = VK_NULL_HANDLE;
-
-    for ( auto &it : m_nodeObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
-    }
-    m_nodeObjects.descriptorPools.clear();
-
-    for ( auto &it : m_nodeObjects.uniforms ) {
-        getRenderDevice()->unbind( it.second.get() );
-    }
-    m_nodeObjects.uniforms.clear();
 }
 
 void SceneDebugPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept

@@ -134,7 +134,8 @@ namespace crimild {
                         .binding = uint32_t( ret.size() ),
                         .stride = vertexLayout.getSize(),
                         .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-                    } );
+                    }
+                );
             }
             // graphicsPipeline->getProgram()->instanceLayouts.each(
             //     [ & ]( const auto &layout ) {
@@ -165,8 +166,10 @@ namespace crimild {
                                 .binding = crimild::UInt32( binding ),
                                 .format = utils::getFormat( attrib.format ),
                                 .offset = attrib.offset,
-                            } );
-                    } );
+                            }
+                        );
+                    }
+                );
                 binding++;
             }
 
@@ -333,7 +336,7 @@ namespace crimild {
             CRIMILD_LOG_TRACE();
 
             // auto physicalDevice = renderDevice->physicalDevice;
-            auto msaaSamples = VK_SAMPLE_COUNT_1_BIT; //physicalDevice->msaaSamples;
+            auto msaaSamples = VK_SAMPLE_COUNT_1_BIT; // physicalDevice->msaaSamples;
 
             return VkPipelineMultisampleStateCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
@@ -505,16 +508,16 @@ namespace crimild {
             };
         }
 
-        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const std::vector< VkDescriptorSetLayout > &descriptorSetLayouts ) noexcept
+        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const const vulkan::GraphicsPipeline::Descriptor &descriptor ) noexcept
         {
             CRIMILD_LOG_TRACE();
 
             auto createInfo = VkPipelineLayoutCreateInfo {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                .setLayoutCount = static_cast< crimild::UInt32 >( descriptorSetLayouts.size() ),
-                .pSetLayouts = descriptorSetLayouts.data(),
-                .pushConstantRangeCount = 0,
-                .pPushConstantRanges = nullptr,
+                .setLayoutCount = static_cast< crimild::UInt32 >( descriptor.descriptorSetLayouts.size() ),
+                .pSetLayouts = descriptor.descriptorSetLayouts.data(),
+                .pushConstantRangeCount = uint32_t( descriptor.pushConstantRanges.size() ),
+                .pPushConstantRanges = descriptor.pushConstantRanges.data(),
             };
 
             VkPipelineLayout pipelineLayout;
@@ -523,7 +526,9 @@ namespace crimild {
                     renderDevice->getHandle(),
                     &createInfo,
                     nullptr,
-                    &pipelineLayout ) );
+                    &pipelineLayout
+                )
+            );
 
             return pipelineLayout;
         }
@@ -542,7 +547,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     const RasterizationState &rasterizationState,
     const ColorBlendState &colorBlendState,
     size_t colorAttachmentCount,
-    std::vector< VkDynamicState > dynamicStates ) noexcept
+    std::vector< VkDynamicState > dynamicStates
+) noexcept
     : vulkan::GraphicsPipeline(
         renderDevice,
         renderPass,
@@ -555,7 +561,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
             .colorBlendState = colorBlendState,
             .colorAttachmentCount = colorAttachmentCount,
             .dynamicStates = dynamicStates,
-        } )
+        }
+    )
 {
     // no-op
 }
@@ -563,7 +570,8 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
 vulkan::GraphicsPipeline::GraphicsPipeline(
     RenderDevice *renderDevice,
     VkRenderPass renderPass,
-    const vulkan::GraphicsPipeline::Descriptor &descriptor ) noexcept
+    const vulkan::GraphicsPipeline::Descriptor &descriptor
+) noexcept
     : m_renderDevice( renderDevice->getHandle() )
 {
     CRIMILD_LOG_TRACE();
@@ -594,7 +602,7 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     auto dynamicState = createDynamicState( descriptor.dynamicStates );
 
     // Create pipeline layout
-    m_pipelineLayout = createPipelineLayout( renderDevice, descriptor.descriptorSetLayouts );
+    m_pipelineLayout = createPipelineLayout( renderDevice, descriptor );
 
     auto createInfo = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -622,7 +630,9 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
             1,
             &createInfo,
             nullptr,
-            &m_pipeline ) );
+            &m_pipeline
+        )
+    );
 }
 
 vulkan::GraphicsPipeline::~GraphicsPipeline( void ) noexcept
@@ -632,12 +642,14 @@ vulkan::GraphicsPipeline::~GraphicsPipeline( void ) noexcept
     vkDestroyPipeline(
         m_renderDevice,
         m_pipeline,
-        nullptr );
+        nullptr
+    );
 
     vkDestroyPipelineLayout(
         m_renderDevice,
         m_pipelineLayout,
-        nullptr );
+        nullptr
+    );
 
     m_pipeline = VK_NULL_HANDLE;
     m_pipelineLayout = VK_NULL_HANDLE;
