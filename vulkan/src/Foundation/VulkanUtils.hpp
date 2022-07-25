@@ -76,7 +76,7 @@ namespace crimild {
             const char *errorToString( VkResult result ) noexcept;
 
             /**
-             	\name Translation
+                \name Translation
              */
             //@{
 
@@ -107,7 +107,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Validation layers
+                \name Validation layers
              */
             //{
 
@@ -129,7 +129,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Extensions
+                \name Extensions
              */
             //@{
 
@@ -140,14 +140,14 @@ namespace crimild {
             const ExtensionArray &getDeviceExtensions( void ) noexcept;
 
             /**
-             	\brief Check if a given device meets all of the required extensions
+                \brief Check if a given device meets all of the required extensions
              */
             crimild::Bool checkDeviceExtensionSupport( const VkPhysicalDevice &device ) noexcept;
 
             //@}
 
             /**
-             	\name Queue family queries
+                \name Queue family queries
              */
             //@{
 
@@ -170,7 +170,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Swapchain
+                \name Swapchain
              */
             //@{
 
@@ -200,7 +200,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Buffers
+                \name Buffers
              */
             //@{
 
@@ -222,7 +222,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Images
+                \name Images
              */
             //@{
 
@@ -254,8 +254,8 @@ namespace crimild {
             //@}
 
             /**
-			   \name ImageView
-			*/
+                           \name ImageView
+                        */
             //@{
 
             VkImageViewType getImageViewType( const ImageView *imageView ) noexcept;
@@ -267,7 +267,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Multisampling
+                \name Multisampling
              */
             //@{
 
@@ -276,7 +276,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Depth and Stencil
+                \name Depth and Stencil
              */
             //@{
 
@@ -289,7 +289,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Commands
+                \name Commands
              */
             //@{
 
@@ -299,7 +299,7 @@ namespace crimild {
             //@}
 
             /**
-             	\name Debug
+                \name Debug
              */
             //@{
 
