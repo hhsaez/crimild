@@ -14,7 +14,7 @@ namespace crimild {
     class Primitive;
     class Geometry;
 
-    class DebugRenderHelper {
+    class [[deprecated]] DebugRenderHelper {
     public:
         static void init( void );
 
@@ -23,8 +23,8 @@ namespace crimild {
         static void renderLines( Renderer *renderer, Camera *camera, const Vector3f *lines, unsigned int count, const ColorRGBA &color = ColorRGBA::Constants::WHITE );
 
         /**
-			\brief Render lines on screen space
-		*/
+            \brief Render lines on screen space
+        */
         static void renderLines( const Vector3f *lines, unsigned int count, const ColorRGBA &color = ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } );
 
         static void render( Renderer *renderer, Camera *camera, Primitive *primitive, const Transformation &model, const ColorRGBA &color );
@@ -32,8 +32,8 @@ namespace crimild {
         static void render( const Transformation &transform, crimild::Real32 axisSize = 1.0f );
 
         /**
-			\brief Renders a geometry on screen space
-		*/
+            \brief Renders a geometry on screen space
+        */
         static void render( Geometry *geometry );
 
         static void renderBox( Renderer *renderer, Camera *camera, const Vector3f &position, float scale, const ColorRGBA &color = ColorRGBA::Constants::WHITE );
