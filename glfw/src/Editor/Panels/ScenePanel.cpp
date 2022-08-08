@@ -51,7 +51,7 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
     }
 
     static ImGuizmo::OPERATION gizmoOperation( ImGuizmo::TRANSLATE );
-    static ImGuizmo::MODE gizmoMode( ImGuizmo::LOCAL );
+    static ImGuizmo::MODE gizmoMode( ImGuizmo::WORLD );
     if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_W ) )
         gizmoOperation = ImGuizmo::TRANSLATE;
     if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_E ) )
@@ -75,18 +75,26 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
     // TODO: Snapping values should depend on the mode (i.e. meters, degrees, etc.)
     const auto snapValues = Vector3 { 1, 1, 1 };
 
-    auto res = selectedNode->getLocal().mat;
+    auto newWorld = selectedNode->getWorld().mat;
     ImGuizmo::Manipulate(
         static_cast< const float * >( &view.c0.x ),
         static_cast< const float * >( &proj.c0.x ),
         gizmoOperation,
         gizmoMode,
-        static_cast< float * >( &res.c0.x ),
+        static_cast< float * >( &newWorld.c0.x ),
         nullptr,
         snap ? static_cast< const float * >( &snapValues.x ) : nullptr
     );
 
-    selectedNode->setLocal( Transformation { res, inverse( res ) } );
+    if ( selectedNode->hasParent() ) {
+        // Node has a parent, so convert world transform into local transform
+        const auto newLocal = selectedNode->getParent()->getWorld().invMat * newWorld;
+        selectedNode->setLocal( Transformation { newLocal, inverse( newLocal ) } );
+    } else {
+        // Node has no parent, so local transform is same as world
+        selectedNode->setLocal( Transformation { newWorld, inverse( newWorld ) } );
+    }
+
     selectedNode->perform( UpdateWorldState() );
 }
 
