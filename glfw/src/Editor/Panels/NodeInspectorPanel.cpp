@@ -32,18 +32,28 @@
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Components/PathComponent.hpp"
 #include "Editor/EditorLayer.hpp"
 #include "Foundation/ImGUIUtils.hpp"
+#include "Foundation/ObjectFactory.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/get_ptr.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
+#include "SceneGraph/Group.hpp"
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
+
+static void pathComponentDetails( components::Path *path ) noexcept
+{
+    if ( ImGui::CollapsingHeader( path->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        ImGui::Text( "Nodes: %i", path->getNode< Group >()->getNodeCount() );
+    }
+}
 
 static void materialComponentDetails( MaterialComponent *materials )
 {
