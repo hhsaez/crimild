@@ -109,6 +109,7 @@
 #include "Components/NodeComponent.hpp"
 #include "Components/NodeComponentCatalog.hpp"
 #include "Components/OrbitComponent.hpp"
+#include "Components/PathComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
 #include "Components/RotationComponent.hpp"
 #include "Components/SingleValueComponent.hpp"
