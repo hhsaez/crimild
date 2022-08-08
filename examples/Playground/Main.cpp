@@ -34,7 +34,9 @@ public:
     Example( void ) noexcept
     {
         if ( auto settings = Settings::getInstance() ) {
-            settings->set( "editor.show", 1 );
+            if ( !settings->hasKey( "editor.show" ) ) {
+                settings->set( "editor.show", 1 );
+            }
         }
     }
 
