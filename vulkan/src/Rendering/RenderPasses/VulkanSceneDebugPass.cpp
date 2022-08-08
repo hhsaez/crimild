@@ -63,8 +63,28 @@ public:
 
     ~DebugVisitor( void ) = default;
 
+    virtual void visitNode( Node *node ) override
+    {
+        node->forEachComponent(
+            [ & ]( auto cmp ) {
+                if ( cmp != nullptr ) {
+                    cmp->renderDebugInfo( nullptr, m_camera );
+                }
+            }
+        );
+    }
+
+    virtual void visitGroup( Group *group ) override
+    {
+        visitNode( group );
+
+        NodeVisitor::visitGroup( group );
+    }
+
     virtual void visitCamera( Camera *camera ) override
     {
+        NodeVisitor::visitCamera( camera );
+
         const auto P = location( camera->getWorld() );
         const auto D = forward( camera->getWorld() );
         const auto R = right( camera->getWorld() );
@@ -89,6 +109,8 @@ public:
 
     virtual void visitLight( Light *light ) override
     {
+        NodeVisitor::visitLight( light );
+
         switch ( light->getType() ) {
             case Light::Type::POINT: {
                 const auto P = location( light->getWorld() );
