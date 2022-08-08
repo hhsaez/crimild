@@ -45,6 +45,7 @@
 #include "Behaviors/Actions/ExecuteBehavior.hpp"
 #include "Behaviors/Actions/ExecuteBehaviorOnTarget.hpp"
 #include "Behaviors/Actions/FindTarget.hpp"
+#include "Behaviors/Actions/FollowPath.hpp"
 #include "Behaviors/Actions/LoadScene.hpp"
 #include "Behaviors/Actions/LookAt.hpp"
 #include "Behaviors/Actions/MotionApply.hpp"

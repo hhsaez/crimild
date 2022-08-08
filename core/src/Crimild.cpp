@@ -85,6 +85,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ExecuteBehavior );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::ExecuteBehaviorOnTarget );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::FindTarget );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::FollowPath );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::LoadScene );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::LookAt );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::behaviors::actions::MotionApply );
