@@ -123,32 +123,60 @@ static void behaviorControllerDetails( behaviors::BehaviorController *controller
     // behaviorEditor( showBehaviorEditor, controller );
 }
 
+static const std::set< std::string > &getComponentList( void ) noexcept
+{
+    static const auto components = ObjectFactory::getInstance()->filter(
+        std::set< std::string > {
+            "crimild::components",
+        }
+    );
+    return components;
+}
+
 static void nodeComponentsSection( Node *node )
 {
     ImGui::SetNextItemOpen( true );
     if ( ImGui::CollapsingHeader( "Components", ImGuiTreeNodeFlags_None ) ) {
+        if ( ImGui::BeginCombo( "##", "Add Component..." ) ) {
+            const auto &components = getComponentList();
+            for ( const auto &componentClassName : components ) {
+                if ( ImGui::Selectable( componentClassName.c_str(), false ) ) {
+                    auto component = std::static_pointer_cast< NodeComponent >( ObjectFactory::getInstance()->build( componentClassName ) );
+                    node->attachComponent( component );
+                    component->start();
+                }
+            }
+            // TODO: Rename BehaviorController to use ::componets namespace or
+            // improve filtering for ObjectFactory
+            if ( node->getComponent< behaviors::BehaviorController >() == nullptr ) {
+                if ( ImGui::Selectable( "crimild::behaviors::BehaviorController", false ) ) {
+                    withBehavior(
+                        retain( node ),
+                        [] {
+                            auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
+                            repeat->setBehavior( behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
+                            return repeat;
+                        }()
+                    );
+                }
+            }
+            ImGui::EndCombo();
+        }
+
         node->forEachComponent(
             [ & ]( NodeComponent *cmp ) {
                 if ( cmp->getClassName() == MaterialComponent::__CLASS_NAME ) {
+                    ImGui::Separator();
                     materialComponentDetails( static_cast< MaterialComponent * >( cmp ) );
                 } else if ( cmp->getClassName() == behaviors::BehaviorController::__CLASS_NAME ) {
+                    ImGui::Separator();
                     behaviorControllerDetails( static_cast< behaviors::BehaviorController * >( cmp ) );
+                } else if ( cmp->getClassName() == components::Path::__CLASS_NAME ) {
+                    ImGui::Separator();
+                    pathComponentDetails( static_cast< components::Path * >( cmp ) );
                 }
             }
         );
-
-        if ( node->getComponent< behaviors::BehaviorController >() == nullptr ) {
-            if ( ImGui::Button( "Add Behaviors..." ) ) {
-                withBehavior(
-                    retain( node ),
-                    [] {
-                        auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
-                        repeat->setBehavior( behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
-                        return repeat;
-                    }()
-                );
-            }
-        }
     }
 }
 
