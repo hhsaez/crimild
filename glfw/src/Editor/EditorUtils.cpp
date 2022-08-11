@@ -146,6 +146,9 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
 
 bool crimild::editor::loadNewScene( void )
 {
+    // Stop simulation to ensure we're handling the right scene
+    EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
+
     auto scene = createDefaultScene();
     Simulation::getInstance()->setScene( scene );
 }
@@ -167,6 +170,9 @@ bool crimild::editor::addToScene( SharedPointer< Node > const &node ) noexcept
 
 bool crimild::editor::saveSceneAs( std::string fileName )
 {
+    // Stop simulation to ensure we're handling the right scene
+    EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
+
     auto path = FilePath {
         .path = fileName,
         .pathType = FilePath::PathType::ABSOLUTE,
@@ -189,6 +195,9 @@ bool crimild::editor::saveSceneAs( std::string fileName )
 
 bool crimild::editor::loadScene( std::string fileName )
 {
+    // Stop simulation to ensure we're handling the right scene
+    EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
+
     auto path = FilePath {
         .path = fileName,
         .pathType = FilePath::PathType::ABSOLUTE,
@@ -223,6 +232,9 @@ bool crimild::editor::loadScene( std::string fileName )
 
 bool crimild::editor::exportScene( std::string fileName )
 {
+    // Stop simulation to ensure we're handling the right scene
+    EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
+
     auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
     coding::FileEncoder encoder;
     encoder.encode( crimild::retain( scene ) );
