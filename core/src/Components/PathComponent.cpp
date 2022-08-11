@@ -29,7 +29,9 @@
 
 #include "Debug/DebugDrawManager.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
+#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_easing.hpp"
 #include "Mathematics/ceil.hpp"
 #include "Mathematics/easing.hpp"
 #include "Mathematics/floor.hpp"
@@ -55,19 +57,17 @@ Transformation Path::evaluate( float time ) noexcept
     const auto &t1 = group->getNodeAt( idx1 )->getWorld();
     const auto t = ( time * N ) - floor( time * N );
 
-    return Transformation {
-        lerp( t0.mat, t1.mat, t ),
-        lerp( t0.invMat, t1.invMat, t ),
-    };
+    return lerp( t0, t1, t );
 }
 
 void Path::renderDebugInfo( Renderer *, Camera * )
 {
-    auto group = getNode< Group >();
-    const auto N = group->getNodeCount();
-    for ( auto i = 1; i < N; i++ ) {
-        const auto p0 = location( group->getNodeAt( i )->getWorld() );
-        const auto p1 = location( group->getNodeAt( i - 1 )->getWorld() );
-        DebugDrawManager::addLine( p0, p1, ColorRGB { 1, 0, 1 } );
+    const auto dt = 0.01f;
+    for ( auto t = 0.0f; t < 1.0f; t += dt ) {
+        const auto T0 = evaluate( t );
+        const auto T1 = evaluate( t + dt );
+        const auto P0 = location( T0 );
+        DebugDrawManager::addLine( P0, location( T1 ), ColorRGB { 1, 0, 1 } );
+        DebugDrawManager::addLine( P0, P0 + up( T0 ), ColorRGB { 1, 1, 0 } );
     }
 }
