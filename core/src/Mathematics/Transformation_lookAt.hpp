@@ -34,6 +34,8 @@
 #include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/normalize.hpp"
+#include "Mathematics/orthonormalization.hpp"
+#include "Mathematics/swizzle.hpp"
 
 namespace crimild {
 
@@ -43,33 +45,42 @@ namespace crimild {
        \remarks Crimild uses a right-handed coordinate system, but the forward vector is always pointing
        in the -Z direction.
      */
-    [[nodiscard]] static constexpr Transformation lookAt( const Point3 &eye, const Point3 &center, const Vector3 &up ) noexcept
+    [[nodiscard]] static constexpr Transformation lookAt( const Point3 &eye, const Point3 &target, const Vector3 &up ) noexcept
     {
-        const auto E = Vector3 { eye.x, eye.y, eye.z };
-        const auto C = Vector3 { center.x, center.y, center.z };
-
         // Compute the view vector. Keep in mind that Forward always point towards the -Z axis.
-        const auto V = normalize( E - C );
+        const auto zAxis = normalize( eye - target );
 
-        // Make sure up vector is normalized. Also, negate the cross produce since we want the R vector
-        // The result is a normalized vector too.
-        const auto R = -( cross( V, normalize( up ) ) );
+        // Makes sure the up vector is normalized
+        const auto xAxis = normalize(
+            [ & ] {
+                auto ret = cross( normalize( up ), zAxis );
+                if ( lengthSquared( ret ) > 0 ) {
+                    return ret;
+                } else {
+                    // Pik a different up vector
+                    Vector3 right, up;
+                    orthonormalBasis( vector3( zAxis ), right, up );
+                    return up;
+                }
+            }()
+        );
 
         // The new up vector is normalized
-        const auto U = cross( V, R );
+        const auto yAxis = normalize( cross( zAxis, xAxis ) );
 
-        // This matrix is in camera space, so we need to invert it later
-        const auto cameraToWorld = Matrix4 {
-            { R.x, U.x, V.x, 0 },
-            { R.y, U.y, V.y, 0 },
-            { R.z, U.z, V.z, 0 },
-            { dot( -E, R ), dot( -E, U ), dot( -E, V ), 1 },
+        // This matrix is in world space. It should only be used by nodes. In order to
+        // use it as the view matrix, it will have to be inverted.
+        const auto mat = Matrix4 {
+            { xAxis.x, xAxis.y, xAxis.z, 0 },
+            { yAxis.x, yAxis.y, yAxis.z, 0 },
+            { zAxis.x, zAxis.y, zAxis.z, 0 },
+            { eye.x, eye.y, eye.z, 1 },
         };
 
         return Transformation {
+            mat,
             // TODO: avoid using inverse
-            inverse( cameraToWorld ),
-            cameraToWorld,
+            inverse( mat ),
             Transformation::Contents::ROTATION | Transformation::Contents::TRANSLATION,
         };
     }

@@ -32,6 +32,7 @@
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/distance.hpp"
+#include "Mathematics/orthonormalization.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 
@@ -74,7 +75,16 @@ void DebugDrawManager::addLine(
         return primitive;
     }();
 
-    const auto up = cross( vector3( to ), vector3( from ) );
+    const auto up = [ & ] {
+        auto ret = cross( vector3( to ), vector3( from ) );
+        if ( lengthSquared( ret ) > 0 ) {
+            return ret;
+        } else {
+            Vector3 right, up;
+            orthonormalBasis( vector3( to ), right, up );
+            return up;
+        }
+    }();
 
     s_renderables.push_back(
         Renderable {

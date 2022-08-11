@@ -60,14 +60,16 @@ TEST( Camera, view_matrix )
         lookAt(
             Point3 { 1, 3, 2 },
             Point3 { 4, -2, 8 },
-            Vector3 { 1, 1, 0 } ) );
+            Vector3 { 1, 1, 0 }
+        )
+    );
     camera->perform( UpdateWorldState() );
 
     constexpr auto M = Matrix4 {
-        { -0.50709, 0.76772, -0.35857, 0 },
-        { 0.50709, 0.60609, 0.59761, 0 },
-        { 0.67612, 0.12122, -0.71714, 0 },
-        { -2.36643, -2.82843, 0, 1 },
+        { -0.514496, 0.778924, -0.358569, 0.000000 },
+        { 0.514496, 0.614940, 0.597614, -0.000000 },
+        { 0.685994, 0.122988, -0.717137, 0.000000 },
+        { -2.400980, -2.869720, 0.000000, 1.000000 },
     };
 
     const auto view = camera->getViewMatrix();
@@ -198,7 +200,9 @@ TEST( Camera, get_ray_for_camera_using_lookAt )
         lookAt(
             Point3 { 0, -2, 5 },
             Point3 { 1, -2, 5 },
-            Vector3 { 0, 1, 0 } ) );
+            Vector3 { 0, 1, 0 }
+        )
+    );
 
     auto px = Real( 100 ) / Real( width );
     auto py = Real( 50 ) / Real( height );
