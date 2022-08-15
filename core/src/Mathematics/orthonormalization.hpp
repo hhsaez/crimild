@@ -39,7 +39,7 @@ namespace crimild {
        \remarks The input vector v1 is assumed to be already normalized.
      */
     template< typename T >
-    static void orthonormalBasis( const Vector3Impl< T > &v1, Vector3Impl< T > &v2, Vector3Impl< T > &v3 ) noexcept
+    static constexpr void orthonormalBasis( const Vector3Impl< T > &v1, Vector3Impl< T > &v2, Vector3Impl< T > &v3 ) noexcept
     {
         // TODO: not sure about handedness...
         if ( abs( v1.x ) > abs( v1.y ) ) {
