@@ -64,11 +64,11 @@ namespace crimild {
         // with its inverse transpose. This is a fairly complex process, but most of the time
         // convergence should only require a few loops.
         R = RS;
-        Real norm;
+        Real norm = 0;
         int count = 0;
         do {
             // Compute next matrix in the series
-            Matrix4 next;
+            auto next = Matrix4 {};
             Matrix4 current = inverse( transpose( R ) );
             for ( int i = 0; i < 4; ++i ) {
                 for ( int j = 0; j < 4; ++j ) {
@@ -107,10 +107,14 @@ namespace crimild {
             return end;
         }
 
-        Matrix4 T0, R0, S0;
+        auto T0 = Matrix4 {};
+        auto R0 = Matrix4 {};
+        auto S0 = Matrix4 {};
         decompose( start.mat, T0, R0, S0 );
 
-        Matrix4 T1, R1, S1;
+        auto T1 = Matrix4 {};
+        auto R1 = Matrix4 {};
+        auto S1 = Matrix4 {};
         decompose( end.mat, T1, R1, S1 );
 
         const auto T = lerp( T0, T1, t );
