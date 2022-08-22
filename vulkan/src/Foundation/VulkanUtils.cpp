@@ -669,6 +669,7 @@ utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
 #if defined( CRIMILD_PLATFORM_OSX )
     // TODO: no macro for platform extensions?
     extensions.push_back( "VK_MVK_macos_surface" );
+    extensions.push_back( VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME );
 #elif defined( CRIMILD_PLATFORM_WIN32 )
     extensions.push_back( "VK_KHR_win32_surface" );
 #endif
@@ -685,7 +686,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-    void *pUserData )
+    void *pUserData
+)
 {
     CRIMILD_LOG_DEBUG( "Vulkan validation layer: ", pCallbackData->pMessage );
     return VK_FALSE;
@@ -831,21 +833,24 @@ utils::SwapchainSupportDetails utils::querySwapchainSupportDetails( const VkPhys
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         device,
         surface,
-        &details.capabilities );
+        &details.capabilities
+    );
 
     crimild::UInt32 formatCount;
     vkGetPhysicalDeviceSurfaceFormatsKHR(
         device,
         surface,
         &formatCount,
-        nullptr );
+        nullptr
+    );
     if ( formatCount > 0 ) {
         details.formats.resize( formatCount );
         vkGetPhysicalDeviceSurfaceFormatsKHR(
             device,
             surface,
             &formatCount,
-            details.formats.data() );
+            details.formats.data()
+        );
     }
 
     crimild::UInt32 presentModeCount;
@@ -853,14 +858,16 @@ utils::SwapchainSupportDetails utils::querySwapchainSupportDetails( const VkPhys
         device,
         surface,
         &presentModeCount,
-        nullptr );
+        nullptr
+    );
     if ( presentModeCount > 0 ) {
         details.presentModes.resize( presentModeCount );
         vkGetPhysicalDeviceSurfacePresentModesKHR(
             device,
             surface,
             &presentModeCount,
-            details.presentModes.data() );
+            details.presentModes.data()
+        );
     }
 
     return details;
@@ -872,7 +879,8 @@ crimild::Bool utils::checkSwapchainSupport( const VkPhysicalDevice &device, cons
 
     auto swapchainSupport = querySwapchainSupportDetails(
         device,
-        surface );
+        surface
+    );
 
     return !swapchainSupport.formats.empty()
            && !swapchainSupport.presentModes.empty();
@@ -931,10 +939,12 @@ VkExtent2D utils::chooseExtent( const VkSurfaceCapabilitiesKHR &capabilities, Vk
     // Keep width/heigth values within the allowed ones, though.
     requestedExtent.width = std::max(
         capabilities.minImageExtent.width,
-        std::min( capabilities.maxImageExtent.width, requestedExtent.width ) );
+        std::min( capabilities.maxImageExtent.width, requestedExtent.width )
+    );
     requestedExtent.height = std::max(
         capabilities.minImageExtent.height,
-        std::min( capabilities.maxImageExtent.height, requestedExtent.height ) );
+        std::min( capabilities.maxImageExtent.height, requestedExtent.height )
+    );
 
     return requestedExtent;
 }
@@ -971,7 +981,9 @@ crimild::Bool utils::createBuffer( RenderDeviceOLD *renderDevice, BufferDescript
             renderDevice->handler,
             &createInfo,
             nullptr,
-            &bufferHandler ) );
+            &bufferHandler
+        )
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements( renderDevice->handler, bufferHandler, &memRequirements );
@@ -982,7 +994,8 @@ crimild::Bool utils::createBuffer( RenderDeviceOLD *renderDevice, BufferDescript
         .memoryTypeIndex = findMemoryType(
             renderDevice->physicalDevice->handler,
             memRequirements.memoryTypeBits,
-            descriptor.properties ),
+            descriptor.properties
+        ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -990,14 +1003,18 @@ crimild::Bool utils::createBuffer( RenderDeviceOLD *renderDevice, BufferDescript
             renderDevice->handler,
             &allocInfo,
             nullptr,
-            &bufferMemory ) );
+            &bufferMemory
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkBindBufferMemory(
             renderDevice->handler,
             bufferHandler,
             bufferMemory,
-            0 ) );
+            0
+        )
+    );
 
     return true;
 }
@@ -1013,7 +1030,9 @@ crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &buffe
             0,
             size,
             0,
-            &dstData ) );
+            &dstData
+        )
+    );
 
     memcpy( dstData, data, ( size_t ) size );
 
@@ -1033,13 +1052,16 @@ crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &buffe
             0,
             size,
             0,
-            &dstData ) );
+            &dstData
+        )
+    );
 
     for ( auto i = 0l; i < count; i++ ) {
         memcpy(
             static_cast< crimild::UChar * >( dstData ) + i * size,
             data[ i ],
-            size );
+            size
+        );
     }
 
     vkUnmapMemory( device, bufferMemory );
@@ -1087,7 +1109,9 @@ crimild::Bool utils::createImage( RenderDeviceOLD *renderDevice, ImageDescriptor
             renderDevice->handler,
             &createInfo,
             nullptr,
-            &image ) );
+            &image
+        )
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements( renderDevice->handler, image, &memRequirements );
@@ -1098,7 +1122,8 @@ crimild::Bool utils::createImage( RenderDeviceOLD *renderDevice, ImageDescriptor
         .memoryTypeIndex = utils::findMemoryType(
             renderDevice->physicalDevice->handler,
             memRequirements.memoryTypeBits,
-            descriptor.memoryProperties ),
+            descriptor.memoryProperties
+        ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -1106,14 +1131,18 @@ crimild::Bool utils::createImage( RenderDeviceOLD *renderDevice, ImageDescriptor
             renderDevice->handler,
             &allocInfo,
             nullptr,
-            &imageMemory ) );
+            &imageMemory
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkBindImageMemory(
             renderDevice->handler,
             image,
             imageMemory,
-            0 ) );
+            0
+        )
+    );
 
     return true;
 }
@@ -1182,7 +1211,8 @@ void utils::transitionImageLayout( RenderDeviceOLD *renderDevice, VkImage image,
         0,
         nullptr,
         1,
-        &barrier );
+        &barrier
+    );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
@@ -1215,7 +1245,8 @@ void utils::copyBufferToImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, V
         image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
-        &region );
+        &region
+    );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
@@ -1251,7 +1282,8 @@ void utils::copyBufferToLayeredImage( RenderDeviceOLD *renderDevice, VkBuffer bu
         image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         static_cast< crimild::UInt32 >( bufferCopyRegions.size() ),
-        bufferCopyRegions.data() );
+        bufferCopyRegions.data()
+    );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
@@ -1302,7 +1334,8 @@ void utils::generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFor
             0,
             nullptr,
             1,
-            &barrier );
+            &barrier
+        );
 
         auto blit = VkImageBlit {
             .srcSubresource = {
@@ -1339,7 +1372,8 @@ void utils::generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFor
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1,
             &blit,
-            VK_FILTER_LINEAR );
+            VK_FILTER_LINEAR
+        );
 
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1356,7 +1390,8 @@ void utils::generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFor
             0,
             nullptr,
             1,
-            &barrier );
+            &barrier
+        );
 
         if ( mipWidth > 1 )
             mipWidth /= 2;
@@ -1380,7 +1415,8 @@ void utils::generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFor
         0,
         nullptr,
         1,
-        &barrier );
+        &barrier
+    );
 
     endSingleTimeCommands( renderDevice, commandBuffer );
 }
@@ -1540,7 +1576,8 @@ VkFormat utils::findDepthFormat( RenderDeviceOLD *renderDevice ) noexcept
             VK_FORMAT_D32_SFLOAT,
         },
         VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT );
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
 }
 
 crimild::Bool utils::hasStencilComponent( VkFormat format ) noexcept
@@ -1565,7 +1602,9 @@ VkCommandBuffer utils::beginSingleTimeCommands( RenderDeviceOLD *renderDevice ) 
         vkAllocateCommandBuffers(
             renderDevice->handler,
             &allocInfo,
-            &commandBuffer ) );
+            &commandBuffer
+        )
+    );
 
     auto beginInfo = VkCommandBufferBeginInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -1595,15 +1634,20 @@ void utils::endSingleTimeCommands( RenderDeviceOLD *renderDevice, VkCommandBuffe
             graphicsQueue,
             1,
             &submitInfo,
-            nullptr ) );
+            nullptr
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkQueueWaitIdle(
-            graphicsQueue ) );
+            graphicsQueue
+        )
+    );
 
     vkFreeCommandBuffers(
         renderDevice->handler,
         commandPool->handler,
         1,
-        &commandBuffer );
+        &commandBuffer
+    );
 }
