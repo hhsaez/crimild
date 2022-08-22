@@ -72,12 +72,14 @@ void VulkanInstance::createInstance( void ) noexcept
         .applicationVersion = VK_MAKE_VERSION(
             appVersionMajor,
             appVersionMinor,
-            appVersionPatch ),
+            appVersionPatch
+        ),
         .pEngineName = "Crimild",
         .engineVersion = VK_MAKE_VERSION(
             CRIMILD_VERSION_MAJOR,
             CRIMILD_VERSION_MINOR,
-            CRIMILD_VERSION_PATCH ),
+            CRIMILD_VERSION_PATCH
+        ),
     };
 
     auto extensions = utils::getRequiredExtensions();
@@ -89,6 +91,10 @@ void VulkanInstance::createInstance( void ) noexcept
         .enabledExtensionCount = static_cast< crimild::UInt32 >( extensions.size() ),
         .ppEnabledExtensionNames = extensions.data(),
     };
+
+#if defined( CRIMILD_PLATFORM_OSX )
+    createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     // Keep reference outside block to it is not automatically destroyed before calling VkCreateInstance
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
@@ -136,7 +142,8 @@ void VulkanInstance::createDebugMessenger( void ) noexcept
                                             VkInstance instance,
                                             const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
                                             const VkAllocationCallbacks *pAllocator,
-                                            VkDebugUtilsMessengerEXT *pDebugMessenger ) {
+                                            VkDebugUtilsMessengerEXT *pDebugMessenger
+                                        ) {
         if ( auto func = ( PFN_vkCreateDebugUtilsMessengerEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" ) ) {
             return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
         }
@@ -147,7 +154,8 @@ void VulkanInstance::createDebugMessenger( void ) noexcept
              m_instanceHandle,
              &createInfo,
              nullptr,
-             &m_debugMessengerHandle )
+             &m_debugMessengerHandle
+         )
          != VK_SUCCESS ) {
         CRIMILD_LOG_ERROR( "Failed to setup debug messenger" );
         return;
@@ -180,7 +188,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_report_callback(
     int32_t messageCode,
     const char *pLayerPrefix,
     const char *pMessage,
-    void *userData )
+    void *userData
+)
 {
     if ( flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT ) {
         // Performance warnings are silenced to make debug output more readable
@@ -211,7 +220,8 @@ void VulkanInstance::createReportCallback( void ) noexcept
             VkInstance instance,
             const VkDebugReportCallbackCreateInfoEXT *pCreateInfo,
             const VkAllocationCallbacks *pAllocator,
-            VkDebugReportCallbackEXT *pHandler ) {
+            VkDebugReportCallbackEXT *pHandler
+        ) {
             if ( auto func = ( PFN_vkCreateDebugReportCallbackEXT ) vkGetInstanceProcAddr( instance, "vkCreateDebugReportCallbackEXT" ) ) {
                 return func( instance, pCreateInfo, pAllocator, pHandler );
             }
@@ -223,7 +233,9 @@ void VulkanInstance::createReportCallback( void ) noexcept
             m_instanceHandle,
             &createInfo,
             nullptr,
-            &m_reportCallbackHandle ) );
+            &m_reportCallbackHandle
+        )
+    );
 }
 
 void VulkanInstance::destroyReportCallback( void ) noexcept
