@@ -29,6 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_CLEAR_
 
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 
 namespace crimild {
 

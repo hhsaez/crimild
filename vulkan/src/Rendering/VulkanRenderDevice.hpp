@@ -32,6 +32,7 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
 
 #include <unordered_map>
