@@ -117,6 +117,15 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
     m_cameraTranslation = translation( 10, 10, 10 );
     m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+
+    m_scenePass.eachAttachment(
+        [ & ]( const auto *att ) {
+            m_attachments.push_back( att );
+        }
+    );
+    m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
+    m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
+    m_selectedAttachment = m_attachments.size() - 1;
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
@@ -236,17 +245,37 @@ void ScenePanel::render( void ) noexcept
             m_lastResizeEvent = Event {};
         }
 
-        const auto att = m_sceneDebugOverlayPass.getColorAttachment();
-        // const auto att = m_sceneDebugPass.getColorAttachment();
-        if ( !att->descriptorSets.empty() ) {
-            ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
-            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-        } else {
-            ImGui::Text( "No scene attachments found" );
+        if ( !m_attachments.empty() ) {
+            const auto att = m_attachments[ m_selectedAttachment ];
+            if ( !att->descriptorSets.empty() ) {
+                ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
+                ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+                ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+                ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+                ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+                ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+            } else {
+                ImGui::Text( "No scene attachments found" );
+            }
+
+            ImGui::SetCursorPos( ImVec2( 20, 40 ) );
+            if ( ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) ) ) {
+                static ImGuiComboFlags flags = 0;
+                if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
+                    for ( size_t i = 0; i < m_attachments.size(); ++i ) {
+                        const auto &att = m_attachments[ i ];
+                        const auto isSelected = i == m_selectedAttachment;
+                        if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
+                            m_selectedAttachment = i;
+                        }
+                        if ( isSelected ) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::EndChild();
+            }
         }
 
         ImGui::End();
@@ -266,10 +295,12 @@ void ScenePanel::render( void ) noexcept
 
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+
     auto transitionAttachment = [ & ]( const auto att ) {
         getRenderDevice()->transitionImageLayout(
             commandBuffer,
-            att->image,
+            att->images[ currentFrameIndex ],
             att->format,
             getRenderDevice()->formatIsColor( att->format )
                 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL

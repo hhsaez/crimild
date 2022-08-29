@@ -53,7 +53,8 @@ namespace crimild {
             ScenePanel(
                 vulkan::RenderDevice *renderDevice,
                 const Point2 &position = { 310, 50 },
-                const Extent2D &extent = { .width = 1280.0, .height = 695.0 } ) noexcept;
+                const Extent2D &extent = { .width = 1280.0, .height = 695.0 }
+            ) noexcept;
             virtual ~ScenePanel( void ) = default;
 
             virtual Event handle( const Event &e ) noexcept override;
@@ -77,6 +78,9 @@ namespace crimild {
             Vector2i m_lastMousePos = Vector2i { 0, 0 };
             Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
             Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
+
+            std::vector< const vulkan::FramebufferAttachment * > m_attachments;
+            size_t m_selectedAttachment = 0;
         };
 
     }
