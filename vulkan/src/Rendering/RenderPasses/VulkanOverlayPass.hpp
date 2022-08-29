@@ -31,6 +31,7 @@
 #include "Foundation/NamedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 
 namespace crimild {
 

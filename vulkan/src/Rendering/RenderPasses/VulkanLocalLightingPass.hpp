@@ -31,6 +31,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 
 namespace crimild {
 

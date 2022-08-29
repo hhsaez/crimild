@@ -35,6 +35,7 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/dot.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Visitors/RTAcceleration.hpp"
 
 namespace crimild {

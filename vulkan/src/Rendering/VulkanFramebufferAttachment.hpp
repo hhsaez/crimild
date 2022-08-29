@@ -25,40 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
-#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
+#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_ATTACHMENT_
+#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_ATTACHMENT_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Simulation/Event.hpp"
 
 namespace crimild {
 
-    struct Event;
-
     namespace vulkan {
 
-        class RenderDevice;
+        struct FramebufferAttachment {
+            std::string name;
+            VkExtent2D extent;
+            VkFormat format = VK_FORMAT_UNDEFINED;
+            std::vector< VkImage > images;
+            std::vector< VkDeviceMemory > memories;
+            std::vector< VkImageView > imageViews;
+            VkSampler sampler = VK_NULL_HANDLE;
+            uint32_t mipLevels = 1;
+            uint32_t layerCount = 1;
+            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > descriptorSets;
 
-        class RenderPassBase {
-        protected:
-            explicit RenderPassBase( RenderDevice *renderDevice ) noexcept;
-
-        public:
-            virtual ~RenderPassBase( void ) = default;
-
-            inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
-            inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-        protected:
-            void createFramebufferAttachment(
-                std::string name,
-                const VkExtent2D &extent,
-                VkFormat format,
-                FramebufferAttachment &out ) const;
-            void destroyFramebufferAttachment( FramebufferAttachment &att ) const;
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
+            // If true, attachment will use device resources (images, image views, etc.)
+            bool usesDeviceResources = false;
         };
 
     }
