@@ -16,8 +16,7 @@ MESSAGE("-- Configuring examples:")
 # ADD_SUBDIRECTORY( Spotlight )
 # ADD_SUBDIRECTORY( Shadows )
 # ENDIF ()
-
-# Only enable Playground for the moment
+ADD_SUBDIRECTORY(LightingPoint)
 ADD_SUBDIRECTORY(Playground)
 ADD_SUBDIRECTORY(Triangle)
 ADD_SUBDIRECTORY(TextureCoordinates)
