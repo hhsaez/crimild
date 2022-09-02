@@ -213,9 +213,9 @@ static void lightPropertiesSection( Node *node )
         ImGui::InputFloat( "Radius", &radius );
         light->setRadius( radius );
 
-        auto color = rgb( light->getColor() );
+        auto color = light->getColor();
         ImGui::ColorEdit3( "Color", get_ptr( color ) );
-        light->setColor( rgba( color ) );
+        light->setColor( color );
 
         auto castShadows = light->castShadows();
         ImGui::Checkbox( "Cast Shadows", &castShadows );

@@ -57,11 +57,11 @@ using namespace crimild;
 Light::Light( Type type )
     : _type( type ),
       _attenuation { 1.0f, 0.0f, 0.0f },
-      _color { 1.0f, 1.0f, 1.0f, 1.0f },
+      _color { 1.0f, 1.0f, 1.0f },
       _outerCutoff( 0.0f ),
       _innerCutoff( 0.0f ),
       _exponent( 0.0f ),
-      _ambient { 0.0f, 0.0f, 0.0f, 0.0f }
+      _ambient { 0.0f, 0.0f, 0.0f }
 {
 }
 
@@ -157,8 +157,8 @@ auto updateCascade = []( auto cascadeId, auto light ) {
     Array< Real > cascadeSplits( 4 );
 
     // TODO: get clipping values from camera
-    auto nearClip = 0.1f;   //frustum.getDMin();
-    auto farClip = 1000.0f; //frustum.getDMax();
+    auto nearClip = 0.1f;   // frustum.getDMin();
+    auto farClip = 1000.0f; // frustum.getDMax();
     auto clipRange = farClip - nearClip;
     auto minZ = nearClip;
     auto maxZ = nearClip + clipRange;
@@ -236,7 +236,8 @@ auto updateCascade = []( auto cascadeId, auto light ) {
     const auto lightViewMatrix = lookAt(
                                      Point3 { frustumCenter + lightDirection * minExtents.z },
                                      point3( frustumCenter ),
-                                     Vector3f::Constants::UP )
+                                     Vector3f::Constants::UP
+    )
                                      .invMat;
 
     // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
@@ -270,38 +271,44 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                                         return lookAt(
                                             lightPos,
                                             lightPos - Vector3::Constants::UNIT_X,
-                                            Vector3::Constants::UP );
+                                            Vector3::Constants::UP
+                                        );
 
                                     case 1: // positive x
                                         return lookAt(
                                             lightPos,
                                             lightPos + Vector3::Constants::UNIT_X,
-                                            Vector3::Constants::UP );
+                                            Vector3::Constants::UP
+                                        );
 
                                     case 2: // positive y
                                         return lookAt(
                                             lightPos,
                                             lightPos + Vector3::Constants::UNIT_Y,
-                                            Vector3::Constants::UNIT_Z );
+                                            Vector3::Constants::UNIT_Z
+                                        );
 
                                     case 3: // negative y
                                         return lookAt(
                                             lightPos,
                                             lightPos - Vector3::Constants::UNIT_Y,
-                                            -Vector3::Constants::UNIT_Z );
+                                            -Vector3::Constants::UNIT_Z
+                                        );
 
                                     case 4: // positive z
                                         return lookAt(
                                             lightPos,
                                             lightPos + Vector3::Constants::UNIT_Z,
-                                            Vector3::Constants::UP );
+                                            Vector3::Constants::UP
+                                        );
 
                                     case 5: // negative z
                                     default:
                                         return lookAt(
                                             lightPos,
                                             lightPos - Vector3::Constants::UNIT_Z,
-                                            Vector3::Constants::UP );
+                                            Vector3::Constants::UP
+                                        );
                                 }
                             }( face );
 
@@ -313,7 +320,8 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                                 .view = vMatrix,
                                 .lightPos = light->getWorld()( Vector3::Constants::ZERO ),
                             };
-                        } ),
+                        }
+                    ),
                 },
             };
             m_shadowAtlasDescriptors[ face ] = descriptors;
@@ -337,7 +345,8 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                                     .view = vMatrix,
                                     .lightPos = light->getWorld()( Vector3::Constants::ZERO ),
                                 };
-                            } );
+                            }
+                        );
                     }(),
                 },
             };
@@ -362,7 +371,8 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                                         .view = Matrix4f::Constants::IDENTITY,
                                         .lightPos = light->getWorld()( Vector3::Constants::ZERO ),
                                     };
-                                } );
+                                }
+                            );
                         }(),
                     },
                 };

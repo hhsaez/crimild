@@ -27,11 +27,11 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Mathematics/ColorRGBA.hpp"
-#include "SceneGraph/Group.hpp"
-#include "Visitors/FetchLights.hpp"
+#include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Vector_equality.hpp"
+#include "SceneGraph/Group.hpp"
+#include "Visitors/FetchLights.hpp"
 
 #include "gtest/gtest.h"
 
@@ -45,7 +45,7 @@ TEST( LightTest, construction )
     EXPECT_EQ( ( Point3 { 0.0f, 0.0f, 0.0f } ), light->getPosition() );
     EXPECT_EQ( ( Vector3f { 1.0f, 0.0f, 0.0f } ), light->getAttenuation() );
     EXPECT_EQ( ( Vector3f { 0.0f, 0.0f, 0.0f } ), light->getDirection() );
-    EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), light->getColor() );
+    EXPECT_EQ( ( ColorRGB { 1.0f, 1.0f, 1.0f } ), light->getColor() );
     EXPECT_EQ( 0.0f, light->getOuterCutoff() );
     EXPECT_EQ( 0.0f, light->getInnerCutoff() );
     EXPECT_EQ( 0.0f, light->getExponent() );
