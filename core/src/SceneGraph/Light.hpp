@@ -29,7 +29,7 @@
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
 #include "Foundation/Containers/Array.hpp"
-#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/ColorRGB.hpp"
 #include "Node.hpp"
 #include "Rendering/Catalog.hpp"
 
@@ -77,8 +77,8 @@ namespace crimild {
         void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
         const Vector3f &getAttenuation( void ) const { return _attenuation; }
 
-        void setColor( const ColorRGBA &color ) { _color = color; }
-        const ColorRGBA &getColor( void ) const { return _color; }
+        void setColor( const ColorRGB &color ) { _color = color; }
+        const ColorRGB &getColor( void ) const { return _color; }
 
         void setOuterCutoff( float value ) { _outerCutoff = value; }
         float getOuterCutoff( void ) const { return _outerCutoff; }
@@ -89,8 +89,8 @@ namespace crimild {
         void setExponent( float value ) { _exponent = value; }
         float getExponent( void ) const { return _exponent; }
 
-        const ColorRGBA &getAmbient( void ) const { return _ambient; }
-        void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
+        const ColorRGB &getAmbient( void ) const { return _ambient; }
+        void setAmbient( const ColorRGB &ambient ) { _ambient = ambient; }
 
         inline Real32 getEnergy( void ) const noexcept { return m_energy; }
         inline void setEnergy( Real32 energy ) noexcept { m_energy = energy; }
@@ -103,11 +103,11 @@ namespace crimild {
     private:
         Type _type;
         Vector3f _attenuation;
-        ColorRGBA _color;
+        ColorRGB _color;
         float _outerCutoff;
         float _innerCutoff;
         float _exponent;
-        ColorRGBA _ambient;
+        ColorRGB _ambient;
         SharedPointer< DescriptorSet > m_descriptors;
         Real32 m_energy = 1.0f;
         Real32 m_radius = -1.0f; // compute radius based on energy by default
