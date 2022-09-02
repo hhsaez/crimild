@@ -56,7 +56,8 @@ Camera::Camera( void )
             }
         }(),
         0.1f,
-        1000.0f )
+        1000.0f
+    )
 {
 }
 
@@ -86,7 +87,7 @@ void Camera::setViewMatrix( const Matrix4f &view )
     */
 }
 
-const Matrix4f &Camera::getViewMatrix( void )
+const Matrix4f &Camera::getViewMatrix( void ) const
 {
     return getWorld().invMat;
 }

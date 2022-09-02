@@ -69,7 +69,7 @@ namespace crimild {
         const Matrix4f &getOrthographicMatrix( void ) const { return _orthographicMatrix; }
 
         void setViewMatrix( const Matrix4f &view );
-        const Matrix4f &getViewMatrix( void );
+        const Matrix4f &getViewMatrix( void ) const;
 
         void setViewMatrixIsCurrent( bool value ) { _viewMatrixIsCurrent = value; }
         bool viewMatrixIsCurrent( void ) const { return _viewMatrixIsCurrent; }
