@@ -116,7 +116,7 @@ public:
                             group->attachNode(
                                 [] {
                                     auto light = crimild::alloc< Light >( Light::Type::POINT );
-                                    light->setColor( ColorRGBA::Constants::WHITE );
+                                    light->setColor( ColorRGB::Constants::WHITE );
                                     light->setEnergy( 5.0f );
                                     return light;
                                 }()
