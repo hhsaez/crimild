@@ -51,33 +51,248 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-LocalLightingPass::LocalLightingPass(
-    RenderDevice *renderDevice,
-    const FramebufferAttachment *albedoInput,
-    const FramebufferAttachment *positionInput,
-    const FramebufferAttachment *normalInput,
-    const FramebufferAttachment *materialInput,
-    const FramebufferAttachment *shadowInput
-) noexcept
-    : RenderPassBase( renderDevice ),
-      m_albedoInput( albedoInput ),
-      m_positionInput( positionInput ),
-      m_normalInput( normalInput ),
-      m_materialInput( materialInput ),
-      m_shadowInput( shadowInput )
-{
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = {
-            .width = 1024,
-            .height = 1024,
-        },
+struct DirectionalLightProps {
+    alignas( 16 ) Vector3f direction;
+    alignas( 16 ) ColorRGBf color;
+};
+
+static const auto DIRECTIONAL_LIGHT_VERT_SHADER = R"(
+    layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
+        mat4 view;
+        mat4 proj;
+        vec2 viewportSize;
     };
 
-    m_lightVolume = std::make_unique< SpherePrimitive >(
+    vec2 positions[6] = vec2[](
+        vec2( -1.0, 1.0 ),
+        vec2( -1.0, -1.0 ),
+        vec2( 1.0, -1.0 ),
+        vec2( -1.0, 1.0 ),
+        vec2( 1.0, -1.0 ),
+        vec2( 1.0, 1.0 )
+    );
+
+    layout ( location = 0 ) out vec2 outViewportSize;
+
+    void main()
+    {
+        gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+        outViewportSize = viewportSize;
+    }
+)";
+
+static const auto DIRECTIONAL_LIGHT_FRAG_SHADER = R"(
+    layout ( location = 0 ) in vec2 inViewportSize;
+
+    layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
+    layout ( set = 0, binding = 2 ) uniform sampler2D uPosition;
+    layout ( set = 0, binding = 3 ) uniform sampler2D uNormal;
+    layout ( set = 0, binding = 4 ) uniform sampler2D uMaterial;
+
+    layout ( set = 1, binding = 0 ) uniform LightProps {
+        vec3 direction;
+        vec3 color;
+    } uLight;
+
+    layout( location = 0 ) out vec4 outColor;
+
+    void main()
+    {
+        vec2 uv = gl_FragCoord.st / inViewportSize;
+
+        vec3 albedo = texture( uAlbedo, uv ).rgb;
+        vec3 N = normalize( texture( uNormal, uv ).rgb );
+
+        vec3 L = normalize( -uLight.direction );
+
+        // Simple diffuse lighting
+        vec3 diffuse = uLight.color * max( dot( N, L ), 0.0 );
+
+        outColor = vec4( albedo * diffuse, 1.0 );
+    }
+)";
+
+struct PointLightProps {
+    alignas( 16 ) Point3f position;
+    alignas( 4 ) Real32 radius;
+    alignas( 16 ) ColorRGBf color;
+};
+
+static const auto POINT_LIGHT_VERT_SHADER = R"(
+    layout ( location = 0 ) in vec3 inPosition;
+
+    layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
+        mat4 view;
+        mat4 proj;
+        vec2 viewportSize;
+    };
+
+    layout ( set = 1, binding = 0 ) uniform LightProps {
+        vec3 position;
+        float radius;
+        vec3 color;
+    } uLight;
+
+    layout ( location = 0 ) out vec2 outViewportSize;
+
+    void main()
+    {
+        gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
+
+        outViewportSize = viewportSize;
+    }
+)";
+
+static const auto POINT_LIGHT_FRAG_SHADER = R"(
+    layout ( location = 0 ) in vec2 inViewportSize;
+
+    layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
+    layout ( set = 0, binding = 2 ) uniform sampler2D uPosition;
+    layout ( set = 0, binding = 3 ) uniform sampler2D uNormal;
+    layout ( set = 0, binding = 4 ) uniform sampler2D uMaterial;
+
+    layout ( set = 1, binding = 0 ) uniform LightProps {
+        vec3 position;
+        float radius;
+        vec3 color;
+    } uLight;
+
+    layout( location = 0 ) out vec4 outColor;
+
+    // Calculate light's attenuation based on distance and radius
+    float attenuation( float d, float r )
+    {
+        // See: https://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/
+        float Kc = 1.0;
+        float Kl = 2.0 / r;
+        float Kq = 1 / ( r * r );
+        return 1 / ( Kc + Kl * d + Kq * d * d );
+    }
+
+    void main()
+    {
+        vec2 uv = gl_FragCoord.st / inViewportSize;
+
+        vec3 albedo = texture( uAlbedo, uv ).rgb;
+        vec3 P = texture( uPosition, uv ).xyz;
+        vec3 N = normalize( texture( uNormal, uv ).xyz );
+
+        vec3 L = uLight.position - P;
+        float distance = length( L );
+        L = normalize( L );
+
+        // Simple diffuse lighting
+        vec3 diffuse = uLight.color * max( dot( N, L ), 0.0 );
+
+        // Simple attenuation
+        diffuse *= attenuation( distance, uLight.radius );
+
+        outColor = vec4( albedo * diffuse, 1.0 );
+    }
+)";
+
+struct SpotLightProps {
+    alignas( 16 ) Point3f position;
+    alignas( 16 ) Vector3f direction;
+    alignas( 4 ) Real32 radius;
+    alignas( 16 ) ColorRGBf color;
+    alignas( 4 ) Real32 innerCutoff;
+    alignas( 4 ) Real32 outerCutoff;
+};
+
+static const auto SPOT_LIGHT_VERT_SHADER = R"(
+    layout ( location = 0 ) in vec3 inPosition;
+
+    layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
+        mat4 view;
+        mat4 proj;
+        vec2 viewportSize;
+    };
+
+    layout ( set = 1, binding = 0 ) uniform LightProps {
+        vec3 position;
+        vec3 direction;
+        float radius;
+        vec3 color;
+        float innerCutoff;
+        float outerCutoff;
+    } uLight;
+
+    layout ( location = 0 ) out vec2 outViewportSize;
+
+    void main()
+    {
+        gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
+
+        outViewportSize = viewportSize;
+    }
+)";
+
+static const auto SPOT_LIGHT_FRAG_SHADER = R"(
+    layout ( location = 0 ) in vec2 inViewportSize;
+
+    layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
+    layout ( set = 0, binding = 2 ) uniform sampler2D uPosition;
+    layout ( set = 0, binding = 3 ) uniform sampler2D uNormal;
+    layout ( set = 0, binding = 4 ) uniform sampler2D uMaterial;
+
+    layout ( set = 1, binding = 0 ) uniform LightProps {
+        vec3 position;
+        vec3 direction;
+        float radius;
+        vec3 color;
+        float innerCutoff;
+        float outerCutoff;
+    } uLight;
+
+    layout( location = 0 ) out vec4 outColor;
+
+    // Calculate light's attenuation based on distance and radius
+    float attenuation( float d, float r )
+    {
+        // See: https://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/
+        float Kc = 1.0;
+        float Kl = 2.0 / r;
+        float Kq = 1 / ( r * r );
+        return 1 / ( Kc + Kl * d + Kq * d * d );
+    }
+
+    void main()
+    {
+        vec2 uv = gl_FragCoord.st / inViewportSize;
+
+        vec3 albedo = texture( uAlbedo, uv ).rgb;
+        vec3 P = texture( uPosition, uv ).xyz;
+        vec3 N = normalize( texture( uNormal, uv ).xyz );
+
+        vec3 L = uLight.position - P;
+        float distance = length( L );
+        L = normalize( L );
+
+        // Simple diffuse lighting with attenuation
+        vec3 diffuse = uLight.color * max( dot( N, L ), 0.0 );
+        diffuse *= attenuation( distance, uLight.radius );
+
+        // Spot
+        float theta = dot( L, normalize( -uLight.direction ) );
+        float epsilon = uLight.innerCutoff - uLight.outerCutoff;
+        float intensity = clamp( ( theta - uLight.outerCutoff ) / epsilon, 0.0, 1.0 );
+        vec3 I = diffuse * intensity;
+
+        outColor = vec4( albedo * I, 1.0 );
+    }
+)";
+
+LocalLightingPass::LocalLightingPass(
+    RenderDevice *renderDevice,
+    const std::vector< const FramebufferAttachment * > inputs,
+    const FramebufferAttachment *output
+) noexcept
+    : RenderPassBase( renderDevice ),
+      m_inputAttachments( inputs ),
+      m_outputAttachment( output )
+{
+    m_lightVolume = crimild::alloc< SpherePrimitive >(
         SpherePrimitive::Params {
             .type = Primitive::Type::TRIANGLES,
             .radius = 1.0,
@@ -90,18 +305,14 @@ LocalLightingPass::LocalLightingPass(
 
 LocalLightingPass::~LocalLightingPass( void ) noexcept
 {
-    clear();
+    deinit();
 }
 
 Event LocalLightingPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
-            m_renderArea.extent = {
-                .width = uint32_t( e.extent.width ),
-                .height = uint32_t( e.extent.height ),
-            };
-            clear();
+            deinit();
             init();
             break;
         }
@@ -115,78 +326,83 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
 
 void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
 {
+    fetchLights( scene );
+    updateCameraUniforms( camera );
+
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    const auto clearValues = std::array< VkClearValue, 1 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    // Set alpha to 1 since the resulting image should not be transparent.
-                    1.0f,
-                },
-            },
-        },
-    };
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,
         .framebuffer = m_framebuffers[ currentFrameIndex ],
         .renderArea = m_renderArea,
-        .clearValueCount = clearValues.size(),
-        .pClearValues = clearValues.data(),
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
     };
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    if ( scene != nullptr && camera != nullptr ) {
-        FetchLights fetchLights;
-        scene->perform( fetchLights );
-
-        // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
-
-        if ( m_renderPassObjects.uniforms != nullptr ) {
-            m_renderPassObjects.uniforms->setValue(
-                RenderPassObjects::Uniforms {
-                    .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix(),
-                    .viewport = Vector2 {
-                        Real( m_renderArea.extent.width ),
-                        Real( m_renderArea.extent.height ),
-                    } }
-            );
-            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-        }
-
-        fetchLights.forEachLight(
-            [ & ]( auto light ) {
-                if ( light->getType() == Light::Type::DIRECTIONAL ) {
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_directionalLightPipeline->getHandle()
-                    );
-                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_directionalLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
-                    bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
-                    vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
-                } else {
-                    // TODO: Use instancing to render all lights in one call
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_pointLightPipeline->getHandle()
-                    );
-                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pointLightPipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
-                    bindLightDescriptors( commandBuffer, m_directionalLightPipeline->getPipelineLayout(), currentFrameIndex, light );
-                    drawPrimitive( commandBuffer, currentFrameIndex, m_lightVolume.get() );
-                }
-            }
+    for ( const auto light : m_directionalLights.lights ) {
+        vkCmdBindPipeline(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_directionalLights.pipeline->getHandle()
         );
+        vkCmdBindDescriptorSets(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_directionalLights.pipeline->getPipelineLayout(),
+            0,
+            1,
+            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+            0,
+            nullptr
+        );
+        bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light );
+        vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
+    }
+
+    for ( const auto light : m_pointLights.lights ) {
+        // TODO: Use instancing to render all lights in one call
+        vkCmdBindPipeline(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_pointLights.pipeline->getHandle()
+        );
+        vkCmdBindDescriptorSets(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_pointLights.pipeline->getPipelineLayout(),
+            0,
+            1,
+            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+            0,
+            nullptr
+        );
+        bindPointLightDescriptors( commandBuffer, currentFrameIndex, light );
+        drawPrimitive( commandBuffer, m_lightVolume.get() );
+    }
+
+    for ( const auto light : m_spotLights.lights ) {
+        // TODO: Use instancing to render all lights in one call
+        vkCmdBindPipeline(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_spotLights.pipeline->getHandle()
+        );
+        vkCmdBindDescriptorSets(
+            commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_spotLights.pipeline->getPipelineLayout(),
+            0,
+            1,
+            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+            0,
+            nullptr
+        );
+        bindSpotLightDescriptors( commandBuffer, currentFrameIndex, light );
+        drawPrimitive( commandBuffer, m_lightVolume.get() );
     }
 
     vkCmdEndRenderPass( commandBuffer );
@@ -196,19 +412,22 @@ void LocalLightingPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    const auto extent = m_renderArea.extent;
+    m_renderArea = VkRect2D {
+        .extent = m_outputAttachment->extent,
+        .offset = { 0, 0 },
+    };
 
-    createFramebufferAttachment( "Scene/Lighting", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
+    const auto extent = m_renderArea.extent;
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
-            .format = m_colorAttachment.format,
+            .format = m_outputAttachment->format,
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         },
     };
@@ -276,7 +495,7 @@ void LocalLightingPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageView,
+            m_outputAttachment->imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -301,466 +520,27 @@ void LocalLightingPass::init( void ) noexcept
     }
 
     createRenderPassObjects();
-    createLightObjects();
 
-    auto createPipeline = [ & ]( auto lightType ) {
-        auto program = crimild::alloc< ShaderProgram >();
-        program->setShaders(
-            Array< SharedPointer< Shader > > {
-                crimild::alloc< Shader >(
-                    Shader::Stage::VERTEX,
-                    lightType == Light::Type::DIRECTIONAL
-                        ? R"(
-                                vec2 positions[6] = vec2[](
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( -1.0, -1.0 ),
-                                    vec2( 1.0, -1.0 ),
-
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 )
-                                );
-
-                                vec2 texCoords[6] = vec2[](
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 0.0, 1.0 ),
-                                    vec2( 1.0, 1.0 ),
-
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 )
-                                );
-
-                                void main()
-                                {
-                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-                                }
-                                  )"
-                        : R"(
-                                layout ( location = 0 ) in vec3 inPosition;
-
-                                layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                                    mat4 view;
-                                    mat4 proj;
-                                    vec2 viewport;
-                                };
-
-                                layout ( set = 1, binding = 0 ) uniform LightProps {
-                                    uint type;
-                                    vec4 position;
-                                    vec4 direction;
-                                    vec4 ambient;
-                                    vec4 color;
-                                    vec4 attenuation;
-                                    vec4 cutoff;
-                                    bool castShadows;
-                                    float shadowBias;
-                                    vec4 cascadeSplitsd;
-                                    mat4 lightSpaceMatrix[ 4 ];
-                                    vec4 viewport;
-                                    float energy;
-                                    float radius;
-                                } uLight;
-
-                                vec2 positions[6] = vec2[](
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( -1.0, -1.0 ),
-                                    vec2( 1.0, -1.0 ),
-
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 )
-                                );
-
-                                vec2 texCoords[6] = vec2[](
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 0.0, 1.0 ),
-                                    vec2( 1.0, 1.0 ),
-
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 )
-                                );
-
-                                void main()
-                                {
-                                    gl_Position = proj * view * vec4( ( uLight.position.xyz + uLight.radius * inPosition ), 1.0 );
-                                }
-                            )"
-                ),
-                crimild::alloc< Shader >(
-                    Shader::Stage::FRAGMENT,
-                    R"(
-                                #include <textureCube>
-
-                                layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                                    mat4 view;
-                                    mat4 proj;
-                                    vec2 viewport;
-                                };
-
-                                layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
-                                layout ( set = 0, binding = 2 ) uniform sampler2D uPositions;
-                                layout ( set = 0, binding = 3 ) uniform sampler2D uNormals;
-                                layout ( set = 0, binding = 4 ) uniform sampler2D uMaterials;
-                                layout ( set = 0, binding = 5 ) uniform sampler2D uShadowAtlas;
-
-                                layout ( set = 1, binding = 0 ) uniform LightProps {
-                                    uint type;
-                                    vec4 position;
-                                    vec4 direction;
-                                    vec4 ambient;
-                                    vec4 color;
-                                    vec4 attenuation;
-                                    vec4 cutoff;
-                                    uint castShadows;
-                                    float shadowBias;
-                                    vec4 cascadeSplits;
-                                    mat4 lightSpaceMatrix[ 4 ];
-                                    vec4 viewport;
-                                    float energy;
-                                    float radius;
-                                } uLight;
-
-                                layout ( location = 0 ) out vec4 outColor;
-
-                                const float PI = 3.14159265359;
-
-                                const mat4 bias = mat4(
-                                    0.5, 0.0, 0.0, 0.0,
-                                    0.0, 0.5, 0.0, 0.0,
-                                    0.0, 0.0, 1.0, 0.0,
-                                    0.5, 0.5, 0.0, 1.0
-                                );
-
-                                float distributionGGX( vec3 N, vec3 H, float roughness )
-                                {
-                                    float a = roughness * roughness;
-                                    float a2 = a * a;
-                                    float NdotH = max( dot( N, H ), 0.0 );
-                                    float NdotH2 = NdotH * NdotH;
-
-                                    float num = a2;
-                                    float denom = ( NdotH2 * ( a2 - 1.0 ) + 1.0 );
-                                    denom = PI * denom * denom;
-
-                                    return num / denom;
-                                }
-
-                                float geometrySchlickGGX( float NdotV, float roughness )
-                                {
-                                    float r = ( roughness + 1.0 );
-                                    float k = ( r * r ) / 8.0;
-                                    float num = NdotV;
-                                    float denom = NdotV * ( 1.0 - k ) + k;
-                                    return num / denom;
-                                }
-
-                                float geometrySmith( vec3 N, vec3 V, vec3 L, float roughness )
-                                {
-                                    float NdotV = max( dot( N, V ), 0.0 );
-                                    float NdotL = max( dot( N, L ), 0.0 );
-                                    float ggx1 = geometrySchlickGGX( NdotL, roughness );
-                                    float ggx2 = geometrySchlickGGX( NdotV, roughness );
-                                    return ggx1 * ggx2;
-                                }
-
-                                vec3 fresnelSchlick( float cosTheta, vec3 F0 )
-                                {
-                                    return F0 + ( 1.0 - F0 ) * pow( 1.0 - cosTheta, 5.0 );
-                                }
-
-                                vec3 fresnelSchlickRoughness( float cosTheta, vec3 F0, float roughness )
-                                {
-                                    return F0 + ( max( vec3( 1.0 - roughness ), F0 ) - F0 ) * pow( 1.0 - cosTheta, 5.0 );
-                                }
-
-                                vec3 computeF0( vec3 albedo, float metallic )
-                                {
-                                    vec3 F0 = vec3( 0.04 );
-                                    F0 = mix( F0, albedo, metallic );
-                                    return F0;
-                                }
-
-                                vec3 brdf( vec3 N, vec3 H, vec3 V, vec3 L, vec3 radiance, vec3 albedo, float metallic, float roughness )
-                                {
-                                    vec3 F0 = computeF0( albedo, metallic );
-
-                                    float NDF = distributionGGX( N, H, roughness );
-                                    float G = geometrySmith( N, V, L, roughness );
-                                    vec3 F = fresnelSchlick( max( dot( H, V ), 0.0 ), F0 );
-
-                                    vec3 kS = F;
-                                    vec3 kD = vec3( 1.0 ) - kS;
-                                    kD *= 1.0 - metallic;
-
-                                    vec3 numerator = NDF * G * F;
-                                    float denominator = 4.0 * max( dot( N, V ), 0.0 ) * max( dot( N, L ), 0.0 );
-                                    vec3 specular = numerator / max( denominator, 0.001 );
-
-                                    // add outgoing radiance
-                                    float NdotL = max( dot( N, L ), 0.0 );
-                                    return ( kD * albedo / PI + specular ) * radiance * NdotL;
-                                }
-
-                                float calculateShadow( vec4 ligthSpacePosition, vec4 viewport, vec3 N, vec3 L, float bias )
-                                {
-                                    // perform perspective divide
-                                    vec3 projCoords = ligthSpacePosition.xyz / ligthSpacePosition.w;
-                                    projCoords.t = 1.0 - projCoords.t;
-
-                                    // Compute shadow PCF
-                                    float depth = projCoords.z;
-                                    float shadow = 0.0f;
-                                    vec2 texelSize = 1.0 / textureSize( uShadowAtlas, 0 );
-                                    for ( int y = -1; y <= 1; ++y ) {
-                                        for ( int x = -1; x <= 1; ++x ) {
-                                            vec2 uv = projCoords.st + vec2( x, y ) * texelSize;
-                                            uv.x = viewport.x + uv.x * viewport.z;
-                                            uv.y = viewport.y + uv.y * viewport.w;
-                                            float pcfDepth = texture( uShadowAtlas, uv ).x;
-                                            shadow += depth - bias > pcfDepth ? 1.0 : 0.0;
-                                        }
-                                    }
-                                    shadow /= 9.0;
-
-                                    return shadow;
-                                }
-
-                                float calculateDirectionalShadow( vec4 lightSpacePosition, vec3 N, vec3 L, float bias )
-                                {
-                                    vec4 P = lightSpacePosition / lightSpacePosition.w;
-                                    // P.t = 1.0 - P.t;
-                                    // P.st = 1.0 - P.st;
-
-                                    float shadow = 1.0;
-                                    if ( P.z > -1.0 && P.z < 1.0 ) {
-                                        float dist = texture( uShadowAtlas, P.st ).r;
-                                        if ( P.w > 0.0 && dist < P.z ) {
-                                            // Not in shadow
-                                            shadow = 0.0;
-                                        }
-                                    }
-                                    return shadow;
-                                }
-
-                                float calculatePointShadow( sampler2D shadowAtlas, float dist, vec3 D, vec4 viewport, float bias )
-                                {
-                                    float depth = dist;
-                                    float shadow = textureCubeUV( shadowAtlas, D, viewport ).r;
-                                    return depth <= ( shadow + bias ) ? 0.0 : 0.85;
-                                }
-
-                                void main()
-                                {
-                                    vec2 uv = gl_FragCoord.st / viewport;
-
-                                    vec4 baseColor = texture( uAlbedo, uv );
-                                    if ( baseColor.a == 0 ) {
-                                        // nothing to render. discard and avoid complex calculations
-                                        discard;
-                                    }
-                                    vec3 albedo = baseColor.rgb;
-
-                                    vec4 positionData = texture( uPositions, uv );
-
-                                    vec3 P = positionData.xyz;
-                                    float viewSpacePositionDepth = positionData.w;
-                                    vec3 N = texture( uNormals, uv ).xyz;
-                                    vec4 material = texture( uMaterials, uv );
-                                    float metallic = material.x;
-                                    float roughness = material.y;
-                                    float ambientOcclusion = material.z;
-
-                                    vec3 E = inverse( view )[ 3 ].xyz;
-                                    vec3 V = normalize( E - P );
-
-                                    vec3 F0 = vec3( 0.04 );
-                                    F0 = mix( F0, albedo, metallic );
-
-                                    vec3 L = vec3( 0 );
-                                    vec3 radiance = vec3( 0 );
-                                    float shadow = 0.0;
-
-                                    vec3 debugColor = vec3( 1 );
-
-                                    if ( uLight.type == 2 ) {
-                                        // directional
-                                        L = normalize( -uLight.direction.xyz );
-                                        radiance = uLight.energy * uLight.color.rgb;
-
-                                        if ( uLight.castShadows == 1 ) {
-                                            // vec4 cascadeSplits = uLight.cascadeSplits;
-
-                                            // these are all negative values. Lower means farther away from the eye
-                                            float depth = viewSpacePositionDepth;
-                                            int cascadeId = 0;
-
-                                            // if ( depth < cascadeSplits[ 0 ] ) {
-                                            //     cascadeId = 1;
-                                            // }
-
-                                            // if ( depth < cascadeSplits[ 1 ] ) {
-                                            //     cascadeId = 2;
-                                            // }
-
-                                            // if ( depth < cascadeSplits[ 2 ] ) {
-                                            //     cascadeId = 3;
-                                            // }
-
-                                            mat4 lightSpaceMatrix = uLight.lightSpaceMatrix[ cascadeId ];
-                                            // vec4 viewport = uLight.viewport;
-                                            // vec2 viewportSize = viewport.zw;
-                                            // viewport.z = 0.5 * viewportSize.x;
-                                            // viewport.w = 0.5 * viewportSize.y;
-                                            // if ( cascadeId == 1 ) {
-                                            //     // top-right cascade
-                                            //     viewport.x += 0.5 * viewportSize.x;
-                                            // } else if ( cascadeId == 2 ) {
-                                            //     // bottom-left cascade
-                                            //     viewport.y += 0.5 * viewportSize.y;
-                                            // } else if ( cascadeId == 3 ) {
-                                            //     // bottom-rigth cascade
-                                            //     viewport.x += 0.5 * viewportSize.x;
-                                            //     viewport.y += 0.5 * viewportSize.y;
-                                            // }
-
-                                            {
-                                                vec4 lightSpacePos = ( bias * lightSpaceMatrix * vec4( P, 1.0 ) );
-                                                lightSpacePos = lightSpacePos / lightSpacePos.w;
-                                                // lightSpacePos.t = 1.0 - lightSpacePos.t;
-
-                                                shadow = 0.0;
-                                                if ( lightSpacePos.z > -1.0 && lightSpacePos.z < 1.0 ) {
-                                                    float dist = texture( uShadowAtlas, lightSpacePos.st ).r;
-                                                    if ( lightSpacePos.w > 0.0 && dist < lightSpacePos.z ) {
-                                                        // In shadow
-                                                        shadow = 1.0;
-                                                    }
-                                                }
-                                            }
-
-
-                                            // if ( true || lightSpacePos.z >= -1.0 && lightSpacePos.z <= 1.0 ) {
-                                            //     // vec4 viewport = vec4(0, 0, 1, 1 );
-                                            //     // shadow = calculateShadow( lightSpacePos, viewport, N, L, 0.005 );
-                                            //     //shadow = calculateDirectionalShadow( lightSpacePos, N, L, 0.005 );
-                                            //     shadow = 1.0;
-                                            // } else {
-                                            //     // the projected position in light space is outside the light's view frustum.
-                                            //     // For directional lights, this means the object will be never in shadows
-                                            //     // This might not be true for other types of lights. For example, a spot light
-                                            //     // will produce shadows on objects outside its cone of influence
-                                            //     shadow = 0.5;
-                                            // }
-                                        }
-                                    } else if ( uLight.type == 3 ) {
-                                        // spot
-                                        L = uLight.position.xyz - P;
-                                        float dist = length( L );
-                                        L = normalize( L );
-
-                                        float theta = dot( L, normalize( -uLight.direction.xyz ) );
-                                        float epsilon = uLight.cutoff.x - uLight.cutoff.y;
-                                        float intensity = clamp( ( theta - uLight.cutoff.y ) / epsilon, 0.0, 1.0 );
-                                        float attenuation = 1.0 / ( dist * dist );
-                                        radiance = attenuation * intensity * uLight.energy * uLight.color.rgb;
-
-                                        if ( uLight.castShadows == 1 ) {
-                                            vec4 lightSpacePos = ( bias * uLight.lightSpaceMatrix[ 0 ] * vec4( P, 1.0 ) );
-                                            shadow = calculateShadow( lightSpacePos, uLight.viewport, N, L, 0.005 );
-                                        }
-                                    } else {
-                                        L = uLight.position.xyz - P;
-                                        float dist = length( L );
-                                        L = normalize( L );
-                                        float attenuation = 1.0 / ( dist * dist );
-                                        radiance = uLight.color.rgb * uLight.energy * attenuation;
-
-                                        debugColor = vec3(dist / 100.0);
-
-                                        if ( uLight.castShadows == 1 ) {
-                                            shadow = calculatePointShadow(
-                                                uShadowAtlas,
-                                                dist,
-                                                -L,
-                                                uLight.viewport,
-                                                uLight.shadowBias
-                                            );
-
-                                            //shadow = textureCubeUV( uShadowAtlas, -L, uLight.viewport ).r;
-                                            //debugColor = vec3(shadow / 100.0);
-                                        }
-                                    }
-
-                                    vec3 H = normalize( V + L );
-                                    vec3 Lo = brdf( N, H, V, L, radiance, albedo, metallic, roughness );
-
-                                    Lo *= 1.0 - shadow;
-                                    //Lo = debugColor;
-
-                                    outColor = vec4( Lo, 1.0 );
-                                }
-                            )"
-                ),
-            }
-        );
-
-        const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
-
-        const auto vertexLayouts = lightType != Light::Type::DIRECTIONAL
-                                       ? std::vector< VertexLayout > { VertexP3::getLayout() }
-                                       : std::vector< VertexLayout > {};
-        return std::make_unique< GraphicsPipeline >(
-            getRenderDevice(),
-            m_renderPass,
-            GraphicsPipeline::Descriptor {
-                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
-                    m_renderPassObjects.layout,
-                    m_lightObjects.descriptorSetLayout,
-                },
-                .program = program.get(),
-                .vertexLayouts = vertexLayouts,
-                .depthStencilState = DepthStencilState {
-                    .depthTestEnable = false,
-                },
-                .rasterizationState = RasterizationState {
-                    .cullMode = lightType == Light::Type::DIRECTIONAL ? CullMode::BACK : CullMode::FRONT, // Render back faces only
-                },
-                .colorBlendState = ColorBlendState {
-                    .enable = true,
-                    .srcColorBlendFactor = BlendFactor::ONE,
-                    .dstColorBlendFactor = BlendFactor::ONE,
-                },
-                .colorAttachmentCount = colorReferences.size(),
-                .viewport = viewport,
-                .scissor = viewport,
-            }
-        );
-    };
-
-    m_pointLightPipeline = createPipeline( Light::Type::POINT );
-    m_directionalLightPipeline = createPipeline( Light::Type::DIRECTIONAL );
+    createLightObjects( m_directionalLights, Light::Type::DIRECTIONAL );
+    createLightObjects( m_pointLights, Light::Type::POINT );
+    createLightObjects( m_spotLights, Light::Type::SPOT );
 }
 
-void LocalLightingPass::clear( void ) noexcept
+void LocalLightingPass::deinit( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
     vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
-    m_pointLightPipeline = nullptr;
-    m_directionalLightPipeline = nullptr;
-
-    destroyLightObjects();
+    destroyLightObjects( m_directionalLights );
+    destroyLightObjects( m_pointLights );
+    destroyLightObjects( m_spotLights );
     destroyRenderPassObjects();
 
     for ( auto &fb : m_framebuffers ) {
         vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
-
-    destroyFramebufferAttachment( m_colorAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -777,31 +557,19 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
         return ubo;
     }();
 
-    const auto poolSizes = std::array< VkDescriptorPoolSize, 6 > {
+    auto poolSizes = std::vector< VkDescriptorPoolSize > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
+    };
+    for ( const auto &att : m_inputAttachments ) {
+        poolSizes.push_back(
+            VkDescriptorPoolSize {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            }
+        );
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
@@ -813,7 +581,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
 
-    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 6 > {
+    auto bindings = std::vector< VkDescriptorSetLayoutBinding > {
         VkDescriptorSetLayoutBinding {
             .binding = 0,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -821,42 +589,19 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
             .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             .pImmutableSamplers = nullptr,
         },
-        VkDescriptorSetLayoutBinding {
-            .binding = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 2,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 3,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 4,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
-        VkDescriptorSetLayoutBinding {
-            .binding = 5,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-            .pImmutableSamplers = nullptr,
-        },
     };
+    uint32_t bindingIndex = bindings.size();
+    for ( const auto &att : m_inputAttachments ) {
+        bindings.push_back(
+            VkDescriptorSetLayoutBinding {
+                .binding = bindingIndex++,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                .pImmutableSamplers = nullptr,
+            }
+        );
+    }
 
     auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
@@ -885,37 +630,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
             .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
         };
 
-        const auto albedoImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_albedoInput->imageView,
-            .sampler = m_albedoInput->sampler,
-        };
-
-        const auto positionImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_positionInput->imageView,
-            .sampler = m_positionInput->sampler,
-        };
-
-        const auto normalImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_normalInput->imageView,
-            .sampler = m_normalInput->sampler,
-        };
-
-        const auto materialImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_materialInput->imageView,
-            .sampler = m_materialInput->sampler,
-        };
-
-        const auto shadowImageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            .imageView = m_shadowInput->imageView,
-            .sampler = m_shadowInput->sampler,
-        };
-
-        const auto writes = std::array< VkWriteDescriptorSet, 6 > {
+        auto writes = std::vector< VkWriteDescriptorSet > {
             VkWriteDescriptorSet {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .dstSet = m_renderPassObjects.descriptorSets[ i ],
@@ -927,63 +642,44 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
                 .pImageInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ i ],
-                .dstBinding = 1,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = 1,
-                .pBufferInfo = nullptr,
-                .pImageInfo = &albedoImageInfo,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ i ],
-                .dstBinding = 2,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = 1,
-                .pBufferInfo = nullptr,
-                .pImageInfo = &positionImageInfo,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ i ],
-                .dstBinding = 3,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = 1,
-                .pBufferInfo = nullptr,
-                .pImageInfo = &normalImageInfo,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ i ],
-                .dstBinding = 4,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = 1,
-                .pBufferInfo = nullptr,
-                .pImageInfo = &materialImageInfo,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_renderPassObjects.descriptorSets[ i ],
-                .dstBinding = 5,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = 1,
-                .pBufferInfo = nullptr,
-                .pImageInfo = &shadowImageInfo,
-                .pTexelBufferView = nullptr,
-            },
         };
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
+
+        std::vector< VkDescriptorImageInfo > imageInfos;
+        for ( const auto &att : m_inputAttachments ) {
+            imageInfos.push_back(
+                VkDescriptorImageInfo {
+                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    .imageView = att->imageViews[ i ],
+                    .sampler = att->sampler,
+                }
+            );
+        }
+
+        uint32_t dstBinding = writes.size();
+        for ( uint32_t j = 0; j < m_inputAttachments.size(); ++j ) {
+            writes.push_back(
+                VkWriteDescriptorSet {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = m_renderPassObjects.descriptorSets[ i ],
+                    .dstBinding = dstBinding + j,
+                    .dstArrayElement = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    .descriptorCount = 1,
+                    .pBufferInfo = nullptr,
+                    // Use the recently added image view
+                    .pImageInfo = &imageInfos[ j ],
+                    .pTexelBufferView = nullptr,
+                }
+            );
+        }
+
+        vkUpdateDescriptorSets(
+            getRenderDevice()->getHandle(),
+            writes.size(),
+            writes.data(),
+            0,
+            nullptr
+        );
     }
 }
 
@@ -1001,7 +697,7 @@ void LocalLightingPass::destroyRenderPassObjects( void ) noexcept
     m_renderPassObjects.uniforms = nullptr;
 }
 
-void LocalLightingPass::createLightObjects( void ) noexcept
+void LocalLightingPass::createLightObjects( LightObjects &objects, Light::Type lightType ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
@@ -1019,143 +715,288 @@ void LocalLightingPass::createLightObjects( void ) noexcept
         .pBindings = &layoutBinding,
     };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_lightObjects.descriptorSetLayout ) );
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            getRenderDevice()->getHandle(),
+            &layoutCreateInfo,
+            nullptr,
+            &objects.descriptorSetLayout
+        )
+    );
+
+    auto program = crimild::alloc< ShaderProgram >();
+    program->setShaders(
+        Array< SharedPointer< Shader > > {
+            crimild::alloc< Shader >(
+                Shader::Stage::VERTEX,
+                [ & ] {
+                    switch ( lightType ) {
+                        case Light::Type::DIRECTIONAL:
+                            return DIRECTIONAL_LIGHT_VERT_SHADER;
+                        case Light::Type::POINT:
+                            return POINT_LIGHT_VERT_SHADER;
+                        case Light::Type::SPOT:
+                            return SPOT_LIGHT_VERT_SHADER;
+                        default:
+                            return "";
+                    }
+                }()
+            ),
+            crimild::alloc< Shader >(
+                Shader::Stage::FRAGMENT,
+                [ & ] {
+                    switch ( lightType ) {
+                        case Light::Type::DIRECTIONAL:
+                            return DIRECTIONAL_LIGHT_FRAG_SHADER;
+                        case Light::Type::POINT:
+                            return POINT_LIGHT_FRAG_SHADER;
+                        case Light::Type::SPOT:
+                            return SPOT_LIGHT_FRAG_SHADER;
+                        default:
+                            return "";
+                    }
+                }()
+            ),
+        }
+    );
+
+    const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+
+    objects.pipeline = crimild::alloc< GraphicsPipeline >(
+        getRenderDevice(),
+        m_renderPass,
+        GraphicsPipeline::Descriptor {
+            .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
+                m_renderPassObjects.layout,
+                objects.descriptorSetLayout,
+            },
+            .program = program.get(),
+            .vertexLayouts = [ & ] {
+                std::vector< VertexLayout > ret;
+                if ( lightType != Light::Type::DIRECTIONAL ) {
+                    ret.push_back( VertexP3::getLayout() );
+                }
+                return ret;
+            }(),
+            .depthStencilState = DepthStencilState {
+                .depthTestEnable = false,
+            },
+            .rasterizationState = RasterizationState {
+                .cullMode = lightType == Light::Type::DIRECTIONAL ? CullMode::BACK : CullMode::FRONT, // Render back faces only
+            },
+            .colorBlendState = ColorBlendState {
+                .enable = true,
+                .srcColorBlendFactor = BlendFactor::ONE,
+                .dstColorBlendFactor = BlendFactor::ONE,
+            },
+            .viewport = viewport,
+            .scissor = viewport,
+        }
+    );
 }
 
-void LocalLightingPass::bindLightDescriptors( VkCommandBuffer cmds, VkPipelineLayout pipelineLayout, Index currentFrameIndex, Light *light ) noexcept
+void LocalLightingPass::destroyLightObjects( LightObjects &objects ) noexcept
 {
-    struct LightProps {
-        alignas( 4 ) UInt32 type;
-        alignas( 16 ) Vector4f position;
-        alignas( 16 ) Vector4f direction;
-        alignas( 16 ) ColorRGBA ambient;
-        alignas( 16 ) ColorRGBA color;
-        alignas( 16 ) Vector4f attenuation;
-        alignas( 16 ) Vector4f cutoff;
-        alignas( 4 ) UInt32 castShadows;
-        alignas( 4 ) Real32 shadowBias;
-        alignas( 16 ) Vector4f cascadeSplits;
-        alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
-        alignas( 16 ) Vector4f viewport;
-        alignas( 4 ) Real32 energy;
-        alignas( 4 ) Real32 radius;
+    CRIMILD_LOG_TRACE();
+
+    objects.pipeline = nullptr;
+
+    // no need to destroy sets
+    objects.descriptorSets.clear();
+
+    vkDestroyDescriptorSetLayout(
+        getRenderDevice()->getHandle(),
+        objects.descriptorSetLayout,
+        nullptr
+    );
+    objects.descriptorSetLayout = VK_NULL_HANDLE;
+
+    for ( auto &it : objects.descriptorPools ) {
+        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
+    }
+    objects.descriptorPools.clear();
+
+    for ( auto &it : objects.uniforms ) {
+        getRenderDevice()->unbind( it.second.get() );
+    }
+    objects.uniforms.clear();
+}
+
+template< typename LightObjectsType, typename LightPropsType >
+static void createLightDescriptors(
+    RenderDevice *renderDevice,
+    LightObjectsType &lightObjects,
+    const Light *light,
+    const LightPropsType &lightProps
+) noexcept
+{
+    VkDescriptorPoolSize poolSize {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
     };
 
-    if ( !m_lightObjects.descriptorSets.contains( light ) ) {
-        VkDescriptorPoolSize poolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
+        .maxSets = uint32_t( renderDevice->getSwapchainImageCount() ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+            renderDevice->getHandle(),
+            &poolCreateInfo,
+            nullptr,
+            &lightObjects.descriptorPools[ light ]
+        )
+    );
+
+    lightObjects.uniforms[ light ] = crimild::alloc< UniformBuffer >( lightProps );
+    renderDevice->bind( lightObjects.uniforms[ light ].get() );
+
+    std::vector< VkDescriptorSetLayout > layouts(
+        renderDevice->getSwapchainImageCount(),
+        lightObjects.descriptorSetLayout
+    );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = lightObjects.descriptorPools[ light ],
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    lightObjects.descriptorSets[ light ].resize( renderDevice->getSwapchainImageCount() );
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateDescriptorSets(
+            renderDevice->getHandle(),
+            &allocInfo,
+            lightObjects.descriptorSets[ light ].data()
+        )
+    );
+
+    for ( size_t i = 0; i < lightObjects.descriptorSets[ light ].size(); ++i ) {
+        const auto bufferInfo = VkDescriptorBufferInfo {
+            .buffer = renderDevice->getHandle( lightObjects.uniforms[ light ].get(), i ),
+            .offset = 0,
+            .range = lightObjects.uniforms[ light ]->getBufferView()->getLength(),
         };
 
-        auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .poolSizeCount = 1,
-            .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        const auto descriptorWrite = VkWriteDescriptorSet {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = lightObjects.descriptorSets[ light ][ i ],
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .pBufferInfo = &bufferInfo,
+            .pImageInfo = nullptr,
+            .pTexelBufferView = nullptr,
         };
 
-        CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_lightObjects.descriptorPools[ light ] ) );
-
-        m_lightObjects.uniforms[ light ] = std::make_unique< UniformBuffer >( LightProps {} );
-        getRenderDevice()->bind( m_lightObjects.uniforms[ light ].get() );
-
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_lightObjects.descriptorSetLayout );
-
-        const auto allocInfo = VkDescriptorSetAllocateInfo {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = m_lightObjects.descriptorPools[ light ],
-            .descriptorSetCount = uint32_t( layouts.size() ),
-            .pSetLayouts = layouts.data(),
-        };
-
-        m_lightObjects.descriptorSets[ light ].resize( getRenderDevice()->getSwapchainImageCount() );
-        CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_lightObjects.descriptorSets[ light ].data() ) );
-
-        for ( size_t i = 0; i < m_lightObjects.descriptorSets[ light ].size(); ++i ) {
-            const auto bufferInfo = VkDescriptorBufferInfo {
-                .buffer = getRenderDevice()->getHandle( m_lightObjects.uniforms[ light ].get(), i ),
-                .offset = 0,
-                .range = m_lightObjects.uniforms[ light ]->getBufferView()->getLength(),
-            };
-
-            const auto descriptorWrite = VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_lightObjects.descriptorSets[ light ][ i ],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
-                .pImageInfo = nullptr,
-                .pTexelBufferView = nullptr,
-            };
-
-            vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-        }
+        vkUpdateDescriptorSets(
+            renderDevice->getHandle(),
+            1,
+            &descriptorWrite,
+            0,
+            nullptr
+        );
     }
+}
 
-    auto props = LightProps {};
-    props.type = static_cast< UInt32 >( light->getType() );
-    props.position = vector4( light->getPosition(), Real( 1 ) );
-    props.direction = vector4( light->getDirection(), Real( 0 ) );
+void LocalLightingPass::bindDirectionalLightDescriptors(
+    VkCommandBuffer cmds,
+    Index currentFrameIndex,
+    const Light *light
+) noexcept
+{
+    DirectionalLightProps props;
+    props.direction = light->getDirection();
     props.color = light->getColor();
-    props.attenuation = vector4( light->getAttenuation(), Real( 0 ) );
-    props.ambient = light->getAmbient();
-    props.cutoff = Vector4f {
-        Numericf::cos( light->getInnerCutoff() ),
-        Numericf::cos( light->getOuterCutoff() ),
-        0.0f,
-        0.0f,
-    };
-    props.castShadows = light->castShadows() ? 1 : 0;
-    if ( light->castShadows() ) {
-        props.shadowBias = light->getShadowMap()->getBias();
-        props.cascadeSplits = light->getShadowMap()->getCascadeSplits();
-        for ( auto split = 0; split < 4; ++split ) {
-            props.lightSpaceMatrix[ split ] = light->getShadowMap()->getLightProjectionMatrix( split );
-        }
-        props.viewport = light->getShadowMap()->getViewport();
-    }
-    props.energy = light->getEnergy();
-    props.radius = light->getRadius();
 
-    m_lightObjects.uniforms[ light ]->setValue( props );
-    getRenderDevice()->update( m_lightObjects.uniforms[ light ].get() );
+    if ( !m_directionalLights.descriptorSets.contains( light ) ) {
+        createLightDescriptors( getRenderDevice(), m_directionalLights, light, props );
+    } else {
+        m_directionalLights.uniforms[ light ]->setValue( props );
+        getRenderDevice()->update( m_directionalLights.uniforms[ light ].get() );
+    }
 
     vkCmdBindDescriptorSets(
         cmds,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout,
+        m_directionalLights.pipeline->getPipelineLayout(),
         1,
         1,
-        &m_lightObjects.descriptorSets[ light ][ currentFrameIndex ],
+        &m_directionalLights.descriptorSets[ light ][ currentFrameIndex ],
         0,
         nullptr
     );
 }
 
-void LocalLightingPass::destroyLightObjects( void ) noexcept
+void LocalLightingPass::bindPointLightDescriptors(
+    VkCommandBuffer cmds,
+    Index currentFrameIndex,
+    const Light *light
+) noexcept
 {
-    CRIMILD_LOG_TRACE();
+    PointLightProps props;
+    props.position = light->getPosition();
+    props.radius = light->getRadius();
+    props.color = light->getColor();
 
-    // no need to destroy sets
-    m_lightObjects.descriptorSets.clear();
-
-    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_lightObjects.descriptorSetLayout, nullptr );
-    m_lightObjects.descriptorSetLayout = VK_NULL_HANDLE;
-
-    for ( auto &it : m_lightObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
+    if ( !m_pointLights.descriptorSets.contains( light ) ) {
+        createLightDescriptors( getRenderDevice(), m_pointLights, light, props );
+    } else {
+        m_pointLights.uniforms[ light ]->setValue( props );
+        getRenderDevice()->update( m_pointLights.uniforms[ light ].get() );
     }
-    m_lightObjects.descriptorPools.clear();
 
-    for ( auto &it : m_lightObjects.uniforms ) {
-        getRenderDevice()->unbind( it.second.get() );
-    }
-    m_lightObjects.uniforms.clear();
+    vkCmdBindDescriptorSets(
+        cmds,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pointLights.pipeline->getPipelineLayout(),
+        1,
+        1,
+        &m_pointLights.descriptorSets[ light ][ currentFrameIndex ],
+        0,
+        nullptr
+    );
 }
 
-void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
+void LocalLightingPass::bindSpotLightDescriptors(
+    VkCommandBuffer cmds,
+    Index currentFrameIndex,
+    const Light *light
+) noexcept
+{
+    SpotLightProps props;
+    props.position = light->getPosition();
+    props.direction = light->getDirection();
+    props.radius = light->getRadius();
+    props.color = light->getColor();
+    props.innerCutoff = Numericf::cos( light->getInnerCutoff() );
+    props.outerCutoff = Numericf::cos( light->getOuterCutoff() );
+
+    if ( !m_spotLights.descriptorSets.contains( light ) ) {
+        createLightDescriptors( getRenderDevice(), m_spotLights, light, props );
+    } else {
+        m_spotLights.uniforms[ light ]->setValue( props );
+        getRenderDevice()->update( m_spotLights.uniforms[ light ].get() );
+    }
+
+    vkCmdBindDescriptorSets(
+        cmds,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_spotLights.pipeline->getPipelineLayout(),
+        1,
+        1,
+        &m_spotLights.descriptorSets[ light ][ currentFrameIndex ],
+        0,
+        nullptr
+    );
+}
+
+void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
@@ -1177,4 +1018,59 @@ void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameI
     );
 
     vkCmdDrawIndexed( cmds, indices->getIndexCount(), 1, 0, 0, 0 );
+}
+
+void LocalLightingPass::fetchLights( Node *scene ) noexcept
+{
+    // TODO: find a way to cache these collections
+    m_directionalLights.lights.clear();
+    m_pointLights.lights.clear();
+    m_spotLights.lights.clear();
+
+    if ( scene == nullptr ) {
+        return;
+    }
+
+    FetchLights allLights;
+    scene->perform( allLights );
+    allLights.forEachLight(
+        [ & ]( auto light ) {
+            switch ( light->getType() ) {
+                case Light::Type::DIRECTIONAL:
+                    m_directionalLights.lights.insert( light );
+                    break;
+                case Light::Type::POINT:
+                    m_pointLights.lights.insert( light );
+                    break;
+                case Light::Type::SPOT:
+                    m_spotLights.lights.insert( light );
+                    break;
+                default:
+                    break;
+            }
+        }
+    );
+}
+
+void LocalLightingPass::updateCameraUniforms( const Camera *camera ) noexcept
+{
+    if ( camera == nullptr ) {
+        return;
+    }
+
+    if ( m_renderPassObjects.uniforms == nullptr ) {
+        return;
+    }
+
+    m_renderPassObjects.uniforms->setValue(
+        RenderPassObjects::Uniforms {
+            .view = camera->getViewMatrix(),
+            .proj = camera->getProjectionMatrix(),
+            .viewport = Vector2 {
+                Real( m_renderArea.extent.width ),
+                Real( m_renderArea.extent.height ),
+            },
+        }
+    );
+    getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
 }

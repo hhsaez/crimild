@@ -32,13 +32,13 @@
 #include "Mathematics/Vector2.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "SceneGraph/Light.hpp"
 #include "Simulation/Event.hpp"
 
 namespace crimild {
 
     class UniformBuffer;
     class Simulation;
-    class Light;
     class Primitive;
     class Node;
     class Camera;
@@ -54,46 +54,44 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
+        /**
+         * \brief Applies lighting and shadows using G-Buffer attachments
+         *
+         */
         class LocalLightingPass : public RenderPassBase {
         public:
             LocalLightingPass(
                 RenderDevice *renderDevice,
-                const FramebufferAttachment *albedoInput,
-                const FramebufferAttachment *positionInput,
-                const FramebufferAttachment *normalInput,
-                const FramebufferAttachment *materialInput,
-                const FramebufferAttachment *shadowInput ) noexcept;
+                const std::vector< const FramebufferAttachment * > inputs,
+                const FramebufferAttachment *output
+            ) noexcept;
             virtual ~LocalLightingPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
             void render( Node *scene, Camera *camera ) noexcept;
 
-            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return &m_colorAttachment; }
+            [[nodiscard]] inline const FramebufferAttachment *getOutputAttachment( void ) const noexcept { return m_outputAttachment; }
 
         private:
             void init( void ) noexcept;
-            void clear( void ) noexcept;
+            void deinit( void ) noexcept;
 
-            void createRenderPassObjects( void ) noexcept;
-            void destroyRenderPassObjects( void ) noexcept;
+            void fetchLights( Node *scene ) noexcept;
+            void updateCameraUniforms( const Camera *camera ) noexcept;
 
-            void createLightObjects( void ) noexcept;
-            void bindLightDescriptors( VkCommandBuffer cmds, VkPipelineLayout pipelineLayout, Index currentFrameIndex, Light *light ) noexcept;
-            void destroyLightObjects( void ) noexcept;
-
-            void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
+            void drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
 
-            vulkan::FramebufferAttachment m_colorAttachment;
+            std::vector< const FramebufferAttachment * > m_inputAttachments;
+            const FramebufferAttachment *m_outputAttachment = nullptr;
 
-            std::unique_ptr< GraphicsPipeline > m_pointLightPipeline;
-            std::unique_ptr< GraphicsPipeline > m_directionalLightPipeline;
-
-            std::unique_ptr< Primitive > m_lightVolume;
+        public:
+            void createRenderPassObjects( void ) noexcept;
+            void destroyRenderPassObjects( void ) noexcept;
 
             struct RenderPassObjects {
                 VkDescriptorPool pool = VK_NULL_HANDLE;
@@ -109,18 +107,28 @@ namespace crimild {
                 std::unique_ptr< UniformBuffer > uniforms;
             } m_renderPassObjects;
 
-            const vulkan::FramebufferAttachment *m_albedoInput = nullptr;
-            const vulkan::FramebufferAttachment *m_positionInput = nullptr;
-            const vulkan::FramebufferAttachment *m_normalInput = nullptr;
-            const vulkan::FramebufferAttachment *m_materialInput = nullptr;
-            const vulkan::FramebufferAttachment *m_shadowInput = nullptr;
-
+        private:
             struct LightObjects {
+                std::unordered_set< const Light * > lights;
+                SharedPointer< GraphicsPipeline > pipeline;
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Light *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Light *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Light *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_lightObjects;
+                std::unordered_map< const Light *, VkDescriptorPool > descriptorPools;
+                std::unordered_map< const Light *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< const Light *, SharedPointer< UniformBuffer > > uniforms;
+            };
+
+            void createLightObjects( LightObjects &objects, Light::Type lightType ) noexcept;
+            void destroyLightObjects( LightObjects &objects ) noexcept;
+
+            void bindDirectionalLightDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, const Light *light ) noexcept;
+            void bindPointLightDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, const Light *light ) noexcept;
+            void bindSpotLightDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, const Light *light ) noexcept;
+
+            SharedPointer< Primitive > m_lightVolume;
+
+            LightObjects m_directionalLights;
+            LightObjects m_pointLights;
+            LightObjects m_spotLights;
         };
 
     }
