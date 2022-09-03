@@ -28,15 +28,15 @@
 #include "Rendering/RenderPasses/VulkanPresentPass.hpp"
 
 #include "Rendering/VulkanRenderDevice.hpp"
-#include "Simulation/Event.hpp"
 
 #include <array>
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-PresentPass::PresentPass( RenderDevice *renderDevice ) noexcept
-    : RenderPassBase( renderDevice )
+PresentPass::PresentPass( RenderDevice *renderDevice, const FramebufferAttachment *colorAttachment ) noexcept
+    : RenderPassBase( renderDevice ),
+      m_colorAttachment( colorAttachment )
 {
     init();
 }
@@ -44,6 +44,8 @@ PresentPass::PresentPass( RenderDevice *renderDevice ) noexcept
 PresentPass::~PresentPass( void ) noexcept
 {
     clear();
+
+    m_colorAttachment = nullptr;
 }
 
 Event PresentPass::handle( const Event &e ) noexcept
@@ -86,33 +88,26 @@ void PresentPass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = getRenderDevice()->getSwapchainExtent(),
+        .extent = m_colorAttachment->extent,
+        .offset = { 0, 0 },
     };
 
-    auto attachments = std::array< VkAttachmentDescription, 1 > {
-        VkAttachmentDescription {
-            .format = getRenderDevice()->getSwapchainFormat(),
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Don't clear input. Just load it as it is
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            // Final layout for presentation
-            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        },
+    const auto attachmentDescription = VkAttachmentDescription {
+        .format = m_colorAttachment->format,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        // Don't clear input. Just load it as it is
+        .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        // Final layout for presentation
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
     };
 
-    auto colorReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
+    auto colorReferences = VkAttachmentReference {
+        .attachment = 0,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     };
 
     auto subpass = VkSubpassDescription {
@@ -120,8 +115,8 @@ void PresentPass::init( void ) noexcept
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
         .inputAttachmentCount = 0,
         .pInputAttachments = nullptr,
-        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-        .pColorAttachments = colorReferences.data(),
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorReferences,
         .pResolveAttachments = nullptr,
         .pDepthStencilAttachment = nullptr,
         .preserveAttachmentCount = 0,
@@ -151,11 +146,11 @@ void PresentPass::init( void ) noexcept
 
     auto createInfo = VkRenderPassCreateInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
-        .pAttachments = attachments.data(),
+        .attachmentCount = 1,
+        .pAttachments = &attachmentDescription,
         .subpassCount = 1,
         .pSubpasses = &subpass,
-        .dependencyCount = crimild::UInt32( dependencies.size() ),
+        .dependencyCount = uint32_t( dependencies.size() ),
         .pDependencies = dependencies.data(),
     };
 
@@ -164,26 +159,26 @@ void PresentPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
-    getRenderDevice()->setObjectName( UInt64( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, "PresentPass: RenderPass" );
+    getRenderDevice()->setObjectName(
+        UInt64( m_renderPass ),
+        VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
+        "PresentPass: RenderPass"
+    );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
-
-        auto attachments = std::array< VkImageView, 1 > {
-            imageView,
-        };
-
         auto createInfo = VkFramebufferCreateInfo {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .pNext = nullptr,
             .renderPass = m_renderPass,
-            .attachmentCount = uint32_t( attachments.size() ),
-            .pAttachments = attachments.data(),
-            .width = getRenderDevice()->getSwapchainExtent().width,
-            .height = getRenderDevice()->getSwapchainExtent().height,
+            .attachmentCount = 1,
+            .pAttachments = &m_colorAttachment->imageViews[ i ],
+            .width = m_renderArea.extent.width,
+            .height = m_renderArea.extent.height,
             .layers = 1,
         };
 
@@ -192,7 +187,9 @@ void PresentPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
 
         getRenderDevice()->setObjectName( UInt64( m_framebuffers[ i ] ), VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, "Framebuffer" );
     }

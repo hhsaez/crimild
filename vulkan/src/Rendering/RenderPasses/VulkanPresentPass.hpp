@@ -41,17 +41,19 @@ namespace crimild {
 
         class PresentPass : public RenderPassBase {
         public:
-            explicit PresentPass( RenderDevice *renderDevice ) noexcept;
+            explicit PresentPass( RenderDevice *renderDevice, const FramebufferAttachment *colorAttachment ) noexcept;
             virtual ~PresentPass( void ) noexcept;
 
-            virtual Event handle( const Event & ) noexcept;
-            virtual void render( void ) noexcept;
+            Event handle( const Event & ) noexcept;
+            void render( void ) noexcept;
 
         private:
             void init( void ) noexcept;
             void clear( void ) noexcept;
 
         private:
+            const FramebufferAttachment *m_colorAttachment = nullptr;
+
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
