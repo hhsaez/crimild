@@ -129,12 +129,14 @@ void ShadowPass::render( Node *scene, Camera *camera ) noexcept
         1.25f,
         0.0f,
         // Slope depth bias factor, applied depending on polygon's slope
-        1.75f );
+        1.75f
+    );
 
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle() );
+        m_pipeline->getHandle()
+    );
 
     RenderableSet renderables;
     Light *light = nullptr;
@@ -145,7 +147,9 @@ void ShadowPass::render( Node *scene, Camera *camera ) noexcept
                     if ( geometry->getLayer() == Node::Layer::DEFAULT ) {
                         renderables.addGeometry( geometry );
                     }
-                } ) );
+                }
+            )
+        );
 
         FetchLights fetch;
         scene->perform( fetch );
@@ -154,7 +158,8 @@ void ShadowPass::render( Node *scene, Camera *camera ) noexcept
                 if ( light == nullptr && l->getType() == Light::Type::DIRECTIONAL && l->castShadows() ) {
                     light = l;
                 }
-            } );
+            }
+        );
     }
 
     if ( light != nullptr ) {
@@ -169,7 +174,8 @@ void ShadowPass::render( Node *scene, Camera *camera ) noexcept
                 RenderPassObjects::Uniforms {
                     .view = light->getShadowMap()->getLightViewMatrix(),
                     .proj = light->getShadowMap()->getLightProjectionMatrix( 0 ),
-                } );
+                }
+            );
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
@@ -185,14 +191,16 @@ void ShadowPass::render( Node *scene, Camera *camera ) noexcept
                             1,
                             &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
                             0,
-                            nullptr );
+                            nullptr
+                        );
 
                         bindGeometryDescriptors( commandBuffer, currentFrameIndex, geometry );
 
                         drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
                     }
                 }
-            } );
+            }
+        );
     }
 
     vkCmdEndRenderPass( commandBuffer );
@@ -215,7 +223,7 @@ void ShadowPass::init( void ) noexcept
         .extent = extent,
     };
 
-    createFramebufferAttachment( "Scene/Shadow", extent, VK_FORMAT_D32_SFLOAT, m_shadowAttachment );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Shadow", extent, VK_FORMAT_D32_SFLOAT, m_shadowAttachment );
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
@@ -286,13 +294,15 @@ void ShadowPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     // Should we have only 1 framebuffer?
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_shadowAttachment.imageView,
+            m_shadowAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -311,7 +321,9 @@ void ShadowPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -339,8 +351,10 @@ void ShadowPass::init( void ) noexcept
                         {
                             gl_Position = proj * view * model * vec4( inPosition, 1.0 );
                         }
-                    )" ),
-            } );
+                    )"
+                ),
+            }
+        );
 
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
@@ -366,7 +380,8 @@ void ShadowPass::init( void ) noexcept
                 VK_DYNAMIC_STATE_VIEWPORT,
                 VK_DYNAMIC_STATE_SCISSOR,
                 VK_DYNAMIC_STATE_DEPTH_BIAS,
-            } );
+            }
+        );
     }();
 }
 
@@ -386,7 +401,7 @@ void ShadowPass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( m_shadowAttachment );
+    getRenderDevice()->destroyFramebufferAttachment( m_shadowAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -574,7 +589,8 @@ void ShadowPass::bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFra
         1,
         &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 }
 
 void ShadowPass::destroyGeometryObjects( void ) noexcept
@@ -607,7 +623,8 @@ void ShadowPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, P
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers( cmds, i, 1, buffers, offsets );
             }
-        } );
+        }
+    );
 
     UInt32 instanceCount = 1;
     // if ( instanceData != nullptr ) {
@@ -626,7 +643,8 @@ void ShadowPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, P
             cmds,
             getRenderDevice()->bind( indices ),
             0,
-            utils::getIndexType( crimild::get_ptr( indices ) ) );
+            utils::getIndexType( crimild::get_ptr( indices ) )
+        );
         vkCmdDrawIndexed( cmds, indices->getIndexCount(), instanceCount, 0, 0, 0 );
     } else if ( primitive->getVertexData().size() > 0 ) {
         auto vertices = primitive->getVertexData()[ 0 ];

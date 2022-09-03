@@ -150,7 +150,7 @@ void SoftRTPass::render( Node *scene, Camera *camera ) noexcept
 
     getRenderDevice()->transitionImageLayout(
         commandBuffer,
-        m_colorAttachment.image,
+        m_colorAttachment.images[ currentFrameIndex ],
         m_colorAttachment.format,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -165,7 +165,7 @@ void SoftRTPass::init( void ) noexcept
 
     const auto extent = m_renderArea.extent;
 
-    createFramebufferAttachment( "SoftRT", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
+    getRenderDevice()->createFramebufferAttachment( "SoftRT", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
@@ -243,7 +243,7 @@ void SoftRTPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageView,
+            m_colorAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -346,7 +346,7 @@ void SoftRTPass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( m_colorAttachment );
+    getRenderDevice()->destroyFramebufferAttachment( m_colorAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;

@@ -32,6 +32,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
@@ -46,7 +47,7 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
-        class SkyboxPass : public RenderPassBase {
+        class [[deprecated]] SkyboxPass : public RenderPassBase {
         public:
             explicit SkyboxPass( RenderDevice *renderDevice, const FramebufferAttachment *colorAttachment, const FramebufferAttachment *depthAttachment ) noexcept;
             virtual ~SkyboxPass( void ) noexcept;

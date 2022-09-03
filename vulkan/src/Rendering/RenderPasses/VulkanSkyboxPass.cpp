@@ -310,8 +310,8 @@ void SkyboxPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 2 > {
-            m_colorAttachment->imageView,
-            m_depthAttachment->imageView,
+            m_colorAttachment->imageViews[ i ],
+            m_depthAttachment->imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {

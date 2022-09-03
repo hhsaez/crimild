@@ -108,7 +108,9 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
             physicalDevice->getHandle(),
             &createInfo,
             nullptr,
-            &m_handle ) );
+            &m_handle
+        )
+    );
 
     // Fetch device queues
     vkGetDeviceQueue( m_handle, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueueHandle );
@@ -232,7 +234,8 @@ void RenderDevice::createSwapchain( void ) noexcept
     if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
         imageCount = std::min(
             swapchainSupport.capabilities.maxImageCount,
-            imageCount );
+            imageCount
+        );
     }
 
     auto createInfo = VkSwapchainCreateInfoKHR {
@@ -289,7 +292,9 @@ void RenderDevice::createSwapchain( void ) noexcept
             getHandle(),
             &createInfo,
             nullptr,
-            &m_swapchain ) );
+            &m_swapchain
+        )
+    );
 
     CRIMILD_LOG_TRACE();
 
@@ -297,7 +302,8 @@ void RenderDevice::createSwapchain( void ) noexcept
         getHandle(),
         m_swapchain,
         &imageCount,
-        nullptr );
+        nullptr
+    );
 
     m_swapchainImages.resize( imageCount );
 
@@ -305,7 +311,8 @@ void RenderDevice::createSwapchain( void ) noexcept
         getHandle(),
         m_swapchain,
         &imageCount,
-        m_swapchainImages.data() );
+        m_swapchainImages.data()
+    );
 
     CRIMILD_LOG_TRACE();
 
@@ -315,7 +322,8 @@ void RenderDevice::createSwapchain( void ) noexcept
         utils::createImageView( getHandle(), m_swapchainImages[ i ], VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, &m_swapchainImageViews[ i ] );
         setObjectName(
             m_swapchainImageViews[ i ],
-            StringUtils::toString( "RenderDevice::swapchainImageView[", uint32_t( i ), "]" ).c_str() );
+            StringUtils::toString( "RenderDevice::swapchainImageView[", uint32_t( i ), "]" ).c_str()
+        );
     }
 
     CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", m_swapchainExtent.width, "x", m_swapchainExtent.height );
@@ -352,7 +360,8 @@ void RenderDevice::createDepthStencilResources( void ) noexcept
             VK_FORMAT_D32_SFLOAT,
         },
         VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT );
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
 
     createImage(
         m_swapchainExtent.width,
@@ -366,14 +375,16 @@ void RenderDevice::createDepthStencilResources( void ) noexcept
         1,
         0,
         m_depthStencilResources.image,
-        m_depthStencilResources.memory );
+        m_depthStencilResources.memory
+    );
 
     utils::createImageView(
         getHandle(),
         m_depthStencilResources.image,
         m_depthStencilResources.format,
         VK_IMAGE_ASPECT_DEPTH_BIT,
-        &m_depthStencilResources.imageView );
+        &m_depthStencilResources.imageView
+    );
 }
 
 void RenderDevice::destroyDepthStencilResources( void ) noexcept
@@ -414,21 +425,27 @@ void RenderDevice::createSyncObjects( void ) noexcept
                 m_handle,
                 &createInfo,
                 nullptr,
-                &m_imageAvailableSemaphores[ i ] ) );
+                &m_imageAvailableSemaphores[ i ]
+            )
+        );
 
         CRIMILD_VULKAN_CHECK(
             vkCreateSemaphore(
                 m_handle,
                 &createInfo,
                 nullptr,
-                &m_renderFinishedSemaphores[ i ] ) );
+                &m_renderFinishedSemaphores[ i ]
+            )
+        );
 
         CRIMILD_VULKAN_CHECK(
             vkCreateFence(
                 m_handle,
                 &fenceInfo,
                 nullptr,
-                &m_inFlightFences[ i ] ) );
+                &m_inFlightFences[ i ]
+            )
+        );
     }
 }
 
@@ -475,7 +492,9 @@ void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
             m_handle,
             &createInfo,
             nullptr,
-            &commandPool ) );
+            &commandPool
+        )
+    );
 }
 
 void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
@@ -486,7 +505,8 @@ void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
         vkDestroyCommandPool(
             m_handle,
             commandPool,
-            nullptr );
+            nullptr
+        );
         m_commandPool = VK_NULL_HANDLE;
     }
 }
@@ -522,7 +542,9 @@ void RenderDevice::createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcep
         vkAllocateCommandBuffers(
             m_handle,
             &allocInfo,
-            &commandBuffer ) );
+            &commandBuffer
+        )
+    );
 }
 
 void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
@@ -538,7 +560,8 @@ void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexce
         m_handle,
         m_commandPool,
         1,
-        &commandBuffer );
+        &commandBuffer
+    );
 
     commandBuffer = VK_NULL_HANDLE;
 }
@@ -553,7 +576,8 @@ bool RenderDevice::beginRender( void ) noexcept
         std::numeric_limits< uint64_t >::max(), // disable timeout
         m_imageAvailableSemaphores[ m_currentFrame ],
         VK_NULL_HANDLE,
-        &m_imageIndex );
+        &m_imageIndex
+    );
     if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
         // TODO: swapchain needs to be recreated
         return false;
@@ -575,7 +599,9 @@ bool RenderDevice::beginRender( void ) noexcept
     CRIMILD_VULKAN_CHECK(
         vkResetCommandBuffer(
             commandBuffer,
-            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
+            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT
+        )
+    );
 
     const auto beginInfo = VkCommandBufferBeginInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -587,7 +613,9 @@ bool RenderDevice::beginRender( void ) noexcept
     CRIMILD_VULKAN_CHECK(
         vkBeginCommandBuffer(
             commandBuffer,
-            &beginInfo ) );
+            &beginInfo
+        )
+    );
 
     return true;
 }
@@ -620,7 +648,9 @@ bool RenderDevice::endRender( void ) noexcept
             m_graphicsQueueHandle,
             1,
             &submitInfo,
-            m_inFlightFences[ m_currentFrame ] ) );
+            m_inFlightFences[ m_currentFrame ]
+        )
+    );
 
     VkSwapchainKHR swapchains[] = { m_swapchain };
 
@@ -651,7 +681,8 @@ void RenderDevice::createBuffer(
     VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
     VkBuffer &bufferHandler,
-    VkDeviceMemory &bufferMemory ) const noexcept
+    VkDeviceMemory &bufferMemory
+) const noexcept
 {
     auto createInfo = VkBufferCreateInfo {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -665,7 +696,9 @@ void RenderDevice::createBuffer(
             m_handle,
             &createInfo,
             nullptr,
-            &bufferHandler ) );
+            &bufferHandler
+        )
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements( m_handle, bufferHandler, &memRequirements );
@@ -681,14 +714,18 @@ void RenderDevice::createBuffer(
             m_handle,
             &allocInfo,
             nullptr,
-            &bufferMemory ) );
+            &bufferMemory
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkBindBufferMemory(
             m_handle,
             bufferHandler,
             bufferMemory,
-            0 ) );
+            0
+        )
+    );
 }
 
 void RenderDevice::copyToBuffer( VkDeviceMemory &memory, const void *data, VkDeviceSize size ) const noexcept
@@ -702,7 +739,9 @@ void RenderDevice::copyToBuffer( VkDeviceMemory &memory, const void *data, VkDev
             0,
             size,
             0,
-            &dstData ) );
+            &dstData
+        )
+    );
 
     memcpy( dstData, data, ( size_t ) size );
 
@@ -735,13 +774,15 @@ bool RenderDevice::bind( const UniformBuffer *uniformBuffer ) noexcept
             usage,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             bufferHandler,
-            bufferMemory );
+            bufferMemory
+        );
 
         if ( bufferView->getData() != nullptr ) {
             copyToBuffer(
                 bufferMemory,
                 bufferView->getData(),
-                bufferSize );
+                bufferSize
+            );
         }
 
         m_buffers[ id ].push_back( bufferHandler );
@@ -805,7 +846,8 @@ void RenderDevice::update( UniformBuffer *uniformBuffer ) const noexcept
         copyToBuffer(
             bufferMemory,
             bufferView->getData(),
-            bufferSize );
+            bufferSize
+        );
     }
 }
 
@@ -817,7 +859,8 @@ VkBuffer RenderDevice::bind( const VertexBuffer *vertexBuffer ) noexcept
             copyToBuffer(
                 m_memories[ id ][ getCurrentFrameIndex() ],
                 vertexBuffer->getBufferView()->getData(),
-                vertexBuffer->getBufferView()->getLength() );
+                vertexBuffer->getBufferView()->getLength()
+            );
         }
 
         return m_buffers[ id ][ getCurrentFrameIndex() ];
@@ -841,13 +884,15 @@ VkBuffer RenderDevice::bind( const VertexBuffer *vertexBuffer ) noexcept
             usage,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             bufferHandler,
-            bufferMemory );
+            bufferMemory
+        );
 
         if ( bufferView->getData() != nullptr ) {
             copyToBuffer(
                 bufferMemory,
                 bufferView->getData(),
-                bufferSize );
+                bufferSize
+            );
         }
 
         m_buffers[ id ].push_back( bufferHandler );
@@ -892,7 +937,8 @@ VkBuffer RenderDevice::bind( const IndexBuffer *indexBuffer ) noexcept
             copyToBuffer(
                 m_memories[ id ][ getCurrentFrameIndex() ],
                 indexBuffer->getBufferView()->getData(),
-                indexBuffer->getBufferView()->getLength() );
+                indexBuffer->getBufferView()->getLength()
+            );
         }
         return m_buffers[ id ][ getCurrentFrameIndex() ];
     }
@@ -915,13 +961,15 @@ VkBuffer RenderDevice::bind( const IndexBuffer *indexBuffer ) noexcept
             usage,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             bufferHandler,
-            bufferMemory );
+            bufferMemory
+        );
 
         if ( bufferView->getData() != nullptr ) {
             copyToBuffer(
                 bufferMemory,
                 bufferView->getData(),
-                bufferSize );
+                bufferSize
+            );
         }
 
         m_buffers[ id ].push_back( bufferHandler );
@@ -973,7 +1021,9 @@ VkCommandBuffer RenderDevice::beginSingleTimeCommands( void ) const noexcept
         vkAllocateCommandBuffers(
             m_handle,
             &allocInfo,
-            &commandBuffer ) );
+            &commandBuffer
+        )
+    );
 
     auto beginInfo = VkCommandBufferBeginInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -1000,17 +1050,22 @@ void RenderDevice::endSingleTimeCommands( VkCommandBuffer commandBuffer ) const 
             m_graphicsQueueHandle,
             1,
             &submitInfo,
-            nullptr ) );
+            nullptr
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkQueueWaitIdle(
-            m_graphicsQueueHandle ) );
+            m_graphicsQueueHandle
+        )
+    );
 
     vkFreeCommandBuffers(
         m_handle,
         m_commandPool,
         1,
-        &commandBuffer );
+        &commandBuffer
+    );
 }
 
 void RenderDevice::transitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) const noexcept
@@ -1092,7 +1147,8 @@ void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage
         0,
         nullptr,
         1,
-        &barrier );
+        &barrier
+    );
 }
 
 void RenderDevice::copyBufferToImage( VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) const noexcept
@@ -1123,7 +1179,8 @@ void RenderDevice::copyBufferToImage( VkBuffer buffer, VkImage image, crimild::U
         image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
-        &region );
+        &region
+    );
 
     endSingleTimeCommands( commandBuffer );
 }
@@ -1173,7 +1230,8 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
             0,
             nullptr,
             1,
-            &barrier );
+            &barrier
+        );
 
         auto blit = VkImageBlit {
             .srcSubresource = {
@@ -1210,7 +1268,8 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1,
             &blit,
-            VK_FILTER_LINEAR );
+            VK_FILTER_LINEAR
+        );
 
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1227,7 +1286,8 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
             0,
             nullptr,
             1,
-            &barrier );
+            &barrier
+        );
 
         if ( mipWidth > 1 )
             mipWidth /= 2;
@@ -1251,7 +1311,8 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
         0,
         nullptr,
         1,
-        &barrier );
+        &barrier
+    );
 
     endSingleTimeCommands( commandBuffer );
 }
@@ -1269,7 +1330,8 @@ void RenderDevice::createImage(
     crimild::UInt32 flags,
     VkImage &image,
     VkDeviceMemory &imageMemory,
-    void *imageData ) const noexcept
+    void *imageData
+) const noexcept
 {
     auto createInfo = VkImageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -1294,7 +1356,9 @@ void RenderDevice::createImage(
             m_handle,
             &createInfo,
             nullptr,
-            &image ) );
+            &image
+        )
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements( m_handle, image, &memRequirements );
@@ -1310,14 +1374,18 @@ void RenderDevice::createImage(
             m_handle,
             &allocInfo,
             nullptr,
-            &imageMemory ) );
+            &imageMemory
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkBindImageMemory(
             m_handle,
             image,
             imageMemory,
-            0 ) );
+            0
+        )
+    );
 
     if ( imageData != nullptr ) {
         VkDeviceSize imageSize = memRequirements.size;
@@ -1329,7 +1397,8 @@ void RenderDevice::createImage(
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             stagingBuffer,
-            stagingBufferMemory );
+            stagingBufferMemory
+        );
 
         copyToBuffer( stagingBufferMemory, imageData, imageSize );
 
@@ -1339,14 +1408,16 @@ void RenderDevice::createImage(
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             mipLevels,
-            arrayLayers );
+            arrayLayers
+        );
 
         copyBufferToImage(
             stagingBuffer,
             image,
             width,
             height,
-            arrayLayers );
+            arrayLayers
+        );
 
         transitionImageLayout(
             image,
@@ -1354,17 +1425,20 @@ void RenderDevice::createImage(
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             mipLevels,
-            arrayLayers );
+            arrayLayers
+        );
 
         vkDestroyBuffer(
             m_handle,
             stagingBuffer,
-            nullptr );
+            nullptr
+        );
 
         vkFreeMemory(
             m_handle,
             stagingBufferMemory,
-            nullptr );
+            nullptr
+        );
     }
 }
 
@@ -1437,7 +1511,9 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             m_handle,
             &createInfo,
             nullptr,
-            &imageHandle ) );
+            &imageHandle
+        )
+    );
 
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements( m_handle, imageHandle, &memRequirements );
@@ -1448,7 +1524,8 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
         .memoryTypeIndex = utils::findMemoryType(
             getPhysicalDevice()->getHandle(),
             memRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ),
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -1456,14 +1533,18 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             m_handle,
             &allocInfo,
             nullptr,
-            &imageMemoryHandle ) );
+            &imageMemoryHandle
+        )
+    );
 
     CRIMILD_VULKAN_CHECK(
         vkBindImageMemory(
             m_handle,
             imageHandle,
             imageMemoryHandle,
-            0 ) );
+            0
+        )
+    );
 
     if ( image->getBufferView() != nullptr ) {
         // Image has pixel data. Upload it
@@ -1478,7 +1559,8 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             stagingBuffer,
-            stagingBufferMemory );
+            stagingBufferMemory
+        );
 
         copyToBuffer( stagingBufferMemory, image->getBufferView()->getData(), imageSize );
 
@@ -1488,14 +1570,16 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             mipLevels,
-            arrayLayers );
+            arrayLayers
+        );
 
         copyBufferToImage(
             stagingBuffer,
             imageHandle,
             width,
             height,
-            arrayLayers );
+            arrayLayers
+        );
 
         if ( type == Image::Type::IMAGE_2D_CUBEMAP ) {
             // No mipmaps. Transition to SHADER_READ_OPTIMAL
@@ -1505,7 +1589,8 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 mipLevels,
-                arrayLayers );
+                arrayLayers
+            );
         } else {
             // Automatically transitions to SHADER_READ_OPTIMAL layout
             generateMipmaps(
@@ -1513,7 +1598,8 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
                 utils::getFormat( image->format ),
                 width,
                 height,
-                mipLevels );
+                mipLevels
+            );
         };
 
         // TODO: Support dynamic images!!
@@ -1522,12 +1608,14 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
         vkDestroyBuffer(
             m_handle,
             stagingBuffer,
-            nullptr );
+            nullptr
+        );
 
         vkFreeMemory(
             m_handle,
             stagingBufferMemory,
-            nullptr );
+            nullptr
+        );
 
         // bindInfo.stagingBuffer = VK_NULL_HANDLE;
         // bindInfo.stagingBufferMemory = VK_NULL_HANDLE;
@@ -1539,7 +1627,8 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             m_handle,
             UInt64( imageHandle ),
             VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
-            image->getName().c_str() );
+            image->getName().c_str()
+        );
     }
 
     m_images[ id ] = { imageHandle };
@@ -1633,7 +1722,9 @@ VkImageView RenderDevice::bind( const ImageView *imageView ) noexcept
             m_handle,
             &viewInfo,
             nullptr,
-            &handle ) );
+            &handle
+        )
+    );
 
     m_imageViews[ id ] = { handle };
 
@@ -1698,7 +1789,9 @@ VkSampler RenderDevice::bind( const Sampler *sampler ) noexcept
             m_handle,
             &samplerInfo,
             nullptr,
-            &handle ) );
+            &handle
+        )
+    );
 
     m_samplers[ id ] = { handle };
 
@@ -1830,4 +1923,266 @@ VkRect2D RenderDevice::getScissor( const ViewportDimensions &scissor ) const noe
             static_cast< crimild::UInt32 >( h ),
         },
     };
+}
+
+void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out, bool usingDeviceResources ) const
+{
+    CRIMILD_LOG_TRACE();
+
+    const auto swapchainImageCount = getSwapchainImageCount();
+
+    const auto isColorAttachment = formatIsColor( format );
+    const auto isDepthStencilAttachment = formatIsDepthStencil( format );
+
+    if ( !isColorAttachment && !isDepthStencilAttachment ) {
+        CRIMILD_LOG_ERROR( "Invalid attachment format ", format );
+        return;
+    }
+
+    // Basic properties
+    out.name = name;
+    out.extent = extent;
+    out.format = format;
+
+    out.images.resize( swapchainImageCount, VK_NULL_HANDLE );
+    out.memories.resize( swapchainImageCount, VK_NULL_HANDLE );
+    out.imageViews.resize( swapchainImageCount, VK_NULL_HANDLE );
+
+    if ( usingDeviceResources ) {
+        if ( isColorAttachment ) {
+            for ( size_t i = 0; i < swapchainImageCount; ++i ) {
+                out.images[ i ] = m_swapchainImages[ i ];
+                out.imageViews[ i ] = m_swapchainImageViews[ i ];
+            }
+        } else {
+            // Use the same depth/stencil image for all attachments
+            // Not sure if this is correct
+            for ( size_t i = 0; i < swapchainImageCount; ++i ) {
+                out.images[ i ] = m_depthStencilResources.image;
+                out.imageViews[ i ] = m_depthStencilResources.imageView;
+            }
+        }
+        // Set this flag so resources are not deleted when destroying the attachment
+        out.usesDeviceResources = true;
+
+        // No need to continue, since this attachment can only be used for presentation
+        return;
+    }
+
+    for ( size_t i = 0; i < swapchainImageCount; ++i ) {
+        // Image
+        createImage(
+            extent.width,
+            extent.height,
+            format,
+            VK_IMAGE_TILING_OPTIMAL,
+            isColorAttachment
+                ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+                : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+            1,
+            VK_SAMPLE_COUNT_1_BIT,
+            1,
+            0,
+            out.images[ i ],
+            out.memories[ i ]
+        );
+        setObjectName( out.images[ i ], ( name + "/Image" ).c_str() );
+
+        // Image View
+        createImageView(
+            out.images[ i ],
+            format,
+            isColorAttachment
+                ? VK_IMAGE_ASPECT_COLOR_BIT
+            : utils::hasStencilComponent( format )
+                ? VK_IMAGE_ASPECT_STENCIL_BIT
+                : VK_IMAGE_ASPECT_DEPTH_BIT,
+            out.imageViews[ i ]
+        );
+        setObjectName( out.imageViews[ i ], ( name + "/ImageView" ).c_str() );
+    }
+
+    // Sampler
+    auto samplerInfo = VkSamplerCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .magFilter = VK_FILTER_LINEAR,
+        .minFilter = VK_FILTER_LINEAR,
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .mipLodBias = 0,
+        .anisotropyEnable = VK_TRUE,
+        .maxAnisotropy = 1,
+        .compareEnable = VK_FALSE,
+        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .minLod = 0,
+        .maxLod = 1,
+        .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
+        .unnormalizedCoordinates = VK_FALSE,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSampler(
+            getHandle(),
+            &samplerInfo,
+            nullptr,
+            &out.sampler
+        )
+    );
+    setObjectName( out.sampler, ( name + "/Sampler" ).c_str() );
+
+    // Descriptor Set Layout
+    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 1 > {
+        VkDescriptorSetLayoutBinding {
+            .binding = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
+        },
+    };
+
+    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = uint32_t( bindings.size() ),
+        .pBindings = bindings.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            getHandle(),
+            &layoutCreateInfo,
+            nullptr,
+            &out.descriptorSetLayout
+        )
+    );
+    setObjectName( out.descriptorSetLayout, ( name + "/DescriptorSetLayout" ).c_str() );
+
+    // Descriptor Pool
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = uint32_t( swapchainImageCount ),
+        },
+    };
+
+    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = uint32_t( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
+        .maxSets = uint32_t( swapchainImageCount ),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+            getHandle(),
+            &poolCreateInfo,
+            nullptr,
+            &out.descriptorPool
+        )
+    );
+    setObjectName( out.descriptorPool, ( name + "/DescriptorPool" ).c_str() );
+
+    out.descriptorSets.resize( swapchainImageCount );
+
+    std::vector< VkDescriptorSetLayout > layouts( swapchainImageCount, out.descriptorSetLayout );
+
+    const auto allocInfo = VkDescriptorSetAllocateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = out.descriptorPool,
+        .descriptorSetCount = uint32_t( layouts.size() ),
+        .pSetLayouts = layouts.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateDescriptorSets(
+            getHandle(),
+            &allocInfo,
+            out.descriptorSets.data()
+        )
+    );
+
+    for ( size_t i = 0; i < out.descriptorSets.size(); ++i ) {
+        const auto imageInfo = VkDescriptorImageInfo {
+            .imageLayout = isColorAttachment ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+            .imageView = out.imageViews[ i ],
+            .sampler = out.sampler,
+        };
+
+        const auto writes = std::array< VkWriteDescriptorSet, 1 > {
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = out.descriptorSets[ i ],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = 1,
+                .pBufferInfo = nullptr,
+                .pImageInfo = &imageInfo,
+                .pTexelBufferView = nullptr,
+            },
+        };
+
+        vkUpdateDescriptorSets(
+            getHandle(),
+            writes.size(),
+            writes.data(),
+            0,
+            nullptr
+        );
+    }
+}
+
+void RenderDevice::destroyFramebufferAttachment( FramebufferAttachment &att ) const
+{
+    if ( !att.usesDeviceResources ) {
+        att.descriptorSets.clear();
+
+        vkDestroyDescriptorSetLayout( getHandle(), att.descriptorSetLayout, nullptr );
+        att.descriptorSetLayout = VK_NULL_HANDLE;
+
+        vkDestroyDescriptorPool( getHandle(), att.descriptorPool, nullptr );
+        att.descriptorPool = VK_NULL_HANDLE;
+
+        vkDestroySampler( getHandle(), att.sampler, nullptr );
+        att.sampler = VK_NULL_HANDLE;
+
+        for ( auto &imageView : att.imageViews ) {
+            vkDestroyImageView( getHandle(), imageView, nullptr );
+        }
+
+        for ( auto &image : att.images ) {
+            vkDestroyImage( getHandle(), image, nullptr );
+        }
+
+        for ( auto &memory : att.memories ) {
+            vkFreeMemory( getHandle(), memory, nullptr );
+        }
+    }
+
+    att.imageViews.clear();
+    att.images.clear();
+    att.memories.clear();
+}
+
+void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
+{
+    const auto currentFrameIndex = getCurrentFrameIndex();
+    auto commandBuffer = getCurrentCommandBuffer();
+    const auto isColorAttachment = formatIsColor( att.format );
+    transitionImageLayout(
+        commandBuffer,
+        att.images[ currentFrameIndex ],
+        att.format,
+        isColorAttachment
+            ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        isColorAttachment
+            ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        att.mipLevels,
+        att.layerCount
+    );
 }

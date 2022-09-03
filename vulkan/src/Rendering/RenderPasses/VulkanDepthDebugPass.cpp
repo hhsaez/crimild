@@ -86,7 +86,8 @@ void DepthDebugPass::render( void ) noexcept
             RenderPassObjects::Uniforms {
                 .near = getNear(),
                 .far = getFar(),
-            } );
+            }
+        );
         getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
     }
 
@@ -121,7 +122,8 @@ void DepthDebugPass::render( void ) noexcept
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle() );
+        m_pipeline->getHandle()
+    );
 
     vkCmdBindDescriptorSets(
         commandBuffer,
@@ -131,7 +133,8 @@ void DepthDebugPass::render( void ) noexcept
         1,
         &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
         0,
-        nullptr );
+        nullptr
+    );
 
     vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
 
@@ -152,7 +155,7 @@ void DepthDebugPass::init( void ) noexcept
         .extent = extent,
     };
 
-    createFramebufferAttachment( m_name, extent, VK_FORMAT_R8G8B8A8_UNORM, m_colorAttachment );
+    getRenderDevice()->createFramebufferAttachment( m_name, extent, VK_FORMAT_R8G8B8A8_UNORM, m_colorAttachment );
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
@@ -223,12 +226,14 @@ void DepthDebugPass::init( void ) noexcept
             getRenderDevice()->getHandle(),
             &createInfo,
             nullptr,
-            &m_renderPass ) );
+            &m_renderPass
+        )
+    );
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageView,
+            m_colorAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -247,7 +252,9 @@ void DepthDebugPass::init( void ) noexcept
                 getRenderDevice()->getHandle(),
                 &createInfo,
                 nullptr,
-                &m_framebuffers[ i ] ) );
+                &m_framebuffers[ i ]
+            )
+        );
     }
 
     createRenderPassObjects();
@@ -268,7 +275,8 @@ void DepthDebugPass::init( void ) noexcept
                             outUV.y = 1 - outUV.y;
                         }
 
-                    )" ),
+                    )"
+                ),
                 crimild::alloc< Shader >(
                     Shader::Stage::FRAGMENT,
                     R"(
@@ -296,8 +304,10 @@ void DepthDebugPass::init( void ) noexcept
                             float depth = texture( samplerColor, inUV ).r;
                             outFragColor = vec4( vec3( LinearizeDepth( depth ) ), 1.0);
                         }
-                    )" ),
-            } );
+                    )"
+                ),
+            }
+        );
 
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
@@ -310,7 +320,8 @@ void DepthDebugPass::init( void ) noexcept
             DepthStencilState {},
             RasterizationState {},
             ColorBlendState {},
-            colorReferences.size() );
+            colorReferences.size()
+        );
     }();
 }
 
@@ -329,7 +340,7 @@ void DepthDebugPass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( m_colorAttachment );
+    getRenderDevice()->destroyFramebufferAttachment( m_colorAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -412,7 +423,7 @@ void DepthDebugPass::createRenderPassObjects( void ) noexcept
 
         const auto depthImageInfo = VkDescriptorImageInfo {
             .imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            .imageView = m_depthInput->imageView,
+            .imageView = m_depthInput->imageViews[ i ],
             .sampler = m_depthInput->sampler,
         };
 

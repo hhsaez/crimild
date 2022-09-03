@@ -32,6 +32,7 @@
 #include "Mathematics/Vector2.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
