@@ -59,6 +59,7 @@ namespace crimild {
                 ViewportDimensions viewport;
                 ViewportDimensions scissor;
                 std::vector< VkPushConstantRange > pushConstantRanges;
+                uint32_t subpass = 0;
             };
 
         public:

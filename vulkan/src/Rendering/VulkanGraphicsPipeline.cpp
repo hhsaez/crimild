@@ -618,7 +618,7 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
         .pDynamicState = &dynamicState,
         .layout = m_pipelineLayout,
         .renderPass = renderPass,
-        .subpass = 0,
+        .subpass = descriptor.subpass,
         .basePipelineHandle = VK_NULL_HANDLE, // Optional
         .basePipelineIndex = -1,              // Optional
     };
