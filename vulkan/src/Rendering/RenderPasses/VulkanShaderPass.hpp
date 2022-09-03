@@ -31,6 +31,7 @@
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
@@ -43,7 +44,13 @@ namespace crimild {
 
         class ShaderPass : public RenderPassBase {
         public:
-            explicit ShaderPass( RenderDevice *renderDevice, const std::string &src ) noexcept;
+            explicit ShaderPass(
+                RenderDevice *renderDevice,
+                std::string_view src,
+                const FramebufferAttachment *colorAttachment,
+                SharedPointer< UniformBuffer > const &uniforms = nullptr,
+                const std::vector< const FramebufferAttachment * > &inputs = {}
+            ) noexcept;
             virtual ~ShaderPass( void ) noexcept;
 
             virtual Event handle( const Event & ) noexcept;
@@ -66,19 +73,23 @@ namespace crimild {
             void destroyDescriptorSets( void ) noexcept;
 
         private:
+            const FramebufferAttachment *m_colorAttachment = nullptr;
+
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
 
             std::unique_ptr< GraphicsPipeline > m_pipeline;
 
-            std::unique_ptr< UniformBuffer > m_uniforms;
+            SharedPointer< UniformBuffer > m_uniforms;
 
             std::unique_ptr< ShaderProgram > m_program;
 
             VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
             VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
             std::vector< VkDescriptorSet > m_descriptorSets;
+
+            std::vector< const FramebufferAttachment * > m_inputs;
         };
 
     }
