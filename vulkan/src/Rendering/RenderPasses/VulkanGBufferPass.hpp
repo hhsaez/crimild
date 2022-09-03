@@ -53,19 +53,28 @@ namespace crimild {
         class RenderDevice;
         class GraphicsPipeline;
 
+        /**
+         * \brief Fills a G-Buffer
+         *
+         * Geomtries are rendered using Vulkan's push constants to avoid creating new descriptor
+         * sets for each renderable.
+         *
+         * G-Buffer Layout:
+         * - Depth: F32
+         * - Color #0: Albedo (F32G32B32)
+         * - Color #1: World Position (F32G32B32)
+         * - Color #2: World Normal (F32G32B32)
+         * - Color #3: Metallic (F32), Roughness (G32), Ambient Occlusion (B32)
+         *
+         * \todo Add instancing support.
+         */
         class GBufferPass : public RenderPassBase {
         public:
-            explicit GBufferPass( RenderDevice *renderDevice ) noexcept;
+            explicit GBufferPass( RenderDevice *renderDevice, std::vector< const FramebufferAttachment * > attachments ) noexcept;
             virtual ~GBufferPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
             void render( Node *scene, Camera *camera ) noexcept;
-
-            [[nodiscard]] inline const FramebufferAttachment *getAlbedoAttachment( void ) const noexcept { return &m_albedoAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment *getPositionAttachment( void ) const noexcept { return &m_positionAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment *getNormalAttachment( void ) const noexcept { return &m_normalAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment *getMaterialAttachment( void ) const noexcept { return &m_materialAttachment; }
-            [[nodiscard]] inline const FramebufferAttachment *getDepthStencilAttachment( void ) const noexcept { return &m_depthStencilAttachment; }
 
         private:
             void init( void ) noexcept;
@@ -78,10 +87,6 @@ namespace crimild {
             void bind( materials::PrincipledBSDF *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
-            void createGeometryObjects( void ) noexcept;
-            void bind( Geometry *geometry ) noexcept;
-            void destroyGeometryObjects( void ) noexcept;
-
             void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
 
         private:
@@ -89,11 +94,7 @@ namespace crimild {
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
 
-            vulkan::FramebufferAttachment m_albedoAttachment;
-            vulkan::FramebufferAttachment m_positionAttachment;
-            vulkan::FramebufferAttachment m_normalAttachment;
-            vulkan::FramebufferAttachment m_materialAttachment;
-            vulkan::FramebufferAttachment m_depthStencilAttachment;
+            std::vector< const FramebufferAttachment * > m_attachments;
 
             struct RenderPassObjects {
                 VkDescriptorPool pool = VK_NULL_HANDLE;
@@ -115,14 +116,6 @@ namespace crimild {
                 std::unordered_map< materials::PrincipledBSDF *, std::vector< VkDescriptorSet > > descriptorSets;
                 std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
-
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct GeometryObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Geometry *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Geometry *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Geometry *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_geometryObjects;
         };
 
     }

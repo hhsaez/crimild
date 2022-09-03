@@ -48,20 +48,16 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-GBufferPass::GBufferPass( RenderDevice *renderDevice ) noexcept
-    : RenderPassBase( renderDevice )
-{
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = {
-            .width = 1024,
-            .height = 1024,
-        },
-    };
+// Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+// use normal uniforms instead.
+struct GeometryUniforms {
+    alignas( 16 ) Matrix4 model;
+};
 
+GBufferPass::GBufferPass( RenderDevice *renderDevice, std::vector< const FramebufferAttachment * > attachments ) noexcept
+    : RenderPassBase( renderDevice ),
+      m_attachments( attachments )
+{
     init();
 }
 
@@ -74,10 +70,6 @@ Event GBufferPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
-            m_renderArea.extent = {
-                .width = uint32_t( e.extent.width ),
-                .height = uint32_t( e.extent.height ),
-            };
             clear();
             init();
             break;
@@ -95,37 +87,13 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    const auto clearColorValue = VkClearValue {
-        .color = {
-            .float32 = {
-                0.0f,
-                0.0f,
-                0.0f,
-                0.0f,
-            },
-        },
-    };
-
-    const auto clearValues = std::array< VkClearValue, 5 > {
-        clearColorValue,
-        clearColorValue,
-        clearColorValue,
-        clearColorValue,
-        VkClearValue {
-            .depthStencil = {
-                1,
-                0,
-            },
-        },
-    };
-
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,
         .framebuffer = m_framebuffers[ currentFrameIndex ],
         .renderArea = m_renderArea,
-        .clearValueCount = clearValues.size(),
-        .pClearValues = clearValues.data(),
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
     };
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -135,6 +103,10 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
         scene->perform(
             ApplyToGeometries(
                 [ & ]( Geometry *geometry ) {
+                    if ( geometry == nullptr ) {
+                        return;
+                    }
+
                     if ( geometry->getLayer() != Node::Layer::DEFAULT ) {
                         return;
                     }
@@ -149,9 +121,6 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
             )
         );
 
-        // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
-
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
@@ -161,13 +130,9 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
             getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
         }
 
+        // TODO: Add instancing support
         renderables.eachGeometry(
             [ & ]( Geometry *geometry ) {
-                if ( geometry == nullptr ) {
-                    return;
-                }
-                bind( geometry );
-
                 if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
                     if ( auto material = static_cast< materials::PrincipledBSDF * >( ms->first() ) ) {
                         bind( material );
@@ -200,15 +165,14 @@ void GBufferPass::render( Node *scene, Camera *camera ) noexcept
                             nullptr
                         );
 
-                        vkCmdBindDescriptorSets(
+                        const auto renderableUniforms = GeometryUniforms { geometry->getWorld().mat };
+                        vkCmdPushConstants(
                             commandBuffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
                             m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                            2,
-                            1,
-                            &m_geometryObjects.descriptorSets[ geometry ][ currentFrameIndex ],
+                            VK_SHADER_STAGE_VERTEX_BIT,
                             0,
-                            nullptr
+                            sizeof( GeometryUniforms ),
+                            &renderableUniforms
                         );
 
                         drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
@@ -225,56 +189,57 @@ void GBufferPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
+    m_renderArea = VkRect2D {
+        .extent = m_attachments.front()->extent,
+        .offset = { 0, 0 },
+    };
+
     const auto extent = m_renderArea.extent;
 
-    createFramebufferAttachment( "Scene/Albedo", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_albedoAttachment );
-    createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_positionAttachment );
-    createFramebufferAttachment( "Scene/Normal", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_normalAttachment );
-    createFramebufferAttachment( "Scene/Material", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_materialAttachment );
-    createFramebufferAttachment( "Scene/Depth", extent, VK_FORMAT_D32_SFLOAT, m_depthStencilAttachment );
+    std::vector< VkAttachmentDescription > attachmentDescriptions;
+    std::vector< VkAttachmentReference > colorReferences;
+    std::vector< VkAttachmentReference > depthStencilReferences;
 
-    auto getAttachmentDescription = [ & ]( const auto &att ) {
-        return VkAttachmentDescription {
-            .format = att.format,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = getRenderDevice()->formatIsColor( att.format )
-                               ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                               : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        };
-    };
+    attachmentDescriptions.reserve( m_attachments.size() );
+    colorReferences.reserve( m_attachments.size() );
+    depthStencilReferences.reserve( m_attachments.size() );
 
-    auto attachments = std::array< VkAttachmentDescription, 5 > {
-        getAttachmentDescription( m_albedoAttachment ),
-        getAttachmentDescription( m_positionAttachment ),
-        getAttachmentDescription( m_normalAttachment ),
-        getAttachmentDescription( m_materialAttachment ),
-        getAttachmentDescription( m_depthStencilAttachment ),
-    };
+    for ( uint32_t i = 0; i < m_attachments.size(); ++i ) {
+        const auto &att = m_attachments[ i ];
+        const auto isColorAttachment = getRenderDevice()->formatIsColor( att->format );
+        const auto isDepthStencilAttachment = getRenderDevice()->formatIsDepthStencil( att->format );
+        attachmentDescriptions.push_back(
+            VkAttachmentDescription {
+                .format = att->format,
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                // Use STORE here since we could access the contents of these attachments outside
+                // of the current render pass.
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .stencilLoadOp = isDepthStencilAttachment ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = isDepthStencilAttachment ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                // Final layout is ready for use in another pass (not presentation, though)
+                .finalLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            }
+        );
 
-    auto getAttachmentReference = [ & ]( const auto &att, uint32_t idx ) {
-        return VkAttachmentReference {
-            .attachment = idx,
-            .layout = getRenderDevice()->formatIsColor( att.format )
-                          ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                          : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        };
-    };
-
-    auto colorReferences = std::array< VkAttachmentReference, 4 > {
-        getAttachmentReference( m_albedoAttachment, 0 ),
-        getAttachmentReference( m_positionAttachment, 1 ),
-        getAttachmentReference( m_normalAttachment, 2 ),
-        getAttachmentReference( m_materialAttachment, 3 ),
-    };
-
-    auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
-        getAttachmentReference( m_depthStencilAttachment, 4 ),
-    };
+        if ( isColorAttachment ) {
+            colorReferences.push_back(
+                VkAttachmentReference {
+                    .attachment = i,
+                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                }
+            );
+        } else {
+            depthStencilReferences.push_back(
+                VkAttachmentReference {
+                    .attachment = i,
+                    .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                }
+            );
+        }
+    }
 
     auto subpass = VkSubpassDescription {
         .flags = 0,
@@ -312,8 +277,8 @@ void GBufferPass::init( void ) noexcept
 
     auto createInfo = VkRenderPassCreateInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
-        .pAttachments = attachments.data(),
+        .attachmentCount = static_cast< crimild::UInt32 >( attachmentDescriptions.size() ),
+        .pAttachments = attachmentDescriptions.data(),
         .subpassCount = 1,
         .pSubpasses = &subpass,
         .dependencyCount = crimild::UInt32( dependencies.size() ),
@@ -331,20 +296,18 @@ void GBufferPass::init( void ) noexcept
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        auto attachments = std::array< VkImageView, 5 > {
-            m_albedoAttachment.imageView,
-            m_positionAttachment.imageView,
-            m_normalAttachment.imageView,
-            m_materialAttachment.imageView,
-            m_depthStencilAttachment.imageView,
-        };
+        std::vector< VkImageView > imageViews;
+        imageViews.reserve( m_attachments.size() );
+        for ( auto att : m_attachments ) {
+            imageViews.push_back( att->imageViews[ i ] );
+        }
 
         auto createInfo = VkFramebufferCreateInfo {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .pNext = nullptr,
             .renderPass = m_renderPass,
-            .attachmentCount = uint32_t( attachments.size() ),
-            .pAttachments = attachments.data(),
+            .attachmentCount = uint32_t( imageViews.size() ),
+            .pAttachments = imageViews.data(),
             .width = extent.width,
             .height = extent.height,
             .layers = 1,
@@ -362,7 +325,6 @@ void GBufferPass::init( void ) noexcept
 
     createRenderPassObjects();
     createMaterialObjects();
-    createGeometryObjects();
 }
 
 void GBufferPass::clear( void ) noexcept
@@ -371,7 +333,6 @@ void GBufferPass::clear( void ) noexcept
 
     vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
-    destroyGeometryObjects();
     destroyMaterialObjects();
     destroyRenderPassObjects();
 
@@ -379,12 +340,6 @@ void GBufferPass::clear( void ) noexcept
         vkDestroyFramebuffer( getRenderDevice()->getHandle(), fb, nullptr );
     }
     m_framebuffers.clear();
-
-    destroyFramebufferAttachment( m_albedoAttachment );
-    destroyFramebufferAttachment( m_positionAttachment );
-    destroyFramebufferAttachment( m_normalAttachment );
-    destroyFramebufferAttachment( m_materialAttachment );
-    destroyFramebufferAttachment( m_depthStencilAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -537,7 +492,7 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
                         mat4 proj;
                     };
 
-                    layout ( set = 2, binding = 0 ) uniform GeometryUniforms {
+                    layout ( push_constant ) uniform GeometryUniforms {
                         mat4 model;
                     };
 
@@ -652,13 +607,20 @@ void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
         getRenderDevice(),
         m_renderPass,
         GraphicsPipeline::Descriptor {
+            .primitiveType = Primitive::Type::TRIANGLES,
             .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
                 m_renderPassObjects.layout,
                 m_materialObjects.descriptorSetLayout,
-                m_geometryObjects.descriptorSetLayout,
             },
             .program = program.get(),
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .pushConstantRanges = {
+                VkPushConstantRange {
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                    .offset = 0,
+                    .size = sizeof( GeometryUniforms ),
+                },
+            },
             .colorAttachmentCount = 4,
             .viewport = viewport,
             .scissor = viewport,
@@ -769,109 +731,6 @@ void GBufferPass::destroyMaterialObjects( void ) noexcept
     m_materialObjects.uniforms.clear();
 
     m_materialObjects.pipelines.clear();
-}
-
-void GBufferPass::createGeometryObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr,
-    };
-
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_geometryObjects.descriptorSetLayout ) );
-}
-
-void GBufferPass::bind( Geometry *geometry ) noexcept
-{
-    if ( m_geometryObjects.descriptorSets.contains( geometry ) ) {
-        // Already bound
-        m_geometryObjects.uniforms[ geometry ]->setValue( geometry->getWorld().mat );
-        getRenderDevice()->update( m_geometryObjects.uniforms[ geometry ].get() );
-        return;
-    }
-
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
-
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
-
-    m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-    getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
-
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
-
-    const auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = m_geometryObjects.descriptorPools[ geometry ],
-        .descriptorSetCount = uint32_t( layouts.size() ),
-        .pSetLayouts = layouts.data(),
-    };
-
-    m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
-
-    for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = getRenderDevice()->getHandle( m_geometryObjects.uniforms[ geometry ].get(), i ),
-            .offset = 0,
-            .range = m_geometryObjects.uniforms[ geometry ]->getBufferView()->getLength(),
-        };
-
-        const auto descriptorWrite = VkWriteDescriptorSet {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = m_geometryObjects.descriptorSets[ geometry ][ i ],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
-            .pImageInfo = nullptr,
-            .pTexelBufferView = nullptr,
-        };
-
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-    }
-}
-
-void GBufferPass::destroyGeometryObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    // no need to destroy sets
-    m_geometryObjects.descriptorSets.clear();
-
-    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_geometryObjects.descriptorSetLayout, nullptr );
-    m_geometryObjects.descriptorSetLayout = VK_NULL_HANDLE;
-
-    for ( auto &it : m_geometryObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
-    }
-    m_geometryObjects.descriptorPools.clear();
-
-    for ( auto &it : m_geometryObjects.uniforms ) {
-        getRenderDevice()->unbind( it.second.get() );
-    }
-    m_geometryObjects.uniforms.clear();
 }
 
 void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
