@@ -38,9 +38,14 @@ namespace crimild {
 
         class RenderDevice;
 
+        /**
+         * \brief Clear attachments before rendering
+         *
+         * \todo Consider implementing this pass as a compute operation for better performance.
+         */
         class ClearPass : public RenderPassBase {
         public:
-            explicit ClearPass( RenderDevice *renderDevice ) noexcept;
+            explicit ClearPass( RenderDevice *renderDevice, const std::vector< const FramebufferAttachment * > &attachments ) noexcept;
             virtual ~ClearPass( void ) noexcept;
 
             virtual Event handle( const Event & ) noexcept;
@@ -48,14 +53,14 @@ namespace crimild {
 
         private:
             void init( void ) noexcept;
-            void clear( void ) noexcept;
-            void beginRenderPass( VkCommandBuffer commandBuffer, uint8_t currentFrameIndex ) noexcept;
-            void endRenderPass( VkCommandBuffer commandBuffer ) noexcept;
+            void deinit( void ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
             std::vector< VkFramebuffer > m_framebuffers;
             VkRect2D m_renderArea;
+            std::vector< const FramebufferAttachment * > m_attachments;
+            std::vector< VkClearValue > m_clearValues;
         };
 
     }
