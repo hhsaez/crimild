@@ -184,6 +184,20 @@ namespace crimild {
 
             void generateMipmaps( VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) const noexcept;
 
+            void createFramebufferAttachment(
+                std::string name,
+                const VkExtent2D &extent,
+                VkFormat format,
+                FramebufferAttachment &out,
+                bool useDeviceImages = false
+            ) const;
+            void destroyFramebufferAttachment( FramebufferAttachment &att ) const;
+
+            /**
+             * \brief Flushes attachments contents and makes it read-only
+             */
+            void flush( const FramebufferAttachment &att ) const noexcept;
+
         private:
             void createSwapchain( void ) noexcept;
             void destroySwapchain( void ) noexcept;

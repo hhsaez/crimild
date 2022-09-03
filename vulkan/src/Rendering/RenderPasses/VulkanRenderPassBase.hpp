@@ -29,11 +29,8 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_RENDER_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Simulation/Event.hpp"
 
 namespace crimild {
-
-    struct Event;
 
     namespace vulkan {
 
@@ -48,14 +45,6 @@ namespace crimild {
 
             inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
             inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-        protected:
-            void createFramebufferAttachment(
-                std::string name,
-                const VkExtent2D &extent,
-                VkFormat format,
-                FramebufferAttachment &out ) const;
-            void destroyFramebufferAttachment( FramebufferAttachment &att ) const;
 
         private:
             RenderDevice *m_renderDevice = nullptr;

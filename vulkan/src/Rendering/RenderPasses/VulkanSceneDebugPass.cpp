@@ -444,15 +444,15 @@ void SceneDebugPass::init( void ) noexcept
         )
     );
 
-    createFramebufferAttachment( "Scene/Debug", extent, colorFormat, m_colorAttachment );
-    createFramebufferAttachment( "Scene/Debug/Depth", extent, depthFormat, m_depthAttachment );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Debug", extent, colorFormat, m_colorAttachment );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Debug/Depth", extent, depthFormat, m_depthAttachment );
 
     // We won't be swapping framebuffers, so create only one
     m_framebuffers.resize( 1 );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 2 > {
-            m_colorAttachment.imageView,
-            m_depthAttachment.imageView,
+            m_colorAttachment.imageViews[ i ],
+            m_depthAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -520,8 +520,8 @@ void SceneDebugPass::clear( void ) noexcept
     }
     m_framebuffers.clear();
 
-    destroyFramebufferAttachment( m_colorAttachment );
-    destroyFramebufferAttachment( m_depthAttachment );
+    getRenderDevice()->destroyFramebufferAttachment( m_colorAttachment );
+    getRenderDevice()->destroyFramebufferAttachment( m_depthAttachment );
 
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
