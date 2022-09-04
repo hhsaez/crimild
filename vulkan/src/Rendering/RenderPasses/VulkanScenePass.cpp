@@ -27,98 +27,144 @@
 
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
+#include "Rendering/RenderPasses/VulkanClearPass.hpp"
+#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
+#include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
+#include "Rendering/RenderPasses/VulkanUnlitPass.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
 ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice ),
-      m_shadowPass( renderDevice ),
-      m_gBufferPass( renderDevice ),
-      m_localLightingPass(
-          renderDevice,
-          m_gBufferPass.getAlbedoAttachment(),
-          m_gBufferPass.getPositionAttachment(),
-          m_gBufferPass.getNormalAttachment(),
-          m_gBufferPass.getMaterialAttachment(),
-          m_shadowPass.getShadowAttachment()
-      ),
-      m_unlitPass(
-          renderDevice,
-          m_localLightingPass.getColorAttachment(),
-          m_gBufferPass.getDepthStencilAttachment()
-      ),
-      m_skyboxPass(
-          renderDevice,
-          m_unlitPass.getColorAttachment(),
-          m_gBufferPass.getDepthStencilAttachment()
-      )
+    : RenderPassBase( renderDevice )
 {
-    // no-op
+    m_renderArea = VkRect2D {
+        .extent = { .width = 1024, .height = 1024 },
+        .offset = { 0, 0 },
+    };
+
+    init();
+
+    m_clear = crimild::alloc< ClearPass >(
+        renderDevice,
+        [ & ] {
+            std::vector< const FramebufferAttachment * > ret;
+            ret.reserve( m_attachments.size() );
+            for ( const auto &att : m_attachments ) {
+                ret.push_back( &att );
+            }
+            return ret;
+        }()
+    );
+
+    m_gBuffer = crimild::alloc< GBufferPass >(
+        renderDevice,
+        std::vector< const FramebufferAttachment * > {
+            &m_attachments[ 0 ],
+            &m_attachments[ 1 ],
+            &m_attachments[ 2 ],
+            &m_attachments[ 3 ],
+            &m_attachments[ 4 ],
+        }
+    );
+
+    m_lighting = crimild::alloc< LocalLightingPass >(
+        renderDevice,
+        std::vector< const FramebufferAttachment * > {
+            &m_attachments[ 1 ],
+            &m_attachments[ 2 ],
+            &m_attachments[ 3 ],
+            &m_attachments[ 4 ],
+        },
+        &m_attachments[ 5 ] // color composition
+    );
+
+    m_unlit = crimild::alloc< UnlitPass >(
+        renderDevice,
+        &m_attachments.back(), // color composition
+        &m_attachments.front() // depth
+    );
+}
+
+ScenePass::~ScenePass( void ) noexcept
+{
+    m_clear = nullptr;
+    m_gBuffer = nullptr;
+    m_lighting = nullptr;
+    m_unlit = nullptr;
+
+    deinit();
 }
 
 Event ScenePass::handle( const Event &e ) noexcept
 {
-    m_shadowPass.handle( e );
-    m_gBufferPass.handle( e );
-    m_localLightingPass.handle( e );
-    m_unlitPass.handle( e );
-    m_skyboxPass.handle( e );
+    switch ( e.type ) {
+        case Event::Type::WINDOW_RESIZE: {
+            m_renderArea.extent = {
+                .width = uint32_t( e.extent.width ),
+                .height = uint32_t( e.extent.height ),
+            };
+            deinit();
+            init();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    m_clear->handle( e );
+    m_gBuffer->handle( e );
+    m_lighting->handle( e );
+    m_unlit->handle( e );
 
     return e;
 }
 
 void ScenePass::render( Node *scene, Camera *camera ) noexcept
 {
-    // TODO: maybe we should use the ClearPass and have ScenePass create its own color/depth attachments
-    // instead of relying on inner passes to do that.
-
-    // TODO: Fetch renderables here so the scene is traverse only once and not multiple times (one
-    // for each render pass below).
-
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    m_shadowPass.render( scene, camera );
-    m_gBufferPass.render( scene, camera );
-
-    auto transitionAttachment = [ & ]( const auto att ) {
-        getRenderDevice()->transitionImageLayout(
-            commandBuffer,
-            att->image,
-            att->format,
-            getRenderDevice()->formatIsColor( att->format )
-                ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            getRenderDevice()->formatIsColor( att->format )
-                ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            att->mipLevels,
-            att->layerCount
-        );
-    };
-
-    const auto attachments = std::vector< const vulkan::FramebufferAttachment * > {
-        m_gBufferPass.getAlbedoAttachment(),
-        m_gBufferPass.getPositionAttachment(),
-        m_gBufferPass.getNormalAttachment(),
-        m_gBufferPass.getMaterialAttachment(),
-    };
-
-    for ( const auto att : attachments ) {
-        transitionAttachment( att );
+    if ( camera != nullptr ) {
+        // Set correct aspect ratio for camera before rendering
+        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
     }
 
-    m_localLightingPass.render( scene, camera );
-    m_unlitPass.render( scene, camera );
-    m_skyboxPass.render( scene, camera );
+    m_clear->render();
+    m_gBuffer->render( scene, camera );
 
-    // Accumulated color buffer can be transitioned now
-    transitionAttachment( m_localLightingPass.getColorAttachment() );
+    // flush all G-Buffer color attachments (depth will be written later) so they
+    // can be read in the next passes.
+    getRenderDevice()->flush( m_attachments[ 1 ] );
+    getRenderDevice()->flush( m_attachments[ 2 ] );
+    getRenderDevice()->flush( m_attachments[ 3 ] );
+    getRenderDevice()->flush( m_attachments[ 4 ] );
 
-    // // Accumulated color buffer can be transitioned now
-    // transitionAttachment( m_unlitPass.getColorAttachment() );
+    m_lighting->render( scene, camera );
+    m_unlit->render( scene, camera );
 
-    // Depth buffer can be transition now
-    transitionAttachment( m_gBufferPass.getDepthStencilAttachment() );
+    // Finally, flush depth and composition attachments
+    getRenderDevice()->flush( m_attachments.front() );
+    getRenderDevice()->flush( m_attachments.back() );
+}
+
+void ScenePass::init( void ) noexcept
+{
+    CRIMILD_LOG_TRACE();
+
+    const auto extent = m_renderArea.extent;
+
+    getRenderDevice()->createFramebufferAttachment( "Scene/Depth", extent, VK_FORMAT_D32_SFLOAT, m_attachments[ 0 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Albedo", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 1 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 2 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Normal", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 3 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Material", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 4 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene/Composite", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 5 ] );
+}
+
+void ScenePass::deinit( void ) noexcept
+{
+    for ( auto &att : m_attachments ) {
+        getRenderDevice()->destroyFramebufferAttachment( att );
+    }
 }

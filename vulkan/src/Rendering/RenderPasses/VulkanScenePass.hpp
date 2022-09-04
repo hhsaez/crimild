@@ -28,46 +28,95 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SCENE_
 
-#include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
-#include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
-#include "Rendering/RenderPasses/VulkanShadowPass.hpp"
-#include "Rendering/RenderPasses/VulkanSkyboxPass.hpp"
-#include "Rendering/RenderPasses/VulkanUnlitPass.hpp"
+#include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
+#include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
-    class UniformBuffer;
-    class Simulation;
-    class Material;
-    class Geometry;
-    class Primitive;
     class Node;
     class Camera;
 
     namespace vulkan {
 
-        class RenderDevice;
+        class ClearPass;
+        class GBufferPass;
         class GraphicsPipeline;
+        class LocalLightingPass;
+        class UnlitPass;
+        class RenderDevice;
 
-        class ScenePass {
+        /**
+         * \brief Renders a scene
+         *
+         * This is a complex render pass which uses multiple sub-passes to produce the final
+         * image for a given scene, applying lighting, shadows, transparency and other effects.
+         *
+         * The output is a color attachment (in HDR format), as well as the G-Buffer used to
+         * produce it.
+         *
+         * This render pass uses the following sub-passes:
+         *
+         * Sub-pass #0: G-Buffer
+         * The first step is to produce a G-Buffer will all of the scene information required
+         * for computing deferred lighting.
+         *
+         * Sub-pass #1: Lighting & Shadows
+         * Once the G-Buffer has been computed, the next step is to compute lighting and shadows.
+         * This is done per-light.
+         *
+         * Sub-pass #2: Forward unlit
+         * Renders unlit and transparent geometries using forward rendering. Writes into depth
+         * and color composition attachments.
+         *
+         * Sub-pass #3: Skybox (TODO)
+         * Last step is to render the skybox and other environmental objects. It is performed
+         * last so we can use the depth-attachment as an occlusion device, avoiding rendering
+         * fragments where the sky is not actually visible.
+         *
+         * Once the render pass is executed, all attachments are transitioned to SHADER_READ
+         * state so they can be used by other passes (i.e. ambient occlusion, post-processing,
+         * etc.)
+         */
+        class ScenePass : public RenderPassBase {
         public:
             explicit ScenePass( RenderDevice *renderDevice ) noexcept;
-            virtual ~ScenePass( void ) noexcept = default;
+            virtual ~ScenePass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
             void render( Node *scene, Camera *camera ) noexcept;
 
-            inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept
+            {
+                // Assumes the last attachment is the composition one
+                return &m_attachments.back();
+            }
 
-            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return m_localLightingPass.getColorAttachment(); }
+            [[nodiscard]] inline const FramebufferAttachment *getAttachment( Index index ) const noexcept { return &m_attachments[ index ]; }
+
+            template< typename Fn >
+            void eachAttachment( Fn fn ) const noexcept
+            {
+                for ( const auto &att : m_attachments ) {
+                    fn( &att );
+                }
+            }
 
         private:
-            vulkan::RenderDevice *m_renderDevice = nullptr;
-            ShadowPass m_shadowPass;
-            GBufferPass m_gBufferPass;
-            LocalLightingPass m_localLightingPass;
-            UnlitPass m_unlitPass;
-            SkyboxPass m_skyboxPass;
+            void init( void ) noexcept;
+            void deinit( void ) noexcept;
+
+        private:
+            VkRect2D m_renderArea;
+
+            SharedPointer< ClearPass > m_clear;
+            SharedPointer< GBufferPass > m_gBuffer;
+            SharedPointer< LocalLightingPass > m_lighting;
+            SharedPointer< UnlitPass > m_unlit;
+
+            // Storage for all attachments in the G-Buffer, including one for depth
+            // and another one for final composition.
+            std::array< FramebufferAttachment, 6 > m_attachments;
         };
 
     }
