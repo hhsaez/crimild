@@ -31,51 +31,57 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
-    void onStarted( void ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
-        setScene(
-            [ & ] {
-                auto scene = crimild::alloc< Group >();
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            setScene(
+                [ & ] {
+                    auto scene = crimild::alloc< Group >();
 
-                auto box = []( const Vector3 &position, const ColorRGBA &color ) {
-                    auto geometry = crimild::alloc< Geometry >();
-                    geometry->setLayer( Node::Layer::SKYBOX );
-                    geometry->attachPrimitive(
-                        crimild::alloc< BoxPrimitive >(
-                            BoxPrimitive::Params {
-                                .type = Primitive::Type::TRIANGLES,
-                                .layout = VertexP3N3TC2::getLayout(),
-                                .size = Vector3 { 1.0f, 1.0f, 1.0f },
-                            } ) );
-                    geometry->attachComponent< MaterialComponent >()->attachMaterial(
-                        [ & ] {
-                            auto material = crimild::alloc< UnlitMaterial >();
-                            material->setColor( color );
-                            return material;
-                        }() );
-                    geometry->setLocal( translation( position ) );
-                    return geometry;
-                };
+                    auto box = []( const Vector3 &position, const ColorRGBA &color ) {
+                        auto geometry = crimild::alloc< Geometry >();
+                        geometry->attachPrimitive(
+                            crimild::alloc< BoxPrimitive >(
+                                BoxPrimitive::Params {
+                                    .type = Primitive::Type::TRIANGLES,
+                                    .layout = VertexP3N3TC2::getLayout(),
+                                    .size = Vector3 { 1.0f, 1.0f, 1.0f },
+                                }
+                            )
+                        );
+                        geometry->attachComponent< MaterialComponent >()->attachMaterial(
+                            [ & ] {
+                                auto material = crimild::alloc< UnlitMaterial >();
+                                material->setColor( color );
+                                return material;
+                            }()
+                        );
+                        geometry->setLocal( translation( position ) );
+                        return geometry;
+                    };
 
-                scene->attachNode( box( Vector3 { 0.0f, 0.0f, 3.0f }, ColorRGBA { 1.0f, 0.5f, 0.31f, 1.0f } ) );
-                scene->attachNode( box( Vector3 { 1.0f, 0.0f, -3.0f }, ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ) );
+                    scene->attachNode( box( Vector3 { 0.0f, 0.0f, 3.0f }, ColorRGBA { 1.0f, 0.5f, 0.31f, 1.0f } ) );
+                    scene->attachNode( box( Vector3 { 1.0f, 0.0f, -3.0f }, ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ) );
 
-                scene->attachNode( [] {
-                    auto camera = crimild::alloc< Camera >();
-                    camera->setLocal(
-                    	lookAt(
-                     		Point3 { 2.0f, 3.0f, 10.0f },
-                       		Point3 { 0, 0, 0 },
-                         	Vector3 { 0, 1, 0 }
-                        )
-                    );
-                    return camera;
-                }() );
+                    scene->attachNode( [] {
+                        auto camera = crimild::alloc< Camera >();
+                        camera->setLocal(
+                            lookAt(
+                                Point3 { 2.0f, 3.0f, 10.0f },
+                                Point3 { 0, 0, 0 },
+                                Vector3 { 0, 1, 0 }
+                            )
+                        );
+                        return camera;
+                    }() );
 
-                scene->perform( StartComponents() );
+                    scene->perform( StartComponents() );
 
-                return scene;
-            }() );
+                    return scene;
+                }()
+            );
+        }
     }
 };
 
