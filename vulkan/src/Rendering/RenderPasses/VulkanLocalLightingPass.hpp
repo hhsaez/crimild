@@ -32,6 +32,7 @@
 #include "Mathematics/Vector2.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Rendering/VulkanSceneRenderState.hpp"
 #include "SceneGraph/Light.hpp"
 #include "Simulation/Event.hpp"
 
@@ -68,7 +69,7 @@ namespace crimild {
             virtual ~LocalLightingPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( Node *scene, Camera *camera ) noexcept;
+            void render( SceneRenderState::Lights &lights, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getOutputAttachment( void ) const noexcept { return m_outputAttachment; }
 
@@ -109,7 +110,6 @@ namespace crimild {
 
         private:
             struct LightObjects {
-                std::unordered_set< const Light * > lights;
                 SharedPointer< GraphicsPipeline > pipeline;
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
                 std::unordered_map< const Light *, VkDescriptorPool > descriptorPools;

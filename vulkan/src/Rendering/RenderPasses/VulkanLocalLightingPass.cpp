@@ -27,13 +27,7 @@
 
 #include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
 
-#include "Components/MaterialComponent.hpp"
-#include "Mathematics/swizzle.hpp"
-#include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
-#include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -41,10 +35,6 @@
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "Simulation/Settings.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/FetchLights.hpp"
 
 #include <array>
 
@@ -324,9 +314,8 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
+void LocalLightingPass::render( SceneRenderState::Lights &lights, Camera *camera ) noexcept
 {
-    fetchLights( scene );
     updateCameraUniforms( camera );
 
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
@@ -343,7 +332,7 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    for ( const auto light : m_directionalLights.lights ) {
+    for ( const auto light : lights[ Light::Type::DIRECTIONAL ] ) {
         vkCmdBindPipeline(
             commandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -363,7 +352,7 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
         vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
     }
 
-    for ( const auto light : m_pointLights.lights ) {
+    for ( const auto light : lights[ Light::Type::POINT ] ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -384,7 +373,7 @@ void LocalLightingPass::render( Node *scene, Camera *camera ) noexcept
         drawPrimitive( commandBuffer, m_lightVolume.get() );
     }
 
-    for ( const auto light : m_spotLights.lights ) {
+    for ( const auto light : lights[ Light::Type::SPOT ] ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -1018,38 +1007,6 @@ void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Primitive *primitiv
     );
 
     vkCmdDrawIndexed( cmds, indices->getIndexCount(), 1, 0, 0, 0 );
-}
-
-void LocalLightingPass::fetchLights( Node *scene ) noexcept
-{
-    // TODO: find a way to cache these collections
-    m_directionalLights.lights.clear();
-    m_pointLights.lights.clear();
-    m_spotLights.lights.clear();
-
-    if ( scene == nullptr ) {
-        return;
-    }
-
-    FetchLights allLights;
-    scene->perform( allLights );
-    allLights.forEachLight(
-        [ & ]( auto light ) {
-            switch ( light->getType() ) {
-                case Light::Type::DIRECTIONAL:
-                    m_directionalLights.lights.insert( light );
-                    break;
-                case Light::Type::POINT:
-                    m_pointLights.lights.insert( light );
-                    break;
-                case Light::Type::SPOT:
-                    m_spotLights.lights.insert( light );
-                    break;
-                default:
-                    break;
-            }
-        }
-    );
 }
 
 void LocalLightingPass::updateCameraUniforms( const Camera *camera ) noexcept

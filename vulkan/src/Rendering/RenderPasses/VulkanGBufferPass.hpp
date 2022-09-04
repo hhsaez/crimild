@@ -31,6 +31,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Rendering/VulkanSceneRenderState.hpp"
 #include "Simulation/Event.hpp"
 
 namespace crimild {
@@ -50,8 +51,8 @@ namespace crimild {
 
     namespace vulkan {
 
-        class RenderDevice;
         class GraphicsPipeline;
+        class RenderDevice;
 
         /**
          * \brief Fills a G-Buffer
@@ -74,7 +75,7 @@ namespace crimild {
             virtual ~GBufferPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( Node *scene, Camera *camera ) noexcept;
+            void render( SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, Camera *camera ) noexcept;
 
         private:
             void init( void ) noexcept;

@@ -33,6 +33,7 @@
 #include "Rendering/RenderPasses/VulkanUnlitPass.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
+#include "Visitors/VulkanFetchSceneRenderState.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -128,13 +129,19 @@ Event ScenePass::handle( const Event &e ) noexcept
 
 void ScenePass::render( Node *scene, Camera *camera ) noexcept
 {
+    m_clear->render();
+
+    auto renderState =
+        scene != nullptr
+            ? scene->perform< FetchSceneRenderState >()
+            : FetchSceneRenderState::Result {};
+
     if ( camera != nullptr ) {
         // Set correct aspect ratio for camera before rendering
         camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
     }
 
-    m_clear->render();
-    m_gBuffer->render( scene, camera );
+    m_gBuffer->render( renderState.litRenderables, camera );
 
     // flush all G-Buffer color attachments (depth will be written later) so they
     // can be read in the next passes.
@@ -143,8 +150,8 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
     getRenderDevice()->flush( m_attachments[ 3 ] );
     getRenderDevice()->flush( m_attachments[ 4 ] );
 
-    m_lighting->render( scene, camera );
-    m_unlit->render( scene, camera );
+    m_lighting->render( renderState.lights, camera );
+    m_unlit->render( renderState.unlitRenderables, camera );
 
     // Finally, flush depth and composition attachments
     getRenderDevice()->flush( m_attachments.front() );
