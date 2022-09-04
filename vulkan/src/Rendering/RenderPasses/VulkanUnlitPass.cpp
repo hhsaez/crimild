@@ -49,22 +49,21 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-UnlitPass::UnlitPass( RenderDevice *renderDevice, const FramebufferAttachment *colorAttachment, const FramebufferAttachment *depthAttachment ) noexcept
+// Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+// use normal uniforms instead.
+struct GeometryUniforms {
+    alignas( 16 ) Matrix4 model;
+};
+
+UnlitPass::UnlitPass(
+    RenderDevice *renderDevice,
+    const FramebufferAttachment *colorAttachment,
+    const FramebufferAttachment *depthAttachment
+) noexcept
     : RenderPassBase( renderDevice ),
       m_colorAttachment( colorAttachment ),
       m_depthAttachment( depthAttachment )
 {
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = {
-            .width = 1024,
-            .height = 1024,
-        },
-    };
-
     init();
 }
 
@@ -77,11 +76,6 @@ Event UnlitPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
-            std::cout << "resize " << e.extent.width << " " << e.extent.height << std::endl;
-            m_renderArea.extent = {
-                .width = uint32_t( e.extent.width ),
-                .height = uint32_t( e.extent.height ),
-            };
             clear();
             init();
             break;
@@ -96,30 +90,16 @@ Event UnlitPass::handle( const Event &e ) noexcept
 
 void UnlitPass::render( Node *scene, Camera *camera ) noexcept
 {
-
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    const auto clearValues = std::array< VkClearValue, 1 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                },
-            },
-        },
-    };
 
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ 0 ],
+        .framebuffer = m_framebuffers[ currentFrameIndex ],
         .renderArea = m_renderArea,
-        .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
-        .pClearValues = clearValues.data(),
+        .clearValueCount = 0,
+        .pClearValues = nullptr,
     };
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -129,6 +109,10 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
         scene->perform(
             ApplyToGeometries(
                 [ & ]( Geometry *geometry ) {
+                    if ( geometry == nullptr ) {
+                        return;
+                    }
+
                     if ( geometry->getLayer() != Node::Layer::DEFAULT ) {
                         return;
                     }
@@ -143,9 +127,6 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
             )
         );
 
-        // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
-
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
@@ -158,11 +139,6 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
 
     renderables.eachGeometry(
         [ & ]( Geometry *geometry ) {
-            if ( geometry == nullptr ) {
-                return;
-            }
-            bind( geometry );
-
             if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
                 // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
                 if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
@@ -196,18 +172,17 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
                         nullptr
                     );
 
-                    vkCmdBindDescriptorSets(
+                    const auto renderableUniforms = GeometryUniforms { geometry->getWorld().mat };
+                    vkCmdPushConstants(
                         commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
                         m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        2,
-                        1,
-                        &m_renderableObjects.descriptorSets[ geometry ][ currentFrameIndex ],
+                        VK_SHADER_STAGE_VERTEX_BIT,
                         0,
-                        nullptr
+                        sizeof( GeometryUniforms ),
+                        &renderableUniforms
                     );
 
-                    drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+                    drawPrimitive( commandBuffer, geometry->anyPrimitive() );
                 }
             }
         }
@@ -220,46 +195,66 @@ void UnlitPass::init( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
+    if ( m_colorAttachment == nullptr && m_depthAttachment == nullptr ) {
+        CRIMILD_LOG_ERROR( "No valid attachment for unlit pass" );
+        exit( -1 );
+    }
+
+    m_renderArea = VkRect2D {
+        .extent =
+            m_colorAttachment != nullptr
+                ? m_colorAttachment->extent
+                : m_depthAttachment->extent,
+        .offset = { 0, 0 },
+    };
+
     const auto extent = m_renderArea.extent;
 
-    auto attachments = std::array< VkAttachmentDescription, 2 > {
-        VkAttachmentDescription {
-            .format = m_colorAttachment->format,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Read from color buffer and update it if needed
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
-        VkAttachmentDescription {
-            .format = m_depthAttachment->format,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Reach from depth buffer but don't write in it
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        }
-    };
+    std::vector< VkAttachmentDescription > attachments;
+    std::vector< VkAttachmentReference > colorReferences;
+    std::vector< VkAttachmentReference > depthStencilReferences;
 
-    auto colorReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
-    };
+    if ( m_colorAttachment != nullptr ) {
+        attachments.push_back(
+            VkAttachmentDescription {
+                .format = m_colorAttachment->format,
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            }
+        );
+        colorReferences.push_back(
+            VkAttachmentReference {
+                .attachment = 0,
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            }
+        );
+    }
 
-    auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 1,
-            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        },
-    };
+    if ( m_depthAttachment != nullptr ) {
+        attachments.push_back(
+            VkAttachmentDescription {
+                .format = m_depthAttachment->format,
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            }
+        );
+        depthStencilReferences.push_back(
+            VkAttachmentReference {
+                .attachment = uint32_t( m_colorAttachment != nullptr ? 1 : 0 ),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            }
+        );
+    }
 
     auto subpass = VkSubpassDescription {
         .flags = 0,
@@ -314,20 +309,22 @@ void UnlitPass::init( void ) noexcept
         )
     );
 
-    // We won't be swapping framebuffers, so create only one
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        auto attachments = std::array< VkImageView, 2 > {
-            m_colorAttachment->imageView,
-            m_depthAttachment->imageView,
-        };
+        std::vector< VkImageView > imageViews;
+        if ( m_colorAttachment != nullptr ) {
+            imageViews.push_back( m_colorAttachment->imageViews[ i ] );
+        }
+        if ( m_depthAttachment != nullptr ) {
+            imageViews.push_back( m_depthAttachment->imageViews[ i ] );
+        }
 
         auto createInfo = VkFramebufferCreateInfo {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .pNext = nullptr,
             .renderPass = m_renderPass,
-            .attachmentCount = uint32_t( attachments.size() ),
-            .pAttachments = attachments.data(),
+            .attachmentCount = uint32_t( imageViews.size() ),
+            .pAttachments = imageViews.data(),
             .width = extent.width,
             .height = extent.height,
             .layers = 1,
@@ -345,7 +342,6 @@ void UnlitPass::init( void ) noexcept
 
     createRenderPassObjects();
     createMaterialObjects();
-    createRenderableObjects();
 }
 
 void UnlitPass::clear( void ) noexcept
@@ -354,7 +350,6 @@ void UnlitPass::clear( void ) noexcept
 
     vkDeviceWaitIdle( getRenderDevice()->getHandle() );
 
-    destroyRenderableObjects();
     destroyMaterialObjects();
     destroyRenderPassObjects();
 
@@ -519,7 +514,7 @@ void UnlitPass::bind( Material *aMaterial ) noexcept
                         mat4 proj;
                     };
 
-                    layout ( set = 2, binding = 0 ) uniform RenderableUniforms {
+                    layout ( push_constant ) uniform RenderableUniforms {
                         mat4 model;
                     };
 
@@ -589,10 +584,16 @@ void UnlitPass::bind( Material *aMaterial ) noexcept
             .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
                 m_renderPassObjects.layout,
                 m_materialObjects.descriptorSetLayout,
-                m_renderableObjects.descriptorSetLayout,
             },
             .program = program.get(),
             .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .pushConstantRanges = {
+                VkPushConstantRange {
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                    .offset = 0,
+                    .size = sizeof( GeometryUniforms ),
+                },
+            },
             .viewport = viewport,
             .scissor = viewport,
         }
@@ -703,110 +704,7 @@ void UnlitPass::destroyMaterialObjects( void ) noexcept
     m_materialObjects.pipelines.clear();
 }
 
-void UnlitPass::createRenderableObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr,
-    };
-
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderableObjects.descriptorSetLayout ) );
-}
-
-void UnlitPass::bind( Node *renderable ) noexcept
-{
-    if ( m_renderableObjects.descriptorSets.contains( renderable ) ) {
-        // Already bound
-        m_renderableObjects.uniforms[ renderable ]->setValue( renderable->getWorld().mat );
-        getRenderDevice()->update( m_renderableObjects.uniforms[ renderable ].get() );
-        return;
-    }
-
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
-
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
-
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderableObjects.descriptorPools[ renderable ] ) );
-
-    m_renderableObjects.uniforms[ renderable ] = std::make_unique< UniformBuffer >( Matrix4 {} );
-    getRenderDevice()->bind( m_renderableObjects.uniforms[ renderable ].get() );
-
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderableObjects.descriptorSetLayout );
-
-    const auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = m_renderableObjects.descriptorPools[ renderable ],
-        .descriptorSetCount = uint32_t( layouts.size() ),
-        .pSetLayouts = layouts.data(),
-    };
-
-    m_renderableObjects.descriptorSets[ renderable ].resize( getRenderDevice()->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderableObjects.descriptorSets[ renderable ].data() ) );
-
-    for ( size_t i = 0; i < m_renderableObjects.descriptorSets[ renderable ].size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = getRenderDevice()->getHandle( m_renderableObjects.uniforms[ renderable ].get(), i ),
-            .offset = 0,
-            .range = m_renderableObjects.uniforms[ renderable ]->getBufferView()->getLength(),
-        };
-
-        const auto descriptorWrite = VkWriteDescriptorSet {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = m_renderableObjects.descriptorSets[ renderable ][ i ],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
-            .pImageInfo = nullptr,
-            .pTexelBufferView = nullptr,
-        };
-
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-    }
-}
-
-void UnlitPass::destroyRenderableObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    // no need to destroy sets
-    m_renderableObjects.descriptorSets.clear();
-
-    vkDestroyDescriptorSetLayout( getRenderDevice()->getHandle(), m_renderableObjects.descriptorSetLayout, nullptr );
-    m_renderableObjects.descriptorSetLayout = VK_NULL_HANDLE;
-
-    for ( auto &it : m_renderableObjects.descriptorPools ) {
-        vkDestroyDescriptorPool( getRenderDevice()->getHandle(), it.second, nullptr );
-    }
-    m_renderableObjects.descriptorPools.clear();
-
-    for ( auto &it : m_renderableObjects.uniforms ) {
-        getRenderDevice()->unbind( it.second.get() );
-    }
-    m_renderableObjects.uniforms.clear();
-}
-
-void UnlitPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
+void UnlitPass::drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {

@@ -32,6 +32,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Simulation/Event.hpp"
 
 namespace crimild {
 
@@ -48,9 +49,6 @@ namespace crimild {
 
         /**
          * \brief Renders geometries using unlit materials
-         *
-         * \todo Merge this pass with the lit pass, using subpasses instead of different
-         * render passes.
          */
         class UnlitPass : public RenderPassBase {
         public:
@@ -59,8 +57,6 @@ namespace crimild {
 
             Event handle( const Event & ) noexcept;
             void render( Node *scene, Camera *camera ) noexcept;
-
-            [[nodiscard]] inline const FramebufferAttachment *getColorAttachment( void ) const noexcept { return m_colorAttachment; }
 
         private:
             void init( void ) noexcept;
@@ -73,11 +69,7 @@ namespace crimild {
             void bind( Material *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
-            void createRenderableObjects( void ) noexcept;
-            void bind( Node *renderable ) noexcept;
-            void destroyRenderableObjects( void ) noexcept;
-
-            void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
+            void drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
@@ -111,14 +103,6 @@ namespace crimild {
                 std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
                 std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
-
-            // TODO: I wonder if some of this cache should go to RenderDevice instead
-            struct RenderableObjects {
-                VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Node *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Node *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Node *, std::unique_ptr< UniformBuffer > > uniforms;
-            } m_renderableObjects;
         };
 
     }
