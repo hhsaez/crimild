@@ -36,6 +36,7 @@
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 #include "Rendering/RenderPasses/VulkanSelectionOutlinePass.hpp"
 #include "Rendering/RenderPasses/VulkanShaderPass.hpp"
+#include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/SimulationLayer.hpp"
@@ -49,10 +50,26 @@ using namespace crimild::glfw;
 class MainLayer : public Layer {
 public:
     explicit MainLayer( vulkan::RenderDevice *renderDevice ) noexcept
-        : m_clear( renderDevice ),
-          m_shader(
-              renderDevice,
-              R"(
+        : m_renderDevice( renderDevice ),
+          m_uniforms( crimild::alloc< UniformBuffer >( Vector2 { 1024, 768 } ) )
+    {
+        init();
+
+        m_clear = crimild::alloc< vulkan::ClearPass >(
+            m_renderDevice,
+            std::vector< const vulkan::FramebufferAttachment * > {
+                &m_colorAttachment,
+                // &m_depthAttachment,
+            }
+        );
+
+        m_shader = crimild::alloc< vulkan::ShaderPass >(
+            renderDevice,
+            R"(
+                layout ( set = 0, binding = 0 ) uniform Context {
+                    vec2 dimensions;
+                } context;
+
                 float circleMask( vec2 uv, vec2 p, float r, float blur )
                 {
                     float d = length( uv - p );
@@ -76,38 +93,78 @@ public:
 
                     outColor = vec4( color, 1.0 );
                 }
-            )"
-          ),
-          m_present( renderDevice )
-    {
-        // no-op
+            )",
+            &m_colorAttachment,
+            m_uniforms
+        );
+
+        m_present = crimild::alloc< vulkan::PresentPass >( m_renderDevice, &m_colorAttachment );
     }
 
-    virtual ~MainLayer( void ) = default;
+    virtual ~MainLayer( void ) noexcept
+    {
+        m_clear = nullptr;
+        m_shader = nullptr;
+        m_present = nullptr;
+
+        deinit();
+    }
+
+    inline vulkan::RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
 
     virtual Event handle( const Event &e ) noexcept override
     {
-        m_clear.handle( e );
-        m_shader.handle( e );
-        m_present.handle( e );
+        if ( e.type == Event::Type::WINDOW_RESIZE ) {
+            // Recreate attachments since swapchain was recreated too.
+            deinit();
+            init();
+        }
+
+        m_clear->handle( e );
+        m_shader->handle( e );
+        m_present->handle( e );
 
         return Layer::handle( e );
     }
 
     virtual void render( void ) noexcept override
     {
-        m_clear.render();
-        m_shader.render();
+        m_clear->render();
+        m_shader->render();
 
         Layer::render();
 
-        m_present.render();
+        m_present->render();
     }
 
 private:
-    vulkan::ClearPass m_clear;
-    vulkan::ShaderPass m_shader;
-    vulkan::PresentPass m_present;
+    void init( void ) noexcept
+    {
+        const auto extent = getRenderDevice()->getSwapchainExtent();
+
+        m_uniforms->setValue( Vector2 { float( extent.width ), float( extent.height ) } );
+
+        getRenderDevice()->createFramebufferAttachment( "Swapchain/Color", extent, getRenderDevice()->getSwapchainFormat(), m_colorAttachment, true );
+        getRenderDevice()->createFramebufferAttachment( "Swapchain/Depth", extent, getRenderDevice()->getDepthStencilFormat(), m_depthAttachment, true );
+    }
+
+    void deinit( void ) noexcept
+    {
+        getRenderDevice()->destroyFramebufferAttachment( m_colorAttachment );
+        getRenderDevice()->destroyFramebufferAttachment( m_depthAttachment );
+    }
+
+private:
+    vulkan::RenderDevice *m_renderDevice = nullptr;
+
+    vulkan::FramebufferAttachment m_colorAttachment;
+    vulkan::FramebufferAttachment m_depthAttachment;
+
+    SharedPointer< vulkan::ClearPass > m_clear;
+    SharedPointer< vulkan::ShaderPass > m_shader;
+    SharedPointer< vulkan::PresentPass > m_present;
+
+    SharedPointer< UniformBuffer > m_uniforms;
 };
 
 Window::Window( const Options &options ) noexcept
@@ -275,7 +332,6 @@ bool Window::createWindow( void )
     glfwSetWindowSizeCallback(
         m_window,
         []( GLFWwindow *windowHandle, int width, int height ) {
-            std::cout << "Resize " << width << " " << height << " " << size_t( windowHandle ) << "\n";
             auto window = static_cast< Window * >( glfwGetWindowUserPointer( windowHandle ) );
             if ( window != nullptr && windowHandle == window->m_window ) {
                 const auto extent = Extent2D { .width = Real( width ), .height = Real( height ) };
