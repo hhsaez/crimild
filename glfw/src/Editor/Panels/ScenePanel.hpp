@@ -31,6 +31,7 @@
 #include "Mathematics/Point2.hpp"
 #include "Mathematics/Transformation_constants.hpp"
 #include "Rendering/Layer.hpp"
+#include "Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp"
 #include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
 #include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
@@ -72,6 +73,7 @@ namespace crimild {
 
             vulkan::SceneDebugPass m_sceneDebugPass;
             vulkan::OverlayPass m_sceneDebugOverlayPass;
+            std::vector< SharedPointer< vulkan::DebugAttachmentPass > > m_debugPasses;
 
             std::unique_ptr< Camera > m_editorCamera;
             bool m_editorCameraEnabled = false;

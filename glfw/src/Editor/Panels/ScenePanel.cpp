@@ -118,14 +118,22 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
     m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
 
-    m_scenePass.eachAttachment(
-        [ & ]( const auto *att ) {
-            m_attachments.push_back( att );
-        }
-    );
-    m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
-    m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
-    m_selectedAttachment = m_attachments.size() - 1;
+    m_debugPasses = {
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Depth", m_scenePass.getAttachment( 0 ), "depth" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Albedo", m_scenePass.getAttachment( 1 ), "rgb" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Position", m_scenePass.getAttachment( 2 ), "rgb" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Normal", m_scenePass.getAttachment( 3 ), "rgb" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Metallic", m_scenePass.getAttachment( 4 ), "r" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Roughness", m_scenePass.getAttachment( 4 ), "g" ),
+        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Ambient Occlusion", m_scenePass.getAttachment( 4 ), "b" ),
+    };
+
+    m_selectedAttachment = 0;
+    m_attachments.push_back( m_scenePass.getColorAttachment() );
+
+    for ( const auto &pass : m_debugPasses ) {
+        m_attachments.push_back( pass->getColorAttachment() );
+    }
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
@@ -204,11 +212,16 @@ Event ScenePanel::handle( const Event &e ) noexcept
             break;
         }
 
-        default:
+        default: {
             m_scenePass.handle( e );
             m_sceneDebugPass.handle( e );
             m_sceneDebugOverlayPass.handle( e );
+            for ( auto &pass : m_debugPasses ) {
+                pass->handle( e );
+            }
+
             break;
+        }
     }
 
     return Layer::handle( e );
@@ -242,6 +255,9 @@ void ScenePanel::render( void ) noexcept
             m_scenePass.handle( m_lastResizeEvent );
             m_sceneDebugPass.handle( m_lastResizeEvent );
             m_sceneDebugOverlayPass.handle( m_lastResizeEvent );
+            for ( auto &pass : m_debugPasses ) {
+                pass->handle( m_lastResizeEvent );
+            }
             m_lastResizeEvent = Event {};
         }
 
@@ -317,9 +333,13 @@ void ScenePanel::render( void ) noexcept
 
     m_scenePass.render( scene, m_editorCamera.get() );
 
-    m_sceneDebugPass.render( scene, m_editorCamera.get() );
-    transitionAttachment( m_sceneDebugPass.getColorAttachment() );
+    for ( auto &pass : m_debugPasses ) {
+        pass->render( scene, m_editorCamera.get() );
+    }
 
-    m_sceneDebugOverlayPass.render();
-    transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
+    // m_sceneDebugPass.render( scene, m_editorCamera.get() );
+    // transitionAttachment( m_sceneDebugPass.getColorAttachment() );
+
+    // m_sceneDebugOverlayPass.render();
+    // transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
 }
