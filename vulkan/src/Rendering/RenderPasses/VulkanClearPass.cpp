@@ -134,10 +134,10 @@ void ClearPass::init( void ) noexcept
                 VkClearValue {
                     .color = {
                         .float32 = {
-                            0.0f,
-                            0.0f,
-                            0.0f,
-                            0.0f,
+                            att->clearColor.r,
+                            att->clearColor.g,
+                            att->clearColor.b,
+                            att->clearColor.a,
                         },
                     },
                 }
@@ -152,8 +152,8 @@ void ClearPass::init( void ) noexcept
             m_clearValues.push_back(
                 VkClearValue {
                     .depthStencil = {
-                        1,
-                        0,
+                        att->clearDepthStencil[ 0 ],
+                        uint32_t( att->clearDepthStencil[ 1 ] ),
                     },
                 }
             );

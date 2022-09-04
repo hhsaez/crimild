@@ -45,6 +45,9 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
         .offset = { 0, 0 },
     };
 
+    // Make composition attachment opaque
+    m_attachments.back().clearColor = ColorRGBA { 0, 0, 0, 1 };
+
     init();
 
     m_clear = crimild::alloc< ClearPass >(

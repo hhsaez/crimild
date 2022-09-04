@@ -50,6 +50,9 @@ namespace crimild {
 
             // If true, attachment will use device resources (images, image views, etc.)
             bool usesDeviceResources = false;
+
+            ColorRGBA clearColor = { 0, 0, 0, 0 };
+            Vector2 clearDepthStencil = { 1, 0 };
         };
 
     }
