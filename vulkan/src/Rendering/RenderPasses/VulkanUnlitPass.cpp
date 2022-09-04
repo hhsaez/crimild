@@ -33,7 +33,6 @@
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
-#include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
@@ -48,12 +47,6 @@
 
 using namespace crimild;
 using namespace crimild::vulkan;
-
-// Vulkan spec only requires a minimum of 128 bytes. Anything larger should
-// use normal uniforms instead.
-struct GeometryUniforms {
-    alignas( 16 ) Matrix4 model;
-};
 
 UnlitPass::UnlitPass(
     RenderDevice *renderDevice,
@@ -88,7 +81,7 @@ Event UnlitPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void UnlitPass::render( Node *scene, Camera *camera ) noexcept
+void UnlitPass::render( SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables, Camera *camera ) noexcept
 {
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
@@ -104,29 +97,7 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    RenderableSet renderables;
-    if ( scene != nullptr && camera != nullptr ) {
-        scene->perform(
-            ApplyToGeometries(
-                [ & ]( Geometry *geometry ) {
-                    if ( geometry == nullptr ) {
-                        return;
-                    }
-
-                    if ( geometry->getLayer() != Node::Layer::DEFAULT ) {
-                        return;
-                    }
-
-                    if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                        // TODO: replace with render mode for materials
-                        if ( auto m = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
-                            renderables.addGeometry( geometry );
-                        }
-                    }
-                }
-            )
-        );
-
+    if ( camera != nullptr ) {
         if ( m_renderPassObjects.uniforms != nullptr ) {
             m_renderPassObjects.uniforms->setValue(
                 RenderPassObjects::Uniforms {
@@ -137,56 +108,54 @@ void UnlitPass::render( Node *scene, Camera *camera ) noexcept
         }
     }
 
-    renderables.eachGeometry(
-        [ & ]( Geometry *geometry ) {
-            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                // TODO: avoid using dynamic_cast here. Maybe add a RenderMode (LIT, UNLIT, SKY, etc)?
-                if ( auto material = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
-                    bind( material );
+    for ( auto &[ material, primitives ] : sceneRenderables ) {
+        for ( auto &[ primitive, renderables ] : primitives ) {
+            for ( auto &renderable : renderables ) {
+                bind( material );
 
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getHandle()
-                    );
+                vkCmdBindPipeline(
+                    commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_materialObjects.pipelines[ material ]->getHandle()
+                );
 
-                    vkCmdBindDescriptorSets(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        0,
-                        1,
-                        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                        0,
-                        nullptr
-                    );
+                vkCmdBindDescriptorSets(
+                    commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    0,
+                    1,
+                    &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+                    0,
+                    nullptr
+                );
 
-                    vkCmdBindDescriptorSets(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        1,
-                        1,
-                        &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
-                        0,
-                        nullptr
-                    );
+                vkCmdBindDescriptorSets(
+                    commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    1,
+                    1,
+                    &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+                    0,
+                    nullptr
+                );
 
-                    const auto renderableUniforms = GeometryUniforms { geometry->getWorld().mat };
-                    vkCmdPushConstants(
-                        commandBuffer,
-                        m_materialObjects.pipelines[ material ]->getPipelineLayout(),
-                        VK_SHADER_STAGE_VERTEX_BIT,
-                        0,
-                        sizeof( GeometryUniforms ),
-                        &renderableUniforms
-                    );
+                // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+                // use normal uniforms instead.
+                vkCmdPushConstants(
+                    commandBuffer,
+                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    VK_SHADER_STAGE_VERTEX_BIT,
+                    0,
+                    sizeof( SceneRenderState::Renderable ),
+                    &renderable
+                );
 
-                    drawPrimitive( commandBuffer, geometry->anyPrimitive() );
-                }
+                drawPrimitive( commandBuffer, primitive );
             }
         }
-    );
+    }
 
     vkCmdEndRenderPass( commandBuffer );
 }
@@ -591,7 +560,7 @@ void UnlitPass::bind( Material *aMaterial ) noexcept
                 VkPushConstantRange {
                     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
                     .offset = 0,
-                    .size = sizeof( GeometryUniforms ),
+                    .size = sizeof( SceneRenderState::Renderable ),
                 },
             },
             .viewport = viewport,

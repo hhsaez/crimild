@@ -32,6 +32,7 @@
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Rendering/VulkanSceneRenderState.hpp"
 #include "Simulation/Event.hpp"
 
 namespace crimild {
@@ -56,7 +57,7 @@ namespace crimild {
             virtual ~UnlitPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( Node *scene, Camera *camera ) noexcept;
+            void render( SceneRenderState::RenderableSet< UnlitMaterial > &renderables, Camera *camera ) noexcept;
 
         private:
             void init( void ) noexcept;
