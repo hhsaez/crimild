@@ -194,7 +194,8 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
         R"(
             #version 450
             #extension GL_ARB_separate_shader_objects : enable
-        )" );
+        )"
+    );
 
     auto src = prefix + m_preprocessor.expand( source );
     auto data = src.c_str();
@@ -211,7 +212,7 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
     tShader.setEnvTarget( glslang::EShTargetSpv, targetVersion );
 
     auto &resources = DefaultTBuiltInResource;
-    EShMessages messages = ( EShMessages )( EShMsgSpvRules | EShMsgVulkanRules );
+    EShMessages messages = ( EShMessages ) ( EShMsgSpvRules | EShMsgVulkanRules );
 
     const int defaultVersion = 110;
 
@@ -245,7 +246,8 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog() );
+            tShader.getInfoDebugLog()
+        );
         exit( -1 );
         return false;
     }
@@ -257,7 +259,8 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog() );
+            tShader.getInfoDebugLog()
+        );
         exit( -1 );
         return false;
     }
@@ -271,7 +274,8 @@ bool vulkan::ShaderCompiler::compile( Shader::Stage shaderStage, const std::stri
             "\n",
             tShader.getInfoLog(),
             "\n",
-            tShader.getInfoDebugLog() );
+            tShader.getInfoDebugLog()
+        );
         exit( -1 );
         return false;
     }
@@ -384,7 +388,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "textureCube",
@@ -504,7 +509,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "linearizeDepth",
@@ -519,7 +525,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "isZero",
@@ -539,7 +546,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "reflectance",
@@ -554,7 +562,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "max",
@@ -575,7 +584,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     m_preprocessor.addChunk(
         "swapsHandedness",
@@ -589,7 +599,8 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
             }
 
             #endif
-        )" );
+        )"
+    );
 
     resetPreprocessor();
 }
@@ -597,8 +608,19 @@ void vulkan::ShaderCompiler::initPreprocessor( void ) noexcept
 void vulkan::ShaderCompiler::resetPreprocessor( void ) noexcept
 {
     m_preprocessor.addChunk(
+        "vert_main",
+        R"(
+            vec4 vert_main( inout Vertex vert, mat4 proj, mat4 view, mat4 model )
+            {
+                return proj * view * vec4( vert.worldPosition, 1.0 );
+            }
+        )"
+    );
+
+    m_preprocessor.addChunk(
         "frag_main",
-        "void frag_main( inout Fragment frag ) { }" );
+        "void frag_main( inout Fragment frag ) { }"
+    );
 }
 
 void vulkan::ShaderCompiler::addChunks( const Array< SharedPointer< Shader > > &chunks ) noexcept
@@ -612,11 +634,15 @@ void vulkan::ShaderCompiler::addChunks( const Array< SharedPointer< Shader > > &
             const auto &code = shader->getData();
             auto src = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
             switch ( shader->getStage() ) {
+                case Shader::Stage::VERTEX:
+                    m_preprocessor.addChunk( "vert_main", src );
+                    break;
                 case Shader::Stage::FRAGMENT:
                     m_preprocessor.addChunk( "frag_main", src );
                     break;
                 default:
                     break;
             }
-        } );
+        }
+    );
 }

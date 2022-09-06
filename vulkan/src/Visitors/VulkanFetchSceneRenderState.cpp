@@ -47,17 +47,28 @@ void FetchSceneRenderState::visitGeometry( Geometry *geometry ) noexcept
         return;
     }
 
-    if ( geometry->getLayer() != Node::Layer::DEFAULT ) {
+    auto materials = geometry->getComponent< MaterialComponent >();
+    if ( materials == nullptr ) {
         return;
     }
 
-    if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-        // TODO: replace with render mode for materials
-        if ( auto m = dynamic_cast< materials::PrincipledBSDF * >( ms->first() ) ) {
-            m_result.litRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
-        } else if ( auto m = dynamic_cast< UnlitMaterial * >( ms->first() ) ) {
-            m_result.unlitRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
+    auto material = materials->first();
+    if ( material == nullptr ) {
+        return;
+    }
+
+    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+        if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
+            m_result.envRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
         }
+        return;
+    }
+
+    // TODO: replace with render mode for materials
+    if ( auto m = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
+        m_result.litRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
+    } else if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
+        m_result.unlitRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
     }
 }
 

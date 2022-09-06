@@ -490,13 +490,28 @@ void UnlitPass::bind( Material *aMaterial ) noexcept
                     layout ( location = 0 ) out vec3 outWorldPosition;
                     layout ( location = 1 ) out vec2 outTexCoord;
 
+                    struct Vertex {
+                        vec3 position;
+                        vec3 worldPosition;
+                        vec3 worldNormal;
+                        vec2 texCoord;
+                    };
+
+                    #include <vert_main>
+
                     void main()
                     {
-                        vec4 worldPosition = model * vec4( inPosition, 1.0 );
-                        gl_Position = proj * view * worldPosition;
+                        Vertex vertex;
 
-                        outWorldPosition = worldPosition.xyz;
-                        outTexCoord = inTexCoord;
+                        vertex.position = inPosition;
+                        vertex.worldPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+                        vertex.worldNormal = normalize( inverse( transpose( mat3( model ) ) ) * inNormal );
+                        vertex.texCoord = inTexCoord;
+
+                        gl_Position = vert_main( vertex, proj, view, model );
+
+                        outWorldPosition = vertex.worldPosition;
+                        outTexCoord = vertex.texCoord;
                     }
                 )"
             ),

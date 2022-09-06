@@ -52,7 +52,9 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
                 .layout = VertexP3N3TC2::getLayout(),
                 .size = Vector3f { 10.0f, 10.0f, 10.0f },
                 .invertFaces = true,
-            } ) );
+            }
+        )
+    );
 
     attachComponent< MaterialComponent >(
         [ color ] {
@@ -60,6 +62,17 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
             material->setProgram(
                 crimild::alloc< ShaderProgram >(
                     Array< SharedPointer< Shader > > {
+                        crimild::alloc< Shader >(
+                            Shader::Stage::VERTEX,
+                            R"(
+                                vec4 vert_main( inout Vertex vert, mat4 proj, mat4 view, mat4 model )
+                                {
+                                    vec4 ret = proj * view * model * vec4( vert.position, 0.0 );
+                                    ret.xyzw = ret.xyww;
+                                    return ret;
+                                }
+                            )"
+                        ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
@@ -73,11 +86,15 @@ Skybox::Skybox( const ColorRGB &color ) noexcept
 
                                     frag.color = mix(horizonColor, y < 0 ? groundColor : skyColor, pow( abs( y ), e ) );
                                 }
-                            )" ),
-                    } ) );
+                            )"
+                        ),
+                    }
+                )
+            );
             material->setColor( rgba( color ) );
             return material;
-        }() );
+        }()
+    );
 }
 
 Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
@@ -91,7 +108,9 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                 .layout = VertexP3::getLayout(),
                 .size = Vector3f { 10.0f, 10.0f, 10.0f },
                 .invertFaces = true,
-            } ) );
+            }
+        )
+    );
 
     attachComponent< MaterialComponent >()->attachMaterial(
         [ & ]() -> SharedPointer< Material > {
@@ -132,7 +151,8 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                                             gl_Position = gl_Position.xyww;
                                             outPosition = inPosition;
                                         }
-                                    )" ),
+                                    )"
+                                    ),
                                     crimild::alloc< Shader >(
                                         Shader::Stage::FRAGMENT,
                                         R"(
@@ -158,7 +178,9 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                                             vec3 color = texture( uHDRMap, uv ).rgb;
                                             outColor = vec4( color, 1.0 );
                                         }
-                                    )" ) } );
+                                    )"
+                                    ) }
+                            );
                             program->vertexLayouts = { VertexP3::getLayout() };
                             program->descriptorSetLayouts = {
                                 [] {
@@ -193,11 +215,13 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                                 }(),
                             };
                             return program;
-                        }() );
+                        }()
+                    );
                     pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
                     pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
                     return pipeline;
-                }() );
+                }()
+            );
             material->setDescriptors(
                 [ & ] {
                     auto descriptors = crimild::alloc< DescriptorSet >();
@@ -208,9 +232,11 @@ Skybox::Skybox( SharedPointer< Texture > const &texture ) noexcept
                         },
                     };
                     return descriptors;
-                }() );
+                }()
+            );
             return material;
-        }() );
+        }()
+    );
 }
 
 void Skybox::encode( coding::Encoder &encoder )

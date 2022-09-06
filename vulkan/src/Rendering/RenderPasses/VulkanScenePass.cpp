@@ -151,7 +151,12 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
     getRenderDevice()->flush( m_attachments[ 4 ] );
 
     m_lighting->render( renderState.lights, camera );
+
+    // Render unlit
     m_unlit->render( renderState.unlitRenderables, camera );
+
+    // Render environment
+    m_unlit->render( renderState.envRenderables, camera );
 
     // Finally, flush depth and composition attachments
     getRenderDevice()->flush( m_attachments.front() );
