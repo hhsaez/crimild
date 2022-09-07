@@ -174,7 +174,7 @@ void ScenePass::init( void ) noexcept
     getRenderDevice()->createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 2 ] );
     getRenderDevice()->createFramebufferAttachment( "Scene/Normal", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 3 ] );
     getRenderDevice()->createFramebufferAttachment( "Scene/Material", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 4 ] );
-    getRenderDevice()->createFramebufferAttachment( "Scene/Composite", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 5 ] );
+    getRenderDevice()->createFramebufferAttachment( "Scene", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 5 ] );
 }
 
 void ScenePass::deinit( void ) noexcept
