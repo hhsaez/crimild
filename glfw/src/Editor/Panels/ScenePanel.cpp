@@ -106,7 +106,7 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
       m_sceneDebugPass( renderDevice ),
       m_sceneDebugOverlayPass(
           renderDevice,
-          "Scene/Debug/Overlay",
+          "Editor",
           {
               m_scenePass.getColorAttachment(),
               m_sceneDebugPass.getColorAttachment(),
@@ -129,11 +129,12 @@ ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &positi
     };
 
     m_selectedAttachment = 0;
+    m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
     m_attachments.push_back( m_scenePass.getColorAttachment() );
-
     for ( const auto &pass : m_debugPasses ) {
         m_attachments.push_back( pass->getColorAttachment() );
     }
+    m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
 }
 
 Event ScenePanel::handle( const Event &e ) noexcept
@@ -337,9 +338,9 @@ void ScenePanel::render( void ) noexcept
         pass->render( scene, m_editorCamera.get() );
     }
 
-    // m_sceneDebugPass.render( scene, m_editorCamera.get() );
-    // transitionAttachment( m_sceneDebugPass.getColorAttachment() );
+    m_sceneDebugPass.render( scene, m_editorCamera.get() );
+    transitionAttachment( m_sceneDebugPass.getColorAttachment() );
 
-    // m_sceneDebugOverlayPass.render();
-    // transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
+    m_sceneDebugOverlayPass.render();
+    transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
 }

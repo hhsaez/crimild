@@ -275,7 +275,7 @@ void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
     auto renderPassInfo = VkRenderPassBeginInfo {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ 0 ],
+        .framebuffer = m_framebuffers[ currentFrameIndex ],
         .renderArea = m_renderArea,
         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
         .pClearValues = clearValues.data(),
@@ -447,8 +447,7 @@ void SceneDebugPass::init( void ) noexcept
     getRenderDevice()->createFramebufferAttachment( "Scene/Debug", extent, colorFormat, m_colorAttachment );
     getRenderDevice()->createFramebufferAttachment( "Scene/Debug/Depth", extent, depthFormat, m_depthAttachment );
 
-    // We won't be swapping framebuffers, so create only one
-    m_framebuffers.resize( 1 );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 2 > {
             m_colorAttachment.imageViews[ i ],

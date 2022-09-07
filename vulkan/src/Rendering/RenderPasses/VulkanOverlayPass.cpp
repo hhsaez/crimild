@@ -142,7 +142,7 @@ void OverlayPass::init( void ) noexcept
 
     const auto extent = m_renderArea.extent;
 
-    getRenderDevice()->createFramebufferAttachment( "Overlay", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
+    getRenderDevice()->createFramebufferAttachment( getName(), extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_colorAttachment );
 
     auto attachments = std::array< VkAttachmentDescription, 1 > {
         VkAttachmentDescription {
@@ -217,7 +217,7 @@ void OverlayPass::init( void ) noexcept
         )
     );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
             m_colorAttachment.imageViews[ i ],
