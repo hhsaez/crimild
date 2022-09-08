@@ -57,7 +57,7 @@ namespace crimild {
             virtual ~UnlitPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( SceneRenderState::RenderableSet< UnlitMaterial > &renderables, Camera *camera ) noexcept;
+            void render( const SceneRenderState::RenderableSet< UnlitMaterial > &renderables, const Camera *camera ) noexcept;
 
         private:
             void init( void ) noexcept;
@@ -67,10 +67,10 @@ namespace crimild {
             void destroyRenderPassObjects( void ) noexcept;
 
             void createMaterialObjects( void ) noexcept;
-            void bind( Material *material ) noexcept;
+            void bind( const Material *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
-            void drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept;
+            void drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
@@ -99,10 +99,10 @@ namespace crimild {
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< Material *, std::unique_ptr< GraphicsPipeline > > pipelines;
-                std::unordered_map< Material *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< Material *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< Material *, std::unique_ptr< UniformBuffer > > uniforms;
+                std::unordered_map< const Material *, std::unique_ptr< GraphicsPipeline > > pipelines;
+                std::unordered_map< const Material *, VkDescriptorPool > descriptorPools;
+                std::unordered_map< const Material *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< const Material *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
         };
 

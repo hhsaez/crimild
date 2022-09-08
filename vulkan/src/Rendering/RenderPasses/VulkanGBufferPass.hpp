@@ -75,7 +75,7 @@ namespace crimild {
             virtual ~GBufferPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, Camera *camera ) noexcept;
+            void render( const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, const Camera *camera ) noexcept;
 
         private:
             void init( void ) noexcept;
@@ -85,10 +85,10 @@ namespace crimild {
             void destroyRenderPassObjects( void ) noexcept;
 
             void createMaterialObjects( void ) noexcept;
-            void bind( materials::PrincipledBSDF *material ) noexcept;
+            void bind( const materials::PrincipledBSDF *material ) noexcept;
             void destroyMaterialObjects( void ) noexcept;
 
-            void drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept;
+            void drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;
@@ -112,10 +112,10 @@ namespace crimild {
             // TODO: I wonder if some of this cache should go to RenderDevice instead
             struct MaterialObjects {
                 VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-                std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< GraphicsPipeline > > pipelines;
-                std::unordered_map< materials::PrincipledBSDF *, VkDescriptorPool > descriptorPools;
-                std::unordered_map< materials::PrincipledBSDF *, std::vector< VkDescriptorSet > > descriptorSets;
-                std::unordered_map< materials::PrincipledBSDF *, std::unique_ptr< UniformBuffer > > uniforms;
+                std::unordered_map< const materials::PrincipledBSDF *, std::unique_ptr< GraphicsPipeline > > pipelines;
+                std::unordered_map< const materials::PrincipledBSDF *, VkDescriptorPool > descriptorPools;
+                std::unordered_map< const materials::PrincipledBSDF *, std::vector< VkDescriptorSet > > descriptorSets;
+                std::unordered_map< const materials::PrincipledBSDF *, std::unique_ptr< UniformBuffer > > uniforms;
             } m_materialObjects;
         };
 

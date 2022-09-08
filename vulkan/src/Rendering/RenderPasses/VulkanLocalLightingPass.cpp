@@ -314,7 +314,7 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void LocalLightingPass::render( SceneRenderState::Lights &lights, Camera *camera ) noexcept
+void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *camera ) noexcept
 {
     updateCameraUniforms( camera );
 
@@ -332,7 +332,7 @@ void LocalLightingPass::render( SceneRenderState::Lights &lights, Camera *camera
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    for ( const auto light : lights[ Light::Type::DIRECTIONAL ] ) {
+    for ( const auto light : lights.at( Light::Type::DIRECTIONAL ) ) {
         vkCmdBindPipeline(
             commandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -352,7 +352,7 @@ void LocalLightingPass::render( SceneRenderState::Lights &lights, Camera *camera
         vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
     }
 
-    for ( const auto light : lights[ Light::Type::POINT ] ) {
+    for ( const auto light : lights.at( Light::Type::POINT ) ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -373,7 +373,7 @@ void LocalLightingPass::render( SceneRenderState::Lights &lights, Camera *camera
         drawPrimitive( commandBuffer, m_lightVolume.get() );
     }
 
-    for ( const auto light : lights[ Light::Type::SPOT ] ) {
+    for ( const auto light : lights.at( Light::Type::SPOT ) ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -985,7 +985,7 @@ void LocalLightingPass::bindSpotLightDescriptors(
     );
 }
 
-void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept
+void LocalLightingPass::drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
