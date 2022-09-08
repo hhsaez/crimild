@@ -55,14 +55,19 @@ namespace crimild {
             template< typename MaterialType >
             using RenderableSet =
                 std::unordered_map<
-                    MaterialType *,
+                    const MaterialType *,
                     std::unordered_map<
-                        Primitive *,
+                        const Primitive *,
                         std::vector< Renderable > > >;
 
-            using Lights = std::unordered_map< Light::Type, std::unordered_set< Light * > >;
+            using Lights = std::unordered_map< Light::Type, std::unordered_set< const Light * > >;
 
-            Lights lights;
+            Lights lights = {
+                { Light::Type::DIRECTIONAL, {} },
+                { Light::Type::POINT, {} },
+                { Light::Type::SPOT, {} },
+            };
+
             RenderableSet< materials::PrincipledBSDF > litRenderables;
             RenderableSet< UnlitMaterial > unlitRenderables;
             RenderableSet< UnlitMaterial > envRenderables;

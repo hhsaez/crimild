@@ -76,7 +76,7 @@ Event GBufferPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void GBufferPass::render( SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, Camera *camera ) noexcept
+void GBufferPass::render( const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, const Camera *camera ) noexcept
 {
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
@@ -147,7 +147,7 @@ void GBufferPass::render( SceneRenderState::RenderableSet< materials::Principled
                     &renderable
                 );
 
-                drawPrimitive( commandBuffer, currentFrameIndex, primitive );
+                drawPrimitive( commandBuffer, primitive );
             }
         }
     }
@@ -435,7 +435,7 @@ void GBufferPass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void GBufferPass::bind( materials::PrincipledBSDF *material ) noexcept
+void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
 {
     if ( m_materialObjects.pipelines.contains( material ) ) {
         // Already bound
@@ -703,7 +703,7 @@ void GBufferPass::destroyMaterialObjects( void ) noexcept
     m_materialObjects.pipelines.clear();
 }
 
-void GBufferPass::drawPrimitive( VkCommandBuffer cmds, Index currentFrameIndex, Primitive *primitive ) noexcept
+void GBufferPass::drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {

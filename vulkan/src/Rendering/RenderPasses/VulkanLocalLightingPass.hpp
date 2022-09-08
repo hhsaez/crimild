@@ -69,7 +69,7 @@ namespace crimild {
             virtual ~LocalLightingPass( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
-            void render( SceneRenderState::Lights &lights, Camera *camera ) noexcept;
+            void render( const SceneRenderState::Lights &lights, Camera *camera ) noexcept;
 
             [[nodiscard]] inline const FramebufferAttachment *getOutputAttachment( void ) const noexcept { return m_outputAttachment; }
 
@@ -77,10 +77,9 @@ namespace crimild {
             void init( void ) noexcept;
             void deinit( void ) noexcept;
 
-            void fetchLights( Node *scene ) noexcept;
             void updateCameraUniforms( const Camera *camera ) noexcept;
 
-            void drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept;
+            void drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept;
 
         private:
             VkRenderPass m_renderPass = VK_NULL_HANDLE;

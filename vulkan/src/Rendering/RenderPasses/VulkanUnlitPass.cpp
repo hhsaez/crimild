@@ -81,7 +81,7 @@ Event UnlitPass::handle( const Event &e ) noexcept
     return e;
 }
 
-void UnlitPass::render( SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables, Camera *camera ) noexcept
+void UnlitPass::render( const SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables, const Camera *camera ) noexcept
 {
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
@@ -451,9 +451,9 @@ void UnlitPass::createMaterialObjects( void ) noexcept
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_materialObjects.descriptorSetLayout ) );
 }
 
-void UnlitPass::bind( Material *aMaterial ) noexcept
+void UnlitPass::bind( const Material *aMaterial ) noexcept
 {
-    const auto material = static_cast< UnlitMaterial * >( aMaterial );
+    const auto material = static_cast< const UnlitMaterial * >( aMaterial );
 
     // TODO: Create pipelines (and maybe pools/layouts) per material type, not material instance
     // That way we can reuse some of them (but uniforms must be assigned per instance)
@@ -688,7 +688,7 @@ void UnlitPass::destroyMaterialObjects( void ) noexcept
     m_materialObjects.pipelines.clear();
 }
 
-void UnlitPass::drawPrimitive( VkCommandBuffer cmds, Primitive *primitive ) noexcept
+void UnlitPass::drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept
 {
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {

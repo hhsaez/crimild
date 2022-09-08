@@ -69,6 +69,7 @@ namespace crimild {
         virtual void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
         virtual void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
         virtual ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
+        virtual const ShaderProgram *getProgram( void ) const { return crimild::get_ptr( _program ); }
 
         virtual void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
         virtual const ColorRGBA &getAmbient( void ) const { return _ambient; }
@@ -132,11 +133,11 @@ namespace crimild {
         //@}
 
         /**
-		   \name Reflection
+                   \name Reflection
            \deprectated
 
-		   In order for the reflection map to work, set reflection value to 1.0
-		*/
+                   In order for the reflection map to work, set reflection value to 1.0
+                */
         //@{
 
     public:
@@ -153,11 +154,11 @@ namespace crimild {
         //@}
 
         /**
-		   \name Refraction
+                   \name Refraction
            \deprectated
 
-		   In order for the refraction map to work, set refraction value to 1.0
-		*/
+                   In order for the refraction map to work, set refraction value to 1.0
+                */
         //@{
 
     public:
