@@ -50,6 +50,6 @@ TEST( RTTITest, getClassName )
 {
     Foo foo;
 
-    EXPECT_EQ( "crimild::test::Foo", foo.getClassName() );
+    ASSERT_STREQ( "crimild::test::Foo", foo.getClassName() );
 }
 

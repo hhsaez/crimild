@@ -38,10 +38,10 @@ using namespace crimild;
 
 TEST( MotionState, rtti )
 {
-    EXPECT_EQ( "crimild::MotionState", MotionState::__CLASS_NAME );
+    ASSERT_STREQ( "crimild::MotionState", MotionState::__CLASS_NAME );
 
     auto motion = crimild::alloc< MotionState >();
-    EXPECT_EQ( "crimild::MotionState", motion->getClassName() );
+    ASSERT_STREQ( "crimild::MotionState", motion->getClassName() );
 }
 
 TEST( MotionState, default_values )

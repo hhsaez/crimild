@@ -39,10 +39,10 @@ using namespace crimild;
 
 TEST( Variant, rtti )
 {
-    EXPECT_EQ( "crimild::Variant", Variant::__CLASS_NAME );
+    ASSERT_STREQ( "crimild::Variant", Variant::__CLASS_NAME );
 
     const auto var = Variant();
-    EXPECT_EQ( "crimild::Variant", var.getClassName() );
+    ASSERT_STREQ( "crimild::Variant", var.getClassName() );
 }
 
 TEST( Variant, is_valid )
