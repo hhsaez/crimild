@@ -511,7 +511,7 @@ void SceneDebugPass::init( void ) noexcept
                 m_renderPassObjects.layout,
             },
             .program = m_program.get(),
-            .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .vertexLayouts = { VertexLayout::P3_N3_TC2 },
             .viewport = viewport,
             .scissor = viewport,
             .pushConstantRanges = {
@@ -567,9 +567,9 @@ void SceneDebugPass::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
@@ -614,10 +614,10 @@ void SceneDebugPass::createRenderPassObjects( void ) noexcept
             .dstSet = m_renderPassObjects.descriptorSets[ i ],
             .dstBinding = 0,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfo,
             .pTexelBufferView = nullptr,
         };
 

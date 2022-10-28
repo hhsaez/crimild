@@ -91,8 +91,8 @@ void ClearPass::init( void ) noexcept
     }
 
     m_renderArea = VkRect2D {
-        .extent = m_attachments.front()->extent,
         .offset = { 0, 0 },
+        .extent = m_attachments.front()->extent,
     };
 
     std::vector< VkAttachmentDescription > attachmentDescriptions;

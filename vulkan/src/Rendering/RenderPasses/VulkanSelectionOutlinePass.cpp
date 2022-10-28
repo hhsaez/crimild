@@ -399,20 +399,20 @@ void SelectionOutlinePass::init( void ) noexcept
         std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
         DepthStencilState {
             .stencilTestEnable = true,
-            .back = {
-                .compareOp = CompareOp::ALWAYS,
+            .front = {
                 .failOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::REPLACE,
                 .passOp = StencilOp::REPLACE,
+                .depthFailOp = StencilOp::REPLACE,
+                .compareOp = CompareOp::ALWAYS,
                 .compareMask = 0xff,
                 .writeMask = 0xff,
                 .reference = 1,
             },
-            .front = {
-                .compareOp = CompareOp::ALWAYS,
+            .back = {
                 .failOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::REPLACE,
                 .passOp = StencilOp::REPLACE,
+                .depthFailOp = StencilOp::REPLACE,
+                .compareOp = CompareOp::ALWAYS,
                 .compareMask = 0xff,
                 .writeMask = 0xff,
                 .reference = 1,
@@ -436,20 +436,20 @@ void SelectionOutlinePass::init( void ) noexcept
         DepthStencilState {
             .depthTestEnable = false,
             .stencilTestEnable = true,
-            .back = {
-                .compareOp = CompareOp::NOT_EQUAL,
+            .front = {
                 .failOp = StencilOp::KEEP,
-                .depthFailOp = StencilOp::KEEP,
                 .passOp = StencilOp::REPLACE,
+                .depthFailOp = StencilOp::KEEP,
+                .compareOp = CompareOp::NOT_EQUAL,
                 .compareMask = 0xff,
                 .writeMask = 0xff,
                 .reference = 1,
             },
-            .front = {
-                .compareOp = CompareOp::NOT_EQUAL,
+            .back = {
                 .failOp = StencilOp::KEEP,
-                .depthFailOp = StencilOp::KEEP,
                 .passOp = StencilOp::REPLACE,
+                .depthFailOp = StencilOp::KEEP,
+                .compareOp = CompareOp::NOT_EQUAL,
                 .compareMask = 0xff,
                 .writeMask = 0xff,
                 .reference = 1,
@@ -497,9 +497,9 @@ void SelectionOutlinePass::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
@@ -544,10 +544,10 @@ void SelectionOutlinePass::createRenderPassObjects( void ) noexcept
             .dstSet = m_renderPassObjects.descriptorSets[ i ],
             .dstBinding = 0,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfo,
             .pTexelBufferView = nullptr,
         };
 
@@ -600,9 +600,9 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
         CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_geometryObjects.descriptorPools[ geometry ] ) );
@@ -634,10 +634,10 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
                 .dstSet = m_geometryObjects.descriptorSets[ geometry ][ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             };
 

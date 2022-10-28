@@ -349,9 +349,9 @@ void ShaderPass::createDescriptorPool( void ) noexcept
 
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &createInfo, nullptr, &m_descriptorPool ) );
@@ -455,10 +455,10 @@ void ShaderPass::createDescriptorSets( void ) noexcept
                     .dstSet = m_descriptorSets[ i ],
                     .dstBinding = 0,
                     .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .descriptorCount = 1,
-                    .pBufferInfo = &bufferInfos[ 0 ],
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .pImageInfo = nullptr,
+                    .pBufferInfo = &bufferInfos[ 0 ],
                     .pTexelBufferView = nullptr,
                 }
             );
@@ -467,11 +467,11 @@ void ShaderPass::createDescriptorSets( void ) noexcept
         for ( uint32_t j = 0; j < m_inputs.size(); ++j ) {
             imageInfos.push_back(
                 {
+                    .sampler = m_inputs[ j ]->sampler,
+                    .imageView = *m_inputs[ j ]->imageViews[ i ],
                     .imageLayout = getRenderDevice()->formatIsColor( m_inputs[ j ]->format )
                                        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                                        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-                    .imageView = *m_inputs[ j ]->imageViews[ i ],
-                    .sampler = m_inputs[ j ]->sampler,
                 }
             );
             writes.push_back(
@@ -480,10 +480,10 @@ void ShaderPass::createDescriptorSets( void ) noexcept
                     .dstSet = m_descriptorSets[ i ],
                     .dstBinding = uint32_t( bufferInfos.size() + j ),
                     .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                     .descriptorCount = 1,
-                    .pBufferInfo = nullptr,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                     .pImageInfo = &imageInfos[ j ],
+                    .pBufferInfo = nullptr,
                     .pTexelBufferView = nullptr,
                 }
             );
