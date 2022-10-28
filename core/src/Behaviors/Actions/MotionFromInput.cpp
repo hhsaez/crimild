@@ -27,7 +27,7 @@
 
 #include "Behaviors/Actions/MotionFromInput.hpp"
 
-#include "Coding/Decoder.cpp"
+#include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Components/MotionStateComponent.hpp"
 #include "SceneGraph/Node.hpp"
