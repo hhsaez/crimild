@@ -31,8 +31,6 @@
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Memory.hpp"
 #include "Mathematics/Transformation.hpp"
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
 
 namespace crimild {
 
@@ -58,9 +56,6 @@ namespace crimild {
             static SharedPointer< Group > importScene( std::string filename );
 
         public:
-            SceneImporter( void );
-            virtual ~SceneImporter( void );
-
             SharedPointer< Group > import( std::string filename );
 
         private:
@@ -69,13 +64,6 @@ namespace crimild {
         private:
             Map< std::string, SharedPointer< animation::Joint > > _joints;
             SharedPointer< animation::Skeleton > _skeleton;
-
-        private:
-            void computeTransform( const aiMatrix4x4 &m, Transformation &t );
-            void loadMaterialTexture( SharedPointer< materials::PrincipledBSDF > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex = 0 );
-            SharedPointer< materials::PrincipledBSDF > buildMaterial( const aiMaterial *mtl, std::string basePath );
-            void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh );
-            void loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh );
         };
 
     }
