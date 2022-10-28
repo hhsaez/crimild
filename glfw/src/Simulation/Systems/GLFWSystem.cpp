@@ -34,7 +34,7 @@
 using namespace crimild;
 using namespace crimild::glfw;
 
-void errorCallback( int error, const char *description )
+static void errorCallback( int error, const char *description )
 {
     std::cerr << "GLFW Error: (" << error << ") " << description << std::endl;
 }

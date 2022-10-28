@@ -31,6 +31,8 @@
 #include "Foundation/Singleton.hpp"
 #include "Simulation/Systems/System.hpp"
 
+#include <functional>
+
 namespace crimild {
 
     class Texture;
