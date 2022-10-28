@@ -126,9 +126,9 @@ void Renderer::presentFrame( void )
 {
 }
 
-/*
-void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
+void Renderer::render( RenderQueue *renderQueue, rendergraph::RenderGraph *renderGraph )
 {
+/*
     auto lightCatalog = getLightCatalog();
     renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
         lightCatalog->bind( light );
@@ -156,8 +156,8 @@ void Renderer::render( RenderQueue *renderQueue, RenderGraph *renderGraph )
     bindProgram( program );
     drawScreenPrimitive( program );
     unbindProgram( program );
-}
 */
+}
 
 void Renderer::bindRenderTarget( RenderTarget *target )
 {

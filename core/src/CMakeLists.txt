@@ -137,7 +137,6 @@ set(
     Boundings/SphereBoundingVolume.hpp
     Coding/Codable.cpp
     Coding/Codable.hpp
-    Coding/Decoder.cpp
     Coding/Decoder.hpp
     Coding/EncodedData.hpp
     Coding/EncodedObject.hpp
