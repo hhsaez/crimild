@@ -323,7 +323,6 @@ void SoftRTPass::init( void ) noexcept
                     m_renderPassObjects.layout,
                 },
                 .program = program.get(),
-                std::vector< VertexLayout > {},
                 .colorAttachmentCount = 1,
                 .viewport = viewport,
                 .scissor = viewport,
@@ -367,9 +366,9 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
@@ -406,9 +405,9 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_imageResources[ i ].imageView,
             .sampler = m_imageResources[ i ].sampler,
+            .imageView = m_imageResources[ i ].imageView,
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
 
         const auto writes = std::array< VkWriteDescriptorSet, 1 > {
@@ -417,10 +416,10 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
                 .dstSet = m_renderPassObjects.descriptorSets[ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
-                .pBufferInfo = nullptr,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = &imageInfo,
+                .pBufferInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
         };

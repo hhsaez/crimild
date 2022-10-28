@@ -582,8 +582,8 @@ void LocalLightingPass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
-        .extent = m_outputAttachment->extent,
         .offset = { 0, 0 },
+        .extent = m_outputAttachment->extent,
     };
 
     const auto extent = m_renderArea.extent;
@@ -743,9 +743,9 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
@@ -805,10 +805,10 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
                 .dstSet = m_renderPassObjects.descriptorSets[ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             },
         };
@@ -817,9 +817,9 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
         for ( const auto &att : m_inputAttachments ) {
             imageInfos.push_back(
                 VkDescriptorImageInfo {
-                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                    .imageView = *att->imageViews[ i ],
                     .sampler = att->sampler,
+                    .imageView = *att->imageViews[ i ],
+                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 }
             );
         }
@@ -832,11 +832,11 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
                     .dstSet = m_renderPassObjects.descriptorSets[ i ],
                     .dstBinding = dstBinding + j,
                     .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                     .descriptorCount = 1,
-                    .pBufferInfo = nullptr,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                     // Use the recently added image view
                     .pImageInfo = &imageInfos[ j ],
+                    .pBufferInfo = nullptr,
                     .pTexelBufferView = nullptr,
                 }
             );

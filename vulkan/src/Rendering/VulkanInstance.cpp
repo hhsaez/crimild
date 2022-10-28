@@ -31,6 +31,7 @@
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Simulation/Settings.hpp"
 #include "VulkanRenderDevice.hpp"
+#include "Foundation/Version.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;

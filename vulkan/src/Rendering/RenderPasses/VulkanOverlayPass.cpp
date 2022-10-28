@@ -294,7 +294,6 @@ void OverlayPass::init( void ) noexcept
                     m_inputs[ 0 ]->descriptorSetLayout,
                 },
                 .program = program.get(),
-                std::vector< VertexLayout > {},
                 .colorAttachmentCount = 1,
                 .viewport = viewport,
                 .scissor = viewport,

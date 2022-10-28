@@ -43,8 +43,8 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
     : RenderPassBase( renderDevice )
 {
     m_renderArea = VkRect2D {
-        .extent = { .width = 1024, .height = 1024 },
         .offset = { 0, 0 },
+        .extent = { .width = 1024, .height = 1024 },
     };
 
     // Make composition attachment opaque

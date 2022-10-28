@@ -89,8 +89,8 @@ void PresentPass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
-        .extent = m_colorAttachment->extent,
         .offset = { 0, 0 },
+        .extent = m_colorAttachment->extent,
     };
 
     const auto attachmentDescription = VkAttachmentDescription {

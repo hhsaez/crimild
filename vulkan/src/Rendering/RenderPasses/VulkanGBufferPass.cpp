@@ -162,8 +162,8 @@ void GBufferPass::init( void ) noexcept
     CRIMILD_LOG_TRACE();
 
     m_renderArea = VkRect2D {
-        .extent = m_attachments.front()->extent,
         .offset = { 0, 0 },
+        .extent = m_attachments.front()->extent,
     };
 
     const auto extent = m_renderArea.extent;
@@ -335,9 +335,9 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
@@ -382,10 +382,10 @@ void GBufferPass::createRenderPassObjects( void ) noexcept
             .dstSet = m_renderPassObjects.descriptorSets[ i ],
             .dstBinding = 0,
             .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfo,
             .pTexelBufferView = nullptr,
         };
 
@@ -589,7 +589,10 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                 m_materialObjects.descriptorSetLayout,
             },
             .program = program.get(),
-            .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+            .vertexLayouts = { VertexLayout::P3_N3_TC2 },
+            .colorAttachmentCount = 4,
+            .viewport = viewport,
+            .scissor = viewport,
             .pushConstantRanges = {
                 VkPushConstantRange {
                     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
@@ -597,9 +600,6 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                     .size = sizeof( SceneRenderState::Renderable ),
                 },
             },
-            .colorAttachmentCount = 4,
-            .viewport = viewport,
-            .scissor = viewport,
         }
     );
 
@@ -620,9 +620,9 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
@@ -653,9 +653,9 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
         };
 
         const auto imageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = imageView,
             .sampler = sampler,
+            .imageView = imageView,
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
 
         const auto writes = std::array< VkWriteDescriptorSet, 2 > {
@@ -664,10 +664,10 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                 .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             },
             VkWriteDescriptorSet {
@@ -675,10 +675,10 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                 .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
                 .dstBinding = 1,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
-                .pBufferInfo = nullptr,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = &imageInfo,
+                .pBufferInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
         };
