@@ -27,6 +27,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
 #include <Crimild.hpp>
 #include <Crimild_GLFW.hpp>
 

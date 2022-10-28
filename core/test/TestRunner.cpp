@@ -32,12 +32,6 @@
 
 using namespace crimild;
 
-template<>
-crimild::RenderResourceLibrary< Shader >::RenderResourceLibrary( void ) noexcept
-{
-    // no-op
-}
-
 int main( int argc, char **argv )
 {
     crimild::init();

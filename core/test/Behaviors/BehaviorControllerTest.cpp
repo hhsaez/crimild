@@ -100,14 +100,12 @@ TEST( BehaviorController, construction )
 
     ASSERT_NE( nullptr, controller->getContext() );
 
-    std::cout << controller->getBehavior( BehaviorController::SCENE_STARTED_BEHAVIOR_NAME )->getClassName() << "\n";
-
-    ASSERT_EQ(
+    ASSERT_STREQ(
         "crimild::behaviors::actions::Success",
         controller->getBehavior( BehaviorController::SCENE_STARTED_BEHAVIOR_NAME )->getClassName()
     );
 
-    ASSERT_EQ(
+    ASSERT_STREQ(
         "crimild::behaviors::actions::Success",
         controller->getBehavior( BehaviorController::DEFAULT_BEHAVIOR_NAME )->getClassName()
     );
