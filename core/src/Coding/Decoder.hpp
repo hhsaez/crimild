@@ -54,10 +54,10 @@ namespace crimild {
 
         class Decoder : public SharedObject {
         protected:
-            Decoder( void );
+            Decoder( void ) = default;
 
         public:
-            virtual ~Decoder( void );
+            virtual ~Decoder( void ) = default;
 
             const Version &getVersion( void ) const { return _version; }
             void setVersion( const Version &version ) { _version = version; }
@@ -202,7 +202,10 @@ namespace crimild {
             virtual void endDecodingArray( std::string key ) = 0;
 
         protected:
-            void addRootObject( SharedPointer< SharedObject > const &obj );
+            inline void addRootObject( SharedPointer< SharedObject > const &obj ) noexcept
+            {
+	            _roots.add( obj );
+            }
 
         private:
             Array< SharedPointer< SharedObject > > _roots;
