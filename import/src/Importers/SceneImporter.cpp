@@ -45,81 +45,17 @@
 #include "SceneGraph/Group.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/LogStream.hpp"
-#include "assimp/postprocess.h"
+
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
 using namespace crimild;
 using namespace crimild::import;
 
-SharedPointer< Group > SceneImporter::importScene( std::string filename )
-{
-    SceneImporter importer;
-    return importer.import( filename );
-}
-
-SceneImporter::SceneImporter( void )
-{
-}
-
-SceneImporter::~SceneImporter( void )
-{
-}
-
-SharedPointer< Group > SceneImporter::import( std::string filename )
-{
-    // check if file exists
-    std::ifstream fin( filename );
-    bool exists = !fin.fail();
-    fin.close();
-    if ( !exists ) {
-        // Is it ok to throw exceptions?
-        throw FileNotFoundException( filename );
-    }
-
-    Assimp::Importer importer;
-    importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
-    const aiScene *importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
-    if ( importedScene == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
-        return nullptr;
-    }
-
-    SharedPointer< SkinnedMesh > skinnedMesh;
-
-    /*
-    auto skinnedMesh = crimild::alloc< SkinnedMesh >();
-    loadAnimations( importedScene, skinnedMesh );
-    */
-
-    auto root = crimild::alloc< Group >( filename );
-    auto basePath = FileSystem::getInstance().extractDirectory( filename ) + "/";
-    recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, skinnedMesh );
-
-    if ( _skeleton != nullptr ) {
-        Transformation globalInverseTransform;
-        computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
-        _skeleton->setGlobalInverseTransform( globalInverseTransform );
-        root->attachComponent( _skeleton );
-    }
-
-    return root;
-}
-
-animation::Joint *SceneImporter::getJoint( std::string name )
-{
-    if ( _joints.contains( name ) ) {
-        return crimild::get_ptr( _joints[ name ] );
-    }
-
-    auto jointId = _joints.size();
-    auto joint = crimild::alloc< animation::Joint >( name, jointId );
-    _joints[ name ] = joint;
-
-    return crimild::get_ptr( joint );
-}
-
-void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
+void computeTransform( const aiMatrix4x4 &m, Transformation &t )
 {
     // Assimp matrices are row-mayor
     const auto mat = Matrix4 {
@@ -135,7 +71,7 @@ void SceneImporter::computeTransform( const aiMatrix4x4 &m, Transformation &t )
     };
 }
 
-void SceneImporter::loadMaterialTexture( SharedPointer< materials::PrincipledBSDF > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
+void loadMaterialTexture( SharedPointer< materials::PrincipledBSDF > material, const aiMaterial *input, std::string basePath, aiTextureType texType, unsigned int texIndex )
 {
     if ( !input->GetTextureCount( texType ) ) {
         return;
@@ -207,7 +143,7 @@ void SceneImporter::loadMaterialTexture( SharedPointer< materials::PrincipledBSD
     }
 }
 
-SharedPointer< materials::PrincipledBSDF > SceneImporter::buildMaterial( const aiMaterial *mtl, std::string basePath )
+SharedPointer< materials::PrincipledBSDF > buildMaterial( const aiMaterial *mtl, std::string basePath )
 {
     auto material = crimild::alloc< materials::PrincipledBSDF >();
 
@@ -270,7 +206,7 @@ SharedPointer< materials::PrincipledBSDF > SceneImporter::buildMaterial( const a
     return material;
 }
 
-void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh )
+void recursiveSceneBuilder( SharedPointer< Group > parent, const struct aiScene *s, const struct aiNode *n, std::string basePath, SharedPointer< SkinnedMesh > &skinnedMesh )
 {
     auto group = crimild::alloc< Group >( std::string( n->mName.data ) );
     computeTransform( n->mTransformation, group->local() );
@@ -435,14 +371,14 @@ void SceneImporter::recursiveSceneBuilder( SharedPointer< Group > parent, const 
     parent->attachNode( group );
 }
 
-void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh )
+SharedPointer< animation::Skeleton > loadAnimations( const aiScene *scene, SharedPointer< SkinnedMesh > &skinnedMesh )
 {
     if ( scene->mNumAnimations == 0 ) {
         // nothing to load
-        return;
+        return nullptr;
     }
 
-    _skeleton = crimild::alloc< animation::Skeleton >();
+    auto skeleton = crimild::alloc< animation::Skeleton >();
 
     for ( crimild::Size aIdx = 0; aIdx < scene->mNumAnimations; aIdx++ ) {
         const auto *inAnimation = scene->mAnimations[ aIdx ];
@@ -507,6 +443,69 @@ void SceneImporter::loadAnimations( const aiScene *scene, SharedPointer< Skinned
             clip->addChannel( sChannel );
         }
 
-        _skeleton->getClips()[ clip->getName() ] = clip;
+        skeleton->getClips()[ clip->getName() ] = clip;
     }
+
+    return skeleton;
 }
+
+SharedPointer< Group > SceneImporter::importScene( std::string filename )
+{
+    SceneImporter importer;
+    return importer.import( filename );
+}
+
+SharedPointer< Group > SceneImporter::import( std::string filename )
+{
+    // check if file exists
+    std::ifstream fin( filename );
+    bool exists = !fin.fail();
+    fin.close();
+    if ( !exists ) {
+        // Is it ok to throw exceptions?
+        throw FileNotFoundException( filename );
+    }
+
+    Assimp::Importer importer;
+    importer.SetPropertyInteger( AI_CONFIG_PP_SLM_VERTEX_LIMIT, 15000 );
+    const aiScene *importedScene = importer.ReadFile( filename, aiProcessPreset_TargetRealtime_MaxQuality );
+    if ( importedScene == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Error importing file ", filename, "\n", importer.GetErrorString() );
+        return nullptr;
+    }
+
+    SharedPointer< SkinnedMesh > skinnedMesh;
+
+    /*
+    auto skinnedMesh = crimild::alloc< SkinnedMesh >();
+    loadAnimations( importedScene, skinnedMesh );
+    */
+
+    auto root = crimild::alloc< Group >( filename );
+    auto basePath = FileSystem::getInstance().extractDirectory( filename ) + "/";
+    recursiveSceneBuilder( root, importedScene, importedScene->mRootNode, basePath, skinnedMesh );
+
+    if ( _skeleton != nullptr ) {
+        Transformation globalInverseTransform;
+        computeTransform( importedScene->mRootNode->mTransformation.Inverse(), globalInverseTransform );
+        _skeleton->setGlobalInverseTransform( globalInverseTransform );
+        root->attachComponent( _skeleton );
+    }
+
+    return root;
+}
+
+animation::Joint *SceneImporter::getJoint( std::string name )
+{
+    if ( _joints.contains( name ) ) {
+        return crimild::get_ptr( _joints[ name ] );
+    }
+
+    auto jointId = _joints.size();
+    auto joint = crimild::alloc< animation::Joint >( name, jointId );
+    _joints[ name ] = joint;
+
+    return crimild::get_ptr( joint );
+}
+
+
