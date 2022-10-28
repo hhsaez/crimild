@@ -1,125 +1,94 @@
-SET( CRIMILD_INCLUDE_DIRECTORIES
-	${CRIMILD_SOURCE_DIR}/core/src
-	${CRIMILD_SOURCE_DIR}/opengl/src
-	${CRIMILD_SOURCE_DIR}/imgui/src
-	${CRIMILD_SOURCE_DIR}/vulkan/src )
+crimild_trace()
 
-SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-	crimild_core
-	crimild_vulkan )
+set(
+    CRIMILD_LIBRARY_NAME
+    crimild_glfw
+)
 
-IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
+set( 
+    CRIMILD_LIBRARY_SOURCE_FILES 
+	Coding/JSONDecoder.cpp
+	Coding/JSONDecoder.hpp
+	Coding/JSONEncoder.cpp
+	Coding/JSONEncoder.hpp
+	Crimild_GLFW.cpp
+	Crimild_GLFW.hpp
+	Editor/EditorLayer.cpp
+	Editor/EditorLayer.hpp
+	Editor/EditorState.cpp
+	Editor/EditorState.hpp
+	Editor/EditorUtils.cpp
+	Editor/EditorUtils.hpp
+	Editor/Menus/editMenu.cpp
+	Editor/Menus/editMenu.hpp
+	Editor/Menus/fileMenu.cpp
+	Editor/Menus/fileMenu.hpp
+	Editor/Menus/helpMenu.cpp
+	Editor/Menus/helpMenu.hpp
+	Editor/Menus/mainMenu.cpp
+	Editor/Menus/mainMenu.hpp
+	Editor/Menus/sceneMenu.cpp
+	Editor/Menus/sceneMenu.hpp
+	Editor/Menus/viewMenu.cpp
+	Editor/Menus/viewMenu.hpp
+	Editor/Panels/BehaviorEditorPanel.cpp
+	Editor/Panels/BehaviorEditorPanel.hpp
+	Editor/Panels/NodeInspectorPanel.cpp
+	Editor/Panels/NodeInspectorPanel.hpp
+	Editor/Panels/RenderScenePanel.cpp
+	Editor/Panels/RenderScenePanel.hpp
+	Editor/Panels/SceneHierarchyPanel.cpp
+	Editor/Panels/SceneHierarchyPanel.hpp
+	Editor/Panels/ScenePanel.cpp
+	Editor/Panels/ScenePanel.hpp
+	Editor/Panels/SimulationPanel.cpp
+	Editor/Panels/SimulationPanel.hpp
+	Editor/Panels/ToolbarPanel.cpp
+	Editor/Panels/ToolbarPanel.hpp
+	Exceptions/GLFWException.hpp
+	Foundation/GLFWUtils.hpp
+	Foundation/JSONUtils.hpp
+	Main.cpp
+	Rendering/GLFWVulkanSurface.cpp
+	Rendering/GLFWVulkanSurface.hpp
+	Rendering/GLFWWindow.cpp
+	Rendering/GLFWWindow.hpp
+	Rendering/ImGUILayer.cpp
+	Rendering/ImGUILayer.hpp
+	Rendering/Layer.cpp
+	Rendering/Layer.hpp
+	Simulation/SimulationLayer.cpp
+	Simulation/SimulationLayer.hpp
+	Simulation/Systems/GLFWSystem.cpp
+	Simulation/Systems/GLFWSystem.hpp
+	Simulation/Systems/GLFWVulkanSystem.cpp
+	Simulation/Systems/GLFWVulkanSystem.hpp
+	Simulation/Systems/GLFWWindowSystem.cpp
+	Simulation/Systems/GLFWWindowSystem.hpp
+	Simulation/Systems/InputSystem.cpp
+	Simulation/Systems/InputSystem.hpp
+)
 
-    SET( CRIMILD_INCLUDE_DIRECTORIES
-	  	 ${CRIMILD_INCLUDE_DIRECTORIES}
-	  	 ${CRIMILD_SOURCE_DIR}/third-party/glfw/include
-	  	 ${CRIMILD_SOURCE_DIR}/third-party/glew/include )
+add_library(
+    ${CRIMILD_LIBRARY_NAME}
+    ${CRIMILD_LIBRARY_SOURCE_FILES}
+)
 
-	SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-	  	 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		 glfw )
+target_include_directories( 
+	${CRIMILD_LIBRARY_NAME} 
+	PUBLIC . 
+	PRIVATE ${Crimild_SOURCE_DIR}/third-party/glfw/include
+	PRIVATE ${Crimild_SOURCE_DIR}/third-party/json/include
+)
 
-	IF ( CRIMILD_ENABLE_IMPORT )
-		 SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-			 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-			 crimild_import )
-		 SET( CRIMILD_INCLUDE_DIRECTORIES
-			 ${CRIMILD_INCLUDE_DIRECTORIES}
-			 ${CRIMILD_SOURCE_DIR}/import/src
-			 ${Assimp_SOURCE_DIR}/include
-			 ${Assimp_SOURCE_DIR}/code )
-	 ENDIF ( CRIMILD_ENABLE_IMPORT )
+target_link_libraries( 
+	${CRIMILD_LIBRARY_NAME} 
+	PRIVATE crimild_core 
+	PRIVATE crimild_vulkan 
+	PRIVATE crimild_imgui
+	PRIVATE crimild_import
+	PRIVATE crimild_stb
+	PRIVATE glfw
+)
 
-	IF ( CRIMILD_ENABLE_IMGUI )
-   	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
-	  	 	${CRIMILD_INCLUDE_DIRECTORIES}
-	  	 	{CRIMILD_SOURCE_DIR}/imgui/src
-			${CRIMILD_SOURCE_DIR}/third-party/imgui
-			${CRIMILD_SOURCE_DIR}/third-party/imgui/examples
-			${CRIMILD_SOURCE_DIR}/third-party/imguizmo
-			${CRIMILD_SOURCE_DIR}/third-party/imguizmo/examples
-			${CRIMILD_SOURCE_DIR}/third-party/ImGuiFileDialog )
-	ENDIF ()
-
-	IF ( CRIMILD_ENABLE_SCRIPTING )
-
-   	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
-	  	 	  ${CRIMILD_INCLUDE_DIRECTORIES}
-	  	 	  ${CRIMILD_SOURCE_DIR}/scripting/src
-	  	 	  ${CRIMILD_SOURCE_DIR}/third-party/lua/src )
-
-	  	 SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-	  	   	  ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		   	  crimild_scripting )
-
-	ENDIF ( CRIMILD_ENABLE_SCRIPTING )
-
-	IF ( CRIMILD_ENABLE_OPENAL )
-
-   	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
-	  	 	  ${CRIMILD_INCLUDE_DIRECTORIES}
-	  	 	  ${CRIMILD_SOURCE_DIR}/openal/src )
-
-	  	 SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-	  	   	  ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		   	  crimild_openal )
-
-	ENDIF ( CRIMILD_ENABLE_OPENAL )
-
-	IF ( CRIMILD_ENABLE_PHYSICS )
-
-	   	 SET( CRIMILD_INCLUDE_DIRECTORIES
-			  ${CRIMILD_INCLUDE_DIRECTORIES}
-		 	  ${CRIMILD_SOURCE_DIR}/physics/src
-		 	  ${CRIMILD_SOURCE_DIR}/third-party/bullet-2.82-r2704/src )
-
-		 SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-		 	  ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		 	  crimild_physics )
-
-	ENDIF ( CRIMILD_ENABLE_PHYSICS )
-
-	IF ( CRIMILD_ENABLE_VULKAN )
-
-		FIND_PACKAGE( Vulkan REQUIRED )
-
-   		SET( CRIMILD_INCLUDE_DIRECTORIES
-   			  ${CRIMILD_INCLUDE_DIRECTORIES}
-			  ${CRIMILD_SOURCE_DIR}/vulkan/src
-			  ${Vulkan_INCLUDE_DIRS}
-		)
-
-   		SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-   		 	 ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		 	 crimild_vulkan
-		 	 ${Vulkan_LIBRARIES}
-		 	 #"-framework Metal"
-		 	 #"-framework IOSurface"
-		 	 #"-framework QuartzCore"
-   		)
-
-	ENDIF ()
-
-    IF ( CRIMILD_ENABLE_STB )
-       SET( CRIMILD_LIBRARY_LINK_LIBRARIES
-		        ${CRIMILD_LIBRARY_LINK_LIBRARIES}
-		        crimild_stb
-	   )
-
-	   SET(
-            CRIMILD_INCLUDE_DIRECTORIES
-	 	    ${CRIMILD_INCLUDE_DIRECTORIES}
-		    ${CRIMILD_SOURCE_DIR}/stb/src
-		    ${CRIMILD_SOURCE_DIR}/third-party/stb
-	    )
-    ENDIF ()
-
-	SET(
-		CRIMILD_INCLUDE_DIRECTORIES
-		${CRIMILD_INCLUDE_DIRECTORIES}
-		${CRIMILD_SOURCE_DIR}/third-party/json/include
-	)
-
-ENDIF ()
-
-INCLUDE( ModuleBuildLibrary )
+target_compile_features( ${CRIMILD_LIBRARY_NAME} PUBLIC cxx_std_20 )

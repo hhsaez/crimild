@@ -1,6 +1,3 @@
-MESSAGE( "-- Configuring stb library" )
+crimild_trace()
 
-SET( CRIMILD_LIBRARY_NAME stb )
-
-ADD_SUBDIRECTORY( src )
-
+add_subdirectory( src )

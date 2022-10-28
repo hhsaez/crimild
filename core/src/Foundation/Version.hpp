@@ -31,17 +31,9 @@
 #include <sstream>
 #include <string>
 
-#ifndef CRIMILD_VERSION_MAJOR
-    #define CRIMILD_VERSION_MAJOR 5
-#endif
-
-#ifndef CRIMILD_VERSION_MINOR
-    #define CRIMILD_VERSION_MINOR 0
-#endif
-
-#ifndef CRIMILD_VERSION_PATCH
-    #define CRIMILD_VERSION_PATCH 0
-#endif
+#define CRIMILD_VERSION_MAJOR 5
+#define CRIMILD_VERSION_MINOR 0
+#define CRIMILD_VERSION_PATCH 0
 
 namespace crimild {
 

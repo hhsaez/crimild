@@ -1,8 +1,38 @@
-SET ( CRIMILD_INCLUDE_DIRECTORIES
-	${CRIMILD_INCLUDE_DIRECTORIES}
-	${CRIMILD_SOURCE_DIR}/core/src
-    ${CRIMILD_SOURCE_DIR}/third-party/json/include
+crimild_trace()
+
+set(
+    CRIMILD_TEST_NAME
+    crimild_glfw_test
 )
 
-INCLUDE( ModuleBuildLibraryTest )
+set( 
+    CRIMILD_TEST_SOURCE_FILES 
+	Coding/JSONCodingTest.cpp
+	TestRunner.cpp
+)
 
+add_executable( 
+    ${CRIMILD_TEST_NAME} 
+    ${CRIMILD_TEST_SOURCE_FILES}
+)
+
+target_include_directories( 
+	${CRIMILD_TEST_NAME} 
+	PRIVATE . 
+	PRIVATE ${Crimild_SOURCE_DIR}/third-party/json/include
+)
+
+target_link_libraries( 
+    ${CRIMILD_TEST_NAME} 
+	PRIVATE crimild_core
+    PRIVATE crimild_glfw 
+    PRIVATE gtest gmock
+)
+
+gtest_discover_tests( 
+    ${CRIMILD_TEST_NAME}
+    WORKING_DIRECTORY ${PROJECT_DIR}
+    PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
+)
+
+set_target_properties( ${CRIMILD_TEST_NAME} PROPERTIES FOLDER tests )

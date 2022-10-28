@@ -1,5 +1,3 @@
-MESSAGE( "-- Configuring imgui library" )
+crimild_trace()
 
-SET( CRIMILD_LIBRARY_NAME imgui )
-
-ADD_SUBDIRECTORY( src )
+add_subdirectory( src )
