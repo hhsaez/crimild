@@ -1,22 +1,32 @@
-SET(
-	CRIMILD_INCLUDE_DIRECTORIES 
-	${CRIMILD_SOURCE_DIR}/core/src
+crimild_trace()
+
+set(
+    CRIMILD_LIBRARY_NAME
+    crimild_stb
 )
 
-
-SET(
-	CRIMILD_LIBRARY_LINK_LIBRARIES 
-	crimild_core
+set( 
+    CRIMILD_LIBRARY_SOURCE_FILES 
+	Rendering/STBImageManager.cpp
+	Rendering/STBImageManager.hpp
+	Crimild_STB.cpp
+	Crimild_STB.hpp
 )
 
-IF ( NOT ( ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" ) )
+add_library(
+    ${CRIMILD_LIBRARY_NAME}
+    ${CRIMILD_LIBRARY_SOURCE_FILES}
+)
 
-    SET(
-		CRIMILD_INCLUDE_DIRECTORIES
-	 	${CRIMILD_INCLUDE_DIRECTORIES}
-		${CRIMILD_SOURCE_DIR}/third-party/stb
-	)
+target_include_directories( 
+	${CRIMILD_LIBRARY_NAME} 
+	PUBLIC . 
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/stb
+)
 
-ENDIF ()
+target_link_libraries( 
+	${CRIMILD_LIBRARY_NAME} 
+	PRIVATE crimild_core 
+)
 
-INCLUDE( ModuleBuildLibrary )
+target_compile_features( ${CRIMILD_LIBRARY_NAME} PUBLIC cxx_std_20 )

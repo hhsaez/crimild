@@ -1,138 +1,91 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required( VERSION 3.19 )
 
-PROJECT(CRIMILD)
+# Register custom scripts
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
-# Register custom modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CRIMILD_SOURCE_DIR}/CMakeTools")
+include( crimild_read_version )
+include( crimild_trace )
 
-INCLUDE(MacroExtractArchive)
-INCLUDE(MacroConfigureSystem)
+project(
+	Crimild
+	VERSION "${CRIMILD_VERSION_MAJOR}.${CRIMILD_VERSION_MINOR}.${CRIMILD_VERSION_PATCH}"
+	DESCRIPTION "Crimild Engine"
+	LANGUAGES CXX
+)
 
-ADD_DEFINITIONS(-DCRIMILD_VERSION_MAJOR=5)
-ADD_DEFINITIONS(-DCRIMILD_VERSION_MINOR=0)
-ADD_DEFINITIONS(-DCRIMILD_VERSION_PATCH=0)
+# Check if Crimild is the current project
+# This is useful when setting defaults, since some modules are
+# only available when Crimild is built as a standalone project.
+if( PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME )
+	set( CRIMILD_IS_MAIN_PROJECT ON )
+else()
+	set( CRIMILD_IS_MAIN_PROJECT OFF )
+endif()
 
-# Configuration options
-OPTION(CRIMILD_ENABLE_TESTS "Would you like to enable unit tests?" ON)
-OPTION(CRIMILD_ENABLE_IMPORT "Build importers?" ON)
-OPTION(CRIMILD_ENABLE_STB "Would you like to build the crimild-stb extension" ON)
-OPTION(CRIMILD_ENABLE_SCRIPTING "Would you like to build the crimild-scripting extension?" ON)
-OPTION(CRIMILD_ENABLE_OPENAL "Would you like to build the crimild-openal extension" ON)
-OPTION(CRIMILD_ENABLE_GLFW "Would you like to build the crimild-glfw extension?" ON)
-OPTION(CRIMILD_ENABLE_VULKAN "Would you like to build the crimild-vulkan extension?" ON)
-OPTION(CRIMILD_ENABLE_IMGUI "Would you like to build the crimild-imgui extension?" ON)
-OPTION(CRIMILD_SCRIPTING_LOG_VERBOSE "Enable verbose logs for scripting system" OFF)
-OPTION(CRIMILD_BUILD_TOOLS "Build tools?" ON)
-OPTION(CRIMILD_BUNDLE_APPS "Enable bundles for apps" OFF)
-OPTION(CRIMILD_BUILD_EXAMPLES "Would you like to build examples?" ON)
+# Define build options here
+option( CRIMILD_BUILD_TESTS "Build tests" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_IMPORT "Build importers?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_STB "Build the STB extension" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_VULKAN "Build the crimild-vulkan extension?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_GLFW "Build the crimild-glfw extension?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_IMGUI "Build the crimild-imgui extension?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_EXAMPLES "Build examples?" ${CRIMILD_IS_MAIN_PROJECT} )
 
-# DEPRECATED
-OPTION(CRIMILD_ENABLE_PHYSICS "(DEPRECATED) Would you like to build the crimild-physics extension?" OFF)
+# Global tests setup
+# Individual directories have to enable their tests too.
+if( CRIMILD_BUILD_TESTS )
+	include( crimild_configure_tests )
+endif ()
 
-IF(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-	SET(CRIMILD_ENABLE_EMSCRIPTEN ON)
-ELSE()
-	SET(CRIMILD_ENABLE_EMSCRIPTEN OFF)
-ENDIF()
+# Add subdirectories
+add_subdirectory( core )
 
-IF(CRIMILD_ENABLE_TESTS)
-	ENABLE_TESTING()
+if( CRIMILD_BUILD_IMPORT )
+	add_definitions( -DCRIMILD_ENABLE_IMPORT=1 )
 
-	# For Windows: Prevent overriding the parent project's compiler/linker settings
-	SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+	set( ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build Static libs" )
+	set( BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libs" )
+	set( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build Assimp tests" )
+	set( ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build Assimp tools" )
+	add_subdirectory( ${PROJECT_SOURCE_DIR}/third-party/assimp )
 
-	ADD_SUBDIRECTORY(${CRIMILD_SOURCE_DIR}/third-party/googletest)
-ENDIF(CRIMILD_ENABLE_TESTS)
+	add_subdirectory( import )
+endif()
 
-# Add core sources
-ADD_SUBDIRECTORY(core)
+if( CRIMILD_BUILD_STB )
+	add_subdirectory( stb )
+endif()
 
-IF(CRIMILD_ENABLE_STB)
-	ADD_SUBDIRECTORY(stb)
-ENDIF()
+if( CRIMILD_BUILD_VULKAN )
+	add_definitions( -DCRIMILD_ENABLE_VULKAN=1 )
+	
+	set( SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip installation" )
+	set( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
+	set( BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External" )
+	set( ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper" )
+	set( ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap" )
+	add_subdirectory( ${Crimild_SOURCE_DIR}/third-party/glslang )
+	
+	add_subdirectory(vulkan)
+endif()
 
-IF(CRIMILD_ENABLE_IMGUI)
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_IMGUI=1)
-	ADD_SUBDIRECTORY(imgui)
-ENDIF()
+if( CRIMILD_BUILD_IMGUI )
+	add_definitions( -DCRIMILD_ENABLE_IMGUI=1 )
+	add_subdirectory( imgui )
+endif()
 
-IF(CRIMILD_ENABLE_IMPORT)
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_IMPORT=1)
+if( CRIMILD_BUILD_GLFW )
+	add_definitions( -DCRIMILD_ENABLE_GLFW=1 )
 
-	SET(ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build Static libs")
-	SET(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libs")
-	SET(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build Assimp tests")
-	SET(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build Assimp tools")
+	set( GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" )
+	set( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" )
+	set( GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" )
+	set( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
+	add_subdirectory( ${Crimild_SOURCE_DIR}/third-party/glfw )
 
-	ADD_SUBDIRECTORY(${CRIMILD_SOURCE_DIR}/third-party/assimp)
-	ADD_SUBDIRECTORY(import)
-ENDIF(CRIMILD_ENABLE_IMPORT)
+	add_subdirectory( glfw )
+endif()
 
-IF(CRIMILD_ENABLE_PHYSICS)
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_PHYSICS=1)
-	ADD_SUBDIRECTORY(physics)
-ENDIF(CRIMILD_ENABLE_PHYSICS)
-
-# Add scripting sources
-iF(CRIMILD_ENABLE_SCRIPTING)
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_SCRIPTING=1)
-
-	# Extract lua sources if needed
-	EXTRACT_ARCHIVE(lua-5.3.4.tar.gz lua ${CRIMILD_SOURCE_DIR}/third-party)
-
-	IF(CRIMILD_SCRIPTING_LOG_VERBOSE)
-		ADD_DEFINITIONS(-DCRIMILD_SCRIPTING_LOG_VERBOSE=1)
-	ENDIF()
-
-	ADD_SUBDIRECTORY(scripting)
-ENDIF()
-
-IF(CRIMILD_ENABLE_OPENAL)
-	IF(APPLE)
-		ADD_DEFINITIONS(-DCRIMILD_ENABLE_OPENAL=1)
-		ADD_SUBDIRECTORY(openal)
-	ELSE()
-		MESSAGE("OpenAL extensions are not supported in this system")
-	ENDIF()
-ENDIF()
-
-IF(CRIMILD_ENABLE_VULKAN)
-	SET(SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip installation")
-	SET(ENABLE_CTEST OFF CACHE BOOL "Enables testing")
-	SET(BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External")
-	SET(ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper")
-	SET(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap")
-	ADD_SUBDIRECTORY(${CRIMILD_SOURCE_DIR}/third-party/glslang)
-
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_VULKAN=1)
-	ADD_SUBDIRECTORY(vulkan)
-ENDIF()
-
-IF(CRIMILD_ENABLE_GLFW)
-	ADD_DEFINITIONS(-DCRIMILD_ENABLE_GLFW=1)
-
-	IF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-		SET(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation")
-		SET(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
-		SET(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs")
-		SET(ENABLE_CTEST OFF CACHE BOOL "Enables testing")
-
-		ADD_SUBDIRECTORY(${CRIMILD_SOURCE_DIR}/third-party/glfw)
-	ELSE()
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_GLFW=3")
-	ENDIF()
-
-	ADD_SUBDIRECTORY(glfw)
-ENDIF(CRIMILD_ENABLE_GLFW)
-
-IF(CRIMILD_BUILD_TOOLS)
-	IF(APPLE)
-		ADD_SUBDIRECTORY(tools)
-	ELSE()
-		MESSAGE("Tools are not supported in this system")
-	ENDIF()
-ENDIF(CRIMILD_BUILD_TOOLS)
-
-IF(CRIMILD_BUILD_EXAMPLES)
-	ADD_SUBDIRECTORY(examples)
-ENDIF()
+if( CRIMILD_BUILD_EXAMPLES )
+	add_subdirectory( examples )
+endif()

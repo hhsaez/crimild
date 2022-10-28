@@ -1,6 +1,3 @@
-MESSAGE( "-- Configuring import library" )
+crimild_trace()
 
-SET( CRIMILD_LIBRARY_NAME import )
-
-ADD_SUBDIRECTORY( src )
-
+add_subdirectory( src )
