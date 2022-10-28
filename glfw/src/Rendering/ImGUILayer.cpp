@@ -627,9 +627,9 @@ void ImGUILayer::createRenderPassObjects( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -673,10 +673,10 @@ void ImGUILayer::createRenderPassObjects( void ) noexcept
                 .dstSet = m_renderPassObjects.descriptorSets[ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             },
         };
@@ -797,9 +797,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( m_renderDevice->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -832,9 +832,9 @@ void ImGUILayer::createFontAtlas( void ) noexcept
 
     for ( size_t i = 0; i < m_fontAtlas.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_fontAtlas.imageView,
             .sampler = m_fontAtlas.sampler,
+            .imageView = m_fontAtlas.imageView,
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
 
         const auto writes = std::array< VkWriteDescriptorSet, 1 > {
@@ -843,10 +843,10 @@ void ImGUILayer::createFontAtlas( void ) noexcept
                 .dstSet = m_fontAtlas.descriptorSets[ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
-                .pBufferInfo = nullptr,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = &imageInfo,
+                .pBufferInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
         };

@@ -151,6 +151,7 @@ bool crimild::editor::loadNewScene( void )
 
     auto scene = createDefaultScene();
     Simulation::getInstance()->setScene( scene );
+    return true;
 }
 
 bool crimild::editor::addToScene( SharedPointer< Node > const &node ) noexcept

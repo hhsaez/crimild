@@ -46,7 +46,7 @@
     #include <Crimild_ImGUI.hpp>
 #endif
 
-void errorCallback( int error, const char *description )
+static void errorCallback( int error, const char *description )
 {
     CRIMILD_LOG_FATAL( "GLFW Error: (", error, ") ", description );
 }
