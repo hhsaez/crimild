@@ -31,131 +31,155 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
-    void onStarted( void ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
-        setScene( [ & ] {
-            auto scene = crimild::alloc< Group >();
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            setScene( [ & ] {
+                auto scene = crimild::alloc< Group >();
 
-            scene->attachNode(
-                [] {
-                    auto primitive = crimild::alloc< BoxPrimitive >(
-                        BoxPrimitive::Params {
-                            .type = Primitive::Type::TRIANGLES,
-                            .layout = VertexP3N3TC2::getLayout(),
-                        } );
+                scene->attachNode(
+                    [] {
+                        auto primitive = crimild::alloc< BoxPrimitive >(
+                            BoxPrimitive::Params {
+                                .type = Primitive::Type::TRIANGLES,
+                                .layout = VertexP3N3TC2::getLayout(),
+                            }
+                        );
 
-                    auto material = [] {
-                        auto material = crimild::alloc< LitMaterial >();
-                        material->setMetallic( 0.0f );
-                        material->setRoughness( 1.0f );
-                        material->setAlbedo( ColorRGB { 250.0 / 255.0, 128.0 / 255.0, 114.0 / 255.0 } );
-                        return material;
-                    }();
-
-                    auto group = crimild::alloc< Group >();
-                    for ( auto i = 0; i < 30; ++i ) {
-                        group->attachNode(
-                            [ & ] {
-                                auto geometry = crimild::alloc< Geometry >();
-                                geometry->attachPrimitive( primitive );
-
-                                const auto T = translation( 30 - 2 * i, 0, 100 - 7 * i );
-                                const auto S = scale( 1, 20, 1 );
-                                geometry->setLocal( T * S );
-
-                                geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
-
-                                return geometry;
-                            }() );
-                    }
-                    return group;
-                }() );
-
-            scene->attachNode(
-                [] {
-                    auto geometry = crimild::alloc< Geometry >();
-                    geometry->attachPrimitive(
-                        crimild::alloc< QuadPrimitive >(
-                            QuadPrimitive::Params {} ) );
-                    geometry->setLocal(
-                        [] {
-                            const auto R = rotationX( -Numericf::HALF_PI );
-                            const auto S = scale( 100.0f );
-                            const auto T = translation( 0.0f, -15.0f, 0.0f );
-                            return T * R * S;
-                        }() );
-                    geometry->attachComponent< MaterialComponent >()->attachMaterial(
-                        [] {
-                            auto material = crimild::alloc< LitMaterial >();
+                        auto material = [] {
+                            auto material = crimild::alloc< materials::PrincipledBSDF >();
                             material->setMetallic( 0.0f );
                             material->setRoughness( 1.0f );
+                            material->setAlbedo( ColorRGB { 250.0 / 255.0, 128.0 / 255.0, 114.0 / 255.0 } );
                             return material;
-                        }() );
-                    return geometry;
-                }() );
+                        }();
 
-            scene->attachNode( [] {
-                auto camera = crimild::alloc< Camera >( 60, 4.0f / 3.0f, 1.0f, 500.0f );
-                camera->setLocal( translation( 15.0f, 20.0f, 50.0f ) );
-                camera->attachComponent< FreeLookCameraComponent >();
-                return camera;
-            }() );
+                        auto group = crimild::alloc< Group >();
+                        for ( auto i = 0; i < 30; ++i ) {
+                            group->attachNode(
+                                [ & ] {
+                                    auto geometry = crimild::alloc< Geometry >();
+                                    geometry->attachPrimitive( primitive );
 
-            scene->attachNode(
-                [ & ] {
-                    auto light = crimild::alloc< Group >();
+                                    const auto T = translation( 30 - 2 * i, 0, 100 - 7 * i );
+                                    const auto S = scale( 1, 20, 1 );
+                                    geometry->setLocal( T * S );
 
-                    light->attachNode(
-                        [] {
-                            auto group = crimild::alloc< Group >();
+                                    geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
 
-                            auto material = crimild::alloc< UnlitMaterial >();
-                            material->setColor( ColorRGBA::Constants::WHITE );
+                                    return geometry;
+                                }()
+                            );
+                        }
+                        return group;
+                    }()
+                );
 
-                            auto primitive = crimild::alloc< ArrowPrimitive >(
-                                ArrowPrimitive::Params {
-                                    .type = Primitive::Type::TRIANGLES,
-                                    .layout = VertexP3N3TC2::getLayout(),
-                                } );
+                scene->attachNode(
+                    [] {
+                        auto geometry = crimild::alloc< Geometry >();
+                        geometry->attachPrimitive(
+                            crimild::alloc< QuadPrimitive >(
+                                QuadPrimitive::Params {}
+                            )
+                        );
+                        geometry->setLocal(
+                            [] {
+                                const auto R = rotationX( -Numericf::HALF_PI );
+                                const auto S = scale( 100.0f );
+                                const auto T = translation( 0.0f, -15.0f, 0.0f );
+                                return T * R * S;
+                            }()
+                        );
+                        geometry->attachComponent< MaterialComponent >()->attachMaterial(
+                            [] {
+                                auto material = crimild::alloc< materials::PrincipledBSDF >();
+                                material->setMetallic( 0.0f );
+                                material->setRoughness( 1.0f );
+                                return material;
+                            }()
+                        );
+                        return geometry;
+                    }()
+                );
 
-                            auto rnd = Random::Generator( 1999 );
-                            for ( auto i = 0; i < 3; i++ ) {
-                                auto geometry = crimild::alloc< Geometry >();
-                                geometry->attachPrimitive( primitive );
-                                geometry->setLocal(
-                                    translation(
-                                        rnd.generate( -2.0f, 2.0f ),
-                                        rnd.generate( -2.0f, 2.0f ),
-                                        rnd.generate( -1.0f, 1.0f ) ) );
-                                geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
-                                group->attachNode( geometry );
-                            }
-
-                            return group;
-                        }() );
-
-                    light->attachNode(
-                        [] {
-                            auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-                            light->setCastShadows( true );
-                            return light;
-                        }() );
-
-                    light->setLocal(
+                scene->attachNode( [] {
+                    auto camera = crimild::alloc< Camera >( 60, 4.0f / 3.0f, 1.0f, 500.0f );
+                    camera->setLocal(
                         lookAt(
-                            Point3 { 20, 20, 20 },
+                            Point3 { 100, 20, 100 },
                             Point3 { 0, 0, 0 },
-                            Vector3::Constants::UP ) );
-
-                    auto pivot = crimild::alloc< Group >();
-                    pivot->attachNode( light );
-                    return pivot;
+                            Vector3::Constants::UP
+                        )
+                    );
+                    return camera;
                 }() );
 
-            scene->perform( StartComponents() );
+                scene->attachNode(
+                    [ & ] {
+                        auto light = crimild::alloc< Group >();
 
-            return scene;
-        }() );
+                        light->attachNode(
+                            [] {
+                                auto group = crimild::alloc< Group >();
+
+                                auto material = crimild::alloc< UnlitMaterial >();
+                                material->setColor( ColorRGBA::Constants::WHITE );
+
+                                auto primitive = crimild::alloc< ArrowPrimitive >(
+                                    ArrowPrimitive::Params {
+                                        .type = Primitive::Type::TRIANGLES,
+                                        .layout = VertexP3N3TC2::getLayout(),
+                                    }
+                                );
+
+                                auto rnd = Random::Generator( 1999 );
+                                for ( auto i = 0; i < 3; i++ ) {
+                                    auto geometry = crimild::alloc< Geometry >();
+                                    geometry->attachPrimitive( primitive );
+                                    geometry->setLocal(
+                                        translation(
+                                            rnd.generate( -2.0f, 2.0f ),
+                                            rnd.generate( -2.0f, 2.0f ),
+                                            rnd.generate( -1.0f, 1.0f )
+                                        )
+                                    );
+                                    geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
+                                    group->attachNode( geometry );
+                                }
+
+                                return group;
+                            }()
+                        );
+
+                        light->attachNode(
+                            [] {
+                                auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                                light->setCastShadows( true );
+                                return light;
+                            }()
+                        );
+
+                        light->setLocal(
+                            lookAt(
+                                Point3 { -100, 20, 100 },
+                                Point3 { 0, 0, 0 },
+                                Vector3::Constants::UP
+                            )
+                        );
+
+                        auto pivot = crimild::alloc< Group >();
+                        pivot->attachNode( light );
+                        return pivot;
+                    }()
+                );
+
+                scene->perform( StartComponents() );
+
+                return scene;
+            }() );
+        }
     }
 };
 
