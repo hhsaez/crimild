@@ -1652,3 +1652,68 @@ void utils::endSingleTimeCommands( RenderDeviceOLD *renderDevice, VkCommandBuffe
         &commandBuffer
     );
 }
+
+std::ostream &operator<<( std::ostream &out, VkImageLayout layout ) noexcept
+{
+    switch ( layout ) {
+        case VK_IMAGE_LAYOUT_UNDEFINED:
+            out << "VK_IMAGE_LAYOUT_UNDEFINED";
+            break;
+        case VK_IMAGE_LAYOUT_GENERAL:
+            out << "VK_IMAGE_LAYOUT_GENERAL";
+            break;
+        case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_PREINITIALIZED:
+            out << "VK_IMAGE_LAYOUT_PREINITIALIZED";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL:
+            out << "VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL";
+            break;
+        case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+            out << "VK_IMAGE_LAYOUT_PRESENT_SRC_KHR";
+            break;
+        default:
+            out << "Unknown (" << uint32_t( layout ) << ")";
+            break;
+    }
+
+    return out;
+}
