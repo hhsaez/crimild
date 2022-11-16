@@ -61,7 +61,13 @@ public:
     {
         visit(
             group,
-            [ & ] { NodeVisitor::visitGroup( group ); },
+            [ & ] {
+                group->forEachNode(
+                    [ & ]( Node *node ) { node->accept( *this ); },
+                    // Include disabled nodes too
+                    false
+                );
+            },
             group->getNodeCount() == 0,
             true
         );
@@ -102,7 +108,11 @@ private:
         }
 
         ImGui::PushID( node->getUniqueID() );
+        ImGui::PushStyleColor( ImGuiCol_Text, node->isEnabled() ? IM_COL32( 255, 255, 255, 255 ) : IM_COL32( 255, 255, 255, 64 ) );
+
         const auto isOpen = ImGui::TreeNodeEx( getNodeName( node ).c_str(), flags );
+
+        ImGui::PopStyleColor();
         ImGui::PopID();
 
         if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
