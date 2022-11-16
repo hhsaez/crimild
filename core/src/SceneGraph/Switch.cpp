@@ -32,14 +32,13 @@ using namespace crimild;
 Switch::Switch( std::string name )
     : Group( name )
 {
-
 }
 
 Switch::~Switch( void )
 {
 }
 
-void Switch::forEachNode( std::function< void( Node * ) > callback )
+void Switch::forEachNode( std::function< void( Node * ) > callback, bool )
 {
     if ( !hasNodes() ) {
         return;
@@ -65,7 +64,7 @@ void Switch::selectPrevNode( void )
     if ( !hasNodes() ) {
         return;
     }
-    
+
     _currentIndex = ( _currentIndex + getNodeCount() - 1 ) % getNodeCount();
 }
 
@@ -73,4 +72,3 @@ Node *Switch::getCurrentNode( void )
 {
     return getNodeAt( _currentIndex );
 }
-
