@@ -32,6 +32,7 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Transformation_constants.hpp"
 #include "Mathematics/Transformation_euler.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
@@ -106,20 +107,46 @@ void crimild::editor::sceneMenu( void ) noexcept
                 auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
                 light->setName( "Directional Light" );
                 light->setEnergy( 5 );
-                addToScene( withRotationY( light, -numbers::PI_DIV_4 ) );
+                light->setCastShadows( true );
+                light->setLocal(
+                    lookAt(
+                        Point3 { -5, 5, 10 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+                addToScene( light );
             }
             if ( ImGui::MenuItem( "Point" ) ) {
                 addToScene(
                     withTranslation(
                         withName(
                             crimild::alloc< Light >( Light::Type::POINT ),
-                            "Point Light" ),
+                            "Point Light"
+                        ),
                         0,
                         1,
-                        0 ) );
+                        0
+                    )
+                );
             }
             if ( ImGui::MenuItem( "Spot" ) ) {
-                addToScene( withName( crimild::alloc< Light >( Light::Type::SPOT ), "Spot Light" ) );
+                auto light = crimild::alloc< Light >( Light::Type::SPOT );
+                light->setName( "Spot Light" );
+                light->setColor( ColorRGB { 1.0f, 1.0f, 1.0f } );
+                light->setCastShadows( true );
+                light->setEnergy( 1000.0f );
+                light->setInnerCutoff( Numericf::DEG_TO_RAD * 20.0f );
+                light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
+                light->setLocal(
+                    lookAt(
+                        Point3 { 10, 10, 0 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+
+                addToScene( light );
             }
 
             ImGui::EndMenu();

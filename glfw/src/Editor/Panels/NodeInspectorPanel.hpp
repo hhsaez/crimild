@@ -33,12 +33,31 @@
 
 namespace crimild {
 
+    namespace vulkan {
+
+        class RenderDevice;
+
+    }
+
     class NodeInspectorPanel : public Layer {
     public:
-        NodeInspectorPanel( void ) = default;
+        class Section {
+        public:
+            virtual ~Section( void ) = default;
 
-        NodeInspectorPanel( const Point2 &position, const Extent2D extent ) noexcept
-            : m_position( position ),
+            virtual void render( Node *node ) noexcept = 0;
+        };
+
+    public:
+        NodeInspectorPanel( vulkan::RenderDevice *renderDevice ) noexcept
+            : m_renderDevice( renderDevice )
+        {
+            // no-op
+        }
+
+        NodeInspectorPanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D extent ) noexcept
+            : m_renderDevice( renderDevice ),
+              m_position( position ),
               m_extent( extent )
         {
             // no-op
@@ -46,11 +65,21 @@ namespace crimild {
 
         ~NodeInspectorPanel( void ) = default;
 
+        inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+
         virtual void render( void ) noexcept override;
 
     private:
+        void configure( Node *node ) noexcept;
+
+    private:
+        vulkan::RenderDevice *m_renderDevice = nullptr;
         Point2 m_position = { 5, 50 };
         Extent2D m_extent = { .width = 300, .height = 1000 };
+
+        Node *m_selectedNode = nullptr;
+
+        std::vector< std::unique_ptr< Section > > m_sections;
     };
 
 }
