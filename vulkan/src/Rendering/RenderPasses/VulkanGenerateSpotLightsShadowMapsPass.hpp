@@ -25,11 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SHADOW_
-#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_SHADOW_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GENERATE_SPOT_LIGHTS_SHADOW_MAPS_
+#define CRIMILD_VULKAN_RENDERING_RENDER_PASSES_GENERATE_SPOT_LIGHTS_SHADOW_MAPS_
 
-#include "Mathematics/Matrix4_constants.hpp"
-#include "Mathematics/Vector2.hpp"
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
@@ -37,34 +35,37 @@
 
 namespace crimild {
 
+    class UniformBuffer;
+    class Simulation;
+    class Light;
+    class Primitive;
+    class Geometry;
+    class Node;
     class Camera;
 
     namespace vulkan {
 
+        class Framebuffer;
         class RenderDevice;
-        class GenerateDirectionalLightsShadowMaps;
-        class GenerateSpotLightsShadowMaps;
-        class GeneratePointLightsShadowMaps;
+        class RenderPass;
+        class GraphicsPipeline;
 
         /**
-         * \brief Compute shadows from lights
+         * \brief Generate shadows for spot lights
          *
-         * \details Some description here
+         * \details This pass generates shadow maps only for spot lights. For each spot light,
+         * we generate its shadow map using a shared framebuffer which is later copied into the lights
+         * own shadow map image.
          *
          * \todo Support different shadow resultions (HIGH, MED, LOW). Not sure if custom resulutions should
          * be supported, though.
          *
-         * \todo Dispatch different render passes for each light. That way we can parallelize shadow map generation.
-         * Requires render passes with their own command buffers. Also, creating one render pass per light might be too
-         * much. Maybe we can use a pool of render passes?
-         *
-         * \todo
-         * - Fix shadows for multiple lights
+         * \todo Generate cascaded shadow maps instead of simple ones.
          */
-        class ShadowPass : public RenderPassBase {
+        class GenerateSpotLightsShadowMaps : public RenderPassBase {
         public:
-            ShadowPass( RenderDevice *renderDevice ) noexcept;
-            virtual ~ShadowPass( void ) noexcept;
+            GenerateSpotLightsShadowMaps( RenderDevice *renderDevice ) noexcept;
+            virtual ~GenerateSpotLightsShadowMaps( void ) noexcept;
 
             Event handle( const Event & ) noexcept;
 
@@ -75,9 +76,34 @@ namespace crimild {
             ) noexcept;
 
         private:
-            SharedPointer< GenerateDirectionalLightsShadowMaps > m_generateDirectionalLightsShadowMaps;
-            SharedPointer< GenerateSpotLightsShadowMaps > m_generateSpotLightsShadowMaps;
-            SharedPointer< GeneratePointLightsShadowMaps > m_generatePointLightsShadowMaps;
+            void init( void ) noexcept;
+            void clear( void ) noexcept;
+
+            [[nodiscard]] inline const FramebufferAttachment *getShadowAttachment( void ) const noexcept { return &m_shadowAttachment; }
+
+            void renderShadowMap(
+                const Light *light,
+                const SceneRenderState::ShadowCasters &shadowCasters,
+                const Matrix4f &lightSpaceMatrix,
+                SharedPointer< vulkan::Image > const &shadowMapImage
+            ) noexcept;
+
+            void createRenderPassObjects( void ) noexcept;
+            void destroyRenderPassObjects( void ) noexcept;
+
+            void createGeometryObjects( void ) noexcept;
+            void bindGeometryDescriptors( VkCommandBuffer cmds, Index currentFrameIndex, Geometry *geometry ) noexcept;
+            void destroyGeometryObjects( void ) noexcept;
+
+            void drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept;
+
+        private:
+            std::shared_ptr< vulkan::RenderPass > m_renderPass;
+            std::vector< std::shared_ptr< vulkan::Framebuffer > > m_framebuffers;
+
+            vulkan::FramebufferAttachment m_shadowAttachment;
+
+            std::unique_ptr< GraphicsPipeline > m_pipeline;
         };
 
     }

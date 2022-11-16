@@ -473,6 +473,7 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                     layout ( location = 3 ) out vec3 outScale;
                     layout ( location = 4 ) out vec3 outModelPosition;
                     layout ( location = 5 ) out vec3 outModelNormal;
+                    layout ( location = 6 ) out vec3 outViewPosition;
 
                     void main()
                     {
@@ -489,6 +490,8 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
 
                         outModelPosition = inPosition;
                         outModelNormal = inNormal;
+
+                        outViewPosition = ( view * model * vec4( inPosition, 1 ) ).xyz;
                     }
                 )"
             ),
@@ -501,6 +504,7 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                     layout ( location = 3 ) in vec3 inScale;
                     layout ( location = 4 ) in vec3 inModelPosition;
                     layout ( location = 5 ) in vec3 inModelNormal;
+                    layout ( location = 6 ) in vec3 inViewPosition;
 
                     layout( set = 1, binding = 0 ) uniform MaterialUniform
                     {
@@ -560,7 +564,7 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
                         frag_main( frag );
 
                         outAlbedo = vec4( frag.albedo, 1.0 );
-                        outPosition = vec4( frag.position, gl_FragCoord.z );
+                        outPosition = vec4( frag.position, inViewPosition.z );
                         outNormal = vec4( frag.normal, 1.0 );
                         outMaterial = vec4( frag.metallic, frag.roughness, frag.ambientOcclusion, 1.0 );
                     }

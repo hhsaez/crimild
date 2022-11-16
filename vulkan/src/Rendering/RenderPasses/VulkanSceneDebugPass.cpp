@@ -121,8 +121,30 @@ public:
                     light->getRadius(),
                     ColorRGB { 1, 1, 0 }
                 );
+                DebugDrawManager::addLine(
+                    P,
+                    P + 3.0 * forward( light->getWorld() ),
+                    ColorRGB { 1, 1, 0 }
+                );
                 break;
             }
+            
+            case Light::Type::SPOT: {
+                const auto P = location( light->getWorld() );
+                DebugDrawManager::addCircle(
+                    P,
+                    forward( m_camera->getWorld() ),
+                    light->getRadius(),
+                    ColorRGB { 1, 1, 0 }
+                );
+                DebugDrawManager::addLine(
+                    P,
+                    P + 3.0 * forward( light->getWorld() ),
+                    ColorRGB { 1, 1, 0 }
+                );
+                break;
+            }
+
 
             case Light::Type::DIRECTIONAL: {
                 const auto P = location( light->getWorld() );
@@ -134,7 +156,7 @@ public:
                 );
                 DebugDrawManager::addLine(
                     P,
-                    P + 3.0 * forward( light->getWorld() ),
+                    P + 10.0 * forward( light->getWorld() ),
                     ColorRGB { 1, 1, 0 }
                 );
                 break;
