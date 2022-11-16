@@ -31,117 +31,138 @@ using namespace crimild;
 
 class Example : public Simulation {
 public:
-    void onStarted( void ) noexcept override
+    virtual Event handle( const Event &e ) noexcept override
     {
-        setScene( [ & ] {
-            auto scene = crimild::alloc< Group >();
+        const auto ret = Simulation::handle( e );
+        if ( ret.type == Event::Type::SIMULATION_START ) {
+            setScene( [ & ] {
+                auto scene = crimild::alloc< Group >();
 
-            scene->attachNode(
-                [] {
-                    auto primitive = crimild::alloc< BoxPrimitive >(
-                        BoxPrimitive::Params {
-                            .type = Primitive::Type::TRIANGLES,
-                            .layout = VertexP3N3TC2::getLayout(),
-                        } );
+                scene->attachNode(
+                    [] {
+                        auto primitive = crimild::alloc< BoxPrimitive >(
+                            BoxPrimitive::Params {
+                                .type = Primitive::Type::TRIANGLES,
+                                .layout = VertexP3N3TC2::getLayout(),
+                            }
+                        );
 
-                    auto material = [] {
-                        auto material = crimild::alloc< LitMaterial >();
-                        material->setMetallic( 0.0f );
-                        material->setRoughness( 1.0f );
-                        return material;
-                    }();
-
-                    auto group = crimild::alloc< Group >();
-                    auto rnd = Random::Generator( 1982 );
-                    group->attachNode(
-                        [ & ] {
-                            auto geometry = crimild::alloc< Geometry >();
-                            geometry->attachPrimitive( primitive );
-
-                            geometry->local().setTranslate(
-                                rnd.generate( -10.0f, 10.0f ),
-                                rnd.generate( -10.0f, 10.0f ),
-                                rnd.generate( -10.0f, 10.0f ) );
-
-                            geometry->local().setScale( rnd.generate( 0.75f, 1.5f ) );
-
-                            geometry->local().rotate().fromAxisAngle(
-                                Vector3f(
-                                    rnd.generate( 0.01f, 1.0f ),
-                                    rnd.generate( 0.01f, 1.0f ),
-                                    rnd.generate( 0.01f, 1.0f ) )
-                                    .getNormalized(),
-                                rnd.generate( 0.0f, Numericf::TWO_PI ) );
-
-                            geometry->attachComponent< LambdaComponent >(
-                                [ origin = geometry->getLocal().getTranslate(),
-                                  speed = ( rnd.generate( -1.0f, 1.0f ) < 0 ? -1.0f : 1.0f ) * rnd.generate( 1.0f, 6.0f ) ]( auto node, const auto &clock ) {
-                                    node->local().setTranslate( origin + Vector3f::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) );
-                                } );
-
-                            geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
-
-                            return geometry;
-                        }() );
-                    return group;
-                }() );
-
-            scene->attachNode(
-                [] {
-                    auto geometry = crimild::alloc< Geometry >();
-                    geometry->attachPrimitive(
-                        crimild::alloc< QuadPrimitive >(
-                            QuadPrimitive::Params {} ) );
-                    geometry->setLocal(
-                        [] {
-                            Transformation t;
-                            t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
-                            t.setScale( 100.0f );
-                            t.setTranslate( 0.0f, -15.0f, 0.0f );
-                            return t;
-                        }() );
-                    geometry->attachComponent< MaterialComponent >()->attachMaterial(
-                        [] {
-                            auto material = crimild::alloc< LitMaterial >();
+                        auto material = [] {
+                            auto material = crimild::alloc< materials::PrincipledBSDF >();
                             material->setMetallic( 0.0f );
                             material->setRoughness( 1.0f );
                             return material;
-                        }() );
-                    return geometry;
+                        }();
+
+                        auto group = crimild::alloc< Group >();
+                        auto rnd = Random::Generator( 1982 );
+                        group->attachNode(
+                            [ & ] {
+                                auto geometry = crimild::alloc< Geometry >();
+                                geometry->attachPrimitive( primitive );
+
+                                geometry->setLocal( translation(
+                                    rnd.generate( -10.0f, 10.0f ),
+                                    rnd.generate( -10.0f, 10.0f ),
+                                    rnd.generate( -10.0f, 10.0f )
+                                ) );
+
+                                geometry->attachComponent< LambdaComponent >(
+                                    [ origin = location( geometry->getLocal() ),
+                                      speed = ( rnd.generate( -1.0f, 1.0f ) < 0 ? -1.0f : 1.0f ) * rnd.generate( 1.0f, 6.0f ) ](
+                                        auto node,
+                                        const auto &clock
+                                    ) {
+                                        node->setLocal( translation( vector3( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
+                                    }
+                                );
+
+                                geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
+
+                                return geometry;
+                            }()
+                        );
+                        return group;
+                    }()
+                );
+
+                scene->attachNode(
+                    [] {
+                        auto geometry = crimild::alloc< Geometry >();
+                        geometry->attachPrimitive(
+                            crimild::alloc< QuadPrimitive >(
+                                QuadPrimitive::Params {}
+                            )
+                        );
+                        geometry->setLocal(
+                            [] {
+                                const auto R = rotationX( -Numericf::HALF_PI );
+                                const auto S = scale( 100.0f );
+                                const auto T = translation( 0.0f, -15.0f, 0.0f );
+                                return T * R * S;
+                            }()
+                        );
+                        geometry->attachComponent< MaterialComponent >()->attachMaterial(
+                            [] {
+                                auto material = crimild::alloc< materials::PrincipledBSDF >();
+                                material->setMetallic( 0.0f );
+                                material->setRoughness( 1.0f );
+                                return material;
+                            }()
+                        );
+                        return geometry;
+                    }()
+                );
+
+                scene->attachNode( [] {
+                    auto camera = crimild::alloc< Camera >();
+                    camera->setLocal(
+                        lookAt(
+                            Point3 { 15, 20, 50 },
+                            Point3 { 0, 0, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
+                    return camera;
                 }() );
 
-            scene->attachNode( [] {
-                auto camera = crimild::alloc< Camera >();
-                camera->local().setTranslate( 15.0f, 20.0f, 50.0f );
-                camera->local().lookAt( 1.0 * Vector3f::UNIT_Y );
-                camera->attachComponent< FreeLookCameraComponent >();
-                return camera;
+                scene->attachNode(
+                    [ & ] {
+                        auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                        light->setColor( ColorRGB { 1.0f, 0.0f, 0.0f } );
+                        light->setCastShadows( true );
+                        light->setLocal(
+                            lookAt(
+                                Point3 { -20.0f, 20.0f, 20.0f },
+                                Point3 { 0, 0, 0 },
+                                Vector3::Constants::UP
+                            )
+                        );
+                        return light;
+                    }()
+                );
+
+                scene->attachNode(
+                    [ & ] {
+                        auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                        light->setColor( ColorRGB { 0.0f, 1.0f, 0.0f } );
+                        light->setCastShadows( true );
+                        light->setLocal(
+                            lookAt(
+                                Point3 { 20.0f, 20.0f, 0.0f },
+                                Point3 { 0, 0, 0 },
+                                Vector3::Constants::UP
+                            )
+                        );
+                        return light;
+                    }()
+                );
+
+                scene->perform( StartComponents() );
+
+                return scene;
             }() );
-
-            scene->attachNode(
-                [ & ] {
-                    auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-                    light->setColor( RGBAColorf( 1.0f, 0.0f, 0.0f ) );
-                    light->setCastShadows( true );
-                    light->local().setTranslate( -20.0f, 20.0f, 20.0f );
-                    light->local().lookAt( Vector3f::ZERO );
-                    return light;
-                }() );
-
-            scene->attachNode(
-                [ & ] {
-                    auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-                    light->setColor( RGBAColorf( 0.0f, 1.0f, 0.0f ) );
-                    light->setCastShadows( true );
-                    light->local().setTranslate( 20.0f, 20.0f, 0.0f );
-                    light->local().lookAt( Vector3f::ZERO );
-                    return light;
-                }() );
-
-            scene->perform( StartComponents() );
-
-            return scene;
-        }() );
+        }
     }
 };
 
