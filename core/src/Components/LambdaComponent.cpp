@@ -29,15 +29,18 @@
 
 using namespace crimild;
 
-LambdaComponent::LambdaComponent( LambdaComponent::Callback callback )
-	: _callback( callback )
+LambdaComponent::LambdaComponent( LambdaComponent::Callback callback, bool invokeOnStart )
+	: _callback( callback ),
+      m_invokeOnStart( invokeOnStart )
 {
 
 }
 
-LambdaComponent::~LambdaComponent( void )
+void LambdaComponent::start( void )
 {
-
+    if ( m_invokeOnStart ) {
+        _callback( getNode(), Clock( 1.0 / 60.0 ) );
+    }
 }
 
 void LambdaComponent::update( const Clock &c )

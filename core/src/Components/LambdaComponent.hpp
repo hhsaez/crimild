@@ -42,13 +42,15 @@ namespace crimild {
         using Callback = std::function< void( Node *, const Clock & ) >;
 
 	public:
-		LambdaComponent( Callback callback );
-		virtual ~LambdaComponent( void );
+		LambdaComponent( Callback callback, bool invokeOnStart = false );
+		virtual ~LambdaComponent( void ) = default;
 
+        virtual void start( void ) override;
 		virtual void update( const Clock &t ) override;
 
 	private:
         Callback _callback;
+        bool m_invokeOnStart = false;
 	};
 
 	using UpdateCallback = LambdaComponent;
