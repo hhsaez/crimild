@@ -37,7 +37,7 @@ namespace crimild {
 
     class CullFaceState;
 
-    class ShadowMap : public SharedObject {
+    class [[deprecated]] ShadowMap : public SharedObject {
     public:
         ShadowMap( void );
         virtual ~ShadowMap( void );
