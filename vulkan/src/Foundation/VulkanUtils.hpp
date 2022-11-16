@@ -316,6 +316,8 @@ namespace crimild {
 
 }
 
+std::ostream &operator<<( std::ostream &out, VkImageLayout layout ) noexcept;
+
 #define CRIMILD_VULKAN_CHECK( x )                                         \
     {                                                                     \
         VkResult ret = x;                                                 \
