@@ -30,6 +30,7 @@
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 #include "Rendering/RenderPasses/VulkanGBufferPass.hpp"
 #include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
+#include "Rendering/RenderPasses/VulkanShadowPass.hpp"
 #include "Rendering/RenderPasses/VulkanUnlitPass.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -63,6 +64,8 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
         }()
     );
 
+    m_shadowPass = crimild::alloc< ShadowPass >( renderDevice );
+
     m_gBuffer = crimild::alloc< GBufferPass >(
         renderDevice,
         std::vector< const FramebufferAttachment * > {
@@ -95,6 +98,7 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
 ScenePass::~ScenePass( void ) noexcept
 {
     m_clear = nullptr;
+    m_shadowPass = nullptr;
     m_gBuffer = nullptr;
     m_lighting = nullptr;
     m_unlit = nullptr;
@@ -120,6 +124,7 @@ Event ScenePass::handle( const Event &e ) noexcept
     }
 
     m_clear->handle( e );
+    m_shadowPass->handle( e );
     m_gBuffer->handle( e );
     m_lighting->handle( e );
     m_unlit->handle( e );
@@ -140,6 +145,8 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
         // Set correct aspect ratio for camera before rendering
         camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
     }
+
+    m_shadowPass->render( renderState.lights, renderState.shadowCasters, camera );
 
     m_gBuffer->render( renderState.litRenderables, camera );
 

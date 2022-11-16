@@ -27,13 +27,16 @@
 
 #include "Rendering/RenderPasses/VulkanLocalLightingPass.hpp"
 
+#include "Mathematics/Matrix4_operators.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanShadowMap.hpp"
 #include "SceneGraph/Camera.hpp"
 
 #include <array>
@@ -42,8 +45,11 @@ using namespace crimild;
 using namespace crimild::vulkan;
 
 struct DirectionalLightProps {
+    alignas( 4 ) Real32 castShadows = 0.0f;
     alignas( 16 ) Vector3f direction;
     alignas( 16 ) ColorRGBf color;
+    alignas( 16 ) Matrix4f lightSpaceMatrices[ 4 ];
+    alignas( 16 ) Vector4f splits;
 };
 
 static const auto DIRECTIONAL_LIGHT_VERT_SHADER = R"(
@@ -72,6 +78,8 @@ static const auto DIRECTIONAL_LIGHT_VERT_SHADER = R"(
 )";
 
 static const auto DIRECTIONAL_LIGHT_FRAG_SHADER = R"(
+    #define DIRECTIONAL_LIGHT_CASCADES 4
+
     layout ( location = 0 ) in vec2 inViewportSize;
 
     layout ( set = 0, binding = 1 ) uniform sampler2D uAlbedo;
@@ -80,25 +88,96 @@ static const auto DIRECTIONAL_LIGHT_FRAG_SHADER = R"(
     layout ( set = 0, binding = 4 ) uniform sampler2D uMaterial;
 
     layout ( set = 1, binding = 0 ) uniform LightProps {
+        float castShadows;
         vec3 direction;
         vec3 color;
+        mat4 lightSpaceMatrices[ DIRECTIONAL_LIGHT_CASCADES ];
+        vec4 splits;
     } uLight;
 
+    layout( set = 1, binding = 1 ) uniform sampler2DArray uShadowMap;
+
     layout( location = 0 ) out vec4 outColor;
+
+    const mat4 biasMat = mat4(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.5, 0.5, 0.0, 1.0
+    );
+
+    // Returns 1 if position is in shadows. 0 otherwise.
+    // If PCF is enabled, it might return a value in between [0, 1].
+    float readShadowMap( vec4 shadowCoord, vec2 offset, uint cascadeIndex )
+    {
+        float shadow = 0.0;
+        if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
+            float dist = texture( uShadowMap, vec3( shadowCoord.st + offset, cascadeIndex ) ).r;
+            if ( shadowCoord.w > 0 && dist < shadowCoord.z ) {
+                shadow = 1;
+            }
+        }
+        return shadow;
+    }
+
+    float calcShadow( vec3 P, float fragZ )
+    {
+        float shadow = 0.0;
+
+        // Get cascade index for the fragment's view position
+        // These are all negative values. Lower means farther away from the eye
+        uint cascadeIndex = 0;
+        for ( uint i = 0; i < DIRECTIONAL_LIGHT_CASCADES - 1; ++i ) {
+            if ( fragZ < uLight.splits[ i ] ) {
+                cascadeIndex = i + 1;
+            }
+        }
+
+        vec4 shadowCoord = biasMat * uLight.lightSpaceMatrices[ cascadeIndex ] * vec4( P, 1.0 );
+        shadowCoord /= shadowCoord.w;
+
+        // TODO: Move this to a setting
+        bool pcf = true;
+
+        if ( pcf ) {
+            ivec2 shadowMapSize = textureSize( uShadowMap, 0 ).xy;
+            float scale = 1.0;
+            float dx = scale * 1.0 / float( shadowMapSize.x );
+            float dy = scale * 1.0 / float( shadowMapSize.y );
+            int count = 0;
+            int range = 1;
+            for ( int x = -range; x <= range; ++x ) {
+                for ( int y = -range; y <= range; ++y ) {
+                    shadow += readShadowMap( shadowCoord, vec2( dx * x, dy * y ), cascadeIndex );
+                    count++;
+                }
+            }
+            shadow /= count;
+        } else {
+            shadow = readShadowMap( shadowCoord, vec2( 0 ), cascadeIndex );
+        }
+        
+        return shadow;
+    }
 
     void main()
     {
         vec2 uv = gl_FragCoord.st / inViewportSize;
 
         vec3 albedo = texture( uAlbedo, uv ).rgb;
-        vec3 N = normalize( texture( uNormal, uv ).rgb );
+        vec4 Pz = texture( uPosition, uv );
+        vec3 P = Pz.xyz;
+        float fragZ = Pz.w;
+        vec3 N = normalize( texture( uNormal, uv ).xyz );
 
         vec3 L = normalize( -uLight.direction );
 
         // Simple diffuse lighting
         vec3 diffuse = uLight.color * max( dot( N, L ), 0.0 );
 
-        outColor = vec4( albedo * diffuse, 1.0 );
+        float shadow = uLight.castShadows * calcShadow( P, fragZ );
+
+        outColor = vec4( albedo * diffuse * ( 1.0 - shadow ), 1.0 );
     }
 )";
 
@@ -106,6 +185,7 @@ struct PointLightProps {
     alignas( 16 ) Point3f position;
     alignas( 4 ) Real32 radius;
     alignas( 16 ) ColorRGBf color;
+    alignas( 4 ) float castShadows;
 };
 
 static const auto POINT_LIGHT_VERT_SHADER = R"(
@@ -121,6 +201,7 @@ static const auto POINT_LIGHT_VERT_SHADER = R"(
         vec3 position;
         float radius;
         vec3 color;
+        float castShadows;
     } uLight;
 
     layout ( location = 0 ) out vec2 outViewportSize;
@@ -145,7 +226,10 @@ static const auto POINT_LIGHT_FRAG_SHADER = R"(
         vec3 position;
         float radius;
         vec3 color;
+        float castShadows;
     } uLight;
+
+    layout( set = 1, binding = 1 ) uniform samplerCube uShadowMap;
 
     layout( location = 0 ) out vec4 outColor;
 
@@ -157,6 +241,38 @@ static const auto POINT_LIGHT_FRAG_SHADER = R"(
         float Kl = 2.0 / r;
         float Kq = 1 / ( r * r );
         return 1 / ( Kc + Kl * d + Kq * d * d );
+    }
+
+    // Pre-defined sample directions
+    vec3 sampleOffsetDirections[ 20 ] = vec3[] (
+        vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
+        vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+        vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+        vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+        vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+    );
+
+    // Performs shadow mapping with PCF
+    float inShadows( float distance, vec3 L )
+    {
+        float shadow = 0.0;
+        float bias = 0.15;
+        int samples = 20;
+        // Computes PCF disk radius using the current fragment's distance, so the
+        // further the fragment is from the light, the more softer the shadow.
+        float diskRadius = distance / pow( 1.0 + uLight.radius, 2.0 );
+        for ( int i = 0; i < samples; ++i ) {
+            float sampledDistance = texture( uShadowMap, normalize( L + sampleOffsetDirections[ i ] * diskRadius ) ).r;
+            if ( distance >= sampledDistance + bias ) {
+                shadow += 1;
+            }
+        }
+        shadow /= float( samples );
+        return shadow;
+
+        float sampledDistance = texture( uShadowMap, L ).r;
+        float EPSILON = 0.15;
+        return ( distance >= sampledDistance + EPSILON ? 1.0 : 0.0 );
     }
 
     void main()
@@ -177,17 +293,21 @@ static const auto POINT_LIGHT_FRAG_SHADER = R"(
         // Simple attenuation
         diffuse *= attenuation( distance, uLight.radius );
 
-        outColor = vec4( albedo * diffuse, 1.0 );
+        float shadow = uLight.castShadows * inShadows( distance, -L );
+
+        outColor = vec4( albedo * diffuse * ( 1.0 - shadow ), 1.0 );
     }
 )";
 
 struct SpotLightProps {
+    alignas( 4 ) Real32 castShadows = 0.0f;
     alignas( 16 ) Point3f position;
     alignas( 16 ) Vector3f direction;
     alignas( 4 ) Real32 radius;
     alignas( 16 ) ColorRGBf color;
     alignas( 4 ) Real32 innerCutoff;
     alignas( 4 ) Real32 outerCutoff;
+    alignas( 16 ) Matrix4f lightSpaceProjection;
 };
 
 static const auto SPOT_LIGHT_VERT_SHADER = R"(
@@ -200,12 +320,14 @@ static const auto SPOT_LIGHT_VERT_SHADER = R"(
     };
 
     layout ( set = 1, binding = 0 ) uniform LightProps {
+        float castShadows;
         vec3 position;
         vec3 direction;
         float radius;
         vec3 color;
         float innerCutoff;
         float outerCutoff;
+        mat4 lightSpaceProjection;
     } uLight;
 
     layout ( location = 0 ) out vec2 outViewportSize;
@@ -227,15 +349,70 @@ static const auto SPOT_LIGHT_FRAG_SHADER = R"(
     layout ( set = 0, binding = 4 ) uniform sampler2D uMaterial;
 
     layout ( set = 1, binding = 0 ) uniform LightProps {
+        float castShadows;
         vec3 position;
         vec3 direction;
         float radius;
         vec3 color;
         float innerCutoff;
         float outerCutoff;
+        mat4 lightSpaceProjection;
     } uLight;
 
+    layout( set = 1, binding = 1 ) uniform sampler2D uShadowMap;
+
     layout( location = 0 ) out vec4 outColor;
+
+    const mat4 biasMat = mat4(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.5, 0.5, 0.0, 1.0
+    );
+
+    // Returns 1 if position is in shadows. 0 otherwise.
+    // If PCF is enabled, it might return a value in between [0, 1].
+    float readShadowMap( vec4 shadowCoord, vec2 offset )
+    {
+        float shadow = 0.0;
+        if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) {
+            float dist = texture( uShadowMap, shadowCoord.st + offset ).r;
+            if ( shadowCoord.w > 0 && dist < shadowCoord.z ) {
+                shadow = 1;
+            }
+        }
+        return shadow;
+    }
+
+    float calcShadow( vec3 P )
+    {
+        float shadow = 0.0;
+
+        vec4 shadowCoord = biasMat * uLight.lightSpaceProjection * vec4( P, 1.0 );
+        shadowCoord /= shadowCoord.w;
+
+        // TODO: Move this to a setting
+        bool pcf = true;
+
+        if ( pcf ) {
+            ivec2 shadowMapSize = textureSize( uShadowMap, 0 );
+            float scale = 1.0;
+            float dx = scale * 1.0 / float( shadowMapSize.x );
+            float dy = scale * 1.0 / float( shadowMapSize.y );
+            int count = 0;
+            int range = 1;
+            for ( int x = -range; x <= range; ++x ) {
+                for ( int y = -range; y <= range; ++y ) {
+                    shadow += readShadowMap( shadowCoord, vec2( dx * x, dy * y ) );
+                    count++;
+                }
+            }
+            shadow /= count;
+        } else {
+            shadow = readShadowMap( shadowCoord, vec2( 0 ) );
+        }
+        return shadow;
+    }
 
     // Calculate light's attenuation based on distance and radius
     float attenuation( float d, float r )
@@ -269,7 +446,9 @@ static const auto SPOT_LIGHT_FRAG_SHADER = R"(
         float intensity = clamp( ( theta - uLight.outerCutoff ) / epsilon, 0.0, 1.0 );
         vec3 I = diffuse * intensity;
 
-        outColor = vec4( albedo * I, 1.0 );
+        float shadow = 1.0 - uLight.castShadows * calcShadow( P );
+
+        outColor = vec4( albedo * I * shadow, 1.0 );
     }
 )";
 
@@ -332,22 +511,22 @@ void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
+    vkCmdBindPipeline(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_directionalLights.pipeline->getHandle()
+    );
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_directionalLights.pipeline->getPipelineLayout(),
+        0,
+        1,
+        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+        0,
+        nullptr
+    );
     for ( const auto light : lights.at( Light::Type::DIRECTIONAL ) ) {
-        vkCmdBindPipeline(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_directionalLights.pipeline->getHandle()
-        );
-        vkCmdBindDescriptorSets(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_directionalLights.pipeline->getPipelineLayout(),
-            0,
-            1,
-            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-            0,
-            nullptr
-        );
         bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light );
         vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
     }
@@ -690,18 +869,27 @@ void LocalLightingPass::createLightObjects( LightObjects &objects, Light::Type l
 {
     CRIMILD_LOG_TRACE();
 
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-        .pImmutableSamplers = nullptr,
+    const auto bindings = std::array< VkDescriptorSetLayoutBinding, 2 > {
+        VkDescriptorSetLayoutBinding {
+            .binding = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
+        },
+        VkDescriptorSetLayoutBinding {
+            .binding = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
+        },
     };
 
     auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
+        .bindingCount = uint32_t( bindings.size() ),
+        .pBindings = bindings.data(),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -819,15 +1007,21 @@ static void createLightDescriptors(
     const LightPropsType &lightProps
 ) noexcept
 {
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
+    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
+        },
+        VkDescriptorPoolSize {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
+        },
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
+        .poolSizeCount = uint32_t( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
         .maxSets = uint32_t( renderDevice->getSwapchainImageCount() ),
     };
 
@@ -864,6 +1058,9 @@ static void createLightDescriptors(
         )
     );
 
+    // Get shadow map for this light. If light does not cast shadows, we'll get a fallback shadow map anyways.
+    auto shadowMap = renderDevice->getShadowMap( light );
+
     for ( size_t i = 0; i < lightObjects.descriptorSets[ light ].size(); ++i ) {
         const auto bufferInfo = VkDescriptorBufferInfo {
             .buffer = renderDevice->getHandle( lightObjects.uniforms[ light ].get(), i ),
@@ -871,22 +1068,40 @@ static void createLightDescriptors(
             .range = lightObjects.uniforms[ light ]->getBufferView()->getLength(),
         };
 
-        const auto descriptorWrite = VkWriteDescriptorSet {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = lightObjects.descriptorSets[ light ][ i ],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
-            .pImageInfo = nullptr,
-            .pTexelBufferView = nullptr,
+        const auto imageInfo = VkDescriptorImageInfo {
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, // renderDevice->formatIsColor( shadowMap->imageFormat ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+            .imageView = *shadowMap->imageViews[ i ],
+            .sampler = shadowMap->sampler,
         };
 
+        const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = lightObjects.descriptorSets[ light ][ i ],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .pBufferInfo = &bufferInfo,
+                .pImageInfo = nullptr,
+                .pTexelBufferView = nullptr,
+            },
+            VkWriteDescriptorSet {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = lightObjects.descriptorSets[ light ][ i ],
+                .dstBinding = 1,
+                .dstArrayElement = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = 1,
+                .pBufferInfo = nullptr,
+                .pImageInfo = &imageInfo,
+                .pTexelBufferView = nullptr,
+            },
+        };
         vkUpdateDescriptorSets(
             renderDevice->getHandle(),
-            1,
-            &descriptorWrite,
+            writes.size(),
+            writes.data(),
             0,
             nullptr
         );
@@ -900,8 +1115,15 @@ void LocalLightingPass::bindDirectionalLightDescriptors(
 ) noexcept
 {
     DirectionalLightProps props;
+    props.castShadows = light->castShadows() ? 1.0f : 0.0f;
     props.direction = light->getDirection();
     props.color = light->getColor();
+    if ( const auto shadowMap = getRenderDevice()->getShadowMap( light ) ) {
+        for ( uint32_t layerId = 0; layerId < shadowMap->imageLayerCount; ++layerId ) {
+            props.lightSpaceMatrices[ layerId ] = shadowMap->lightSpaceMatrices[ layerId ];
+            props.splits[ layerId ] = shadowMap->splits[ layerId ];
+        }
+    }
 
     if ( !m_directionalLights.descriptorSets.contains( light ) ) {
         createLightDescriptors( getRenderDevice(), m_directionalLights, light, props );
@@ -932,6 +1154,7 @@ void LocalLightingPass::bindPointLightDescriptors(
     props.position = light->getPosition();
     props.radius = light->getRadius();
     props.color = light->getColor();
+    props.castShadows = light->castShadows() ? 1.0 : 0.0;
 
     if ( !m_pointLights.descriptorSets.contains( light ) ) {
         createLightDescriptors( getRenderDevice(), m_pointLights, light, props );
@@ -959,12 +1182,16 @@ void LocalLightingPass::bindSpotLightDescriptors(
 ) noexcept
 {
     SpotLightProps props;
+    props.castShadows = light->castShadows() ? 1.0f : 0.0f;
     props.position = light->getPosition();
     props.direction = light->getDirection();
     props.radius = light->getRadius();
     props.color = light->getColor();
     props.innerCutoff = Numericf::cos( light->getInnerCutoff() );
     props.outerCutoff = Numericf::cos( light->getOuterCutoff() );
+    if ( const auto shadowMap = getRenderDevice()->getShadowMap( light ) ) {
+        props.lightSpaceProjection = shadowMap->lightSpaceMatrices[ 0 ];
+    }
 
     if ( !m_spotLights.descriptorSets.contains( light ) ) {
         createLightDescriptors( getRenderDevice(), m_spotLights, light, props );

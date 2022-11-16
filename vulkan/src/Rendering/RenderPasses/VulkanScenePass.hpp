@@ -43,6 +43,7 @@ namespace crimild {
         class GBufferPass;
         class GraphicsPipeline;
         class LocalLightingPass;
+        class ShadowPass;
         class UnlitPass;
         class RenderDevice;
 
@@ -110,6 +111,9 @@ namespace crimild {
             VkRect2D m_renderArea;
 
             SharedPointer< ClearPass > m_clear;
+
+            SharedPointer< ShadowPass > m_shadowPass;
+
             SharedPointer< GBufferPass > m_gBuffer;
             SharedPointer< LocalLightingPass > m_lighting;
             SharedPointer< UnlitPass > m_unlit;
