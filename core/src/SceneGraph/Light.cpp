@@ -97,7 +97,10 @@ void Light::setCastShadows( crimild::Bool enabled )
 Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
 {
     if ( getType() == Type::DIRECTIONAL ) {
-        assert( false && "this should never happen" );
+        // Use a hardcoded orthographic projection for light space matrix when using
+        // directional lights. This will change later when using cascade shadow
+        // mapping.
+        return ortho( -200, 200, -200, 200, 0.0f, 400.0f ) * getWorld().invMat;
     } else if ( getType() == Type::POINT ) {
         return perspective( 90.0f, 1.0f, 0.01f, 200.0f );
     } else {

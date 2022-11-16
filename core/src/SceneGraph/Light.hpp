@@ -119,10 +119,10 @@ namespace crimild {
         void setCastShadows( crimild::Bool enabled );
         inline crimild::Bool castShadows( void ) const { return _shadowMap != nullptr; }
 
-        Matrix4f computeLightSpaceMatrix( void ) const noexcept;
+        [[deprecated]] Matrix4f computeLightSpaceMatrix( void ) const noexcept;
 
-        void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
-        inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
+        [[deprecated]] void setShadowMap( SharedPointer< ShadowMap > const &shadowMap ) { _shadowMap = shadowMap; }
+        [[deprecated]] inline ShadowMap *getShadowMap( void ) { return crimild::get_ptr( _shadowMap ); }
 
         /**
            \brief Get descriptors used for computing the shadow atlas
@@ -130,11 +130,11 @@ namespace crimild {
            For most lights, we will need only one. But point lights will require
            up to six (one for each face of the cubemap)
          */
-        Array< SharedPointer< DescriptorSet > > &getShadowAtlasDescriptors( void ) noexcept;
+        [[deprecated]] Array< SharedPointer< DescriptorSet > > &getShadowAtlasDescriptors( void ) noexcept;
 
     private:
-        SharedPointer< ShadowMap > _shadowMap;
-        Array< SharedPointer< DescriptorSet > > m_shadowAtlasDescriptors;
+        [[deprecated]] SharedPointer< ShadowMap > _shadowMap;
+        [[deprecated]] Array< SharedPointer< DescriptorSet > > m_shadowAtlasDescriptors;
 
         /**
             \name Coding
