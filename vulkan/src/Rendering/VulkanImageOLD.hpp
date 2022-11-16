@@ -25,33 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
-#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_OLD_
+#define CRIMILD_VULKAN_RENDERING_IMAGE_OLD_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/Image.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
     namespace vulkan {
-    
-        class Image;
 
-        class ImageView
-            : public SharedObject,
-              public WithConstRenderDevice {
+        struct [[deprecated]] ImageBindInfo {
+            VkImage imageHandler = VK_NULL_HANDLE;
+            VkDeviceMemory imageMemoryHandler = VK_NULL_HANDLE;
+
+            /**
+             * \brief Staging buffer for dynamic images
+             *
+             * Dynamic images are updated using a staging buffer, which is created
+             * during image binding. Static images also use a staging buffer but they
+             * release it as soon as possible.
+             */
+            VkBuffer stagingBuffer = VK_NULL_HANDLE;
+            VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
+        };
+
+        class [[deprecated]] ImageManager : public BasicRenderResourceManagerImpl< Image, ImageBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< Image, ImageBindInfo >;
+
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
-            virtual ~ImageView( void ) noexcept;
+            virtual ~ImageManager( void ) = default;
 
-            operator VkImageView() const noexcept { return m_imageView; }
+            crimild::Bool bind( Image *image ) noexcept override;
+            crimild::Bool unbind( Image *image ) noexcept override;
 
-            void setName( std::string_view name ) noexcept;
-
-        private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            void updateImages( void ) noexcept;
         };
 
     }

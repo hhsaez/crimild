@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holders nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,33 +25,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
-#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
+#define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanWithRenderDevice.hpp"
 
 namespace crimild {
 
     namespace vulkan {
-    
-        class Image;
 
-        class ImageView
+        class RenderPass;
+        struct FramebufferAttachment;
+
+        class Framebuffer
             : public SharedObject,
               public WithConstRenderDevice {
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
-            virtual ~ImageView( void ) noexcept;
+            static std::vector< SharedPointer< Framebuffer > > createInFlightFramebuffers(
+                const RenderDevice *rd,
+                const SharedPointer< RenderPass > &renderPass,
+                const std::vector< const FramebufferAttachment * > &attachments
+            ) noexcept;
 
-            operator VkImageView() const noexcept { return m_imageView; }
+        public:
+            Framebuffer( const RenderDevice *rd, const VkFramebufferCreateInfo &createInfo ) noexcept;
 
-            void setName( std::string_view name ) noexcept;
+            virtual ~Framebuffer( void ) noexcept;
+
+            operator VkFramebuffer() const noexcept { return m_framebuffer; }
 
         private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
         };
 
     }

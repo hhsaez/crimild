@@ -27,6 +27,8 @@
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
+#include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "Simulation/Event.hpp"
@@ -127,6 +129,18 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
+    m_descriptorSets.clear();
+
+    for ( const auto &[ _, descriptorSetLayout ] : m_descriptorSetLayouts ) {
+        vkDestroyDescriptorSetLayout( getHandle(), descriptorSetLayout, nullptr );
+    }
+    m_descriptorSetLayouts.clear();
+
+    for ( const auto &[ _, descriptorPool ] : m_descriptorPools ) {
+        vkDestroyDescriptorPool( getHandle(), descriptorPool, nullptr );
+    }
+    m_descriptorPools.clear();
+
     for ( auto &it : m_buffers ) {
         for ( auto handler : it.second ) {
             vkDestroyBuffer( m_handle, handler, nullptr );
@@ -198,8 +212,8 @@ void RenderDevice::handle( const Event &e ) noexcept
             createDepthStencilResources();
             createSyncObjects();
             createCommandBuffers();
-            m_imageIndex = 0;
 
+            m_imageIndex = 0;
             m_currentFrame = 0;
 
             break;
@@ -214,6 +228,110 @@ void RenderDevice::handle( const Event &e ) noexcept
 void RenderDevice::flush( void ) noexcept
 {
     vkDeviceWaitIdle( m_handle );
+}
+
+void RenderDevice::createDescriptorSetLayout(
+    const std::vector< VkDescriptorSetLayoutBinding > &bindings,
+    VkDescriptorSetLayout &descriptorSetLayout,
+    std::string_view objectName
+) const noexcept
+{
+    const auto createInfo = VkDescriptorSetLayoutCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = static_cast< uint32_t >( bindings.size() ),
+        .pBindings = bindings.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorSetLayout(
+            getHandle(),
+            &createInfo,
+            nullptr,
+            &descriptorSetLayout
+        )
+    );
+
+    if ( !objectName.empty() ) {
+        setObjectName( descriptorSetLayout, objectName );
+    }
+}
+
+void RenderDevice::destroyDescriptorSetLayout( VkDescriptorSetLayout &descriptorSetLayout ) const noexcept
+{
+    vkDestroyDescriptorSetLayout( getHandle(), descriptorSetLayout, nullptr );
+    descriptorSetLayout = VK_NULL_HANDLE;
+}
+
+void RenderDevice::createDescriptorPool(
+    const std::vector< VkDescriptorPoolSize > &poolSizes,
+    uint32_t additionalSets,
+    VkDescriptorPool &descriptorPool,
+    std::string_view objectName
+) const noexcept
+{
+    auto createInfo = VkDescriptorPoolCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = static_cast< uint32_t >( poolSizes.size() ),
+        .pPoolSizes = poolSizes.data(),
+        .maxSets = static_cast< uint32_t >( getInFlightFrameCount() ) + additionalSets,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateDescriptorPool(
+            getHandle(),
+            &createInfo,
+            nullptr,
+            &descriptorPool
+        )
+    );
+
+    if ( !objectName.empty() ) {
+        setObjectName( descriptorPool, objectName );
+    }
+}
+
+void RenderDevice::destroyDescriptorPool( VkDescriptorPool &descriptorPool ) const noexcept
+{
+    vkDestroyDescriptorPool( getHandle(), descriptorPool, nullptr );
+    descriptorPool = VK_NULL_HANDLE;
+}
+
+void RenderDevice::createSampler( const VkSamplerCreateInfo &createInfo, VkSampler &sampler ) const noexcept
+{
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSampler(
+            getHandle(),
+            &createInfo,
+            nullptr,
+            &sampler
+        )
+    );
+}
+
+void RenderDevice::createSampler(
+    const VkSamplerCreateInfo &createInfo,
+    VkSampler &sampler,
+    std::string_view objectName
+) const noexcept
+{
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSampler(
+            getHandle(),
+            &createInfo,
+            nullptr,
+            &sampler
+        )
+    );
+
+    if ( !objectName.empty() ) {
+        setObjectName( sampler, objectName );
+    }
+}
+
+void RenderDevice::destroySampler( VkSampler &sampler ) const noexcept
+{
+    vkDestroySampler( getHandle(), sampler, nullptr );
+    sampler = VK_NULL_HANDLE;
 }
 
 void RenderDevice::createSwapchain( void ) noexcept
@@ -305,24 +423,38 @@ void RenderDevice::createSwapchain( void ) noexcept
         nullptr
     );
 
-    m_swapchainImages.resize( imageCount );
-
+    std::vector< VkImage > images( imageCount );
     vkGetSwapchainImagesKHR(
         getHandle(),
         m_swapchain,
         &imageCount,
-        m_swapchainImages.data()
+        images.data()
     );
+
+    m_swapchainImages.clear();
+    for ( auto &image : images ) {
+        m_swapchainImages.push_back(
+            crimild::alloc< vulkan::Image >(
+                this,
+                image,
+                VkExtent3D { m_swapchainExtent.width, m_swapchainExtent.height, 1 }
+            )
+        );
+    }
 
     CRIMILD_LOG_TRACE();
 
-    m_swapchainImageViews.resize( imageCount );
-
-    for ( uint8_t i = 0; i < imageCount; ++i ) {
-        utils::createImageView( getHandle(), m_swapchainImages[ i ], VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, &m_swapchainImageViews[ i ] );
-        setObjectName(
-            m_swapchainImageViews[ i ],
-            StringUtils::toString( "RenderDevice::swapchainImageView[", uint32_t( i ), "]" ).c_str()
+    m_swapchainImageViews.clear();
+    for ( auto &image : m_swapchainImages ) {
+        m_swapchainImageViews.push_back(
+            [ & ] {
+                auto createInfo = vulkan::initializers::imageViewCreateInfo();
+                createInfo.image = *image;
+                createInfo.format = m_swapchainFormat; // VK_FORMAT_B8G8R8A8_UNORM
+                auto imageView = crimild::alloc< vulkan::ImageView >( this, createInfo );
+                imageView->setName( "RenderDevice::swapchainImageView" );
+                return imageView;
+            }()
         );
     }
 
@@ -332,14 +464,9 @@ void RenderDevice::createSwapchain( void ) noexcept
 void RenderDevice::destroySwapchain( void ) noexcept
 {
     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image views" );
-
-    for ( auto &imageView : m_swapchainImageViews ) {
-        vkDestroyImageView( getHandle(), imageView, nullptr );
-    }
     m_swapchainImageViews.clear();
 
     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image" );
-
     m_swapchainImages.clear();
 
     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain" );
@@ -363,41 +490,36 @@ void RenderDevice::createDepthStencilResources( void ) noexcept
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
     );
 
-    createImage(
-        m_swapchainExtent.width,
-        m_swapchainExtent.height,
-        m_depthStencilResources.format,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        1,
-        VK_SAMPLE_COUNT_1_BIT,
-        1,
-        0,
-        m_depthStencilResources.image,
-        m_depthStencilResources.memory
-    );
-
-    utils::createImageView(
-        getHandle(),
-        m_depthStencilResources.image,
-        m_depthStencilResources.format,
-        VK_IMAGE_ASPECT_DEPTH_BIT,
-        &m_depthStencilResources.imageView
+    m_depthStencilResources.image = [ & ] {
+        auto image = crimild::alloc< vulkan::Image >(
+            this,
+            [ & ] {
+                auto createInfo = vulkan::initializers::imageCreateInfo();
+                createInfo.extent = { m_swapchainExtent.width, m_swapchainExtent.height, 1 };
+                createInfo.format = m_depthStencilResources.format;
+                createInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+                return createInfo;
+            }()
+        );
+        return image;
+        image->allocateMemory();
+    }();
+    m_depthStencilResources.imageView = crimild::alloc< vulkan::ImageView >(
+        this,
+        [ & ] {
+            auto createInfo = vulkan::initializers::imageViewCreateInfo();
+            createInfo.image = *m_depthStencilResources.image;
+            createInfo.format = m_depthStencilResources.format;
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+            return createInfo;
+        }()
     );
 }
 
 void RenderDevice::destroyDepthStencilResources( void ) noexcept
 {
-    vkDestroyImageView( m_handle, m_depthStencilResources.imageView, nullptr );
-    m_depthStencilResources.imageView = VK_NULL_HANDLE;
-
-    vkDestroyImage( m_handle, m_depthStencilResources.image, nullptr );
-    m_depthStencilResources.image = VK_NULL_HANDLE;
-
-    vkFreeMemory( m_handle, m_depthStencilResources.memory, nullptr );
-    m_depthStencilResources.memory = VK_NULL_HANDLE;
-
+    m_depthStencilResources.imageView = nullptr;
+    m_depthStencilResources.image = nullptr;
     m_depthStencilResources.format = VK_FORMAT_UNDEFINED;
 }
 
@@ -1068,14 +1190,14 @@ void RenderDevice::endSingleTimeCommands( VkCommandBuffer commandBuffer ) const 
     );
 }
 
-void RenderDevice::transitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) const noexcept
+void RenderDevice::transitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount, uint32_t baseArrayLayer ) const noexcept
 {
     auto commandBuffer = beginSingleTimeCommands();
-    transitionImageLayout( commandBuffer, image, format, oldLayout, newLayout, mipLevels, layerCount );
+    transitionImageLayout( commandBuffer, image, format, oldLayout, newLayout, mipLevels, layerCount, baseArrayLayer );
     endSingleTimeCommands( commandBuffer );
 }
 
-void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) const noexcept
+void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount, uint32_t baseArrayLayer ) const noexcept
 {
     auto barrier = VkImageMemoryBarrier {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -1090,7 +1212,7 @@ void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage
             .aspectMask = 0, // Defined below
             .baseMipLevel = 0,
             .levelCount = mipLevels,
-            .baseArrayLayer = 0,
+            .baseArrayLayer = baseArrayLayer,
             .layerCount = layerCount,
         },
     };
@@ -1317,6 +1439,57 @@ void RenderDevice::generateMipmaps( VkImage image, VkFormat imageFormat, crimild
     endSingleTimeCommands( commandBuffer );
 }
 
+void RenderDevice::createImage( const VkImageCreateInfo &createInfo, VkImage &image ) const noexcept
+{
+    CRIMILD_VULKAN_CHECK(
+        vkCreateImage(
+            m_handle,
+            &createInfo,
+            nullptr,
+            &image
+        )
+    );
+}
+
+void RenderDevice::destroyImage( VkImage &image ) const noexcept
+{
+    vkDestroyImage( m_handle, image, nullptr );
+    image = VK_NULL_HANDLE;
+}
+
+void RenderDevice::allocateImageMemory( const VkImage &image, VkDeviceMemory &imageMemory ) const noexcept
+{
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements( m_handle, image, &memRequirements );
+
+    auto allocInfo = vulkan::initializers::memoryAllocateInfo();
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = m_physicalDevice->findMemoryType( memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+
+    allocateImageMemory( image, allocInfo, imageMemory );
+}
+
+void RenderDevice::allocateImageMemory( const VkImage &image, const VkMemoryAllocateInfo &allocInfo, VkDeviceMemory &imageMemory ) const noexcept
+{
+    CRIMILD_VULKAN_CHECK(
+        vkAllocateMemory(
+            m_handle,
+            &allocInfo,
+            nullptr,
+            &imageMemory
+        )
+    );
+
+    CRIMILD_VULKAN_CHECK(
+        vkBindImageMemory(
+            m_handle,
+            image,
+            imageMemory,
+            0
+        )
+    );
+}
+
 void RenderDevice::createImage(
     crimild::UInt32 width,
     crimild::UInt32 height,
@@ -1442,12 +1615,77 @@ void RenderDevice::createImage(
     }
 }
 
-void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept
+void RenderDevice::createImageView( const VkImageViewCreateInfo &createInfo, VkImageView &imageView ) const noexcept
 {
-    utils::createImageView( m_handle, image, format, aspectFlags, &imageView );
+    CRIMILD_VULKAN_CHECK( vkCreateImageView( m_handle, &createInfo, nullptr, &imageView ) );
 }
 
-VkImage RenderDevice::bind( const Image *image ) noexcept
+void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept
+{
+    const auto imageViewInfo = VkImageViewCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .subresourceRange = {
+            .aspectMask = aspectFlags,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1,
+        },
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateImageView( m_handle, &imageViewInfo, nullptr, &imageView ) );
+}
+
+void RenderDevice::createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t baseArrayLayer, VkImageView &imageView ) const noexcept
+{
+    const auto imageViewInfo = VkImageViewCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .subresourceRange = {
+            .aspectMask = aspectFlags,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = baseArrayLayer,
+            .layerCount = 1,
+        },
+    };
+
+    CRIMILD_VULKAN_CHECK( vkCreateImageView( m_handle, &imageViewInfo, nullptr, &imageView ) );
+}
+
+void RenderDevice::createImageViewArray( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t layerCount, VkImageView &imageView ) const noexcept
+{
+    const auto imageViewInfo = VkImageViewCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+        .format = format,
+        .subresourceRange = {
+            .aspectMask = aspectFlags,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = layerCount,
+        },
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkCreateImageView( m_handle, &imageViewInfo, nullptr, &imageView )
+    );
+}
+
+VkImage RenderDevice::bind( const crimild::Image *image ) noexcept
 {
     const auto id = image->getUniqueID();
     if ( m_images.contains( id ) ) {
@@ -1581,7 +1819,7 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
             arrayLayers
         );
 
-        if ( type == Image::Type::IMAGE_2D_CUBEMAP ) {
+        if ( type == crimild::Image::Type::IMAGE_2D_CUBEMAP ) {
             // No mipmaps. Transition to SHADER_READ_OPTIMAL
             transitionImageLayout(
                 imageHandle,
@@ -1637,7 +1875,7 @@ VkImage RenderDevice::bind( const Image *image ) noexcept
     return m_images[ id ][ 0 ];
 }
 
-void RenderDevice::unbind( const Image *image ) noexcept
+void RenderDevice::unbind( const crimild::Image *image ) noexcept
 {
     const auto id = image->getUniqueID();
     if ( !m_images.contains( id ) ) {
@@ -1668,7 +1906,7 @@ void RenderDevice::unbind( const Image *image ) noexcept
     m_memories.erase( id );
 }
 
-VkImageView RenderDevice::bind( const ImageView *imageView ) noexcept
+VkImageView RenderDevice::bind( const crimild::ImageView *imageView ) noexcept
 {
     const auto id = imageView->getUniqueID();
     if ( m_imageViews.contains( id ) ) {
@@ -1731,7 +1969,7 @@ VkImageView RenderDevice::bind( const ImageView *imageView ) noexcept
     return m_imageViews[ id ][ 0 ];
 }
 
-void RenderDevice::unbind( const ImageView *imageView ) noexcept
+void RenderDevice::unbind( const crimild::ImageView *imageView ) noexcept
 {
     const auto id = imageView->getUniqueID();
     if ( !m_imageViews.contains( id ) ) {
@@ -1814,7 +2052,7 @@ void RenderDevice::unbind( const Sampler *sampler ) noexcept
     m_samplers.erase( id );
 }
 
-void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT objectType, std::string name ) const noexcept
+void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT objectType, std::string_view name ) const noexcept
 {
 #if defined( CRIMILD_PLATFORM_OSX )
     static auto vkDebugMarkerSetObjectName = ( PFN_vkDebugMarkerSetObjectNameEXT ) vkGetDeviceProcAddr( m_handle, "vkDebugMarkerSetObjectNameEXT" );
@@ -1823,23 +2061,25 @@ void RenderDevice::setObjectName( UInt64 object, VkDebugReportObjectTypeEXT obje
         return;
     }
 
+    const auto nameStr = std::string( name );
+
     VkDebugMarkerObjectNameInfoEXT nameInfo = {
         .sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT,
         .objectType = objectType,
         .object = object,
-        .pObjectName = name.c_str(),
+        .pObjectName = nameStr.c_str(),
     };
 
     vkDebugMarkerSetObjectName( m_handle, &nameInfo );
 #endif
 }
 
-bool RenderDevice::formatIsColor( VkFormat format ) const
+bool RenderDevice::formatIsColor( VkFormat format ) const noexcept
 {
     return !formatIsDepthStencil( format );
 }
 
-bool RenderDevice::formatIsDepthStencil( VkFormat format ) const
+bool RenderDevice::formatIsDepthStencil( VkFormat format ) const noexcept
 {
     switch ( format ) {
         case VK_FORMAT_D16_UNORM:
@@ -1851,6 +2091,11 @@ bool RenderDevice::formatIsDepthStencil( VkFormat format ) const
         default:
             return false;
     }
+}
+
+bool RenderDevice::formatHasStencilComponent( VkFormat format ) const noexcept
+{
+    return utils::hasStencilComponent( format );
 }
 
 VkViewport RenderDevice::getViewport( const ViewportDimensions &viewport ) const noexcept
@@ -1944,9 +2189,8 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     out.extent = extent;
     out.format = format;
 
-    out.images.resize( swapchainImageCount, VK_NULL_HANDLE );
-    out.memories.resize( swapchainImageCount, VK_NULL_HANDLE );
-    out.imageViews.resize( swapchainImageCount, VK_NULL_HANDLE );
+    out.images.resize( swapchainImageCount );
+    out.imageViews.resize( swapchainImageCount );
 
     if ( usingDeviceResources ) {
         if ( isColorAttachment ) {
@@ -1970,37 +2214,30 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     }
 
     for ( size_t i = 0; i < swapchainImageCount; ++i ) {
-        // Image
-        createImage(
-            extent.width,
-            extent.height,
-            format,
-            VK_IMAGE_TILING_OPTIMAL,
-            isColorAttachment
-                ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
-                : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
-            1,
-            VK_SAMPLE_COUNT_1_BIT,
-            1,
-            0,
-            out.images[ i ],
-            out.memories[ i ]
-        );
-        setObjectName( out.images[ i ], ( name + "/Image" ).c_str() );
+        out.images[ i ] = [ & ] {
+            auto image = crimild::alloc< vulkan::Image >(
+                this,
+                [ & ] {
+                    auto createInfo = vulkan::initializers::imageCreateInfo();
+                    createInfo.extent = { extent.width, extent.height, 1 };
+                    createInfo.format = format;
+                    createInfo.usage =
+                        isColorAttachment
+                            ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+                            : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+                    return createInfo;
+                }()
+            );
+            image->allocateMemory();
+            image->setName( name + "/Image" );
+            return image;
+        }();
 
-        // Image View
-        createImageView(
-            out.images[ i ],
-            format,
-            isColorAttachment
-                ? VK_IMAGE_ASPECT_COLOR_BIT
-            : utils::hasStencilComponent( format )
-                ? VK_IMAGE_ASPECT_STENCIL_BIT
-                : VK_IMAGE_ASPECT_DEPTH_BIT,
-            out.imageViews[ i ]
-        );
-        setObjectName( out.imageViews[ i ], ( name + "/ImageView" ).c_str() );
+        out.imageViews[ i ] = [ & ] {
+            auto imageView = crimild::alloc< vulkan::ImageView >( this, out.images[ i ] );
+            imageView->setName( name + "/ImageView" );
+            return imageView;
+        }();
     }
 
     // Sampler
@@ -2107,7 +2344,7 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     for ( size_t i = 0; i < out.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
             .imageLayout = isColorAttachment ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            .imageView = out.imageViews[ i ],
+            .imageView = *out.imageViews[ i ],
             .sampler = out.sampler,
         };
 
@@ -2148,23 +2385,10 @@ void RenderDevice::destroyFramebufferAttachment( FramebufferAttachment &att ) co
 
         vkDestroySampler( getHandle(), att.sampler, nullptr );
         att.sampler = VK_NULL_HANDLE;
-
-        for ( auto &imageView : att.imageViews ) {
-            vkDestroyImageView( getHandle(), imageView, nullptr );
-        }
-
-        for ( auto &image : att.images ) {
-            vkDestroyImage( getHandle(), image, nullptr );
-        }
-
-        for ( auto &memory : att.memories ) {
-            vkFreeMemory( getHandle(), memory, nullptr );
-        }
     }
 
     att.imageViews.clear();
     att.images.clear();
-    att.memories.clear();
 }
 
 void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
@@ -2174,7 +2398,7 @@ void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
     const auto isColorAttachment = formatIsColor( att.format );
     transitionImageLayout(
         commandBuffer,
-        att.images[ currentFrameIndex ],
+        *att.images[ currentFrameIndex ],
         att.format,
         isColorAttachment
             ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL

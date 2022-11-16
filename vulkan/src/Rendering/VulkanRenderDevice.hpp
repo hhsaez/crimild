@@ -64,12 +64,18 @@ namespace crimild {
 
             [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
             [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
-            [[nodiscard]] inline const std::vector< VkImageView > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
+            [[nodiscard]] inline const std::vector< SharedPointer< vulkan::ImageView > > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
             [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
 
             [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
-            [[nodiscard]] inline VkImageView getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
+            [[nodiscard]] inline const SharedPointer< vulkan::ImageView > &getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
 
+            /**
+             * \brief Get the total number of frames active at any given point in time
+             *
+             * This value is the same as the number of swapchain images.
+             */
+            [[nodiscard]] inline size_t getInFlightFrameCount( void ) const noexcept { return m_swapchainImages.size(); }
             [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_imageIndex; }
             [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
 
@@ -81,6 +87,29 @@ namespace crimild {
             void flush( void ) noexcept;
 
             inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
+
+            void createDescriptorSetLayout(
+                const std::vector< VkDescriptorSetLayoutBinding > &bindings,
+                VkDescriptorSetLayout &layout,
+                std::string_view objectName = ""
+            ) const noexcept;
+            void destroyDescriptorSetLayout( VkDescriptorSetLayout &layout ) const noexcept;
+
+            void createDescriptorPool(
+                const std::vector< VkDescriptorPoolSize > &poolSizes,
+                uint32_t additionalSets,
+                VkDescriptorPool &descriptorPool,
+                std::string_view objectName = ""
+            ) const noexcept;
+            void destroyDescriptorPool( VkDescriptorPool &descriptorPool ) const noexcept;
+
+            void createSampler( const VkSamplerCreateInfo &createInfo, VkSampler &sampler ) const noexcept;
+            [[deprecated]] void createSampler(
+                const VkSamplerCreateInfo &createInfo,
+                VkSampler &sampler,
+                std::string_view objectName
+            ) const noexcept;
+            void destroySampler( VkSampler &sampler ) const noexcept;
 
             using UniformBuffer::Observer::ignore;
             using UniformBuffer::Observer::observe;
@@ -111,23 +140,76 @@ namespace crimild {
                 unbind( indexBuffer );
             }
 
-            VkImage bind( const Image *image ) noexcept;
-            void unbind( const Image *image ) noexcept;
+            VkImage bind( const crimild::Image *image ) noexcept;
+            void unbind( const crimild::Image *image ) noexcept;
 
-            VkImageView bind( const ImageView *imageView ) noexcept;
-            void unbind( const ImageView *imageView ) noexcept;
+            VkImageView bind( const crimild::ImageView *imageView ) noexcept;
+            void unbind( const crimild::ImageView *imageView ) noexcept;
 
-            VkSampler bind( const Sampler *sampler ) noexcept;
-            void unbind( const Sampler *sampler ) noexcept;
+            VkSampler bind( const crimild::Sampler *sampler ) noexcept;
+            void unbind( const crimild::Sampler *sampler ) noexcept;
 
-            inline void setObjectName( VkImage handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
-            inline void setObjectName( VkImageView handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
-            inline void setObjectName( VkSampler handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
-            inline void setObjectName( VkDescriptorSetLayout handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
-            inline void setObjectName( VkDescriptorPool handle, std::string name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
-            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string name ) const noexcept;
+            /**
+             * \brief Get shadow map for a given light
+             *
+             * If the light does not cast shadows, nullptr will be returned.
+             * Otherwise, it will return a valid ShadowMap pointer.
+             *
+             * A new ShadowMap instance will be created if needed.
+             */
+            ShadowMap *getShadowMap( const Light *light ) noexcept;
 
-            void createImage(
+            /**
+             * \brief Get shadow map for a given light
+             *
+             * If the light does not cast shadows, nullptr will be returned.
+             * Otherwise, it will return a valid ShadowMap pointer.
+             *
+             * Might return nullptr if the light was never bound before, since this is
+             * a const function and has no side effect.
+             */
+            const ShadowMap *getShadowMap( const Light *light ) const noexcept;
+
+            // TODO: Move to RenderDeviceCache class instead. Retrieve using getRenderDevice()->getCache()->getImage(...);
+            inline VkImage getImage( Size id, Index frameIndex ) const noexcept
+            {
+                return m_images.contains( id ) ? m_images.at( id )[ frameIndex ] : VK_NULL_HANDLE;
+            }
+
+            inline VkImageView getImageView( Size id, Index frameIndex ) const noexcept
+            {
+                return m_imageViews.contains( id ) ? m_imageViews.at( id )[ frameIndex ] : VK_NULL_HANDLE;
+            }
+
+            inline VkSampler getSampler( Size id, Index frameIndex ) const noexcept
+            {
+                return m_samplers.contains( id ) ? m_samplers.at( id )[ frameIndex ] : VK_NULL_HANDLE;
+            }
+
+            inline VkDescriptorSet getDescriptorSet( Size id, Index frameIndex ) const noexcept
+            {
+                return m_descriptorSets.contains( id ) ? m_descriptorSets.at( id )[ frameIndex ] : VK_NULL_HANDLE;
+            }
+
+            inline const VkDescriptorSet *getDescriptorSets( Size id ) const noexcept
+            {
+                return m_descriptorSets.contains( id ) ? m_descriptorSets.at( id ).data() : nullptr;
+            }
+
+            inline void setObjectName( VkImage handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
+            inline void setObjectName( VkImageView handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
+            inline void setObjectName( VkSampler handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
+            inline void setObjectName( VkDescriptorSetLayout handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
+            inline void setObjectName( VkDescriptorPool handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
+            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string_view name ) const noexcept;
+
+            void createImage( const VkImageCreateInfo &createInfo, VkImage &image ) const noexcept;
+            void destroyImage( VkImage &image ) const noexcept;
+
+            void allocateImageMemory( const VkImage &image, VkDeviceMemory &imageMemory ) const noexcept;
+            void allocateImageMemory( const VkImage &image, const VkMemoryAllocateInfo &memAllocInfo, VkDeviceMemory &imageMemory ) const noexcept;
+
+            [[deprecated]] void createImage(
                 crimild::UInt32 width,
                 crimild::UInt32 height,
                 VkFormat format,
@@ -143,10 +225,15 @@ namespace crimild {
                 void *imageData = nullptr
             ) const noexcept;
 
-            void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept;
+            void createImageView( const VkImageViewCreateInfo &createInfo, VkImageView &imageView ) const noexcept;
 
-            [[nodiscard]] bool formatIsColor( VkFormat format ) const;
-            [[nodiscard]] bool formatIsDepthStencil( VkFormat format ) const;
+            [[deprecated]] void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView ) const noexcept;
+            [[deprecated]] void createImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t baseArrayLayer, VkImageView &imageView ) const noexcept;
+            [[deprecated]] void createImageViewArray( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t layerCount, VkImageView &imageView ) const noexcept;
+
+            [[nodiscard]] bool formatIsColor( VkFormat format ) const noexcept;
+            [[nodiscard]] bool formatIsDepthStencil( VkFormat format ) const noexcept;
+            [[nodiscard]] bool formatHasStencilComponent( VkFormat format ) const noexcept;
 
             void transitionImageLayout(
                 VkCommandBuffer commandBuffer,
@@ -155,7 +242,8 @@ namespace crimild {
                 VkImageLayout oldLayout,
                 VkImageLayout newLayout,
                 crimild::UInt32 mipLevels,
-                crimild::UInt32 layerCount
+                crimild::UInt32 layerCount,
+                uint32_t baseArrayLayer = 0
             ) const noexcept;
 
             VkViewport getViewport( const ViewportDimensions &viewport ) const noexcept;
@@ -179,7 +267,8 @@ namespace crimild {
                 VkImageLayout oldLayout,
                 VkImageLayout newLayout,
                 crimild::UInt32 mipLevels,
-                crimild::UInt32 layerCount
+                crimild::UInt32 layerCount,
+                uint32_t baseArrayLayer = 0
             ) const noexcept;
 
             void generateMipmaps( VkImage image, VkFormat imageFormat, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) const noexcept;
@@ -235,8 +324,8 @@ namespace crimild {
             VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
             VkExtent2D m_swapchainExtent;
             VkFormat m_swapchainFormat = VK_FORMAT_UNDEFINED;
-            std::vector< VkImage > m_swapchainImages;
-            std::vector< VkImageView > m_swapchainImageViews;
+            std::vector< SharedPointer< vulkan::Image > > m_swapchainImages;
+            std::vector< SharedPointer< vulkan::ImageView > > m_swapchainImageViews;
 
             std::vector< VkSemaphore > m_imageAvailableSemaphores;
             std::vector< VkSemaphore > m_renderFinishedSemaphores;
@@ -254,17 +343,20 @@ namespace crimild {
 
             ShaderCompiler m_shaderCompiler;
 
+            // TODO: Move these to RenderDeviceCache
             std::unordered_map< Size, std::vector< VkBuffer > > m_buffers;
             std::unordered_map< Size, std::vector< VkDeviceMemory > > m_memories;
             std::unordered_map< Size, std::vector< VkImage > > m_images;
             std::unordered_map< Size, std::vector< VkImageView > > m_imageViews;
             std::unordered_map< Size, std::vector< VkSampler > > m_samplers;
+            std::unordered_map< Size, VkDescriptorPool > m_descriptorPools;
+            std::unordered_map< Size, VkDescriptorSetLayout > m_descriptorSetLayouts;
+            std::unordered_map< Size, std::vector< VkDescriptorSet > > m_descriptorSets;
 
             struct DepthStencilResources {
                 VkFormat format = VK_FORMAT_UNDEFINED;
-                VkImage image = VK_NULL_HANDLE;
-                VkDeviceMemory memory = VK_NULL_HANDLE;
-                VkImageView imageView = VK_NULL_HANDLE;
+                SharedPointer< vulkan::Image > image;
+                SharedPointer< vulkan::ImageView > imageView;
             } m_depthStencilResources;
         };
 

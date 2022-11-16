@@ -30,6 +30,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
@@ -220,7 +221,7 @@ void OverlayPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageViews[ i ],
+            *m_colorAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {

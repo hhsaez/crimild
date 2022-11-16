@@ -45,6 +45,8 @@
 #include "Mathematics/whichSide.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/BinTreeScene.hpp"
@@ -150,7 +152,7 @@ void SoftRTPass::render( Node *scene, Camera *camera ) noexcept
 
     getRenderDevice()->transitionImageLayout(
         commandBuffer,
-        m_colorAttachment.images[ currentFrameIndex ],
+        *m_colorAttachment.images[ currentFrameIndex ],
         m_colorAttachment.format,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -243,7 +245,7 @@ void SoftRTPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            m_colorAttachment.imageViews[ i ],
+            *m_colorAttachment.imageViews[ i ],
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -497,6 +499,7 @@ void SoftRTPass::createImageResources( void ) noexcept
             m_imageResources[ i ].image,
             m_imageFormat,
             VK_IMAGE_ASPECT_COLOR_BIT,
+            0,
             m_imageResources[ i ].imageView
         );
         getRenderDevice()->setObjectName( m_imageResources[ i ].imageView, "SoftRT/ImageView" );

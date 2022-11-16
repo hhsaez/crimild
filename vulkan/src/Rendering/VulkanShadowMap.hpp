@@ -9,7 +9,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holders nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
@@ -25,33 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
-#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
+#define CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
 
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/VulkanWithRenderDevice.hpp"
 
 namespace crimild {
 
+    class Light;
+
     namespace vulkan {
-    
+
         class Image;
+        class ImageView;
+        class RenderDevice;
 
-        class ImageView
-            : public SharedObject,
-              public WithConstRenderDevice {
+        class ShadowMap : public SharedObject, public WithRenderDevice {
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
-            virtual ~ImageView( void ) noexcept;
+            static constexpr uint32_t DIRECTIONAL_LIGHT_CASCADES = 4;
 
-            operator VkImageView() const noexcept { return m_imageView; }
+        public:
+            ShadowMap( RenderDevice *rd, const Light *light ) noexcept;
+            virtual ~ShadowMap( void ) noexcept;
 
-            void setName( std::string_view name ) noexcept;
+            VkFormat imageFormat = VK_FORMAT_D32_SFLOAT;
+            VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-        private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            uint32_t imageLayerCount = 1;
+
+            std::vector< SharedPointer< Image > > images;
+            std::vector< SharedPointer< ImageView > > imageViews;
+
+            // Sampler does not change in between frames, so we only need one.
+            VkSampler sampler = VK_NULL_HANDLE;
+
+            VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+            VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+            std::vector< VkDescriptorSet > descriptorSets;
+
+            std::vector< Matrix4f > lightSpaceMatrices;
+            std::vector< Real > splits;
         };
 
     }

@@ -38,7 +38,6 @@
 #include "VulkanImage.hpp"
 #include "VulkanImageView.hpp"
 #include "VulkanInstance.hpp"
-#include "VulkanRenderPass.hpp"
 #include "VulkanSemaphore.hpp"
 #include "VulkanSwapchainOLD.hpp"
 
@@ -90,7 +89,8 @@ void RenderDeviceOLD::submitGraphicsCommands( const Semaphore *wait, Array< Comm
         [ & ]( auto commandBuffer ) {
             updateCommandBuffer( commandBuffer );
             return getBindInfo( commandBuffer ).handler;
-        } );
+        }
+    );
 
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -108,7 +108,9 @@ void RenderDeviceOLD::submitGraphicsCommands( const Semaphore *wait, Array< Comm
             graphicsQueue,
             1,
             &submitInfo,
-            fence != nullptr ? fence->handler : VK_NULL_HANDLE ) );
+            fence != nullptr ? fence->handler : VK_NULL_HANDLE
+        )
+    );
 }
 
 void RenderDeviceOLD::submitComputeCommands( CommandBuffer *commands ) noexcept
@@ -128,7 +130,9 @@ void RenderDeviceOLD::submitComputeCommands( CommandBuffer *commands ) noexcept
             computeQueue,
             1,
             &submitInfo,
-            VK_NULL_HANDLE ) );
+            VK_NULL_HANDLE
+        )
+    );
 }
 
 void RenderDeviceOLD::submit( CommandBuffer *commands, crimild::Bool wait ) noexcept
@@ -146,12 +150,16 @@ void RenderDeviceOLD::submit( CommandBuffer *commands, crimild::Bool wait ) noex
             graphicsQueue,
             1,
             &submitInfo,
-            VK_NULL_HANDLE ) );
+            VK_NULL_HANDLE
+        )
+    );
 
     if ( wait ) {
         CRIMILD_VULKAN_CHECK(
             vkQueueWaitIdle(
-                graphicsQueue ) );
+                graphicsQueue
+            )
+        );
     }
 }
 
@@ -213,44 +221,44 @@ void RenderDeviceManager::destroy( RenderDeviceOLD *renderDevice ) noexcept
 /*
 
 VulkanRenderDevice::VulkanRenderDevice( VulkanInstance *instance, VulkanSurface *surface, const VkPhysicalDevice &physicalDevice, const VkDevice &device )
-	: m_instance( instance ),
-	  m_surface( surface ),
-	  m_physicalDevice( physicalDevice ),
-	  m_device( device )
+        : m_instance( instance ),
+          m_surface( surface ),
+          m_physicalDevice( physicalDevice ),
+          m_device( device )
 {
-	m_msaaSamples = getMaxUsableSampleCount();
+        m_msaaSamples = getMaxUsableSampleCount();
 
 //	QueueFamilyIndices indices = findQueueFamilies( physicalDevice, surface->handler );
 
-	// Get queue handles
+        // Get queue handles
 //	vkGetDeviceQueue( m_device, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueue );
 //	vkGetDeviceQueue( m_device, indices.presentFamily[ 0 ], 0, &m_presentQueue );
 }
 
 VulkanRenderDevice::~VulkanRenderDevice( void )
 {
-	m_swapchain = nullptr;
+        m_swapchain = nullptr;
 
-	vkDestroyDevice( m_device, nullptr );
-	m_device = VK_NULL_HANDLE;
+        vkDestroyDevice( m_device, nullptr );
+        m_device = VK_NULL_HANDLE;
 }
 
 VkSampleCountFlagBits VulkanRenderDevice::getMaxUsableSampleCount( void ) const noexcept
 {
-	VkPhysicalDeviceProperties physicalDeviceProperties;
-	vkGetPhysicalDeviceProperties( m_physicalDevice, &physicalDeviceProperties );
+        VkPhysicalDeviceProperties physicalDeviceProperties;
+        vkGetPhysicalDeviceProperties( m_physicalDevice, &physicalDeviceProperties );
 
-	auto counts = std::min(
-		physicalDeviceProperties.limits.framebufferColorSampleCounts,
-		physicalDeviceProperties.limits.framebufferDepthSampleCounts
-	);
+        auto counts = std::min(
+                physicalDeviceProperties.limits.framebufferColorSampleCounts,
+                physicalDeviceProperties.limits.framebufferDepthSampleCounts
+        );
 
-	if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
-	if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
-	if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
-	if ( counts & VK_SAMPLE_COUNT_8_BIT ) return VK_SAMPLE_COUNT_8_BIT;
-	if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
-	if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
-	return VK_SAMPLE_COUNT_1_BIT;
+        if ( counts & VK_SAMPLE_COUNT_64_BIT ) return VK_SAMPLE_COUNT_64_BIT;
+        if ( counts & VK_SAMPLE_COUNT_32_BIT ) return VK_SAMPLE_COUNT_32_BIT;
+        if ( counts & VK_SAMPLE_COUNT_16_BIT ) return VK_SAMPLE_COUNT_16_BIT;
+        if ( counts & VK_SAMPLE_COUNT_8_BIT ) return VK_SAMPLE_COUNT_8_BIT;
+        if ( counts & VK_SAMPLE_COUNT_4_BIT ) return VK_SAMPLE_COUNT_4_BIT;
+        if ( counts & VK_SAMPLE_COUNT_2_BIT ) return VK_SAMPLE_COUNT_2_BIT;
+        return VK_SAMPLE_COUNT_1_BIT;
 }
 */

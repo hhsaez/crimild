@@ -31,6 +31,7 @@
 #include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/Types.hpp"
+#include "Foundation/VulkanInitializers.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/Image.hpp"
@@ -262,7 +263,7 @@ namespace crimild {
             VkFormat getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *imageView ) noexcept;
             VkImageAspectFlags getImageViewAspectFlags( const ImageView *imageView ) noexcept;
 
-            void createImageView( VkDevice renderDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept;
+            [[deprecated]] void createImageView( VkDevice renderDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept;
 
             //@}
 

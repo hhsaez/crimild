@@ -25,85 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/Log.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/VulkanRenderDeviceOLD.hpp"
+#include "Rendering/VulkanImageView.hpp"
+
+#include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;
-using namespace crimild::vulkan;
 
-crimild::Bool vulkan::ImageViewManager::bind( ImageView *imageView ) noexcept
+vulkan::ImageView::ImageView( const vulkan::RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept
+    : vulkan::ImageView(
+        rd,
+        [ & ] {
+            auto info = vulkan::initializers::imageViewCreateInfo();
+            info.image = *image;
+            info.subresourceRange.aspectMask =
+                rd->formatIsColor( image->getFormat() )
+                    ? VK_IMAGE_ASPECT_COLOR_BIT
+                : rd->formatHasStencilComponent( image->getFormat() )
+                    ? VK_IMAGE_ASPECT_STENCIL_BIT
+                    : VK_IMAGE_ASPECT_DEPTH_BIT;
+            info.format = image->getFormat();
+            return info;
+        }()
+    )
 {
-    if ( validate( imageView ) ) {
-        return true;
-    }
-
-    CRIMILD_LOG_DEBUG( "Binding Vulkan Image View: ", imageView->getName() );
-
-    auto renderDevice = getRenderDevice();
-
-    auto mipLevels = imageView->mipLevels;
-    if ( mipLevels == 0 ) {
-        mipLevels = Numerici::max( 1, imageView->image->getMipLevels() );
-    }
-
-    auto image = renderDevice->getBindInfo( crimild::get_ptr( imageView->image ) ).imageHandler;
-
-    auto layerCount = imageView->layerCount;
-    if ( layerCount == 0 ) {
-        layerCount = imageView->image->getLayerCount();
-    }
-
-    auto viewInfo = VkImageViewCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .flags = 0,
-        .image = image,
-        .viewType = utils::getImageViewType( imageView ),
-        .format = utils::getImageViewFormat( renderDevice, imageView ),
-        .components = {
-            .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-        },
-        .subresourceRange = {
-            .aspectMask = utils::getImageViewAspectFlags( imageView ),
-            .baseMipLevel = 0,
-            .levelCount = mipLevels,
-            .baseArrayLayer = 0,
-            .layerCount = layerCount,
-        },
-    };
-
-    VkImageView handler;
-    CRIMILD_VULKAN_CHECK(
-        vkCreateImageView(
-            renderDevice->handler,
-            &viewInfo,
-            nullptr,
-            &handler ) );
-
-    setBindInfo( imageView, handler );
-
-    return ManagerImpl::bind( imageView );
 }
 
-crimild::Bool vulkan::ImageViewManager::unbind( ImageView *imageView ) noexcept
+vulkan::ImageView::ImageView( const vulkan::RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept
+    : WithConstRenderDevice( rd )
 {
-    if ( !validate( imageView ) ) {
-        return false;
-    }
+    CRIMILD_VULKAN_CHECK(
+        vkCreateImageView(
+            getRenderDevice()->getHandle(),
+            &createInfo,
+            nullptr,
+            &m_imageView
+        )
+    );
+}
 
-    CRIMILD_LOG_TRACE();
+vulkan::ImageView::~ImageView( void ) noexcept
+{
+    vkDestroyImageView( getRenderDevice()->getHandle(), m_imageView, nullptr );
+    m_imageView = VK_NULL_HANDLE;
+}
 
-    auto renderDevice = getRenderDevice();
-    auto handler = renderDevice->getBindInfo( imageView );
-
-    if ( renderDevice != nullptr && handler != VK_NULL_HANDLE ) {
-        vkDestroyImageView( renderDevice->handler, handler, nullptr );
-    }
-
-    removeBindInfo( imageView );
-
-    return ManagerImpl::unbind( imageView );
+void vulkan::ImageView::setName( std::string_view name ) noexcept
+{
+    getRenderDevice()->setObjectName( m_imageView, name );
 }

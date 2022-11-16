@@ -36,6 +36,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -269,7 +270,7 @@ void GBufferPass::init( void ) noexcept
         std::vector< VkImageView > imageViews;
         imageViews.reserve( m_attachments.size() );
         for ( auto att : m_attachments ) {
-            imageViews.push_back( att->imageViews[ i ] );
+            imageViews.push_back( *att->imageViews[ i ] );
         }
 
         auto createInfo = VkFramebufferCreateInfo {

@@ -30,6 +30,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
@@ -196,7 +197,7 @@ void BlitPass::init( void ) noexcept
         const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
-            imageView,
+            *imageView,
         };
 
         auto createInfo = VkFramebufferCreateInfo {
