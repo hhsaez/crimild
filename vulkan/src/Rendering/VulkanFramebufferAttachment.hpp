@@ -34,13 +34,15 @@ namespace crimild {
 
     namespace vulkan {
 
+        class Image;
+        class ImageView;
+
         struct FramebufferAttachment {
             std::string name;
             VkExtent2D extent;
             VkFormat format = VK_FORMAT_UNDEFINED;
-            std::vector< VkImage > images;
-            std::vector< VkDeviceMemory > memories;
-            std::vector< VkImageView > imageViews;
+            std::vector< SharedPointer< vulkan::Image > > images;
+            std::vector< SharedPointer< vulkan::ImageView > > imageViews;
             VkSampler sampler = VK_NULL_HANDLE;
             uint32_t mipLevels = 1;
             uint32_t layerCount = 1;

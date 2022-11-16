@@ -34,6 +34,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -362,8 +363,8 @@ void SelectionOutlinePass::init( void ) noexcept
         const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 2 > {
-            imageView,
-            getRenderDevice()->getDepthStencilImageView(),
+            *imageView,
+            *getRenderDevice()->getDepthStencilImageView(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

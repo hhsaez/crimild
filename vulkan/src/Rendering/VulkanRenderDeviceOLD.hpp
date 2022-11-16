@@ -37,11 +37,11 @@
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanGraphicsPipelineOLD.hpp"
-#include "Rendering/VulkanImage.hpp"
-#include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanImageOLD.hpp"
+#include "Rendering/VulkanImageViewOLD.hpp"
 #include "Rendering/VulkanIndexBuffer.hpp"
 #include "Rendering/VulkanPipelineLayout.hpp"
-#include "Rendering/VulkanRenderPass.hpp"
+#include "Rendering/VulkanRenderPassOLD.hpp"
 #include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
@@ -89,8 +89,7 @@ namespace crimild {
               public StorageBufferManager,
               public TextureManager,
               public UniformBufferManager,
-              public VertexBufferManager
-        {
+              public VertexBufferManager {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::RenderDeviceOLD )
 
         public:
@@ -151,8 +150,8 @@ namespace crimild {
 
         public:
             void submitGraphicsCommands( const Semaphore *wait, Array< CommandBuffer * > &commandBuffer, crimild::UInt32 imageIndex, const Semaphore *signal, const Fence *fence ) noexcept;
-            void submitComputeCommands( CommandBuffer * commands ) noexcept;
-            void submit( CommandBuffer * commands, crimild::Bool wait ) noexcept;
+            void submitComputeCommands( CommandBuffer *commands ) noexcept;
+            void submit( CommandBuffer *commands, crimild::Bool wait ) noexcept;
             void waitIdle( void ) const noexcept;
         };
 

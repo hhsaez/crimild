@@ -82,7 +82,7 @@ ScenePass::ScenePass( RenderDevice *renderDevice ) noexcept
             &m_attachments[ 3 ],
             &m_attachments[ 4 ],
         },
-        &m_attachments[ 5 ] // color composition
+        &m_attachments.back() // color composition
     );
 
     m_unlit = crimild::alloc< UnlitPass >(

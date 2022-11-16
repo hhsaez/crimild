@@ -25,33 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
-#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_OLD_
+#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_OLD_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/ImageView.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
     namespace vulkan {
-    
-        class Image;
 
-        class ImageView
-            : public SharedObject,
-              public WithConstRenderDevice {
+        class ImageViewManager : public BasicRenderResourceManagerImpl< ImageView, VkImageView > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< ImageView, VkImageView >;
+
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
-            virtual ~ImageView( void ) noexcept;
+            virtual ~ImageViewManager( void ) = default;
 
-            operator VkImageView() const noexcept { return m_imageView; }
-
-            void setName( std::string_view name ) noexcept;
-
-        private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            crimild::Bool bind( ImageView *imageView ) noexcept override;
+            crimild::Bool unbind( ImageView *imageView ) noexcept override;
         };
 
     }

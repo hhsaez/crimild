@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,38 +28,62 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_
 
-#include "Rendering/Image.hpp"
-#include "Rendering/VulkanRenderResource.hpp"
+#include "Foundation/SharedObject.hpp"
+#include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VulkanWithRenderDevice.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
-        struct ImageBindInfo {
-            VkImage imageHandler = VK_NULL_HANDLE;
-            VkDeviceMemory imageMemoryHandler = VK_NULL_HANDLE;
+        class Image
+            : public SharedObject,
+              public WithConstRenderDevice {
+        public:
+            Image( const RenderDevice *rd, const VkImageCreateInfo &createInfo ) noexcept;
 
             /**
-             * \brief Staging buffer for dynamic images
-             * 
-             * Dynamic images are updated using a staging buffer, which is created
-             * during image binding. Static images also use a staging buffer but they
-             * release it as soon as possible.
-             */
-            VkBuffer stagingBuffer = VK_NULL_HANDLE;
-            VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
-        };
+                \brief Constructs an image from an already allocated resource
 
-        class ImageManager : public BasicRenderResourceManagerImpl< Image, ImageBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< Image, ImageBindInfo >;
+                \remarks Sets m_readonly to true
 
-        public:
-            virtual ~ImageManager( void ) = default;
+                \remarks Internal use only
+            */
+            Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent ) noexcept;
 
-            crimild::Bool bind( Image *image ) noexcept override;
-            crimild::Bool unbind( Image *image ) noexcept override;
+            virtual ~Image( void ) noexcept;
 
-            void updateImages( void ) noexcept;
+            operator VkImage() const noexcept { return m_image; }
+
+            inline VkExtent3D getExtent( void ) const noexcept { return m_extent; }
+            inline VkFormat getFormat( void ) const noexcept { return m_format; }
+
+            void setName( std::string_view name ) noexcept;
+
+            void allocateMemory( void ) noexcept;
+            void allocateMemory( const VkMemoryAllocateInfo &allocateInfo ) noexcept;
+
+            void transitionLayout( VkImageLayout newLayout ) const noexcept;
+            void transitionLayout( VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
+            void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout newLayout ) const noexcept;
+            void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
+
+            void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src ) noexcept;
+            void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src, const VkImageCopy &copyRegion ) noexcept;
+
+        private:
+            VkImage m_image = VK_NULL_HANDLE;
+            VkDeviceMemory m_memory = VK_NULL_HANDLE;
+
+            VkFormat m_format = VK_FORMAT_UNDEFINED;
+            VkExtent3D m_extent = { 1, 1, 1 };
+            uint32_t m_mipLevels = 1;
+            uint32_t m_arrayLayers = 1;
+
+            mutable VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+            // Read-only images cannot be destroyed (i.e. swapchain images).
+            bool m_readonly = false;
         };
 
     }

@@ -36,6 +36,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -282,10 +283,10 @@ void UnlitPass::init( void ) noexcept
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         std::vector< VkImageView > imageViews;
         if ( m_colorAttachment != nullptr ) {
-            imageViews.push_back( m_colorAttachment->imageViews[ i ] );
+            imageViews.push_back( *m_colorAttachment->imageViews[ i ] );
         }
         if ( m_depthAttachment != nullptr ) {
-            imageViews.push_back( m_depthAttachment->imageViews[ i ] );
+            imageViews.push_back( *m_depthAttachment->imageViews[ i ] );
         }
 
         auto createInfo = VkFramebufferCreateInfo {

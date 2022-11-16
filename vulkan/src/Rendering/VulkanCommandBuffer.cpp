@@ -35,7 +35,7 @@
 #include "VulkanCommandPool.hpp"
 #include "VulkanGraphicsPipelineOLD.hpp"
 #include "VulkanRenderDeviceOLD.hpp"
-#include "VulkanRenderPass.hpp"
+#include "VulkanRenderPassOLD.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -67,14 +67,17 @@ crimild::Bool CommandBufferManager::bind( CommandBuffer *commandBuffer ) noexcep
         vkAllocateCommandBuffers(
             renderDevice->handler,
             &allocInfo,
-            &handler ) );
+            &handler
+        )
+    );
 
     if ( !commandBuffer->getName().empty() ) {
         utils::setObjectName(
             renderDevice->handler,
             UInt64( handler ),
             VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
-            commandBuffer->getName().c_str() );
+            commandBuffer->getName().c_str()
+        );
     }
 
     setBindInfo( commandBuffer, CommandBufferBindInfo { .handler = handler } );
@@ -111,7 +114,8 @@ crimild::Bool CommandBufferManager::unbind( CommandBuffer *commandBuffer ) noexc
         renderDevice->handler,
         commandPool->handler,
         1,
-        &handler );
+        &handler
+    );
 
     removeBindInfo( commandBuffer );
 
@@ -139,7 +143,9 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                     CRIMILD_VULKAN_CHECK(
                         vkBeginCommandBuffer(
                             handler,
-                            &beginInfo ) );
+                            &beginInfo
+                        )
+                    );
                     break;
                 }
 
@@ -147,7 +153,9 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                     CRIMILD_VULKAN_CHECK(
                         vkResetCommandBuffer(
                             handler,
-                            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT ) );
+                            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT
+                        )
+                    );
                     break;
                 }
 
@@ -209,7 +217,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                                             0,
                                             nullptr,
                                             1,
-                                            &imageMemoryBarrier );
+                                            &imageMemoryBarrier
+                                        );
                                     }
 
                                     break;
@@ -218,7 +227,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                                     break;
                                 }
                             }
-                        } );
+                        }
+                    );
 
                     auto clearColor = m_currentRenderPass->clearValue.color;
                     auto clearDepth = m_currentRenderPass->clearValue.depthStencil;
@@ -233,7 +243,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                                             clearDepth.x,
                                             static_cast< crimild::UInt32 >( clearDepth.y ),
                                         },
-                                    } );
+                                    }
+                                );
                             } else {
                                 clearValues.push_back(
                                     {
@@ -245,9 +256,11 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                                                 clearColor.a,
                                             },
                                         },
-                                    } );
+                                    }
+                                );
                             }
-                        } );
+                        }
+                    );
 
                     auto renderPassInfo = VkRenderPassBeginInfo {
                         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -259,7 +272,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                             .offset = { 0, 0 },
                             .extent = utils::getExtent(
                                 m_currentRenderPass->extent,
-                                renderDevice ),
+                                renderDevice
+                            ),
                         },
                         .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
                         .pClearValues = clearValues.data(),
@@ -332,7 +346,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                     vkCmdBindPipeline(
                         handler,
                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        pipelineBindInfo.pipelineHandler );
+                        pipelineBindInfo.pipelineHandler
+                    );
                     break;
                 }
 
@@ -347,7 +362,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                     vkCmdBindPipeline(
                         handler,
                         VK_PIPELINE_BIND_POINT_COMPUTE,
-                        pipelineBindInfo.pipelineHandler );
+                        pipelineBindInfo.pipelineHandler
+                    );
                     break;
                 }
 
@@ -368,7 +384,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                         index,
                         1,
                         vertexBuffers,
-                        offsets );
+                        offsets
+                    );
                     break;
                 }
 
@@ -380,7 +397,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                         handler,
                         bindInfo.bufferHandler,
                         0,
-                        utils::getIndexType( crimild::get_ptr( ibo ) ) );
+                        utils::getIndexType( crimild::get_ptr( ibo ) )
+                    );
                     break;
                 }
 
@@ -416,7 +434,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                         1,
                         descriptorSets,
                         0,
-                        nullptr );
+                        nullptr
+                    );
                     break;
                 }
 
@@ -450,7 +469,9 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                 case CommandBuffer::Command::Type::END: {
                     CRIMILD_VULKAN_CHECK(
                         vkEndCommandBuffer(
-                            handler ) );
+                            handler
+                        )
+                    );
                     break;
                 }
 
@@ -458,7 +479,8 @@ void CommandBufferManager::recordCommands( RenderDeviceOLD *renderDevice, Comman
                     CRIMILD_LOG_DEBUG( "Ignoring command of type ", static_cast< uint32_t >( cmd.type ) );
                     break;
             }
-        } );
+        }
+    );
 }
 
 void CommandBufferManager::updateCommandBuffer( CommandBuffer *commandBuffer ) noexcept

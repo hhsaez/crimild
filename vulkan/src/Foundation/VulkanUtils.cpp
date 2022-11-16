@@ -1520,7 +1520,8 @@ void utils::createImageView( VkDevice device, VkImage image, VkFormat format, Vk
             .baseMipLevel = 0,
             .levelCount = 1,
             .baseArrayLayer = 0,
-            .layerCount = 1 },
+            .layerCount = 1,
+        },
     };
 
     CRIMILD_VULKAN_CHECK( vkCreateImageView( device, &imageViewInfo, nullptr, imageView ) );

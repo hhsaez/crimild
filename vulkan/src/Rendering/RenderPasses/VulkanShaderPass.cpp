@@ -30,6 +30,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Settings.hpp"
@@ -233,12 +234,16 @@ void ShaderPass::init( void ) noexcept
 
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+        auto attachments = std::array< VkImageView, 1 > {
+            *m_colorAttachment->imageViews[ i ],
+        };
+
         auto createInfo = VkFramebufferCreateInfo {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .pNext = nullptr,
             .renderPass = m_renderPass,
-            .attachmentCount = 1,
-            .pAttachments = &m_colorAttachment->imageViews[ i ],
+            .attachmentCount = uint32_t( attachments.size() ),
+            .pAttachments = attachments.data(),
             .width = m_renderArea.extent.width,
             .height = m_renderArea.extent.height,
             .layers = 1,
@@ -465,7 +470,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
                     .imageLayout = getRenderDevice()->formatIsColor( m_inputs[ j ]->format )
                                        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                                        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-                    .imageView = m_inputs[ j ]->imageViews[ i ],
+                    .imageView = *m_inputs[ j ]->imageViews[ i ],
                     .sampler = m_inputs[ j ]->sampler,
                 }
             );

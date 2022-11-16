@@ -25,33 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
-#define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
+#ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASS_
+#define CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/RenderPass.hpp"
+#include "Rendering/VulkanRenderResource.hpp"
 
 namespace crimild {
 
+    class RenderPass;
+
     namespace vulkan {
-    
-        class Image;
 
-        class ImageView
-            : public SharedObject,
-              public WithConstRenderDevice {
+        struct [[deprecated]] RenderPassBindInfo {
+            Array< VkFramebuffer > framebuffers;
+            VkRenderPass handler;
+        };
+
+        class [[deprecated]] RenderPassManager : public BasicRenderResourceManagerImpl< RenderPass, RenderPassBindInfo > {
+            using ManagerImpl = BasicRenderResourceManagerImpl< RenderPass, RenderPassBindInfo >;
+
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
-            virtual ~ImageView( void ) noexcept;
+            virtual ~RenderPassManager( void ) = default;
 
-            operator VkImageView() const noexcept { return m_imageView; }
+            crimild::Bool bind( RenderPass *renderPass ) noexcept override;
+            crimild::Bool unbind( RenderPass *renderPass ) noexcept override;
 
-            void setName( std::string_view name ) noexcept;
+            inline void setCurrentRenderPass( RenderPass *renderPass ) noexcept { m_currentRenderPass = renderPass; }
+            inline RenderPass *getCurrentRenderPass( void ) noexcept { return m_currentRenderPass; }
 
         private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            RenderPass *m_currentRenderPass = nullptr;
         };
 
     }

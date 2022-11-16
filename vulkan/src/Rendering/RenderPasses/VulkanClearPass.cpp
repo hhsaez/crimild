@@ -27,6 +27,7 @@
 
 #include "Rendering/RenderPasses/VulkanClearPass.hpp"
 
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 #include <array>
@@ -218,7 +219,7 @@ void ClearPass::init( void ) noexcept
         std::vector< VkImageView > imageViews;
         imageViews.reserve( m_attachments.size() );
         for ( auto att : m_attachments ) {
-            imageViews.push_back( att->imageViews[ i ] );
+            imageViews.push_back( *att->imageViews[ i ] );
         }
 
         auto createInfo = VkFramebufferCreateInfo {
