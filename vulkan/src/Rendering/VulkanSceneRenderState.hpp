@@ -71,6 +71,12 @@ namespace crimild {
             RenderableSet< materials::PrincipledBSDF > litRenderables;
             RenderableSet< UnlitMaterial > unlitRenderables;
             RenderableSet< UnlitMaterial > envRenderables;
+
+            using ShadowCasters =
+                std::unordered_map<
+                    const Primitive *,
+                    std::vector< Renderable > >;
+            ShadowCasters shadowCasters;
         };
 
     }

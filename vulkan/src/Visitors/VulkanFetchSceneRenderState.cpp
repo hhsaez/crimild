@@ -67,6 +67,7 @@ void FetchSceneRenderState::visitGeometry( Geometry *geometry ) noexcept
     // TODO: replace with render mode for materials
     if ( auto m = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
         m_result.litRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
+        m_result.shadowCasters[ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
     } else if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
         m_result.unlitRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
     }

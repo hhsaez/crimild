@@ -42,11 +42,13 @@ namespace crimild {
 
     struct Event;
 
+    class Light;
     class UniformBuffer;
 
     namespace vulkan {
 
         class PhysicalDevice;
+        class ShadowMap;
         class VulkanSurface;
 
         class RenderDevice
@@ -358,6 +360,8 @@ namespace crimild {
                 SharedPointer< vulkan::Image > image;
                 SharedPointer< vulkan::ImageView > imageView;
             } m_depthStencilResources;
+
+            std::unordered_map< const Light *, SharedPointer< ShadowMap > > m_shadowMaps;
         };
 
     }
