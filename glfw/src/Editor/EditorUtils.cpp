@@ -109,7 +109,7 @@ SharedPointer< Node > crimild::editor::createDefaultScene( void ) noexcept
             light->setEnergy( 5 );
             light->setLocal(
                 lookAt(
-                    Point3 { 0, 10, 10 },
+                    Point3 { -10, 10, 10 },
                     Point3 { 0, 0, 0 },
                     Vector3 { 0, 1, 0 }
                 )

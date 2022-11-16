@@ -56,7 +56,7 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     attach< editor::ScenePanel >( renderDevice, Point2 { 0, 50 }, Extent2D { .width = 1280, .height = 515 } );
     attach< editor::SimulationPanel >( renderDevice, Point2 { 0, 565 }, Extent2D { .width = 1280, .height = 515 } );
     attach< SceneHierarchyPanel >( Point2 { 1280, 50 }, Extent2D { .width = 320, .height = 1030 } );
-    attach< NodeInspectorPanel >( Point2 { 1600, 50 }, Extent2D { .width = 320, .height = 1030 } );
+    attach< NodeInspectorPanel >( renderDevice, Point2 { 1600, 50 }, Extent2D { .width = 320, .height = 1030 } );
 }
 
 EditorLayer::~EditorLayer( void ) noexcept

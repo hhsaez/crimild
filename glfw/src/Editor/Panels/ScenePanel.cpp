@@ -36,6 +36,7 @@
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Simulation.hpp"
@@ -317,7 +318,7 @@ void ScenePanel::render( void ) noexcept
     auto transitionAttachment = [ & ]( const auto att ) {
         getRenderDevice()->transitionImageLayout(
             commandBuffer,
-            att->images[ currentFrameIndex ],
+            *att->images[ currentFrameIndex ],
             att->format,
             getRenderDevice()->formatIsColor( att->format )
                 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL

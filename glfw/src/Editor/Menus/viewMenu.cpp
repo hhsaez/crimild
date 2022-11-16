@@ -46,7 +46,7 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
         }
 
         if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            editor->attach< NodeInspectorPanel >();
+            editor->attach< NodeInspectorPanel >( editor->getRenderDevice() );
         }
 
         ImGui::Separator();

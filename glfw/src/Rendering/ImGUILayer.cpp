@@ -33,6 +33,7 @@
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 #define MAX_VERTEX_COUNT 100000
@@ -506,7 +507,7 @@ void ImGUILayer::init( void ) noexcept
         const auto &imageView = m_renderDevice->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
-            imageView,
+            *imageView,
             // TODO: add depth image view if available
         };
 
