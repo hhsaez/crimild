@@ -107,13 +107,25 @@ Node *Group::getNode( std::string name )
     return result;
 }
 
-void Group::forEachNode( std::function< void( Node * ) > callback )
+void Group::forEachNode( std::function< void( Node * ) > callback, bool skipDisabledNodes )
 {
-    _nodes.each( [ &callback ]( SharedPointer< Node > &node ) {
-        if ( node != nullptr && node->isEnabled() ) {
-            callback( crimild::get_ptr( node ) );
-        }
-    } );
+    if ( skipDisabledNodes ) {
+        _nodes.each(
+            [ &callback ]( SharedPointer< Node > &node ) {
+                if ( node != nullptr && node->isEnabled() ) {
+                    callback( crimild::get_ptr( node ) );
+                }
+            }
+        );
+    } else {
+        _nodes.each(
+            [ &callback ]( SharedPointer< Node > &node ) {
+                if ( node != nullptr ) {
+                    callback( crimild::get_ptr( node ) );
+                }
+            }
+        );
+    }
 }
 
 void Group::accept( NodeVisitor &visitor )

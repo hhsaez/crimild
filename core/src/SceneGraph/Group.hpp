@@ -55,8 +55,8 @@ namespace crimild {
         void detachAllNodes( void );
 
         /**
-			\brief Gets a node at a given position
-		*/
+            \brief Gets a node at a given position
+        */
         Node *getNodeAt( unsigned int index );
 
         template< typename T >
@@ -73,7 +73,7 @@ namespace crimild {
             return static_cast< T * >( getNode( name ) );
         }
 
-        virtual void forEachNode( std::function< void( Node * ) > callback );
+        virtual void forEachNode( std::function< void( Node * ) > callback, bool skipDisabledNodes = true );
 
     protected:
         Array< SharedPointer< Node > > _nodes;
