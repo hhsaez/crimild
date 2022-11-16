@@ -39,6 +39,7 @@
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Simulation/Systems/RenderSystem.hpp"
+#include "UI/Menus/mainMenu.hpp"
 #include "imgui.h"
 
 using namespace crimild;
@@ -519,22 +520,7 @@ namespace crimild {
         {
             auto showAbout = false;
             if ( ImGui::BeginMainMenuBar() ) {
-                if ( ImGui::BeginMenu( "File" ) ) {
-                    ImGui::EndMenu();
-                }
-
-                if ( ImGui::BeginMenu( "Edit" ) ) {
-                    if ( ImGui::MenuItem( "Rendering..." ) ) {
-                        settings->set( "ui.edit.rendering.show", true );
-                    }
-                    if ( ImGui::MenuItem( "RT..." ) ) {
-                        settings->set( "ui.edit.rt.show", true );
-                    }
-                    if ( ImGui::MenuItem( "Settings..." ) ) {
-                        settings->set( "ui.edit.settings.show", true );
-                    }
-                    ImGui::EndMenu();
-                }
+                mainMenu();
 
                 if ( ImGui::BeginMenu( "Rendering" ) ) {
                     if ( ImGui::MenuItem( "Default" ) ) {
