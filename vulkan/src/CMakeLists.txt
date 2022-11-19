@@ -12,6 +12,7 @@ set(
     Debug/VulkanDebugMessenger.cpp
     Debug/VulkanDebugMessenger.hpp
     Exceptions/VulkanException.hpp
+    Foundation/VulkanInitializers.hpp
     Foundation/VulkanObject.hpp
     Foundation/VulkanUtils.cpp
     Foundation/VulkanUtils.hpp
@@ -23,6 +24,12 @@ set(
     Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp
     Rendering/RenderPasses/VulkanGBufferPass.cpp
     Rendering/RenderPasses/VulkanGBufferPass.hpp
+    Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.cpp
+    Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp
+    Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.cpp
+    Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp
+    Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.cpp 
+    Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp
     Rendering/RenderPasses/VulkanLocalLightingPass.cpp
     Rendering/RenderPasses/VulkanLocalLightingPass.hpp
     Rendering/RenderPasses/VulkanOverlayPass.cpp
@@ -59,6 +66,8 @@ set(
     Rendering/VulkanDescriptorSetLayout.hpp
     Rendering/VulkanFence.cpp
     Rendering/VulkanFence.hpp
+    Rendering/VulkanFramebuffer.cpp
+    Rendering/VulkanFramebuffer.hpp
     Rendering/VulkanFramebufferAttachment.hpp
     Rendering/VulkanGraphicsPipeline.cpp
     Rendering/VulkanGraphicsPipeline.hpp
@@ -66,11 +75,15 @@ set(
     Rendering/VulkanGraphicsPipelineOLD.hpp
     Rendering/VulkanImage.cpp
     Rendering/VulkanImage.hpp
+    Rendering/VulkanImageOLD.cpp
+    Rendering/VulkanImageOLD.hpp
     Rendering/VulkanImageView.cpp
     Rendering/VulkanImageView.hpp
+    Rendering/VulkanImageViewOLD.cpp
+    Rendering/VulkanImageViewOLD.hpp
     Rendering/VulkanIndexBuffer.cpp
     Rendering/VulkanIndexBuffer.hpp
-    Rendering/VulkanInstance.cpp
+    Rendering/VulkanInstance.cpp 
     Rendering/VulkanInstance.hpp
     Rendering/VulkanPhysicalDevice.cpp
     Rendering/VulkanPhysicalDevice.hpp
@@ -94,6 +107,8 @@ set(
     Rendering/VulkanShaderCompiler.hpp
     Rendering/VulkanShaderModule.cpp
     Rendering/VulkanShaderModule.hpp
+    Rendering/VulkanShadowMap.cpp
+    Rendering/VulkanShadowMap.hpp
     Rendering/VulkanStorageBuffer.cpp
     Rendering/VulkanStorageBuffer.hpp
     Rendering/VulkanSurface.cpp
