@@ -47,6 +47,7 @@ namespace crimild {
             {
                 return VkImageCreateInfo {
                     .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+                    .flags = 0,
                     .imageType = imageType,
                     .mipLevels = 1,
                     .arrayLayers = 1,
@@ -54,7 +55,6 @@ namespace crimild {
                     .tiling = VK_IMAGE_TILING_OPTIMAL,
                     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
                     .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                    .flags = 0,
                 };
             }
 

@@ -196,9 +196,9 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
 
     for ( size_t i = 0; i < descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
-            .imageLayout = renderDevice->formatIsColor( imageFormat ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            .imageView = *imageViews[ i ],
             .sampler = sampler,
+            .imageView = *imageViews[ i ],
+            .imageLayout = renderDevice->formatIsColor( imageFormat ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
         };
 
         const auto writes = std::array< VkWriteDescriptorSet, 1 > {
@@ -207,10 +207,10 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
                 .dstSet = descriptorSets[ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
-                .pBufferInfo = nullptr,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = &imageInfo,
+                .pBufferInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
         };
