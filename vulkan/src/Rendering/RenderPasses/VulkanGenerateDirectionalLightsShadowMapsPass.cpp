@@ -238,8 +238,8 @@ void GenerateDirectionalLightsShadowMaps::renderShadowMapImage(
     vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
 
     const auto scissor = VkRect2D {
-        .extent = m_shadowAttachment.extent,
         .offset = { 0, 0 },
+        .extent = m_shadowAttachment.extent,
     };
     vkCmdSetScissor( commandBuffer, 0, 1, &scissor );
 
@@ -342,39 +342,44 @@ void GenerateDirectionalLightsShadowMaps::init( void ) noexcept
 
         const auto viewport = ViewportDimensions { .scalingMode = ScalingMode::DYNAMIC };
 
+        const auto vertexLayouts = std::vector< VertexLayout > {
+            VertexLayout::P3_N3_TC2
+        };
+
+        const auto pipelineDescriptor = GraphicsPipeline::Descriptor {
+            .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {},
+            .program = program.get(),
+            .vertexLayouts = vertexLayouts,
+            .depthStencilState = DepthStencilState {
+                .depthCompareOp = CompareOp::LESS_OR_EQUAL,
+            },
+            .rasterizationState = RasterizationState {
+                .cullMode = CullMode::FRONT,
+                .depthBiasEnable = true,
+            },
+            .colorBlendState = ColorBlendState {
+                .enable = false,
+            },
+            .colorAttachmentCount = 0,
+            .dynamicStates = std::vector< VkDynamicState > {
+                VK_DYNAMIC_STATE_VIEWPORT,
+                VK_DYNAMIC_STATE_SCISSOR,
+                VK_DYNAMIC_STATE_DEPTH_BIAS,
+            },
+            .viewport = viewport,
+            .scissor = viewport,
+            .pushConstantRanges = {
+                VkPushConstantRange {
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                    .offset = 0,
+                    .size = sizeof( Matrix4f ),
+                },
+            },
+        };
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             *m_renderPass,
-            GraphicsPipeline::Descriptor {
-                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {},
-                .program = program.get(),
-                .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-                .pushConstantRanges = {
-                    VkPushConstantRange {
-                        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-                        .offset = 0,
-                        .size = sizeof( Matrix4f ),
-                    },
-                },
-                .depthStencilState = DepthStencilState {
-                    .depthCompareOp = CompareOp::LESS_OR_EQUAL,
-                },
-                .rasterizationState = RasterizationState {
-                    .depthBiasEnable = true,
-                    .cullMode = CullMode::FRONT,
-                },
-                .colorBlendState = ColorBlendState {
-                    .enable = false,
-                },
-                .dynamicStates = std::vector< VkDynamicState > {
-                    VK_DYNAMIC_STATE_VIEWPORT,
-                    VK_DYNAMIC_STATE_SCISSOR,
-                    VK_DYNAMIC_STATE_DEPTH_BIAS,
-                },
-                .viewport = viewport,
-                .scissor = viewport,
-                .colorAttachmentCount = 0,
-            }
+            pipelineDescriptor
         );
     }();
 }

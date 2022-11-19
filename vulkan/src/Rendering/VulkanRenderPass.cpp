@@ -41,8 +41,8 @@ vulkan::RenderPass::RenderPass(
     : WithConstRenderDevice( rd )
 {
     m_renderArea = VkRect2D {
-        .extent = attachments.front()->extent,
         .offset = { 0, 0 },
+        .extent = attachments.front()->extent,
     };
 
     std::vector< VkAttachmentDescription > attachmentDescriptions;

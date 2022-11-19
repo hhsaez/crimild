@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/perspective.hpp"
@@ -32,7 +34,6 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShadowMap.hpp"
@@ -140,8 +141,8 @@ void GenerateSpotLightsShadowMaps::renderShadowMap(
     vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
 
     const auto scissor = VkRect2D {
-        .extent = m_shadowAttachment.extent,
         .offset = { 0, 0 },
+        .extent = m_shadowAttachment.extent,
     };
     vkCmdSetScissor( commandBuffer, 0, 1, &scissor );
 
@@ -250,30 +251,27 @@ void GenerateSpotLightsShadowMaps::init( void ) noexcept
 
         const auto viewport = ViewportDimensions { .scalingMode = ScalingMode::DYNAMIC };
 
+        const auto vertexLayouts = std::vector< VertexLayout > {
+            VertexLayout::P3_N3_TC2,
+        };
+
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             *m_renderPass,
             GraphicsPipeline::Descriptor {
-                .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {},
                 .program = program.get(),
-                .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-                .pushConstantRanges = {
-                    VkPushConstantRange {
-                        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-                        .offset = 0,
-                        .size = sizeof( Matrix4f ),
-                    },
-                },
+                .vertexLayouts = vertexLayouts,
                 .depthStencilState = DepthStencilState {
                     .depthCompareOp = CompareOp::LESS_OR_EQUAL,
                 },
                 .rasterizationState = RasterizationState {
-                    .depthBiasEnable = true,
                     .cullMode = CullMode::FRONT,
+                    .depthBiasEnable = true,
                 },
                 .colorBlendState = ColorBlendState {
                     .enable = false,
                 },
+                .colorAttachmentCount = 0,
                 .dynamicStates = std::vector< VkDynamicState > {
                     VK_DYNAMIC_STATE_VIEWPORT,
                     VK_DYNAMIC_STATE_SCISSOR,
@@ -281,7 +279,13 @@ void GenerateSpotLightsShadowMaps::init( void ) noexcept
                 },
                 .viewport = viewport,
                 .scissor = viewport,
-                .colorAttachmentCount = 0,
+                .pushConstantRanges = std::vector< VkPushConstantRange > {
+                    VkPushConstantRange {
+                        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                        .offset = 0,
+                        .size = sizeof( Matrix4f ),
+                    },
+                },
             }
         );
     }();

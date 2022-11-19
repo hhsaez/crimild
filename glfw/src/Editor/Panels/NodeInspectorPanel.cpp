@@ -407,9 +407,9 @@ namespace crimild {
 
                 for ( size_t i = 0; i < descriptorSets.size(); ++i ) {
                     const auto imageInfo = VkDescriptorImageInfo {
-                        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = imageViews[ i ],
                         .sampler = shadowMap->sampler,
+                        .imageView = imageViews[ i ],
+                        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                     };
 
                     const auto writes = std::array< VkWriteDescriptorSet, 1 > {
@@ -418,10 +418,10 @@ namespace crimild {
                             .dstSet = descriptorSets[ i ],
                             .dstBinding = 0,
                             .dstArrayElement = 0,
-                            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                             .descriptorCount = 1,
-                            .pBufferInfo = nullptr,
+                            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                             .pImageInfo = &imageInfo,
+                            .pBufferInfo = nullptr,
                             .pTexelBufferView = nullptr,
                         },
                     };

@@ -358,6 +358,10 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
 
         const auto viewport = ViewportDimensions::fromExtent( extent.width, extent.height );
 
+        const auto vertexLayouts = std::vector< VertexLayout > {
+            VertexLayout::P3_N3_TC2
+        };
+
         return std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             *m_renderPass,
@@ -366,7 +370,20 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
                     m_lightObjects.layout,
                 },
                 .program = program.get(),
-                .vertexLayouts = std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+                .vertexLayouts = vertexLayouts,
+                .depthStencilState = DepthStencilState {
+                    .depthCompareOp = CompareOp::LESS_OR_EQUAL,
+                },
+                .rasterizationState = RasterizationState {
+                    .cullMode = CullMode::FRONT,
+                    .depthBiasEnable = true,
+                },
+                .colorBlendState = ColorBlendState {
+                    .enable = false,
+                },
+                .colorAttachmentCount = 1,
+                .viewport = viewport,
+                .scissor = viewport,
                 .pushConstantRanges = {
                     VkPushConstantRange {
                         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
@@ -374,19 +391,6 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
                         .size = sizeof( PerGeometryUniforms ),
                     },
                 },
-                .depthStencilState = DepthStencilState {
-                    .depthCompareOp = CompareOp::LESS_OR_EQUAL,
-                },
-                .rasterizationState = RasterizationState {
-                    .depthBiasEnable = true,
-                    .cullMode = CullMode::FRONT,
-                },
-                .colorBlendState = ColorBlendState {
-                    .enable = false,
-                },
-                .viewport = viewport,
-                .scissor = viewport,
-                .colorAttachmentCount = 1,
             }
         );
     }();
@@ -455,9 +459,9 @@ void GeneratePointLightsShadowMaps::bindLight( const Light *light ) noexcept
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
             .poolSizeCount = uint32_t( poolSizes.size() ),
             .pPoolSizes = poolSizes.data(),
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
         };
 
         CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_lightObjects.lights[ light ][ layerIndex ].pool ) );
@@ -487,10 +491,10 @@ void GeneratePointLightsShadowMaps::bindLight( const Light *light ) noexcept
                     .dstSet = m_lightObjects.lights[ light ][ layerIndex ].descriptorSets[ i ],
                     .dstBinding = 0,
                     .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .descriptorCount = 1,
-                    .pBufferInfo = &bufferInfo,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .pImageInfo = nullptr,
+                    .pBufferInfo = &bufferInfo,
                     .pTexelBufferView = nullptr,
                 },
             };

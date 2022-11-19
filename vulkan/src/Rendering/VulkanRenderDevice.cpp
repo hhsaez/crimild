@@ -280,9 +280,9 @@ void RenderDevice::createDescriptorPool(
 {
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = static_cast< uint32_t >( getInFlightFrameCount() ) + additionalSets,
         .poolSizeCount = static_cast< uint32_t >( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = static_cast< uint32_t >( getInFlightFrameCount() ) + additionalSets,
     };
 
     CRIMILD_VULKAN_CHECK(

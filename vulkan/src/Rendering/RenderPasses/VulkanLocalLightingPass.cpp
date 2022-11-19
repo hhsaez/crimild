@@ -1021,9 +1021,9 @@ static void createLightDescriptors(
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = uint32_t( renderDevice->getSwapchainImageCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
-        .maxSets = uint32_t( renderDevice->getSwapchainImageCount() ),
     };
 
     CRIMILD_VULKAN_CHECK(
@@ -1070,9 +1070,9 @@ static void createLightDescriptors(
         };
 
         const auto imageInfo = VkDescriptorImageInfo {
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, // renderDevice->formatIsColor( shadowMap->imageFormat ) ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            .imageView = *shadowMap->imageViews[ i ],
             .sampler = shadowMap->sampler,
+            .imageView = *shadowMap->imageViews[ i ],
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
 
         const auto writes = std::array< VkWriteDescriptorSet, 2 > {
@@ -1081,10 +1081,10 @@ static void createLightDescriptors(
                 .dstSet = lightObjects.descriptorSets[ light ][ i ],
                 .dstBinding = 0,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = 1,
-                .pBufferInfo = &bufferInfo,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             },
             VkWriteDescriptorSet {
@@ -1092,10 +1092,10 @@ static void createLightDescriptors(
                 .dstSet = lightObjects.descriptorSets[ light ][ i ],
                 .dstBinding = 1,
                 .dstArrayElement = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = 1,
-                .pBufferInfo = nullptr,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = &imageInfo,
+                .pBufferInfo = nullptr,
                 .pTexelBufferView = nullptr,
             },
         };
