@@ -313,6 +313,7 @@ void GenerateDirectionalLightsShadowMaps::init( void ) noexcept
         std::vector< const FramebufferAttachment * > { &m_shadowAttachment },
         true
     );
+    m_renderPass->setName( "GenerateDirectionalLightShadowMaps" );
 
     m_framebuffers = vulkan::Framebuffer::createInFlightFramebuffers( getRenderDevice(), m_renderPass, { &m_shadowAttachment } );
 

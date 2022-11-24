@@ -196,6 +196,11 @@ vulkan::RenderPass::~RenderPass( void ) noexcept
     m_clearValues.clear();
 }
 
+void vulkan::RenderPass::setName( std::string_view name ) const noexcept
+{
+    getRenderDevice()->setObjectName( uint64_t( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, name );
+}
+
 void vulkan::RenderPass::begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::Framebuffer > &framebuffer ) const noexcept
 {
     auto beginInfo = vulkan::initializers::renderPassBeginInfo();

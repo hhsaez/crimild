@@ -56,6 +56,8 @@ namespace crimild {
             virtual ~RenderPass( void ) noexcept;
 
             operator VkRenderPass() const noexcept { return m_renderPass; }
+                  
+            void setName( std::string_view name ) const noexcept;
 
             void begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::Framebuffer > &framebuffer ) const noexcept;
             void begin( VkCommandBuffer commandBuffer, const VkRenderPassBeginInfo &beginInfo ) const noexcept;

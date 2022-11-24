@@ -186,6 +186,8 @@ void ScenePass::init( void ) noexcept
 
 void ScenePass::deinit( void ) noexcept
 {
+    vkDeviceWaitIdle( getRenderDevice()->getHandle() );
+    
     for ( auto &att : m_attachments ) {
         getRenderDevice()->destroyFramebufferAttachment( att );
     }
