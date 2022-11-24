@@ -38,9 +38,9 @@
 #include "Foundation/ObjectFactory.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/get_ptr.hpp"
-#include "Mathematics/trigonometry.hpp"
 #include "Mathematics/min.hpp"
 #include "Mathematics/swizzle.hpp"
+#include "Mathematics/trigonometry.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 #include "Rendering/VulkanImage.hpp"
@@ -141,7 +141,7 @@ static const std::set< std::string > &getComponentList( void ) noexcept
 
 namespace crimild {
 
-    class NodeInfoSection : public NodeInspectorPanel::Section {
+    class NodeInfoSection : public editor::NodeInspectorPanel::Section {
     public:
         virtual void render( Node *node ) noexcept override
         {
@@ -159,9 +159,9 @@ namespace crimild {
         }
     };
 
-    class NodeTransformationSection : public NodeInspectorPanel::Section {
+    class NodeTransformationSection : public editor::NodeInspectorPanel::Section {
     public:
-        virtual void render( Node *node ) noexcept override
+        virtual void render( crimild::Node *node ) noexcept override
         {
             Point3 nodeTranslation;
             Vector3 nodeRotation;
@@ -181,9 +181,9 @@ namespace crimild {
         }
     };
 
-    class NodeComponentsSection : public NodeInspectorPanel::Section {
+    class NodeComponentsSection : public editor::NodeInspectorPanel::Section {
     public:
-        virtual void render( Node *node ) noexcept override
+        virtual void render( crimild::Node *node ) noexcept override
         {
             ImGui::SetNextItemOpen( true );
             if ( ImGui::CollapsingHeader( "Components", ImGuiTreeNodeFlags_None ) ) {
@@ -232,7 +232,7 @@ namespace crimild {
     };
 
     class LightPropertiesSection
-        : public NodeInspectorPanel::Section,
+        : public editor::NodeInspectorPanel::Section,
           public vulkan::WithConstRenderDevice {
     public:
         LightPropertiesSection( const vulkan::RenderDevice *renderDevice )
@@ -253,7 +253,7 @@ namespace crimild {
             m_shadowMapLayers.clear();
         }
 
-        virtual void render( Node *node ) noexcept override
+        virtual void render( crimild::Node *node ) noexcept override
         {
             auto light = dynamic_cast< Light * >( node );
             if ( light == nullptr ) {
@@ -289,12 +289,12 @@ namespace crimild {
                 auto color = light->getColor();
                 ImGui::ColorEdit3( "Color", get_ptr( color ) );
                 light->setColor( color );
-                
+
                 if ( light->getType() == Light::Type::SPOT ) {
                     auto innerCutoff = degrees( light->getInnerCutoff() );
                     ImGui::SliderFloat( "Inner Cutoff", &innerCutoff, 0, 180 );
                     light->setInnerCutoff( radians( innerCutoff ) );
-                    
+
                     auto outerCutoff = degrees( light->getOuterCutoff() );
                     ImGui::SliderFloat( "Outer Cutoff", &outerCutoff, 0, 180 );
                     light->setOuterCutoff( radians( outerCutoff ) );
@@ -450,45 +450,38 @@ namespace crimild {
 
 }
 
-void NodeInspectorPanel::render( void ) noexcept
+void editor::NodeInspectorPanel::render( void ) noexcept
 {
-    // Allow opening multiple panels with the same name
-    std::stringstream ss;
-    ss << "Node Inspector##" << ( size_t ) this;
-
     bool open = true;
-    ImGui::SetNextWindowPos( ImVec2( m_position.x, m_position.y ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
+    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
 
-    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
-        auto editor = EditorLayer::getInstance();
+    auto editor = EditorLayer::getInstance();
 
-        auto node = editor->getSelectedNode();
-        if ( m_selectedNode != node ) {
-            configure( node );
-        }
-
-        if ( !m_sections.empty() ) {
-            // lightPropertiesSection( node, getRenderDevice() );
-            // nodeComponentsSection( node );
-            for ( auto &section : m_sections ) {
-                section->render( node );
-            }
-        } else {
-            ImGui::Text( "No node selected" );
-        }
+    auto node = editor->getSelectedNode();
+    if ( m_selectedNode != node ) {
+        configure( node );
     }
-    ImGui::End();
 
+    if ( !m_sections.empty() ) {
+        // lightPropertiesSection( node, getRenderDevice() );
+        // nodeComponentsSection( node );
+        for ( auto &section : m_sections ) {
+            section->render( node );
+        }
+    } else {
+        ImGui::Text( "No node selected" );
+    }
+
+    ImGui::End();
+    
     if ( !open ) {
-        detachFromParent();
+        configure( nullptr );
+        removeFromParent();
         return;
     }
-
-    Layer::render();
 }
 
-void NodeInspectorPanel::configure( Node *node ) noexcept
+void editor::NodeInspectorPanel::configure( crimild::Node *node ) noexcept
 {
     if ( m_selectedNode != node ) {
         m_sections.clear();

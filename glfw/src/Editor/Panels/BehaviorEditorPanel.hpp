@@ -28,14 +28,21 @@
 #ifndef CRIMILD_GLFW_EDITOR_PANELS_BEHAVIOR_EDITOR_
 #define CRIMILD_GLFW_EDITOR_PANELS_BEHAVIOR_EDITOR_
 
-#include "Rendering/Layer.hpp"
+#include "Editor/Layout.hpp"
 
 namespace crimild {
 
-    class BehaviorEditorPanel : public Layer {
-    public:
-        virtual void render( void ) noexcept override;
-    };
+    namespace editor {
+
+        class BehaviorEditorPanel : public layout::Panel {
+        public:
+            BehaviorEditorPanel( void ) noexcept;
+            virtual ~BehaviorEditorPanel( void ) = default;
+            
+            virtual void render( void ) noexcept override;
+        };
+
+    }
 
 }
 

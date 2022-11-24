@@ -28,9 +28,9 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE_
 #define CRIMILD_EDITOR_PANELS_SCENE_
 
+#include "Editor/Layout.hpp"
 #include "Mathematics/Point2.hpp"
 #include "Mathematics/Transformation_constants.hpp"
-#include "Rendering/Layer.hpp"
 #include "Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp"
 #include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
 #include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
@@ -49,13 +49,9 @@ namespace crimild {
 
     namespace editor {
 
-        class ScenePanel : public Layer {
+        class ScenePanel : public layout::Panel {
         public:
-            ScenePanel(
-                vulkan::RenderDevice *renderDevice,
-                const Point2 &position = { 310, 50 },
-                const Extent2D &extent = { .width = 1280.0, .height = 695.0 }
-            ) noexcept;
+            ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept;
             virtual ~ScenePanel( void ) = default;
 
             virtual Event handle( const Event &e ) noexcept override;
@@ -66,7 +62,6 @@ namespace crimild {
         private:
             vulkan::RenderDevice *m_renderDevice = nullptr;
 
-            Point2 m_pos = Point2 { 310, 50 };
             Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
             Event m_lastResizeEvent = Event {};
             vulkan::ScenePass m_scenePass;

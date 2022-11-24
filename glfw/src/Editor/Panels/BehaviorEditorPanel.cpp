@@ -300,19 +300,18 @@ struct GraphEditorDelegate : public GraphEditor::Delegate {
     void CustomDraw( ImDrawList *drawList, ImRect rectangle, GraphEditor::NodeIndex nodeIndex ) override
     {
         auto windowPos = ImGui::GetWindowPos();
-        ImVec2 pos = rectangle.GetTL();
+        ImVec2 pos = rectangle.Min;
         pos.x -= windowPos.x;
         pos.y -= windowPos.y;
 
         ImGui::SetCursorPos( pos );
-        if ( ImGui::BeginChild( "Some child", rectangle.GetSize(), ImGuiWindowFlags_NoBackground ) ) {
-            auto node = m_nodes[ nodeIndex ];
-            if ( node.type == Node::Type::ACTION ) {
-                showActionDetails( node.action );
-            }
-
-            ImGui::EndChild();
+        ImGui::BeginChild( "Some child", rectangle.GetSize(), ImGuiWindowFlags_NoBackground );
+        auto node = m_nodes[ nodeIndex ];
+        if ( node.type == Node::Type::ACTION ) {
+            showActionDetails( node.action );
         }
+
+        ImGui::EndChild();
     }
 
     const size_t GetTemplateCount() override
@@ -404,9 +403,16 @@ private:
     std::vector< GraphEditor::Link > m_links;
     std::vector< GraphEditor::Template > m_templates;
     std::vector< SharedPointer< behaviors::Behavior > > m_allBehaviors;
+    ImVec2 m_windowPos;
 };
 
-void BehaviorEditorPanel::render( void ) noexcept
+editor::BehaviorEditorPanel::BehaviorEditorPanel( void ) noexcept
+    : layout::Panel( "Behaviors" )
+{
+    // no-op
+}
+
+void editor::BehaviorEditorPanel::render( void ) noexcept
 {
     bool open = true;
 
@@ -425,54 +431,41 @@ void BehaviorEditorPanel::render( void ) noexcept
     static GraphEditor::ViewState viewState;
     static GraphEditor::FitOnScreen fit = GraphEditor::Fit_None;
 
-    if ( !open ) {
-        return;
-    }
-
     delegate.configure( controller );
 
-    // Allow opening multiple panels with the same name
-    auto panelId = ( size_t ) this;
-    std::stringstream ss;
-    ss << "Behaviors##" << panelId;
-
-    ImGui::SetNextWindowPos( ImVec2( 310, 200 ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( 1280, 600 ), ImGuiCond_FirstUseEver );
-
-    if ( ImGui::Begin( ss.str().c_str(), &open, 0 ) ) {
-        if ( ImGui::BeginCombo( "##", "Add Behavior..." ) ) {
-            const auto &behaviorList = getBehaviorList();
-            for ( const auto &behaviorClassName : behaviorList ) {
-                if ( ImGui::Selectable( behaviorClassName.c_str(), false ) ) {
-                    auto behavior = std::static_pointer_cast< behaviors::Behavior >( ObjectFactory::getInstance()->build( behaviorClassName ) );
-                    delegate.addBehavior( behavior );
-                }
+    bool visible = ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    if ( ImGui::BeginCombo( "##", "Add Behavior..." ) ) {
+        const auto &behaviorList = getBehaviorList();
+        for ( const auto &behaviorClassName : behaviorList ) {
+            if ( ImGui::Selectable( behaviorClassName.c_str(), false ) ) {
+                auto behavior = std::static_pointer_cast< behaviors::Behavior >( ObjectFactory::getInstance()->build( behaviorClassName ) );
+                delegate.addBehavior( behavior );
             }
-
-            ImGui::EndCombo();
         }
 
-        ImGui::SameLine();
-
-        if ( ImGui::Button( "Fit All" ) ) {
-            fit = GraphEditor::Fit_AllNodes;
-        }
-
-        ImGui::SameLine();
-
-        if ( ImGui::Button( "Fit Selected" ) ) {
-            fit = GraphEditor::Fit_SelectedNodes;
-        }
-
-        GraphEditor::Show( delegate, options, viewState, true, &fit );
-
-        ImGui::End();
+        ImGui::EndCombo();
     }
+
+    ImGui::SameLine();
+
+    if ( ImGui::Button( "Fit All" ) ) {
+        fit = GraphEditor::Fit_AllNodes;
+    }
+
+    ImGui::SameLine();
+
+    if ( ImGui::Button( "Fit Selected" ) ) {
+        fit = GraphEditor::Fit_SelectedNodes;
+    }
+
+    if ( visible ) {
+        GraphEditor::Show( delegate, options, viewState, true, &fit );
+    }
+
+    ImGui::End();
 
     if ( !open ) {
-        detachFromParent();
+        removeFromParent();
         return;
     }
-
-    Layer::render();
 }

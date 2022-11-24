@@ -163,36 +163,31 @@ private:
     ImGuiTreeNodeFlags m_baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 };
 
-void SceneHierarchyPanel::render( void ) noexcept
+editor::SceneHierarchyPanel::SceneHierarchyPanel( void ) noexcept
+    : layout::Panel( "Scene Hierarchy" )
 {
-    ImGui::SetNextWindowPos( ImVec2( m_position.x, m_position.y ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
+    // no-op
+}
 
-    // Allow opening multiple panels with the same name
-    std::stringstream ss;
-    ss << "Scene Hierarchy##" << ( size_t ) this;
-
+void editor::SceneHierarchyPanel::render( void ) noexcept
+{
     bool open = true;
-    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
-        if ( Simulation::getInstance() != nullptr ) {
-            auto scene = Simulation::getInstance()->getScene();
-            if ( scene ) {
-                scene->perform( SceneTreeBuilder() );
-            } else {
-                ImGui::Text( "No valid scene" );
-            }
+    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    if ( Simulation::getInstance() != nullptr ) {
+        auto scene = Simulation::getInstance()->getScene();
+        if ( scene ) {
+            scene->perform( SceneTreeBuilder() );
         } else {
-            ImGui::Text( "No Simulation instance found" );
+            ImGui::Text( "No valid scene" );
         }
-        ImGui::Text( "" ); // padding
-
-        ImGui::End();
+    } else {
+        ImGui::Text( "No Simulation instance found" );
     }
+    ImGui::Text( "" ); // padding
 
+    ImGui::End();
+    
     if ( !open ) {
-        detachFromParent();
-        return;
+        removeFromParent();
     }
-
-    Layer::render();
 }

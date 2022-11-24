@@ -28,6 +28,7 @@
 #include "Editor/Menus/viewMenu.hpp"
 
 #include "Editor/EditorLayer.hpp"
+#include "Editor/Layout.hpp"
 #include "Editor/Panels/BehaviorEditorPanel.hpp"
 #include "Editor/Panels/NodeInspectorPanel.hpp"
 #include "Editor/Panels/RenderScenePanel.hpp"
@@ -38,39 +39,48 @@
 
 using namespace crimild;
 
+static void addPanel( EditorLayer *editor, std::shared_ptr< editor::layout::Panel > const &newPanel ) noexcept
+{
+    auto newLayout = crimild::alloc< editor::layout::Layout >( editor::layout::Layout::Direction::LEFT, editor::layout::Layout::Fraction( 0.25 ) );
+    newLayout->setFirst( newPanel );
+    newLayout->setSecond( editor->getLayout() );
+    editor->setLayout( newLayout );
+}
+
 void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 {
     if ( ImGui::BeginMenu( "View" ) ) {
         if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
-            editor->attach< SceneHierarchyPanel >();
+            addPanel( editor, crimild::alloc< SceneHierarchyPanel >() );
         }
 
         if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            editor->attach< NodeInspectorPanel >( editor->getRenderDevice() );
+            addPanel( editor, crimild::alloc< NodeInspectorPanel >( editor->getRenderDevice() ) );
         }
 
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Scene..." ) ) {
-            editor->attach< ScenePanel >( editor->getRenderDevice() );
+            addPanel( editor, crimild::alloc< ScenePanel >( editor->getRenderDevice() ) );
         }
 
         if ( ImGui::MenuItem( "Simulation..." ) ) {
-            editor->attach< SimulationPanel >( editor->getRenderDevice() );
+            addPanel( editor, crimild::alloc< SimulationPanel >( editor->getRenderDevice() ) );
         }
 
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
-            editor->attach< BehaviorEditorPanel >();
+            addPanel( editor, crimild::alloc< BehaviorEditorPanel >() );
         }
 
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Render..." ) ) {
-            editor->attach< RenderScenePanel >( editor->getRenderDevice() );
+            addPanel( editor, crimild::alloc< RenderScenePanel >( editor->getRenderDevice() ) );
         }
 
         ImGui::EndMenu();
     }
 }
+

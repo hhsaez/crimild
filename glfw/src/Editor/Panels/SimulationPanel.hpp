@@ -28,8 +28,8 @@
 #ifndef CRIMILD_EDITOR_PANELS_SIMULATION_
 #define CRIMILD_EDITOR_PANELS_SIMULATION_
 
+#include "Editor/Layout.hpp"
 #include "Mathematics/Point2.hpp"
-#include "Rendering/Layer.hpp"
 #include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
 namespace crimild {
@@ -42,20 +42,16 @@ namespace crimild {
 
     namespace editor {
 
-        class SimulationPanel : public Layer {
+        class SimulationPanel : public layout::Panel {
         public:
-            SimulationPanel(
-                vulkan::RenderDevice *renderDevice,
-                const Point2 &position = { 310, 50 },
-                const Extent2D &extent = { .width = 1280.0, .height = 695.0 } ) noexcept;
+            SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept;
             virtual ~SimulationPanel( void ) = default;
 
             virtual Event handle( const Event &e ) noexcept override;
             virtual void render( void ) noexcept override;
 
         private:
-            Point2 m_pos = Point2 { 310, 50 };
-            Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+            Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
             Event m_lastResizeEvent = Event {};
             vulkan::ScenePass m_scenePass;
         };
