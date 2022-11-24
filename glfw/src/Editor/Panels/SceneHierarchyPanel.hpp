@@ -28,30 +28,21 @@
 #ifndef CRIMILD_GLFW_EDITOR_PANELS_SCENE_HIERARCHY_
 #define CRIMILD_GLFW_EDITOR_PANELS_SCENE_HIERARCHY_
 
-#include "Mathematics/Point2.hpp"
-#include "Rendering/Layer.hpp"
+#include "Editor/Layout.hpp"
 
 namespace crimild {
 
-    class SceneHierarchyPanel : public Layer {
-    public:
-        SceneHierarchyPanel( void ) = default;
+    namespace editor {
 
-        SceneHierarchyPanel( const Point2 &position, const Extent2D extent ) noexcept
-            : m_position( position ),
-              m_extent( extent )
-        {
-            // no-op
-        }
+        class SceneHierarchyPanel : public layout::Panel {
+        public:
+            SceneHierarchyPanel( void ) noexcept;
+            virtual ~SceneHierarchyPanel( void ) = default;
 
-        ~SceneHierarchyPanel( void ) = default;
+            virtual void render( void ) noexcept override;
+        };
 
-        virtual void render( void ) noexcept override;
-
-    private:
-        Point2 m_position = { 5, 50 };
-        Extent2D m_extent = { .width = 300, .height = 1000 };
-    };
+    }
 
 }
 

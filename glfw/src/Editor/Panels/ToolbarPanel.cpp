@@ -32,54 +32,57 @@
 
 using namespace crimild;
 
+editor::ToolbarPanel::ToolbarPanel( void ) noexcept
+    : layout::Panel( "Top Bar" )
+{
+    // no-op
+}
+
 void editor::ToolbarPanel::render( void ) noexcept
 {
     auto editor = EditorLayer::getInstance();
     auto simState = editor->getSimulationState();
+    
+    // Hides title bar when panel is docked
+    ImGuiWindowClass windowClass;
+    windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+    ImGui::SetNextWindowClass( &windowClass );
 
-    {
-        ImGui::SetNextWindowPos( ImVec2( 0, 15 ), ImGuiCond_Always );
-        ImGui::SetNextWindowSize( ImVec2( 1920, 10 ), ImGuiCond_Always );
-        bool open = true;
+    ImGui::Begin( getUniqueName().c_str() );
 
-        if ( ImGui::Begin( "Top Bar", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove ) ) {
-            ImGui::SetCursorPosX( ImGui::GetCursorPosX() + 800 );
+    ImGui::SetCursorPosX( ImGui::GetCursorPosX() + 800 );
 
-            if ( simState != SimulationState::PLAYING ) {
-                if ( ImGui::Button( "Play" ) ) {
-                    editor->setSimulationState( SimulationState::PLAYING );
-                }
-            } else {
-                ImGui::BeginDisabled( true );
-                ImGui::Button( "Play" );
-                ImGui::EndDisabled();
-            }
-
-            ImGui::SameLine();
-            if ( simState == SimulationState::PLAYING ) {
-                if ( ImGui::Button( "Pause" ) ) {
-                    editor->setSimulationState( SimulationState::PAUSED );
-                }
-            } else {
-                ImGui::BeginDisabled( true );
-                ImGui::Button( "Pause" );
-                ImGui::EndDisabled();
-            }
-
-            ImGui::SameLine();
-            if ( simState != SimulationState::STOPPED ) {
-                if ( ImGui::Button( "Stop" ) ) {
-                    editor->setSimulationState( SimulationState::STOPPED );
-                }
-            } else {
-                ImGui::BeginDisabled( true );
-                ImGui::Button( "Stop" );
-                ImGui::EndDisabled();
-            }
-
-            ImGui::End();
+    if ( simState != SimulationState::PLAYING ) {
+        if ( ImGui::Button( "Play" ) ) {
+            editor->setSimulationState( SimulationState::PLAYING );
         }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Play" );
+        ImGui::EndDisabled();
     }
 
-    Layer::render();
+    ImGui::SameLine();
+    if ( simState == SimulationState::PLAYING ) {
+        if ( ImGui::Button( "Pause" ) ) {
+            editor->setSimulationState( SimulationState::PAUSED );
+        }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Pause" );
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+    if ( simState != SimulationState::STOPPED ) {
+        if ( ImGui::Button( "Stop" ) ) {
+            editor->setSimulationState( SimulationState::STOPPED );
+        }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Stop" );
+        ImGui::EndDisabled();
+    }
+
+    ImGui::End();
 }

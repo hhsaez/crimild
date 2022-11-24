@@ -29,6 +29,7 @@
 #define CRIMILD_GLFW_EDITOR_LAYER_
 
 #include "Editor/EditorState.hpp"
+#include "Editor/Layout.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Rendering/Layer.hpp"
 
@@ -73,6 +74,13 @@ namespace crimild {
         inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
         void setSimulationState( SimulationState state ) noexcept;
 
+        inline std::shared_ptr< editor::layout::Layout > getLayout( void ) noexcept { return m_layout; }
+        inline void setLayout( std::shared_ptr< editor::layout::Layout > const &layout )
+        {
+            m_layout = layout;
+            m_dockspace->setFirst( m_layout );
+        }
+
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
         SimulationState m_simulationState = SimulationState::STOPPED;
@@ -80,6 +88,9 @@ namespace crimild {
 
         std::shared_ptr< EditorState > m_state;
         std::shared_ptr< EditorState > m_previousState;
+
+        std::shared_ptr< editor::layout::Dockspace > m_dockspace;
+        std::shared_ptr< editor::layout::Layout > m_layout;
     };
 }
 

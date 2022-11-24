@@ -29,7 +29,7 @@
 #define CRIMILD_EDITOR_PANELS_RENDER_SCENE_
 
 #include "Mathematics/Point2.hpp"
-#include "Rendering/Layer.hpp"
+#include "Editor/Layout.hpp"
 #include "Rendering/RenderPasses/VulkanSoftRTPass.hpp"
 
 namespace crimild {
@@ -42,7 +42,7 @@ namespace crimild {
 
     namespace editor {
 
-        class RenderScenePanel : public Layer {
+        class RenderScenePanel : public layout::Panel {
         public:
             RenderScenePanel(
                 vulkan::RenderDevice *renderDevice,

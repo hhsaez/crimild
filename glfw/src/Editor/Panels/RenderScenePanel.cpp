@@ -36,7 +36,8 @@ using namespace crimild;
 using namespace crimild::editor;
 
 RenderScenePanel::RenderScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
-    : m_pos( position ),
+    : editor::layout::Panel( "Render" ),
+      m_pos( position ),
       m_extent( extent ),
       m_scenePass( renderDevice )
 {
@@ -56,56 +57,48 @@ Event RenderScenePanel::handle( const Event &e ) noexcept
             break;
     }
 
-    return Layer::handle( e );
+    return Panel::handle( e );
 }
 
 void RenderScenePanel::render( void ) noexcept
 {
-    ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
-
-    // Allow opening multiple panels with the same name
-    std::stringstream ss;
-    ss << "Render##" << ( size_t ) this;
-
+    Panel::render();
+    
     bool open = true;
-    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
-        ImVec2 actualSize = ImGui::GetContentRegionAvail();
-        if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
-            m_extent.width = actualSize.x;
-            m_extent.height = actualSize.y;
-            m_lastResizeEvent = Event {
-                .type = Event::Type::WINDOW_RESIZE,
-                .extent = m_extent,
-            };
-        }
-
-        if ( m_lastResizeEvent.type != Event::Type::NONE ) {
-            m_scenePass.handle( m_lastResizeEvent );
-            m_lastResizeEvent = Event {};
-        }
-
-        const auto att = m_scenePass.getColorAttachment();
-        if ( !att->descriptorSets.empty() ) {
-            ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
-            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-        } else {
-            ImGui::Text( "No scene attachments found" );
-        }
-
-        ImGui::End();
+    ImGui::Begin( getUniqueName().c_str(), &open, ImGuiWindowFlags_NoCollapse );
+    ImVec2 actualSize = ImGui::GetContentRegionAvail();
+    if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
+        m_extent.width = actualSize.x;
+        m_extent.height = actualSize.y;
+        m_lastResizeEvent = Event {
+            .type = Event::Type::WINDOW_RESIZE,
+            .extent = m_extent,
+        };
     }
+
+    if ( m_lastResizeEvent.type != Event::Type::NONE ) {
+        m_scenePass.handle( m_lastResizeEvent );
+        m_lastResizeEvent = Event {};
+    }
+
+    const auto att = m_scenePass.getColorAttachment();
+    if ( !att->descriptorSets.empty() ) {
+        ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
+        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+    } else {
+        ImGui::Text( "No scene attachments found" );
+    }
+
+    ImGui::End();
 
     if ( !open ) {
-        detachFromParent();
+        removeFromParent();
         return;
     }
-
-    Layer::render();
 
     m_scenePass.render( Simulation::getInstance()->getScene(), Simulation::getInstance()->getMainCamera() );
 }

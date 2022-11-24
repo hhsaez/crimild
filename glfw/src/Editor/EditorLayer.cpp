@@ -35,6 +35,7 @@
 #include "Editor/Panels/SceneHierarchyPanel.hpp"
 #include "Editor/Panels/ScenePanel.hpp"
 #include "Editor/Panels/SimulationPanel.hpp"
+#include "Editor/Panels/BehaviorEditorPanel.hpp"
 #include "Editor/Panels/ToolbarPanel.hpp"
 #include "Foundation/Log.hpp"
 #include "Simulation/Settings.hpp"
@@ -43,6 +44,7 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 #include <array>
+#include <imgui.h>
 
 using namespace crimild;
 
@@ -52,11 +54,49 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    attach< editor::ToolbarPanel >();
-    attach< editor::ScenePanel >( renderDevice, Point2 { 0, 50 }, Extent2D { .width = 1280, .height = 515 } );
-    attach< editor::SimulationPanel >( renderDevice, Point2 { 0, 565 }, Extent2D { .width = 1280, .height = 515 } );
-    attach< SceneHierarchyPanel >( Point2 { 1280, 50 }, Extent2D { .width = 320, .height = 1030 } );
-    attach< NodeInspectorPanel >( renderDevice, Point2 { 1600, 50 }, Extent2D { .width = 320, .height = 1030 } );
+    m_layout = [ & ] {
+        using namespace crimild::editor;
+        using namespace crimild::editor::layout;
+        
+        auto split = crimild::alloc< Layout >( Layout::Direction::UP, Layout::Pixels( 40 ) );
+        split->setFirst( crimild::alloc< ToolbarPanel >() );
+        split->setSecond(
+            [ & ] {
+                auto split = crimild::alloc< Layout >( Layout::Direction::LEFT, Layout::Pixels( 300 ) );
+                split->setFirst( crimild::alloc< SceneHierarchyPanel >() );
+                split->setSecond(
+                    [ & ] {
+                        auto split = crimild::alloc< Layout >( Layout::Direction::RIGHT, Layout::Pixels( 300 ) );
+                        split->setFirst( crimild::alloc< NodeInspectorPanel >( renderDevice ) );
+                        split->setSecond(
+                            [ & ] {
+                                auto split = crimild::alloc< Layout >( Layout::Direction::UP, Layout::Fraction( 0.5 ) );
+                                split->setFirst( crimild::alloc< ScenePanel >( renderDevice ) );
+                                split->setSecond(
+                                    [&] {
+                                        auto tab = crimild::alloc< layout::Tab >();
+                                        tab->setFirst( crimild::alloc< editor::SimulationPanel >( renderDevice ) );
+                                        tab->setSecond( crimild::alloc< editor::BehaviorEditorPanel >() );
+                                        return tab;
+                                    }()
+                                );
+                                return split;
+                            }()
+                        );
+                        return split;
+                    }()
+                );
+                return split;
+            }()
+        );
+        return split;
+    }();
+
+    m_dockspace = [ & ] {
+        auto dock = crimild::alloc< editor::layout::Dockspace >();
+        dock->setFirst( m_layout );
+        return dock;
+    }();
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
@@ -103,14 +143,13 @@ Event EditorLayer::handle( const Event &e ) noexcept
         Simulation::getInstance()->handle( e );
     }
 
-    return Layer::handle( e );
+    return m_dockspace->handle( e );
 }
 
 void EditorLayer::render( void ) noexcept
 {
     editor::mainMenu( this );
-
-    Layer::render();
+    m_dockspace->render();
 }
 
 void EditorLayer::setSimulationState( SimulationState newState ) noexcept
@@ -141,12 +180,12 @@ void EditorLayer::setSimulationState( SimulationState newState ) noexcept
         m_state = decoder->getObjectAt< EditorState >( 1 );
 
         Simulation::getInstance()->setScene( simScene );
-        handle( Event { Event::Type::SCENE_CHANGED } );
+        handle( Event { .type = Event::Type::SCENE_CHANGED } );
     } else if ( newState == SimulationState::STOPPED ) {
         Simulation::getInstance()->setScene( m_edittableScene );
         m_state = m_previousState;
         m_previousState = nullptr;
-        handle( Event { Event::Type::SCENE_CHANGED } );
+        handle( Event { .type = Event::Type::SCENE_CHANGED } );
     }
 
     if ( auto selected = getSelectedNode() ) {

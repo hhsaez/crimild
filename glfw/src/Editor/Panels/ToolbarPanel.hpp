@@ -28,14 +28,17 @@
 #ifndef CRIMILD_GLFW_EDITOR_PANELS_TOOLBAR_
 #define CRIMILD_GLFW_EDITOR_PANELS_TOOLBAR_
 
-#include "Rendering/Layer.hpp"
+#include "Editor/Layout.hpp"
 
 namespace crimild {
 
     namespace editor {
 
-        class ToolbarPanel : public Layer {
+        class ToolbarPanel : public layout::Panel {
         public:
+            ToolbarPanel( void ) noexcept;
+            virtual ~ToolbarPanel( void ) = default;
+
             virtual void render( void ) noexcept override;
         };
 

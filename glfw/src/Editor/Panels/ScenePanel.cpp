@@ -36,6 +36,8 @@
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -53,11 +55,11 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
 
     static ImGuizmo::OPERATION gizmoOperation( ImGuizmo::TRANSLATE );
     static ImGuizmo::MODE gizmoMode( ImGuizmo::WORLD );
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_W ) )
+    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_W ) ) )
         gizmoOperation = ImGuizmo::TRANSLATE;
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_E ) )
+    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_E ) ) )
         gizmoOperation = ImGuizmo::ROTATE;
-    if ( ImGui::IsKeyPressed( CRIMILD_INPUT_KEY_R ) ) // r Key
+    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_R ) ) )
         gizmoOperation = ImGuizmo::SCALE;
 
     ImGuizmo::BeginFrame();
@@ -99,10 +101,9 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
     selectedNode->perform( UpdateWorldState() );
 }
 
-ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice, const Point2 &position, const Extent2D &extent ) noexcept
-    : m_renderDevice( renderDevice ),
-      m_pos( position ),
-      m_extent( extent ),
+ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
+    : layout::Panel( "Scene" ),
+      m_renderDevice( renderDevice ),
       m_scenePass( renderDevice ),
       m_sceneDebugPass( renderDevice ),
       m_sceneDebugOverlayPass(
@@ -226,90 +227,83 @@ Event ScenePanel::handle( const Event &e ) noexcept
         }
     }
 
-    return Layer::handle( e );
+    return layout::Panel::handle( e );
 }
 
 void ScenePanel::render( void ) noexcept
 {
-    ImGui::SetNextWindowPos( ImVec2( m_pos.x, m_pos.y ), ImGuiCond_FirstUseEver );
-    ImGui::SetNextWindowSize( ImVec2( m_extent.width, m_extent.height ), ImGuiCond_FirstUseEver );
-
-    // Allow opening multiple panels with the same name
-    std::stringstream ss;
-    ss << "Scene##" << ( size_t ) this;
-
     bool open = true;
-    if ( ImGui::Begin( ss.str().c_str(), &open, ImGuiWindowFlags_NoCollapse ) ) {
-        ImVec2 windowPos = ImGui::GetWindowPos();
-        m_pos = Point2 { windowPos.x, windowPos.y };
+    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
 
-        ImVec2 actualSize = ImGui::GetContentRegionAvail();
-        if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
-            m_extent.width = actualSize.x;
-            m_extent.height = actualSize.y;
-            m_lastResizeEvent = Event {
-                .type = Event::Type::WINDOW_RESIZE,
-                .extent = m_extent,
-            };
-        }
+    // Get content region, and ensure we have a valid size for rendering.
+    ImVec2 actualSize = ImGui::GetContentRegionAvail();
+    actualSize.x = max( 1.0f, actualSize.x );
+    actualSize.y = max( 1.0f, actualSize.y );
 
-        if ( m_lastResizeEvent.type != Event::Type::NONE ) {
-            m_scenePass.handle( m_lastResizeEvent );
-            m_sceneDebugPass.handle( m_lastResizeEvent );
-            m_sceneDebugOverlayPass.handle( m_lastResizeEvent );
-            for ( auto &pass : m_debugPasses ) {
-                pass->handle( m_lastResizeEvent );
-            }
-            m_lastResizeEvent = Event {};
-        }
+    ImVec2 windowPos = ImGui::GetWindowPos();
 
-        if ( !m_attachments.empty() ) {
-            const auto att = m_attachments[ m_selectedAttachment ];
-            if ( !att->descriptorSets.empty() ) {
-                ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
-                ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-                ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-                ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-                ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-                ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-            } else {
-                ImGui::Text( "No scene attachments found" );
-            }
-
-            ImGui::SetCursorPos( ImVec2( 20, 40 ) );
-            if ( ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) ) ) {
-                static ImGuiComboFlags flags = 0;
-                if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
-                    for ( size_t i = 0; i < m_attachments.size(); ++i ) {
-                        const auto &att = m_attachments[ i ];
-                        const auto isSelected = i == m_selectedAttachment;
-                        if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
-                            m_selectedAttachment = i;
-                        }
-                        if ( isSelected ) {
-                            ImGui::SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui::EndCombo();
-                }
-                ImGui::EndChild();
-            }
-        }
-
-        ImGui::End();
+    if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
+        m_extent.width = actualSize.x;
+        m_extent.height = actualSize.y;
+        m_lastResizeEvent = Event {
+            .type = Event::Type::WINDOW_RESIZE,
+            .extent = m_extent,
+        };
     }
 
+    if ( m_lastResizeEvent.type != Event::Type::NONE ) {
+        m_scenePass.handle( m_lastResizeEvent );
+        m_sceneDebugPass.handle( m_lastResizeEvent );
+        m_sceneDebugOverlayPass.handle( m_lastResizeEvent );
+        for ( auto &pass : m_debugPasses ) {
+            pass->handle( m_lastResizeEvent );
+        }
+        m_lastResizeEvent = Event {};
+    }
+
+    if ( !m_attachments.empty() ) {
+        const auto att = m_attachments[ m_selectedAttachment ];
+        if ( !att->descriptorSets.empty() ) {
+            ImTextureID tex_id = ( ImTextureID ) ( void * ) att->descriptorSets.data();
+            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+        } else {
+            ImGui::Text( "No scene attachments found" );
+        }
+
+        ImGui::SetCursorPos( ImVec2( 20, 40 ) );
+        ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) );
+        static ImGuiComboFlags flags = 0;
+        if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
+            for ( size_t i = 0; i < m_attachments.size(); ++i ) {
+                const auto &att = m_attachments[ i ];
+                const auto isSelected = i == m_selectedAttachment;
+                if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
+                    m_selectedAttachment = i;
+                }
+                if ( isSelected ) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::EndChild();
+    }
+
+    ImGui::End();
+
     if ( !open ) {
-        detachFromParent();
+        removeFromParent();
         return;
     }
 
     if ( auto editor = EditorLayer::getInstance() ) {
         // TODO: Fix gizmo position
-        drawGizmo( editor->getSelectedNode(), m_editorCamera.get(), m_pos.x, m_pos.y, m_extent.width, m_extent.height );
+        drawGizmo( editor->getSelectedNode(), m_editorCamera.get(), windowPos.x, windowPos.y, m_extent.width, m_extent.height );
     }
-
-    Layer::render();
 
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
