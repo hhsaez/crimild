@@ -25,33 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_NAMED_OBJECT_
-#define CRIMILD_FOUNDATION_NAMED_OBJECT_
+#include "Foundation/Named.hpp"
 
-#include <string>
+#include "gtest/gtest.h"
 
-namespace crimild {
+using namespace crimild;
 
-    class [[deprecated( "Use Named instead" )]] NamedObject
-    {
-    public:
-        explicit NamedObject( std::string name = "" );
-
-        virtual ~NamedObject( void );
-
-        void setName( std::string name )
-        {
-            _name = name;
-        }
-        std::string getName( void ) const
-        {
-            return _name;
-        }
-
-    private:
-        std::string _name;
-    };
-
+TEST( Named, with_default_value )
+{
+    Named named;
+    EXPECT_STREQ( "", named.getName().c_str() );
 }
 
-#endif
+TEST( Named, with_explicit_name )
+{
+    Named named( "a name" );
+    EXPECT_STREQ( "a name", named.getName().c_str() );
+}
+
+TEST( Named, override_name )
+{
+    Named named( "a name" );
+    named.setName( "another name" );
+    EXPECT_STREQ( "another name", named.getName().c_str() );
+}
