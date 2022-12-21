@@ -79,6 +79,13 @@ namespace crimild {
             crimild::Bool encode( std::string key, Codable *codable );
             virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
 
+            Bool encode( std::string key, const Version &version ) noexcept
+            {
+                return encode( key + "_major", version.getMajor() )
+                       && encode( key + "_minor", version.getMinor() )
+                       && encode( key + "_patch", version.getPatch() );
+            }
+
             // values
             virtual crimild::Bool encode( std::string key, std::string str ) = 0;
             virtual crimild::Bool encode( std::string key, crimild::Size value ) = 0;

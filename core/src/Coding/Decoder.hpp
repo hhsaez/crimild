@@ -68,6 +68,16 @@ namespace crimild {
         public:
             virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
 
+            Bool decode( std::string key, Version &version ) noexcept
+            {
+                uint32_t major, minor, patch;
+                decode( key + "_major", major );
+                decode( key + "_minor", minor );
+                decode( key + "_patch", patch );
+                version = Version( major, minor, patch );
+                return true;
+            }
+
             template< class T >
             crimild::Bool decode( std::string key, SharedPointer< T > &obj )
             {
