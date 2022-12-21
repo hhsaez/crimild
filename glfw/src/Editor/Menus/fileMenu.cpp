@@ -28,47 +28,101 @@
 #include "Editor/Menus/fileMenu.hpp"
 
 #include "Coding/JSONEncoder.hpp"
+#include "Concurrency/Async.hpp"
+#include "Editor/EditorLayer.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
 
+#include <filesystem>
 #include <iostream>
 
 void crimild::editor::fileMenu( void ) noexcept
 {
+    static std::string dialogId;
+    static std::function< void( const std::filesystem::path & ) > dialogHandler;
+
+    auto openDialog = [ & ]( std::string id, std::string title, std::function< void( std::string ) > handler, const char *filters = ".crimild" ) {
+        dialogId = id;
+        dialogHandler = handler;
+        ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_Default;
+        ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, ".", 1, nullptr, flags );
+    };
+
     if ( ImGui::BeginMenu( "File" ) ) {
-        if ( ImGui::MenuItem( "New Scene" ) ) {
-            crimild::editor::loadNewScene();
+        if ( ImGui::MenuItem( "New Project..." ) ) {
+            openDialog(
+                "NewProjectDlgKey",
+                "Create Project",
+                []( const auto &path ) {
+                    EditorLayer::getInstance()->createProject( path );
+                },
+                nullptr
+            );
+        }
+
+        if ( ImGui::MenuItem( "New Scene..." ) ) {
+            openDialog(
+                "NewSceneDlgKey",
+                "Create Scene",
+                []( const auto &path ) {
+                    EditorLayer::getInstance()->createNewScene( path );
+                },
+                ".crimild"
+            );
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Open Project..." ) ) {
+            openDialog(
+                "OpenProjectDlgKey",
+                "Open Project",
+                []( const auto &path ) {
+                    EditorLayer::getInstance()->loadProject( path );
+                },
+                nullptr
+            );
         }
 
         if ( ImGui::MenuItem( "Open Scene..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "LoadSceneDlgKey", "Open Scene...", ".crimild,.json", "." );
+            openDialog(
+                "OpenSceneDlgKey",
+                "Open Scene",
+                []( const auto &path ) {
+                    EditorLayer::getInstance()->loadScene( path );
+                },
+                ".crimild"
+            );
         }
+        
+        ImGui::Separator();
 
-        if ( ImGui::BeginMenu( "Open Recent" ) ) {
-            if ( ImGui::MenuItem( "TODO" ) ) {
-                // TODO
+        if ( ImGui::MenuItem( "Save Scene As..." ) ) {
+            openDialog(
+                "SaveSceneAsDlgKey",
+                "Save Scene As...",
+                []( const auto &path ) {
+                    EditorLayer::getInstance()->saveSceneAs( path );
+                },
+                ".crimild"
+            );
+        }
+        
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Import..." ) ) {
+            if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
+                openDialog(
+                    "ImportGLTFDlgKey",
+                    "Import",
+                    []( const auto &path ) {
+                        // TODO
+                    },
+                    ".gltf"
+                );
             }
             ImGui::EndMenu();
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Save Scene" ) ) {
-            // TODO
-        }
-        if ( ImGui::MenuItem( "Save Scene As..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "SaveSceneDlgKey", "Save Scene As...", ".crimild,.json", "." );
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Export..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "ExportSceneDlgKey", "Export scene", ".crimild", "." );
-        }
-
-        if ( ImGui::MenuItem( "Import..." ) ) {
-            ImGuiFileDialog::Instance()->OpenDialog( "ChooseFileDlgKey", "Choose File", ".crimild,.obj,.gltf", "." );
         }
 
         ImGui::Separator();
@@ -82,39 +136,22 @@ void crimild::editor::fileMenu( void ) noexcept
         ImGui::EndMenu();
     }
 
-    if ( ImGuiFileDialog::Instance()->Display( "LoadSceneDlgKey" ) ) {
-        if ( ImGuiFileDialog::Instance()->IsOk() ) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            crimild::editor::loadScene( filePathName );
+    if ( dialogHandler != nullptr && !dialogId.empty() ) {
+        ImGui::SetNextWindowSize( ImVec2( 800, 600 ) );
+        if ( ImGuiFileDialog::Instance()->Display( dialogId ) ) {
+            if ( ImGuiFileDialog::Instance()->IsOk() ) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                const auto path = std::filesystem::path { filePathName };
+                // Resolve at the beginning of next frame
+                crimild::concurrency::sync_frame(
+                    [ path, handler = dialogHandler ] {
+                        handler( path );
+                    }
+                );
+            }
+            ImGuiFileDialog::Instance()->Close();
+            dialogHandler = nullptr;
+            dialogId = "";
         }
-        ImGuiFileDialog::Instance()->Close();
-    }
-
-    if ( ImGuiFileDialog::Instance()->Display( "SaveSceneDlgKey" ) ) {
-        if ( ImGuiFileDialog::Instance()->IsOk() ) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            crimild::editor::saveSceneAs( filePathName );
-        }
-        ImGuiFileDialog::Instance()->Close();
-    }
-
-    if ( ImGuiFileDialog::Instance()->Display( "ExportSceneDlgKey" ) ) {
-        if ( ImGuiFileDialog::Instance()->IsOk() ) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            crimild::editor::exportScene( filePathName );
-        }
-        ImGuiFileDialog::Instance()->Close();
-    }
-
-    if ( ImGuiFileDialog::Instance()->Display( "ChooseFileDlgKey" ) ) {
-        if ( ImGuiFileDialog::Instance()->IsOk() ) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-            crimild::editor::importFile( filePathName );
-        }
-        ImGuiFileDialog::Instance()->Close();
     }
 }
