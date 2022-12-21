@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,31 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_FOUNDATION_NAMED_OBJECT_
-#define CRIMILD_FOUNDATION_NAMED_OBJECT_
+#ifndef CRIMILD_CORE_FOUNDATION_NAMED_
+#define CRIMILD_CORE_FOUNDATION_NAMED_
 
 #include <string>
 
 namespace crimild {
 
-    class [[deprecated( "Use Named instead" )]] NamedObject
-    {
+    class Named {
     public:
-        explicit NamedObject( std::string name = "" );
+        Named( void ) = default;
 
-        virtual ~NamedObject( void );
+        explicit Named( std::string_view name ) noexcept
+            : m_name( name )
+        {
+            // no-op
+        }
 
-        void setName( std::string name )
-        {
-            _name = name;
-        }
-        std::string getName( void ) const
-        {
-            return _name;
-        }
+        virtual ~Named( void ) = default;
+
+        inline void setName( std::string_view name ) noexcept { m_name = name; }
+        inline const std::string &getName( void ) const noexcept { return m_name; }
+
+    protected:
+        /**
+         * \brief Get a reference to the name
+         *
+         * This is useful when coding derive classes. But it's made protected so
+         * it is not used to access the variable in other cases.
+         */
+        inline std::string &getNameRefForCoding( void ) noexcept { return m_name; }
 
     private:
-        std::string _name;
+        std::string m_name;
     };
 
 }
