@@ -28,13 +28,14 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <Crimild.hpp>
-// #include <Crimild_Scripting.hpp>
+#include <Crimild_GLFW.hpp>
 
 using namespace crimild;
 
 int main( int argc, char **argv )
 {
     crimild::init();
+    crimild::glfw::init();
 
     FileSystem::getInstance().init( argc, argv );
 
