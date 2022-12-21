@@ -33,6 +33,8 @@
 #include "Foundation/Singleton.hpp"
 #include "Rendering/Layer.hpp"
 
+#include <filesystem>
+
 namespace crimild {
 
     class Node;
@@ -40,6 +42,12 @@ namespace crimild {
     namespace vulkan {
 
         class RenderDevice;
+
+    }
+
+    namespace editor {
+
+        class Project;
 
     }
 
@@ -80,6 +88,20 @@ namespace crimild {
             m_layout = layout;
             m_dockspace->setFirst( m_layout );
         }
+        
+        void createProject( const std::filesystem::path &path ) noexcept;
+        void loadProject( const std::filesystem::path &path ) noexcept;
+        void saveProject( void ) noexcept;
+
+        inline editor::Project *getProject( void ) noexcept { return m_project.get(); }
+        inline const editor::Project *getProject( void ) const noexcept { return m_project.get(); }
+        
+        void createNewScene( const std::filesystem::path &path ) noexcept;
+        void loadScene( const std::filesystem::path &path  ) noexcept;
+        void saveSceneAs( const std::filesystem::path &path ) noexcept;
+
+    private:
+        void loadDefaultLayout( void ) noexcept;
 
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
@@ -91,6 +113,10 @@ namespace crimild {
 
         std::shared_ptr< editor::layout::Dockspace > m_dockspace;
         std::shared_ptr< editor::layout::Layout > m_layout;
+
+        std::shared_ptr< editor::Project > m_project;
+        
+        Event m_lastResizeEvent = Event { .type = Event::Type::NONE };
     };
 }
 
