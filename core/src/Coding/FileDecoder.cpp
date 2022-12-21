@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,41 +26,35 @@
  */
 
 #include "FileDecoder.hpp"
+
 #include "Foundation/Log.hpp"
 
 using namespace crimild;
 using namespace crimild::coding;
 
-FileDecoder::FileDecoder( void )
-{
-
-}
-
-FileDecoder::~FileDecoder( void )
-{
-
-}
-
 crimild::Bool FileDecoder::read( std::string filePath )
 {
-	FILE *file = fopen( filePath.c_str(), "rb" );
-	if ( file == nullptr ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", filePath );
-		return false;
-	}
-
-	crimild::Size size;
-	fread( &size, 1, sizeof( crimild::Size ), file );
-
-	if ( size > 0 ) {
-		ByteArray bytes( size );
-		fread( &bytes[ 0 ], 1, size, file );
-		fromBytes( bytes );
-	}
-
-	fclose( file );
-	
-	return true;
+    return read( std::filesystem::path { filePath } );
 }
 
+crimild::Bool FileDecoder::read( const std::filesystem::path &path ) noexcept
+{
+    FILE *file = fopen( path.c_str(), "rb" );
+    if ( file == nullptr ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path );
+        return false;
+    }
 
+    crimild::Size size;
+    fread( &size, 1, sizeof( crimild::Size ), file );
+
+    if ( size > 0 ) {
+        ByteArray bytes( size );
+        fread( &bytes[ 0 ], 1, size, file );
+        fromBytes( bytes );
+    }
+
+    fclose( file );
+
+    return true;
+}
