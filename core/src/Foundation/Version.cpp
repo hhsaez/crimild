@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,83 +26,78 @@
  */
 
 #include "Version.hpp"
-#include "StringUtils.hpp"
+
 #include "Log.hpp"
+#include "StringUtils.hpp"
 
 using namespace crimild;
 
 Version::Version( void )
-	: Version( CRIMILD_VERSION_MAJOR, CRIMILD_VERSION_MINOR, CRIMILD_VERSION_PATCH )
+    : Version( CRIMILD_VERSION_MAJOR, CRIMILD_VERSION_MINOR, CRIMILD_VERSION_PATCH )
 {
-
 }
 
 Version::Version( const Version &other )
-	: Version( other._major, other._minor, other._patch )
+    : Version( other._major, other._minor, other._patch )
 {
-
 }
 
 Version::Version( int major, int minor, int patch )
-	: _major( major ),
-	  _minor( minor ),
-	  _patch( patch )
+    : _major( major ),
+      _minor( minor ),
+      _patch( patch )
 {
-
 }
 
 Version::Version( std::string versionStr )
 {
-	fromString( versionStr );
+    fromString( versionStr );
 }
 
 Version::~Version( void )
 {
-
 }
 
 Version &Version::operator=( const Version &other )
 {
-	_major = other._major;
-	_minor = other._minor;
-	_patch = other._patch;
-	
-	return *this;
+    _major = other._major;
+    _minor = other._minor;
+    _patch = other._patch;
+
+    return *this;
 }
 
-std::string Version::getDescription( void ) const 
+std::string Version::getDescription( void ) const
 {
-	std::stringstream str;
-	str << "CRIMILD "
-	    << "v" << getMajor()
-	    << "." << getMinor()
-	    << "." << getPatch();
+    std::stringstream str;
+    str << "v" << getMajor()
+        << "." << getMinor()
+        << "." << getPatch();
 
-	return str.str();
+    return str.str();
 }
 
 void Version::fromString( std::string str )
 {
-	_major = 0;
-	_minor = 0;
-	_patch = 0;
+    _major = 0;
+    _minor = 0;
+    _patch = 0;
 
-	const std::string VERSION_TAG( "CRIMILD v" );
+    const std::string VERSION_TAG( "v" );
 
-	auto pos = str.find( VERSION_TAG );
-	if ( pos == std::string::npos ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
-		return;
-	}
+    auto pos = str.find( VERSION_TAG );
+    if ( pos == std::string::npos ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
+        return;
+    }
 
-	auto values = StringUtils::split< int >( str.substr( pos + VERSION_TAG.length() ), '.' );
-	if ( values.size() != 3 ) {
-		Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
-		return;
-	}
+    auto values = StringUtils::split< int >( str.substr( pos + VERSION_TAG.length() ), '.' );
+    if ( values.size() != 3 ) {
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Invalid version string" );
+        return;
+    }
 
-	_major = values[ 0 ];
-	_minor = values[ 1 ];
-	_patch = values[ 2 ];
+    _major = values[ 0 ];
+    _minor = values[ 1 ];
+    _patch = values[ 2 ];
 }
-
