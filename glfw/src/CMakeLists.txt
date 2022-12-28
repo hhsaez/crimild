@@ -102,3 +102,6 @@ target_link_libraries(
 	PRIVATE crimild_glfw
 )
 add_library( Crimild::GLFW::Main ALIAS crimild_glfw_main )
+
+# Keep IDEs folders clean
+set_target_properties( glfw PROPERTIES FOLDER extern )
