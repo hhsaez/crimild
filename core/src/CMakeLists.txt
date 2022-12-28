@@ -1,213 +1,119 @@
 crimild_trace()
 
-set(
-    CRIMILD_LIBRARY_NAME
-    crimild_core
-)
+add_library( crimild_core OBJECT )
 
-set( 
-    CRIMILD_LIBRARY_SOURCE_FILES 
+target_sources( 
+    crimild_core
+    
+    PUBLIC
     Animation/Accumulator.hpp
-    Animation/Animation.cpp
     Animation/Animation.hpp
-    Animation/Channel.cpp
     Animation/Channel.hpp
     Animation/ChannelImpl.hpp
-    Animation/Clip.cpp
     Animation/Clip.hpp
-    Animation/Skeleton.cpp
     Animation/Skeleton.hpp   
-    Audio/AudioListener.cpp
     Audio/AudioListener.hpp
-    Audio/AudioSource.cpp
     Audio/AudioSource.hpp
-    Behaviors/Actions/AnimateContextValue.cpp
     Behaviors/Actions/AnimateContextValue.hpp
-    Behaviors/Actions/AnimateParticleSystem.cpp
     Behaviors/Actions/AnimateParticleSystem.hpp
-    Behaviors/Actions/AnimateSettingValue.cpp
     Behaviors/Actions/AnimateSettingValue.hpp
-    Behaviors/Actions/ClampPosition.cpp
     Behaviors/Actions/ClampPosition.hpp
-    Behaviors/Actions/ClampPositionToView.cpp
     Behaviors/Actions/ClampPositionToView.hpp
-    Behaviors/Actions/ClearTargets.cpp
     Behaviors/Actions/ClearTargets.hpp
-    Behaviors/Actions/CopyTransformFromTarget.cpp
     Behaviors/Actions/CopyTransformFromTarget.hpp
-    Behaviors/Actions/EnableNode.cpp
     Behaviors/Actions/EnableNode.hpp
-    Behaviors/Actions/ExecuteBehavior.cpp
     Behaviors/Actions/ExecuteBehavior.hpp
-    Behaviors/Actions/ExecuteBehaviorOnTarget.cpp
     Behaviors/Actions/ExecuteBehaviorOnTarget.hpp
-    Behaviors/Actions/FindTarget.cpp
     Behaviors/Actions/FindTarget.hpp
-    Behaviors/Actions/FollowPath.cpp
     Behaviors/Actions/FollowPath.hpp
-    Behaviors/Actions/LoadScene.cpp
     Behaviors/Actions/LoadScene.hpp
-    Behaviors/Actions/LookAt.cpp
     Behaviors/Actions/LookAt.hpp
-    Behaviors/Actions/MotionApply.cpp
     Behaviors/Actions/MotionApply.hpp
-    Behaviors/Actions/MotionAvoidOthers.cpp
     Behaviors/Actions/MotionAvoidOthers.hpp
-    Behaviors/Actions/MotionAvoidWalls.cpp
     Behaviors/Actions/MotionAvoidWalls.hpp
-    Behaviors/Actions/MotionComputePathToTarget.cpp
     Behaviors/Actions/MotionComputePathToTarget.hpp
-    Behaviors/Actions/MotionFromInput.cpp
     Behaviors/Actions/MotionFromInput.hpp
-    Behaviors/Actions/MotionReset.cpp
     Behaviors/Actions/MotionReset.hpp
-    Behaviors/Actions/MotionSeek.cpp
     Behaviors/Actions/MotionSeek.hpp
-    Behaviors/Actions/PrintMessage.cpp
     Behaviors/Actions/PrintMessage.hpp
-    Behaviors/Actions/ResetNavigation.cpp
     Behaviors/Actions/ResetNavigation.hpp
-    Behaviors/Actions/Rotate.cpp
     Behaviors/Actions/Rotate.hpp
-    Behaviors/Actions/SetContextValue.cpp
     Behaviors/Actions/SetContextValue.hpp
-    Behaviors/Actions/SetSettingValue.cpp
     Behaviors/Actions/SetSettingValue.hpp
-    Behaviors/Actions/Success.cpp
     Behaviors/Actions/Success.hpp
-    Behaviors/Actions/Transform.cpp
     Behaviors/Actions/Transform.hpp
-    Behaviors/Actions/Trigger.cpp
     Behaviors/Actions/Trigger.hpp
-    Behaviors/Actions/Wait.cpp
     Behaviors/Actions/Wait.hpp
-    Behaviors/Composites/Composite.cpp
     Behaviors/Composites/Composite.hpp
-    Behaviors/Composites/Parallel.cpp
     Behaviors/Composites/Parallel.hpp
-    Behaviors/Composites/Selector.cpp
     Behaviors/Composites/Selector.hpp
-    Behaviors/Composites/Sequence.cpp
     Behaviors/Composites/Sequence.hpp
-    Behaviors/Conditions/DistanceToTarget.cpp
     Behaviors/Conditions/DistanceToTarget.hpp
-    Behaviors/Conditions/HasTargets.cpp
     Behaviors/Conditions/HasTargets.hpp
-    Behaviors/Conditions/IsAtTarget.cpp
     Behaviors/Conditions/IsAtTarget.hpp
-    Behaviors/Conditions/TestContextValue.cpp
     Behaviors/Conditions/TestContextValue.hpp
-    Behaviors/Conditions/TestInputAxis.cpp
     Behaviors/Conditions/TestInputAxis.hpp
-    Behaviors/Conditions/TestSettingValue.cpp
     Behaviors/Conditions/TestSettingValue.hpp
-    Behaviors/Decorators/Decorator.cpp
     Behaviors/Decorators/Decorator.hpp
-    Behaviors/Decorators/Inverter.cpp
     Behaviors/Decorators/Inverter.hpp
-    Behaviors/Decorators/Repeat.cpp
     Behaviors/Decorators/Repeat.hpp
-    Behaviors/Decorators/RepeatUntilFail.cpp
     Behaviors/Decorators/RepeatUntilFail.hpp
-    Behaviors/Decorators/RepeatUntilSuccess.cpp
     Behaviors/Decorators/RepeatUntilSuccess.hpp
-    Behaviors/Decorators/Succeeder.cpp
     Behaviors/Decorators/Succeeder.hpp
     Behaviors/Decorators/Throttle.hpp
-    Behaviors/Behavior.cpp
     Behaviors/Behavior.hpp
-    Behaviors/BehaviorContext.cpp
     Behaviors/BehaviorContext.hpp
-    Behaviors/BehaviorController.cpp
     Behaviors/BehaviorController.hpp
-    Behaviors/BehaviorTree.cpp
     Behaviors/BehaviorTree.hpp
     Behaviors/withBehavior.hpp
-    Boundings/AABBBoundingVolume.cpp
     Boundings/AABBBoundingVolume.hpp
-    Boundings/BoundingVolume.cpp
     Boundings/BoundingVolume.hpp
-    Boundings/Box2DBoundingVolume.cpp
     Boundings/Box2DBoundingVolume.hpp
-    Boundings/OrientedBoxBoundingVolume.cpp
     Boundings/OrientedBoxBoundingVolume.hpp
-    Boundings/PlaneBoundingVolume.cpp
     Boundings/PlaneBoundingVolume.hpp
-    Boundings/SphereBoundingVolume.cpp
     Boundings/SphereBoundingVolume.hpp
-    Coding/Codable.cpp
     Coding/Codable.hpp
     Coding/Decoder.hpp
     Coding/EncodedData.hpp
     Coding/EncodedObject.hpp
-    Coding/Encoder.cpp
     Coding/Encoder.hpp
-    Coding/FileDecoder.cpp
     Coding/FileDecoder.hpp
-    Coding/FileEncoder.cpp
     Coding/FileEncoder.hpp
-    Coding/MemoryDecoder.cpp
     Coding/MemoryDecoder.hpp
-    Coding/MemoryEncoder.cpp
     Coding/MemoryEncoder.hpp
-    Coding/Tags.cpp
     Coding/Tags.hpp
     Components/AnimatorComponent.hpp
-    Components/AudioListenerComponent.cpp
     Components/AudioListenerComponent.hpp
-    Components/AudioSourceComponent.cpp
     Components/AudioSourceComponent.hpp
-    Components/BillboardComponent.cpp
     Components/BillboardComponent.hpp
-    Components/FreeLookCameraComponent.cpp
     Components/FreeLookCameraComponent.hpp
-    Components/LambdaComponent.cpp
     Components/LambdaComponent.hpp
-    Components/MaterialComponent.cpp
     Components/MaterialComponent.hpp
-    Components/MotionStateComponent.cpp
     Components/MotionStateComponent.hpp
-    Components/NodeComponent.cpp
     Components/NodeComponent.hpp
     Components/NodeComponentCatalog.hpp
-    Components/OrbitComponent.cpp
     Components/OrbitComponent.hpp
-    Components/PathComponent.cpp
     Components/PathComponent.hpp
-    Components/RenderStateComponent.cpp
     Components/RenderStateComponent.hpp
-    Components/RotationComponent.cpp
     Components/RotationComponent.hpp
     Components/SingleValueComponent.hpp
-    Components/SkinnedMeshComponent.cpp
     Components/SkinnedMeshComponent.hpp
-    Components/TimerComponent.cpp
     Components/TimerComponent.hpp
-    Components/UIResponder.cpp
     Components/UIResponder.hpp
-    Concurrency/Async.cpp
     Concurrency/Async.hpp
-    Concurrency/Job.cpp
     Concurrency/Job.hpp
-    Concurrency/JobScheduler.cpp
     Concurrency/JobScheduler.hpp
     Concurrency/WorkStealingDeque.hpp
-    Crimild.cpp
     Crimild.hpp
-    Debug/DebugDrawManager.cpp
     Debug/DebugDrawManager.hpp
-    Debug/DebugRenderComponent.cpp
     Debug/DebugRenderComponent.hpp
-    Debug/DebugRenderHelper.cpp
     Debug/DebugRenderHelper.hpp
-    Debug/SceneDebugDump.cpp
     Debug/SceneDebugDump.hpp
     Exceptions/Exception.hpp
     Exceptions/FileNotFoundException.hpp
     Exceptions/HasParentException.hpp
     Exceptions/InvalidFileFormatException.hpp
     Exceptions/RuntimeException.hpp
-    Foundation/Chunk.cpp
     Foundation/Chunk.hpp
     Foundation/Containers
     Foundation/Containers/Array.hpp
@@ -218,39 +124,29 @@ set(
     Foundation/Containers/Queue.hpp
     Foundation/Containers/Set.hpp
     Foundation/Containers/Stack.hpp
-    Foundation/FilePath.cpp
     Foundation/FilePath.hpp
-    Foundation/FixedAllocator.cpp
     Foundation/FixedAllocator.hpp
     Foundation/KeyValuePair.hpp
-    Foundation/Log.cpp
     Foundation/Log.hpp
     Foundation/Macros.hpp
     Foundation/Memory.hpp
-    Foundation/NamedObject.cpp
     Foundation/NamedObject.hpp
     Foundation/NonCopyable.hpp
-    Foundation/ObjectFactory.cpp
     Foundation/ObjectFactory.hpp
     Foundation/Observable.hpp
     Foundation/Policies
     Foundation/Policies/CachePolicy.hpp
     Foundation/Policies/ThreadingPolicy.hpp
-    Foundation/Profiler.cpp
     Foundation/Profiler.hpp
     Foundation/RTTI.hpp
     Foundation/SharedObject.hpp
     Foundation/Singleton.hpp
     Foundation/SmallObject.hpp
-    Foundation/SmallObjectAllocator.cpp
     Foundation/SmallObjectAllocator.hpp
     Foundation/StringUtils.hpp
     Foundation/Types.hpp
-    Foundation/Variant.cpp
     Foundation/Variant.hpp
-    Foundation/Version.cpp
     Foundation/Version.hpp
-    Loaders/OBJLoader.cpp
     Loaders/OBJLoader.hpp
     Mathematics/abs.hpp
     Mathematics/Bounds3.hpp
@@ -274,7 +170,6 @@ set(
     Mathematics/Box_normal.hpp
     Mathematics/ceil.hpp
     Mathematics/clamp.hpp
-    Mathematics/Clock.cpp
     Mathematics/Clock.hpp
     Mathematics/ColorRGB.hpp
     Mathematics/ColorRGBA.hpp
@@ -340,7 +235,6 @@ set(
     Mathematics/pow.hpp
     Mathematics/project.hpp
     Mathematics/Quaternion.hpp
-    Mathematics/Random.cpp
     Mathematics/Random.hpp
     Mathematics/Ray3.hpp
     Mathematics/Ray3_operators.hpp
@@ -395,184 +289,391 @@ set(
     Mathematics/Vector4_constants.hpp
     Mathematics/Vector_equality.hpp
     Mathematics/whichSide.hpp
-    Messaging/MessageQueue.cpp
     Messaging/MessageQueue.hpp
-    Navigation/NavigationCell.cpp
     Navigation/NavigationCell.hpp
-    Navigation/NavigationCellEdge.cpp
     Navigation/NavigationCellEdge.hpp
-    Navigation/NavigationController.cpp
     Navigation/NavigationController.hpp
-    Navigation/NavigationMesh.cpp
     Navigation/NavigationMesh.hpp
-    Navigation/NavigationMeshContainer.cpp
     Navigation/NavigationMeshContainer.hpp
-    Navigation/NavigationMeshOBJ.cpp
     Navigation/NavigationMeshOBJ.hpp
-    ParticleSystem/Generators/AccelerationParticleGenerator.cpp
     ParticleSystem/Generators/AccelerationParticleGenerator.hpp
-    ParticleSystem/Generators/BoxPositionParticleGenerator.cpp
     ParticleSystem/Generators/BoxPositionParticleGenerator.hpp
-    ParticleSystem/Generators/CirclePositionParticleGenerator.cpp
     ParticleSystem/Generators/CirclePositionParticleGenerator.hpp
-    ParticleSystem/Generators/ColorParticleGenerator.cpp
     ParticleSystem/Generators/ColorParticleGenerator.hpp
     ParticleSystem/Generators/DefaultValueParticleGenerator.hpp
-    ParticleSystem/Generators/EulerAnglesParticleGenerator.cpp
     ParticleSystem/Generators/EulerAnglesParticleGenerator.hpp
-    ParticleSystem/Generators/GridPositionParticleGenerator.cpp
     ParticleSystem/Generators/GridPositionParticleGenerator.hpp
-    ParticleSystem/Generators/NodePositionParticleGenerator.cpp
     ParticleSystem/Generators/NodePositionParticleGenerator.hpp
-    ParticleSystem/Generators/OrbitPositionParticleGenerator.cpp
     ParticleSystem/Generators/OrbitPositionParticleGenerator.hpp
     ParticleSystem/Generators/RandomValueParticleGenerator.hpp
-    ParticleSystem/Generators/SpherePositionParticleGenerator.cpp
     ParticleSystem/Generators/SpherePositionParticleGenerator.hpp
-    ParticleSystem/Generators/SphereVelocityParticleGenerator.cpp
     ParticleSystem/Generators/SphereVelocityParticleGenerator.hpp
-    ParticleSystem/Generators/TimeParticleGenerator.cpp
     ParticleSystem/Generators/TimeParticleGenerator.hpp
-    ParticleSystem/Generators/UniformScaleParticleGenerator.cpp
     ParticleSystem/Generators/UniformScaleParticleGenerator.hpp
-    ParticleSystem/Generators/VelocityParticleGenerator.cpp
     ParticleSystem/Generators/VelocityParticleGenerator.hpp
-    ParticleSystem/ParticleAttribArray.cpp
     ParticleSystem/ParticleAttribArray.hpp
-    ParticleSystem/ParticleData.cpp
     ParticleSystem/ParticleData.hpp
-    ParticleSystem/ParticleSystemComponent.cpp
     ParticleSystem/ParticleSystemComponent.hpp
-    ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.cpp
     ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.hpp
-    ParticleSystem/Renderers/InstancedParticleRenderer.cpp
     ParticleSystem/Renderers/InstancedParticleRenderer.hpp
-    ParticleSystem/Renderers/NodeParticleRenderer.cpp
     ParticleSystem/Renderers/NodeParticleRenderer.hpp
-    ParticleSystem/Renderers/OrientedQuadParticleRenderer.cpp
     ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp
-    ParticleSystem/Renderers/PointSpriteParticleRenderer.cpp
     ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp
-    ParticleSystem/Updaters/AttractorParticleUpdater.cpp
     ParticleSystem/Updaters/AttractorParticleUpdater.hpp
-    ParticleSystem/Updaters/CameraSortParticleUpdater.cpp
     ParticleSystem/Updaters/CameraSortParticleUpdater.hpp
-    ParticleSystem/Updaters/ColorParticleUpdater.cpp
     ParticleSystem/Updaters/ColorParticleUpdater.hpp
-    ParticleSystem/Updaters/EulerParticleUpdater.cpp
     ParticleSystem/Updaters/EulerParticleUpdater.hpp
-    ParticleSystem/Updaters/FloorParticleUpdater.cpp
     ParticleSystem/Updaters/FloorParticleUpdater.hpp
-    ParticleSystem/Updaters/PositionColorParticleUpdater.cpp
     ParticleSystem/Updaters/PositionColorParticleUpdater.hpp
-    ParticleSystem/Updaters/PositionVelocityParticleUpdater.cpp
     ParticleSystem/Updaters/PositionVelocityParticleUpdater.hpp
     ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp
-    ParticleSystem/Updaters/TimeParticleUpdater.cpp
     ParticleSystem/Updaters/TimeParticleUpdater.hpp
-    ParticleSystem/Updaters/UniformScaleParticleUpdater.cpp
     ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp
-    ParticleSystem/Updaters/VelocityColorParticleUpdater.cpp
     ParticleSystem/Updaters/VelocityColorParticleUpdater.hpp
-    ParticleSystem/Updaters/ZSortParticleUpdater.cpp
     ParticleSystem/Updaters/ZSortParticleUpdater.hpp
-    Primitives/ArcPrimitive.cpp
     Primitives/ArcPrimitive.hpp
-    Primitives/ArrowPrimitive.cpp
     Primitives/ArrowPrimitive.hpp
-    Primitives/BoxPrimitive.cpp
     Primitives/BoxPrimitive.hpp
-    Primitives/ConePrimitive.cpp
     Primitives/ConePrimitive.hpp
-    Primitives/CylinderPrimitive.cpp
     Primitives/CylinderPrimitive.hpp
-    Primitives/KleinBottlePrimitive.cpp
     Primitives/KleinBottlePrimitive.hpp
-    Primitives/MobiusStripPrimitive.cpp
     Primitives/MobiusStripPrimitive.hpp
-    Primitives/NewellTeapotPrimitive.cpp
     Primitives/NewellTeapotPrimitive.hpp
-    Primitives/ParametricPrimitive.cpp
     Primitives/ParametricPrimitive.hpp
-    Primitives/ParametricSpherePrimitive.cpp
     Primitives/ParametricSpherePrimitive.hpp
-    Primitives/Primitive.cpp
     Primitives/Primitive.hpp
-    Primitives/QuadPrimitive.cpp
     Primitives/QuadPrimitive.hpp
-    Primitives/SpherePrimitive.cpp
     Primitives/SpherePrimitive.hpp
-    Primitives/TorusPrimitive.cpp
     Primitives/TorusPrimitive.hpp
-    Primitives/TrefoilKnotPrimitive.cpp
     Primitives/TrefoilKnotPrimitive.hpp
-    Rendering/Buffer.cpp
     Rendering/Buffer.hpp
-    Rendering/BufferAccessor.cpp
     Rendering/BufferAccessor.hpp
-    Rendering/BufferView.cpp
     Rendering/BufferView.hpp
     Rendering/Catalog.hpp
     Rendering/ColorBlendState.hpp
-    Rendering/ColorMaskState.cpp
     Rendering/ColorMaskState.hpp
-    Rendering/CommandBuffer.cpp
     Rendering/CommandBuffer.hpp
     Rendering/CompareOp.hpp
     Rendering/ComputePass.hpp
     Rendering/DepthStencilState.hpp
     Rendering/DescriptorSet.hpp
     Rendering/Extent.hpp
-    Rendering/Font.cpp
     Rendering/Font.hpp
     Rendering/Format.hpp
     Rendering/Framebuffer.hpp
-    Rendering/FrameGraphOperation.cpp
     Rendering/FrameGraphOperation.hpp
-    Rendering/FrameGraphResource.cpp
     Rendering/FrameGraphResource.hpp
-    Rendering/Image.cpp
     Rendering/Image.hpp
-    Rendering/ImageManager.cpp
     Rendering/ImageManager.hpp
-    Rendering/ImageTGA.cpp
     Rendering/ImageTGA.hpp
-    Rendering/ImageView.cpp
     Rendering/ImageView.hpp
-    Rendering/IndexBuffer.cpp
     Rendering/IndexBuffer.hpp
-    Rendering/Material.cpp
     Rendering/Material.hpp
-    Rendering/Materials/PrincipledBSDFMaterial.cpp
     Rendering/Materials/PrincipledBSDFMaterial.hpp
-    Rendering/Materials/PrincipledVolumeMaterial.cpp
     Rendering/Materials/PrincipledVolumeMaterial.hpp
-    Rendering/Materials/SkyboxMaterial.cpp
     Rendering/Materials/SkyboxMaterial.hpp
-    Rendering/Materials/UnlitMaterial.cpp
     Rendering/Materials/UnlitMaterial.hpp
-    Rendering/Materials/WorldGridMaterial.cpp
     Rendering/Materials/WorldGridMaterial.hpp
     Rendering/Operations/Operations.hpp
+    Rendering/Operations/Operations_computeBuffer.hpp
+    Rendering/Operations/Operations_computeImage.hpp
+    Rendering/Operations/Operations_computeRT.hpp
+    Rendering/Operations/Operations_debugLightCascades.hpp
+    Rendering/Operations/Operations_debugShadowAtlas.hpp
+    Rendering/Operations/Operations_softRT.hpp
+    Rendering/Operations/Operations_ssao.hpp
+    Rendering/Operations/OperationUtils.hpp
+    Rendering/Pipeline.hpp
+    Rendering/Programs/LitShaderProgram.frag
+    Rendering/Programs/LitShaderProgram.hpp
+    Rendering/Programs/LitShaderProgram.vert
+    Rendering/Programs/SkyboxShaderProgram.hpp
+    Rendering/Programs/UnlitShaderProgram.hpp
+    Rendering/RasterizationState.hpp
+    Rendering/RenderableSet.hpp
+    Rendering/Renderer.hpp
+    Rendering/RenderPass.hpp
+    Rendering/RenderQueue.hpp
+    Rendering/RenderResource.hpp
+    Rendering/RenderState.hpp
+    Rendering/Sampler.hpp
+    Rendering/ScalingMode.hpp
+    Rendering/ScenePass.hpp
+    Rendering/Shader.hpp
+    Rendering/ShaderLibrary.hpp
+    Rendering/ShaderLocation.hpp
+    Rendering/ShaderProgram.hpp
+    Rendering/ShaderProgramLibrary.hpp
+    Rendering/ShaderUniform.hpp
+    Rendering/ShaderUniformImpl.hpp
+    Rendering/ShadowMap.hpp
+    Rendering/SkinnedMesh.hpp
+    Rendering/StorageBuffer.hpp
+    Rendering/Swapchain.hpp
+    Rendering/SystemFont.hpp
+    Rendering/SystemFontData.hpp
+    Rendering/Texture.hpp
+    Rendering/UniformBuffer.hpp
+    Rendering/Uniforms/CallbackUniformBuffer.hpp
+    Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp
+    Rendering/Uniforms/LightingUniform.hpp
+    Rendering/Uniforms/LightUniform.hpp
+    Rendering/Uniforms/ModelUniformBuffer.hpp
+    Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp
+    Rendering/Vertex.hpp
+    Rendering/VertexAttribute.hpp
+    Rendering/VertexBuffer.hpp
+    Rendering/VertexLayout.hpp
+    Rendering/ViewportDimensions.hpp
+    SceneGraph/Camera.hpp
+    SceneGraph/CSGNode.hpp
+    SceneGraph/Geometry.hpp
+    SceneGraph/Group.hpp
+    SceneGraph/Light.hpp
+    SceneGraph/Node.hpp
+    SceneGraph/Node_io.hpp
+    SceneGraph/Node_withTransformation.hpp
+    SceneGraph/NullNode.hpp
+    SceneGraph/Skybox.hpp
+    SceneGraph/Switch.hpp
+    SceneGraph/Text.hpp
+    Simulation/AssetManager.hpp
+    Simulation/Console/Commands/EchoConsoleCommand.hpp
+    Simulation/Console/Commands/SetConsoleCommand.hpp
+    Simulation/Console/Console.hpp
+    Simulation/Console/ConsoleCommand.hpp
+    Simulation/Event.hpp
+    Simulation/FileSystem.hpp
+    Simulation/Input.hpp
+    Simulation/Settings.hpp
+    Simulation/Simulation.hpp
+    Simulation/Systems/AudioSystem.hpp
+    Simulation/Systems/CaptureSystem.hpp
+    Simulation/Systems/ConsoleSystem.hpp
+    Simulation/Systems/DebugSystem.hpp
+    Simulation/Systems/RenderSystem.hpp
+    Simulation/Systems/StreamingSystem.hpp
+    Simulation/Systems/System.hpp
+    Simulation/Systems/UISystem.hpp
+    Simulation/Systems/UpdateSystem.hpp
+    UI/UIBackground.hpp
+    UI/UIButton.hpp
+    UI/UICanvas.hpp
+    UI/UIFrame.hpp
+    UI/UIFrameConstraint.hpp
+    UI/UIFrameConstraintMaker.hpp
+    UI/UILabel.hpp
+    Visitors/Apply.hpp
+    Visitors/ApplyToGeometries.hpp
+    Visitors/BinTreeScene.hpp
+    Visitors/ComputeRenderQueue.hpp
+    Visitors/FetchCameras.hpp
+    Visitors/FetchLights.hpp
+    Visitors/IntersectWorld.hpp
+    Visitors/NodeVisitor.hpp
+    Visitors/ParallelApply.hpp
+    Visitors/Picking.hpp
+    Visitors/RTAcceleration.hpp
+    Visitors/SelectNodes.hpp
+    Visitors/ShallowCopy.hpp
+    Visitors/StartComponents.hpp
+    Visitors/UpdateComponents.hpp
+    Visitors/UpdateRenderState.hpp
+    Visitors/UpdateWorldState.hpp
+
+    PRIVATE
+    Animation/Animation.cpp
+    Animation/Channel.cpp
+    Animation/Clip.cpp
+    Animation/Skeleton.cpp
+    Audio/AudioListener.cpp
+    Audio/AudioSource.cpp
+    Behaviors/Actions/AnimateContextValue.cpp
+    Behaviors/Actions/AnimateParticleSystem.cpp
+    Behaviors/Actions/AnimateSettingValue.cpp
+    Behaviors/Actions/ClampPosition.cpp
+    Behaviors/Actions/ClampPositionToView.cpp
+    Behaviors/Actions/ClearTargets.cpp
+    Behaviors/Actions/CopyTransformFromTarget.cpp
+    Behaviors/Actions/EnableNode.cpp
+    Behaviors/Actions/ExecuteBehavior.cpp
+    Behaviors/Actions/ExecuteBehaviorOnTarget.cpp
+    Behaviors/Actions/FindTarget.cpp
+    Behaviors/Actions/FollowPath.cpp
+    Behaviors/Actions/LoadScene.cpp
+    Behaviors/Actions/LookAt.cpp
+    Behaviors/Actions/MotionApply.cpp
+    Behaviors/Actions/MotionAvoidOthers.cpp
+    Behaviors/Actions/MotionAvoidWalls.cpp
+    Behaviors/Actions/MotionComputePathToTarget.cpp
+    Behaviors/Actions/MotionFromInput.cpp
+    Behaviors/Actions/MotionReset.cpp
+    Behaviors/Actions/MotionSeek.cpp
+    Behaviors/Actions/PrintMessage.cpp
+    Behaviors/Actions/ResetNavigation.cpp
+    Behaviors/Actions/Rotate.cpp
+    Behaviors/Actions/SetContextValue.cpp
+    Behaviors/Actions/SetSettingValue.cpp
+    Behaviors/Actions/Success.cpp
+    Behaviors/Actions/Transform.cpp
+    Behaviors/Actions/Trigger.cpp
+    Behaviors/Actions/Wait.cpp
+    Behaviors/Composites/Composite.cpp
+    Behaviors/Composites/Parallel.cpp
+    Behaviors/Composites/Selector.cpp
+    Behaviors/Composites/Sequence.cpp
+    Behaviors/Conditions/DistanceToTarget.cpp
+    Behaviors/Conditions/HasTargets.cpp
+    Behaviors/Conditions/IsAtTarget.cpp
+    Behaviors/Conditions/TestContextValue.cpp
+    Behaviors/Conditions/TestInputAxis.cpp
+    Behaviors/Conditions/TestSettingValue.cpp
+    Behaviors/Decorators/Decorator.cpp
+    Behaviors/Decorators/Inverter.cpp
+    Behaviors/Decorators/Repeat.cpp
+    Behaviors/Decorators/RepeatUntilFail.cpp
+    Behaviors/Decorators/RepeatUntilSuccess.cpp
+    Behaviors/Decorators/Succeeder.cpp
+    Behaviors/Behavior.cpp
+    Behaviors/BehaviorContext.cpp
+    Behaviors/BehaviorController.cpp
+    Behaviors/BehaviorTree.cpp
+    Boundings/AABBBoundingVolume.cpp
+    Boundings/BoundingVolume.cpp
+    Boundings/Box2DBoundingVolume.cpp
+    Boundings/OrientedBoxBoundingVolume.cpp
+    Boundings/PlaneBoundingVolume.cpp
+    Boundings/SphereBoundingVolume.cpp
+    Coding/Codable.cpp
+    Coding/Encoder.cpp
+    Coding/FileDecoder.cpp
+    Coding/FileEncoder.cpp
+    Coding/MemoryDecoder.cpp
+    Coding/MemoryEncoder.cpp
+    Coding/Tags.cpp
+    Components/AudioListenerComponent.cpp
+    Components/AudioSourceComponent.cpp
+    Components/BillboardComponent.cpp
+    Components/FreeLookCameraComponent.cpp
+    Components/LambdaComponent.cpp
+    Components/MaterialComponent.cpp
+    Components/MotionStateComponent.cpp
+    Components/NodeComponent.cpp
+    Components/OrbitComponent.cpp
+    Components/PathComponent.cpp
+    Components/RenderStateComponent.cpp
+    Components/RotationComponent.cpp
+    Components/SkinnedMeshComponent.cpp
+    Components/TimerComponent.cpp
+    Components/UIResponder.cpp
+    Concurrency/Async.cpp
+    Concurrency/Job.cpp
+    Concurrency/JobScheduler.cpp
+    Crimild.cpp
+    Debug/DebugDrawManager.cpp
+    Debug/DebugRenderComponent.cpp
+    Debug/DebugRenderHelper.cpp
+    Debug/SceneDebugDump.cpp
+    Foundation/Chunk.cpp
+    Foundation/FilePath.cpp
+    Foundation/FixedAllocator.cpp
+    Foundation/Log.cpp
+    Foundation/NamedObject.cpp
+    Foundation/ObjectFactory.cpp
+    Foundation/Profiler.cpp
+    Foundation/SmallObjectAllocator.cpp
+    Foundation/Variant.cpp
+    Foundation/Version.cpp
+    Loaders/OBJLoader.cpp
+    Mathematics/Clock.cpp
+    Mathematics/Random.cpp
+    Messaging/MessageQueue.cpp
+    Navigation/NavigationCell.cpp
+    Navigation/NavigationCellEdge.cpp
+    Navigation/NavigationController.cpp
+    Navigation/NavigationMesh.cpp
+    Navigation/NavigationMeshContainer.cpp
+    Navigation/NavigationMeshOBJ.cpp
+    ParticleSystem/Generators/AccelerationParticleGenerator.cpp
+    ParticleSystem/Generators/BoxPositionParticleGenerator.cpp
+    ParticleSystem/Generators/CirclePositionParticleGenerator.cpp
+    ParticleSystem/Generators/ColorParticleGenerator.cpp
+    ParticleSystem/Generators/EulerAnglesParticleGenerator.cpp
+    ParticleSystem/Generators/GridPositionParticleGenerator.cpp
+    ParticleSystem/Generators/NodePositionParticleGenerator.cpp
+    ParticleSystem/Generators/OrbitPositionParticleGenerator.cpp
+    ParticleSystem/Generators/SpherePositionParticleGenerator.cpp
+    ParticleSystem/Generators/SphereVelocityParticleGenerator.cpp
+    ParticleSystem/Generators/TimeParticleGenerator.cpp
+    ParticleSystem/Generators/UniformScaleParticleGenerator.cpp
+    ParticleSystem/Generators/VelocityParticleGenerator.cpp
+    ParticleSystem/ParticleAttribArray.cpp
+    ParticleSystem/ParticleData.cpp
+    ParticleSystem/ParticleSystemComponent.cpp
+    ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.cpp
+    ParticleSystem/Renderers/InstancedParticleRenderer.cpp
+    ParticleSystem/Renderers/NodeParticleRenderer.cpp
+    ParticleSystem/Renderers/OrientedQuadParticleRenderer.cpp
+    ParticleSystem/Renderers/PointSpriteParticleRenderer.cpp
+    ParticleSystem/Updaters/AttractorParticleUpdater.cpp
+    ParticleSystem/Updaters/CameraSortParticleUpdater.cpp
+    ParticleSystem/Updaters/ColorParticleUpdater.cpp
+    ParticleSystem/Updaters/EulerParticleUpdater.cpp
+    ParticleSystem/Updaters/FloorParticleUpdater.cpp
+    ParticleSystem/Updaters/PositionColorParticleUpdater.cpp
+    ParticleSystem/Updaters/PositionVelocityParticleUpdater.cpp
+    ParticleSystem/Updaters/TimeParticleUpdater.cpp
+    ParticleSystem/Updaters/UniformScaleParticleUpdater.cpp
+    ParticleSystem/Updaters/VelocityColorParticleUpdater.cpp
+    ParticleSystem/Updaters/ZSortParticleUpdater.cpp
+    Primitives/ArcPrimitive.cpp
+    Primitives/ArrowPrimitive.cpp
+    Primitives/BoxPrimitive.cpp
+    Primitives/ConePrimitive.cpp
+    Primitives/CylinderPrimitive.cpp
+    Primitives/KleinBottlePrimitive.cpp
+    Primitives/MobiusStripPrimitive.cpp
+    Primitives/NewellTeapotPrimitive.cpp
+    Primitives/ParametricPrimitive.cpp
+    Primitives/ParametricSpherePrimitive.cpp
+    Primitives/Primitive.cpp
+    Primitives/QuadPrimitive.cpp
+    Primitives/SpherePrimitive.cpp
+    Primitives/TorusPrimitive.cpp
+    Primitives/TrefoilKnotPrimitive.cpp
+    Rendering/Buffer.cpp
+    Rendering/BufferAccessor.cpp
+    Rendering/BufferView.cpp
+    Rendering/ColorMaskState.cpp
+    Rendering/CommandBuffer.cpp
+    Rendering/Font.cpp
+    Rendering/FrameGraphOperation.cpp
+    Rendering/FrameGraphResource.cpp
+    Rendering/Image.cpp
+    Rendering/ImageManager.cpp
+    Rendering/ImageTGA.cpp
+    Rendering/ImageView.cpp
+    Rendering/IndexBuffer.cpp
+    Rendering/Material.cpp
+    Rendering/Materials/PrincipledBSDFMaterial.cpp
+    Rendering/Materials/PrincipledVolumeMaterial.cpp
+    Rendering/Materials/SkyboxMaterial.cpp
+    Rendering/Materials/UnlitMaterial.cpp
+    Rendering/Materials/WorldGridMaterial.cpp
     Rendering/Operations/Operations_blend.cpp
     Rendering/Operations/Operations_brightPassFilter.cpp
     Rendering/Operations/Operations_channel.cpp
     Rendering/Operations/Operations_computeBRDFLUT.cpp
     Rendering/Operations/Operations_computeBuffer.cpp
-    Rendering/Operations/Operations_computeBuffer.hpp
     Rendering/Operations/Operations_computeImage.cpp
-    Rendering/Operations/Operations_computeImage.hpp
     Rendering/Operations/Operations_computeIrradianceMap.cpp
     Rendering/Operations/Operations_computePrefilterMap.cpp
     Rendering/Operations/Operations_computeReflectionMap.cpp
     Rendering/Operations/Operations_computeRT.cpp
-    Rendering/Operations/Operations_computeRT.hpp
     Rendering/Operations/Operations_convolution.cpp
     Rendering/Operations/Operations_debug.cpp
     Rendering/Operations/Operations_debugLightCascades.cpp
-    Rendering/Operations/Operations_debugLightCascades.hpp
     Rendering/Operations/Operations_debugShadowAtlas.cpp
-    Rendering/Operations/Operations_debugShadowAtlas.hpp
     Rendering/Operations/Operations_fetchRenderables.cpp
     Rendering/Operations/Operations_forwardUnlitPass.cpp
     Rendering/Operations/Operations_gaussianBlur.cpp
@@ -585,192 +686,87 @@ set(
     Rendering/Operations/Operations_renderShadowAtlas.cpp
     Rendering/Operations/Operations_shader.cpp
     Rendering/Operations/Operations_softRT.cpp
-    Rendering/Operations/Operations_softRT.hpp
     Rendering/Operations/Operations_ssao.cpp
-    Rendering/Operations/Operations_ssao.hpp
     Rendering/Operations/Operations_tonemapping.cpp
     Rendering/Operations/OperationUtils.cpp
-    Rendering/Operations/OperationUtils.hpp
-    Rendering/Pipeline.hpp
     Rendering/Programs/LitShaderProgram.cpp
-    Rendering/Programs/LitShaderProgram.frag
-    Rendering/Programs/LitShaderProgram.hpp
-    Rendering/Programs/LitShaderProgram.vert
     Rendering/Programs/SkyboxShaderProgram.cpp
-    Rendering/Programs/SkyboxShaderProgram.hpp
     Rendering/Programs/UnlitShaderProgram.cpp
-    Rendering/Programs/UnlitShaderProgram.hpp
-    Rendering/RasterizationState.hpp
-    Rendering/RenderableSet.hpp
     Rendering/Renderer.cpp
-    Rendering/Renderer.hpp
     Rendering/RenderPass.cpp
-    Rendering/RenderPass.hpp
     Rendering/RenderQueue.cpp
-    Rendering/RenderQueue.hpp
-    Rendering/RenderResource.hpp
     Rendering/RenderState.cpp
-    Rendering/RenderState.hpp
     Rendering/Sampler.cpp
-    Rendering/Sampler.hpp
-    Rendering/ScalingMode.hpp
-    Rendering/ScenePass.hpp
     Rendering/Shader.cpp
-    Rendering/Shader.hpp
-    Rendering/ShaderLibrary.hpp
     Rendering/ShaderLocation.cpp
-    Rendering/ShaderLocation.hpp
     Rendering/ShaderProgram.cpp
-    Rendering/ShaderProgram.hpp
     Rendering/ShaderProgramLibrary.cpp
-    Rendering/ShaderProgramLibrary.hpp
     Rendering/ShaderUniform.cpp
-    Rendering/ShaderUniform.hpp
     Rendering/ShaderUniformImpl.cpp
-    Rendering/ShaderUniformImpl.hpp
     Rendering/ShadowMap.cpp
-    Rendering/ShadowMap.hpp
     Rendering/SkinnedMesh.cpp
-    Rendering/SkinnedMesh.hpp
     Rendering/StorageBuffer.cpp
-    Rendering/StorageBuffer.hpp
-    Rendering/Swapchain.hpp
     Rendering/SystemFont.cpp
-    Rendering/SystemFont.hpp
-    Rendering/SystemFontData.hpp
     Rendering/Texture.cpp
-    Rendering/Texture.hpp
-    Rendering/UniformBuffer.hpp
-    Rendering/Uniforms/CallbackUniformBuffer.hpp
     Rendering/Uniforms/CameraViewProjectionUniformBuffer.cpp
-    Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp
     Rendering/Uniforms/LightingUniform.cpp
-    Rendering/Uniforms/LightingUniform.hpp
     Rendering/Uniforms/LightUniform.cpp
-    Rendering/Uniforms/LightUniform.hpp
     Rendering/Uniforms/ModelUniformBuffer.cpp
-    Rendering/Uniforms/ModelUniformBuffer.hpp
     Rendering/Uniforms/ModelViewProjectionUniformBuffer.cpp
-    Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp
-    Rendering/Vertex.hpp
-    Rendering/VertexAttribute.hpp
     Rendering/VertexBuffer.cpp
-    Rendering/VertexBuffer.hpp
     Rendering/VertexLayout.cpp
-    Rendering/VertexLayout.hpp
-    Rendering/ViewportDimensions.hpp
     SceneGraph/Camera.cpp
-    SceneGraph/Camera.hpp
     SceneGraph/CSGNode.cpp
-    SceneGraph/CSGNode.hpp
     SceneGraph/Geometry.cpp
-    SceneGraph/Geometry.hpp
     SceneGraph/Group.cpp
-    SceneGraph/Group.hpp
     SceneGraph/Light.cpp
-    SceneGraph/Light.hpp
     SceneGraph/Node.cpp
-    SceneGraph/Node.hpp
-    SceneGraph/Node_io.hpp
-    SceneGraph/Node_withTransformation.hpp
-    SceneGraph/NullNode.hpp
     SceneGraph/Skybox.cpp
-    SceneGraph/Skybox.hpp
     SceneGraph/Switch.cpp
-    SceneGraph/Switch.hpp
     SceneGraph/Text.cpp
-    SceneGraph/Text.hpp
     Simulation/AssetManager.cpp
-    Simulation/AssetManager.hpp
     Simulation/Console/Commands/EchoConsoleCommand.cpp
-    Simulation/Console/Commands/EchoConsoleCommand.hpp
     Simulation/Console/Commands/SetConsoleCommand.cpp
-    Simulation/Console/Commands/SetConsoleCommand.hpp
     Simulation/Console/Console.cpp
-    Simulation/Console/Console.hpp
-    Simulation/Console/ConsoleCommand.hpp
-    Simulation/Event.hpp
     Simulation/FileSystem.cpp
-    Simulation/FileSystem.hpp
     Simulation/Input.cpp
-    Simulation/Input.hpp
     Simulation/Settings.cpp
-    Simulation/Settings.hpp
     Simulation/Simulation.cpp
-    Simulation/Simulation.hpp
-    Simulation/Systems/AudioSystem.hpp
     Simulation/Systems/CaptureSystem.cpp
-    Simulation/Systems/CaptureSystem.hpp
     Simulation/Systems/ConsoleSystem.cpp
-    Simulation/Systems/ConsoleSystem.hpp
     Simulation/Systems/DebugSystem.cpp
-    Simulation/Systems/DebugSystem.hpp
     Simulation/Systems/RenderSystem.cpp
-    Simulation/Systems/RenderSystem.hpp
     Simulation/Systems/StreamingSystem.cpp
-    Simulation/Systems/StreamingSystem.hpp
     Simulation/Systems/System.cpp
-    Simulation/Systems/System.hpp
     Simulation/Systems/UISystem.cpp
-    Simulation/Systems/UISystem.hpp
     Simulation/Systems/UpdateSystem.cpp
-    Simulation/Systems/UpdateSystem.hpp
     UI/UIBackground.cpp
-    UI/UIBackground.hpp
     UI/UIButton.cpp
-    UI/UIButton.hpp
     UI/UICanvas.cpp
-    UI/UICanvas.hpp
     UI/UIFrame.cpp
-    UI/UIFrame.hpp
     UI/UIFrameConstraint.cpp
-    UI/UIFrameConstraint.hpp
     UI/UIFrameConstraintMaker.cpp
-    UI/UIFrameConstraintMaker.hpp
     UI/UILabel.cpp
-    UI/UILabel.hpp
     Visitors/Apply.cpp
-    Visitors/Apply.hpp
     Visitors/ApplyToGeometries.cpp
-    Visitors/ApplyToGeometries.hpp
     Visitors/BinTreeScene.cpp
-    Visitors/BinTreeScene.hpp
     Visitors/ComputeRenderQueue.cpp
-    Visitors/ComputeRenderQueue.hpp
     Visitors/FetchCameras.cpp
-    Visitors/FetchCameras.hpp
     Visitors/FetchLights.cpp
-    Visitors/FetchLights.hpp
     Visitors/IntersectWorld.cpp
-    Visitors/IntersectWorld.hpp
     Visitors/NodeVisitor.cpp
-    Visitors/NodeVisitor.hpp
     Visitors/ParallelApply.cpp
-    Visitors/ParallelApply.hpp
     Visitors/Picking.cpp
-    Visitors/Picking.hpp
     Visitors/RTAcceleration.cpp
-    Visitors/RTAcceleration.hpp
     Visitors/SelectNodes.cpp
-    Visitors/SelectNodes.hpp
     Visitors/ShallowCopy.cpp
-    Visitors/ShallowCopy.hpp
     Visitors/StartComponents.cpp
-    Visitors/StartComponents.hpp
     Visitors/UpdateComponents.cpp
-    Visitors/UpdateComponents.hpp
     Visitors/UpdateRenderState.cpp
-    Visitors/UpdateRenderState.hpp
     Visitors/UpdateWorldState.cpp
-    Visitors/UpdateWorldState.hpp
 )
 
-add_library(
-    ${CRIMILD_LIBRARY_NAME}
-    OBJECT
-    ${CRIMILD_LIBRARY_SOURCE_FILES}
-)
+target_include_directories( crimild_core PUBLIC . )
+target_compile_features( crimild_core PUBLIC cxx_std_20 )
 
-target_include_directories( ${CRIMILD_LIBRARY_NAME} PUBLIC . )
-target_compile_features( ${CRIMILD_LIBRARY_NAME} PUBLIC cxx_std_20 )
-
+add_library( Crimild::Core ALIAS crimild_core )

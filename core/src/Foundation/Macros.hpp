@@ -88,14 +88,14 @@ namespace crimild {
     {
         auto end = fqn.find( "(" );
         if ( end == std::string::npos ) {
-            return "asd" + fqn;
+            return fqn;
         }
 
         auto begin = fqn.substr( 0, end ).rfind( "::" );
         if ( begin == std::string::npos ) {
             begin = fqn.substr( 0, end ).rfind( ' ' );
             if ( begin == std::string::npos ) {
-                return "qwe" + fqn;
+                return fqn;
             }
             begin += 1;
         } else {

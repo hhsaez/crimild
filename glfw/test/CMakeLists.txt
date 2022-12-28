@@ -24,8 +24,12 @@ target_include_directories(
 
 target_link_libraries( 
     ${CRIMILD_TEST_NAME} 
-	PRIVATE crimild_core
-    PRIVATE crimild_glfw 
+	PRIVATE Crimild::Core
+    PRIVATE Crimild::Vulkan
+    PRIVATE Crimild::STB
+    PRIVATE Crimild::ImGui
+    PRIVATE Crimild::Import
+    PRIVATE Crimild::GLFW
     PRIVATE gtest gmock
 )
 

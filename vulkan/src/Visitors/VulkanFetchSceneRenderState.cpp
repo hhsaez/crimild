@@ -57,6 +57,11 @@ void FetchSceneRenderState::visitGeometry( Geometry *geometry ) noexcept
         return;
     }
 
+    auto primitive = geometry->anyPrimitive();
+    if (primitive == nullptr) {
+        return;
+    }
+
     if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
         if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
             m_result.envRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );

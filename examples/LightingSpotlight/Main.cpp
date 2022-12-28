@@ -123,6 +123,8 @@ public:
                 }()
             );
         }
+
+        return ret;
     }
 };
 

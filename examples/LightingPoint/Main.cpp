@@ -98,8 +98,8 @@ public:
                                         crimild::alloc< SpherePrimitive >(
                                             SpherePrimitive::Params {
                                                 .type = Primitive::Type::TRIANGLES,
-                                                .layout = VertexP3N3TC2::getLayout(),
                                                 .radius = 0.1f,
+                                                .layout = VertexP3N3TC2::getLayout(),
                                             }
                                         )
                                     );
