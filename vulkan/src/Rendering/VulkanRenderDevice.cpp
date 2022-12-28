@@ -205,8 +205,11 @@ RenderDevice::~RenderDevice( void ) noexcept
 void RenderDevice::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::WINDOW_RESIZE: {
+        case Event::Type::WINDOW_RESIZE:
             m_extent = e.extent;
+            // Don't break here (this might be error prone, though).
+
+        case Event::Type::SCENE_CHANGED: {
             vkDeviceWaitIdle( m_handle );
 
             destroyCommandBuffers();

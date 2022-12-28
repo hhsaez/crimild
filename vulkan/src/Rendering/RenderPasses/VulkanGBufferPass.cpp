@@ -64,6 +64,7 @@ GBufferPass::~GBufferPass( void ) noexcept
 Event GBufferPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
+        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();

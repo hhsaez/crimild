@@ -69,6 +69,7 @@ UnlitPass::~UnlitPass( void ) noexcept
 Event UnlitPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
+        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
