@@ -480,6 +480,7 @@ LocalLightingPass::~LocalLightingPass( void ) noexcept
 Event LocalLightingPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
+        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             deinit();
             init();

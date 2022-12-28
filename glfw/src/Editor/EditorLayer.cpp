@@ -304,7 +304,11 @@ void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept
 {
     auto scene = editor::createDefaultScene();
     if ( auto sim = Simulation::getInstance() ) {
+        sim->setScene( nullptr );
+        handle( Event { .type = Event::Type::SCENE_CHANGED } );
+        
         sim->setScene( editor::createDefaultScene() );
+        handle( Event { .type = Event::Type::SCENE_CHANGED } );
     }
     
     saveSceneAs( path );
@@ -316,9 +320,15 @@ void EditorLayer::loadScene( const std::filesystem::path &path ) noexcept
         CRIMILD_LOG_ERROR( path, " does not exists" );
         return;
     }
-
+    
     // Stop simulation to ensure we're handling the right scene
     EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
+    
+    {
+        auto prevScene = retain( Simulation::getInstance()->getScene() );
+        Simulation::getInstance()->setScene( nullptr );
+        handle( Event { .type = Event::Type::SCENE_CHANGED } );
+    }
     
     coding::FileDecoder decoder;
     decoder.read( path );
@@ -328,6 +338,7 @@ void EditorLayer::loadScene( const std::filesystem::path &path ) noexcept
     }
     auto scene = decoder.getObjectAt< Node >( 0 );
     Simulation::getInstance()->setScene( scene );
+    handle( Event { .type = Event::Type::SCENE_CHANGED } );
 }
 
 void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept

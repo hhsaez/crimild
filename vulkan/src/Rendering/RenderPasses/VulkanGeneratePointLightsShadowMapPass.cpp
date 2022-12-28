@@ -79,6 +79,7 @@ GeneratePointLightsShadowMaps::~GeneratePointLightsShadowMaps( void ) noexcept
 Event GeneratePointLightsShadowMaps::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
+        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
