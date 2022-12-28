@@ -1,12 +1,11 @@
 crimild_trace()
 
-set(
-    CRIMILD_TEST_NAME
-    crimild_core_test
-)
+add_executable( crimild_core_test )
 
-set( 
-    CRIMILD_TEST_SOURCE_FILES 
+target_sources( 
+    crimild_core_test
+
+    PRIVATE
     Behaviors/Actions/MotionApplyTest.cpp
     Behaviors/Actions/MotionFromInputTest.cpp
     Behaviors/Actions/MotionResetTest.cpp
@@ -103,23 +102,18 @@ set(
     Visitors/UpdateWorldStateTest.cpp
 )
 
-add_executable( 
-    crimild_core_test 
-    ${CRIMILD_TEST_SOURCE_FILES}
-)
-
-target_include_directories( ${CRIMILD_TEST_NAME} PRIVATE . )
+target_include_directories( crimild_core_test PRIVATE . )
 
 target_link_libraries( 
-    ${CRIMILD_TEST_NAME} 
+    crimild_core_test
     PRIVATE crimild_core 
     PRIVATE gtest gmock
 )
 
 gtest_discover_tests( 
-    ${CRIMILD_TEST_NAME}
+    crimild_core_test
     WORKING_DIRECTORY ${PROJECT_DIR}
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
 )
 
-set_target_properties( ${CRIMILD_TEST_NAME} PROPERTIES FOLDER tests )
+set_target_properties( crimild_core_test PROPERTIES FOLDER tests )

@@ -180,6 +180,8 @@ public:
                 return scene;
             }() );
         }
+
+        return ret;
     }
 };
 

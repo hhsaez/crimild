@@ -1,19 +1,34 @@
-include( crimild_add_example )
-
 crimild_trace()
 
-# ADD_SUBDIRECTORY( LightingDirectional )
-# ADD_SUBDIRECTORY( LightingMulitple )
-# ADD_SUBDIRECTORY( LightingPoint )
-# ADD_SUBDIRECTORY( LightingSpotlight )
-# ADD_SUBDIRECTORY( LightingUnlit )
-ADD_SUBDIRECTORY( Playground )
-# ADD_SUBDIRECTORY( PBRBasic )
-# ADD_SUBDIRECTORY( ShadowsDirectional )
-# ADD_SUBDIRECTORY( ShadowsDirectionalMultiple )
-# ADD_SUBDIRECTORY( ShadowsSpot )
-# ADD_SUBDIRECTORY( ShadowsSpotMultiple )
-# ADD_SUBDIRECTORY( ShadowsPoint )
-# ADD_SUBDIRECTORY( ShadowsPointMultiple )
-# ADD_SUBDIRECTORY( TextureCoordinates )
-# ADD_SUBDIRECTORY( Triangle )
+function( CRIMILD_ADD_EXAMPLE EXAMPLE_NAME EXAMPLE_SOURCES )
+    add_executable( ${EXAMPLE_NAME} )
+    target_sources( ${EXAMPLE_NAME} PRIVATE ${EXAMPLE_SOURCES} )
+    target_include_directories( ${EXAMPLE_NAME} PRIVATE . )
+    target_link_libraries(
+        ${EXAMPLE_NAME}
+        PRIVATE Crimild::Core
+        PRIVATE Crimild::Vulkan
+        PRIVATE Crimild::ImGui
+        PRIVATE Crimild::Import
+        PRIVATE Crimild::STB
+        PRIVATE Crimild::GLFW
+        PRIVATE Crimild::GLFW::Main
+    )
+    set_target_properties( ${EXAMPLE_NAME} PROPERTIES FOLDER examples )
+endfunction()
+
+add_subdirectory( LightingDirectional )
+add_subdirectory( LightingMulitple )
+add_subdirectory( LightingPoint )
+add_subdirectory( LightingSpotlight )
+add_subdirectory( LightingUnlit )
+add_subdirectory( Playground )
+# add_subdirectory( PBRBasic )
+add_subdirectory( ShadowsDirectional )
+add_subdirectory( ShadowsDirectionalMultiple )
+add_subdirectory( ShadowsSpot )
+add_subdirectory( ShadowsSpotMultiple )
+add_subdirectory( ShadowsPoint )
+add_subdirectory( ShadowsPointMultiple )
+add_subdirectory( TextureCoordinates )
+add_subdirectory( Triangle )

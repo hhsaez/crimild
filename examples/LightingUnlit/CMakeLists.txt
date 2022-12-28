@@ -1,5 +1,2 @@
-SET( CRIMILD_APP_NAME LightingUnlit )
-SET( CRIMILD_APP_SOURCE_DIRECTORIES "src" )
-SET( CRIMILD_APP_INCLUDE_DIRECTORIES "src" )
-
-INCLUDE( ModuleBuildApp )
+crimild_trace()
+crimild_add_example( LightingUnlit src/Main.cpp )

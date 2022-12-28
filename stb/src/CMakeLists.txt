@@ -1,32 +1,28 @@
 crimild_trace()
 
-set(
-    CRIMILD_LIBRARY_NAME
+add_library( crimild_stb OBJECT )
+target_sources( 
     crimild_stb
-)
 
-set( 
-    CRIMILD_LIBRARY_SOURCE_FILES 
-	Rendering/STBImageManager.cpp
-	Rendering/STBImageManager.hpp
-	Crimild_STB.cpp
+	PUBLIC
 	Crimild_STB.hpp
-)
+	Rendering/STBImageManager.hpp
 
-add_library(
-    ${CRIMILD_LIBRARY_NAME}
-    ${CRIMILD_LIBRARY_SOURCE_FILES}
+	PRIVATE
+	Crimild_STB.cpp
+	Rendering/STBImageManager.cpp
 )
 
 target_include_directories( 
-	${CRIMILD_LIBRARY_NAME} 
+	crimild_stb
 	PUBLIC . 
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/stb
 )
 
 target_link_libraries( 
-	${CRIMILD_LIBRARY_NAME} 
-	PRIVATE crimild_core 
+	crimild_stb
+	PRIVATE Crimild::Core
 )
 
-target_compile_features( ${CRIMILD_LIBRARY_NAME} PUBLIC cxx_std_20 )
+add_library( Crimild::STB ALIAS crimild_stb )
+

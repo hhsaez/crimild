@@ -1,5 +1,2 @@
-SET( CRIMILD_APP_NAME LightingDirectional )
-SET( CRIMILD_APP_SOURCE_DIRECTORIES "." )
-SET( CRIMILD_APP_INCLUDE_DIRECTORIES "." )
-
-INCLUDE( ModuleBuildApp )
+crimild_trace()
+crimild_add_example( LightingDirectional Main.cpp )
