@@ -31,3 +31,6 @@ target_link_libraries(
 )
 
 add_library( Crimild::Import ALIAS crimild_import )
+
+# Keep IDEs folders clean
+set_target_properties( assimp PROPERTIES FOLDER extern )

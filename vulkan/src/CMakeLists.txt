@@ -155,3 +155,7 @@ target_link_libraries(
 )
 
 add_library( Crimild::Vulkan ALIAS crimild_vulkan )
+
+# Keep IDEs folders clean
+set_target_properties( glslang PROPERTIES FOLDER extern )
+set_target_properties( SPIRV PROPERTIES FOLDER extern )
