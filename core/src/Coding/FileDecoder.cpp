@@ -39,9 +39,9 @@ crimild::Bool FileDecoder::read( std::string filePath )
 
 crimild::Bool FileDecoder::read( const std::filesystem::path &path ) noexcept
 {
-    FILE *file = fopen( path.c_str(), "rb" );
+    FILE *file = fopen( path.string().c_str(), "rb" );
     if ( file == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
         return false;
     }
 

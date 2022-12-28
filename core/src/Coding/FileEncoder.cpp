@@ -46,9 +46,9 @@ crimild::Bool FileEncoder::write( const std::filesystem::path &path ) noexcept
         return false;
     }
 
-    FILE *file = fopen( path.c_str(), "wb" );
+    FILE *file = fopen( path.string().c_str(), "wb" );
     if ( file == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path );
+        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
         return false;
     }
 
