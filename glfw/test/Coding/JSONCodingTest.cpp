@@ -45,7 +45,7 @@ TEST( JSONCoding, encode_version )
     }();
 
     const auto expected = nlohmann::json {
-        { "__VERSION__", "CRIMILD v5.0.0" },
+        { "__VERSION__", "v5.0.0" },
     };
 
     EXPECT_EQ( expected, json );
@@ -54,7 +54,7 @@ TEST( JSONCoding, encode_version )
 TEST( JSONCoding, decode_version )
 {
     const auto json = nlohmann::json {
-        { "__VERSION__", "CRIMILD v5.0.0" },
+        { "__VERSION__", "v5.0.0" },
     };
 
     coding::JSONDecoder decoder;

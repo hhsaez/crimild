@@ -29,6 +29,7 @@ target_sources(
 	Coding/JSONEncoder.hpp
 	Crimild_GLFW.hpp
 	Editor/EditorLayer.hpp
+	Editor/EditorProject.hpp
 	Editor/Layout.hpp
 	Editor/EditorState.hpp
 	Editor/EditorUtils.hpp
@@ -39,6 +40,7 @@ target_sources(
 	Editor/Menus/sceneMenu.hpp
 	Editor/Menus/viewMenu.hpp
 	Editor/Panels/BehaviorEditorPanel.hpp
+	Editor/Panels/EditorProjectPanel.hpp
 	Editor/Panels/NodeInspectorPanel.hpp
 	Editor/Panels/RenderScenePanel.hpp
 	Editor/Panels/SceneHierarchyPanel.hpp
@@ -63,6 +65,7 @@ target_sources(
 	Coding/JSONEncoder.cpp
 	Crimild_GLFW.cpp
 	Editor/EditorLayer.cpp
+	Editor/EditorProject.cpp
 	Editor/Layout.cpp
 	Editor/EditorState.cpp
 	Editor/EditorUtils.cpp
@@ -73,6 +76,7 @@ target_sources(
 	Editor/Menus/sceneMenu.cpp
 	Editor/Menus/viewMenu.cpp
 	Editor/Panels/BehaviorEditorPanel.cpp
+	Editor/Panels/EditorProjectPanel.cpp
 	Editor/Panels/NodeInspectorPanel.cpp
 	Editor/Panels/RenderScenePanel.cpp
 	Editor/Panels/SceneHierarchyPanel.cpp
