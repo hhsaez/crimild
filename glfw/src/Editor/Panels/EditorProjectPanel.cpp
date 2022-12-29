@@ -82,7 +82,7 @@ void editor::ProjectPanel::traverse( const std::filesystem::path &path ) noexcep
     
     ImGui::PushStyleColor( ImGuiCol_Text, IM_COL32( 255, 255, 255, 255 ) );
 
-    const auto isOpen = ImGui::TreeNodeEx( path.filename().c_str(), flags );
+    const auto isOpen = ImGui::TreeNodeEx( path.filename().string().c_str(), flags );
 
     ImGui::PopStyleColor();
     

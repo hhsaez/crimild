@@ -185,7 +185,7 @@ void EditorLayer::createProject( const std::filesystem::path &path ) noexcept
     std::filesystem::create_directories( projectRoot/"Assets"/"Textures" );
     std::filesystem::create_directories( projectRoot/"Assets"/"Prefabs" );
 
-    m_project = crimild::alloc< editor::Project >( projectName, projectVersion );
+    m_project = crimild::alloc< editor::Project >( projectName.string(), projectVersion );
     m_project->setPath( projectRoot/"project.crimild" );
     CRIMILD_LOG_INFO( "Created project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 

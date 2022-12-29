@@ -42,7 +42,7 @@ void crimild::editor::fileMenu( void ) noexcept
     static std::string dialogId;
     static std::function< void( const std::filesystem::path & ) > dialogHandler;
 
-    auto openDialog = [ & ]( std::string id, std::string title, std::function< void( std::string ) > handler, const char *filters = ".crimild" ) {
+    auto openDialog = [ & ]( std::string id, std::string title, auto handler, const char *filters = ".crimild" ) {
         dialogId = id;
         dialogHandler = handler;
         ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_Default;
