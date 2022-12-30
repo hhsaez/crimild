@@ -33,6 +33,7 @@
 #include "Editor/EditorUtils.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
+#include "Editor/EditorProject.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -46,7 +47,13 @@ void crimild::editor::fileMenu( void ) noexcept
         dialogId = id;
         dialogHandler = handler;
         ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_Default;
-        ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, ".", 1, nullptr, flags );
+        std::string pathName = ".";
+        if ( auto editor = EditorLayer::getInstance() ) {
+            if ( auto project = editor->getProject() ) {
+                pathName = project->getPath().parent_path().string();
+            }
+        }
+        ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, pathName, 1, nullptr, flags );
     };
 
     if ( ImGui::BeginMenu( "File" ) ) {
