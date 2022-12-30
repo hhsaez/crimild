@@ -33,14 +33,14 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-ShaderModule::~ShaderModule( void )
+ShaderModuleOLD::~ShaderModuleOLD( void )
 {
     if ( manager != nullptr ) {
         manager->destroy( this );
     }
 }
 
-SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descriptor const &descriptor ) noexcept
+SharedPointer< ShaderModuleOLD > ShaderModuleManager::create( ShaderModuleOLD::Descriptor const &descriptor ) noexcept
 {
     CRIMILD_LOG_DEBUG( "Creating shader module for stage ", descriptor.shader->getStageDescription() );
 
@@ -73,7 +73,7 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
         return nullptr;
     }
 
-    auto shaderModule = crimild::alloc< ShaderModule >();
+    auto shaderModule = crimild::alloc< ShaderModuleOLD >();
     shaderModule->renderDevice = renderDevice;
     shaderModule->handler = shaderModuleHandler;
     shaderModule->manager = this;
@@ -83,7 +83,7 @@ SharedPointer< ShaderModule > ShaderModuleManager::create( ShaderModule::Descrip
     return shaderModule;
 }
 
-void ShaderModuleManager::destroy( ShaderModule *shaderModule ) noexcept
+void ShaderModuleManager::destroy( ShaderModuleOLD *shaderModule ) noexcept
 {
     if ( shaderModule->renderDevice != nullptr && shaderModule->handler != VK_NULL_HANDLE ) {
         vkDestroyShaderModule( shaderModule->renderDevice->handler, shaderModule->handler, nullptr );

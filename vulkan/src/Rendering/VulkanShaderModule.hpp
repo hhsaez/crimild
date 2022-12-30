@@ -40,7 +40,7 @@ namespace crimild {
         class ShaderModuleManager;
         class RenderDeviceOLD;
 
-        class ShaderModule : public VulkanObject {
+        class [[deprecated]] ShaderModuleOLD : public VulkanObject {
             CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::ShaderModule )
 
         public:
@@ -50,7 +50,7 @@ namespace crimild {
             };
 
         public:
-            ~ShaderModule( void );
+            ~ShaderModuleOLD( void );
 
             ShaderModuleManager *manager = nullptr;
             RenderDeviceOLD *renderDevice = nullptr;
@@ -59,14 +59,14 @@ namespace crimild {
             std::string entryPointName = "main";
         };
 
-        class ShaderModuleManager : public VulkanObjectManager< ShaderModule > {
+        class [[deprecated]] ShaderModuleManager : public VulkanObjectManager< ShaderModuleOLD > {
         public:
             explicit ShaderModuleManager( RenderDeviceOLD *renderDevice ) noexcept
                 : m_renderDevice( renderDevice ) { }
             virtual ~ShaderModuleManager( void ) = default;
 
-            SharedPointer< ShaderModule > create( ShaderModule::Descriptor const &descriptor ) noexcept;
-            void destroy( ShaderModule *shaderModule ) noexcept override;
+            SharedPointer< ShaderModuleOLD > create( ShaderModuleOLD::Descriptor const &descriptor ) noexcept;
+            void destroy( ShaderModuleOLD *shaderModule ) noexcept override;
 
             ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
 
