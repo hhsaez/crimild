@@ -130,7 +130,7 @@ ComputePipelineManager::ShaderModuleArray ComputePipelineManager::createShaderMo
     assert( !program->getShaders().empty() && "Invalid shader program" );
     program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
         auto module = renderDevice->create(
-            ShaderModule::Descriptor {
+                                           ShaderModuleOLD::Descriptor {
                 .shader = crimild::get_ptr( shader ) } );
         if ( module != nullptr ) {
             modules.push_back( module );
