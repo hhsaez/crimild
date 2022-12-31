@@ -64,7 +64,7 @@ void crimild::editor::fileMenu( void ) noexcept
                 []( const auto &path ) {
                     EditorLayer::getInstance()->createProject( path );
                 },
-                nullptr
+                ".crimild"
             );
         }
 
@@ -88,7 +88,7 @@ void crimild::editor::fileMenu( void ) noexcept
                 []( const auto &path ) {
                     EditorLayer::getInstance()->loadProject( path );
                 },
-                nullptr
+                ".crimild"
             );
         }
 
