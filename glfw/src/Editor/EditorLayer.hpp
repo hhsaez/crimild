@@ -91,6 +91,7 @@ namespace crimild {
 
         void createNewScene( const std::filesystem::path &path ) noexcept;
         void loadScene( const std::filesystem::path &path ) noexcept;
+        void saveScene( void ) noexcept;
         void saveSceneAs( const std::filesystem::path &path ) noexcept;
 
     private:
