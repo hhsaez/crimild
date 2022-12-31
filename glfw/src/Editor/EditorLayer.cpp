@@ -53,7 +53,11 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
 
 EditorLayer::~EditorLayer( void ) noexcept
 {
+    saveScene();
+    saveProject();
+
     m_layoutManager = nullptr;
+
     m_state = nullptr;
     m_previousState = nullptr;
     m_renderDevice = nullptr;
@@ -96,7 +100,6 @@ Event EditorLayer::handle( const Event &e ) noexcept
 void EditorLayer::render( void ) noexcept
 {
     editor::mainMenu( this );
-
     m_layoutManager->render();
 }
 
@@ -176,7 +179,7 @@ void EditorLayer::createProject( const std::filesystem::path &path ) noexcept
     std::filesystem::create_directories( projectRoot / "Assets" / "Prefabs" );
 
     m_project = crimild::alloc< editor::Project >( projectName.string(), projectVersion );
-    m_project->setPath( projectRoot / "project.crimild" );
+    m_project->setFilePath( projectRoot / "project.crimild" );
     CRIMILD_LOG_INFO( "Created project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
     saveProject();
@@ -210,11 +213,11 @@ void EditorLayer::loadProject( const std::filesystem::path &path ) noexcept
         return;
     }
 
-    m_project->setPath( projectFilePath );
+    m_project->setFilePath( projectFilePath );
 
     CRIMILD_LOG_INFO( "Loaded project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
-    loadScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
+    loadScene( m_project->getScenePath( m_project->getCurrentSceneName() ) );
     loadDefaultLayout();
 }
 
@@ -226,7 +229,7 @@ void EditorLayer::saveProject( void ) noexcept
 
     coding::FileEncoder encoder;
     encoder.encode( m_project );
-    if ( !encoder.write( m_project->getPath() ) ) {
+    if ( !encoder.write( m_project->getFilePath() ) ) {
         CRIMILD_LOG_ERROR( "Failed to encode project" );
         return;
     }
@@ -237,7 +240,7 @@ void EditorLayer::saveProject( void ) noexcept
 void EditorLayer::loadDefaultLayout( void ) noexcept
 {
     // TODO: FixMe - Loading a layout at this point seems to be breakig the app.
-    //    m_layoutManager->loadDefaultLayout();
+    // m_layoutManager->loadDefaultLayout();
 }
 
 void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept
@@ -279,6 +282,19 @@ void EditorLayer::loadScene( const std::filesystem::path &path ) noexcept
     auto scene = decoder.getObjectAt< Node >( 0 );
     Simulation::getInstance()->setScene( scene );
     handle( Event { .type = Event::Type::SCENE_CHANGED } );
+
+    if ( auto project = getProject() ) {
+        project->setCurrentSceneName( path.stem().string() );
+        saveProject();
+    }
+}
+
+void EditorLayer::saveScene( void ) noexcept
+{
+    if ( auto project = getProject() ) {
+        auto path = project->getScenePath( project->getCurrentSceneName() );
+        saveSceneAs( path );
+    }
 }
 
 void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept
@@ -291,4 +307,9 @@ void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept
     coding::FileEncoder encoder;
     encoder.encode( scene );
     encoder.write( path );
+
+    if ( auto project = getProject() ) {
+        project->setCurrentSceneName( path.stem().string() );
+        saveProject();
+    }
 }

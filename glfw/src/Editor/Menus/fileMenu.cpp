@@ -43,17 +43,23 @@ void crimild::editor::fileMenu( void ) noexcept
     static std::string dialogId;
     static std::function< void( const std::filesystem::path & ) > dialogHandler;
 
-    auto openDialog = [ & ]( std::string id, std::string title, auto handler, const char *filters = ".crimild" ) {
+    auto openDialog = [ & ]( std::string id, std::string title, auto handler, const char *filters = ".crimild", std::string pathName = "." ) {
         dialogId = id;
         dialogHandler = handler;
-        ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_Default;
-        std::string pathName = ".";
-        if ( auto editor = EditorLayer::getInstance() ) {
-            if ( auto project = editor->getProject() ) {
-                pathName = project->getPath().parent_path().string();
-            }
-        }
+        ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
         ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, pathName, 1, nullptr, flags );
+    };
+
+    auto project = EditorLayer::getInstance()->getProject();
+
+    auto enabledWithProject = [ hasProject = project != nullptr ]( auto fn ) {
+        if ( !hasProject ) {
+            ImGui::BeginDisabled();
+        }
+        fn();
+        if ( !hasProject ) {
+            ImGui::EndDisabled();
+        }
     };
 
     if ( ImGui::BeginMenu( "File" ) ) {
@@ -68,16 +74,21 @@ void crimild::editor::fileMenu( void ) noexcept
             );
         }
 
-        if ( ImGui::MenuItem( "New Scene..." ) ) {
-            openDialog(
-                "NewSceneDlgKey",
-                "Create Scene",
-                []( const auto &path ) {
-                    EditorLayer::getInstance()->createNewScene( path );
-                },
-                ".crimild"
-            );
-        }
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "New Scene..." ) ) {
+                    openDialog(
+                        "NewSceneDlgKey",
+                        "Create Scene",
+                        []( const auto &path ) {
+                            EditorLayer::getInstance()->createNewScene( path );
+                        },
+                        ".crimild",
+                        project->getScenesDirectory().string()
+                    );
+                }
+            }
+        );
 
         ImGui::Separator();
 
@@ -92,45 +103,75 @@ void crimild::editor::fileMenu( void ) noexcept
             );
         }
 
-        if ( ImGui::MenuItem( "Open Scene..." ) ) {
-            openDialog(
-                "OpenSceneDlgKey",
-                "Open Scene",
-                []( const auto &path ) {
-                    EditorLayer::getInstance()->loadScene( path );
-                },
-                ".crimild"
-            );
-        }
-        
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Save Scene As..." ) ) {
-            openDialog(
-                "SaveSceneAsDlgKey",
-                "Save Scene As...",
-                []( const auto &path ) {
-                    EditorLayer::getInstance()->saveSceneAs( path );
-                },
-                ".crimild"
-            );
-        }
-        
-        ImGui::Separator();
-
-        if ( ImGui::BeginMenu( "Import..." ) ) {
-            if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
-                openDialog(
-                    "ImportGLTFDlgKey",
-                    "Import",
-                    []( const auto &path ) {
-                        // TODO
-                    },
-                    ".gltf"
-                );
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Open Scene..." ) ) {
+                    openDialog(
+                        "OpenSceneDlgKey",
+                        "Open Scene",
+                        []( const auto &path ) {
+                            EditorLayer::getInstance()->loadScene( path );
+                        },
+                        ".crimild",
+                        project->getScenesDirectory().string()
+                    );
+                }
             }
-            ImGui::EndMenu();
-        }
+        );
+
+        ImGui::Separator();
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Project" ) ) {
+                    EditorLayer::getInstance()->saveProject();
+                }
+            }
+        );
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Scene" ) ) {
+                    EditorLayer::getInstance()->saveScene();
+                }
+            }
+        );
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Scene As..." ) ) {
+                    openDialog(
+                        "SaveSceneAsDlgKey",
+                        "Save Scene As...",
+                        []( const auto &path ) {
+                            EditorLayer::getInstance()->saveSceneAs( path );
+                        },
+                        ".crimild",
+                        project->getScenesDirectory().string()
+                    );
+                }
+            }
+        );
+
+        ImGui::Separator();
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::BeginMenu( "Import..." ) ) {
+                    if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
+                        openDialog(
+                            "ImportGLTFDlgKey",
+                            "Import",
+                            []( const auto &path ) {
+                                // TODO
+                            },
+                            ".gltf"
+                        );
+                    }
+                    ImGui::EndMenu();
+                }
+            }
+        );
 
         ImGui::Separator();
 
