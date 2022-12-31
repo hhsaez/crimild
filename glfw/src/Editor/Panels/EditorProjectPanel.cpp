@@ -46,7 +46,7 @@ void editor::ProjectPanel::render( void ) noexcept
     ImGui::Begin( getName().c_str(), &open, 0 );
 
     if ( auto project = EditorLayer::getInstance()->getProject() ) {
-        const auto path = project->getPath().parent_path();
+        const auto path = project->getFilePath().parent_path();
         if ( std::filesystem::exists( path ) ) {
             // Makes sure the root node is always expanded.
             for ( const auto &entry : std::filesystem::directory_iterator( path ) ) {

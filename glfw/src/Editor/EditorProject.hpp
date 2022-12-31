@@ -48,10 +48,23 @@ namespace crimild {
             Project( std::string name, const Version &version ) noexcept;
             virtual ~Project( void ) = default;
 
-            inline const std::filesystem::path &getPath( void ) const noexcept { return m_path; }
+            /**
+             * \brief Get the absolute path to the project.crimild file
+             */
+            inline const std::filesystem::path &getFilePath( void ) const noexcept { return m_filePath; }
+
+            inline std::filesystem::path getRootDirectory( void ) const noexcept { return m_filePath.parent_path(); }
+            inline std::filesystem::path getAssetsDirectory( void ) const noexcept { return getRootDirectory() / "Assets"; }
+            inline std::filesystem::path getScenesDirectory( void ) const noexcept { return getAssetsDirectory() / "Scenes"; }
+
+            inline void setCurrentSceneName( std::string_view sceneName ) noexcept { m_currentSceneName = sceneName; }
+            inline const std::string &getCurrentSceneName( void ) const noexcept { return m_currentSceneName; }
+            inline std::filesystem::path getScenePath( std::string_view sceneName ) const noexcept { return getScenesDirectory() / ( std::string( sceneName ) + ".crimild" ); }
 
         private:
-            std::filesystem::path m_path;
+            mutable std::filesystem::path m_filePath;
+
+            std::string m_currentSceneName = "main";
 
             /**
                 \name Coding support
@@ -70,7 +83,7 @@ namespace crimild {
             //@{
 
         public:
-            inline void setPath( const std::filesystem::path &path ) noexcept { m_path = std::filesystem::absolute( path ); }
+            inline void setFilePath( const std::filesystem::path &path ) const noexcept { m_filePath = std::filesystem::absolute( path ); }
 
             //@}
         };

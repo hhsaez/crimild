@@ -53,6 +53,7 @@ void Project::encode( coding::Encoder &encoder )
 
     encoder.encode( "name", getNameRefForCoding() );
     encoder.encode( "version", getVersionRefForCoding() );
+    encoder.encode( "currentSceneName", m_currentSceneName );
 }
 
 void Project::decode( coding::Decoder &decoder )
@@ -61,4 +62,5 @@ void Project::decode( coding::Decoder &decoder )
 
     decoder.decode( "name", getNameRefForCoding() );
     decoder.decode( "version", getVersionRefForCoding() );
+    decoder.decode( "currentSceneName", m_currentSceneName );
 }

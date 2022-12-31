@@ -30,10 +30,10 @@
 #include "Coding/JSONEncoder.hpp"
 #include "Concurrency/Async.hpp"
 #include "Editor/EditorLayer.hpp"
+#include "Editor/EditorProject.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "Foundation/Version.hpp"
-#include "Editor/EditorProject.hpp"
 
 #include <filesystem>
 #include <iostream>

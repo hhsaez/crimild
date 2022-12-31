@@ -40,18 +40,41 @@ TEST( Project, with_default_values )
     const Project project;
     EXPECT_STREQ( "Crimild", project.getName().c_str() );
     EXPECT_EQ( Version( 1, 0, 0 ), project.getVersion() );
+    EXPECT_EQ( std::string( "main" ), project.getCurrentSceneName() );
 }
 
 TEST( Project, with_custom_values )
 {
-    const Project project( "MyProject", Version( 1, 2, 3 ) );
+    Project project( "MyProject", Version( 1, 2, 3 ) );
+    project.setCurrentSceneName( "test" );
+
     EXPECT_STREQ( "MyProject", project.getName().c_str() );
     EXPECT_EQ( Version( 1, 2, 3 ), project.getVersion() );
+    EXPECT_EQ( std::string( "test" ), project.getCurrentSceneName() );
+}
+
+TEST( Project, path_handling )
+{
+    Project project( "MyProject", Version( 1, 2, 3 ) );
+    project.setFilePath( "/path/to/MyProject/project.crimild" );
+
+    const auto expected = std::filesystem::absolute( "/path/to/MyProject/project.crimild" );
+    EXPECT_EQ( project.getFilePath(), expected );
+    EXPECT_EQ( project.getRootDirectory(), std::filesystem::absolute( "/path/to/MyProject" ) );
+    EXPECT_EQ( project.getAssetsDirectory(), std::filesystem::absolute( "/path/to/MyProject/Assets" ) );
+    EXPECT_EQ( project.getScenesDirectory(), std::filesystem::absolute( "/path/to/MyProject/Assets/Scenes" ) );
+
+    EXPECT_EQ( project.getCurrentSceneName(), std::string( "main" ) );
+    EXPECT_EQ( project.getScenePath( project.getCurrentSceneName() ), std::filesystem::absolute( "/path/to/MyProject/Assets/Scenes/main.crimild" ) );
+
+    project.setCurrentSceneName( "test" );
+    EXPECT_EQ( project.getScenePath( project.getCurrentSceneName() ), std::filesystem::absolute( "/path/to/MyProject/Assets/Scenes/test.crimild" ) );
 }
 
 TEST( Project, coding )
 {
     auto project = crimild::alloc< Project >( "MyProject", Version( 4, 5, 6 ) );
+    project->setCurrentSceneName( "test" );
 
     coding::MemoryEncoder encoder;
     encoder.encode( project );
@@ -64,4 +87,5 @@ TEST( Project, coding )
 
     EXPECT_STREQ( "MyProject", decoded->getName().c_str() );
     EXPECT_EQ( Version( 4, 5, 6 ), decoded->getVersion() );
+    EXPECT_EQ( std::string( "test" ), decoded->getCurrentSceneName() );
 }
