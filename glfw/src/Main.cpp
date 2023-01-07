@@ -147,6 +147,9 @@ namespace crimild {
                 // TODO: Is this creating two Vulkan instances when multiple windows are available?
                 std::vector< std::shared_ptr< Window > > windows;
 
+                // Push simulation window
+                windows.push_back( crimild::alloc< Window >( options ) );
+
                 if ( settings.get< bool >( "editor.show", false ) ) {
                     // Push editor window
                     windows.push_back(
@@ -155,9 +158,6 @@ namespace crimild {
                             return crimild::alloc< Window >( options );
                         }()
                     );
-                } else {
-                    // Push simulation window
-                    windows.push_back( crimild::alloc< Window >( options ) );
                 }
 
                 // Start simulation
