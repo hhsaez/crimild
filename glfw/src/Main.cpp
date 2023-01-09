@@ -185,6 +185,10 @@ namespace crimild {
                     while ( it != windows.end() ) {
                         const auto ret = ( *it )->handle( tick );
                         if ( ret.type == Event::Type::TERMINATE ) {
+                            // Remove all windows
+                            windows.clear();
+                            break;
+                        } else if ( ret.type == Event::Type::WINDOW_CLOSED ) {
                             it = windows.erase( it );
                         } else {
                             ++it;

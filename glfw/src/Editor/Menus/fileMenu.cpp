@@ -176,9 +176,7 @@ void crimild::editor::fileMenu( void ) noexcept
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Quit" ) ) {
-            // crimild::concurrency::sync_frame( [] {
-            // Simulation::getInstance()->stop();
-            // } );
+            EditorLayer::getInstance()->terminate();
         }
 
         ImGui::EndMenu();
