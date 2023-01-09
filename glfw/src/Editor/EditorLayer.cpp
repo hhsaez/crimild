@@ -65,6 +65,12 @@ EditorLayer::~EditorLayer( void ) noexcept
 
 Event EditorLayer::handle( const Event &e ) noexcept
 {
+    if ( m_didTerminate ) {
+        return Event {
+            .type = Event::Type::TERMINATE,
+        };
+    }
+
     switch ( e.type ) {
         case Event::Type::SIMULATION_START: {
             if ( auto sim = Simulation::getInstance() ) {

@@ -230,7 +230,7 @@ Event Window::handle( const Event &e ) noexcept
     switch ( e.type ) {
         case Event::Type::TICK: {
             if ( glfwWindowShouldClose( m_window ) ) {
-                return Event { .type = Event::Type::TERMINATE };
+                return Event { .type = Event::Type::WINDOW_CLOSED };
             }
 
             if ( Input::getInstance() != nullptr ) {
@@ -252,8 +252,10 @@ Event Window::handle( const Event &e ) noexcept
                 }
             }
 
-            // TODO: handle layer return events
-            m_mainLayer->handle( e );
+            auto ret = m_mainLayer->handle( e );
+            if ( ret.type == Event::Type::TERMINATE ) {
+                return ret;
+            }
 
             if ( m_lastResizeEvent.type != Event::Type::NONE ) {
                 m_renderDevice->handle( m_lastResizeEvent );

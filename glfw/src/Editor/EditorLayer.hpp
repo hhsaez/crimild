@@ -94,6 +94,8 @@ namespace crimild {
         void saveScene( void ) noexcept;
         void saveSceneAs( const std::filesystem::path &path ) noexcept;
 
+        void terminate( void ) noexcept { m_didTerminate = true; }
+
     private:
         void loadDefaultLayout( void ) noexcept;
 
@@ -110,6 +112,8 @@ namespace crimild {
         std::shared_ptr< editor::Project > m_project;
 
         Event m_lastResizeEvent = Event { .type = Event::Type::NONE };
+
+        bool m_didTerminate = false;
     };
 }
 
