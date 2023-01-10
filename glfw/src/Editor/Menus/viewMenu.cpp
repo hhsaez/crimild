@@ -30,26 +30,28 @@
 #include "Editor/EditorLayer.hpp"
 #include "Editor/Layout.hpp"
 #include "Editor/Panels/BehaviorEditorPanel.hpp"
+#include "Editor/Panels/EditorProjectPanel.hpp"
 #include "Editor/Panels/NodeInspectorPanel.hpp"
-#include "Editor/Panels/RenderScenePanel.hpp"
 #include "Editor/Panels/SceneHierarchyPanel.hpp"
 #include "Editor/Panels/ScenePanel.hpp"
 #include "Editor/Panels/SimulationPanel.hpp"
+#include "Editor/Panels/ToolbarPanel.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 
 using namespace crimild;
 
-static void addPanel( EditorLayer *editor, std::shared_ptr< editor::layout::Panel > const &newPanel ) noexcept
+static void addPanel( EditorLayer *editor, std::shared_ptr< editor::layout::Panel > const &panel ) noexcept
 {
-    auto newLayout = crimild::alloc< editor::layout::Layout >( editor::layout::Layout::Direction::LEFT, editor::layout::Layout::Fraction( 0.25 ) );
-    newLayout->setFirst( newPanel );
-    newLayout->setSecond( editor->getLayout() );
-    editor->setLayout( newLayout );
+    editor::layout::LayoutManager::getInstance()->attachPanel( panel );
 }
 
 void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 {
     if ( ImGui::BeginMenu( "View" ) ) {
+        if ( ImGui::MenuItem( "Project..." ) ) {
+            addPanel( editor, crimild::alloc< editor::ProjectPanel >() );
+        }
+
         if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
             addPanel( editor, crimild::alloc< SceneHierarchyPanel >() );
         }
@@ -76,11 +78,27 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 
         ImGui::Separator();
 
+        ImGui::BeginDisabled();
         if ( ImGui::MenuItem( "Render..." ) ) {
-            addPanel( editor, crimild::alloc< RenderScenePanel >( editor->getRenderDevice() ) );
+            //            addPanel( editor, crimild::alloc< RenderScenePanel >( editor->getRenderDevice() ) );
+        }
+        ImGui::EndDisabled();
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Layout..." ) ) {
+            if ( ImGui::MenuItem( "Clear" ) ) {
+                editor::layout::LayoutManager::getInstance()->clear();
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Toolbar..." ) ) {
+            addPanel( editor, crimild::alloc< editor::ToolbarPanel >() );
         }
 
         ImGui::EndMenu();
     }
 }
-
