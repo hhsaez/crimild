@@ -28,8 +28,8 @@
 #ifndef CRIMILD_DESKTOP_EDITOR_LAYOUT_
 #define CRIMILD_DESKTOP_EDITOR_LAYOUT_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/RTTI.hpp"
+#include "Foundation/Named.hpp"
+#include "Foundation/Singleton.hpp"
 #include "Simulation/Event.hpp"
 
 #include <imgui.h>
@@ -41,104 +41,45 @@ namespace crimild {
 
         namespace layout {
 
-            class Layout : public NamedObject {
-            public:
-                using Fraction = float;
-                using Pixels = uint32_t;
-                
-                // Values match the ones in ImGuiDir_
-                enum class Direction : int {
-                    NONE = -1,
-                    LEFT = 0,
-                    RIGHT = 1,
-                    UP = 2,
-                    DOWN = 3,
-                };
-                
+            class Layout : public Named {
             public:
                 explicit Layout( std::string_view name ) noexcept;
-                Layout( Direction direction, Fraction fraction ) noexcept;
-                Layout( Direction direction, Pixels pixels ) noexcept;
                 virtual ~Layout( void ) noexcept = default;
 
-                std::string getUniqueName( void ) const noexcept
-                {
-                    std::stringstream ss;
-                    ss << getName() << "##" << ( size_t ) this;
-                    return ss.str();
-                }
-                
-                inline ImGuiID getID( void ) const noexcept { return m_id; }
-                
-                inline const ImVec2 &getPos( void ) const noexcept { return m_pos; }
-
-                inline const std::shared_ptr< Layout > &getFirst( void ) const noexcept { return m_first; }
-                inline std::shared_ptr< Layout > &getFirst( void ) noexcept { return m_first; }
-                void setFirst( std::shared_ptr< Layout > const &first ) noexcept;
-                
-                inline const std::shared_ptr< Layout > &getSecond( void ) const noexcept { return m_second; }
-                inline std::shared_ptr< Layout > &getSecond( void ) noexcept { return m_second; }
-                void setSecond( std::shared_ptr< Layout > const &second ) noexcept;
-                
-                inline const Layout *getParent( void ) const noexcept { return m_parent; }
-                inline Layout *getParent( void ) noexcept { return m_parent; }
-                
                 virtual Event handle( const Event &e ) noexcept;
-                virtual void build( ImGuiID id ) noexcept;
                 virtual void render( void ) noexcept;
-                
-                virtual void removeFromParent( void ) noexcept;
-                
-            protected:
-                inline void setParent( Layout *parent ) noexcept { m_parent = parent; }
-                
-                virtual void onLayoutChanged( void ) noexcept;
-                
-            private:
-                Direction m_direction = Direction::NONE;
-                std::shared_ptr< Layout > m_first;
-                std::shared_ptr< Layout > m_second;
-                Layout *m_parent = nullptr;
-                ImGuiID m_id;
-                Fraction m_fraction = 0.5f;
-                Pixels m_pixels = 0;
-                ImVec2 m_size;
-                ImVec2 m_pos;
             };
 
-            class Dockspace : public Layout {
-            public:
-                Dockspace( void ) : Layout( "Dockspace" ) { }
-                virtual ~Dockspace( void ) = default;
-                
-                virtual Event handle( const Event &e ) noexcept override;
-                virtual void render( void ) noexcept override;
-
-                virtual void onLayoutChanged( void ) noexcept override
-                {
-                    m_reset = true;
-                    Layout::onLayoutChanged();
-                }
-
-            private:
-                Extent2D m_extent;
-                bool m_reset = true;
-            };
-
-            class Tab : public Layout {
-            public:
-                Tab( void ) : Layout( "Tab" ) { }
-                virtual ~Tab( void ) = default;
-            };
-        
             class Panel : public Layout {
             public:
                 explicit Panel( std::string_view name ) noexcept;
                 virtual ~Panel( void ) = default;
-                
-                virtual void build( ImGuiID parent ) noexcept override;
+
+                void removeFromParent( void ) noexcept;
             };
-        
+
+            class LayoutManager
+                : public Layout,
+                  public DynamicSingleton< LayoutManager > {
+            public:
+                LayoutManager( void ) noexcept;
+                virtual ~LayoutManager( void ) noexcept;
+
+                virtual Event handle( const Event &e ) noexcept;
+                virtual void render( void ) noexcept;
+
+                void attachPanel( std::shared_ptr< Panel > const &panel ) noexcept;
+                void detachPanel( Panel *panel ) noexcept;
+
+                void clear( void ) noexcept;
+
+            private:
+                std::vector< std::shared_ptr< Panel > > m_panels;
+                Extent2D m_extent;
+                bool m_reset = false;
+                bool m_loaded = false;
+            };
+
         }
 
     }

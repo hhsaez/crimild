@@ -26,7 +26,16 @@
  */
 
 #include "Editor/Layout.hpp"
+
 #include "Concurrency/Async.hpp"
+#include "Editor/EditorLayer.hpp"
+#include "Editor/Panels/BehaviorEditorPanel.hpp"
+#include "Editor/Panels/EditorProjectPanel.hpp"
+#include "Editor/Panels/NodeInspectorPanel.hpp"
+#include "Editor/Panels/SceneHierarchyPanel.hpp"
+#include "Editor/Panels/ScenePanel.hpp"
+#include "Editor/Panels/SimulationPanel.hpp"
+#include "Editor/Panels/ToolbarPanel.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -35,144 +44,83 @@ using namespace crimild;
 using namespace crimild::editor;
 
 layout::Layout::Layout( std::string_view name ) noexcept
-    : NamedObject( std::string( name ) )
+    : Named( std::string( name ) )
 {
-    
-}
-
-layout::Layout::Layout( Direction direction, float fraction ) noexcept
-    : m_direction( direction ),
-      m_fraction( fraction )
-{
-    
-}
-
-layout::Layout::Layout( Direction direction, uint32_t pixels ) noexcept
-    : m_direction( direction ),
-      m_pixels( pixels )
-{
-    
-}
-
-void layout::Layout::setFirst( std::shared_ptr< Layout > const &first ) noexcept
-{
-    if ( m_first != nullptr ) {
-        m_first->setParent( nullptr );
-    }
-    m_first = first;
-    if ( m_first != nullptr ) {
-        m_first->setParent( this );
-    }
-    
-    // TODO: if child is null and direction != none, maybe replace this node?
-    onLayoutChanged();
-}
-
-void layout::Layout::setSecond( std::shared_ptr< Layout > const &second ) noexcept
-{
-    if ( m_second != nullptr ) {
-        m_second->setParent( nullptr );
-    }
-    m_second = second;
-    if ( m_second != nullptr ) {
-        m_second->setParent( this );
-    }
-    // TODO: if child is null and direction != none, maybe replace this node?
-    onLayoutChanged();
 }
 
 Event layout::Layout::handle( const Event &e ) noexcept
 {
-    auto ret = e;
-    if ( m_first ) {
-        ret = m_first->handle( ret );
-    }
-    
-    if ( m_second != nullptr ) {
-        ret = m_second->handle( ret );
-    }
-    return ret;
-}
-
-void layout::Layout::build( ImGuiID id ) noexcept
-{
-    m_id = id;
-    
-    auto ctx = ImGui::GetCurrentContext();
-    auto node = ImGui::DockContextFindNodeByID( ctx, m_id );
-    m_size = node->Size;
-    m_pos = node->Pos;
-    
-    ImGuiID firstID = id;
-    ImGuiID secondID = id;
-    
-    if ( m_direction != Direction::NONE ) {
-        if ( m_direction == Direction::LEFT || m_direction == Direction::RIGHT ) {
-            if ( m_pixels > 0 ) {
-                m_fraction = float( m_pixels ) / m_size.x;
-            }
-        } else {
-            if ( m_pixels > 0 ) {
-                m_fraction = float( m_pixels ) / m_size.y;
-            }
-        }
-        ImGui::DockBuilderSplitNode( getID(), int( m_direction ), m_fraction, &firstID, &secondID );
-    }
-    
-    if ( m_first != nullptr ) {
-        m_first->build( firstID );
-    }
-    
-    if ( m_second != nullptr ) {
-        m_second->build( secondID );
-    }
+    return e;
 }
 
 void layout::Layout::render( void ) noexcept
 {
-    if ( m_first != nullptr ) {
-        m_first->render();
-    }
-    
-    if ( m_second != nullptr ) {
-        m_second->render();
-    }
 }
 
-void layout::Layout::removeFromParent( void ) noexcept
+layout::Panel::Panel( std::string_view name ) noexcept
+    : Layout( name )
+{
+}
+
+void layout::Panel::removeFromParent( void ) noexcept
 {
     concurrency::sync_frame(
         [ & ] {
-            if ( auto parent = getParent() ) {
-                if ( parent->getFirst().get() == this ) {
-                    parent->setFirst( nullptr );
-                } else if ( parent->getSecond().get() == this ) {
-                    parent->setSecond( nullptr );
-                }
+            if ( auto manager = LayoutManager::getInstance() ) {
+                manager->detachPanel( this );
             }
         }
     );
 }
 
-void layout::Layout::onLayoutChanged( void ) noexcept
+layout::LayoutManager::LayoutManager( void ) noexcept
+    : layout::Layout( "LayoutManager" )
 {
-    if ( auto parent = getParent() ) {
-        parent->onLayoutChanged();
-    }
 }
 
-Event layout::Dockspace::handle( const Event &e ) noexcept
+layout::LayoutManager::~LayoutManager( void ) noexcept
+{
+    m_panels.clear();
+}
+
+Event layout::LayoutManager::handle( const Event &e ) noexcept
 {
     if ( e.type == Event::Type::WINDOW_RESIZE ) {
         m_extent = e.extent;
-        m_reset = true;
     }
-    
-    return Layout::handle( e );
+
+    Event ret = e;
+    for ( auto &panel : m_panels ) {
+        ret = panel->handle( ret );
+    }
+    return ret;
 }
 
-void layout::Dockspace::render( void ) noexcept
+void layout::LayoutManager::render( void ) noexcept
 {
+    if ( !m_loaded ) {
+        auto &context = *GImGui;
+        for ( ImGuiWindowSettings *settings = context.SettingsWindows.begin(); settings != nullptr; settings = context.SettingsWindows.next_chunk( settings ) ) {
+            // TODO: Have a factory of panels?
+            if ( strcmp( settings->GetName(), editor::ScenePanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::ScenePanel >( EditorLayer::getInstance()->getRenderDevice() ) );
+            } else if ( strcmp( settings->GetName(), editor::SimulationPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::SimulationPanel >( EditorLayer::getInstance()->getRenderDevice() ) );
+            } else if ( strcmp( settings->GetName(), editor::SceneHierarchyPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::SceneHierarchyPanel >() );
+            } else if ( strcmp( settings->GetName(), editor::NodeInspectorPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::NodeInspectorPanel >( EditorLayer::getInstance()->getRenderDevice() ) );
+            } else if ( strcmp( settings->GetName(), editor::BehaviorEditorPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::BehaviorEditorPanel >() );
+            } else if ( strcmp( settings->GetName(), editor::ProjectPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::ProjectPanel >() );
+            } else if ( strcmp( settings->GetName(), editor::ToolbarPanel::NAME ) == 0 ) {
+                attachPanel( crimild::alloc< editor::ToolbarPanel >() );
+            }
+        }
+        m_loaded = true;
+    }
+
     ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -192,12 +140,12 @@ void layout::Dockspace::render( void ) noexcept
     ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
 
     static bool p_open = true;
-    ImGui::Begin( "DockSpace", &p_open, window_flags );
+    ImGui::Begin( getName().c_str(), &p_open, window_flags );
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
 
-    auto dockspaceId = ImGui::GetID( "dockspace" );
+    auto dockspaceId = ImGui::GetID( getName().c_str() );
     ImGui::DockSpace( dockspaceId, ImVec2( 0.0f, 0.0f ), dockspace_flags );
 
     if ( m_reset ) {
@@ -205,8 +153,10 @@ void layout::Dockspace::render( void ) noexcept
 
         ImGui::DockBuilderAddNode( dockspaceId, dockspace_flags | ImGuiDockNodeFlags_DockSpace );
         ImGui::DockBuilderSetNodeSize( dockspaceId, size );
-        
-        build( dockspaceId );
+
+        for ( auto &panel : m_panels ) {
+            ImGui::DockBuilderDockWindow( panel->getName().c_str(), dockspaceId );
+        }
 
         ImGui::DockBuilderFinish( dockspaceId );
 
@@ -214,70 +164,60 @@ void layout::Dockspace::render( void ) noexcept
     }
 
     ImGui::End();
-    
-    Layout::render();
+
+    for ( auto &panel : m_panels ) {
+        panel->render();
+    }
 }
 
-//Event layout::Tab::handle( const Event &e ) noexcept
-//{
-//    for ( auto &child : m_children ) {
-//        child->handle( e );
-//    }
-//    return Node::handle( e );
-//}
-//
-//void layout::Tab::build( ImGuiID parentId ) noexcept
-//{
-//    for ( auto &child : m_children ) {
-//        child->build( parentId );
-//    }
-//}
-//
-//void layout::Tab::render( void ) noexcept
-//{
-//    for ( auto &child : m_children ) {
-//        child->render();
-//    }
-//}
-//
-//void layout::Tab::removeChild( Node *child ) noexcept
-//{
-//    auto it = std::find_if( m_children.begin(), m_children.end(), [&]( auto &other ) { return other.get() == child; } );
-//    if ( it != m_children.end() ) {
-//        m_children.erase( it );
-//        child->setParent( nullptr );
-//    }
-//    if ( m_children.size() == 1 ) {
-//        getParent()->replaceChild( this, m_children.front() );
-//    } else {
-//        onLayoutChanged();
-//    }
-//}
-//
-//void layout::Tab::replaceChild( Node *child, std::shared_ptr< Node > const newChild ) noexcept
-//{
-//    auto it = std::find_if( m_children.begin(), m_children.end(), [&]( auto &other ) { return other.get() == child; } );
-//    if ( it != m_children.end() ) {
-//        m_children.erase( it );
-//        child->setParent( nullptr );
-//    }
-//    addChild( newChild );
-//    if ( m_children.size() == 1 ) {
-//        getParent()->replaceChild( this, m_children.front() );
-//    } else {
-//        onLayoutChanged();
-//    }
-//}
-
-layout::Panel::Panel( std::string_view name ) noexcept
-    : Layout( name )
+void layout::LayoutManager::attachPanel( std::shared_ptr< Panel > const &panel ) noexcept
 {
-    
+    m_panels.push_back( panel );
 }
 
-void layout::Panel::build( ImGuiID id ) noexcept
+void layout::LayoutManager::detachPanel( Panel *panel ) noexcept
 {
-    Layout::build( id );
-    
-    ImGui::DockBuilderDockWindow( getUniqueName().c_str(), getID() );
+    auto &context = *GImGui;
+    ImGuiWindow *window = nullptr;
+    int windowIdx = 0;
+    for ( ; windowIdx < context.Windows.Size; ++windowIdx ) {
+        if ( auto candidate = context.Windows[ windowIdx ] ) {
+            if ( strcmp( candidate->Name, panel->getName().c_str() ) == 0 ) {
+                window = candidate;
+                break;
+            }
+        }
+    }
+
+    if ( window != nullptr ) {
+        // TODO: ImGui docking branch does not expose DockNodeRemoveWindow function,
+        // so it is not possible to cleanly remove the window. If window is still docked,
+        // we cannot close it.
+        if ( auto dockNode = window->DockNode ) {
+            CRIMILD_LOG_WARNING( "Please undock window before closing" );
+            return;
+        }
+
+        // This removes windows from ImGui context, prevent it to be saved in settings file
+        context.Windows.erase( context.Windows.Data + windowIdx );
+    }
+
+    auto it = std::find_if(
+        m_panels.begin(),
+        m_panels.end(),
+        [ & ]( auto other ) { return other.get() == panel; }
+    );
+    if ( it != m_panels.end() ) {
+        m_panels.erase( it );
+    }
+
+    // Regenerate settings file so this window is no longer included.
+    ImGui::ClearIniSettings();
+}
+
+void layout::LayoutManager::clear( void ) noexcept
+{
+    ImGui::ClearIniSettings();
+    m_panels.clear();
+    m_reset = true;
 }
