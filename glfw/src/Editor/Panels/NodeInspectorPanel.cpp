@@ -453,27 +453,29 @@ namespace crimild {
 void editor::NodeInspectorPanel::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    ImGui::Begin( "Inspector", &open, 0 );
 
-    auto editor = EditorLayer::getInstance();
+    if ( open ) {
+        auto editor = EditorLayer::getInstance();
 
-    auto node = editor->getSelectedNode();
-    if ( m_selectedNode != node ) {
-        configure( node );
-    }
-
-    if ( !m_sections.empty() ) {
-        // lightPropertiesSection( node, getRenderDevice() );
-        // nodeComponentsSection( node );
-        for ( auto &section : m_sections ) {
-            section->render( node );
+        auto node = editor->getSelectedNode();
+        if ( m_selectedNode != node ) {
+            configure( node );
         }
-    } else {
-        ImGui::Text( "No node selected" );
+
+        if ( !m_sections.empty() ) {
+            // lightPropertiesSection( node, getRenderDevice() );
+            // nodeComponentsSection( node );
+            for ( auto &section : m_sections ) {
+                section->render( node );
+            }
+        } else {
+            ImGui::Text( "No node selected" );
+        }
     }
 
     ImGui::End();
-    
+
     if ( !open ) {
         configure( nullptr );
         removeFromParent();
