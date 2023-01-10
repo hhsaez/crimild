@@ -32,13 +32,6 @@
 #include "Editor/EditorProject.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Editor/Menus/mainMenu.hpp"
-#include "Editor/Panels/BehaviorEditorPanel.hpp"
-#include "Editor/Panels/EditorProjectPanel.hpp"
-#include "Editor/Panels/NodeInspectorPanel.hpp"
-#include "Editor/Panels/SceneHierarchyPanel.hpp"
-#include "Editor/Panels/ScenePanel.hpp"
-#include "Editor/Panels/SimulationPanel.hpp"
-#include "Editor/Panels/ToolbarPanel.hpp"
 #include "Foundation/Log.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
@@ -52,18 +45,18 @@ using namespace crimild;
 
 EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     : m_renderDevice( renderDevice ),
-      m_state( crimild::alloc< EditorState >() )
+      m_state( crimild::alloc< EditorState >() ),
+      m_layoutManager( crimild::alloc< editor::layout::LayoutManager >() )
 {
     CRIMILD_LOG_TRACE();
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
 {
+    m_layoutManager = nullptr;
     m_state = nullptr;
     m_previousState = nullptr;
     m_renderDevice = nullptr;
-    m_layout = nullptr;
-    m_dockspace = nullptr;
 }
 
 Event EditorLayer::handle( const Event &e ) noexcept
@@ -81,7 +74,7 @@ Event EditorLayer::handle( const Event &e ) noexcept
             setSelectedNode( e.node );
             break;
         }
-            
+
         case Event::Type::WINDOW_RESIZE: {
             m_lastResizeEvent = e;
             break;
@@ -97,16 +90,14 @@ Event EditorLayer::handle( const Event &e ) noexcept
         Simulation::getInstance()->handle( e );
     }
 
-    return m_dockspace != nullptr ? m_dockspace->handle( e ) : e;
+    return m_layoutManager->handle( e );
 }
 
 void EditorLayer::render( void ) noexcept
 {
     editor::mainMenu( this );
-    
-    if ( m_dockspace != nullptr ) {
-        m_dockspace->render();
-    }
+
+    m_layoutManager->render();
 }
 
 void EditorLayer::setSimulationState( SimulationState newState ) noexcept
@@ -171,26 +162,25 @@ void EditorLayer::createProject( const std::filesystem::path &path ) noexcept
               << "\n\tWork Dir: " << std::filesystem::current_path()
               << "\n\tDONE"
               << std::endl;
-    
-    
-    const auto projectRoot = path.parent_path()/projectName;
+
+    const auto projectRoot = path.parent_path() / projectName;
     if ( std::filesystem::exists( projectRoot ) ) {
         CRIMILD_LOG_ERROR( "Project root direcotory", projectRoot, " already exists" );
         return;
     }
-    
-    std::filesystem::create_directories( projectRoot/"Assets"/"Scenes" );
-    std::filesystem::create_directories( projectRoot/"Assets"/"Models" );
-    std::filesystem::create_directories( projectRoot/"Assets"/"Audio" );
-    std::filesystem::create_directories( projectRoot/"Assets"/"Textures" );
-    std::filesystem::create_directories( projectRoot/"Assets"/"Prefabs" );
+
+    std::filesystem::create_directories( projectRoot / "Assets" / "Scenes" );
+    std::filesystem::create_directories( projectRoot / "Assets" / "Models" );
+    std::filesystem::create_directories( projectRoot / "Assets" / "Audio" );
+    std::filesystem::create_directories( projectRoot / "Assets" / "Textures" );
+    std::filesystem::create_directories( projectRoot / "Assets" / "Prefabs" );
 
     m_project = crimild::alloc< editor::Project >( projectName.string(), projectVersion );
-    m_project->setPath( projectRoot/"project.crimild" );
+    m_project->setPath( projectRoot / "project.crimild" );
     CRIMILD_LOG_INFO( "Created project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
     saveProject();
-    createNewScene( projectRoot/"Assets"/"Scenes"/"main.crimild" );
+    createNewScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
     loadDefaultLayout();
 }
 
@@ -200,14 +190,14 @@ void EditorLayer::loadProject( const std::filesystem::path &path ) noexcept
         CRIMILD_LOG_ERROR( path, " does not exists" );
         return;
     }
-    
-    const auto projectRoot = std::filesystem::is_directory( path ) ?  path : path.parent_path();
-    const auto projectFilePath = projectRoot/"project.crimild";
+
+    const auto projectRoot = std::filesystem::is_directory( path ) ? path : path.parent_path();
+    const auto projectFilePath = projectRoot / "project.crimild";
     if ( !std::filesystem::exists( projectFilePath ) ) {
         CRIMILD_LOG_ERROR( path, " is not a valid Crimild project directory" );
         return;
     }
-    
+
     coding::FileDecoder decoder;
     decoder.read( projectFilePath );
     if ( decoder.getObjectCount() == 0 ) {
@@ -219,12 +209,12 @@ void EditorLayer::loadProject( const std::filesystem::path &path ) noexcept
         CRIMILD_LOG_ERROR( "Cannot load project from path ", path );
         return;
     }
-    
+
     m_project->setPath( projectFilePath );
 
     CRIMILD_LOG_INFO( "Loaded project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
-    
-    loadScene( projectRoot/"Assets"/"Scenes"/"main.crimild" );
+
+    loadScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
     loadDefaultLayout();
 }
 
@@ -246,58 +236,7 @@ void EditorLayer::saveProject( void ) noexcept
 
 void EditorLayer::loadDefaultLayout( void ) noexcept
 {
-    m_layout = [ & ] {
-        using namespace crimild::editor;
-        using namespace crimild::editor::layout;
-
-        auto split = crimild::alloc< Layout >( Layout::Direction::UP, Layout::Pixels( 40 ) );
-        split->setFirst( crimild::alloc< ToolbarPanel >() );
-        split->setSecond(
-            [ & ] {
-                auto split = crimild::alloc< Layout >( Layout::Direction::LEFT, Layout::Pixels( 300 ) );
-                split->setFirst(
-                    [ & ] {
-                        auto split = crimild::alloc< Layout >( Layout::Direction::UP, Layout::Fraction( 0.6 ) );
-                        split->setFirst( crimild::alloc< SceneHierarchyPanel >() );
-                        split->setSecond( crimild::alloc< ProjectPanel >() );
-                        return split;
-                    }()
-                );
-                split->setSecond(
-                    [ & ] {
-                        auto split = crimild::alloc< Layout >( Layout::Direction::RIGHT, Layout::Pixels( 300 ) );
-                        split->setFirst( crimild::alloc< NodeInspectorPanel >( m_renderDevice ) );
-                        split->setSecond(
-                            [ & ] {
-                                auto split = crimild::alloc< Layout >( Layout::Direction::UP, Layout::Fraction( 0.5 ) );
-                                split->setFirst( crimild::alloc< ScenePanel >( m_renderDevice ) );
-                                split->setSecond(
-                                    [ & ] {
-                                        auto tab = crimild::alloc< layout::Tab >();
-                                        tab->setFirst( crimild::alloc< editor::SimulationPanel >( m_renderDevice ) );
-                                        tab->setSecond( crimild::alloc< editor::BehaviorEditorPanel >() );
-                                        return tab;
-                                    }()
-                                );
-                                return split;
-                            }()
-                        );
-                        return split;
-                    }()
-                );
-                return split;
-            }()
-        );
-        return split;
-    }();
-
-    m_dockspace = [ & ] {
-        auto dock = crimild::alloc< editor::layout::Dockspace >();
-        dock->setFirst( m_layout );
-        return dock;
-    }();
-    
-    m_dockspace->handle( m_lastResizeEvent );
+    m_layoutManager->clear();
 }
 
 void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept
@@ -306,11 +245,11 @@ void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept
     if ( auto sim = Simulation::getInstance() ) {
         sim->setScene( nullptr );
         handle( Event { .type = Event::Type::SCENE_CHANGED } );
-        
+
         sim->setScene( editor::createDefaultScene() );
         handle( Event { .type = Event::Type::SCENE_CHANGED } );
     }
-    
+
     saveSceneAs( path );
 }
 
@@ -320,16 +259,16 @@ void EditorLayer::loadScene( const std::filesystem::path &path ) noexcept
         CRIMILD_LOG_ERROR( path, " does not exists" );
         return;
     }
-    
+
     // Stop simulation to ensure we're handling the right scene
     EditorLayer::getInstance()->setSimulationState( SimulationState::STOPPED );
-    
+
     {
         auto prevScene = retain( Simulation::getInstance()->getScene() );
         Simulation::getInstance()->setScene( nullptr );
         handle( Event { .type = Event::Type::SCENE_CHANGED } );
     }
-    
+
     coding::FileDecoder decoder;
     decoder.read( path );
     if ( decoder.getObjectCount() == 0 ) {
@@ -345,9 +284,9 @@ void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept
 {
     auto scene = crimild::retain( Simulation::getInstance()->getScene() );
     if ( scene == nullptr ) {
-        return ;
+        return;
     }
-    
+
     coding::FileEncoder encoder;
     encoder.encode( scene );
     encoder.write( path );

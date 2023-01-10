@@ -82,22 +82,15 @@ namespace crimild {
         inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
         void setSimulationState( SimulationState state ) noexcept;
 
-        inline std::shared_ptr< editor::layout::Layout > getLayout( void ) noexcept { return m_layout; }
-        inline void setLayout( std::shared_ptr< editor::layout::Layout > const &layout )
-        {
-            m_layout = layout;
-            m_dockspace->setFirst( m_layout );
-        }
-        
         void createProject( const std::filesystem::path &path ) noexcept;
         void loadProject( const std::filesystem::path &path ) noexcept;
         void saveProject( void ) noexcept;
 
         inline editor::Project *getProject( void ) noexcept { return m_project.get(); }
         inline const editor::Project *getProject( void ) const noexcept { return m_project.get(); }
-        
+
         void createNewScene( const std::filesystem::path &path ) noexcept;
-        void loadScene( const std::filesystem::path &path  ) noexcept;
+        void loadScene( const std::filesystem::path &path ) noexcept;
         void saveSceneAs( const std::filesystem::path &path ) noexcept;
 
     private:
@@ -111,11 +104,10 @@ namespace crimild {
         std::shared_ptr< EditorState > m_state;
         std::shared_ptr< EditorState > m_previousState;
 
-        std::shared_ptr< editor::layout::Dockspace > m_dockspace;
-        std::shared_ptr< editor::layout::Layout > m_layout;
+        std::shared_ptr< editor::layout::LayoutManager > m_layoutManager;
 
         std::shared_ptr< editor::Project > m_project;
-        
+
         Event m_lastResizeEvent = Event { .type = Event::Type::NONE };
     };
 }
