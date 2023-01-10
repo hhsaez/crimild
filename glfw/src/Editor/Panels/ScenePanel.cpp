@@ -102,7 +102,7 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
 }
 
 ScenePanel::ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept
-    : layout::Panel( "Scene" ),
+    : layout::Panel( ScenePanel::NAME ),
       m_renderDevice( renderDevice ),
       m_scenePass( renderDevice ),
       m_sceneDebugPass( renderDevice ),
@@ -233,7 +233,7 @@ Event ScenePanel::handle( const Event &e ) noexcept
 void ScenePanel::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    ImGui::Begin( getName().c_str(), &open, 0 );
 
     // Get content region, and ensure we have a valid size for rendering.
     ImVec2 actualSize = ImGui::GetContentRegionAvail();

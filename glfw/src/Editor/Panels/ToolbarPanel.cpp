@@ -33,7 +33,7 @@
 using namespace crimild;
 
 editor::ToolbarPanel::ToolbarPanel( void ) noexcept
-    : layout::Panel( "Top Bar" )
+    : layout::Panel( NAME )
 {
     // no-op
 }
@@ -42,13 +42,13 @@ void editor::ToolbarPanel::render( void ) noexcept
 {
     auto editor = EditorLayer::getInstance();
     auto simState = editor->getSimulationState();
-    
+
     // Hides title bar when panel is docked
     ImGuiWindowClass windowClass;
     windowClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
     ImGui::SetNextWindowClass( &windowClass );
 
-    ImGui::Begin( getUniqueName().c_str() );
+    ImGui::Begin( getName().c_str() );
 
     ImGui::SetCursorPosX( ImGui::GetCursorPosX() + 800 );
 

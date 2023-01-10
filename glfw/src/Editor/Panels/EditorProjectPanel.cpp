@@ -35,7 +35,7 @@
 using namespace crimild;
 
 editor::ProjectPanel::ProjectPanel( void ) noexcept
-    : layout::Panel( "Project" )
+    : layout::Panel( NAME )
 {
     // no-op
 }
@@ -43,11 +43,11 @@ editor::ProjectPanel::ProjectPanel( void ) noexcept
 void editor::ProjectPanel::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    ImGui::Begin( getName().c_str(), &open, 0 );
 
     if ( auto project = EditorLayer::getInstance()->getProject() ) {
         const auto path = project->getPath().parent_path();
-        if (std::filesystem::exists( path ) ) {
+        if ( std::filesystem::exists( path ) ) {
             // Makes sure the root node is always expanded.
             for ( const auto &entry : std::filesystem::directory_iterator( path ) ) {
                 traverse( entry.path() );
@@ -69,23 +69,23 @@ void editor::ProjectPanel::render( void ) noexcept
 void editor::ProjectPanel::traverse( const std::filesystem::path &path ) noexcept
 {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-    
+
     if ( std::filesystem::is_directory( path ) ) {
         flags |= ImGuiTreeNodeFlags_OpenOnArrow;
     } else {
         flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
     }
-    
+
     if ( m_selectedPath == path ) {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
-    
+
     ImGui::PushStyleColor( ImGuiCol_Text, IM_COL32( 255, 255, 255, 255 ) );
 
     const auto isOpen = ImGui::TreeNodeEx( path.filename().string().c_str(), flags );
 
     ImGui::PopStyleColor();
-    
+
     // Handles selection by using mouse hover+released instead of click
     // because click is triggered on mouse down and will conflict with
     // drag/drop events.
@@ -105,4 +105,3 @@ void editor::ProjectPanel::traverse( const std::filesystem::path &path ) noexcep
         }
     }
 }
-

@@ -37,7 +37,7 @@ using namespace crimild;
 using namespace crimild::editor;
 
 SimulationPanel::SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept
-    : layout::Panel( "Simulation" ),
+    : layout::Panel( NAME ),
       m_scenePass( renderDevice )
 {
     // no-op
@@ -62,7 +62,7 @@ Event SimulationPanel::handle( const Event &e ) noexcept
 void SimulationPanel::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    ImGui::Begin( getName().c_str(), &open, 0 );
 
     ImVec2 actualSize = ImGui::GetContentRegionAvail();
     actualSize.x = max( 1.0f, actualSize.x );

@@ -63,9 +63,9 @@ Event RenderScenePanel::handle( const Event &e ) noexcept
 void RenderScenePanel::render( void ) noexcept
 {
     Panel::render();
-    
+
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, ImGuiWindowFlags_NoCollapse );
+    ImGui::Begin( getName().c_str(), &open, ImGuiWindowFlags_NoCollapse );
     ImVec2 actualSize = ImGui::GetContentRegionAvail();
     if ( actualSize.x != m_extent.width || actualSize.y != m_extent.height ) {
         m_extent.width = actualSize.x;

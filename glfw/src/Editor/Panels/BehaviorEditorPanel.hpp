@@ -36,9 +36,12 @@ namespace crimild {
 
         class BehaviorEditorPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Behaviors";
+
+        public:
             BehaviorEditorPanel( void ) noexcept;
             virtual ~BehaviorEditorPanel( void ) = default;
-            
+
             virtual void render( void ) noexcept override;
         };
 

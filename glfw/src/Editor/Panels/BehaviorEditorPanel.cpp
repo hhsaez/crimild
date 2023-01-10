@@ -407,7 +407,7 @@ private:
 };
 
 editor::BehaviorEditorPanel::BehaviorEditorPanel( void ) noexcept
-    : layout::Panel( "Behaviors" )
+    : layout::Panel( NAME )
 {
     // no-op
 }
@@ -433,7 +433,7 @@ void editor::BehaviorEditorPanel::render( void ) noexcept
 
     delegate.configure( controller );
 
-    bool visible = ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    bool visible = ImGui::Begin( getName().c_str(), &open, 0 );
     if ( ImGui::BeginCombo( "##", "Add Behavior..." ) ) {
         const auto &behaviorList = getBehaviorList();
         for ( const auto &behaviorClassName : behaviorList ) {

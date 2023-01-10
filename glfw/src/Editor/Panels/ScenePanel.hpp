@@ -51,6 +51,9 @@ namespace crimild {
 
         class ScenePanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Scene";
+
+        public:
             ScenePanel( vulkan::RenderDevice *renderDevice ) noexcept;
             virtual ~ScenePanel( void ) = default;
 

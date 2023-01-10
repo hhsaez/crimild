@@ -36,6 +36,9 @@ namespace crimild {
 
         class SceneHierarchyPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Scene Hierarchy";
+
+        public:
             SceneHierarchyPanel( void ) noexcept;
             virtual ~SceneHierarchyPanel( void ) = default;
 

@@ -43,6 +43,9 @@ namespace crimild {
 
         class NodeInspectorPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Inspector";
+
+        public:
             class Section {
             public:
                 virtual ~Section( void ) = default;
@@ -52,7 +55,7 @@ namespace crimild {
 
         public:
             NodeInspectorPanel( vulkan::RenderDevice *renderDevice ) noexcept
-                : layout::Panel( "Inspector" ),
+                : layout::Panel( NAME ),
                   m_renderDevice( renderDevice )
             {
                 // no-op

@@ -36,6 +36,9 @@ namespace crimild {
 
         class ToolbarPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Toolbar";
+
+        public:
             ToolbarPanel( void ) noexcept;
             virtual ~ToolbarPanel( void ) = default;
 

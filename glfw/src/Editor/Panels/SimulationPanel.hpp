@@ -44,6 +44,9 @@ namespace crimild {
 
         class SimulationPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Simulation";
+
+        public:
             SimulationPanel( vulkan::RenderDevice *renderDevice ) noexcept;
             virtual ~SimulationPanel( void ) = default;
 

@@ -38,14 +38,17 @@ namespace crimild {
 
         class ProjectPanel : public layout::Panel {
         public:
+            static constexpr const char *NAME = "Project";
+
+        public:
             ProjectPanel( void ) noexcept;
             virtual ~ProjectPanel( void ) = default;
 
             virtual void render( void ) noexcept override;
-            
+
         private:
             void traverse( const std::filesystem::path &path ) noexcept;
-            
+
         private:
             std::filesystem::path m_selectedPath;
         };

@@ -164,7 +164,7 @@ private:
 };
 
 editor::SceneHierarchyPanel::SceneHierarchyPanel( void ) noexcept
-    : layout::Panel( "Scene Hierarchy" )
+    : layout::Panel( NAME )
 {
     // no-op
 }
@@ -172,7 +172,7 @@ editor::SceneHierarchyPanel::SceneHierarchyPanel( void ) noexcept
 void editor::SceneHierarchyPanel::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( getUniqueName().c_str(), &open, 0 );
+    ImGui::Begin( getName().c_str(), &open, 0 );
     if ( Simulation::getInstance() != nullptr ) {
         auto scene = Simulation::getInstance()->getScene();
         if ( scene ) {
@@ -186,7 +186,7 @@ void editor::SceneHierarchyPanel::render( void ) noexcept
     ImGui::Text( "" ); // padding
 
     ImGui::End();
-    
+
     if ( !open ) {
         removeFromParent();
     }
