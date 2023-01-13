@@ -34,6 +34,7 @@
 
 #include <imgui.h>
 #include <sstream>
+#include <unordered_set>
 
 namespace crimild {
 
@@ -78,6 +79,15 @@ namespace crimild {
                 Extent2D m_extent;
                 bool m_reset = false;
                 bool m_loaded = false;
+
+                // ImGui does not allow removing windows from context. Instead, closed windows
+                // are kept in a cache and rendered with the ImGuiWindowFlags_NoSavedSettings
+                // outside of the view, so they're not visible
+                std::unordered_set< std::string > m_closedWindows;
+
+                // Keep track of windows that have been re-opeened. Their position
+                // needs to be reset since closing them move them outside of view
+                std::unordered_set< std::string > m_reopenedWindows;
             };
 
         }

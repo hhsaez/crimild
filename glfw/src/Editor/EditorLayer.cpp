@@ -236,7 +236,7 @@ void EditorLayer::saveProject( void ) noexcept
 
 void EditorLayer::loadDefaultLayout( void ) noexcept
 {
-    m_layoutManager->clear();
+    // TODO
 }
 
 void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept
