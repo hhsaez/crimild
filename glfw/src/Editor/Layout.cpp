@@ -165,42 +165,39 @@ void layout::LayoutManager::render( void ) noexcept
 
     ImGui::End();
 
-    for ( auto &panel : m_panels ) {
+    // Closing a panel will change the collection, so copy it before rendering
+    auto panels = m_panels;
+    for ( auto &panel : panels ) {
+        bool wasReopened = m_reopenedWindows.contains( panel->getName() );
+        ImGui::SetNextWindowPos( ImVec2( 100, 100 ), wasReopened ? ImGuiCond_Always : ImGuiCond_FirstUseEver );
+        ImGui::SetNextWindowSize( ImVec2( 300, 400 ), ImGuiCond_FirstUseEver );
         panel->render();
+    }
+
+    m_reopenedWindows.clear();
+
+    for ( auto &closedWindow : m_closedWindows ) {
+        ImGui::SetNextWindowPos( ImVec2( 999999, 999999 ) );
+        auto flags = ImGuiWindowFlags_NoSavedSettings;
+        bool open = false;
+        ImGui::Begin( closedWindow.c_str(), &open, flags );
+        ImGui::End();
     }
 }
 
 void layout::LayoutManager::attachPanel( std::shared_ptr< Panel > const &panel ) noexcept
 {
+    if ( m_closedWindows.find( panel->getName() ) != m_closedWindows.end() ) {
+        m_closedWindows.erase( panel->getName() );
+        m_reopenedWindows.insert( panel->getName() );
+    }
+
     m_panels.push_back( panel );
 }
 
 void layout::LayoutManager::detachPanel( Panel *panel ) noexcept
 {
-    auto &context = *GImGui;
-    ImGuiWindow *window = nullptr;
-    int windowIdx = 0;
-    for ( ; windowIdx < context.Windows.Size; ++windowIdx ) {
-        if ( auto candidate = context.Windows[ windowIdx ] ) {
-            if ( strcmp( candidate->Name, panel->getName().c_str() ) == 0 ) {
-                window = candidate;
-                break;
-            }
-        }
-    }
-
-    if ( window != nullptr ) {
-        // TODO: ImGui docking branch does not expose DockNodeRemoveWindow function,
-        // so it is not possible to cleanly remove the window. If window is still docked,
-        // we cannot close it.
-        if ( auto dockNode = window->DockNode ) {
-            CRIMILD_LOG_WARNING( "Please undock window before closing" );
-            return;
-        }
-
-        // This removes windows from ImGui context, prevent it to be saved in settings file
-        context.Windows.erase( context.Windows.Data + windowIdx );
-    }
+    m_closedWindows.insert( panel->getName() );
 
     auto it = std::find_if(
         m_panels.begin(),
@@ -217,6 +214,10 @@ void layout::LayoutManager::detachPanel( Panel *panel ) noexcept
 
 void layout::LayoutManager::clear( void ) noexcept
 {
+    for ( auto panel : m_panels ) {
+        m_closedWindows.insert( panel->getName() );
+    }
+
     ImGui::ClearIniSettings();
     m_panels.clear();
     m_reset = true;

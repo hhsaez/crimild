@@ -86,17 +86,17 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
 
         ImGui::Separator();
 
+        if ( ImGui::MenuItem( "Toolbar..." ) ) {
+            addPanel( editor, crimild::alloc< editor::ToolbarPanel >() );
+        }
+
+        ImGui::Separator();
+
         if ( ImGui::BeginMenu( "Layout..." ) ) {
             if ( ImGui::MenuItem( "Clear" ) ) {
                 editor::layout::LayoutManager::getInstance()->clear();
             }
             ImGui::EndMenu();
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Toolbar..." ) ) {
-            addPanel( editor, crimild::alloc< editor::ToolbarPanel >() );
         }
 
         ImGui::EndMenu();
