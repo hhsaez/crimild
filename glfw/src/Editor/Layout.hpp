@@ -74,6 +74,8 @@ namespace crimild {
 
                 void clear( void ) noexcept;
 
+                void loadDefaultLayout( void ) noexcept;
+
             private:
                 std::vector< std::shared_ptr< Panel > > m_panels;
                 Extent2D m_extent;

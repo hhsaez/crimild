@@ -236,7 +236,8 @@ void EditorLayer::saveProject( void ) noexcept
 
 void EditorLayer::loadDefaultLayout( void ) noexcept
 {
-    // TODO
+    // TODO: FixMe - Loading a layout at this point seems to be breakig the app.
+    //    m_layoutManager->loadDefaultLayout();
 }
 
 void EditorLayer::createNewScene( const std::filesystem::path &path ) noexcept

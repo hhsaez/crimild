@@ -93,6 +93,12 @@ void crimild::editor::viewMenu( EditorLayer *editor ) noexcept
         ImGui::Separator();
 
         if ( ImGui::BeginMenu( "Layout..." ) ) {
+            if ( ImGui::MenuItem( "Default" ) ) {
+                editor::layout::LayoutManager::getInstance()->loadDefaultLayout();
+            }
+
+            ImGui::Separator();
+
             if ( ImGui::MenuItem( "Clear" ) ) {
                 editor::layout::LayoutManager::getInstance()->clear();
             }
