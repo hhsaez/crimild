@@ -43,6 +43,67 @@
 using namespace crimild;
 using namespace crimild::editor;
 
+const std::string DEFAULT_LAYOUT = R"(
+[Window][LayoutManager]
+Pos=0,0
+Size=1920,1080
+Collapsed=0
+
+[Window][Debug##Default]
+Pos=60,60
+Size=400,400
+Collapsed=0
+
+[Window][Project]
+Pos=1109,685
+Size=455,395
+Collapsed=0
+DockId=0x0000000A,0
+
+[Window][Inspector]
+Pos=1566,53
+Size=354,1027
+Collapsed=0
+DockId=0x00000005,0
+
+[Window][Scene Hierarchy]
+Pos=1109,53
+Size=455,630
+Collapsed=0
+DockId=0x00000009,0
+
+[Window][Behaviors]
+Pos=0,682
+Size=1107,398
+Collapsed=0
+DockId=0x00000008,0
+
+[Window][Scene]
+Pos=0,53
+Size=1107,627
+Collapsed=0
+DockId=0x00000007,0
+
+[Window][Toolbar]
+Pos=0,19
+Size=1920,32
+Collapsed=0
+DockId=0x00000001
+
+[Docking][Data]
+DockSpace         ID=0x25045BC6 Window=0x04ECA795 Pos=0,19 Size=1920,1061 Split=Y
+  DockNode        ID=0x00000001 Parent=0x25045BC6 SizeRef=1920,32 Selected=0x738351EE
+  DockNode        ID=0x00000002 Parent=0x25045BC6 SizeRef=1920,1027 Split=X
+    DockNode      ID=0x0000000B Parent=0x00000002 SizeRef=0,0 Split=Y
+      DockNode    ID=0x00000007 Parent=0x0000000B SizeRef=1431,627 CentralNode=1 Selected=0xE192E354
+      DockNode    ID=0x00000008 Parent=0x0000000B SizeRef=1431,398 Selected=0xD79FB21B
+    DockNode      ID=0x00000003 Parent=0x00000002 SizeRef=811,1028 Split=X
+      DockNode    ID=0x00000004 Parent=0x00000003 SizeRef=455,1027 Split=Y Selected=0x2E9237F7
+        DockNode  ID=0x00000009 Parent=0x00000004 SizeRef=122,630 Selected=0x2E9237F7
+        DockNode  ID=0x0000000A Parent=0x00000004 SizeRef=122,395 Selected=0xD04A4B96
+      DockNode    ID=0x00000005 Parent=0x00000003 SizeRef=354,1027 Selected=0xE7039252
+)";
+
 layout::Layout::Layout( std::string_view name ) noexcept
     : Named( std::string( name ) )
 {
@@ -118,7 +179,6 @@ void layout::LayoutManager::render( void ) noexcept
                 attachPanel( crimild::alloc< editor::ToolbarPanel >() );
             }
         }
-        m_loaded = true;
     }
 
     ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -168,9 +228,11 @@ void layout::LayoutManager::render( void ) noexcept
     // Closing a panel will change the collection, so copy it before rendering
     auto panels = m_panels;
     for ( auto &panel : panels ) {
-        bool wasReopened = m_reopenedWindows.contains( panel->getName() );
-        ImGui::SetNextWindowPos( ImVec2( 100, 100 ), wasReopened ? ImGuiCond_Always : ImGuiCond_FirstUseEver );
-        ImGui::SetNextWindowSize( ImVec2( 300, 400 ), ImGuiCond_FirstUseEver );
+        if ( m_loaded ) {
+            bool wasReopened = m_reopenedWindows.contains( panel->getName() );
+            ImGui::SetNextWindowPos( ImVec2( 100, 100 ), wasReopened ? ImGuiCond_Always : ImGuiCond_FirstUseEver );
+            ImGui::SetNextWindowSize( ImVec2( 300, 400 ), ImGuiCond_FirstUseEver );
+        }
         panel->render();
     }
 
@@ -183,6 +245,8 @@ void layout::LayoutManager::render( void ) noexcept
         ImGui::Begin( closedWindow.c_str(), &open, flags );
         ImGui::End();
     }
+
+    m_loaded = true;
 }
 
 void layout::LayoutManager::attachPanel( std::shared_ptr< Panel > const &panel ) noexcept
@@ -221,4 +285,18 @@ void layout::LayoutManager::clear( void ) noexcept
     ImGui::ClearIniSettings();
     m_panels.clear();
     m_reset = true;
+}
+
+void layout::LayoutManager::loadDefaultLayout( void ) noexcept
+{
+    clear();
+
+    concurrency::sync_frame(
+        [ this ] {
+            ImGui::LoadIniSettingsFromMemory( DEFAULT_LAYOUT.c_str(), DEFAULT_LAYOUT.size() );
+            ImGui::MarkIniSettingsDirty();
+            m_loaded = false;
+            m_reset = false;
+        }
+    );
 }
