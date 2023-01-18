@@ -28,6 +28,7 @@
 #include "Visitors/VulkanFetchSceneRenderState.hpp"
 
 #include "Components/MaterialComponent.hpp"
+#include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 #include "SceneGraph/Geometry.hpp"
@@ -52,33 +53,33 @@ void FetchSceneRenderState::visitGeometry( Geometry *geometry ) noexcept
         return;
     }
 
-    auto material = materials->first();
+    auto material = crimild::retain( materials->first() );
     if ( material == nullptr ) {
         return;
     }
 
-    auto primitive = geometry->anyPrimitive();
-    if (primitive == nullptr) {
+    auto primitive = crimild::retain( geometry->anyPrimitive() );
+    if ( primitive == nullptr ) {
         return;
     }
 
     if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-        if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
-            m_result.envRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
+        if ( auto m = std::dynamic_pointer_cast< UnlitMaterial >( material ) ) {
+            m_result.envRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
         }
         return;
     }
 
-    // TODO: replace with render mode for materials
-    if ( auto m = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
-        m_result.litRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
-        m_result.shadowCasters[ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
-    } else if ( auto m = dynamic_cast< UnlitMaterial * >( material ) ) {
-        m_result.unlitRenderables[ m ][ geometry->anyPrimitive() ].push_back( { geometry->getWorld().mat } );
+    // TODO: replace dynamic casts with render mode for materials
+    if ( auto m = std::dynamic_pointer_cast< materials::PrincipledBSDF >( material ) ) {
+        m_result.litRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
+        m_result.shadowCasters[ primitive ].push_back( { geometry->getWorld().mat } );
+    } else if ( auto m = std::dynamic_pointer_cast< UnlitMaterial >( material ) ) {
+        m_result.unlitRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
     }
 }
 
 void FetchSceneRenderState::visitLight( Light *light ) noexcept
 {
-    m_result.lights[ light->getType() ].insert( light );
+    m_result.lights[ light->getType() ].insert( crimild::retain( light ) );
 }

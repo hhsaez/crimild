@@ -308,18 +308,21 @@ bool crimild::editor::cloneSelected( void ) noexcept
 
 bool crimild::editor::deleteSelected( void ) noexcept
 {
-    auto editor = EditorLayer::getInstance();
-    if ( editor == nullptr ) {
-        return false;
-    }
+    crimild::concurrency::sync_frame(
+        [] {
+            auto editor = EditorLayer::getInstance();
+            if ( editor == nullptr ) {
+                return false;
+            }
 
-    auto selected = editor->getSelectedNode();
-    if ( selected == nullptr ) {
-        return false;
-    }
+            auto selected = editor->getSelectedNode();
+            if ( selected == nullptr ) {
+                return false;
+            }
 
-    selected->detachFromParent();
-    editor->setSelectedNode( nullptr );
-
+            selected->detachFromParent();
+            editor->setSelectedNode( nullptr );
+        }
+    );
     return true;
 }

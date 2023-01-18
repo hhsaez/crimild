@@ -136,10 +136,15 @@ void ScenePass::render( Node *scene, Camera *camera ) noexcept
 {
     m_clear->render();
 
+    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+
     auto renderState =
         scene != nullptr
             ? scene->perform< FetchSceneRenderState >()
             : FetchSceneRenderState::Result {};
+
+    // Save render state for this command buffer
+    m_inUseAssets[ currentFrameIndex ] = renderState;
 
     if ( camera != nullptr ) {
         // Set correct aspect ratio for camera before rendering
@@ -176,6 +181,8 @@ void ScenePass::init( void ) noexcept
 
     const auto extent = m_renderArea.extent;
 
+    m_inUseAssets.resize( getRenderDevice()->getInFlightFrameCount() );
+
     getRenderDevice()->createFramebufferAttachment( "Scene/Depth", extent, VK_FORMAT_D32_SFLOAT, m_attachments[ 0 ] );
     getRenderDevice()->createFramebufferAttachment( "Scene/Albedo", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 1 ] );
     getRenderDevice()->createFramebufferAttachment( "Scene/Position", extent, VK_FORMAT_R32G32B32A32_SFLOAT, m_attachments[ 2 ] );
@@ -187,7 +194,7 @@ void ScenePass::init( void ) noexcept
 void ScenePass::deinit( void ) noexcept
 {
     vkDeviceWaitIdle( getRenderDevice()->getHandle() );
-    
+
     for ( auto &att : m_attachments ) {
         getRenderDevice()->destroyFramebufferAttachment( att );
     }

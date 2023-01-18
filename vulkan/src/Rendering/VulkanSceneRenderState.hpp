@@ -55,12 +55,12 @@ namespace crimild {
             template< typename MaterialType >
             using RenderableSet =
                 std::unordered_map<
-                    const MaterialType *,
+                    std::shared_ptr< MaterialType >,
                     std::unordered_map<
-                        const Primitive *,
+                        std::shared_ptr< Primitive >,
                         std::vector< Renderable > > >;
 
-            using Lights = std::unordered_map< Light::Type, std::unordered_set< const Light * > >;
+            using Lights = std::unordered_map< Light::Type, std::unordered_set< std::shared_ptr< Light > > >;
 
             Lights lights = {
                 { Light::Type::DIRECTIONAL, {} },
@@ -74,7 +74,7 @@ namespace crimild {
 
             using ShadowCasters =
                 std::unordered_map<
-                    const Primitive *,
+                    std::shared_ptr< Primitive >,
                     std::vector< Renderable > >;
             ShadowCasters shadowCasters;
         };

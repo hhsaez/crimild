@@ -480,7 +480,6 @@ LocalLightingPass::~LocalLightingPass( void ) noexcept
 Event LocalLightingPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             deinit();
             init();
@@ -527,12 +526,12 @@ void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *
         0,
         nullptr
     );
-    for ( const auto light : lights.at( Light::Type::DIRECTIONAL ) ) {
-        bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light );
+    for ( const auto &light : lights.at( Light::Type::DIRECTIONAL ) ) {
+        bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
         vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
     }
 
-    for ( const auto light : lights.at( Light::Type::POINT ) ) {
+    for ( const auto &light : lights.at( Light::Type::POINT ) ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -549,11 +548,11 @@ void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *
             0,
             nullptr
         );
-        bindPointLightDescriptors( commandBuffer, currentFrameIndex, light );
+        bindPointLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
         drawPrimitive( commandBuffer, m_lightVolume.get() );
     }
 
-    for ( const auto light : lights.at( Light::Type::SPOT ) ) {
+    for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
         // TODO: Use instancing to render all lights in one call
         vkCmdBindPipeline(
             commandBuffer,
@@ -570,7 +569,7 @@ void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *
             0,
             nullptr
         );
-        bindSpotLightDescriptors( commandBuffer, currentFrameIndex, light );
+        bindSpotLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
         drawPrimitive( commandBuffer, m_lightVolume.get() );
     }
 

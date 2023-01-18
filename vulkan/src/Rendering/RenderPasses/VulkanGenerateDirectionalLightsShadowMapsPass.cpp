@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
@@ -39,7 +41,6 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShadowMap.hpp"
@@ -78,7 +79,7 @@ GenerateDirectionalLightsShadowMaps::~GenerateDirectionalLightsShadowMaps( void 
 Event GenerateDirectionalLightsShadowMaps::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::SCENE_CHANGED:
+            //        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
@@ -192,17 +193,17 @@ void GenerateDirectionalLightsShadowMaps::render(
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    for ( const auto *light : lights.at( Light::Type::DIRECTIONAL ) ) {
+    for ( const auto &light : lights.at( Light::Type::DIRECTIONAL ) ) {
         if ( light->castShadows() ) {
-            if ( auto shadowMap = getRenderDevice()->getShadowMap( light ) ) {
+            if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
                 auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
 
                 // Transition to transfer so we can write into the image after render.
                 shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
                 for ( uint32_t layerIndex = 0; layerIndex < shadowMap->imageLayerCount; ++layerIndex ) {
-                    computeLightSpaceMatrix( camera, light, shadowMap, layerIndex );
-                    renderShadowMapImage( light, shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
+                    computeLightSpaceMatrix( camera, light.get(), shadowMap, layerIndex );
+                    renderShadowMapImage( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
                 }
 
                 // Transition back to read after render.
@@ -272,7 +273,7 @@ void GenerateDirectionalLightsShadowMaps::renderShadowMapImage(
                 &mvp
             );
 
-            drawPrimitive( commandBuffer, primitive );
+            drawPrimitive( commandBuffer, primitive.get() );
         }
     }
 

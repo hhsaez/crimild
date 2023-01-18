@@ -145,6 +145,10 @@ namespace crimild {
     public:
         virtual void render( Node *node ) noexcept override
         {
+            if ( node == nullptr ) {
+                return;
+            }
+
             auto enabled = node->isEnabled();
             ImGui::Checkbox( "Enable", &enabled );
             node->setEnabled( enabled );
@@ -464,8 +468,6 @@ void editor::NodeInspectorPanel::render( void ) noexcept
         }
 
         if ( !m_sections.empty() ) {
-            // lightPropertiesSection( node, getRenderDevice() );
-            // nodeComponentsSection( node );
             for ( auto &section : m_sections ) {
                 section->render( node );
             }
@@ -490,7 +492,7 @@ void editor::NodeInspectorPanel::configure( crimild::Node *node ) noexcept
         m_selectedNode = node;
     }
 
-    if ( m_sections.empty() ) {
+    if ( m_sections.empty() && node != nullptr ) {
         m_sections.push_back( std::make_unique< NodeInfoSection >() );
         m_sections.push_back( std::make_unique< NodeTransformationSection >() );
 
