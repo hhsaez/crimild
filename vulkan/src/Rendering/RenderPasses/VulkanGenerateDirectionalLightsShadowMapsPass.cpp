@@ -376,11 +376,13 @@ void GenerateDirectionalLightsShadowMaps::init( void ) noexcept
                 },
             },
         };
-        return std::make_unique< GraphicsPipeline >(
+        auto pipeline = std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             *m_renderPass,
             pipelineDescriptor
         );
+        getRenderDevice()->setObjectName( pipeline->getHandle(), "GenerateDirectionalLightsShadowMapsPass" );
+        return pipeline;
     }();
 }
 

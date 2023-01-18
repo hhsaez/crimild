@@ -128,7 +128,7 @@ public:
                 );
                 break;
             }
-            
+
             case Light::Type::SPOT: {
                 const auto P = location( light->getWorld() );
                 DebugDrawManager::addCircle(
@@ -144,7 +144,6 @@ public:
                 );
                 break;
             }
-
 
             case Light::Type::DIRECTIONAL: {
                 const auto P = location( light->getWorld() );
@@ -523,6 +522,7 @@ void SceneDebugPass::init( void ) noexcept
             },
         }
     );
+    getRenderDevice()->setObjectName( m_pipeline->getHandle(), "SceneDebugPass" );
 
     m_inFlightPrimitives.resize( getRenderDevice()->getSwapchainImageCount() );
 }

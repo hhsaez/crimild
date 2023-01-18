@@ -270,6 +270,7 @@ void BlitPass::init( void ) noexcept
         program.get(),
         std::vector< VertexLayout > {}
     );
+    getRenderDevice()->setObjectName( m_pipeline->getHandle(), "BlitPass" );
 }
 
 void BlitPass::clear( void ) noexcept
