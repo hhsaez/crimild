@@ -72,7 +72,6 @@ GenerateSpotLightsShadowMaps::~GenerateSpotLightsShadowMaps( void ) noexcept
 Event GenerateSpotLightsShadowMaps::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
@@ -95,9 +94,9 @@ void GenerateSpotLightsShadowMaps::render(
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    for ( const auto *light : lights.at( Light::Type::SPOT ) ) {
+    for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
         if ( light->castShadows() ) {
-            if ( auto shadowMap = getRenderDevice()->getShadowMap( light ) ) {
+            if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
                 auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
 
                 // Transition to transfer so we can write into the image after render.
@@ -107,7 +106,7 @@ void GenerateSpotLightsShadowMaps::render(
                 // spot lights, using the radius as limit.
                 shadowMap->lightSpaceMatrices[ 0 ] = perspective( 90, 1, 0.01f, light->getRadius() ) * light->getWorld().invMat;
 
-                renderShadowMap( light, shadowCasters, shadowMap->lightSpaceMatrices[ 0 ], shadowMapImage );
+                renderShadowMap( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ 0 ], shadowMapImage );
 
                 // Transition back to read after render.
                 shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
@@ -175,7 +174,7 @@ void GenerateSpotLightsShadowMaps::renderShadowMap(
                 &mvp
             );
 
-            drawPrimitive( commandBuffer, primitive );
+            drawPrimitive( commandBuffer, primitive.get() );
         }
     }
 

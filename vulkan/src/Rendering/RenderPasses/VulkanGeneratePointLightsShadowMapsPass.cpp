@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp"
+
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Numbers.hpp"
@@ -40,7 +42,6 @@
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp"
 #include "Rendering/RenderableSet.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/ShadowMap.hpp"
@@ -79,7 +80,6 @@ GeneratePointLightsShadowMaps::~GeneratePointLightsShadowMaps( void ) noexcept
 Event GeneratePointLightsShadowMaps::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
@@ -170,17 +170,17 @@ void GeneratePointLightsShadowMaps::render(
     const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    for ( const auto *light : lights.at( Light::Type::POINT ) ) {
+    for ( const auto &light : lights.at( Light::Type::POINT ) ) {
         if ( light->castShadows() ) {
-            if ( auto shadowMap = getRenderDevice()->getShadowMap( light ) ) {
+            if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
                 auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
 
                 // Transition to transfer so we can write into the image after render.
                 shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
                 for ( uint32_t layerIndex = 0; layerIndex < shadowMap->imageLayerCount; ++layerIndex ) {
-                    shadowMap->lightSpaceMatrices[ layerIndex ] = computeLightSpaceMatrix( light, layerIndex );
-                    renderShadowMapImage( light, shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
+                    shadowMap->lightSpaceMatrices[ layerIndex ] = computeLightSpaceMatrix( light.get(), layerIndex );
+                    renderShadowMapImage( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
                 }
 
                 // Transition back to read after render.
@@ -250,7 +250,7 @@ void GeneratePointLightsShadowMaps::renderShadowMapImage(
                 &uniforms
             );
 
-            drawPrimitive( commandBuffer, primitive );
+            drawPrimitive( commandBuffer, primitive.get() );
         }
     }
 

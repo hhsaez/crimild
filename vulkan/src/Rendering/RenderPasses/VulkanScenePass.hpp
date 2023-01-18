@@ -30,6 +30,7 @@
 
 #include "Rendering/RenderPasses/VulkanRenderPassBase.hpp"
 #include "Rendering/VulkanFramebufferAttachment.hpp"
+#include "Rendering/VulkanSceneRenderState.hpp"
 #include "Simulation/Event.hpp"
 
 namespace crimild {
@@ -121,6 +122,11 @@ namespace crimild {
             // Storage for all attachments in the G-Buffer, including one for depth
             // and another one for final composition.
             std::array< FramebufferAttachment, 6 > m_attachments;
+
+            // Keep render state alive for each frame that is sent to the GPU,
+            // ensuring command buffers work with valid data for as long as they are
+            // alive.
+            std::vector< SceneRenderState > m_inUseAssets;
         };
 
     }

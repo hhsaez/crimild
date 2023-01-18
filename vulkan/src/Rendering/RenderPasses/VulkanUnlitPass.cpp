@@ -69,7 +69,6 @@ UnlitPass::~UnlitPass( void ) noexcept
 Event UnlitPass::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
-        case Event::Type::SCENE_CHANGED:
         case Event::Type::WINDOW_RESIZE: {
             clear();
             init();
@@ -113,18 +112,18 @@ void UnlitPass::render( const SceneRenderState::RenderableSet< UnlitMaterial > &
     for ( auto &[ material, primitives ] : sceneRenderables ) {
         for ( auto &[ primitive, renderables ] : primitives ) {
             for ( auto &renderable : renderables ) {
-                bind( material );
+                bind( material.get() );
 
                 vkCmdBindPipeline(
                     commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material ]->getHandle()
+                    m_materialObjects.pipelines[ material.get() ]->getHandle()
                 );
 
                 vkCmdBindDescriptorSets(
                     commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
                     0,
                     1,
                     &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
@@ -135,10 +134,10 @@ void UnlitPass::render( const SceneRenderState::RenderableSet< UnlitMaterial > &
                 vkCmdBindDescriptorSets(
                     commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
                     1,
                     1,
-                    &m_materialObjects.descriptorSets[ material ][ currentFrameIndex ],
+                    &m_materialObjects.descriptorSets[ material.get() ][ currentFrameIndex ],
                     0,
                     nullptr
                 );
@@ -147,14 +146,14 @@ void UnlitPass::render( const SceneRenderState::RenderableSet< UnlitMaterial > &
                 // use normal uniforms instead.
                 vkCmdPushConstants(
                     commandBuffer,
-                    m_materialObjects.pipelines[ material ]->getPipelineLayout(),
+                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
                     VK_SHADER_STAGE_VERTEX_BIT,
                     0,
                     sizeof( SceneRenderState::Renderable ),
                     &renderable
                 );
 
-                drawPrimitive( commandBuffer, primitive );
+                drawPrimitive( commandBuffer, primitive.get() );
             }
         }
     }
@@ -554,8 +553,7 @@ void UnlitPass::bind( const Material *aMaterial ) noexcept
                         outFragColor = vec4( frag.color, frag.opacity );
                     }
                 )"
-            ) 
-        }
+            ) }
     );
 
     if ( auto program = material->getProgram() ) {
