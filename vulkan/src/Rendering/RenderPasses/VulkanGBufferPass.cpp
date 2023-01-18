@@ -266,6 +266,8 @@ void GBufferPass::init( void ) noexcept
         )
     );
 
+    getRenderDevice()->setObjectName( m_renderPass, "GBuffer" );
+
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         std::vector< VkImageView > imageViews;
@@ -602,6 +604,8 @@ void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
             },
         }
     );
+
+    getRenderDevice()->setObjectName( pipeline->getHandle(), "GBufferPass" );
 
     // m_materialObjects.pipelines.insert( material, std::move( pipeline ) );
     m_materialObjects.pipelines[ material ] = std::move( pipeline );

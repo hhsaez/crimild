@@ -423,6 +423,7 @@ void SelectionOutlinePass::init( void ) noexcept
             .enable = true,
         }
     );
+    getRenderDevice()->setObjectName( m_stencilPipeline.pipeline->getHandle(), "SelectionOutlinePass/Stencil" );
 
     m_outlinePipeline.pipeline = std::make_unique< GraphicsPipeline >(
         getRenderDevice(),
@@ -456,6 +457,7 @@ void SelectionOutlinePass::init( void ) noexcept
             },
         }
     );
+    getRenderDevice()->setObjectName( m_outlinePipeline.pipeline->getHandle(), "SelectionOutlinePass/Outline" );
 }
 
 void SelectionOutlinePass::clear( void ) noexcept

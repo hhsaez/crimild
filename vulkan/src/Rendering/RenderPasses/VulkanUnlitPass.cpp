@@ -585,6 +585,7 @@ void UnlitPass::bind( const Material *aMaterial ) noexcept
             },
         }
     );
+    getRenderDevice()->setObjectName( pipeline->getHandle(), "UnlitPass/Material" );
     m_materialObjects.pipelines[ material ] = std::move( pipeline );
 
     // create descriptors

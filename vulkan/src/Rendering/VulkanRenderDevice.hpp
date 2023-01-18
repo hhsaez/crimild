@@ -203,6 +203,8 @@ namespace crimild {
             inline void setObjectName( VkSampler handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
             inline void setObjectName( VkDescriptorSetLayout handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
             inline void setObjectName( VkDescriptorPool handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
+            inline void setObjectName( VkRenderPass handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, name ); }
+            inline void setObjectName( VkPipeline handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, name ); }
             void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string_view name ) const noexcept;
 
             void createImage( const VkImageCreateInfo &createInfo, VkImage &image ) const noexcept;

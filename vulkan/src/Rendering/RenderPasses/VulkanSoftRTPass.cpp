@@ -315,7 +315,7 @@ void SoftRTPass::init( void ) noexcept
 
         const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
 
-        return std::make_unique< GraphicsPipeline >(
+        auto pipeline = std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             m_renderPass,
             GraphicsPipeline::Descriptor {
@@ -328,6 +328,8 @@ void SoftRTPass::init( void ) noexcept
                 .scissor = viewport,
             }
         );
+        getRenderDevice()->setObjectName( pipeline->getHandle(), "SoftRTPass" );
+        return pipeline;
     }();
 }
 

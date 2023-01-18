@@ -279,6 +279,7 @@ void ShaderPass::init( void ) noexcept
             .scissor = viewport,
         }
     );
+    getRenderDevice()->setObjectName( m_pipeline->getHandle(), "ShaderPass" );
 }
 
 void ShaderPass::clear( void ) noexcept

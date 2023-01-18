@@ -971,6 +971,7 @@ void LocalLightingPass::createLightObjects( LightObjects &objects, Light::Type l
             .scissor = viewport,
         }
     );
+    getRenderDevice()->setObjectName( objects.pipeline->getHandle(), "LocalLightingPass" );
 }
 
 void LocalLightingPass::destroyLightObjects( LightObjects &objects ) noexcept

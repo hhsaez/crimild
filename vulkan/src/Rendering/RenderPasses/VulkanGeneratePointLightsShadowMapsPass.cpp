@@ -362,7 +362,7 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
             VertexLayout::P3_N3_TC2
         };
 
-        return std::make_unique< GraphicsPipeline >(
+        auto pipeline = std::make_unique< GraphicsPipeline >(
             getRenderDevice(),
             *m_renderPass,
             GraphicsPipeline::Descriptor {
@@ -393,6 +393,8 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
                 },
             }
         );
+        getRenderDevice()->setObjectName( pipeline->getHandle(), "GeneratePointLightsShadowMapsPass" );
+        return pipeline;
     }();
 }
 
