@@ -305,7 +305,14 @@ void EditorLayer::saveScene( void ) noexcept
 
 void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept
 {
-    auto scene = crimild::retain( Simulation::getInstance()->getScene() );
+    // Always save the editable scene, not the simulated one
+    auto scene = [ & ] {
+        if ( m_edittableScene != nullptr ) {
+            return m_edittableScene;
+        } else {
+            return crimild::retain( Simulation::getInstance()->getScene() );
+        }
+    }();
     if ( scene == nullptr ) {
         return;
     }
