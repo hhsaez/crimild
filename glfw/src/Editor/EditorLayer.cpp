@@ -29,6 +29,7 @@
 
 #include "Coding/FileDecoder.hpp"
 #include "Coding/FileEncoder.hpp"
+#include "Concurrency/Async.hpp"
 #include "Editor/EditorProject.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Editor/Menus/mainMenu.hpp"
@@ -52,6 +53,18 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
     CRIMILD_LOG_TRACE();
 
     loadRecentProjects();
+
+    if ( !m_recentProjects.empty() ) {
+        auto autoload = Settings::getInstance()->get( "editor.load_last_project", false );
+        if ( autoload ) {
+            auto path = m_recentProjects.front();
+            crimild::concurrency::sync_frame(
+                [ path ]() {
+                    EditorLayer::getInstance()->loadProject( path );
+                }
+            );
+        }
+    }
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
