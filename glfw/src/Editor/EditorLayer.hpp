@@ -34,6 +34,7 @@
 #include "Rendering/Layer.hpp"
 
 #include <filesystem>
+#include <list>
 
 namespace crimild {
 
@@ -96,8 +97,13 @@ namespace crimild {
 
         void terminate( void ) noexcept { m_didTerminate = true; }
 
+        inline const std::list< std::string > &getRecentProjects( void ) const noexcept { return m_recentProjects; }
+
     private:
         void loadDefaultLayout( void ) noexcept;
+
+        void saveRecentProjects( void ) noexcept;
+        void loadRecentProjects( void ) noexcept;
 
     private:
         vulkan::RenderDevice *m_renderDevice = nullptr;
@@ -114,6 +120,8 @@ namespace crimild {
         Event m_lastResizeEvent = Event { .type = Event::Type::NONE };
 
         bool m_didTerminate = false;
+
+        std::list< std::string > m_recentProjects;
     };
 }
 
