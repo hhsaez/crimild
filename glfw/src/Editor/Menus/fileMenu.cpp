@@ -155,6 +155,29 @@ void crimild::editor::fileMenu( void ) noexcept
 
         ImGui::Separator();
 
+        if ( ImGui::BeginMenu( "Recent Projects..." ) ) {
+            const auto &recentProjects = EditorLayer::getInstance()->getRecentProjects();
+            if ( recentProjects.empty() ) {
+                ImGui::MenuItem( "No Recent Projects" );
+            } else {
+                for ( const auto &path : recentProjects ) {
+                    if ( path.empty() ) {
+                        continue;
+                    }
+                    if ( ImGui::MenuItem( path.c_str() ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ path ] {
+                                EditorLayer::getInstance()->loadProject( path );
+                            }
+                        );
+                    }
+                }
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
         enabledWithProject(
             [ & ] {
                 if ( ImGui::BeginMenu( "Import..." ) ) {

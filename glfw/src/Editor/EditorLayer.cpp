@@ -39,6 +39,7 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 #include <array>
+#include <fstream>
 #include <imgui.h>
 
 using namespace crimild;
@@ -49,6 +50,8 @@ EditorLayer::EditorLayer( vulkan::RenderDevice *renderDevice ) noexcept
       m_layoutManager( crimild::alloc< editor::layout::LayoutManager >() )
 {
     CRIMILD_LOG_TRACE();
+
+    loadRecentProjects();
 }
 
 EditorLayer::~EditorLayer( void ) noexcept
@@ -225,6 +228,7 @@ void EditorLayer::loadProject( const std::filesystem::path &path ) noexcept
 
     loadScene( m_project->getScenePath( m_project->getCurrentSceneName() ) );
     loadDefaultLayout();
+    saveRecentProjects();
 }
 
 void EditorLayer::saveProject( void ) noexcept
@@ -241,6 +245,8 @@ void EditorLayer::saveProject( void ) noexcept
     }
 
     CRIMILD_LOG_INFO( "Saved project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
+
+    saveRecentProjects();
 }
 
 void EditorLayer::loadDefaultLayout( void ) noexcept
@@ -325,4 +331,42 @@ void EditorLayer::saveSceneAs( const std::filesystem::path &path ) noexcept
         project->setCurrentSceneName( path.stem().string() );
         saveProject();
     }
+}
+
+void EditorLayer::saveRecentProjects( void ) noexcept
+{
+    m_recentProjects.remove( m_project->getFilePath().string() );
+    m_recentProjects.push_front( m_project->getFilePath().string() );
+
+    auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
+    auto fs = std::ofstream( settingsPath, std::ios::out );
+    if ( !fs.is_open() ) {
+        CRIMILD_LOG_WARNING( "Cannot open recent projects file: ", settingsPath );
+        return;
+    }
+    for ( const auto &path : m_recentProjects ) {
+        if ( !path.empty() ) {
+            fs << path << "\n";
+        }
+    }
+    fs.close();
+}
+
+void EditorLayer::loadRecentProjects( void ) noexcept
+{
+    m_recentProjects.clear();
+    auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
+    auto fs = std::ifstream( settingsPath, std::ios::in );
+    if ( !fs.is_open() ) {
+        return;
+    }
+    while ( !fs.eof() ) {
+        char buff[ 1024 ];
+        fs.getline( buff, 1024 );
+        auto path = std::string( buff );
+        if ( !path.empty() ) {
+            m_recentProjects.push_back( std::string( buff ) );
+        }
+    }
+    fs.close();
 }
