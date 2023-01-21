@@ -35,7 +35,8 @@ public:
     {
         if ( auto settings = Settings::getInstance() ) {
             if ( !settings->hasKey( "editor.show" ) ) {
-                settings->set( "editor.show", 1 );
+                settings->set( "editor.show", true );
+                settings->set( "editor.load_last_project", true );
             }
         }
     }
