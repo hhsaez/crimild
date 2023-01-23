@@ -39,11 +39,6 @@ using namespace crimild;
 void ShallowCopy::traverse( Node *node )
 {
     NodeVisitor::traverse( node );
-
-    if ( _result != nullptr ) {
-        // make sure the result is not transformed
-        // _result->setLocal( Transformation {} );
-    }
 }
 
 void ShallowCopy::visitNode( Node *node )
