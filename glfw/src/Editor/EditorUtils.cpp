@@ -301,6 +301,14 @@ bool crimild::editor::cloneSelected( void ) noexcept
         return false;
     }
 
+    // Start components on new node
+    copy->perform( StartComponents() );
+
+    // Update world state. Otherwise, transformations will be reset
+    // by the transformation gizmo control, since it operates on
+    // world transformation (which is identity up to this point).
+    copy->perform( UpdateWorldState() );
+
     editor->setSelectedNode( get_ptr( copy ) );
 
     return true;
