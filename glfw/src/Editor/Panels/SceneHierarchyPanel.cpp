@@ -34,6 +34,7 @@
 #include "SceneGraph/Group.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
+#include "Editor/EditorUtils.hpp"
 
 using namespace crimild;
 
@@ -122,6 +123,17 @@ private:
             // DragDrop tooltip
             ImGui::Text( "%s", getNodeName( node ).c_str() );
             ImGui::EndDragDropSource();
+        }
+
+        if ( ImGui::BeginPopupContextItem() ) {
+            if ( ImGui::Selectable( "Clone" ) ) {
+                editor::cloneNode( node );
+            }
+            ImGui::Separator();
+            if ( ImGui::Selectable( "Delete" ) ) {
+                editor::deleteNode( node );
+            }
+            ImGui::EndPopup();
         }
 
         if ( isDropTarget ) {

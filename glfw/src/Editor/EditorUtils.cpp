@@ -282,20 +282,10 @@ bool crimild::editor::importFile( std::string fileName ) noexcept
     return addToScene( model );
 }
 
-bool crimild::editor::cloneSelected( void ) noexcept
+bool crimild::editor::cloneNode( Node *node ) noexcept
 {
-    auto editor = EditorLayer::getInstance();
-    if ( editor == nullptr ) {
-        return false;
-    }
-
-    auto selected = editor->getSelectedNode();
-    if ( selected == nullptr ) {
-        return false;
-    }
-
-    auto copy = selected->perform< ShallowCopy >();
-    if ( auto parent = dynamic_cast< Group * >( selected->getParent() ) ) {
+    auto copy = node->perform< ShallowCopy >();
+    if ( auto parent = dynamic_cast< Group * >( node->getParent() ) ) {
         parent->attachNode( copy );
     } else {
         return false;
@@ -309,28 +299,52 @@ bool crimild::editor::cloneSelected( void ) noexcept
     // world transformation (which is identity up to this point).
     copy->perform( UpdateWorldState() );
 
-    editor->setSelectedNode( get_ptr( copy ) );
+    if ( auto editor = EditorLayer::getInstance() ) {
+        editor->setSelectedNode( get_ptr( copy ) );
+    }
 
+    return true;
+}
+
+bool crimild::editor::cloneSelected( void ) noexcept
+{
+    auto editor = EditorLayer::getInstance();
+    if ( editor == nullptr ) {
+        return false;
+    }
+
+    auto selected = editor->getSelectedNode();
+    if ( selected == nullptr ) {
+        return false;
+    }
+
+    return cloneNode( selected );
+}
+
+bool crimild::editor::deleteNode( Node *node ) noexcept
+{
+    crimild::concurrency::sync_frame(
+        [ node = crimild::retain( node ) ] {
+            node->detachFromParent();
+            if ( auto editor = EditorLayer::getInstance() ) {
+                editor->setSelectedNode( nullptr );
+            }
+        }
+    );
     return true;
 }
 
 bool crimild::editor::deleteSelected( void ) noexcept
 {
-    crimild::concurrency::sync_frame(
-        [] {
-            auto editor = EditorLayer::getInstance();
-            if ( editor == nullptr ) {
-                return false;
-            }
+    auto editor = EditorLayer::getInstance();
+    if ( editor == nullptr ) {
+        return false;
+    }
 
-            auto selected = editor->getSelectedNode();
-            if ( selected == nullptr ) {
-                return false;
-            }
+    auto selected = editor->getSelectedNode();
+    if ( selected == nullptr ) {
+        return false;
+    }
 
-            selected->detachFromParent();
-            editor->setSelectedNode( nullptr );
-        }
-    );
-    return true;
+    return deleteNode( selected );
 }
