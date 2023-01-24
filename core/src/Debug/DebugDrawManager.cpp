@@ -36,6 +36,7 @@
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Mathematics/isNaN.hpp"
+#include "Mathematics/Vector_equality.hpp"
 
 using namespace crimild;
 
@@ -59,6 +60,10 @@ void DebugDrawManager::addLine(
     bool depthEnabled
 ) noexcept
 {
+    if ( isEqual( to, from ) ) {
+        return;
+    }
+
     // Use a single primitive for all lines
     // This might lead to some performance issues when rendering many lines, but I'll deal with that later.
     static auto primitive = [] {
@@ -84,6 +89,9 @@ void DebugDrawManager::addLine(
         } else {
             Vector3 right, up;
             orthonormalBasis( vector3( to ), right, up );
+            if ( isNaN( up ) || isZero( lengthSquared( up ) ) ) {
+                return Vector3 { 0, 1, 0 };
+            }
             return up;
         }
     }();
