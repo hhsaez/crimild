@@ -35,7 +35,7 @@
 
 using namespace crimild;
 
-TEST( GroupNodeTest, construction )
+TEST( Group, construction )
 {
     auto group = crimild::alloc< Group >( "a group" );
 
@@ -43,7 +43,7 @@ TEST( GroupNodeTest, construction )
     EXPECT_FALSE( group->hasNodes() );
 }
 
-TEST( GroupNodeTest, destruction )
+TEST( Group, destruction )
 {
     auto child1 = crimild::alloc< Group >( "child 1" );
     auto child2 = crimild::alloc< Group >( "child 2" );
@@ -67,7 +67,7 @@ TEST( GroupNodeTest, destruction )
     EXPECT_EQ( child2->getParent(), nullptr );
 }
 
-TEST( GroupNodeTest, attachNode )
+TEST( Group, attachNode )
 {
     auto parent = crimild::alloc< Group >( "parent" );
 
@@ -96,7 +96,7 @@ TEST( GroupNodeTest, attachNode )
     EXPECT_TRUE( found );
 }
 
-TEST( GroupNodeTest, attachMultipleNodes )
+TEST( Group, attachMultipleNodes )
 {
     auto parent = crimild::alloc< Group >( "parent" );
 
@@ -117,7 +117,85 @@ TEST( GroupNodeTest, attachMultipleNodes )
     EXPECT_EQ( count, 3 );
 }
 
-TEST( GroupNodeTest, reattachNodeToSameParent )
+TEST( Group, attachAfter )
+{
+    auto parent = crimild::alloc< Group >( "parent" );
+
+    auto child1 = crimild::alloc< Group >( "child1" );
+    auto child2 = crimild::alloc< Group >( "child2" );
+    auto child3 = crimild::alloc< Group >( "child3" );
+
+    parent->attachNode( child1 );
+    parent->attachNode( child2 );
+    parent->attachNode( child3 );
+
+    EXPECT_EQ( 3, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 2 )->getName() );
+
+    auto child4 = crimild::alloc< Group >( "child4" );
+    parent->attachNodeAfter( child4, child1 );
+    EXPECT_EQ( parent.get(), child4->getParent() );
+    EXPECT_EQ( 4, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child4" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 2 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 3 )->getName() );
+
+    auto child5 = crimild::alloc< Group >( "child5" );
+    auto child6 = crimild::alloc< Group >( "child6" );
+    parent->attachNodeAfter( child6, child5 ); // Child5 not found
+    EXPECT_EQ( nullptr, child5->getParent() );
+    EXPECT_EQ( parent.get(), child6->getParent() );
+    EXPECT_EQ( 5, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child4" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 2 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 3 )->getName() );
+    EXPECT_EQ( std::string( "child6" ), parent->getNodeAt( 4 )->getName() );
+}
+
+TEST( Group, attachBefore )
+{
+    auto parent = crimild::alloc< Group >( "parent" );
+
+    auto child1 = crimild::alloc< Group >( "child1" );
+    auto child2 = crimild::alloc< Group >( "child2" );
+    auto child3 = crimild::alloc< Group >( "child3" );
+
+    parent->attachNode( child1 );
+    parent->attachNode( child2 );
+    parent->attachNode( child3 );
+
+    EXPECT_EQ( 3, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 2 )->getName() );
+
+    auto child4 = crimild::alloc< Group >( "child4" );
+    parent->attachNodeBefore( child4, child2 );
+    EXPECT_EQ( parent.get(), child4->getParent() );
+    EXPECT_EQ( 4, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child4" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 2 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 3 )->getName() );
+
+    auto child5 = crimild::alloc< Group >( "child5" );
+    auto child6 = crimild::alloc< Group >( "child6" );
+    parent->attachNodeBefore( child6, child5 ); // Child5 not found
+    EXPECT_EQ( nullptr, child5->getParent() );
+    EXPECT_EQ( parent.get(), child6->getParent() );
+    EXPECT_EQ( 5, parent->getNodeCount() );
+    EXPECT_EQ( std::string( "child1" ), parent->getNodeAt( 0 )->getName() );
+    EXPECT_EQ( std::string( "child4" ), parent->getNodeAt( 1 )->getName() );
+    EXPECT_EQ( std::string( "child2" ), parent->getNodeAt( 2 )->getName() );
+    EXPECT_EQ( std::string( "child3" ), parent->getNodeAt( 3 )->getName() );
+    EXPECT_EQ( std::string( "child6" ), parent->getNodeAt( 4 )->getName() );
+}
+
+TEST( Group, reattachNodeToSameParent )
 {
     auto parent = crimild::alloc< Group >( "parent" );
     auto child = crimild::alloc< Group >( "child" );
@@ -139,7 +217,7 @@ TEST( GroupNodeTest, reattachNodeToSameParent )
     EXPECT_TRUE( found );
 }
 
-TEST( GroupNodeTest, reattachNodeToDifferentParent )
+TEST( Group, reattachNodeToDifferentParent )
 {
     auto parent1 = crimild::alloc< Group >( "parent1" );
     auto parent2 = crimild::alloc< Group >( "parent2" );
@@ -150,7 +228,7 @@ TEST( GroupNodeTest, reattachNodeToDifferentParent )
     ASSERT_THROW( parent2->attachNode( child ), HasParentException );
 }
 
-TEST( GroupNodeTest, detachNode )
+TEST( Group, detachNode )
 {
     auto parent = crimild::alloc< Group >( "parent" );
     auto child = crimild::alloc< Group >( "child" );
@@ -163,7 +241,7 @@ TEST( GroupNodeTest, detachNode )
     EXPECT_EQ( child->getParent(), nullptr );
 }
 
-TEST( GroupNodeTest, detachMultipleNodes )
+TEST( Group, detachMultipleNodes )
 {
     auto parent = crimild::alloc< Group >( "parent" );
 
@@ -188,7 +266,7 @@ TEST( GroupNodeTest, detachMultipleNodes )
     EXPECT_EQ( count, 1 );
 }
 
-TEST( GroupNodeTest, detachNodeFromDifferentParent )
+TEST( Group, detachNodeFromDifferentParent )
 {
     auto parent1 = crimild::alloc< Group >( "parent1" );
     auto parent2 = crimild::alloc< Group >( "parent2" );
@@ -203,7 +281,7 @@ TEST( GroupNodeTest, detachNodeFromDifferentParent )
     EXPECT_FALSE( parent2->hasNodes() );
 }
 
-TEST( GroupNodeTest, detachAllNodes )
+TEST( Group, detachAllNodes )
 {
     auto parent = crimild::alloc< Group >( "parent" );
 
@@ -234,7 +312,7 @@ TEST( GroupNodeTest, detachAllNodes )
     EXPECT_EQ( count, 0 );
 }
 
-TEST( GroupNodeTest, buildHierarchy )
+TEST( Group, buildHierarchy )
 {
     //		node0
     //		/   \
@@ -262,64 +340,7 @@ TEST( GroupNodeTest, buildHierarchy )
     EXPECT_EQ( node4->getParent(), crimild::get_ptr( node2 ) );
 }
 
-//TEST( GroupNodeTest, streaming )
-//{
-//	//		node0
-//	//		/   \
-//	//	node1	node2
-//	//			/	\
-//	//		node3	node4
-//
-//	auto node0 = crimild::alloc< Group >( "node0" );
-//		auto node1 = crimild::alloc< Group >( "node1" );
-//		node0->attachNode( node1 );
-//		auto node2 = crimild::alloc< Group >( "node2" );
-//		node0->attachNode( node2 );
-//			auto node3 = crimild::alloc< Group >( "node3" );
-//			node2->attachNode( node3 );
-//			auto node4 = crimild::alloc< Group >( "node4" );
-//			node2->attachNode( node4 );
-//
-//	{
-//		FileStream os( "group.crimild", FileStream::OpenMode::WRITE );
-//		os.addObject( node0 );
-//		os.flush();
-//	}
-//
-//	{
-//		FileStream is( "group.crimild", FileStream::OpenMode::READ );
-//		EXPECT_TRUE( is.load() );
-//
-//		EXPECT_EQ( 1, is.getObjectCount() );
-//		auto n0 = is.getObjectAt< Group >( 0 );
-//		EXPECT_TRUE( n0 != nullptr );
-//		EXPECT_EQ( "node0", n0->getName() );
-//		EXPECT_EQ( 2, n0->getNodeCount() );
-//
-//		auto n1 = n0->getNodeAt< Group >( 0 );
-//		EXPECT_TRUE( n1 != nullptr );
-//		EXPECT_EQ( "node1", n1->getName() );
-//		EXPECT_EQ( 0, n1->getNodeCount() );
-//
-//		auto n2 = n0->getNodeAt< Group >( 1 );
-//		EXPECT_TRUE( n2 != nullptr );
-//		EXPECT_EQ( "node2", n2->getName() );
-//		EXPECT_EQ( 2, n2->getNodeCount() );
-//
-//		auto n3 = n2->getNodeAt< Group >( 0 );
-//		EXPECT_TRUE( n3 != nullptr );
-//		EXPECT_EQ( "node3", n3->getName() );
-//		EXPECT_EQ( 0, n3->getNodeCount() );
-//
-//		auto n4 = n2->getNodeAt< Group >( 1 );
-//		EXPECT_TRUE( n4 != nullptr );
-//		EXPECT_EQ( "node4", n4->getName() );
-//		EXPECT_EQ( 0, n4->getNodeCount() );
-//	}
-//
-//}
-
-TEST( GroupTest, coding )
+TEST( Group, coding )
 {
     //		node0
     //		/   \
