@@ -25,8 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Foundation/Types.hpp"
 #include "Foundation/Containers/Array.hpp"
+
+#include "Foundation/Types.hpp"
 
 #include "gtest/gtest.h"
 
@@ -34,104 +35,136 @@ using namespace crimild;
 
 TEST( ArrayTest, construction )
 {
-	Array< int > a( 10 );
+    Array< int > a( 10 );
 
-	EXPECT_EQ( 10, a.size() );
-	EXPECT_FALSE( a.empty() );
+    EXPECT_EQ( 10, a.size() );
+    EXPECT_FALSE( a.empty() );
 
-	a[ 0 ] = 1;
+    a[ 0 ] = 1;
 
-	EXPECT_EQ( 1, a[ 0 ] );
+    EXPECT_EQ( 1, a[ 0 ] );
 }
 
 TEST( ArrayTest, initializationList )
 {
-	Array< int > a = { 1, 2, 3, 4, 5 };
+    Array< int > a = { 1, 2, 3, 4, 5 };
 
-	EXPECT_EQ( 1, a[ 0 ] );
-	EXPECT_EQ( 2, a[ 1 ] );
-	EXPECT_EQ( 3, a[ 2 ] );
-	EXPECT_EQ( 4, a[ 3 ] );
-	EXPECT_EQ( 5, a[ 4 ] );
+    EXPECT_EQ( 1, a[ 0 ] );
+    EXPECT_EQ( 2, a[ 1 ] );
+    EXPECT_EQ( 3, a[ 2 ] );
+    EXPECT_EQ( 4, a[ 3 ] );
+    EXPECT_EQ( 5, a[ 4 ] );
 }
 
 TEST( ArrayTest, foreach )
 {
-	Array< int > a( 10 );
-	for ( int i = 0; i < 10; i++ ) {
-		a[ i ] = i + 1;
-	}
+    Array< int > a( 10 );
+    for ( int i = 0; i < 10; i++ ) {
+        a[ i ] = i + 1;
+    }
 
-	auto sum = 10 * 11 / 2;
-	a.each( [&sum]( int &e ) {
-		sum -= e;
-	});
+    auto sum = 10 * 11 / 2;
+    a.each( [ &sum ]( int &e ) {
+        sum -= e;
+    } );
 
-	EXPECT_EQ( 0, sum );
+    EXPECT_EQ( 0, sum );
 }
 
 TEST( ArrayTest, add )
 {
-	Array< int > a;
+    Array< int > a;
 
-	a.add( 1 );
-	EXPECT_EQ( a[ 0 ], 1 );
-	EXPECT_EQ( 1, a.size() );
+    a.add( 1 );
+    EXPECT_EQ( a[ 0 ], 1 );
+    EXPECT_EQ( 1, a.size() );
 
-	a.add( 2 );
-	EXPECT_EQ( a[ 1 ], 2 );
-	EXPECT_EQ( 2, a.size() );
+    a.add( 2 );
+    EXPECT_EQ( a[ 1 ], 2 );
+    EXPECT_EQ( 2, a.size() );
 
-	a.add( 3 );
-	EXPECT_EQ( a[ 2 ], 3 );
-	EXPECT_EQ( 3, a.size() );
+    a.add( 3 );
+    EXPECT_EQ( a[ 2 ], 3 );
+    EXPECT_EQ( 3, a.size() );
+}
+
+TEST( Array, indexOf )
+{
+    Array< int > a = { 1, 2, 3, 4 };
+
+    size_t index;
+
+    EXPECT_TRUE( a.indexOf( 3, index ) );
+    EXPECT_EQ( 2, index );
+    EXPECT_TRUE( a.indexOf( 2, index ) );
+    EXPECT_EQ( 1, index );
+    EXPECT_FALSE( a.indexOf( 5, index ) );
+}
+
+TEST( ArrayTest, addAt )
+{
+    Array< int > a;
+
+    a.add( 1 );
+    EXPECT_EQ( a[ 0 ], 1 );
+    EXPECT_EQ( 1, a.size() );
+
+    a.add( 2 );
+    EXPECT_EQ( a[ 1 ], 2 );
+    EXPECT_EQ( 2, a.size() );
+
+    a.addAt( 3, 1 );
+    EXPECT_EQ( a[ 0 ], 1 );
+    EXPECT_EQ( a[ 1 ], 3 );
+    EXPECT_EQ( a[ 2 ], 2 );
+    EXPECT_EQ( 3, a.size() );
 }
 
 TEST( ArrayTest, remove )
 {
-	Array< int > a;
-	a.add( 1 );
-	a.add( 2 );
-	a.add( 3 );
+    Array< int > a;
+    a.add( 1 );
+    a.add( 2 );
+    a.add( 3 );
 
-	EXPECT_EQ( a[ 0 ], 1 );
-	EXPECT_EQ( a[ 1 ], 2 );
-	EXPECT_EQ( a[ 2 ], 3 );
+    EXPECT_EQ( a[ 0 ], 1 );
+    EXPECT_EQ( a[ 1 ], 2 );
+    EXPECT_EQ( a[ 2 ], 3 );
 
-	a.remove( 1 );
+    a.remove( 1 );
 
-	EXPECT_EQ( a[ 0 ], 2 );
-	EXPECT_EQ( a[ 1 ], 3 );
+    EXPECT_EQ( a[ 0 ], 2 );
+    EXPECT_EQ( a[ 1 ], 3 );
 }
 
 TEST( ArrayTest, removeAt )
 {
-	auto a = Array< int >{ 0, 1, 2, 3, 4, 5 };
-	auto b = Array< int >{ 0, 1, 2, 3, 4, 5 };
-	auto c = Array< int >{ 0, 1, 2, 4, 5 };
+    auto a = Array< int > { 0, 1, 2, 3, 4, 5 };
+    auto b = Array< int > { 0, 1, 2, 3, 4, 5 };
+    auto c = Array< int > { 0, 1, 2, 4, 5 };
 
-	EXPECT_EQ( b, a );
+    EXPECT_EQ( b, a );
 
-	a.removeAt( 3 );
+    a.removeAt( 3 );
 
-	EXPECT_EQ( c, a );
+    EXPECT_EQ( c, a );
 }
 
 TEST( ArrayTest, sort )
 {
-    auto a = Array< int >{ 0, 3, 1, 2, 5, 4 };
-    auto sorted = Array< int >{ 0, 1, 2, 3, 4, 5 };
-    auto reversed = Array< int >{ 5, 4, 3, 2, 1, 0 };
+    auto a = Array< int > { 0, 3, 1, 2, 5, 4 };
+    auto sorted = Array< int > { 0, 1, 2, 3, 4, 5 };
+    auto reversed = Array< int > { 5, 4, 3, 2, 1, 0 };
 
     a.sort( []( int a, int b ) -> bool {
         return a < b;
-    });
+    } );
 
     EXPECT_EQ( sorted, a );
 
     a.sort( []( int a, int b ) -> bool {
         return a > b;
-    });
+    } );
 
     EXPECT_EQ( reversed, a );
 }
@@ -156,7 +189,7 @@ TEST( ArrayTest, sortAdvanced )
 
     es.sort( []( const Element &a, const Element &b ) -> bool {
         return a.first < b.first;
-    });
+    } );
 
     EXPECT_TRUE( sorted == es );
 }
@@ -180,10 +213,10 @@ TEST( ArrayTest, mapString )
     auto expected = Array< std::string > { "0", "1", "2", "3", "4" };
     auto ret = es.map(
         []( auto e ) {
-        	std::stringstream ss;
+            std::stringstream ss;
             ss << e;
             return ss.str();
-    	}
+        }
     );
 
     EXPECT_EQ( expected, ret );

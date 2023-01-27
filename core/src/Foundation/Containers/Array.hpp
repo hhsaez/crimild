@@ -218,6 +218,20 @@ namespace crimild {
             return _elems[ _size - 1 ];
         }
 
+        inline bool indexOf( T const &elem, size_t &index ) const noexcept
+        {
+            LockImpl lock( this );
+
+            index = 0;
+            while ( index < _size ) {
+                if ( _elems[ index ] == elem ) {
+                    return true;
+                }
+                ++index;
+            }
+            return false;
+        }
+
         void add( T const &elem ) noexcept
         {
             LockImpl lock( this );
@@ -226,6 +240,24 @@ namespace crimild {
             }
 
             _elems[ _size++ ] = elem;
+        }
+
+        void addAt( T const &elem, size_t index ) noexcept
+        {
+            LockImpl lock( this );
+            if ( _size == _capacity ) {
+                resize_unsafe( 2 * _capacity );
+            }
+
+            // Shift elements after index, starting at the back
+            for ( size_t i = _size; i > index; --i ) {
+                _elems[ i ] = _elems[ i - 1 ];
+            }
+            // add new element
+            _elems[ index ] = elem;
+
+            // Increment size
+            ++_size;
         }
 
         Array &remove( const T &elem ) noexcept
@@ -408,7 +440,8 @@ namespace crimild {
                 [ &os,
                   i = 0 ]( const T &a ) mutable {
                     os << ( i++ == 0 ? "" : ", " ) << a;
-                } );
+                }
+            );
             os << "]";
             return os;
         }
