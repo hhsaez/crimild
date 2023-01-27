@@ -48,6 +48,8 @@ namespace crimild {
 
         void attachNode( Node *node );
         void attachNode( SharedPointer< Node > const &node );
+        void attachNodeBefore( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
+        void attachNodeAfter( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
 
         void detachNode( Node *node );
         void detachNode( SharedPointer< Node > const &node );

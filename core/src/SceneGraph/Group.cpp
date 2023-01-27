@@ -69,6 +69,37 @@ void Group::attachNode( SharedPointer< Node > const &node )
     _nodes.add( node );
 }
 
+void Group::attachNodeAfter( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept
+{
+    if ( node->hasParent() ) {
+        node->detachFromParent();
+    }
+
+    size_t index;
+    if ( _nodes.indexOf( before, index ) ) {
+        _nodes.addAt( node, index + 1 );
+    } else {
+        _nodes.add( node );
+    }
+    node->setParent( this );
+}
+
+void Group::attachNodeBefore( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept
+{
+    if ( node->hasParent() ) {
+        node->detachFromParent();
+    }
+
+    size_t index;
+    if ( _nodes.indexOf( before, index ) ) {
+        _nodes.addAt( node, index );
+    } else {
+        _nodes.add( node );
+    }
+
+    node->setParent( this );
+}
+
 void Group::detachNode( Node *node )
 {
     if ( node->getParent() == this ) {
