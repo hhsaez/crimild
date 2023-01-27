@@ -286,7 +286,7 @@ bool crimild::editor::cloneNode( Node *node ) noexcept
 {
     auto copy = node->perform< ShallowCopy >();
     if ( auto parent = dynamic_cast< Group * >( node->getParent() ) ) {
-        parent->attachNode( copy );
+        parent->attachNodeAfter( copy, retain( node ) );
     } else {
         return false;
     }
