@@ -596,7 +596,6 @@ INPUT                  = ../core \
 						 ../physics \
 						 ../raytracing \
 					     ../al \
-						 ../scripting \
 						 ../opengl \
                          ./
 

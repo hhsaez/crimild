@@ -14,8 +14,6 @@ glfw-3.0.4
 glfw-3.0.4/**/*
 glew-1.9.0
 glew-1.9.0/**/*
-lua-5.2.3
-lua-5.2.3/**/*
 
 CMakeCache.txt
 CTestTestfile.cmake
@@ -32,10 +30,8 @@ CMakeScripts
 \#*\#
 *~
 third-party/bullet-2.82-r2704
-scripting/test/crimild_scripting_test
 tools/fontgen/fontgen
 *.xcodeproj
-scripting/test/Debug
 /bin
 third-party/glew-1.13.0
 /third-party/glew
