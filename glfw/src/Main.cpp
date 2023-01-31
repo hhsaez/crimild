@@ -103,8 +103,8 @@ namespace crimild {
                     auto settings = Settings::getInstance();
 
                     Window::Options ret;
-                    ret.extent.width = settings->get< crimild::Int32 >( "video.width", 1920 );
-                    ret.extent.height = settings->get< crimild::Int32 >( "video.height", 1080 );
+                    ret.extent.width = settings->get< crimild::Int32 >( "video.width", 1280 );
+                    ret.extent.height = settings->get< crimild::Int32 >( "video.height", 720 );
                     ret.fullscreen = settings->get< crimild::Bool >( "video.fullscreen", false );
                     if ( settings->hasKey( "video.resolution" ) ) {
                         auto resolution = settings->get< std::string >( "video.resolution", "1080p" );
@@ -155,6 +155,8 @@ namespace crimild {
                     windows.push_back(
                         [ & ] {
                             options.showEditor = true;
+                            options.extent.width = 2560;
+                            options.extent.height = 1440;
                             return crimild::alloc< Window >( options );
                         }()
                     );
