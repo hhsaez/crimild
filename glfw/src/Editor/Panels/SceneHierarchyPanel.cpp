@@ -27,14 +27,17 @@
 
 #include "Editor/Panels/SceneHierarchyPanel.hpp"
 
+#include "Coding/FileDecoder.hpp"
 #include "Editor/EditorLayer.hpp"
+#include "Editor/EditorUtils.hpp"
 #include "Foundation/ImGUIUtils.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
-#include "Editor/EditorUtils.hpp"
+#include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
 
@@ -148,6 +151,26 @@ private:
                         } else {
                             CRIMILD_LOG_WARNING( "Drop target node is not a group" );
                         }
+                    }
+                } else if ( auto payload = ImGui::AcceptDragDropPayload( "DND_FILE_PATH" ) ) {
+                    std::string path( static_cast< const char * >( payload->Data ), payload->DataSize );
+                    coding::FileDecoder decoder;
+                    decoder.read( path );
+                    if ( decoder.getObjectCount() != 0 ) {
+                        auto newNode = decoder.getObjectAt< Node >( 0 );
+                        if ( newNode.get() != nullptr ) {
+                            if ( auto group = dynamic_cast< Group * >( node ) ) {
+                                group->attachNode( newNode );
+                                newNode->perform( StartComponents() );
+                                newNode->perform( UpdateWorldState() );
+                            } else {
+                                CRIMILD_LOG_WARNING( "Drop target node is not a group" );
+                            }
+                        } else {
+                            CRIMILD_LOG_ERROR( "Cannot load Node from ", path );
+                        }
+                    } else {
+                        CRIMILD_LOG_ERROR( "Cannot read file ", path );
                     }
                 }
                 ImGui::EndDragDropTarget();

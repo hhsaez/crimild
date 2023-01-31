@@ -27,8 +27,10 @@
 
 #include "Editor/Panels/EditorProjectPanel.hpp"
 
+#include "Coding/FileEncoder.hpp"
 #include "Editor/EditorLayer.hpp"
 #include "Editor/EditorProject.hpp"
+#include "SceneGraph/Node.hpp"
 
 #include <filesystem>
 
@@ -96,12 +98,41 @@ void editor::ProjectPanel::traverse( const std::filesystem::path &path ) noexcep
     }
 
     if ( std::filesystem::is_directory( path ) ) {
+        if ( ImGui::BeginDragDropTarget() ) {
+            if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+                size_t nodeAddr = *( ( size_t * ) payload->Data );
+                Node *node = reinterpret_cast< Node * >( nodeAddr );
+                if ( node != nullptr ) {
+                    const auto fileName = [ & ] {
+                        if ( !node->getName().empty() ) {
+                            return node->getName();
+                        } else {
+                            return std::string( "node" );
+                        }
+                    }();
+                    const auto filePath = path / ( node->getName() + ".crimild" );
+                    coding::FileEncoder encoder;
+                    encoder.encode( retain( node ) );
+                    encoder.write( filePath );
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+
         if ( isOpen ) {
             for ( const auto &entry : std::filesystem::directory_iterator( path ) ) {
                 traverse( entry.path() );
             }
             // Pop tree state only for directories
             ImGui::TreePop();
+        }
+    } else {
+        // Files can be dragged and dropped to other panels
+        if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
+            ImGui::SetDragDropPayload( "DND_FILE_PATH", path.string().c_str(), path.string().length() );
+            // Tooltip
+            ImGui::Text( path.filename().string().c_str() );
+            ImGui::EndDragDropSource();
         }
     }
 }
