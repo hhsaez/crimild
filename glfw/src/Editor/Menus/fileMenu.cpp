@@ -33,7 +33,9 @@
 #include "Editor/EditorProject.hpp"
 #include "Editor/EditorUtils.hpp"
 #include "Foundation/ImGUIUtils.hpp"
+#include "Foundation/Log.hpp"
 #include "Foundation/Version.hpp"
+#include "Loaders/OBJLoader.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -181,6 +183,22 @@ void crimild::editor::fileMenu( void ) noexcept
         enabledWithProject(
             [ & ] {
                 if ( ImGui::BeginMenu( "Import..." ) ) {
+                    if ( ImGui::MenuItem( "Wavefront OBJ (.obj)..." ) ) {
+                        openDialog(
+                            "ImportOBJDlgKey",
+                            "Import",
+                            []( const auto &path ) {
+                                OBJLoader loader( path.string() );
+                                if ( auto model = loader.load() ) {
+                                    addToScene( model );
+                                } else {
+                                    CRIMILD_LOG_ERROR( "Cannot load model from file ", path.string() );
+                                }
+                            },
+                            ".obj",
+                            project->getAssetsDirectory().string()
+                        );
+                    }
                     if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
                         openDialog(
                             "ImportGLTFDlgKey",
@@ -188,7 +206,8 @@ void crimild::editor::fileMenu( void ) noexcept
                             []( const auto &path ) {
                                 // TODO
                             },
-                            ".gltf"
+                            ".gltf",
+                            project->getAssetsDirectory().string()
                         );
                     }
                     ImGui::EndMenu();
