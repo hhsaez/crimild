@@ -8,6 +8,7 @@ target_include_directories(
 	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
 	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/json/include
 	INTERFACE ${Vulkan_INCLUDE_DIRS} 
+	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/tinygltf
 )
 target_link_libraries( 
 	crimild_glfw_base
