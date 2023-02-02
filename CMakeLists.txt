@@ -83,6 +83,10 @@ if( CRIMILD_BUILD_GLFW )
 	set( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
 	add_subdirectory( ${Crimild_SOURCE_DIR}/third-party/glfw )
 
+	set( TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE )
+	set( TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE )
+	add_subdirectory( ${PROJECT_SOURCE_DIR}/third-party/tinygltf )
+
 	add_subdirectory( glfw )
 endif()
 
