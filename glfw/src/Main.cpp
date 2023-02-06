@@ -32,10 +32,10 @@
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Rendering/GLFWWindow.hpp"
+#include "Rendering/STBImageManager.hpp"
 
 #include <Crimild.hpp>
 #include <Crimild_GLFW.hpp>
-#include <Crimild_STB.hpp>
 #include <Crimild_Vulkan.hpp>
 
 #ifdef CRIMILD_ENABLE_OPENAL

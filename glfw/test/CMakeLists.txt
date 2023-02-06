@@ -27,7 +27,6 @@ target_link_libraries(
     ${CRIMILD_TEST_NAME} 
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
-    PRIVATE Crimild::STB
     PRIVATE Crimild::ImGui
     PRIVATE Crimild::Import
     PRIVATE Crimild::GLFW

@@ -8,6 +8,7 @@ target_include_directories(
 	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
 	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/json/include
 	INTERFACE ${Vulkan_INCLUDE_DIRS} 
+	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/stb
 	INTERFACE ${PROJECT_SOURCE_DIR}/third-party/tinygltf
 )
 target_link_libraries( 
@@ -16,7 +17,6 @@ target_link_libraries(
 	INTERFACE Crimild::Vulkan
 	INTERFACE Crimild::ImGui
 	INTERFACE Crimild::Import
-	INTERFACE Crimild::STB
 	INTERFACE glfw
 )
 
@@ -84,10 +84,14 @@ target_sources(
 	Editor/Panels/ScenePanel.cpp
 	Editor/Panels/SimulationPanel.cpp
 	Editor/Panels/ToolbarPanel.cpp
+	Foundation/STBUtils.cpp
+	Foundation/STBUtils.hpp
 	Rendering/GLFWVulkanSurface.cpp
 	Rendering/GLFWWindow.cpp
 	Rendering/ImGUILayer.cpp
 	Rendering/Layer.cpp
+	Rendering/STBImageManager.cpp
+	Rendering/STBImageManager.hpp
 	Simulation/SimulationLayer.cpp
 	Simulation/Systems/GLFWSystem.cpp
 	Simulation/Systems/GLFWVulkanSystem.cpp
