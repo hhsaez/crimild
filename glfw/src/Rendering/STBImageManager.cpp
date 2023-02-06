@@ -28,11 +28,9 @@
 #include "Rendering/STBImageManager.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Foundation/STBUtils.hpp"
 #include "Foundation/Types.hpp"
 #include "Rendering/Image.hpp"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 using namespace crimild;
 
@@ -85,7 +83,10 @@ SharedPointer< Image > crimild::stb::ImageManager::loadImage( ImageDescriptor co
                     auto data = ByteArray( size );
                     memcpy( data.getData(), pixels, data.size() );
                     return data;
-                }() ) ) );
+                }()
+            )
+        )
+    );
 
     stbi_image_free( pixels );
 

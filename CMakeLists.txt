@@ -25,7 +25,6 @@ endif()
 # Define build options here
 option( CRIMILD_BUILD_TESTS "Build tests" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_IMPORT "Build importers?" ${CRIMILD_IS_MAIN_PROJECT} )
-option( CRIMILD_BUILD_STB "Build the STB extension" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_VULKAN "Build the crimild-vulkan extension?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_GLFW "Build the crimild-glfw extension?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_IMGUI "Build the crimild-imgui extension?" ${CRIMILD_IS_MAIN_PROJECT} )
@@ -50,10 +49,6 @@ if( CRIMILD_BUILD_IMPORT )
 	add_subdirectory( ${PROJECT_SOURCE_DIR}/third-party/assimp )
 
 	add_subdirectory( import )
-endif()
-
-if( CRIMILD_BUILD_STB )
-	add_subdirectory( stb )
 endif()
 
 if( CRIMILD_BUILD_VULKAN )
