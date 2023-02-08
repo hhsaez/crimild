@@ -36,6 +36,7 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/Version.hpp"
 #include "Loaders/OBJLoader.hpp"
+#include "Importers/GLTFImporter.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -204,7 +205,13 @@ void crimild::editor::fileMenu( void ) noexcept
                             "ImportGLTFDlgKey",
                             "Import",
                             []( const auto &path ) {
-                                // TODO
+                                crimild::importers::GLTFImporter importer;
+                                auto model = importer.import( path );
+                                if ( model != nullptr ) {
+                                    addToScene( model );
+                                } else {
+                                    CRIMILD_LOG_ERROR( "Cannot load model from file ", path.string() );
+                                }
                             },
                             ".gltf",
                             project->getAssetsDirectory().string()
