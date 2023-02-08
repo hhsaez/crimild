@@ -24,7 +24,6 @@ endif()
 
 # Define build options here
 option( CRIMILD_BUILD_TESTS "Build tests" ${CRIMILD_IS_MAIN_PROJECT} )
-option( CRIMILD_BUILD_IMPORT "Build importers?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_VULKAN "Build the crimild-vulkan extension?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_GLFW "Build the crimild-glfw extension?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_IMGUI "Build the crimild-imgui extension?" ${CRIMILD_IS_MAIN_PROJECT} )
@@ -38,18 +37,6 @@ endif ()
 
 # Add subdirectories
 add_subdirectory( core )
-
-if( CRIMILD_BUILD_IMPORT )
-	add_definitions( -DCRIMILD_ENABLE_IMPORT=1 )
-
-	set( ASSIMP_BUILD_STATIC_LIB ON CACHE BOOL "Build Static libs" )
-	set( BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libs" )
-	set( ASSIMP_BUILD_TESTS OFF CACHE BOOL "Build Assimp tests" )
-	set( ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Build Assimp tools" )
-	add_subdirectory( ${PROJECT_SOURCE_DIR}/third-party/assimp )
-
-	add_subdirectory( import )
-endif()
 
 if( CRIMILD_BUILD_VULKAN )
 	add_definitions( -DCRIMILD_ENABLE_VULKAN=1 )

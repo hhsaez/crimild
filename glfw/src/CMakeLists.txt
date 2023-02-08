@@ -16,7 +16,6 @@ target_link_libraries(
 	INTERFACE Crimild::Core 
 	INTERFACE Crimild::Vulkan
 	INTERFACE Crimild::ImGui
-	INTERFACE Crimild::Import
 	INTERFACE glfw
 )
 
