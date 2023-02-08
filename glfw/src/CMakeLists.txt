@@ -86,6 +86,8 @@ target_sources(
 	Editor/Panels/ToolbarPanel.cpp
 	Foundation/STBUtils.cpp
 	Foundation/STBUtils.hpp
+	Importers/GLTFImporter.cpp
+	Importers/GLTFImporter.hpp
 	Rendering/GLFWVulkanSurface.cpp
 	Rendering/GLFWWindow.cpp
 	Rendering/ImGUILayer.cpp
