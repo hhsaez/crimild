@@ -9,7 +9,6 @@ function( CRIMILD_ADD_EXAMPLE EXAMPLE_NAME EXAMPLE_SOURCES )
         PRIVATE Crimild::Core
         PRIVATE Crimild::Vulkan
         PRIVATE Crimild::ImGui
-        PRIVATE Crimild::Import
         PRIVATE Crimild::GLFW
         PRIVATE Crimild::GLFW::Main
     )

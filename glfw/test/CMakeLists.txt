@@ -28,7 +28,6 @@ target_link_libraries(
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
     PRIVATE Crimild::ImGui
-    PRIVATE Crimild::Import
     PRIVATE Crimild::GLFW
     PRIVATE gtest gmock
 )

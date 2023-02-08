@@ -37,7 +37,6 @@
 #include "Components/MaterialComponent.hpp"
 #include "Concurrency/Async.hpp"
 #include "Editor/EditorLayer.hpp"
-#include "Importers/SceneImporter.hpp"
 #include "Loaders/OBJLoader.hpp"
 #include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
@@ -265,13 +264,8 @@ bool crimild::editor::importFile( std::string fileName ) noexcept
         loader.setVerbose( false );
         model = loader.load();
     } else {
-#ifdef CRIMILD_ENABLE_IMPORT
-        import::SceneImporter importer;
-        model = importer.import( path.getAbsolutePath() );
-#else
         CRIMILD_LOG_ERROR( "Unsupported file type" );
         return false;
-#endif
     }
 
     if ( model == nullptr ) {
