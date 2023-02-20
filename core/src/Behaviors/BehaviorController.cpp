@@ -6,7 +6,10 @@
 #include "Behaviors/Actions/Success.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Coding/MemoryDecoder.hpp"
+#include "Coding/MemoryEncoder.hpp"
 #include "Concurrency/Async.hpp"
+#include "Foundation/Log.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;
@@ -105,7 +108,22 @@ void BehaviorController::decode( coding::Decoder &decoder )
 SharedPointer< NodeComponent > BehaviorController::clone( void )
 {
     auto other = crimild::alloc< BehaviorController >();
-    other->_context = _context;
-    other->m_currentBehavior = m_currentBehavior;
+
+    // Behaviors have state that cannot be shared, so we must deep
+    // copy them to the new component.
+    coding::MemoryEncoder encoder;
+    encoder.encode( _context );
+    encoder.encode( m_currentBehavior );
+
+    const auto bytes = encoder.getBytes();
+    coding::MemoryDecoder decoder;
+    decoder.fromBytes( bytes );
+    if ( decoder.getObjectCount() == 0 ) {
+        CRIMILD_LOG_ERROR( "Decoder is empty after encoding behaviors" );
+        return nullptr;
+    }
+    other->_context = decoder.getObjectAt< BehaviorContext >( 0 );
+    other->m_currentBehavior = decoder.getObjectAt< Behavior >( 1 );
+
     return other;
 }
