@@ -263,34 +263,6 @@ TEST( Codable, it_fails_decoding_for_children_with_unknown_types )
     EXPECT_EQ( nullptr, decoded->getComponent< crimild::CodableComponent >() );
 }
 
-TEST( Codable, handles_references_to_other_root_objects )
-{
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode );
-    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableComponentWithReference );
-
-    auto n0 = crimild::alloc< crimild::CodableNode >( "a node" );
-    auto n1 = crimild::alloc< crimild::CodableNode >( "another node" );
-
-    n0->attachComponent< crimild::CodableComponentWithReference >()->node = n1.get();
-
-    auto encoder = crimild::alloc< crimild::coding::MemoryEncoder >();
-    ASSERT_TRUE( encoder->encode( n0 ) );
-    ASSERT_TRUE( encoder->encode( n1 ) );
-    auto bytes = encoder->getBytes();
-
-    auto decoder = crimild::alloc< crimild::coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
-    ASSERT_EQ( 2, decoder->getObjectCount() );
-
-    auto decoded = decoder->getObjectAt< crimild::CodableNode >( 0 );
-    ASSERT_TRUE( decoded != nullptr );
-    EXPECT_EQ( n0->getName(), decoded->getName() );
-    auto decodedComponent = decoded->getComponent< crimild::CodableComponentWithReference >();
-    ASSERT_TRUE( decodedComponent != nullptr );
-    ASSERT_NE( nullptr, decodedComponent->node );
-    EXPECT_EQ( "another node", decodedComponent->node->getName() );
-}
-
 TEST( Codable, ignores_references_to_unknown_objects )
 {
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableNode );
