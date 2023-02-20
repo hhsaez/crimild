@@ -31,6 +31,7 @@
 #include "Editor/Layout.hpp"
 
 #include <filesystem>
+#include <functional>
 
 namespace crimild {
 
@@ -51,6 +52,7 @@ namespace crimild {
 
         private:
             std::filesystem::path m_selectedPath;
+            std::function< bool( void ) > m_popup;
         };
 
     }

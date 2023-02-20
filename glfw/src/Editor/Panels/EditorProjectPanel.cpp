@@ -31,6 +31,7 @@
 #include "Editor/EditorLayer.hpp"
 #include "Editor/EditorProject.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/PrefabNode.hpp"
 
 #include <filesystem>
 
@@ -62,6 +63,12 @@ void editor::ProjectPanel::render( void ) noexcept
     }
 
     ImGui::End();
+
+    if ( m_popup != nullptr ) {
+        if ( !m_popup() ) {
+            m_popup = nullptr;
+        }
+    }
 
     if ( !open ) {
         removeFromParent();
@@ -103,17 +110,37 @@ void editor::ProjectPanel::traverse( const std::filesystem::path &path ) noexcep
                 size_t nodeAddr = *( ( size_t * ) payload->Data );
                 Node *node = reinterpret_cast< Node * >( nodeAddr );
                 if ( node != nullptr ) {
-                    const auto fileName = [ & ] {
-                        if ( !node->getName().empty() ) {
-                            return node->getName();
-                        } else {
-                            return std::string( "node" );
-                        }
-                    }();
-                    const auto filePath = path / ( node->getName() + ".crimild" );
-                    coding::FileEncoder encoder;
-                    encoder.encode( retain( node ) );
-                    encoder.write( filePath );
+                    if ( auto prefab = dynamic_cast< PrefabNode * >( node ) ) {
+                        m_popup = [] {
+                            bool ret = true;
+                            ImGui::OpenPopup( "Error" );
+
+                            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+                            ImGui::SetNextWindowPos( center, ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+
+                            if ( ImGui::BeginPopupModal( "Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+                                ImGui::Text( "A Prefab already exists for this node.\nUse \"Override\" option in Inspector to update prefabs." );
+                                if ( ImGui::Button( "Close" ) ) {
+                                    ImGui::CloseCurrentPopup();
+                                    ret = false;
+                                }
+                                ImGui::EndPopup();
+                            }
+                            return ret;
+                        };
+                    } else {
+                        const auto fileName = [ & ] {
+                            if ( !node->getName().empty() ) {
+                                return node->getName();
+                            } else {
+                                return std::string( "node" );
+                            }
+                        }();
+                        const auto filePath = path / ( node->getName() + ".crimild" );
+                        coding::FileEncoder encoder;
+                        encoder.encode( retain( node ) );
+                        encoder.write( filePath );
+                    }
                 }
             }
             ImGui::EndDragDropTarget();
