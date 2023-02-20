@@ -9,6 +9,7 @@ set(
     CRIMILD_TEST_SOURCE_FILES 
 	Coding/JSONCodingTest.cpp
     Editor/EditorProjectTest.cpp
+    SceneGraph/PrefabNodeTest.cpp
 	TestRunner.cpp
 )
 

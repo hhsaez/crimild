@@ -93,6 +93,8 @@ target_sources(
 	Rendering/Layer.cpp
 	Rendering/STBImageManager.cpp
 	Rendering/STBImageManager.hpp
+	SceneGraph/PrefabNode.cpp
+	SceneGraph/PrefabNode.hpp
 	Simulation/SimulationLayer.cpp
 	Simulation/Systems/GLFWSystem.cpp
 	Simulation/Systems/GLFWVulkanSystem.cpp

@@ -50,6 +50,7 @@
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Node.hpp"
+#include "SceneGraph/PrefabNode.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
@@ -160,6 +161,36 @@ namespace crimild {
             strcpy( nameStr, node->getName().c_str() );
             ImGui::InputText( "Name", nameStr, 256 );
             node->setName( nameStr );
+
+            if ( auto prefab = dynamic_cast< PrefabNode * >( node ) ) {
+                ImGui::Separator();
+                ImGui::Text( "Prefab:" );
+                ImGui::SameLine();
+                if ( prefab->isLinked() ) {
+                    if ( ImGui::Button( "Unlink" ) ) {
+                        prefab->setLinked( !prefab->isLinked() );
+                    }
+                    ImGui::SameLine();
+                    if ( prefab->isEditable() ) {
+                        if ( ImGui::Button( "Override" ) ) {
+                            prefab->overrideInstance();
+                        }
+                        ImGui::SameLine();
+                        if ( ImGui::Button( "Reset" ) ) {
+                            prefab->reloadInstance();
+                        }
+                    } else {
+                        if ( ImGui::Button( "Edit" ) ) {
+                            prefab->setEditable( true );
+                        }
+                    }
+                } else {
+                    if ( ImGui::Button( "Restore" ) ) {
+                        prefab->reloadInstance();
+                    }
+                }
+                ImGui::Separator();
+            }
         }
     };
 

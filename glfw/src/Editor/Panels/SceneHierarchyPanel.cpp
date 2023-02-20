@@ -34,6 +34,7 @@
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
+#include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/StartComponents.hpp"
@@ -63,6 +64,27 @@ public:
 
     void visitGroup( Group *group ) override
     {
+        auto color = ColorRGB { 1, 1, 1 };
+        auto modified = false;
+
+        if ( auto prefab = dynamic_cast< PrefabNode * >( group ) ) {
+            color = ColorRGB { 0, 0.5, 1 };
+            if ( prefab->isLinked() && !prefab->isEditable() ) {
+                visit(
+                    group,
+                    [] {},
+                    true,
+                    false,
+                    color
+                );
+                return;
+            } else if ( !prefab->isLinked() ) {
+                color = ColorRGB { 0.75, 0.85, 1 };
+            } else if ( prefab->isEditable() ) {
+                modified = true;
+            }
+        }
+
         visit(
             group,
             [ & ] {
@@ -73,7 +95,9 @@ public:
                 );
             },
             group->getNodeCount() == 0,
-            true
+            true,
+            color,
+            modified
         );
     }
 
@@ -96,7 +120,14 @@ private:
     }
 
     template< typename NodeType, typename Fn >
-    void visit( NodeType *node, Fn fn, bool isLeaf, bool isDropTarget )
+    void visit(
+        NodeType *node,
+        Fn fn,
+        bool isLeaf,
+        bool isDropTarget,
+        const ColorRGB &color = ColorRGB { 1, 1, 1 },
+        bool modified = false
+    )
     {
         auto editor = EditorLayer::getInstance();
 
@@ -112,9 +143,16 @@ private:
         }
 
         ImGui::PushID( node->getUniqueID() );
-        ImGui::PushStyleColor( ImGuiCol_Text, node->isEnabled() ? IM_COL32( 255, 255, 255, 255 ) : IM_COL32( 255, 255, 255, 64 ) );
+        ImGui::PushStyleColor(
+            ImGuiCol_Text,
+            node->isEnabled()
+                ? IM_COL32( color.r * 255, color.g * 255, color.b * 255, 255 )
+                : IM_COL32( color.r * 255, color.g * 255, color.b * 255, 64 )
+        );
 
-        const auto isOpen = ImGui::TreeNodeEx( getNodeName( node ).c_str(), flags );
+        auto treeNodeName = getNodeName( node ) + ( modified ? " (*)" : "" );
+
+        const auto isOpen = ImGui::TreeNodeEx( treeNodeName.c_str(), flags );
 
         ImGui::PopStyleColor();
         ImGui::PopID();
@@ -154,23 +192,13 @@ private:
                     }
                 } else if ( auto payload = ImGui::AcceptDragDropPayload( "DND_FILE_PATH" ) ) {
                     std::string path( static_cast< const char * >( payload->Data ), payload->DataSize );
-                    coding::FileDecoder decoder;
-                    decoder.read( path );
-                    if ( decoder.getObjectCount() != 0 ) {
-                        auto newNode = decoder.getObjectAt< Node >( 0 );
-                        if ( newNode.get() != nullptr ) {
-                            if ( auto group = dynamic_cast< Group * >( node ) ) {
-                                group->attachNode( newNode );
-                                newNode->perform( StartComponents() );
-                                newNode->perform( UpdateWorldState() );
-                            } else {
-                                CRIMILD_LOG_WARNING( "Drop target node is not a group" );
-                            }
-                        } else {
-                            CRIMILD_LOG_ERROR( "Cannot load Node from ", path );
-                        }
+                    auto prefab = crimild::alloc< PrefabNode >( path );
+                    if ( auto group = dynamic_cast< Group * >( node ) ) {
+                        group->attachNode( prefab );
+                        prefab->perform( StartComponents() );
+                        prefab->perform( UpdateWorldState() );
                     } else {
-                        CRIMILD_LOG_ERROR( "Cannot read file ", path );
+                        CRIMILD_LOG_WARNING( "Drop target node is not a group" );
                     }
                 }
                 ImGui::EndDragDropTarget();
