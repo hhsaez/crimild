@@ -192,7 +192,7 @@ namespace crimild {
             template< class T >
             inline SharedPointer< T > getObjectAt( crimild::Size index )
             {
-                return crimild::cast_ptr< T >( _roots[ index ] );
+                return crimild::dynamic_cast_ptr< T >( _roots[ index ] );
             }
 
         protected:
@@ -204,7 +204,7 @@ namespace crimild {
         protected:
             inline void addRootObject( SharedPointer< SharedObject > const &obj ) noexcept
             {
-	            _roots.add( obj );
+                _roots.add( obj );
             }
 
         private:
