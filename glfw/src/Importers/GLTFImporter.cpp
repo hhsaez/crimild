@@ -316,7 +316,7 @@ std::shared_ptr< Node > loadNode( const tinygltf::Node &inNode, const tinygltf::
                 }
                 default: {
                     CRIMILD_LOG_ERROR( "Index component type ", accessor.componentType, " not supported!" );
-                    return;
+                    return nullptr;
                 }
             }
 
