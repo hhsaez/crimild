@@ -28,12 +28,25 @@
 #ifndef CRIMILD_EDITOR_PANELS_SIMULATION
 #define CRIMILD_EDITOR_PANELS_SIMULATION
 
-namespace crimild::editor::panels {
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
 
-    class Simulation {
-    public:
-        void render( void ) noexcept;
-    };
+namespace crimild {
+
+    namespace editor::panels {
+
+        class Simulation {
+        public:
+            Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
+            virtual ~Simulation( void ) = default;
+
+            void render( void ) noexcept;
+
+        private:
+            Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
+            vulkan::ScenePass m_scenePass;
+        };
+
+    }
 
 }
 

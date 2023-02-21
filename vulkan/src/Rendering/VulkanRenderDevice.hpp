@@ -90,8 +90,8 @@ namespace crimild {
 
             void handle( const Event &e ) noexcept;
 
-            bool beginRender( void ) noexcept;
-            bool endRender( void ) noexcept;
+            bool beginRender( bool isPresenting = true ) noexcept;
+            bool endRender( bool isPresenting = true ) noexcept;
 
             void flush( void ) noexcept;
 
