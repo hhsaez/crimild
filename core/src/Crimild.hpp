@@ -170,6 +170,7 @@
 #include "Mathematics/Sphere.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
