@@ -738,6 +738,9 @@ const utils::ExtensionArray &utils::getDeviceExtensions( void ) noexcept
 #if defined( CRIMILD_PLATFORM_OSX )
         // Require to name objects for debug
         VK_EXT_DEBUG_MARKER_EXTENSION_NAME,
+
+        // Require portability subset
+        "VK_KHR_portability_subset",
 #endif
     };
     return deviceExtensions;

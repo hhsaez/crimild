@@ -81,6 +81,13 @@ namespace crimild {
             [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_imageIndex; }
             [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
 
+            inline uint32_t getGraphicsQueueFamily( void ) const noexcept { return m_graphicsQueueFamily; }
+            inline VkQueue getGraphicsQueue( void ) const noexcept { return m_graphicsQueueHandle; }
+            inline uint32_t getComputeQueueFamily( void ) const noexcept { return m_computeQueueFamily; }
+            inline VkQueue getComputeQueue( void ) const noexcept { return m_computeQueueHandle; }
+            inline uint32_t getPresentQueueFamily( void ) const noexcept { return m_presentQueueFamily; }
+            inline VkQueue getPresentQueue( void ) const noexcept { return m_presentQueueHandle; }
+
             void handle( const Event &e ) noexcept;
 
             bool beginRender( void ) noexcept;
@@ -321,8 +328,11 @@ namespace crimild {
 
             Extent2D m_extent;
 
+            uint32_t m_graphicsQueueFamily = -1;
             VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
+            uint32_t m_computeQueueFamily = -1;
             VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
+            uint32_t m_presentQueueFamily = -1;
             VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
 
             VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;

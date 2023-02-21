@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002 - present, H. Hernan Saez
+ * Copyright (c) 2002-present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,23 +25,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_
-#define CRIMILD_VULKAN_
+#ifndef CRIMILD_DESKTOP_SCENE_GRAPH_NODE_
+#define CRIMILD_DESKTOP_SCENE_GRAPH_NODE_
 
-#include "Rendering/VulkanInstance.hpp"
-#include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanShaderCompiler.hpp"
-#include "Rendering/VulkanSurface.hpp"
-#include "Simulation/Systems/VulkanCaptureSystem.hpp"
+#include "SceneGraph/Group.hpp"
+
+#include <filesystem>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace crimild {
 
-    namespace vulkan {
+    class PrefabNode : public Group {
+        CRIMILD_IMPLEMENT_RTTI( crimild::PrefabNode )
 
-        void init( void );
+    private:
+        static std::unordered_map< std::string, std::unordered_set< PrefabNode * > > s_prefabs;
+        static std::unordered_map< std::string, std::shared_ptr< Node > > s_instances;
 
-    }
+    public:
+        PrefabNode( void ) = default;
+        explicit PrefabNode( const std::filesystem::path &path ) noexcept;
+        virtual ~PrefabNode( void ) noexcept;
+
+        inline bool isLinked( void ) const noexcept { return m_linked; }
+        inline void setLinked( bool linked ) noexcept { m_linked = linked; }
+
+        inline bool isEditable( void ) const noexcept { return m_editable; }
+        inline void setEditable( bool editable ) noexcept { m_editable = editable; }
+
+        void overrideInstance( void ) noexcept;
+        void reloadInstance( void ) noexcept;
+
+    private:
+        void load( void ) noexcept;
+
+    private:
+        std::filesystem::path m_path;
+        bool m_linked = true;
+        bool m_editable = false;
+
+        /**
+            \name Coding support
+         */
+        //@{
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
+
+        //@}
+    };
 
 }
 
