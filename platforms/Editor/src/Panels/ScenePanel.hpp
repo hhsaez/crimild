@@ -28,11 +28,40 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE
 #define CRIMILD_EDITOR_PANELS_SCENE
 
+#include <Crimild.hpp>
+#include <Crimild_Vulkan.hpp>
+
 namespace crimild::editor::panels {
 
     class Scene {
     public:
+        Scene( vulkan::RenderDevice *renderDevice ) noexcept;
+        virtual ~Scene( void ) = default;
+
         void render( void ) noexcept;
+
+    private:
+        inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+
+    private:
+        vulkan::RenderDevice *m_renderDevice = nullptr;
+
+        Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+        Event m_lastResizeEvent = Event {};
+        vulkan::ScenePass m_scenePass;
+
+        vulkan::SceneDebugPass m_sceneDebugPass;
+        vulkan::OverlayPass m_sceneDebugOverlayPass;
+        std::vector< SharedPointer< vulkan::DebugAttachmentPass > > m_debugPasses;
+
+        std::unique_ptr< Camera > m_editorCamera;
+        bool m_editorCameraEnabled = false;
+        Vector2i m_lastMousePos = Vector2i { 0, 0 };
+        Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
+        Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
+
+        std::vector< const vulkan::FramebufferAttachment * > m_attachments;
+        size_t m_selectedAttachment = 0;
     };
 
 }

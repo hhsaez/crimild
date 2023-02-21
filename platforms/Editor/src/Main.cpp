@@ -9,6 +9,15 @@
 //   the backend itself (imgui_impl_vulkan.cpp), but should PROBABLY NOT be used by your own engine/app code.
 // Read comments in imgui_impl_vulkan.h.
 
+#include "Foundation/GLFWUtils.hpp"
+#include "Foundation/ImGuiUtils.hpp"
+#include "Panels/BehaviorsPanel.hpp"
+#include "Panels/MainMenuBar.hpp"
+#include "Panels/SceneHierarchyPanel.hpp"
+#include "Panels/ScenePanel.hpp"
+#include "Panels/SimulationPanel.hpp"
+#include "Panels/TimelinePanel.hpp"
+
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
 
@@ -432,7 +441,7 @@ int main( int argc, char **argv )
 
     // Create window with Vulkan context
     glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-    GLFWwindow *window = glfwCreateWindow( 1280, 720, "Crimild Editor", NULL, NULL );
+    GLFWwindow *window = glfwCreateWindow( 2560, 1440, "Crimild Editor", NULL, NULL );
     if ( !glfwVulkanSupported() ) {
         printf( "GLFW: Vulkan Not Supported\n" );
         return 1;
@@ -547,7 +556,8 @@ int main( int argc, char **argv )
 
     struct Panels {
         Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
-            : simulation( renderDevice )
+            : scene( renderDevice ),
+              simulation( renderDevice )
         {
             // no-op
         }

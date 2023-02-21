@@ -28,6 +28,11 @@
 #ifndef CRIMILD_VULKAN_
 #define CRIMILD_VULKAN_
 
+#include "Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp"
+#include "Rendering/RenderPasses/VulkanOverlayPass.hpp"
+#include "Rendering/RenderPasses/VulkanSceneDebugPass.hpp"
+#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
