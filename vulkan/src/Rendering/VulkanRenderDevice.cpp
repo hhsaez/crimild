@@ -57,6 +57,10 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
         exit( EXIT_FAILURE );
     }
 
+    m_graphicsQueueFamily = indices.graphicsFamily.front();
+    m_computeQueueFamily = indices.graphicsFamily.front();
+    m_presentQueueFamily = indices.graphicsFamily.front();
+
     // Make sure we're creating queue for unique families,
     // since both graphics and presenatation might be same family
     // \see utils::findQueueFamilies()
@@ -87,7 +91,6 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     };
 
     const auto &deviceExtensions = utils::getDeviceExtensions();
-    // deviceExtensions.push_back( "VK_KHR_portability_subset" );
 
     auto createInfo = VkDeviceCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

@@ -1,0 +1,475 @@
+#include "Panels/MainMenuBar.hpp"
+
+#include "Components/MaterialComponent.hpp"
+#include "Concurrency/Async.hpp"
+#include "Foundation/ImGuiUtils.hpp"
+#include "Foundation/Version.hpp"
+#include "Mathematics/Transformation_lookAt.hpp"
+#include "Mathematics/Transformation_rotation.hpp"
+#include "Primitives/BoxPrimitive.hpp"
+#include "Primitives/QuadPrimitive.hpp"
+#include "Primitives/SpherePrimitive.hpp"
+#include "Rendering/Material.hpp"
+#include "Rendering/Materials/WorldGridMaterial.hpp"
+#include "SceneGraph/Geometry.hpp"
+#include "SceneGraph/Group.hpp"
+#include "SceneGraph/Node_withTransformation.hpp"
+#include "Simulation/Simulation.hpp"
+#include "Visitors/StartComponents.hpp"
+#include "Visitors/UpdateWorldState.hpp"
+
+#include <filesystem>
+
+using namespace crimild;
+using namespace crimild::editor::panels;
+
+void MainMenuBar::render( void ) noexcept
+{
+    if ( ImGui::BeginMainMenuBar() ) {
+        renderFileMenu();
+        renderEditMenu();
+        renderSceneMenu();
+        renderViewMenu();
+        renderHelpMenu();
+        ImGui::EndMainMenuBar();
+    }
+}
+
+void MainMenuBar::renderFileMenu( void ) noexcept
+{
+    static std::string dialogId;
+    static std::function< void( const std::filesystem::path & ) > dialogHandler;
+
+    auto openDialog = [ & ]( std::string id, std::string title, auto handler, const char *filters = ".crimild", std::string pathName = "." ) {
+        dialogId = id;
+        dialogHandler = handler;
+        ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
+        ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, pathName, 1, nullptr, flags );
+    };
+
+    // auto project = EditorLayer::getInstance()->getProject();
+
+    auto enabledWithProject = [ /*hasProject = project != nullptr*/ ]( auto fn ) {
+        // if ( !hasProject ) {
+        //     ImGui::BeginDisabled();
+        // }
+        fn();
+        // if ( !hasProject ) {
+        //     ImGui::EndDisabled();
+        // }
+    };
+
+    // const auto baseDirectory = project->getScenesDirectory().string();
+    const auto baseDirectory = std::filesystem::current_path().string();
+
+    if ( ImGui::BeginMenu( "File" ) ) {
+        if ( ImGui::MenuItem( "New Project..." ) ) {
+            openDialog(
+                "NewProjectDlgKey",
+                "Create Project",
+                []( const auto &path ) {
+                    // EditorLayer::getInstance()->createProject( path );
+                },
+                ".crimild"
+            );
+        }
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "New Scene..." ) ) {
+                    openDialog(
+                        "NewSceneDlgKey",
+                        "Create Scene",
+                        []( const auto &path ) {
+                            // EditorLayer::getInstance()->createNewScene( path );
+                        },
+                        ".crimild",
+                        baseDirectory
+                    );
+                }
+            }
+        );
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Open Project..." ) ) {
+            openDialog(
+                "OpenProjectDlgKey",
+                "Open Project",
+                []( const auto &path ) {
+                    // EditorLayer::getInstance()->loadProject( path );
+                },
+                ".crimild"
+            );
+        }
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Open Scene..." ) ) {
+                    openDialog(
+                        "OpenSceneDlgKey",
+                        "Open Scene",
+                        []( const auto &path ) {
+                            // EditorLayer::getInstance()->loadScene( path );
+                        },
+                        ".crimild",
+                        baseDirectory
+                    );
+                }
+            }
+        );
+
+        ImGui::Separator();
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Project" ) ) {
+                    // EditorLayer::getInstance()->saveProject();
+                }
+            }
+        );
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Scene" ) ) {
+                    // EditorLayer::getInstance()->saveScene();
+                }
+            }
+        );
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::MenuItem( "Save Scene As..." ) ) {
+                    openDialog(
+                        "SaveSceneAsDlgKey",
+                        "Save Scene As...",
+                        []( const auto &path ) {
+                            // EditorLayer::getInstance()->saveSceneAs( path );
+                        },
+                        ".crimild",
+                        baseDirectory
+                    );
+                }
+            }
+        );
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Recent Projects..." ) ) {
+            // const auto &recentProjects = EditorLayer::getInstance()->getRecentProjects();
+            // if ( recentProjects.empty() ) {
+            ImGui::MenuItem( "No Recent Projects" );
+            // } else {
+            //     for ( const auto &path : recentProjects ) {
+            //         if ( path.empty() ) {
+            //             continue;
+            //         }
+            //         if ( ImGui::MenuItem( path.c_str() ) ) {
+            //             crimild::concurrency::sync_frame(
+            //                 [ path ] {
+            //                     EditorLayer::getInstance()->loadProject( path );
+            //                 }
+            //             );
+            //         }
+            //     }
+            // }
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        enabledWithProject(
+            [ & ] {
+                if ( ImGui::BeginMenu( "Import..." ) ) {
+                    if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
+                        openDialog(
+                            "ImportGLTFDlgKey",
+                            "Import",
+                            []( const auto &path ) {
+                                // TODO
+                            },
+                            ".gltf"
+                        );
+                    }
+                    ImGui::EndMenu();
+                }
+            }
+        );
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Quit" ) ) {
+            // EditorLayer::getInstance()->terminate();
+        }
+
+        ImGui::EndMenu();
+    }
+
+    if ( dialogHandler != nullptr && !dialogId.empty() ) {
+        ImGui::SetNextWindowSize( ImVec2( 800, 600 ) );
+        if ( ImGuiFileDialog::Instance()->Display( dialogId ) ) {
+            if ( ImGuiFileDialog::Instance()->IsOk() ) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                const auto path = std::filesystem::path { filePathName };
+                // Resolve at the beginning of next frame
+                crimild::concurrency::sync_frame(
+                    [ path, handler = dialogHandler ] {
+                        handler( path );
+                    }
+                );
+            }
+            ImGuiFileDialog::Instance()->Close();
+            dialogHandler = nullptr;
+            dialogId = "";
+        }
+    }
+}
+
+void MainMenuBar::renderEditMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Edit" ) ) {
+        if ( ImGui::MenuItem( "Clone" ) ) {
+            // crimild::editor::cloneSelected();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Delete" ) ) {
+            // crimild::editor::deleteSelected();
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+auto withName( auto node, std::string name ) noexcept
+{
+    node->setName( name );
+    return node;
+}
+
+static void addToScene( SharedPointer< Node > const &node ) noexcept
+{
+    // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
+    // always be the case. Maybe I should check the class type
+    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    node->perform( UpdateWorldState() );
+    node->perform( StartComponents() );
+    scene->attachNode( node );
+}
+
+static void addGeometry( std::string name, SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept
+{
+    auto geometry = crimild::alloc< Geometry >( name );
+    geometry->attachPrimitive( primitive );
+    geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
+    geometry->setLocal( local );
+    addToScene( geometry );
+}
+
+static void addEmptyNode( void ) noexcept
+{
+    addToScene( crimild::alloc< Group >() );
+}
+
+void MainMenuBar::renderSceneMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Scene" ) ) {
+        if ( ImGui::MenuItem( "Add Empty" ) ) {
+            addEmptyNode();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Geometry" ) ) {
+            if ( ImGui::MenuItem( "Plane" ) ) {
+                addGeometry( "Plane", QuadPrimitive::UNIT_QUAD, rotationX( -numbers::PI_DIV_2 ) );
+            }
+
+            if ( ImGui::MenuItem( "Box" ) ) {
+                addGeometry( "Box", BoxPrimitive::UNIT_BOX );
+            }
+
+            if ( ImGui::MenuItem( "Sphere" ) ) {
+                addGeometry( "Sphere", SpherePrimitive::UNIT_SPHERE );
+            }
+
+            ImGui::EndMenu();
+        }
+
+        if ( ImGui::BeginMenu( "Light" ) ) {
+            if ( ImGui::MenuItem( "Directional" ) ) {
+                auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                light->setName( "Directional Light" );
+                light->setEnergy( 5 );
+                light->setCastShadows( true );
+                light->setLocal(
+                    lookAt(
+                        Point3 { -5, 5, 10 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+                addToScene( light );
+            }
+            if ( ImGui::MenuItem( "Point" ) ) {
+                addToScene(
+                    withTranslation(
+                        withName(
+                            crimild::alloc< Light >( Light::Type::POINT ),
+                            "Point Light"
+                        ),
+                        0,
+                        1,
+                        0
+                    )
+                );
+            }
+            if ( ImGui::MenuItem( "Spot" ) ) {
+                auto light = crimild::alloc< Light >( Light::Type::SPOT );
+                light->setName( "Spot Light" );
+                light->setColor( ColorRGB { 1.0f, 1.0f, 1.0f } );
+                light->setCastShadows( true );
+                light->setEnergy( 1000.0f );
+                light->setInnerCutoff( Numericf::DEG_TO_RAD * 20.0f );
+                light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
+                light->setLocal(
+                    lookAt(
+                        Point3 { 10, 10, 0 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+
+                addToScene( light );
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Add Camera" ) ) {
+            // TODO
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+// static void addPanel( EditorLayer *editor, std::shared_ptr< editor::layout::Panel > const &panel ) noexcept
+// {
+//     editor::layout::LayoutManager::getInstance()->attachPanel( panel );
+// }
+
+void MainMenuBar::renderViewMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "View" ) ) {
+        if ( ImGui::MenuItem( "Project..." ) ) {
+            // addPanel( editor, crimild::alloc< editor::ProjectPanel >() );
+        }
+
+        if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
+            // addPanel( editor, crimild::alloc< SceneHierarchyPanel >() );
+        }
+
+        if ( ImGui::MenuItem( "Node Inspector..." ) ) {
+            // addPanel( editor, crimild::alloc< NodeInspectorPanel >( editor->getRenderDevice() ) );
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Scene..." ) ) {
+            // addPanel( editor, crimild::alloc< ScenePanel >( editor->getRenderDevice() ) );
+        }
+
+        if ( ImGui::MenuItem( "Simulation..." ) ) {
+            // addPanel( editor, crimild::alloc< SimulationPanel >( editor->getRenderDevice() ) );
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
+            // addPanel( editor, crimild::alloc< BehaviorEditorPanel >() );
+        }
+
+        if ( ImGui::MenuItem( "Timeline Editor..." ) ) {
+            // addPanel( editor, crimild::alloc< TimelinePanel >() );
+        }
+
+        ImGui::Separator();
+
+        ImGui::BeginDisabled();
+        if ( ImGui::MenuItem( "Render..." ) ) {
+            //            addPanel( editor, crimild::alloc< RenderScenePanel >( editor->getRenderDevice() ) );
+        }
+        ImGui::EndDisabled();
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Toolbar..." ) ) {
+            // addPanel( editor, crimild::alloc< editor::ToolbarPanel >() );
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Layout..." ) ) {
+            if ( ImGui::MenuItem( "Default" ) ) {
+                // editor::layout::LayoutManager::getInstance()->loadDefaultLayout();
+            }
+
+            ImGui::Separator();
+
+            if ( ImGui::MenuItem( "Clear" ) ) {
+                // editor::layout::LayoutManager::getInstance()->clear();
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+void helpAboutDialog( bool &open ) noexcept
+{
+    if ( !open ) {
+        return;
+    }
+
+    ImGui::SetNextWindowPos( ImVec2( 200, 200 ), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2( 350, 120 ), ImGuiCond_Always );
+
+    if ( ImGui::Begin( "About", &open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize ) ) {
+        Version version;
+        auto versionStr = version.getDescription();
+        ImGui::Text( "%s", versionStr.c_str() );
+        ImGui::Text( "http://crimild.hhsaez.com" );
+        ImGui::Text( "" );
+        ImGui::Text( "Copyright (c) 2002 - present, H. Hernan Saez" );
+        ImGui::Text( "All rights reserved." );
+
+        ImGui::End();
+    }
+}
+
+void MainMenuBar::renderHelpMenu( void ) noexcept
+{
+    static bool showHelpAboutDialog = false;
+    static bool showImGuiDemoWindow = false;
+
+    if ( ImGui::BeginMenu( "Help" ) ) {
+        if ( ImGui::MenuItem( "About..." ) ) {
+            showHelpAboutDialog = true;
+        }
+        if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
+            showImGuiDemoWindow = true;
+        }
+        ImGui::EndMenu();
+    }
+
+    helpAboutDialog( showHelpAboutDialog );
+
+    if ( showImGuiDemoWindow ) {
+        ImGui::ShowDemoWindow( &showImGuiDemoWindow );
+    }
+}
