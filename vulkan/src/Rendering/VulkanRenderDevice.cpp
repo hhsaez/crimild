@@ -697,26 +697,28 @@ void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexce
     commandBuffer = VK_NULL_HANDLE;
 }
 
-bool RenderDevice::beginRender( void ) noexcept
+bool RenderDevice::beginRender( bool isPresenting ) noexcept
 {
     CRIMILD_VULKAN_CHECK( vkWaitForFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ], VK_TRUE, UINT64_MAX ) );
 
-    const auto ret = vkAcquireNextImageKHR(
-        getHandle(),
-        m_swapchain,
-        std::numeric_limits< uint64_t >::max(), // disable timeout
-        m_imageAvailableSemaphores[ m_currentFrame ],
-        VK_NULL_HANDLE,
-        &m_imageIndex
-    );
-    if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
-        // TODO: swapchain needs to be recreated
-        return false;
-    }
+    if ( isPresenting ) {
+        const auto ret = vkAcquireNextImageKHR(
+            getHandle(),
+            m_swapchain,
+            std::numeric_limits< uint64_t >::max(), // disable timeout
+            m_imageAvailableSemaphores[ m_currentFrame ],
+            VK_NULL_HANDLE,
+            &m_imageIndex
+        );
+        if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
+            // TODO: swapchain needs to be recreated
+            return false;
+        }
 
-    if ( ret != VK_SUCCESS ) {
-        // no available image index. Skip frame
-        return false;
+        if ( ret != VK_SUCCESS ) {
+            // no available image index. Skip frame
+            return false;
+        }
     }
 
     // Wait for any previous frame that is using the image that we've just been assigned for the new frame
@@ -751,7 +753,7 @@ bool RenderDevice::beginRender( void ) noexcept
     return true;
 }
 
-bool RenderDevice::endRender( void ) noexcept
+bool RenderDevice::endRender( bool present ) noexcept
 {
     auto commandBuffer = getCurrentCommandBuffer();
     vkEndCommandBuffer( commandBuffer );
@@ -759,18 +761,22 @@ bool RenderDevice::endRender( void ) noexcept
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    submitInfo.pWaitDstStageMask = &waitStageMask;
-    VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[ m_currentFrame ] };
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
+    if ( present ) {
+        VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        submitInfo.pWaitDstStageMask = &waitStageMask;
+        VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[ m_currentFrame ] };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+    }
 
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
     VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[ m_currentFrame ] };
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
+    if ( present ) {
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+    }
 
     vkResetFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ] );
 
@@ -783,22 +789,24 @@ bool RenderDevice::endRender( void ) noexcept
         )
     );
 
-    VkSwapchainKHR swapchains[] = { m_swapchain };
+    if ( present ) {
+        VkSwapchainKHR swapchains[] = { m_swapchain };
 
-    auto presentInfo = VkPresentInfoKHR {
-        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .waitSemaphoreCount = 1,
-        .pWaitSemaphores = signalSemaphores,
-        .swapchainCount = 1,
-        .pSwapchains = swapchains,
-        .pImageIndices = &m_imageIndex,
-        .pResults = nullptr,
-    };
+        auto presentInfo = VkPresentInfoKHR {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = signalSemaphores,
+            .swapchainCount = 1,
+            .pSwapchains = swapchains,
+            .pImageIndices = &m_imageIndex,
+            .pResults = nullptr,
+        };
 
-    auto ret = vkQueuePresentKHR( m_presentQueueHandle, &presentInfo );
-    if ( ret == VK_ERROR_OUT_OF_DATE_KHR || ret == VK_SUBOPTIMAL_KHR ) {
-        // swapchain needs to be recreated
-        return false;
+        auto ret = vkQueuePresentKHR( m_presentQueueHandle, &presentInfo );
+        if ( ret == VK_ERROR_OUT_OF_DATE_KHR || ret == VK_SUBOPTIMAL_KHR ) {
+            // swapchain needs to be recreated
+            return false;
+        }
     }
 
     // Advance to the next frame

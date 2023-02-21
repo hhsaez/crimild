@@ -28,14 +28,55 @@
 #include "Panels/SimulationPanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Simulation/Simulation.hpp"
 
 using namespace crimild::editor::panels;
+
+Simulation::Simulation( crimild::vulkan::RenderDevice *renderDevice ) noexcept
+    : m_scenePass( renderDevice )
+{
+}
 
 void Simulation::render( void ) noexcept
 {
     bool open = true;
-
     bool visible = ImGui::Begin( "Simulation", &open, 0 );
+
+    ImVec2 renderSize = ImGui::GetContentRegionAvail();
+    bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
+    if ( !isMinimized ) {
+        if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
+            m_extent.width = renderSize.x;
+            m_extent.height = renderSize.y;
+            m_scenePass.handle(
+                Event {
+                    .type = Event::Type::WINDOW_RESIZE,
+                    .extent = m_extent,
+                }
+            );
+        }
+
+        auto camera = crimild::Simulation::getInstance()->getMainCamera();
+        if ( camera != nullptr ) {
+            camera->setAspectRatio( m_extent.width / m_extent.height );
+        }
+        m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
+    }
+
+    auto currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
+
+    const auto att = m_scenePass.getColorAttachment();
+    if ( !att->descriptorSets.empty() ) {
+        ImTextureID tex_id = att->descriptorSets[ currentFrameIdx ];
+        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+    } else {
+        ImGui::Text( "No scene attachments found" );
+    }
 
     ImGui::End();
 }

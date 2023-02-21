@@ -9,22 +9,8 @@
 //   the backend itself (imgui_impl_vulkan.cpp), but should PROBABLY NOT be used by your own engine/app code.
 // Read comments in imgui_impl_vulkan.h.
 
-#include "Concurrency/JobScheduler.hpp"
-#include "Foundation/GLFWUtils.hpp"
-#include "Foundation/ImGuiUtils.hpp"
-#include "Messaging/MessageQueue.hpp"
-#include "Panels/BehaviorsPanel.hpp"
-#include "Panels/MainMenuBar.hpp"
-#include "Panels/SceneHierarchyPanel.hpp"
-#include "Panels/ScenePanel.hpp"
-#include "Panels/SimulationPanel.hpp"
-#include "Panels/TimelinePanel.hpp"
-#include "Simulation/Settings.hpp"
-#include "Simulation/Simulation.hpp"
-
+#include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
-#include <stdio.h>  // printf, fprintf
-#include <stdlib.h> // abort
 
 namespace crimild::vulkan {
 
@@ -408,6 +394,10 @@ struct VulkanObjects {
 
     void cleanup( void ) noexcept
     {
+        if ( renderDevice != nullptr ) {
+            renderDevice->flush();
+        }
+
         renderDevice = nullptr;
         physicalDevice = nullptr;
         surface = nullptr;
@@ -456,6 +446,7 @@ int main( int argc, char **argv )
     // SetupVulkan( extensions, extensions_count );
 
     g_Instance = vulkanObjects.instance->getHandle();
+    g_Allocator = vulkanObjects.instance->getAllocator();
     g_PhysicalDevice = vulkanObjects.physicalDevice->getHandle();
     g_Device = vulkanObjects.renderDevice->getHandle();
     g_QueueFamily = vulkanObjects.renderDevice->getGraphicsQueueFamily();
@@ -555,6 +546,12 @@ int main( int argc, char **argv )
     ImVec4 clear_color = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
 
     struct Panels {
+        Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
+            : simulation( renderDevice )
+        {
+            // no-op
+        }
+
         crimild::editor::panels::MainMenuBar mainMenu;
         crimild::editor::panels::Timeline timeline;
         crimild::editor::panels::Behaviors behaviors;
@@ -574,7 +571,8 @@ int main( int argc, char **argv )
             sceneHierarchy.render();
             simulation.render();
         }
-    } panels;
+    };
+    auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
 
     // Start simulation
     simulation->start();
@@ -611,7 +609,9 @@ int main( int argc, char **argv )
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        panels.render();
+        vulkanObjects.renderDevice->beginRender( false );
+        panels->render();
+        vulkanObjects.renderDevice->endRender( false );
 
         // Rendering
         ImGui::Render();
@@ -634,6 +634,8 @@ int main( int argc, char **argv )
 
     jobScheduler.stop();
     crimild::MessageQueue::getInstance()->clear();
+
+    panels = nullptr;
 
     // Cleanup
     err = vkDeviceWaitIdle( g_Device );
