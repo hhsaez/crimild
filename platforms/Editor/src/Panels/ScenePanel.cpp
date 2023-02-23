@@ -27,6 +27,7 @@
 
 #include "Panels/ScenePanel.hpp"
 
+#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/VulkanImageView.hpp"
 
@@ -203,11 +204,19 @@ void Scene::render( void ) noexcept
         return;
     }
 
-    // if ( auto editor = EditorLayer::getInstance() ) {
-    // TODO: Fix gizmo position
-    auto selectedNode = Simulation::getInstance()->getScene();
-    drawGizmo( selectedNode, m_editorCamera.get(), windowPos.x, windowPos.y, m_extent.width, m_extent.height );
-    // }
+    if ( auto editor = Editor::getInstance() ) {
+        if ( auto selected = editor->getSelectedObject< Node >() ) {
+            // TODO: Fix gizmo position
+            drawGizmo(
+                selected,
+                m_editorCamera.get(),
+                windowPos.x,
+                windowPos.y,
+                m_extent.width,
+                m_extent.height
+            );
+        }
+    }
 
     auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 

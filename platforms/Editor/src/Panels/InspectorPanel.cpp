@@ -27,9 +27,375 @@
 
 #include "Panels/InspectorPanel.hpp"
 
+#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "SceneGraph/PrefabNode.hpp"
 
+#include <Crimild_Vulkan.hpp>
+
+using namespace crimild;
 using namespace crimild::editor::panels;
+
+static void pathComponentDetails( components::Path *path ) noexcept
+{
+    if ( ImGui::CollapsingHeader( path->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        ImGui::Text( "Nodes: %i", path->getNode< Group >()->getNodeCount() );
+    }
+}
+
+static void materialComponentDetails( MaterialComponent *materials )
+{
+    auto material = materials->first();
+    if ( material == nullptr ) {
+        return;
+    }
+
+    if ( ImGui::CollapsingHeader( material->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        if ( auto bsdf = dynamic_cast< materials::PrincipledBSDF * >( material ) ) {
+            auto albedo = bsdf->getAlbedo();
+            ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
+            bsdf->setAlbedo( albedo );
+        } else if ( auto unlit = dynamic_cast< UnlitMaterial * >( material ) ) {
+            auto color = rgb( unlit->getColor() );
+            ImGui::ColorEdit3( "Color", get_ptr( color ) );
+            unlit->setColor( rgba( color ) );
+        } else {
+            ImGui::Text( "Unknown material class: %s", material->getClassName() );
+        }
+    }
+}
+
+static void behaviorControllerDetails( behaviors::BehaviorController *controller )
+{
+    if ( controller == nullptr ) {
+        return;
+    }
+
+    auto context = controller->getContext();
+
+    static bool showBehaviorEditor = false;
+    ImGui::SetNextItemOpen( true );
+    if ( ImGui::CollapsingHeader( controller->getClassName(), ImGuiTreeNodeFlags_None ) ) {
+        if ( ImGui::Button( "Edit Behaviors..." ) ) {
+            showBehaviorEditor = true;
+        }
+    }
+
+    auto targetName = [ & ] {
+        std::string name = "N/A";
+        context->foreachTarget(
+            [ & ]( auto target ) {
+                std::stringstream ss;
+                ss << ( target->getName().empty() ? target->getClassName() : target->getName() );
+                ss << " (" << target->getUniqueID() << ")";
+                name = ss.str();
+            }
+        );
+        return name;
+    }();
+
+    ImGui::Text( "Target: %s", targetName.c_str() );
+    if ( ImGui::BeginDragDropTarget() ) {
+        if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+            size_t nodeAddr = *( ( size_t * ) payload->Data );
+            Node *target = reinterpret_cast< Node * >( nodeAddr );
+            if ( target ) {
+                context->removeAllTargets();
+                context->addTarget( target );
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // TODO: open behavior editor
+    // behaviorEditor( showBehaviorEditor, controller );
+}
+
+static const std::set< std::string > &getComponentList( void ) noexcept
+{
+    static const auto components = ObjectFactory::getInstance()->filter(
+        std::set< std::string > {
+            "crimild::components",
+        }
+    );
+    return components;
+}
+
+namespace crimild::editor::panels {
+
+    class NodeInfoSection : public Inspector::Section {
+    public:
+        virtual void render( Node *node ) noexcept override
+        {
+            if ( node == nullptr ) {
+                return;
+            }
+
+            auto enabled = node->isEnabled();
+            ImGui::Checkbox( "Enable", &enabled );
+            node->setEnabled( enabled );
+
+            ImGui::Text( "Class: %s", node->getClassName() );
+            ImGui::Text( "ID: %llu", node->getUniqueID() );
+
+            char nameStr[ 256 ] = { '\0' };
+            strcpy( nameStr, node->getName().c_str() );
+            ImGui::InputText( "Name", nameStr, 256 );
+            node->setName( nameStr );
+
+            if ( auto prefab = dynamic_cast< PrefabNode * >( node ) ) {
+                ImGui::Separator();
+                ImGui::Text( "Prefab:" );
+                ImGui::SameLine();
+                if ( prefab->isLinked() ) {
+                    if ( ImGui::Button( "Unlink" ) ) {
+                        prefab->setLinked( !prefab->isLinked() );
+                    }
+                    ImGui::SameLine();
+                    if ( prefab->isEditable() ) {
+                        if ( ImGui::Button( "Override" ) ) {
+                            prefab->overrideInstance();
+                        }
+                        ImGui::SameLine();
+                        if ( ImGui::Button( "Reset" ) ) {
+                            prefab->reloadInstance();
+                        }
+                    } else {
+                        if ( ImGui::Button( "Edit" ) ) {
+                            prefab->setEditable( true );
+                        }
+                    }
+                } else {
+                    if ( ImGui::Button( "Restore" ) ) {
+                        prefab->reloadInstance();
+                    }
+                }
+                ImGui::Separator();
+            }
+        }
+    };
+
+    class NodeTransformationSection : public Inspector::Section {
+    public:
+        virtual void render( crimild::Node *node ) noexcept override
+        {
+            Point3 nodeTranslation;
+            Vector3 nodeRotation;
+            Vector3 nodeScale;
+            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
+
+            bool changed = false;
+            changed = changed || ImGui::InputFloat3( "Tr", get_ptr( nodeTranslation ) );
+            changed = changed || ImGui::InputFloat3( "Rt", get_ptr( nodeRotation ) );
+            changed = changed || ImGui::InputFloat3( "Sc", get_ptr( nodeScale ) );
+            if ( changed ) {
+                Matrix4 mat;
+                ImGuizmo::RecomposeMatrixFromComponents( get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ), get_ptr( mat ) );
+                node->setLocal( Transformation { mat, inverse( mat ) } );
+                node->perform( UpdateWorldState() );
+            }
+        }
+    };
+
+    class NodeComponentsSection : public Inspector::Section {
+    public:
+        virtual void render( crimild::Node *node ) noexcept override
+        {
+            ImGui::SetNextItemOpen( true );
+            if ( ImGui::CollapsingHeader( "Components", ImGuiTreeNodeFlags_None ) ) {
+                if ( ImGui::BeginCombo( "##", "Add Component..." ) ) {
+                    const auto &components = getComponentList();
+                    for ( const auto &componentClassName : components ) {
+                        if ( ImGui::Selectable( componentClassName.c_str(), false ) ) {
+                            auto component = std::static_pointer_cast< NodeComponent >( ObjectFactory::getInstance()->build( componentClassName ) );
+                            node->attachComponent( component );
+                            component->start();
+                        }
+                    }
+                    // TODO: Rename BehaviorController to use ::componets namespace or
+                    // improve filtering for ObjectFactory
+                    if ( node->getComponent< behaviors::BehaviorController >() == nullptr ) {
+                        if ( ImGui::Selectable( "crimild::behaviors::BehaviorController", false ) ) {
+                            withBehavior(
+                                retain( node ),
+                                [] {
+                                    auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
+                                    repeat->setBehavior( behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.5f ) );
+                                    return repeat;
+                                }()
+                            );
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                node->forEachComponent(
+                    [ & ]( NodeComponent *cmp ) {
+                        if ( cmp->getClassName() == MaterialComponent::__CLASS_NAME ) {
+                            ImGui::Separator();
+                            materialComponentDetails( static_cast< MaterialComponent * >( cmp ) );
+                        } else if ( cmp->getClassName() == behaviors::BehaviorController::__CLASS_NAME ) {
+                            ImGui::Separator();
+                            behaviorControllerDetails( static_cast< behaviors::BehaviorController * >( cmp ) );
+                        } else if ( cmp->getClassName() == components::Path::__CLASS_NAME ) {
+                            ImGui::Separator();
+                            pathComponentDetails( static_cast< components::Path * >( cmp ) );
+                        }
+                    }
+                );
+            }
+        }
+    };
+
+    class LightPropertiesSection
+        : public Inspector::Section,
+          public vulkan::WithConstRenderDevice {
+    public:
+        LightPropertiesSection( const vulkan::RenderDevice *renderDevice )
+            : vulkan::WithConstRenderDevice( renderDevice )
+        {
+            // no-op
+        }
+
+        virtual ~LightPropertiesSection( void ) noexcept
+        {
+            for ( auto &layer : m_shadowMapLayers ) {
+                for ( auto ds : layer.descriptorSets ) {
+                    ImGui_ImplVulkan_RemoveTexture( ds );
+                }
+                for ( auto &imageView : layer.imageViews ) {
+                    vkDestroyImageView( getRenderDevice()->getHandle(), imageView, nullptr );
+                }
+            }
+            m_shadowMapLayers.clear();
+        }
+
+        virtual void render( crimild::Node *node ) noexcept override
+        {
+            auto light = dynamic_cast< Light * >( node );
+            if ( light == nullptr ) {
+                return;
+            }
+
+            ImGui::SetNextItemOpen( true );
+            if ( ImGui::CollapsingHeader( "Light", ImGuiTreeNodeFlags_None ) ) {
+                ImGui::Text(
+                    "Type: %s",
+                    [ & ] {
+                        switch ( light->getType() ) {
+                            case Light::Type::AMBIENT:
+                                return "Ambient";
+                            case Light::Type::DIRECTIONAL:
+                                return "Directional";
+                            case Light::Type::POINT:
+                                return "Point";
+                            case Light::Type::SPOT:
+                                return "Spot";
+                        }
+                    }()
+                );
+
+                auto energy = light->getEnergy();
+                ImGui::InputFloat( "Energy", &energy );
+                light->setEnergy( energy );
+
+                auto radius = light->getRadius();
+                ImGui::InputFloat( "Radius", &radius );
+                light->setRadius( radius );
+
+                auto color = light->getColor();
+                ImGui::ColorEdit3( "Color", get_ptr( color ) );
+                light->setColor( color );
+
+                if ( light->getType() == Light::Type::SPOT ) {
+                    auto innerCutoff = degrees( light->getInnerCutoff() );
+                    ImGui::SliderFloat( "Inner Cutoff", &innerCutoff, 0, 180 );
+                    light->setInnerCutoff( radians( innerCutoff ) );
+
+                    auto outerCutoff = degrees( light->getOuterCutoff() );
+                    ImGui::SliderFloat( "Outer Cutoff", &outerCutoff, 0, 180 );
+                    light->setOuterCutoff( radians( outerCutoff ) );
+                }
+
+                auto castShadows = light->castShadows();
+                ImGui::Checkbox( "Cast Shadows", &castShadows );
+                light->setCastShadows( castShadows );
+
+                if ( castShadows ) {
+                    const auto *shadowMap = getRenderDevice()->getShadowMap( light );
+                    if ( shadowMap != nullptr ) {
+                        renderShadowMap( shadowMap );
+                    } else {
+                        ImGui::Text( "No shadow map available" );
+                    }
+                }
+            }
+        }
+
+    private:
+        void renderShadowMap( const vulkan::ShadowMap *shadowMap ) noexcept
+        {
+            if ( m_shadowMapLayers.empty() ) {
+                configureShadowMapLayers( shadowMap );
+            }
+
+            // All shadow maps images will be rendered as squares.
+            ImVec2 imageSize = ImGui::GetContentRegionAvail();
+            imageSize.y = imageSize.x;
+
+            const auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
+
+            for ( uint32_t i = 0; i < m_shadowMapLayers.size(); i++ ) {
+                ImTextureID tex_id = m_shadowMapLayers[ i ].descriptorSets[ currentFrameIdx ];
+                ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+                ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+                ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+                ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+                ImGui::Image( tex_id, imageSize, uv_min, uv_max, tint_col, border_col );
+            }
+        }
+
+        void configureShadowMapLayers( const vulkan::ShadowMap *shadowMap ) noexcept
+        {
+            m_shadowMapLayers.resize( shadowMap->imageLayerCount );
+
+            for ( uint32_t layerId = 0; layerId < m_shadowMapLayers.size(); ++layerId ) {
+                auto &imageViews = m_shadowMapLayers[ layerId ].imageViews;
+
+                // Create image views for each layer
+                imageViews.resize( getRenderDevice()->getInFlightFrameCount(), VK_NULL_HANDLE );
+                for ( uint32_t viewId = 0; viewId < imageViews.size(); viewId++ ) {
+                    getRenderDevice()->createImageView(
+                        *shadowMap->images[ viewId ],
+                        shadowMap->imageFormat,
+                        shadowMap->imageAspect,
+                        layerId,
+                        imageViews[ viewId ]
+                    );
+                }
+
+                auto &descriptorSets = m_shadowMapLayers[ layerId ].descriptorSets;
+                descriptorSets.resize( getRenderDevice()->getInFlightFrameCount(), VK_NULL_HANDLE );
+                for ( uint32_t i = 0; i < descriptorSets.size(); ++i ) {
+                    descriptorSets[ i ] = ImGui_ImplVulkan_AddTexture(
+                        shadowMap->sampler,
+                        imageViews[ i ],
+                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    );
+                }
+            }
+        }
+
+    private:
+        struct ShadowMapLayer {
+            std::vector< VkImageView > imageViews;
+            std::vector< VkDescriptorSet > descriptorSets;
+        };
+
+        std::vector< ShadowMapLayer > m_shadowMapLayers;
+    };
+
+}
 
 void Inspector::render( void ) noexcept
 {
@@ -37,5 +403,43 @@ void Inspector::render( void ) noexcept
 
     ImGui::Begin( "Inspector", &open, 0 );
 
+    if ( open ) {
+        auto editor = editor::Editor::getInstance();
+
+        auto node = editor->getSelectedObject< Node >();
+        if ( m_selectedNode != node ) {
+            configure( node );
+        }
+
+        if ( !m_sections.empty() ) {
+            for ( auto &section : m_sections ) {
+                section->render( node );
+            }
+        } else {
+            ImGui::Text( "No node selected" );
+        }
+    } else {
+        configure( nullptr );
+    }
+
     ImGui::End();
+}
+
+void Inspector::configure( crimild::Node *node ) noexcept
+{
+    if ( m_selectedNode != node ) {
+        m_sections.clear();
+        m_selectedNode = node;
+    }
+
+    if ( m_sections.empty() && node != nullptr ) {
+        m_sections.push_back( std::make_unique< NodeInfoSection >() );
+        m_sections.push_back( std::make_unique< NodeTransformationSection >() );
+
+        if ( auto light = dynamic_cast< Light * >( node ) ) {
+            m_sections.push_back( std::make_unique< LightPropertiesSection >( getRenderDevice() ) );
+        }
+
+        m_sections.push_back( std::make_unique< NodeComponentsSection >() );
+    }
 }

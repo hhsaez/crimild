@@ -560,7 +560,8 @@ int main( int argc, char **argv )
     struct Panels {
         Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
             : scene( renderDevice ),
-              simulation( renderDevice )
+              simulation( renderDevice ),
+              inspector( renderDevice )
         {
             // no-op
         }

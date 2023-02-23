@@ -28,11 +28,42 @@
 #ifndef CRIMILD_EDITOR_PANELS_INSPECTOR
 #define CRIMILD_EDITOR_PANELS_INSPECTOR
 
+#include <Crimild.hpp>
+#include <Crimild_Vulkan.hpp>
+
 namespace crimild::editor::panels {
 
     class Inspector {
     public:
+        class Section {
+        public:
+            virtual ~Section( void ) = default;
+
+            virtual void render( crimild::Node *node ) noexcept = 0;
+        };
+
+    public:
+        Inspector( vulkan::RenderDevice *renderDevice ) noexcept
+            : m_renderDevice( renderDevice )
+        {
+            // no-op
+        }
+
+        virtual ~Inspector( void ) = default;
+
+        inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+
         void render( void ) noexcept;
+
+    private:
+        void configure( crimild::Node *node ) noexcept;
+
+    private:
+        vulkan::RenderDevice *m_renderDevice = nullptr;
+
+        crimild::Node *m_selectedNode = nullptr;
+
+        std::vector< std::unique_ptr< Section > > m_sections;
     };
 
 }

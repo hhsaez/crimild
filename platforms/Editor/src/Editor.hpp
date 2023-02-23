@@ -28,19 +28,54 @@
 #ifndef CRIMILD_EDITOR
 #define CRIMILD_EDITOR
 
-#include "Simulation/Simulation.hpp"
+#include <Crimild.hpp>
 
 namespace crimild::editor {
 
     class Editor : public Simulation {
     public:
+        // Cannot use DynamicSingleton here since Simulation is already deriving from it.
+        static Editor *getInstance( void ) noexcept { return s_instance; }
+
+    private:
+        static Editor *s_instance;
+
+    public:
+        class State : public coding::Codable {
+            CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editor::State )
+        public:
+            coding::Codable *selectedObject = nullptr;
+
+            void encode( coding::Encoder &encoder ) override;
+            void decode( coding::Decoder &decoder ) override;
+        };
+
+    public:
         Editor( void ) noexcept;
-        ~Editor( void ) = default;
+        ~Editor( void ) noexcept;
 
         virtual Event handle( const Event &e ) noexcept override;
 
+        inline void setSelectedObject( coding::Codable *selected ) noexcept
+        {
+            if ( m_state != nullptr ) {
+                m_state->selectedObject = selected;
+            }
+        }
+
+        template< class SelectedObjectType >
+        inline SelectedObjectType *getSelectedObject( void ) noexcept
+        {
+            return m_state != nullptr
+                       ? dynamic_cast< SelectedObjectType * >( m_state->selectedObject )
+                       : nullptr;
+        }
+
     private:
         SharedPointer< Node > createDefaultScene( void ) noexcept;
+
+    private:
+        SharedPointer< State > m_state;
     };
 
 }
