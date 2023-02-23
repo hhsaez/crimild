@@ -27,33 +27,42 @@
 
 #include "Editor.hpp"
 
-#include "Behaviors/Actions/Rotate.hpp"
-#include "Behaviors/Decorators/Repeat.hpp"
-#include "Behaviors/withBehavior.hpp"
-#include "Components/MaterialComponent.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Primitives/BoxPrimitive.hpp"
-#include "Primitives/QuadPrimitive.hpp"
-#include "Rendering/Materials/WorldGridMaterial.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Skybox.hpp"
-#include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateWorldState.hpp"
-
 using namespace crimild;
 using namespace crimild::editor;
 
 CRIMILD_CREATE_SIMULATION( crimild::editor::Editor, "Crimild" );
 
-Editor::Editor( void ) noexcept
+Editor *Editor::s_instance = nullptr;
+
+void Editor::State::encode( coding::Encoder &encoder )
 {
+    Codable::encode( encoder );
+
+    encoder.encode( "selectedObject", selectedObject );
+}
+
+void Editor::State::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    SharedPointer< coding::Codable > selected;
+    decoder.decode( "selectedObject", selected );
+    selectedObject = get_ptr( selected );
+}
+
+Editor::Editor( void ) noexcept
+    : m_state( crimild::alloc< State >() )
+{
+    s_instance = this;
+
     setScene( createDefaultScene() );
+}
+
+Editor::~Editor( void ) noexcept
+{
+    m_state = nullptr;
+
+    s_instance = nullptr;
 }
 
 Event Editor::handle( const Event &e ) noexcept

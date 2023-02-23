@@ -27,16 +27,11 @@
 
 #include "Panels/SceneHierarchyPanel.hpp"
 
-#include "Coding/FileDecoder.hpp"
+#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
-#include "SceneGraph/CSGNode.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
 #include "SceneGraph/PrefabNode.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/NodeVisitor.hpp"
-#include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateWorldState.hpp"
+
+#include <Crimild.hpp>
 
 using namespace crimild;
 using namespace crimild::editor::panels;
@@ -128,12 +123,13 @@ private:
         bool modified = false
     )
     {
-        // auto editor = EditorLayer::getInstance();
+        auto editor = editor::Editor::getInstance();
+        auto selected = editor->getSelectedObject< Node >();
 
         auto flags = m_baseFlags;
-        // if ( editor->getSelectedNode() == node ) {
-        //     flags |= ImGuiTreeNodeFlags_Selected;
-        // }
+        if ( selected == node ) {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
 
         if ( isLeaf ) {
             flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -209,7 +205,7 @@ private:
         // drag/drop events.
         if ( ImGui::IsItemHovered() ) {
             if ( ImGui::IsMouseReleased( 0 ) ) {
-                // editor->setSelectedNode( node );
+                editor->setSelectedObject( node );
             }
         }
 
