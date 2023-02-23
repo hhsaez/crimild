@@ -30,6 +30,7 @@
 
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
+#include <unordered_map>
 
 namespace crimild::editor::panels {
 
@@ -61,6 +62,7 @@ namespace crimild::editor::panels {
         Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
 
         std::vector< const vulkan::FramebufferAttachment * > m_attachments;
+        std::unordered_map< const vulkan::FramebufferAttachment *, std::vector< VkDescriptorSet > > m_descriptorSets;
         size_t m_selectedAttachment = 0;
     };
 

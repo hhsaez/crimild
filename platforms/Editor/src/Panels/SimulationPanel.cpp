@@ -28,6 +28,7 @@
 #include "Panels/SimulationPanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -55,20 +56,26 @@ void Simulation::render( void ) noexcept
                     .extent = m_extent,
                 }
             );
+            m_descriptorSets.clear();
         }
-
-        auto camera = crimild::Simulation::getInstance()->getMainCamera();
-        if ( camera != nullptr ) {
-            camera->setAspectRatio( m_extent.width / m_extent.height );
-        }
-        m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
     }
 
     auto currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
 
     const auto att = m_scenePass.getColorAttachment();
     if ( !att->descriptorSets.empty() ) {
-        ImTextureID tex_id = att->descriptorSets[ currentFrameIdx ];
+        if ( !m_descriptorSets.contains( att ) ) {
+            auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
+            for ( int i = 0; i < ds.size(); ++i ) {
+                ds[ i ] = ImGui_ImplVulkan_AddTexture(
+                    att->sampler,
+                    ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                );
+            }
+            m_descriptorSets[ att ] = ds;
+        }
+        auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
@@ -79,4 +86,14 @@ void Simulation::render( void ) noexcept
     }
 
     ImGui::End();
+
+    if ( !visible || !open || isMinimized ) {
+        return;
+    }
+
+    auto camera = crimild::Simulation::getInstance()->getMainCamera();
+    if ( camera != nullptr ) {
+        camera->setAspectRatio( m_extent.width / m_extent.height );
+    }
+    m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
 }

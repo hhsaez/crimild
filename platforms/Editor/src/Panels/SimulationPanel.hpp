@@ -28,25 +28,24 @@
 #ifndef CRIMILD_EDITOR_PANELS_SIMULATION
 #define CRIMILD_EDITOR_PANELS_SIMULATION
 
-#include "Rendering/RenderPasses/VulkanScenePass.hpp"
+#include <Crimild.hpp>
+#include <Crimild_Vulkan.hpp>
+#include <unordered_map>
 
-namespace crimild {
+namespace crimild::editor::panels {
 
-    namespace editor::panels {
+    class Simulation {
+    public:
+        Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
+        virtual ~Simulation( void ) = default;
 
-        class Simulation {
-        public:
-            Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
-            virtual ~Simulation( void ) = default;
+        void render( void ) noexcept;
 
-            void render( void ) noexcept;
-
-        private:
-            Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
-            vulkan::ScenePass m_scenePass;
-        };
-
-    }
+    private:
+        Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
+        vulkan::ScenePass m_scenePass;
+        std::unordered_map< const vulkan::FramebufferAttachment *, std::vector< VkDescriptorSet > > m_descriptorSets;
+    };
 
 }
 

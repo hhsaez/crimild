@@ -28,6 +28,7 @@
 #include "Panels/ScenePanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/VulkanImageView.hpp"
 
 using namespace crimild;
 using namespace crimild::editor::panels;
@@ -126,7 +127,7 @@ Scene::Scene( vulkan::RenderDevice *renderDevice ) noexcept
 void Scene::render( void ) noexcept
 {
     bool open = true;
-    ImGui::Begin( "Scene", &open, 0 );
+    const bool visible = ImGui::Begin( "Scene", &open, 0 );
 
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
@@ -146,15 +147,28 @@ void Scene::render( void ) noexcept
             for ( auto &pass : m_debugPasses ) {
                 pass->handle( e );
             }
+
+            m_descriptorSets.clear();
         }
     }
 
-    auto currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
+    uint32_t currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
 
     if ( !m_attachments.empty() ) {
         const auto att = m_attachments[ m_selectedAttachment ];
         if ( !att->descriptorSets.empty() ) {
-            ImTextureID tex_id = att->descriptorSets[ currentFrameIdx ];
+            if ( !m_descriptorSets.contains( att ) ) {
+                auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
+                for ( int i = 0; i < ds.size(); ++i ) {
+                    ds[ i ] = ImGui_ImplVulkan_AddTexture(
+                        att->sampler,
+                        ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
+                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    );
+                }
+                m_descriptorSets[ att ] = ds;
+            }
+            auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
             ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
             ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
             ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
@@ -185,7 +199,7 @@ void Scene::render( void ) noexcept
 
     ImGui::End();
 
-    if ( isMinimized || !open ) {
+    if ( !visible || isMinimized || !open ) {
         return;
     }
 
