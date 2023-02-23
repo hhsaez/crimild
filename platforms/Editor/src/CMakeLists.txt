@@ -15,8 +15,14 @@ target_sources(
 	Main.cpp
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
+    Panels/InspectorPanel.cpp
+    Panels/InspectorPanel.hpp
     Panels/MainMenuBar.cpp
     Panels/MainMenuBar.hpp
+    Panels/PlaybackControlsPanel.cpp
+    Panels/PlaybackControlsPanel.hpp
+    Panels/ProjectPanel.cpp
+    Panels/ProjectPanel.hpp
     Panels/SceneHierarchyPanel.cpp
     Panels/SceneHierarchyPanel.hpp
     Panels/ScenePanel.cpp

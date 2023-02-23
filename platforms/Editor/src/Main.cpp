@@ -12,7 +12,10 @@
 #include "Foundation/GLFWUtils.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Panels/BehaviorsPanel.hpp"
+#include "Panels/InspectorPanel.hpp"
 #include "Panels/MainMenuBar.hpp"
+#include "Panels/PlaybackControlsPanel.hpp"
+#include "Panels/ProjectPanel.hpp"
 #include "Panels/SceneHierarchyPanel.hpp"
 #include "Panels/ScenePanel.hpp"
 #include "Panels/SimulationPanel.hpp"
@@ -568,6 +571,9 @@ int main( int argc, char **argv )
         crimild::editor::panels::Scene scene;
         crimild::editor::panels::SceneHierarchy sceneHierarchy;
         crimild::editor::panels::Simulation simulation;
+        crimild::editor::panels::PlaybackControls playbackControls;
+        crimild::editor::panels::Inspector inspector;
+        crimild::editor::panels::Project project;
 
         void render( void ) noexcept
         {
@@ -580,6 +586,9 @@ int main( int argc, char **argv )
             scene.render();
             sceneHierarchy.render();
             simulation.render();
+            playbackControls.render();
+            inspector.render();
+            project.render();
         }
     };
     auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
