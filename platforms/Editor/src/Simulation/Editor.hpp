@@ -87,6 +87,7 @@ namespace crimild::editor {
         void loadScene( const std::filesystem::path &path ) noexcept;
         void saveScene( void ) noexcept;
         void saveSceneAs( const std::filesystem::path &path ) noexcept;
+        bool addToScene( SharedPointer< Node > const &node ) noexcept;
 
     private:
         void saveRecentProjects( void ) noexcept;

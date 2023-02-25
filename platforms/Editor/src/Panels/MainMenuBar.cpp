@@ -1,7 +1,9 @@
 #include "Panels/MainMenuBar.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Importers/GLTFImporter.hpp"
 #include "Simulation/Editor.hpp"
+#include "Simulation/Project.hpp"
 
 #include <Crimild.hpp>
 #include <filesystem>
@@ -167,14 +169,37 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         enabledWithProject(
             [ & ] {
                 if ( ImGui::BeginMenu( "Import..." ) ) {
+                    if ( ImGui::MenuItem( "Wavefront OBJ (.obj)..." ) ) {
+                        openDialog(
+                            "ImportOBJDlgKey",
+                            "Import",
+                            []( const auto &path ) {
+                                OBJLoader loader( path.string() );
+                                if ( auto model = loader.load() ) {
+                                    Editor::getInstance()->addToScene( model );
+                                } else {
+                                    CRIMILD_LOG_ERROR( "Cannot load model from file ", path.string() );
+                                }
+                            },
+                            ".obj",
+                            project->getAssetsDirectory().string()
+                        );
+                    }
                     if ( ImGui::MenuItem( "glTF 2.0 (.gltf)..." ) ) {
                         openDialog(
                             "ImportGLTFDlgKey",
                             "Import",
                             []( const auto &path ) {
-                                // TODO
+                                GLTFImporter importer;
+                                auto model = importer.import( path );
+                                if ( model != nullptr ) {
+                                    Editor::getInstance()->addToScene( model );
+                                } else {
+                                    CRIMILD_LOG_ERROR( "Cannot load model from file ", path.string() );
+                                }
                             },
-                            ".gltf"
+                            ".gltf",
+                            project->getAssetsDirectory().string()
                         );
                     }
                     ImGui::EndMenu();
@@ -185,7 +210,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Quit" ) ) {
-            // EditorLayer::getInstance()->terminate();
+            // Editor::getInstance()->terminate();
         }
 
         ImGui::EndMenu();

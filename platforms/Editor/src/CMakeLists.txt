@@ -10,7 +10,10 @@ target_sources(
 	PRIVATE
     Foundation/GLFWUtils.hpp
     Foundation/ImGuiUtils.hpp
-	Main.cpp
+    Foundation/STBUtils.cpp
+    Foundation/STBUtils.hpp
+    Importers/GLTFImporter.cpp
+    Importers/GLTFImporter.hpp
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
     Panels/InspectorPanel.cpp
@@ -29,12 +32,15 @@ target_sources(
     Panels/SimulationPanel.hpp
     Panels/TimelinePanel.cpp
     Panels/TimelinePanel.hpp
+    Rendering/STBImageManager.cpp
+    Rendering/STBImageManager.hpp
     SceneGraph/PrefabNode.cpp
     SceneGraph/PrefabNode.hpp
     Simulation/Editor.hpp
     Simulation/Editor.cpp
     Simulation/Project.hpp
     Simulation/Project.cpp
+	Main.cpp
 
     PRIVATE
 	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui.cpp
@@ -63,6 +69,8 @@ target_include_directories(
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/examples
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/stb
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/tinygltf
 )
 
 target_link_libraries( 

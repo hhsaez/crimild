@@ -20,6 +20,7 @@
 #include "Panels/ScenePanel.hpp"
 #include "Panels/SimulationPanel.hpp"
 #include "Panels/TimelinePanel.hpp"
+#include "Rendering/STBImageManager.hpp"
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
@@ -441,7 +442,7 @@ int main( int argc, char **argv )
 
     // TODO: Move AssetManager here
     // TODO: Move AudioManager here
-    // crimild::stb::ImageManager imageManager;
+    crimild::editor::ImageManager imageManager;
 
     // Create simulation before creating the window, but
     // delay its actual start until the window has been
