@@ -20,6 +20,9 @@
 #include "Panels/ScenePanel.hpp"
 #include "Panels/SimulationPanel.hpp"
 #include "Panels/TimelinePanel.hpp"
+#include "SceneGraph/PrefabNode.hpp"
+#include "Simulation/Editor.hpp"
+#include "Simulation/Project.hpp"
 
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
@@ -420,6 +423,13 @@ struct VulkanObjects {
 // Main code
 int main( int argc, char **argv )
 {
+    crimild::init();
+    crimild::vulkan::init();
+
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Editor::State );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Project );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::PrefabNode );
+
     crimild::Settings settings;
     settings.parseCommandLine( argc, argv );
 

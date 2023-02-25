@@ -25,16 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR
-#define CRIMILD_EDITOR
+#ifndef CRIMILD_EDITOR_SIMULATION_EDITOR
+#define CRIMILD_EDITOR_SIMULATION_EDITOR
 
 #include <Crimild.hpp>
 
 namespace crimild::editor {
 
+    class Project;
+
     class Editor : public Simulation {
     public:
         // Cannot use DynamicSingleton here since Simulation is already deriving from it.
+        // TODO: Maybe consider using virtual inheritance?
         static Editor *getInstance( void ) noexcept { return s_instance; }
 
     private:
@@ -71,11 +74,34 @@ namespace crimild::editor {
                        : nullptr;
         }
 
+        void createProject( const std::filesystem::path &path ) noexcept;
+        void loadProject( const std::filesystem::path &path ) noexcept;
+        void saveProject( void ) noexcept;
+
+        inline Project *getProject( void ) noexcept { return m_project.get(); }
+        inline const Project *getProject( void ) const noexcept { return m_project.get(); }
+
+        inline const std::list< std::string > &getRecentProjects( void ) const noexcept { return m_recentProjects; }
+
+        void createNewScene( const std::filesystem::path &path ) noexcept;
+        void loadScene( const std::filesystem::path &path ) noexcept;
+        void saveScene( void ) noexcept;
+        void saveSceneAs( const std::filesystem::path &path ) noexcept;
+
     private:
+        void saveRecentProjects( void ) noexcept;
+        void loadRecentProjects( void ) noexcept;
+
         SharedPointer< Node > createDefaultScene( void ) noexcept;
 
     private:
         SharedPointer< State > m_state;
+
+        std::shared_ptr< Node > m_edittableScene;
+
+        std::shared_ptr< Project > m_project;
+
+        std::list< std::string > m_recentProjects;
     };
 
 }

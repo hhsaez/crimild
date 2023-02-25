@@ -27,9 +27,9 @@
 
 #include "Panels/ScenePanel.hpp"
 
-#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/VulkanImageView.hpp"
+#include "Simulation/Editor.hpp"
 
 using namespace crimild;
 using namespace crimild::editor::panels;

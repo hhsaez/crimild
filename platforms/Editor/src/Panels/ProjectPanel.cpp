@@ -28,6 +28,11 @@
 #include "Panels/ProjectPanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "SceneGraph/PrefabNode.hpp"
+#include "Simulation/Editor.hpp"
+#include "Simulation/Project.hpp"
+
+using namespace crimild;
 
 using namespace crimild::editor::panels;
 
@@ -37,5 +42,114 @@ void Project::render( void ) noexcept
 
     ImGui::Begin( "Project", &open, 0 );
 
+    if ( auto project = Editor::getInstance()->getProject() ) {
+        const auto path = project->getFilePath().parent_path();
+        if ( std::filesystem::exists( path ) ) {
+            // Makes sure the root node is always expanded.
+            for ( const auto &entry : std::filesystem::directory_iterator( path ) ) {
+                traverse( entry.path() );
+            }
+        } else {
+            ImGui::Text( "Project path not found" );
+        }
+    } else {
+        ImGui::Text( "No Project available" );
+    }
+
     ImGui::End();
+
+    if ( m_popup != nullptr ) {
+        if ( !m_popup() ) {
+            m_popup = nullptr;
+        }
+    }
+}
+
+void Project::traverse( const std::filesystem::path &path ) noexcept
+{
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+    if ( std::filesystem::is_directory( path ) ) {
+        flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+    } else {
+        flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    }
+
+    if ( m_selectedPath == path ) {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    ImGui::PushStyleColor( ImGuiCol_Text, IM_COL32( 255, 255, 255, 255 ) );
+
+    const auto isOpen = ImGui::TreeNodeEx( path.filename().string().c_str(), flags );
+
+    ImGui::PopStyleColor();
+
+    // Handles selection by using mouse hover+released instead of click
+    // because click is triggered on mouse down and will conflict with
+    // drag/drop events.
+    if ( ImGui::IsItemHovered() ) {
+        if ( ImGui::IsMouseReleased( 0 ) ) {
+            m_selectedPath = path;
+        }
+    }
+
+    if ( std::filesystem::is_directory( path ) ) {
+        if ( ImGui::BeginDragDropTarget() ) {
+            if ( auto payload = ImGui::AcceptDragDropPayload( "DND_NODE" ) ) {
+                size_t nodeAddr = *( ( size_t * ) payload->Data );
+                Node *node = reinterpret_cast< Node * >( nodeAddr );
+                if ( node != nullptr ) {
+                    if ( auto prefab = dynamic_cast< PrefabNode * >( node ) ) {
+                        m_popup = [] {
+                            bool ret = true;
+                            ImGui::OpenPopup( "Error" );
+
+                            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+                            ImGui::SetNextWindowPos( center, ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+
+                            if ( ImGui::BeginPopupModal( "Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) ) {
+                                ImGui::Text( "A Prefab already exists for this node.\nUse \"Override\" option in Inspector to update prefabs." );
+                                if ( ImGui::Button( "Close" ) ) {
+                                    ImGui::CloseCurrentPopup();
+                                    ret = false;
+                                }
+                                ImGui::EndPopup();
+                            }
+                            return ret;
+                        };
+                    } else {
+                        const auto fileName = [ & ] {
+                            if ( !node->getName().empty() ) {
+                                return node->getName();
+                            } else {
+                                return std::string( "node" );
+                            }
+                        }();
+                        const auto filePath = path / ( node->getName() + ".crimild" );
+                        coding::FileEncoder encoder;
+                        encoder.encode( retain( node ) );
+                        encoder.write( filePath );
+                    }
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+
+        if ( isOpen ) {
+            for ( const auto &entry : std::filesystem::directory_iterator( path ) ) {
+                traverse( entry.path() );
+            }
+            // Pop tree state only for directories
+            ImGui::TreePop();
+        }
+    } else {
+        // Files can be dragged and dropped to other panels
+        if ( ImGui::BeginDragDropSource( ImGuiDragDropFlags_None ) ) {
+            ImGui::SetDragDropPayload( "DND_FILE_PATH", path.string().c_str(), path.string().length() );
+            // Tooltip
+            ImGui::Text( path.filename().string().c_str() );
+            ImGui::EndDragDropSource();
+        }
+    }
 }
