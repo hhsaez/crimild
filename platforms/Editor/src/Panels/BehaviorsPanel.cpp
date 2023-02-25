@@ -27,8 +27,8 @@
 
 #include "Panels/BehaviorsPanel.hpp"
 
-#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Simulation/Editor.hpp"
 
 #include <Crimild.hpp>
 

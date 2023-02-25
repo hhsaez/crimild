@@ -27,9 +27,9 @@
 
 #include "Panels/SceneHierarchyPanel.hpp"
 
-#include "Editor.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "SceneGraph/PrefabNode.hpp"
+#include "Simulation/Editor.hpp"
 
 #include <Crimild.hpp>
 

@@ -10,8 +10,6 @@ target_sources(
 	PRIVATE
     Foundation/GLFWUtils.hpp
     Foundation/ImGuiUtils.hpp
-    Editor.hpp
-    Editor.cpp
 	Main.cpp
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
@@ -33,6 +31,10 @@ target_sources(
     Panels/TimelinePanel.hpp
     SceneGraph/PrefabNode.cpp
     SceneGraph/PrefabNode.hpp
+    Simulation/Editor.hpp
+    Simulation/Editor.cpp
+    Simulation/Project.hpp
+    Simulation/Project.cpp
 
     PRIVATE
 	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui.cpp

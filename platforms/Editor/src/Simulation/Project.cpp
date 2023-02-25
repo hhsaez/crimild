@@ -25,26 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_PANELS_PROJECT
-#define CRIMILD_EDITOR_PANELS_PROJECT
+#include "Simulation/Project.hpp"
 
-#include <filesystem>
-#include <functional>
+using namespace crimild;
+using namespace crimild::editor;
 
-namespace crimild::editor::panels {
-
-    class Project {
-    public:
-        void render( void ) noexcept;
-
-    private:
-        void traverse( const std::filesystem::path &path ) noexcept;
-
-    private:
-        std::filesystem::path m_selectedPath;
-        std::function< bool( void ) > m_popup;
-    };
-
+Project::Project( void ) noexcept
+    : Named( "Crimild" ),
+      Versionable( Version( 1, 0, 0 ) )
+{
+    // no-op
 }
 
-#endif
+Project::Project( std::string name, const Version &version ) noexcept
+    : Named( name ),
+      Versionable( version )
+{
+    // no-op
+}
+
+void Project::encode( coding::Encoder &encoder )
+{
+    Codable::encode( encoder );
+
+    encoder.encode( "name", getNameRefForCoding() );
+    encoder.encode( "version", getVersionRefForCoding() );
+    encoder.encode( "currentSceneName", m_currentSceneName );
+}
+
+void Project::decode( coding::Decoder &decoder )
+{
+    Codable::decode( decoder );
+
+    decoder.decode( "name", getNameRefForCoding() );
+    decoder.decode( "version", getVersionRefForCoding() );
+    decoder.decode( "currentSceneName", m_currentSceneName );
+}

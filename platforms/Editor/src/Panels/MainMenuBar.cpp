@@ -1,23 +1,9 @@
 #include "Panels/MainMenuBar.hpp"
 
-#include "Components/MaterialComponent.hpp"
-#include "Concurrency/Async.hpp"
 #include "Foundation/ImGuiUtils.hpp"
-#include "Foundation/Version.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Primitives/BoxPrimitive.hpp"
-#include "Primitives/QuadPrimitive.hpp"
-#include "Primitives/SpherePrimitive.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/Materials/WorldGridMaterial.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
-#include "SceneGraph/Node_withTransformation.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateWorldState.hpp"
+#include "Simulation/Editor.hpp"
 
+#include <Crimild.hpp>
 #include <filesystem>
 
 using namespace crimild;
@@ -47,16 +33,16 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, pathName, 1, nullptr, flags );
     };
 
-    // auto project = EditorLayer::getInstance()->getProject();
+    auto project = Editor::getInstance()->getProject();
 
-    auto enabledWithProject = [ /*hasProject = project != nullptr*/ ]( auto fn ) {
-        // if ( !hasProject ) {
-        //     ImGui::BeginDisabled();
-        // }
+    auto enabledWithProject = [ hasProject = project != nullptr ]( auto fn ) {
+        if ( !hasProject ) {
+            ImGui::BeginDisabled();
+        }
         fn();
-        // if ( !hasProject ) {
-        //     ImGui::EndDisabled();
-        // }
+        if ( !hasProject ) {
+            ImGui::EndDisabled();
+        }
     };
 
     // const auto baseDirectory = project->getScenesDirectory().string();
@@ -68,7 +54,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                 "NewProjectDlgKey",
                 "Create Project",
                 []( const auto &path ) {
-                    // EditorLayer::getInstance()->createProject( path );
+                    Editor::getInstance()->createProject( path );
                 },
                 ".crimild"
             );
@@ -81,7 +67,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                         "NewSceneDlgKey",
                         "Create Scene",
                         []( const auto &path ) {
-                            // EditorLayer::getInstance()->createNewScene( path );
+                            Editor::getInstance()->createNewScene( path );
                         },
                         ".crimild",
                         baseDirectory
@@ -97,7 +83,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                 "OpenProjectDlgKey",
                 "Open Project",
                 []( const auto &path ) {
-                    // EditorLayer::getInstance()->loadProject( path );
+                    Editor::getInstance()->loadProject( path );
                 },
                 ".crimild"
             );
@@ -110,7 +96,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                         "OpenSceneDlgKey",
                         "Open Scene",
                         []( const auto &path ) {
-                            // EditorLayer::getInstance()->loadScene( path );
+                            Editor::getInstance()->loadScene( path );
                         },
                         ".crimild",
                         baseDirectory
@@ -124,7 +110,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         enabledWithProject(
             [ & ] {
                 if ( ImGui::MenuItem( "Save Project" ) ) {
-                    // EditorLayer::getInstance()->saveProject();
+                    Editor::getInstance()->saveProject();
                 }
             }
         );
@@ -132,7 +118,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         enabledWithProject(
             [ & ] {
                 if ( ImGui::MenuItem( "Save Scene" ) ) {
-                    // EditorLayer::getInstance()->saveScene();
+                    Editor::getInstance()->saveScene();
                 }
             }
         );
@@ -144,7 +130,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                         "SaveSceneAsDlgKey",
                         "Save Scene As...",
                         []( const auto &path ) {
-                            // EditorLayer::getInstance()->saveSceneAs( path );
+                            Editor::getInstance()->saveSceneAs( path );
                         },
                         ".crimild",
                         baseDirectory
@@ -156,23 +142,23 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         ImGui::Separator();
 
         if ( ImGui::BeginMenu( "Recent Projects..." ) ) {
-            // const auto &recentProjects = EditorLayer::getInstance()->getRecentProjects();
-            // if ( recentProjects.empty() ) {
-            ImGui::MenuItem( "No Recent Projects" );
-            // } else {
-            //     for ( const auto &path : recentProjects ) {
-            //         if ( path.empty() ) {
-            //             continue;
-            //         }
-            //         if ( ImGui::MenuItem( path.c_str() ) ) {
-            //             crimild::concurrency::sync_frame(
-            //                 [ path ] {
-            //                     EditorLayer::getInstance()->loadProject( path );
-            //                 }
-            //             );
-            //         }
-            //     }
-            // }
+            const auto &recentProjects = Editor::getInstance()->getRecentProjects();
+            if ( recentProjects.empty() ) {
+                ImGui::MenuItem( "No Recent Projects" );
+            } else {
+                for ( const auto &path : recentProjects ) {
+                    if ( path.empty() ) {
+                        continue;
+                    }
+                    if ( ImGui::MenuItem( path.c_str() ) ) {
+                        crimild::concurrency::sync_frame(
+                            [ path ] {
+                                Editor::getInstance()->loadProject( path );
+                            }
+                        );
+                    }
+                }
+            }
             ImGui::EndMenu();
         }
 
