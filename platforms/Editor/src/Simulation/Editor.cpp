@@ -62,7 +62,7 @@ Editor::Editor( void ) noexcept
     loadRecentProjects();
 
     if ( !m_recentProjects.empty() ) {
-        auto autoload = Settings::getInstance()->get( "editor.load_last_project", false );
+        auto autoload = Settings::getInstance()->get( "editor.load_last_project", true );
         if ( autoload ) {
             auto path = m_recentProjects.front();
             crimild::concurrency::sync_frame(
@@ -72,12 +72,11 @@ Editor::Editor( void ) noexcept
             );
         }
     }
-
-    // setScene( createDefaultScene() );
 }
 
 Editor::~Editor( void ) noexcept
 {
+    saveScene();
     saveProject();
 
     m_state = nullptr;
@@ -371,4 +370,22 @@ void Editor::saveSceneAs( const std::filesystem::path &path ) noexcept
         project->setCurrentSceneName( path.stem().string() );
         saveProject();
     }
+}
+
+bool Editor::addToScene( SharedPointer< Node > const &node ) noexcept
+{
+    auto scene = getScene();
+    if ( scene == nullptr ) {
+        node->perform( UpdateWorldState() );
+        node->perform( StartComponents() );
+        setScene( node );
+    } else if ( auto group = dynamic_cast< Group * >( scene ) ) {
+        group->attachNode( node );
+        node->perform( UpdateWorldState() );
+        node->perform( StartComponents() );
+    } else {
+        CRIMILD_LOG_ERROR( "Scene is not a valid node" );
+        return false;
+    }
+    return true;
 }
