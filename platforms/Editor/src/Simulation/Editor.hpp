@@ -89,6 +89,12 @@ namespace crimild::editor {
         void saveSceneAs( const std::filesystem::path &path ) noexcept;
         bool addToScene( SharedPointer< Node > const &node ) noexcept;
 
+        bool cloneNode( Node *node ) noexcept;
+        bool cloneSelectedNode( void ) noexcept;
+
+        bool deleteNode( Node *node ) noexcept;
+        bool deleteSelectedNode( void ) noexcept;
+
     private:
         void saveRecentProjects( void ) noexcept;
         void loadRecentProjects( void ) noexcept;

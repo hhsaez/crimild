@@ -240,13 +240,13 @@ void MainMenuBar::renderEditMenu( void ) noexcept
 {
     if ( ImGui::BeginMenu( "Edit" ) ) {
         if ( ImGui::MenuItem( "Clone" ) ) {
-            // crimild::editor::cloneSelected();
+            Editor::getInstance()->cloneSelectedNode();
         }
 
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Delete" ) ) {
-            // crimild::editor::deleteSelected();
+            Editor::getInstance()->deleteSelectedNode();
         }
 
         ImGui::EndMenu();

@@ -163,11 +163,11 @@ private:
 
         if ( ImGui::BeginPopupContextItem() ) {
             if ( ImGui::Selectable( "Clone" ) ) {
-                // editor::cloneNode( node );
+                editor::Editor::getInstance()->cloneNode( node );
             }
             ImGui::Separator();
             if ( ImGui::Selectable( "Delete" ) ) {
-                // editor::deleteNode( node );
+                editor::Editor::getInstance()->deleteNode( node );
             }
             ImGui::EndPopup();
         }

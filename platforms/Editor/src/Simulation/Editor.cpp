@@ -389,3 +389,58 @@ bool Editor::addToScene( SharedPointer< Node > const &node ) noexcept
     }
     return true;
 }
+
+bool Editor::cloneNode( Node *node ) noexcept
+{
+    auto copy = node->perform< ShallowCopy >();
+    if ( auto parent = dynamic_cast< Group * >( node->getParent() ) ) {
+        parent->attachNodeAfter( copy, retain( node ) );
+    } else {
+        return false;
+    }
+
+    // Start components on new node
+    copy->perform( StartComponents() );
+
+    // Update world state. Otherwise, transformations will be reset
+    // by the transformation gizmo control, since it operates on
+    // world transformation (which is identity up to this point).
+    copy->perform( UpdateWorldState() );
+
+    setSelectedObject( get_ptr( copy ) );
+
+    return true;
+}
+
+bool Editor::cloneSelectedNode( void ) noexcept
+{
+    auto selected = getSelectedObject< Node >();
+    if ( selected == nullptr ) {
+        return false;
+    }
+
+    return cloneNode( selected );
+}
+
+bool Editor::deleteNode( Node *node ) noexcept
+{
+    crimild::concurrency::sync_frame(
+        [ node = crimild::retain( node ) ] {
+            node->detachFromParent();
+            if ( auto editor = Editor::getInstance() ) {
+                editor->setSelectedObject( nullptr );
+            }
+        }
+    );
+    return true;
+}
+
+bool Editor::deleteSelectedNode( void ) noexcept
+{
+    auto selected = getSelectedObject< Node >();
+    if ( selected == nullptr ) {
+        return false;
+    }
+
+    return deleteNode( selected );
+}
