@@ -34,6 +34,12 @@ namespace crimild::editor {
 
     class Project;
 
+    enum class SimulationState {
+        PLAYING,
+        PAUSED,
+        STOPPED,
+    };
+
     class Editor : public Simulation {
     public:
         // Cannot use DynamicSingleton here since Simulation is already deriving from it.
@@ -95,6 +101,11 @@ namespace crimild::editor {
         bool deleteNode( Node *node ) noexcept;
         bool deleteSelectedNode( void ) noexcept;
 
+        inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
+        void setSimulationState( SimulationState state ) noexcept;
+
+        void terminate( void ) noexcept { m_didTerminate = true; }
+
     private:
         void saveRecentProjects( void ) noexcept;
         void loadRecentProjects( void ) noexcept;
@@ -102,13 +113,18 @@ namespace crimild::editor {
         SharedPointer< Node > createDefaultScene( void ) noexcept;
 
     private:
-        SharedPointer< State > m_state;
+        std::shared_ptr< State > m_state;
+        std::shared_ptr< State > m_previousState;
 
         std::shared_ptr< Node > m_edittableScene;
+
+        SimulationState m_simulationState = SimulationState::STOPPED;
 
         std::shared_ptr< Project > m_project;
 
         std::list< std::string > m_recentProjects;
+
+        bool m_didTerminate = false;
     };
 
 }
