@@ -605,8 +605,9 @@ int main( int argc, char **argv )
     };
     auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
 
-    // Start simulation
+    // Start simulation to init all systems, but then pause it.
     simulation->start();
+    simulation->pause();
 
     // Main loop
     while ( !glfwWindowShouldClose( window ) ) {
@@ -633,6 +634,13 @@ int main( int argc, char **argv )
                 g_MainWindowData.FrameIndex = 0;
                 g_SwapChainRebuild = false;
             }
+        }
+
+        const auto tick = crimild::Event {
+            .type = crimild::Event::Type::TICK,
+        };
+        if ( simulation->handle( tick ).type == crimild::Event::Type::TERMINATE ) {
+            break;
         }
 
         // Start the Dear ImGui frame

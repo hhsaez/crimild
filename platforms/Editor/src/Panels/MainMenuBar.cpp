@@ -210,7 +210,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         ImGui::Separator();
 
         if ( ImGui::MenuItem( "Quit" ) ) {
-            // Editor::getInstance()->terminate();
+            Editor::getInstance()->terminate();
         }
 
         ImGui::EndMenu();
@@ -367,11 +367,6 @@ void MainMenuBar::renderSceneMenu( void ) noexcept
         ImGui::EndMenu();
     }
 }
-
-// static void addPanel( EditorLayer *editor, std::shared_ptr< editor::layout::Panel > const &panel ) noexcept
-// {
-//     editor::layout::LayoutManager::getInstance()->attachPanel( panel );
-// }
 
 void MainMenuBar::renderViewMenu( void ) noexcept
 {

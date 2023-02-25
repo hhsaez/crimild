@@ -28,24 +28,50 @@
 #include "Panels/PlaybackControlsPanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Simulation/Editor.hpp"
 
+using namespace crimild::editor;
 using namespace crimild::editor::panels;
 
 void PlaybackControls::render( void ) noexcept
 {
     bool open = true;
 
+    auto editor = Editor::getInstance();
+    auto simState = editor->getSimulationState();
+
     ImGui::Begin( "Playback Controls", &open, 0 );
-    if ( ImGui::Button( "Play" ) ) {
-        // TODO
+
+    if ( simState != SimulationState::PLAYING ) {
+        if ( ImGui::Button( "Play" ) ) {
+            editor->setSimulationState( SimulationState::PLAYING );
+        }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Play" );
+        ImGui::EndDisabled();
     }
+
     ImGui::SameLine();
-    if ( ImGui::Button( "Pause" ) ) {
-        // TODO
+    if ( simState == SimulationState::PLAYING ) {
+        if ( ImGui::Button( "Pause" ) ) {
+            editor->setSimulationState( SimulationState::PAUSED );
+        }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Pause" );
+        ImGui::EndDisabled();
     }
+
     ImGui::SameLine();
-    if ( ImGui::Button( "Stop" ) ) {
-        // TODO
+    if ( simState != SimulationState::STOPPED ) {
+        if ( ImGui::Button( "Stop" ) ) {
+            editor->setSimulationState( SimulationState::STOPPED );
+        }
+    } else {
+        ImGui::BeginDisabled( true );
+        ImGui::Button( "Stop" );
+        ImGui::EndDisabled();
     }
 
     ImGui::End();
