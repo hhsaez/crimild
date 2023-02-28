@@ -230,15 +230,19 @@ void JobScheduler::delayAsync( JobPtr const &job )
 void JobScheduler::executeDelayedJobs( void )
 {
     // Schedule async jobs first since we don't need to wait for them
+    // Copy lists before executing, just in case something schedules new
+    // jobs.
     // Flush lists afterwards
 
-    _delayedAsyncJobs.each(
+    auto asyncJobs = _delayedAsyncJobs;
+    asyncJobs.each(
         [&]( JobPtr const &j ) {
             schedule( j );
         }
     );
     
-    _delayedSyncJobs.each(
+    auto syncJobs = _delayedSyncJobs;
+    syncJobs.each(
         [&]( JobPtr const &j ) {
             execute( j );
         }
