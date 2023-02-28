@@ -1,11 +1,46 @@
+/*
+ * Copyright (c) 2002 - present, H. Hernan Saez
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the copyright holder nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "Panels/MainMenuBar.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
 #include "Importers/GLTFImporter.hpp"
+#include "Panels/BehaviorsPanel.hpp"
+#include "Panels/InspectorPanel.hpp"
+#include "Panels/MainMenuBar.hpp"
+#include "Panels/PlaybackControlsPanel.hpp"
+#include "Panels/ProjectPanel.hpp"
+#include "Panels/SceneHierarchyPanel.hpp"
+#include "Panels/ScenePanel.hpp"
+#include "Panels/SimulationPanel.hpp"
+#include "Panels/TimelinePanel.hpp"
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 
-#include <Crimild.hpp>
 #include <filesystem>
 
 using namespace crimild;
@@ -17,7 +52,7 @@ void MainMenuBar::render( void ) noexcept
         renderFileMenu();
         renderEditMenu();
         renderSceneMenu();
-        renderViewMenu();
+        renderWorkspaceMenu();
         renderHelpMenu();
         ImGui::EndMainMenuBar();
     }
@@ -263,7 +298,7 @@ static void addToScene( SharedPointer< Node > const &node ) noexcept
 {
     // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
     // always be the case. Maybe I should check the class type
-    auto scene = crimild::cast_ptr< Group >( Simulation::getInstance()->getScene() );
+    auto scene = crimild::cast_ptr< Group >( crimild::Simulation::getInstance()->getScene() );
     node->perform( UpdateWorldState() );
     node->perform( StartComponents() );
     scene->attachNode( node );
@@ -368,67 +403,58 @@ void MainMenuBar::renderSceneMenu( void ) noexcept
     }
 }
 
-void MainMenuBar::renderViewMenu( void ) noexcept
+template< class PanelType >
+static void renderWorkspaceMenuItem( void ) noexcept
 {
-    if ( ImGui::BeginMenu( "View" ) ) {
-        if ( ImGui::MenuItem( "Project..." ) ) {
-            // addPanel( editor, crimild::alloc< editor::ProjectPanel >() );
-        }
+    auto panel = PanelType::getInstance();
+    if ( ImGui::MenuItem( panel->getTitle() ) ) {
+        panel->setOpen( true );
+    }
+}
 
-        if ( ImGui::MenuItem( "Scene Hierarchy..." ) ) {
-            // addPanel( editor, crimild::alloc< SceneHierarchyPanel >() );
-        }
-
-        if ( ImGui::MenuItem( "Node Inspector..." ) ) {
-            // addPanel( editor, crimild::alloc< NodeInspectorPanel >( editor->getRenderDevice() ) );
-        }
-
-        ImGui::Separator();
-
-        if ( ImGui::MenuItem( "Scene..." ) ) {
-            // addPanel( editor, crimild::alloc< ScenePanel >( editor->getRenderDevice() ) );
-        }
-
-        if ( ImGui::MenuItem( "Simulation..." ) ) {
-            // addPanel( editor, crimild::alloc< SimulationPanel >( editor->getRenderDevice() ) );
-        }
+void MainMenuBar::renderWorkspaceMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Workspace" ) ) {
+        renderWorkspaceMenuItem< panels::Project >();
+        renderWorkspaceMenuItem< panels::SceneHierarchy >();
+        renderWorkspaceMenuItem< panels::Inspector >();
 
         ImGui::Separator();
 
-        if ( ImGui::MenuItem( "Behavior Editor..." ) ) {
-            // addPanel( editor, crimild::alloc< BehaviorEditorPanel >() );
-        }
+        renderWorkspaceMenuItem< panels::Scene >();
+        renderWorkspaceMenuItem< panels::Simulation >();
+        renderWorkspaceMenuItem< panels::PlaybackControls >();
 
-        if ( ImGui::MenuItem( "Timeline Editor..." ) ) {
-            // addPanel( editor, crimild::alloc< TimelinePanel >() );
-        }
+        ImGui::Separator();
 
+        renderWorkspaceMenuItem< panels::Behaviors >();
+        renderWorkspaceMenuItem< panels::Timeline >();
         ImGui::Separator();
 
         ImGui::BeginDisabled();
         if ( ImGui::MenuItem( "Render..." ) ) {
-            //            addPanel( editor, crimild::alloc< RenderScenePanel >( editor->getRenderDevice() ) );
+            // TODO
         }
         ImGui::EndDisabled();
 
         ImGui::Separator();
 
-        if ( ImGui::MenuItem( "Toolbar..." ) ) {
-            // addPanel( editor, crimild::alloc< editor::ToolbarPanel >() );
-        }
-
-        ImGui::Separator();
-
         if ( ImGui::BeginMenu( "Layout..." ) ) {
+            ImGui::BeginDisabled();
             if ( ImGui::MenuItem( "Default" ) ) {
-                // editor::layout::LayoutManager::getInstance()->loadDefaultLayout();
+                // TODO
             }
+            ImGui::EndDisabled();
 
             ImGui::Separator();
 
             if ( ImGui::MenuItem( "Clear" ) ) {
-                // editor::layout::LayoutManager::getInstance()->clear();
+                auto panels = panels::Panel::getAllPanels();
+                for ( auto &p : panels ) {
+                    p->setOpen( false );
+                }
             }
+
             ImGui::EndMenu();
         }
 

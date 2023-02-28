@@ -28,13 +28,18 @@
 #ifndef CRIMILD_EDITOR_PANELS_PLAYBACK_CONTROLS
 #define CRIMILD_EDITOR_PANELS_PLAYBACK_CONTROLS
 
-#include <Crimild.hpp>
+#include "Panels/Panel.hpp"
 
 namespace crimild::editor::panels {
 
-    class PlaybackControls {
+    class PlaybackControls
+        : public Panel,
+          public DynamicSingleton< PlaybackControls > {
     public:
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Playback"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
     };
 
 }

@@ -397,13 +397,11 @@ namespace crimild::editor::panels {
 
 }
 
-void Inspector::render( void ) noexcept
+void Inspector::onRender( void ) noexcept
 {
-    bool open = true;
+    // ImGui::Begin( "Inspector", getOpenPtr(), 0 );
 
-    ImGui::Begin( "Inspector", &open, 0 );
-
-    if ( open ) {
+    if ( Panel::isOpen() ) {
         auto editor = editor::Editor::getInstance();
 
         auto node = editor->getSelectedObject< Node >();
@@ -422,7 +420,7 @@ void Inspector::render( void ) noexcept
         configure( nullptr );
     }
 
-    ImGui::End();
+    // ImGui::End();
 }
 
 void Inspector::configure( crimild::Node *node ) noexcept

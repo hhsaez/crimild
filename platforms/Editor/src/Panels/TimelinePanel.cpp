@@ -203,9 +203,8 @@ struct MySequence : public ImSequencer::SequenceInterface {
     }
 };
 
-static void renderTimeline( void ) noexcept
+void Timeline::onRender( void ) noexcept
 {
-
     static MySequence mySequence = [] {
         MySequence mySequence;
         mySequence.mFrameMin = -100;
@@ -238,30 +237,4 @@ static void renderTimeline( void ) noexcept
         ImGui::Text( "I am a %s, please edit me", SequencerItemTypeNames[ item.mType ] );
         // switch (type) ....
     }
-}
-
-void Timeline::render( void ) noexcept
-{
-    bool open = true;
-
-    bool visible = ImGui::Begin( "Timeline", &open, 0 );
-
-    // const auto pos = ImGui::GetWindowPos();
-    // const auto size = ImGui::GetWindowSize();
-
-    // std::cout << "pos: " << pos.x << ", " << pos.y
-    //           << "\nsize: " << size.x << ", " << size.y
-    //           << std::endl;
-
-    // const ImVec2 p0 = ImGui::GetItemRectMin();
-    // const ImVec2 p1 = ImGui::GetItemRectMax();
-    // std::cout << "min: " << p0.x << ", " << p0.y << "\n"
-    //           << "max: " << p1.x << ", " << p1.y << std::endl;
-    // ImGui::PushClipRect( pos, pos + size, true );
-    // draw_list->AddRectFilled( p0, p1, IM_COL32( 90, 90, 120, 255 ) );
-    renderTimeline();
-    // draw_list->AddText( text_pos, IM_COL32_WHITE, text_str );
-    // ImGui::PopClipRect();
-
-    ImGui::End();
 }

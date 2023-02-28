@@ -27,6 +27,7 @@
 
 #include "Panels/SimulationPanel.hpp"
 
+#include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
@@ -39,10 +40,15 @@ Simulation::Simulation( crimild::vulkan::RenderDevice *renderDevice ) noexcept
 {
 }
 
-void Simulation::render( void ) noexcept
+void Simulation::onRender( void ) noexcept
 {
-    bool open = true;
-    bool visible = ImGui::Begin( "Simulation", &open, 0 );
+    static auto debouncedResize = concurrency::debounce(
+        [ this ]( Event e ) {
+            m_scenePass.handle( e );
+            m_descriptorSets.clear();
+        },
+        100
+    );
 
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
     bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
@@ -50,13 +56,12 @@ void Simulation::render( void ) noexcept
         if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
             m_extent.width = renderSize.x;
             m_extent.height = renderSize.y;
-            m_scenePass.handle(
+            debouncedResize(
                 Event {
                     .type = Event::Type::WINDOW_RESIZE,
                     .extent = m_extent,
                 }
             );
-            m_descriptorSets.clear();
         }
     }
 
@@ -85,9 +90,7 @@ void Simulation::render( void ) noexcept
         ImGui::Text( "No scene attachments found" );
     }
 
-    ImGui::End();
-
-    if ( !visible || !open || isMinimized ) {
+    if ( isMinimized ) {
         return;
     }
 

@@ -28,11 +28,18 @@
 #ifndef CRIMILD_EDITOR_PANELS_BEHAVIORS
 #define CRIMILD_EDITOR_PANELS_BEHAVIORS
 
+#include "Panels/Panel.hpp"
+
 namespace crimild::editor::panels {
 
-    class Behaviors {
+    class Behaviors
+        : public Panel,
+          public DynamicSingleton< Behaviors > {
     public:
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Behaviors"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
     };
 
 }

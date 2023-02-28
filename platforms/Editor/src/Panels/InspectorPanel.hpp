@@ -28,12 +28,16 @@
 #ifndef CRIMILD_EDITOR_PANELS_INSPECTOR
 #define CRIMILD_EDITOR_PANELS_INSPECTOR
 
+#include "Panels/Panel.hpp"
+
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
 
 namespace crimild::editor::panels {
 
-    class Inspector {
+    class Inspector
+        : public Panel,
+          public DynamicSingleton< Inspector > {
     public:
         class Section {
         public:
@@ -51,9 +55,12 @@ namespace crimild::editor::panels {
 
         virtual ~Inspector( void ) = default;
 
+        virtual const char *getTitle( void ) const noexcept override { return "Inspector"; }
+
         inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
 
-        void render( void ) noexcept;
+    protected:
+        virtual void onRender( void ) noexcept override;
 
     private:
         void configure( crimild::Node *node ) noexcept;

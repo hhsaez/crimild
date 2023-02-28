@@ -36,12 +36,8 @@ using namespace crimild;
 
 using namespace crimild::editor::panels;
 
-void Project::render( void ) noexcept
+void Project::onRender( void ) noexcept
 {
-    bool open = true;
-
-    ImGui::Begin( "Project", &open, 0 );
-
     if ( auto project = Editor::getInstance()->getProject() ) {
         const auto path = project->getFilePath().parent_path();
         if ( std::filesystem::exists( path ) ) {
@@ -55,8 +51,6 @@ void Project::render( void ) noexcept
     } else {
         ImGui::Text( "No Project available" );
     }
-
-    ImGui::End();
 
     if ( m_popup != nullptr ) {
         if ( !m_popup() ) {
