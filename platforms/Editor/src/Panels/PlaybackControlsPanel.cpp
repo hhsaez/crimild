@@ -33,14 +33,10 @@
 using namespace crimild::editor;
 using namespace crimild::editor::panels;
 
-void PlaybackControls::render( void ) noexcept
+void PlaybackControls::onRender( void ) noexcept
 {
-    bool open = true;
-
     auto editor = Editor::getInstance();
     auto simState = editor->getSimulationState();
-
-    ImGui::Begin( "Playback Controls", &open, 0 );
 
     if ( simState != SimulationState::PLAYING ) {
         if ( ImGui::Button( "Play" ) ) {
@@ -73,6 +69,4 @@ void PlaybackControls::render( void ) noexcept
         ImGui::Button( "Stop" );
         ImGui::EndDisabled();
     }
-
-    ImGui::End();
 }

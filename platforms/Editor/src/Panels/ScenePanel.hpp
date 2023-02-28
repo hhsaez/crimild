@@ -28,18 +28,25 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE
 #define CRIMILD_EDITOR_PANELS_SCENE
 
+#include "Panels/Panel.hpp"
+
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
 #include <unordered_map>
 
 namespace crimild::editor::panels {
 
-    class Scene {
+    class Scene
+        : public Panel,
+          public DynamicSingleton< Scene > {
     public:
         Scene( vulkan::RenderDevice *renderDevice ) noexcept;
         virtual ~Scene( void ) = default;
 
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Scene"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
 
     private:
         inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }

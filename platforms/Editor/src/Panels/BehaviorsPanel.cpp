@@ -395,10 +395,8 @@ private:
     ImVec2 m_windowPos;
 };
 
-void Behaviors::render( void ) noexcept
+void Behaviors::onRender( void ) noexcept
 {
-    bool open = true;
-
     auto editor = editor::Editor::getInstance();
 
     auto controller = [ & ]() -> behaviors::BehaviorController * {
@@ -416,7 +414,6 @@ void Behaviors::render( void ) noexcept
 
     delegate.configure( controller );
 
-    bool visible = ImGui::Begin( "Behaviors", &open, 0 );
     if ( ImGui::BeginCombo( "##", "Add Behavior..." ) ) {
         const auto &behaviorList = getBehaviorList();
         for ( const auto &behaviorClassName : behaviorList ) {
@@ -447,9 +444,5 @@ void Behaviors::render( void ) noexcept
         // TODO
     }
 
-    if ( visible ) {
-        GraphEditor::Show( delegate, options, viewState, true, &fit );
-    }
-
-    ImGui::End();
+    GraphEditor::Show( delegate, options, viewState, true, &fit );
 }

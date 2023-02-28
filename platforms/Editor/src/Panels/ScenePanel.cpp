@@ -27,6 +27,7 @@
 
 #include "Panels/ScenePanel.hpp"
 
+#include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Simulation/Editor.hpp"
@@ -125,10 +126,20 @@ Scene::Scene( vulkan::RenderDevice *renderDevice ) noexcept
     m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
 }
 
-void Scene::render( void ) noexcept
+void Scene::onRender( void ) noexcept
 {
-    bool open = true;
-    const bool visible = ImGui::Begin( "Scene", &open, 0 );
+    static auto debouncedResize = concurrency::debounce(
+        [ this ]( Event e ) {
+            m_scenePass.handle( e );
+            m_sceneDebugPass.handle( e );
+            m_sceneDebugOverlayPass.handle( e );
+            for ( auto &pass : m_debugPasses ) {
+                pass->handle( e );
+            }
+            m_descriptorSets.clear();
+        },
+        100
+    );
 
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
@@ -137,19 +148,12 @@ void Scene::render( void ) noexcept
         if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
             m_extent.width = renderSize.x;
             m_extent.height = renderSize.y;
-            const auto e = Event {
-                .type = Event::Type::WINDOW_RESIZE,
-                .extent = m_extent,
-            };
-
-            m_scenePass.handle( e );
-            m_sceneDebugPass.handle( e );
-            m_sceneDebugOverlayPass.handle( e );
-            for ( auto &pass : m_debugPasses ) {
-                pass->handle( e );
-            }
-
-            m_descriptorSets.clear();
+            debouncedResize(
+                Event {
+                    .type = Event::Type::WINDOW_RESIZE,
+                    .extent = m_extent,
+                }
+            );
         }
     }
 
@@ -198,9 +202,7 @@ void Scene::render( void ) noexcept
         ImGui::EndChild();
     }
 
-    ImGui::End();
-
-    if ( !visible || isMinimized || !open ) {
+    if ( isMinimized ) {
         return;
     }
 

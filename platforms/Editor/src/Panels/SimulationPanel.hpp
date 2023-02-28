@@ -28,18 +28,25 @@
 #ifndef CRIMILD_EDITOR_PANELS_SIMULATION
 #define CRIMILD_EDITOR_PANELS_SIMULATION
 
+#include "Panels/Panel.hpp"
+
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
 #include <unordered_map>
 
 namespace crimild::editor::panels {
 
-    class Simulation {
+    class Simulation
+        : public Panel,
+          public DynamicSingleton< Simulation > {
     public:
         Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
         virtual ~Simulation( void ) = default;
 
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Simulation"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
 
     private:
         Extent2D m_extent = Extent2D { .width = 1, .height = 1 };

@@ -28,11 +28,18 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE_HIERARCHY
 #define CRIMILD_EDITOR_PANELS_SCENE_HIERARCHY
 
+#include "Panels/Panel.hpp"
+
 namespace crimild::editor::panels {
 
-    class SceneHierarchy {
+    class SceneHierarchy
+        : public Panel,
+          public DynamicSingleton< SceneHierarchy > {
     public:
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Scene Hierarchy"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
     };
 
 }

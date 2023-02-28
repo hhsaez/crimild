@@ -221,11 +221,8 @@ private:
     ImGuiTreeNodeFlags m_baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 };
 
-void SceneHierarchy::render( void ) noexcept
+void SceneHierarchy::onRender( void ) noexcept
 {
-    bool open = true;
-
-    ImGui::Begin( "Scene Hierarchy", &open, 0 );
     if ( Simulation::getInstance() != nullptr ) {
         auto scene = Simulation::getInstance()->getScene();
         if ( scene ) {
@@ -236,6 +233,4 @@ void SceneHierarchy::render( void ) noexcept
     } else {
         ImGui::Text( "No Simulation instance found" );
     }
-
-    ImGui::End();
 }

@@ -28,14 +28,21 @@
 #ifndef CRIMILD_EDITOR_PANELS_PROJECT
 #define CRIMILD_EDITOR_PANELS_PROJECT
 
+#include "Panels/Panel.hpp"
+
 #include <filesystem>
 #include <functional>
 
 namespace crimild::editor::panels {
 
-    class Project {
+    class Project
+        : public Panel,
+          public DynamicSingleton< Project > {
     public:
-        void render( void ) noexcept;
+        virtual const char *getTitle( void ) const noexcept override { return "Project"; }
+
+    public:
+        virtual void onRender( void ) noexcept override;
 
     private:
         void traverse( const std::filesystem::path &path ) noexcept;
