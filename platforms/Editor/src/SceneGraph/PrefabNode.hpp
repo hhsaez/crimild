@@ -39,6 +39,13 @@ namespace crimild {
     class PrefabNode : public Group {
         CRIMILD_IMPLEMENT_RTTI( crimild::PrefabNode )
 
+    public:
+        static void cleanup( void ) noexcept
+        {
+            s_prefabs.clear();
+            s_instances.clear();
+        }
+        
     private:
         static std::unordered_map< std::string, std::unordered_set< PrefabNode * > > s_prefabs;
         static std::unordered_map< std::string, std::shared_ptr< Node > > s_instances;

@@ -670,6 +670,8 @@ int main( int argc, char **argv )
             ImGui::RenderPlatformWindowsDefault();
         }
     }
+    
+    crimild::PrefabNode::cleanup();
 
     jobScheduler.stop();
     crimild::MessageQueue::getInstance()->clear();
