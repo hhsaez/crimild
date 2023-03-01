@@ -367,7 +367,13 @@ void RenderDevice::createSwapchain( void ) noexcept
     auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
     auto presentMode = utils::choosePresentationMode( swapchainSupport.presentModes );
 
-    m_swapchainExtent = utils::chooseExtent( swapchainSupport.capabilities, utils::getExtent( m_extent ) );
+    m_swapchainExtent = utils::chooseExtent(
+        swapchainSupport.capabilities,
+        VkExtent2D {
+            .width = crimild::UInt32( m_extent.width ),
+            .height = crimild::UInt32( m_extent.height ),
+        }
+    );
     m_swapchainFormat = surfaceFormat.format;
 
     // The Vulkan implementation defines a minimum number of images to work with.

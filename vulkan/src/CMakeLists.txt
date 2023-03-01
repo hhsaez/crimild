@@ -11,10 +11,7 @@ target_sources(
     Crimild_Vulkan.hpp
 
     PRIVATE
-    Debug/VulkanDebugMessenger.hpp
-    Exceptions/VulkanException.hpp
     Foundation/VulkanInitializers.hpp
-    Foundation/VulkanObject.hpp
     Foundation/VulkanUtils.hpp
     Rendering/RenderPasses/VulkanBlitPass.hpp
     Rendering/RenderPasses/VulkanClearPass.hpp
@@ -35,49 +32,23 @@ target_sources(
     Rendering/RenderPasses/VulkanSoftRTPass.hpp
     Rendering/RenderPasses/VulkanUnlitPass.hpp
     Rendering/VulkanCommandBuffer.hpp
-    Rendering/VulkanCommandPool.hpp
-    Rendering/VulkanComputePipeline.hpp
-    Rendering/VulkanDescriptorPool.hpp
-    Rendering/VulkanDescriptorSet.hpp
-    Rendering/VulkanDescriptorSetLayout.hpp
-    Rendering/VulkanFence.hpp
     Rendering/VulkanFramebuffer.hpp
     Rendering/VulkanFramebufferAttachment.hpp
     Rendering/VulkanGraphicsPipeline.hpp
-    Rendering/VulkanGraphicsPipelineOLD.hpp
     Rendering/VulkanImage.hpp
-    Rendering/VulkanImageOLD.hpp
     Rendering/VulkanImageView.hpp
-    Rendering/VulkanImageViewOLD.hpp
-    Rendering/VulkanIndexBuffer.hpp
     Rendering/VulkanInstance.hpp
     Rendering/VulkanPhysicalDevice.hpp
-    Rendering/VulkanPhysicalDeviceOLD.hpp
-    Rendering/VulkanPipelineLayout.hpp
     Rendering/VulkanRenderDevice.hpp
-    Rendering/VulkanRenderDeviceOLD.hpp
     Rendering/VulkanRenderPass.hpp
-    Rendering/VulkanRenderPassOLD.hpp
-    Rendering/VulkanRenderResource.hpp
-    Rendering/VulkanSampler.hpp
     Rendering/VulkanSceneRenderState.hpp
-    Rendering/VulkanSemaphore.hpp
     Rendering/VulkanShaderCompiler.hpp
-    Rendering/VulkanShaderModule.hpp
     Rendering/VulkanShadowMap.hpp
-    Rendering/VulkanStorageBuffer.hpp
     Rendering/VulkanSurface.hpp
-    Rendering/VulkanSwapchainOLD.hpp
-    Rendering/VulkanTexture.hpp
-    Rendering/VulkanUniformBuffer.hpp
-    Rendering/VulkanVertexBuffer.hpp
-    Simulation/Systems/VulkanCaptureSystem.hpp
-    Simulation/Systems/VulkanSystem.hpp
     Visitors/VulkanFetchSceneRenderState.hpp
 
     PRIVATE
     Crimild_Vulkan.cpp
-    Debug/VulkanDebugMessenger.cpp
     Foundation/VulkanUtils.cpp
     Rendering/RenderPasses/VulkanBlitPass.cpp
     Rendering/RenderPasses/VulkanClearPass.cpp
@@ -98,41 +69,17 @@ target_sources(
     Rendering/RenderPasses/VulkanSoftRTPass.cpp
     Rendering/RenderPasses/VulkanUnlitPass.cpp
     Rendering/VulkanCommandBuffer.cpp
-    Rendering/VulkanCommandPool.cpp
-    Rendering/VulkanComputePipeline.cpp
-    Rendering/VulkanDescriptorPool.cpp
-    Rendering/VulkanDescriptorSet.cpp
-    Rendering/VulkanDescriptorSetLayout.cpp
-    Rendering/VulkanFence.cpp
     Rendering/VulkanFramebuffer.cpp
     Rendering/VulkanGraphicsPipeline.cpp
-    Rendering/VulkanGraphicsPipelineOLD.cpp
     Rendering/VulkanImage.cpp
-    Rendering/VulkanImageOLD.cpp
     Rendering/VulkanImageView.cpp
-    Rendering/VulkanImageViewOLD.cpp
-    Rendering/VulkanIndexBuffer.cpp
     Rendering/VulkanInstance.cpp 
     Rendering/VulkanPhysicalDevice.cpp
-    Rendering/VulkanPhysicalDeviceOLD.cpp
-    Rendering/VulkanPipelineLayout.cpp
     Rendering/VulkanRenderDevice.cpp
-    Rendering/VulkanRenderDeviceOLD.cpp
     Rendering/VulkanRenderPass.cpp
-    Rendering/VulkanRenderPassOLD.cpp
-    Rendering/VulkanSampler.cpp
-    Rendering/VulkanSemaphore.cpp
     Rendering/VulkanShaderCompiler.cpp
-    Rendering/VulkanShaderModule.cpp
     Rendering/VulkanShadowMap.cpp
-    Rendering/VulkanStorageBuffer.cpp
     Rendering/VulkanSurface.cpp
-    Rendering/VulkanSwapchainOLD.cpp
-    Rendering/VulkanTexture.cpp
-    Rendering/VulkanUniformBuffer.cpp
-    Rendering/VulkanVertexBuffer.cpp
-    Simulation/Systems/VulkanCaptureSystem.cpp
-    Simulation/Systems/VulkanSystem.cpp
     Visitors/VulkanFetchSceneRenderState.cpp
 )
 

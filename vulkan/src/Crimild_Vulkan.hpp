@@ -39,7 +39,6 @@
 #include "Rendering/VulkanShaderCompiler.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
 #include "Rendering/VulkanSurface.hpp"
-#include "Simulation/Systems/VulkanCaptureSystem.hpp"
 
 namespace crimild {
 

@@ -28,49 +28,13 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Rendering/CommandBuffer.hpp"
-#include "Rendering/VulkanRenderResource.hpp"
+#include "Foundation/SharedObject.hpp"
 
-namespace crimild {
+namespace crimild::vulkan {
 
-    class Buffer;
-    class DescriptorSet;
-    class Framebuffer;
-    class GraphicsPipeline;
-    class ComputePipeline;
-    class RenderPass;
-
-    namespace vulkan {
-
-        struct CommandBufferBindInfo {
-            VkCommandBuffer handler;
-        };
-
-        class CommandBufferManager : public BasicRenderResourceManagerImpl< CommandBuffer, CommandBufferBindInfo > {
-            using ManagerImpl = BasicRenderResourceManagerImpl< CommandBuffer, CommandBufferBindInfo >;
-
-        public:
-            virtual ~CommandBufferManager( void ) noexcept = default;
-
-            crimild::Bool bind( CommandBuffer *commandBuffer ) noexcept override;
-            crimild::Bool unbind( CommandBuffer *commandBuffer ) noexcept override;
-
-            void updateCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
-
-        private:
-            void recordCommands( RenderDeviceOLD *renderDevice, CommandBuffer *parent, CommandBuffer *commandBuffer ) noexcept;
-
-        private:
-            GraphicsPipeline *m_currentGraphicsPipeline = nullptr;
-            ComputePipeline *m_currentComputePipeline = nullptr;
-            SharedPointer< Framebuffer > m_currentFramebuffer;
-            SharedPointer< RenderPass > m_currentRenderPass;
-            crimild::UInt32 m_boundDescriptorSets = 0;
-        };
-
-    }
+    class CommandBuffer : public SharedObject {
+    public:
+    };
 
 }
 
