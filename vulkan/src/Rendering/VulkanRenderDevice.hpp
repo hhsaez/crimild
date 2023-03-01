@@ -374,6 +374,9 @@ namespace crimild {
             } m_depthStencilResources;
 
             std::unordered_map< const Light *, SharedPointer< ShadowMap > > m_shadowMaps;
+            std::shared_ptr< ShadowMap > m_fallbackDirectionalShadowMap;
+            std::shared_ptr< ShadowMap > m_fallbackPointShadowMap;
+            std::shared_ptr< ShadowMap > m_fallbackSpotShadowMap;
         };
 
     }
