@@ -126,6 +126,17 @@ Scene::Scene( vulkan::RenderDevice *renderDevice ) noexcept
     m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
 }
 
+Event Scene::handle( const Event &e ) noexcept
+{
+    m_scenePass.handle( e );
+    m_sceneDebugPass.handle( e );
+    m_sceneDebugOverlayPass.handle( e );
+    for ( auto &pass : m_debugPasses ) {
+        pass->handle( e );
+    }
+    return e;
+}
+
 void Scene::onRender( void ) noexcept
 {
     static auto debouncedResize = concurrency::debounce(
@@ -138,7 +149,7 @@ void Scene::onRender( void ) noexcept
             }
             m_descriptorSets.clear();
         },
-        100
+        500
     );
 
     ImVec2 windowPos = ImGui::GetWindowPos();

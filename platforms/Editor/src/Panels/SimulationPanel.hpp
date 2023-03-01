@@ -43,6 +43,8 @@ namespace crimild::editor::panels {
         Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
         virtual ~Simulation( void ) = default;
 
+        virtual Event handle( const Event &e ) noexcept override;
+
         virtual const char *getTitle( void ) const noexcept override { return "Simulation"; }
 
     protected:
@@ -50,6 +52,7 @@ namespace crimild::editor::panels {
 
     private:
         Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
+        Extent2D m_simulationExtent = Extent2D { .width = 1280, .height = 720 };
         vulkan::ScenePass m_scenePass;
         std::unordered_map< const vulkan::FramebufferAttachment *, std::vector< VkDescriptorSet > > m_descriptorSets;
     };
