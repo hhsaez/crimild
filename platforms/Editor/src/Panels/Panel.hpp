@@ -56,6 +56,11 @@ namespace crimild::editor::panels {
 
         virtual const char *getTitle( void ) const noexcept = 0;
 
+        virtual Event handle( const Event &e ) noexcept
+        {
+            return e;
+        }
+
         inline bool isOpen( void ) noexcept { return m_open; }
         inline void setOpen( bool open ) noexcept
         {

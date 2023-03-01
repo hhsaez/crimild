@@ -38,16 +38,22 @@ using namespace crimild::editor::panels;
 Simulation::Simulation( crimild::vulkan::RenderDevice *renderDevice ) noexcept
     : m_scenePass( renderDevice )
 {
+    // Simulation renders at the fixed size. This might change in the future
+    m_scenePass.handle( Event { .type = Event::Type::WINDOW_RESIZE, .extent = m_simulationExtent } );
+}
+
+crimild::Event Simulation::handle( const crimild::Event &e ) noexcept
+{
+    return m_scenePass.handle( e );
 }
 
 void Simulation::onRender( void ) noexcept
 {
     static auto debouncedResize = concurrency::debounce(
         [ this ]( Event e ) {
-            m_scenePass.handle( e );
             m_descriptorSets.clear();
         },
-        100
+        500
     );
 
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
@@ -85,7 +91,17 @@ void Simulation::onRender( void ) noexcept
         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
         ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-        ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+        const auto aspect = m_simulationExtent.width / m_simulationExtent.height;
+        auto available = ImGui::GetContentRegionAvail();
+        auto imageSize = available;
+        if ( imageSize.x > aspect * imageSize.y ) {
+            imageSize.x = aspect * imageSize.y;
+            ImGui::SetCursorPosX( 0.5f * ( available.x - imageSize.x ) );
+        } else {
+            imageSize.y = imageSize.x / aspect;
+            ImGui::SetCursorPosY( 0.5f * ( available.y - imageSize.y ) );
+        }
+        ImGui::Image( tex_id, imageSize, uv_min, uv_max, tint_col, border_col );
     } else {
         ImGui::Text( "No scene attachments found" );
     }

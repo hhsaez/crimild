@@ -36,7 +36,7 @@ namespace crimild::editor::panels {
         : public Panel,
           public DynamicSingleton< SceneHierarchy > {
     public:
-        virtual const char *getTitle( void ) const noexcept override { return "Scene Hierarchy"; }
+        virtual const char *getTitle( void ) const noexcept override { return "Hierarchy"; }
 
     protected:
         virtual void onRender( void ) noexcept override;

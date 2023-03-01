@@ -43,6 +43,8 @@ namespace crimild::editor::panels {
         Scene( vulkan::RenderDevice *renderDevice ) noexcept;
         virtual ~Scene( void ) = default;
 
+        virtual Event handle( const Event &e ) noexcept;
+
         virtual const char *getTitle( void ) const noexcept override { return "Scene"; }
 
     protected:
