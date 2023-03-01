@@ -28,10 +28,10 @@
 #include "Rendering/VulkanInstance.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Foundation/Version.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Simulation/Settings.hpp"
 #include "VulkanRenderDevice.hpp"
-#include "Foundation/Version.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -260,37 +260,4 @@ void VulkanInstance::destroyReportCallback( void ) noexcept
 std::unique_ptr< PhysicalDevice > VulkanInstance::createPhysicalDevice( VulkanSurface *surface ) noexcept
 {
     return std::make_unique< PhysicalDevice >( this, surface );
-}
-
-//////////////////////
-// DELETE FROM HERE //
-//////////////////////
-
-VulkanInstanceOLD::~VulkanInstanceOLD( void )
-{
-    CRIMILD_LOG_TRACE();
-
-    //	if ( m_renderDevice != nullptr ) {
-    //		CRIMILD_LOG_TRACE( "Waiting for pending operations" );
-    //		m_renderDevice->waitIdle();
-    //	}
-    //
-    //	m_renderDevice = nullptr;
-    //
-    //	destroyDebugMessenger();
-    //
-    //	m_surface = nullptr;
-    //
-    if ( manager != nullptr ) {
-        manager->destroy( this );
-    }
-}
-
-SharedPointer< VulkanInstanceOLD > VulkanInstanceManager::create( VulkanInstanceOLD::Descriptor const &descriptor ) noexcept
-{
-    return nullptr;
-}
-
-void VulkanInstanceManager::destroy( VulkanInstanceOLD *instance ) noexcept
-{
 }

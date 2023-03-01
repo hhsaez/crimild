@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_UTILS_
 #define CRIMILD_VULKAN_UTILS_
 
-#include "Exceptions/VulkanException.hpp"
 #include "Foundation/Log.hpp"
 #include "Foundation/Types.hpp"
 #include "Foundation/VulkanInitializers.hpp"
@@ -48,8 +47,6 @@ namespace crimild {
     struct ViewportDimensions;
 
     namespace vulkan {
-
-        class RenderDeviceOLD;
 
         namespace utils {
 
@@ -84,9 +81,6 @@ namespace crimild {
             VkShaderStageFlagBits getVulkanShaderStageFlag( Shader::Stage stage ) noexcept;
             VkDescriptorType getVulkanDescriptorType( DescriptorType type ) noexcept;
             VkFilter getVulkanFilter( Texture::Filter filter ) noexcept; //< Deprecated
-            VkRect2D getViewportRect( const ViewportDimensions *viewport, const RenderDeviceOLD *renderDevice ) noexcept;
-            VkViewport getViewport( const ViewportDimensions *viewport, const RenderDeviceOLD *renderDevice ) noexcept;
-            VkRect2D getScissor( const ViewportDimensions *scissor, const RenderDeviceOLD *renderDevice ) noexcept;
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
             VkCompareOp getCompareOp( const CompareOp &compareOp ) noexcept;
             VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept; //< Deprecated
@@ -95,12 +89,10 @@ namespace crimild {
             VkBorderColor getBorderColor( Sampler::BorderColor borderColor ) noexcept;
             VkFilter getSamplerFilter( Sampler::Filter filter ) noexcept;
             VkFormat getFormat( Format format ) noexcept;
-            VkFormat getFormat( RenderDeviceOLD *renderDevice, Format format ) noexcept;
             Format getFormat( VkFormat format ) noexcept; //< Reversed
             crimild::Bool formatIsColor( Format format ) noexcept;
             crimild::Bool formatIsDepthStencil( Format format ) noexcept;
             VkImageUsageFlags getAttachmentUsage( Attachment::Usage usage ) noexcept;
-            VkExtent2D getExtent( const Extent2D &extent, const RenderDeviceOLD *renderDevice = nullptr ) noexcept;
             Extent2D getExtent( const VkExtent2D &extent ) noexcept; //< Reverse
             VkAttachmentLoadOp getLoadOp( Attachment::LoadOp loadOp ) noexcept;
             VkAttachmentStoreOp getStoreOp( Attachment::StoreOp storeOp ) noexcept;
@@ -213,12 +205,8 @@ namespace crimild {
                 VkMemoryPropertyFlags properties;
             };
 
-            crimild::Bool createBuffer( RenderDeviceOLD *renderDevice, BufferDescriptor const &descriptor, VkBuffer &bufferHandler, VkDeviceMemory &bufferMemory ) noexcept;
-
             crimild::Bool copyToBuffer( const VkDevice &device, VkDeviceMemory &bufferMemory, const void *data, VkDeviceSize size ) noexcept;
             crimild::Bool copyToBuffer( const VkDevice &device, VkDeviceMemory &bufferMemory, const void **data, crimild::UInt32 count, VkDeviceSize size ) noexcept;
-
-            crimild::Bool copyBuffer( RenderDeviceOLD *renderDevice, VkBuffer src, VkBuffer dst, VkDeviceSize size ) noexcept;
 
             //@}
 
@@ -240,15 +228,6 @@ namespace crimild {
                 crimild::UInt32 flags = 0;
             };
 
-            [[deprecated]] crimild::Bool createImage( RenderDeviceOLD *renderDevice, ImageDescriptor const &descriptor, VkImage &image, VkDeviceMemory &imageMemory ) noexcept;
-
-            [[deprecated]] void transitionImageLayout( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount ) noexcept;
-
-            [[deprecated]] void copyBufferToImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::UInt32 width, crimild::UInt32 height, UInt32 layerCount ) noexcept;
-            void copyBufferToLayeredImage( RenderDeviceOLD *renderDevice, VkBuffer buffer, VkImage image, crimild::Size layerCount, crimild::Size layerSize, crimild::UInt32 layerWidth, crimild::UInt32 layerHeight ) noexcept;
-
-            [[deprecated]] void generateMipmaps( RenderDeviceOLD *renderDevice, VkImage image, VkFormat format, crimild::Int32 width, crimild::Int32 height, crimild::UInt32 mipLevels ) noexcept;
-
             VkImageType getImageType( Image *image ) noexcept;
             VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
 
@@ -260,7 +239,6 @@ namespace crimild {
             //@{
 
             VkImageViewType getImageViewType( const ImageView *imageView ) noexcept;
-            VkFormat getImageViewFormat( RenderDeviceOLD *renderDevice, ImageView *imageView ) noexcept;
             VkImageAspectFlags getImageViewAspectFlags( const ImageView *imageView ) noexcept;
 
             [[deprecated]] void createImageView( VkDevice renderDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView *imageView ) noexcept;
@@ -281,21 +259,7 @@ namespace crimild {
              */
             //@{
 
-            VkFormat findSupportedFormat( RenderDeviceOLD *renderDevice, const std::vector< VkFormat > &candidates, VkImageTiling tiling, VkFormatFeatureFlags features ) noexcept;
-
-            VkFormat findDepthFormat( RenderDeviceOLD *renderDevice ) noexcept;
-
             crimild::Bool hasStencilComponent( VkFormat format ) noexcept;
-
-            //@}
-
-            /**
-                \name Commands
-             */
-            //@{
-
-            VkCommandBuffer beginSingleTimeCommands( RenderDeviceOLD *renderDevice ) noexcept;
-            void endSingleTimeCommands( RenderDeviceOLD *renderDevice, VkCommandBuffer commandBuffer ) noexcept;
 
             //@}
 

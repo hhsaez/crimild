@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_INSTANCE_
 #define CRIMILD_VULKAN_RENDERING_INSTANCE_
 
-#include "Debug/VulkanDebugMessenger.hpp"
-#include "Foundation/VulkanObject.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
 #include <vector>
 
@@ -66,77 +65,6 @@ namespace crimild {
             VkDebugUtilsMessengerEXT m_debugMessengerHandle = VK_NULL_HANDLE;
             VkDebugReportCallbackEXT m_reportCallbackHandle = VK_NULL_HANDLE;
             VkAllocationCallbacks *m_allocator = nullptr;
-        };
-
-        //////////////////////
-        // DELETE FROM HERE //
-        //////////////////////
-
-        class VulkanInstanceManager;
-        class VulkanSurface;
-        class VulkanRenderDevice;
-        class Swapchain;
-
-        /**
-                   \brief Handles creation and setup for the Vulkan instance
-                 */
-        class [[deprecated]] VulkanInstanceOLD : public VulkanObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::vulkan::VulkanInstanceOLD )
-
-        public:
-            struct Descriptor {
-                std::string appName;
-                crimild::UInt32 appVersionMajor;
-                crimild::UInt32 appVersionMinor;
-                crimild::UInt32 appVersionPatch;
-            };
-
-        public:
-            ~VulkanInstanceOLD( void );
-
-            VkInstance handler = VK_NULL_HANDLE;
-
-            // This may be confusing. Whoever creates the instance must be derived
-            // from VulkanInstanceManager. This is so because the instance does not
-            // have a true parent object. Again, confusing, but also keeps it
-            // standardized with other objects
-            VulkanInstanceManager *manager = nullptr;
-
-            /**
-                           \name Surface
-                         */
-            //@{
-
-            //		public:
-            //			void setSurface( SharedPointer< VulkanSurface > const &surface ) noexcept { m_surface = surface; }
-            //			VulkanSurface *getSurface( void ) noexcept { return crimild::get_ptr( m_surface ); }
-
-            //		private:
-            //			SharedPointer< VulkanSurface > m_surface;
-
-            //@}
-
-            /**
-                           \name Render Device
-                         */
-            //@{
-
-            //		public:
-            //			void setRenderDevice( SharedPointer< VulkanRenderDevice > const &renderDevice ) noexcept { m_renderDevice = renderDevice; }
-            //			VulkanRenderDevice *getRenderDevice( void ) noexcept { return crimild::get_ptr( m_renderDevice ); }
-
-            //		private:
-            //			SharedPointer< VulkanRenderDevice > m_renderDevice;
-
-            //@}
-        };
-
-        class [[deprecated]] VulkanInstanceManager : public VulkanObjectManager< VulkanInstanceOLD > {
-        public:
-            virtual ~VulkanInstanceManager( void ) = default;
-
-            SharedPointer< VulkanInstanceOLD > create( VulkanInstanceOLD::Descriptor const &descriptor ) noexcept;
-            void destroy( VulkanInstanceOLD *instance ) noexcept override;
         };
 
     }
