@@ -131,12 +131,28 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
     createSyncObjects();
     createCommandBuffers();
 
-    m_shadowMaps[ nullptr ] = crimild::alloc< ShadowMap >( this, nullptr );
+    m_fallbackDirectionalShadowMap = [ this ] {
+        auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+        return crimild::alloc< ShadowMap >( this, light.get() );
+    }();
+
+    m_fallbackPointShadowMap = [ this ] {
+        auto light = crimild::alloc< Light >( Light::Type::POINT );
+        return crimild::alloc< ShadowMap >( this, light.get() );
+    }();
+
+    m_fallbackSpotShadowMap = [ this ] {
+        auto light = crimild::alloc< Light >( Light::Type::SPOT );
+        return crimild::alloc< ShadowMap >( this, light.get() );
+    }();
 }
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
     m_shadowMaps.clear();
+    m_fallbackDirectionalShadowMap = nullptr;
+    m_fallbackPointShadowMap = nullptr;
+    m_fallbackSpotShadowMap = nullptr;
 
     m_descriptorSets.clear();
 
@@ -2486,5 +2502,17 @@ vulkan::ShadowMap *RenderDevice::getShadowMap( const Light *light ) noexcept
 
 const vulkan::ShadowMap *RenderDevice::getShadowMap( const Light *light ) const noexcept
 {
+    if ( !m_shadowMaps.contains( light ) ) {
+        switch ( light->getType() ) {
+            case Light::Type::DIRECTIONAL:
+                return m_fallbackDirectionalShadowMap.get();
+            case Light::Type::POINT:
+                return m_fallbackPointShadowMap.get();
+            case Light::Type::SPOT:
+                return m_fallbackSpotShadowMap.get();
+            default:
+                return nullptr;
+        }
+    }
     return m_shadowMaps.at( light ).get();
 }

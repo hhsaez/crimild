@@ -259,14 +259,27 @@ namespace crimild::editor::panels {
 
         virtual ~LightPropertiesSection( void ) noexcept
         {
-            for ( auto &layer : m_shadowMapLayers ) {
-                for ( auto ds : layer.descriptorSets ) {
-                    ImGui_ImplVulkan_RemoveTexture( ds );
+            auto layersToDelete = m_shadowMapLayers;
+            concurrency::sync_frame(
+                [ layersToDelete, renderDevice = getRenderDevice() ] {
+                    for ( auto &layer : layersToDelete ) {
+                        for ( auto ds : layer.descriptorSets ) {
+                            ImGui_ImplVulkan_RemoveTexture( ds );
+                        }
+                        for ( auto &imageView : layer.imageViews ) {
+                            vkDestroyImageView( renderDevice->getHandle(), imageView, nullptr );
+                        }
+                    }
                 }
-                for ( auto &imageView : layer.imageViews ) {
-                    vkDestroyImageView( getRenderDevice()->getHandle(), imageView, nullptr );
-                }
-            }
+            );
+            // for ( auto &layer : m_shadowMapLayers ) {
+            //     for ( auto ds : layer.descriptorSets ) {
+            //         ImGui_ImplVulkan_RemoveTexture( ds );
+            //     }
+            //     for ( auto &imageView : layer.imageViews ) {
+            //         vkDestroyImageView( getRenderDevice()->getHandle(), imageView, nullptr );
+            //     }
+            // }
             m_shadowMapLayers.clear();
         }
 
@@ -399,8 +412,6 @@ namespace crimild::editor::panels {
 
 void Inspector::onRender( void ) noexcept
 {
-    // ImGui::Begin( "Inspector", getOpenPtr(), 0 );
-
     if ( Panel::isOpen() ) {
         auto editor = editor::Editor::getInstance();
 
@@ -419,8 +430,6 @@ void Inspector::onRender( void ) noexcept
     } else {
         configure( nullptr );
     }
-
-    // ImGui::End();
 }
 
 void Inspector::configure( crimild::Node *node ) noexcept
