@@ -363,8 +363,8 @@ void SelectionOutlinePass::init( void ) noexcept
         const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 2 > {
-            *imageView,
-            *getRenderDevice()->getDepthStencilImageView(),
+            imageView->getHandle(),
+            getRenderDevice()->getDepthStencilImageView()->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

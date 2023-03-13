@@ -235,7 +235,7 @@ void ShaderPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            *m_colorAttachment->imageViews[ i ],
+            m_colorAttachment->imageViews[ i ]->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -469,7 +469,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
             imageInfos.push_back(
                 {
                     .sampler = m_inputs[ j ]->sampler,
-                    .imageView = *m_inputs[ j ]->imageViews[ i ],
+                    .imageView = m_inputs[ j ]->imageViews[ i ]->getHandle(),
                     .imageLayout = getRenderDevice()->formatIsColor( m_inputs[ j ]->format )
                                        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                                        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,

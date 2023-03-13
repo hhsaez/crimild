@@ -28,30 +28,67 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 #define CRIMILD_VULKAN_RENDERING_FRAMEBUFFER_
 
+#include "Foundation/Named.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 
 namespace crimild {
 
     namespace vulkan {
 
+        class ImageView;
         class RenderPass;
+        class RenderTarget;
+
+        /**
+         * Keep track of bound image views so they don't get released before time
+         */
+        class Framebuffer
+            : public SharedObject,
+              public Named,
+              public WithRenderDevice,
+              public WithHandle< VkFramebuffer > {
+        public:
+            Framebuffer(
+                RenderDevice *device,
+                std::string name,
+                const VkExtent2D &extent,
+                std::shared_ptr< RenderPass > &renderPass,
+                const std::vector< std::shared_ptr< RenderTarget > > &renderTargets
+            ) noexcept;
+
+            virtual ~Framebuffer( void ) noexcept;
+
+            inline const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }
+
+        private:
+            VkExtent2D m_extent;
+            std::shared_ptr< RenderPass > m_renderPass;
+            std::vector< std::shared_ptr< ImageView > > m_imageViews;
+        };
+
+        //////////////////////////
+        // DEPRECATED FROM HERE //
+        //////////////////////////
+
+        class RenderPassDEPRECATED;
         struct FramebufferAttachment;
 
-        class Framebuffer
+        class [[deprecated]] FramebufferDEPRECATED
             : public SharedObject,
               public WithConstRenderDevice {
         public:
-            static std::vector< SharedPointer< Framebuffer > > createInFlightFramebuffers(
+            static std::vector< SharedPointer< FramebufferDEPRECATED > > createInFlightFramebuffers(
                 const RenderDevice *rd,
-                const SharedPointer< RenderPass > &renderPass,
+                const SharedPointer< RenderPassDEPRECATED > &renderPass,
                 const std::vector< const FramebufferAttachment * > &attachments
             ) noexcept;
 
         public:
-            Framebuffer( const RenderDevice *rd, const VkFramebufferCreateInfo &createInfo ) noexcept;
+            FramebufferDEPRECATED( const RenderDevice *rd, const VkFramebufferCreateInfo &createInfo ) noexcept;
 
-            virtual ~Framebuffer( void ) noexcept;
+            virtual ~FramebufferDEPRECATED( void ) noexcept;
 
             operator VkFramebuffer() const noexcept { return m_framebuffer; }
 

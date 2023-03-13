@@ -288,7 +288,7 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
     getRenderDevice()->createFramebufferAttachment( "Scene/Shadows/Point/Color", extent, VK_FORMAT_R32_SFLOAT, m_colorAttachment );
     getRenderDevice()->createFramebufferAttachment( "Scene/Shadows/Point/Depth", extent, VK_FORMAT_D32_SFLOAT, m_depthAttachment );
 
-    m_renderPass = crimild::alloc< vulkan::RenderPass >(
+    m_renderPass = crimild::alloc< vulkan::RenderPassDEPRECATED >(
         getRenderDevice(),
         std::vector< const FramebufferAttachment * > {
             &m_colorAttachment,
@@ -297,7 +297,7 @@ void GeneratePointLightsShadowMaps::init( void ) noexcept
         true
     );
 
-    m_framebuffers = vulkan::Framebuffer::createInFlightFramebuffers(
+    m_framebuffers = vulkan::FramebufferDEPRECATED::createInFlightFramebuffers(
         getRenderDevice(),
         m_renderPass,
         {

@@ -31,6 +31,7 @@
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanSampler.hpp"
 #include "SceneGraph/Light.hpp"
 
 #include <array>
@@ -111,7 +112,7 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
             );
             image->allocateMemory();
             image->setName( "Light/ShadowMap/Image" );
-            
+
             // Ensures image is in the correct layout
             image->transitionLayout( VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
             return image;
@@ -120,6 +121,8 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
         imageViews[ frameId ] = [ & ] {
             auto imageView = crimild::alloc< vulkan::ImageView >(
                 renderDevice,
+                "Light/ShadowMap/ImageView",
+                images[ frameId ],
                 [ & ] {
                     auto createInfo = vulkan::initializers::imageViewCreateInfo(
                         [ & ] {
@@ -132,7 +135,7 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
                             }
                         }()
                     );
-                    createInfo.image = *images[ frameId ];
+                    createInfo.image = images[ frameId ]->getHandle();
                     createInfo.format = imageFormat;
                     createInfo.subresourceRange.aspectMask = imageAspect;
                     createInfo.subresourceRange.layerCount = imageLayerCount;
@@ -142,13 +145,12 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
                     return createInfo;
                 }()
             );
-            imageView->setName( "Light/ShadowMap/ImageView" );
             return imageView;
         }();
     }
 
     // Sampler
-    renderDevice->createSampler( vulkan::initializers::samplerCreateInfo(), sampler );
+    renderDevice->createSampler( vulkan::Sampler::createInfo(), sampler );
     renderDevice->setObjectName( sampler, "Light/ShadowMap/Sampler" );
 
     getRenderDevice()->createDescriptorSetLayout(
@@ -197,7 +199,7 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
     for ( size_t i = 0; i < descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
             .sampler = sampler,
-            .imageView = *imageViews[ i ],
+            .imageView = imageViews[ i ]->getHandle(),
             .imageLayout = renderDevice->formatIsColor( imageFormat ) ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
         };
 

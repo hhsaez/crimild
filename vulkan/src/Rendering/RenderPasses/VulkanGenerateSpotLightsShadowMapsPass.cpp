@@ -210,7 +210,7 @@ void GenerateSpotLightsShadowMaps::init( void ) noexcept
 
     getRenderDevice()->createFramebufferAttachment( "Scene/Shadow", extent, VK_FORMAT_D32_SFLOAT, m_shadowAttachment );
 
-    m_renderPass = crimild::alloc< vulkan::RenderPass >(
+    m_renderPass = crimild::alloc< vulkan::RenderPassDEPRECATED >(
         getRenderDevice(),
         std::vector< const FramebufferAttachment * > {
             &m_shadowAttachment,
@@ -218,7 +218,7 @@ void GenerateSpotLightsShadowMaps::init( void ) noexcept
         true
     );
 
-    m_framebuffers = vulkan::Framebuffer::createInFlightFramebuffers(
+    m_framebuffers = vulkan::FramebufferDEPRECATED::createInFlightFramebuffers(
         getRenderDevice(),
         m_renderPass,
         {

@@ -379,7 +379,7 @@ namespace crimild::editor::panels {
                 imageViews.resize( getRenderDevice()->getInFlightFrameCount(), VK_NULL_HANDLE );
                 for ( uint32_t viewId = 0; viewId < imageViews.size(); viewId++ ) {
                     getRenderDevice()->createImageView(
-                        *shadowMap->images[ viewId ],
+                        shadowMap->images[ viewId ]->getHandle(),
                         shadowMap->imageFormat,
                         shadowMap->imageAspect,
                         layerId,

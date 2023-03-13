@@ -310,14 +310,14 @@ void GenerateDirectionalLightsShadowMaps::init( void ) noexcept
 
     getRenderDevice()->createFramebufferAttachment( "Scene/Shadow", extent, VK_FORMAT_D32_SFLOAT, m_shadowAttachment );
 
-    m_renderPass = crimild::alloc< vulkan::RenderPass >(
+    m_renderPass = crimild::alloc< vulkan::RenderPassDEPRECATED >(
         getRenderDevice(),
         std::vector< const FramebufferAttachment * > { &m_shadowAttachment },
         true
     );
     m_renderPass->setName( "GenerateDirectionalLightShadowMaps" );
 
-    m_framebuffers = vulkan::Framebuffer::createInFlightFramebuffers( getRenderDevice(), m_renderPass, { &m_shadowAttachment } );
+    m_framebuffers = vulkan::FramebufferDEPRECATED::createInFlightFramebuffers( getRenderDevice(), m_renderPass, { &m_shadowAttachment } );
 
     m_pipeline = [ & ] {
         auto program = crimild::alloc< ShaderProgram >();

@@ -25,56 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_WITH_RENDER_DEVICE_
-#define CRIMILD_VULKAN_RENDERING_WITH_RENDER_DEVICE_
+#include "Foundation/ImGuiUtils.hpp"
 
-namespace crimild {
+#include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanSampler.hpp"
 
-    namespace vulkan {
+using namespace crimild;
 
-        class RenderDevice;
-
-        class WithRenderDevice {
-        public:
-            WithRenderDevice( RenderDevice *rd ) noexcept
-                : m_renderDevice( rd )
-            {
-                // no-op
-            }
-
-            virtual ~WithRenderDevice( void ) noexcept
-            {
-                m_renderDevice = nullptr;
-            }
-
-            [[nodiscard]] inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
-            [[nodiscard]] inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-        };
-
-        class WithConstRenderDevice {
-        public:
-            WithConstRenderDevice( const RenderDevice *rd ) noexcept
-                : m_renderDevice( rd )
-            {
-                // no-op
-            }
-
-            virtual ~WithConstRenderDevice( void ) noexcept
-            {
-                m_renderDevice = nullptr;
-            }
-
-            [[nodiscard]] inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-        private:
-            const RenderDevice *m_renderDevice = nullptr;
-        };
-
-    }
-
+ImGuiVulkanTexture::ImGuiVulkanTexture( std::shared_ptr< vulkan::ImageView > const &imageView, std::shared_ptr< vulkan::Sampler > const &sampler ) noexcept
+{
+    m_descriptorSet = ImGui_ImplVulkan_AddTexture(
+        sampler->getHandle(),
+        imageView->getHandle(),
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    );
 }
-
-#endif

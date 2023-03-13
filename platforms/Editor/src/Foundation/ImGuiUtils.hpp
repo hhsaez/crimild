@@ -44,4 +44,37 @@
 #include "GraphEditor.h"
 // clang-format on
 
+#include "Foundation/SharedObject.hpp"
+
+namespace crimild {
+
+    namespace vulkan {
+
+        class ImageView;
+        class Sampler;
+
+    }
+
+    /**
+     * Retains ownership of bound resources so they don't get deleted before time.
+     */
+    class ImGuiVulkanTexture : public SharedObject {
+    public:
+        ImGuiVulkanTexture(
+            std::shared_ptr< vulkan::ImageView > const &imageView,
+            std::shared_ptr< vulkan::Sampler > const &sampelr
+        ) noexcept;
+
+        ~ImGuiVulkanTexture( void ) = default;
+
+        inline VkDescriptorSet getDescriptorSet( void ) const noexcept { return m_descriptorSet; }
+
+    private:
+        std::shared_ptr< vulkan::ImageView > m_imageView;
+        std::shared_ptr< vulkan::Sampler > m_sampler;
+        VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
+    };
+
+}
+
 #endif

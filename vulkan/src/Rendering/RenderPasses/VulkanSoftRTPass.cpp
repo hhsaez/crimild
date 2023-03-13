@@ -152,7 +152,7 @@ void SoftRTPass::render( Node *scene, Camera *camera ) noexcept
 
     getRenderDevice()->transitionImageLayout(
         commandBuffer,
-        *m_colorAttachment.images[ currentFrameIndex ],
+        m_colorAttachment.images[ currentFrameIndex ]->getHandle(),
         m_colorAttachment.format,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -245,7 +245,7 @@ void SoftRTPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            *m_colorAttachment.imageViews[ i ],
+            m_colorAttachment.imageViews[ i ]->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

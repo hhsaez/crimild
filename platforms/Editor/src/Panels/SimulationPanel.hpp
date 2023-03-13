@@ -28,20 +28,26 @@
 #ifndef CRIMILD_EDITOR_PANELS_SIMULATION
 #define CRIMILD_EDITOR_PANELS_SIMULATION
 
+#include "Foundation/VulkanUtils.hpp"
 #include "Panels/Panel.hpp"
 
-#include <Crimild.hpp>
-#include <Crimild_Vulkan.hpp>
 #include <unordered_map>
+
+namespace crimild::vulkan::framegraph {
+
+    class RenderScene;
+
+}
 
 namespace crimild::editor::panels {
 
     class Simulation
         : public Panel,
+          public vulkan::WithRenderDevice,
           public DynamicSingleton< Simulation > {
     public:
         Simulation( vulkan::RenderDevice *renderDevice ) noexcept;
-        virtual ~Simulation( void ) = default;
+        virtual ~Simulation( void ) noexcept;
 
         virtual Event handle( const Event &e ) noexcept override;
 
@@ -53,8 +59,9 @@ namespace crimild::editor::panels {
     private:
         Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
         Extent2D m_simulationExtent = Extent2D { .width = 1280, .height = 720 };
-        vulkan::ScenePass m_scenePass;
-        std::unordered_map< const vulkan::FramebufferAttachment *, std::vector< VkDescriptorSet > > m_descriptorSets;
+
+        std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_framegraphs;
+        std::vector< std::shared_ptr< ImGuiVulkanTexture > > m_outputTextures;
     };
 
 }

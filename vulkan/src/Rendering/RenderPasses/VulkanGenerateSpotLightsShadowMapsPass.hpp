@@ -45,9 +45,9 @@ namespace crimild {
 
     namespace vulkan {
 
-        class Framebuffer;
+        class FramebufferDEPRECATED;
         class RenderDevice;
-        class RenderPass;
+        class RenderPassDEPRECATED;
         class GraphicsPipeline;
 
         /**
@@ -98,8 +98,8 @@ namespace crimild {
             void drawPrimitive( VkCommandBuffer cmds, const Primitive *primitive ) noexcept;
 
         private:
-            std::shared_ptr< vulkan::RenderPass > m_renderPass;
-            std::vector< std::shared_ptr< vulkan::Framebuffer > > m_framebuffers;
+            std::shared_ptr< vulkan::RenderPassDEPRECATED > m_renderPass;
+            std::vector< std::shared_ptr< vulkan::FramebufferDEPRECATED > > m_framebuffers;
 
             vulkan::FramebufferAttachment m_shadowAttachment;
 

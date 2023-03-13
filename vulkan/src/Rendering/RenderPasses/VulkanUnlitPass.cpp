@@ -283,10 +283,10 @@ void UnlitPass::init( void ) noexcept
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         std::vector< VkImageView > imageViews;
         if ( m_colorAttachment != nullptr ) {
-            imageViews.push_back( *m_colorAttachment->imageViews[ i ] );
+            imageViews.push_back( m_colorAttachment->imageViews[ i ]->getHandle() );
         }
         if ( m_depthAttachment != nullptr ) {
-            imageViews.push_back( *m_depthAttachment->imageViews[ i ] );
+            imageViews.push_back( m_depthAttachment->imageViews[ i ]->getHandle() );
         }
 
         auto createInfo = VkFramebufferCreateInfo {

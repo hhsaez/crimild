@@ -28,12 +28,168 @@
 #include "Rendering/VulkanRenderPass.hpp"
 
 #include "Rendering/VulkanFramebuffer.hpp"
-#include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderTarget.hpp"
 
-using namespace crimild;
+using namespace crimild::vulkan;
 
-vulkan::RenderPass::RenderPass(
+RenderPass::RenderPass(
+    RenderDevice *device,
+    std::string name,
+    std::vector< std::shared_ptr< RenderTarget > > &renderTargets,
+    VkAttachmentLoadOp loadOp
+) noexcept
+    : Named( name ),
+      WithRenderDevice( device )
+{
+    std::vector< VkAttachmentDescription > attachmentDescriptions;
+    std::vector< VkAttachmentReference > colorReferences;
+    std::vector< VkAttachmentReference > depthStencilReferences;
+
+    const auto storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    const bool clearAttachments = loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR;
+
+    uint32_t attachmentIndex = 0;
+    for ( const auto &target : renderTargets ) {
+        const bool isColor = device->formatIsColor( target->getFormat() );
+        const bool isDepthStencil = device->formatIsDepthStencil( target->getFormat() );
+
+        attachmentDescriptions.push_back(
+            VkAttachmentDescription {
+                .format = target->getFormat(),
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .loadOp = loadOp,
+                .storeOp = storeOp,
+                .stencilLoadOp = isDepthStencil ? loadOp : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                .stencilStoreOp = isDepthStencil ? storeOp : VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                .initialLayout =
+                    clearAttachments
+                        // We don't care for initial layout if attachment is going to be cleared
+                        ? VK_IMAGE_LAYOUT_UNDEFINED
+                        : ( isColor ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                                    : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL ),
+                // Final layout is ready for use in another pass (not presentation, though)
+                .finalLayout =
+                    isColor
+                        ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            }
+        );
+
+        if ( isColor ) {
+            colorReferences.push_back(
+                VkAttachmentReference {
+                    .attachment = attachmentIndex,
+                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                }
+            );
+        } else {
+            depthStencilReferences.push_back(
+                VkAttachmentReference {
+                    .attachment = attachmentIndex,
+                    .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                }
+            );
+        }
+
+        if ( clearAttachments ) {
+            m_clearValues.push_back( target->getClearValue() );
+        }
+
+        ++attachmentIndex;
+    }
+
+    std::vector< VkSubpassDescription > subpasses = {
+        VkSubpassDescription {
+            .flags = 0,
+            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            .inputAttachmentCount = 0,
+            .pInputAttachments = nullptr,
+            .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+            .pColorAttachments = colorReferences.data(),
+            .pResolveAttachments = nullptr,
+            .pDepthStencilAttachment = depthStencilReferences.data(),
+            .preserveAttachmentCount = 0,
+            .pPreserveAttachments = nullptr,
+        }
+    };
+
+    std::vector< VkSubpassDependency > dependencies = {
+        VkSubpassDependency {
+            .srcSubpass = VK_SUBPASS_EXTERNAL,
+            .dstSubpass = 0,
+            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        },
+        VkSubpassDependency {
+            .srcSubpass = 0,
+            .dstSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+        }
+    };
+
+    auto createInfo = VkRenderPassCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = uint32_t( attachmentDescriptions.size() ),
+        .pAttachments = attachmentDescriptions.data(),
+        .subpassCount = uint32_t( subpasses.size() ),
+        .pSubpasses = subpasses.data(),
+        .dependencyCount = uint32_t( dependencies.size() ),
+        .pDependencies = dependencies.data(),
+    };
+
+    VkRenderPass handle;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateRenderPass(
+            getRenderDevice()->getHandle(),
+            &createInfo,
+            getRenderDevice()->getAllocator(),
+            &handle
+        )
+    );
+    setHandle( handle );
+}
+
+RenderPass::RenderPass(
+    RenderDevice *device,
+    std::string name,
+    const VkRenderPassCreateInfo &createInfo
+) noexcept
+    : Named( name ),
+      WithRenderDevice( device )
+{
+    VkRenderPass handle;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateRenderPass(
+            getRenderDevice()->getHandle(),
+            &createInfo,
+            getRenderDevice()->getAllocator(),
+            &handle
+        )
+    );
+    setHandle( handle );
+}
+
+RenderPass::~RenderPass( void ) noexcept
+{
+    vkDestroyRenderPass( getRenderDevice()->getHandle(), getHandle(), getRenderDevice()->getAllocator() );
+    setHandle( VK_NULL_HANDLE );
+
+    m_clearValues.clear();
+}
+
+//////////////////////
+// DELETE FROM HERE //
+//////////////////////
+
+RenderPassDEPRECATED::RenderPassDEPRECATED(
     const RenderDevice *rd,
     const std::vector< const FramebufferAttachment * > &attachments,
     bool clearAttachments
@@ -172,7 +328,7 @@ vulkan::RenderPass::RenderPass(
     );
 }
 
-vulkan::RenderPass::RenderPass(
+RenderPassDEPRECATED::RenderPassDEPRECATED(
     const vulkan::RenderDevice *rd,
     const VkRenderPassCreateInfo &createInfo
 ) noexcept
@@ -188,7 +344,7 @@ vulkan::RenderPass::RenderPass(
     );
 }
 
-vulkan::RenderPass::~RenderPass( void ) noexcept
+RenderPassDEPRECATED::~RenderPassDEPRECATED( void ) noexcept
 {
     vkDestroyRenderPass( getRenderDevice()->getHandle(), m_renderPass, nullptr );
     m_renderPass = VK_NULL_HANDLE;
@@ -196,12 +352,12 @@ vulkan::RenderPass::~RenderPass( void ) noexcept
     m_clearValues.clear();
 }
 
-void vulkan::RenderPass::setName( std::string_view name ) const noexcept
+void RenderPassDEPRECATED::setName( std::string_view name ) const noexcept
 {
     getRenderDevice()->setObjectName( uint64_t( m_renderPass ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, name );
 }
 
-void vulkan::RenderPass::begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::Framebuffer > &framebuffer ) const noexcept
+void RenderPassDEPRECATED::begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::FramebufferDEPRECATED > &framebuffer ) const noexcept
 {
     auto beginInfo = vulkan::initializers::renderPassBeginInfo();
     beginInfo.renderPass = m_renderPass;
@@ -213,12 +369,12 @@ void vulkan::RenderPass::begin( VkCommandBuffer commandBuffer, const SharedPoint
     begin( commandBuffer, beginInfo );
 }
 
-void vulkan::RenderPass::begin( VkCommandBuffer commandBuffer, const VkRenderPassBeginInfo &beginInfo ) const noexcept
+void RenderPassDEPRECATED::begin( VkCommandBuffer commandBuffer, const VkRenderPassBeginInfo &beginInfo ) const noexcept
 {
     vkCmdBeginRenderPass( commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE );
 }
 
-void vulkan::RenderPass::end( VkCommandBuffer commandBuffer ) const noexcept
+void RenderPassDEPRECATED::end( VkCommandBuffer commandBuffer ) const noexcept
 {
     vkCmdEndRenderPass( commandBuffer );
 }

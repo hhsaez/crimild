@@ -197,7 +197,7 @@ void BlitPass::init( void ) noexcept
         const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
         auto attachments = std::array< VkImageView, 1 > {
-            *imageView,
+            imageView->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

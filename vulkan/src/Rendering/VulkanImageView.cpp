@@ -32,18 +32,19 @@
 
 using namespace crimild;
 
-vulkan::ImageView::ImageView( const vulkan::RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept
+vulkan::ImageView::ImageView(
+    vulkan::RenderDevice *device,
+    std::string name,
+    std::shared_ptr< vulkan::Image > const &image
+) noexcept
     : vulkan::ImageView(
-        rd,
+        device,
+        name,
+        image,
         [ & ] {
-            auto info = vulkan::initializers::imageViewCreateInfo();
-            info.image = *image;
-            info.subresourceRange.aspectMask =
-                rd->formatIsColor( image->getFormat() )
-                    ? VK_IMAGE_ASPECT_COLOR_BIT
-                : rd->formatHasStencilComponent( image->getFormat() )
-                    ? VK_IMAGE_ASPECT_STENCIL_BIT
-                    : VK_IMAGE_ASPECT_DEPTH_BIT;
+            auto info = createInfo();
+            info.image = image->getHandle();
+            info.subresourceRange.aspectMask = image->getAspectFlags();
             info.format = image->getFormat();
             return info;
         }()
@@ -51,26 +52,36 @@ vulkan::ImageView::ImageView( const vulkan::RenderDevice *rd, const SharedPointe
 {
 }
 
-vulkan::ImageView::ImageView( const vulkan::RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept
-    : WithConstRenderDevice( rd )
+vulkan::ImageView::ImageView(
+    vulkan::RenderDevice *device,
+    std::string name,
+    std::shared_ptr< vulkan::Image > const &image,
+    const VkImageViewCreateInfo &createInfo
+) noexcept
+    : WithRenderDevice( device ),
+      Named( name ),
+      m_image( image )
 {
+    VkImageView handle;
     CRIMILD_VULKAN_CHECK(
         vkCreateImageView(
             getRenderDevice()->getHandle(),
             &createInfo,
-            nullptr,
-            &m_imageView
+            getRenderDevice()->getAllocator(),
+            &handle
         )
     );
+    setHandle( handle );
+
+    device->setObjectName( handle, name );
 }
 
 vulkan::ImageView::~ImageView( void ) noexcept
 {
-    vkDestroyImageView( getRenderDevice()->getHandle(), m_imageView, nullptr );
-    m_imageView = VK_NULL_HANDLE;
-}
-
-void vulkan::ImageView::setName( std::string_view name ) noexcept
-{
-    getRenderDevice()->setObjectName( m_imageView, name );
+    vkDestroyImageView(
+        getRenderDevice()->getHandle(),
+        getHandle(),
+        getRenderDevice()->getAllocator()
+    );
+    setHandle( VK_NULL_HANDLE );
 }
