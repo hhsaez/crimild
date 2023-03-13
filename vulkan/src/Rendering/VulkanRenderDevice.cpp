@@ -27,9 +27,11 @@
 
 #include "Rendering/VulkanRenderDevice.hpp"
 
+#include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
+#include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "SceneGraph/Light.hpp"
@@ -145,10 +147,16 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
         auto light = crimild::alloc< Light >( Light::Type::SPOT );
         return crimild::alloc< ShadowMap >( this, light.get() );
     }();
+
+    for ( int i = 0; i < getInFlightFrameCount(); ++i ) {
+        m_caches.emplace_back( crimild::alloc< RenderDeviceCache >( this ) );
+    }
 }
 
 RenderDevice::~RenderDevice( void ) noexcept
 {
+    m_caches.clear();
+
     m_shadowMaps.clear();
     m_fallbackDirectionalShadowMap = nullptr;
     m_fallbackPointShadowMap = nullptr;
@@ -480,10 +488,9 @@ void RenderDevice::createSwapchain( void ) noexcept
         m_swapchainImageViews.push_back(
             [ & ] {
                 auto createInfo = vulkan::initializers::imageViewCreateInfo();
-                createInfo.image = *image;
+                createInfo.image = image->getHandle();
                 createInfo.format = m_swapchainFormat; // VK_FORMAT_B8G8R8A8_UNORM
-                auto imageView = crimild::alloc< vulkan::ImageView >( this, createInfo );
-                imageView->setName( "RenderDevice::swapchainImageView" );
+                auto imageView = crimild::alloc< vulkan::ImageView >( this, "RenderDevice::swapchainImageView", image, createInfo );
                 return imageView;
             }()
         );
@@ -537,9 +544,11 @@ void RenderDevice::createDepthStencilResources( void ) noexcept
     }();
     m_depthStencilResources.imageView = crimild::alloc< vulkan::ImageView >(
         this,
+        "DepthStencil/ImageView",
+        m_depthStencilResources.image,
         [ & ] {
             auto createInfo = vulkan::initializers::imageViewCreateInfo();
-            createInfo.image = *m_depthStencilResources.image;
+            createInfo.image = m_depthStencilResources.image->getHandle();
             createInfo.format = m_depthStencilResources.format;
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
             return createInfo;
@@ -728,6 +737,10 @@ bool RenderDevice::beginRender( bool isPresenting ) noexcept
             getHandle(),
             m_swapchain,
             std::numeric_limits< uint64_t >::max(), // disable timeout
+
+            // Will signal these semaphores, so render commands recorded below can be executed.
+            // That's why we acquire the next image as soon as possible, so this operation
+            // is completelly (hopefully) by the time we submit commands.
             m_imageAvailableSemaphores[ m_currentFrame ],
             VK_NULL_HANDLE,
             &m_imageIndex
@@ -786,6 +799,8 @@ bool RenderDevice::endRender( bool present ) noexcept
     if ( present ) {
         VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         submitInfo.pWaitDstStageMask = &waitStageMask;
+        // Wait for an image to be available. Hopefully, by the time we're submitting commands
+        // the semaphore is already signaled since we call vkAcquireNextImage in beginRender().
         VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[ m_currentFrame ] };
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
@@ -796,6 +811,8 @@ bool RenderDevice::endRender( bool present ) noexcept
 
     VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[ m_currentFrame ] };
     if ( present ) {
+        // Signal these semaphores when all commands are executed
+        // That way the queue can present the frame
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
     }
@@ -817,6 +834,7 @@ bool RenderDevice::endRender( bool present ) noexcept
         auto presentInfo = VkPresentInfoKHR {
             .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .waitSemaphoreCount = 1,
+            // Wait for commands to be executed before presenting.
             .pWaitSemaphores = signalSemaphores,
             .swapchainCount = 1,
             .pSwapchains = swapchains,
@@ -2074,7 +2092,7 @@ void RenderDevice::unbind( const crimild::ImageView *imageView ) noexcept
     m_imageViews.erase( id );
 }
 
-VkSampler RenderDevice::bind( const Sampler *sampler ) noexcept
+VkSampler RenderDevice::bind( const crimild::Sampler *sampler ) noexcept
 {
     const auto id = sampler->getUniqueID();
     if ( m_samplers.contains( id ) ) {
@@ -2123,7 +2141,7 @@ VkSampler RenderDevice::bind( const Sampler *sampler ) noexcept
     return m_samplers[ id ][ 0 ];
 }
 
-void RenderDevice::unbind( const Sampler *sampler ) noexcept
+void RenderDevice::unbind( const crimild::Sampler *sampler ) noexcept
 {
     const auto id = sampler->getUniqueID();
     if ( !m_samplers.contains( id ) ) {
@@ -2257,7 +2275,7 @@ VkRect2D RenderDevice::getScissor( const ViewportDimensions &scissor ) const noe
     };
 }
 
-void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out, bool usingDeviceResources ) const
+void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent2D &extent, VkFormat format, FramebufferAttachment &out, bool usingDeviceResources )
 {
     CRIMILD_LOG_TRACE();
 
@@ -2321,8 +2339,7 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
         }();
 
         out.imageViews[ i ] = [ & ] {
-            auto imageView = crimild::alloc< vulkan::ImageView >( this, out.images[ i ] );
-            imageView->setName( name + "/ImageView" );
+            auto imageView = crimild::alloc< vulkan::ImageView >( this, name + "/ImageView", out.images[ i ] );
             return imageView;
         }();
     }
@@ -2431,7 +2448,7 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     for ( size_t i = 0; i < out.descriptorSets.size(); ++i ) {
         const auto imageInfo = VkDescriptorImageInfo {
             .sampler = out.sampler,
-            .imageView = *out.imageViews[ i ],
+            .imageView = out.imageViews[ i ]->getHandle(),
             .imageLayout = isColorAttachment ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
         };
 
@@ -2459,7 +2476,7 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     }
 }
 
-void RenderDevice::destroyFramebufferAttachment( FramebufferAttachment &att ) const
+void RenderDevice::destroyFramebufferAttachment( FramebufferAttachment &att )
 {
     if ( !att.usesDeviceResources ) {
         att.descriptorSets.clear();
@@ -2485,7 +2502,7 @@ void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
     const auto isColorAttachment = formatIsColor( att.format );
     transitionImageLayout(
         commandBuffer,
-        *att.images[ currentFrameIndex ],
+        att.images[ currentFrameIndex ]->getHandle(),
         att.format,
         isColorAttachment
             ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
@@ -2521,4 +2538,32 @@ const vulkan::ShadowMap *RenderDevice::getShadowMap( const Light *light ) const 
         }
     }
     return m_shadowMaps.at( light ).get();
+}
+
+void RenderDevice::submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
+{
+    const auto handle = commandBuffer->getHandle();
+    auto submitInfo = VkSubmitInfo {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &handle,
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            getGraphicsQueue(),
+            1,
+            &submitInfo,
+            nullptr
+        )
+    );
+
+    // TODO: Waiting should be optional
+    // Also, if not waiting, we should keep track of which command buffers are in flight and
+    // retain ownership of them. We might need fences or another way to check if they finished.
+    CRIMILD_VULKAN_CHECK(
+        vkQueueWaitIdle(
+            getGraphicsQueue()
+        )
+    );
 }

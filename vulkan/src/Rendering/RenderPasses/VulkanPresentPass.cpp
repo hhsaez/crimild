@@ -173,7 +173,7 @@ void PresentPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            *m_colorAttachment->imageViews[ i ],
+            m_colorAttachment->imageViews[ i ]->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

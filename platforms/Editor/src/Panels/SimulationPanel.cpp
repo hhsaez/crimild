@@ -27,66 +27,96 @@
 
 #include "Panels/SimulationPanel.hpp"
 
-#include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderTarget.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild::editor::panels;
 
-Simulation::Simulation( crimild::vulkan::RenderDevice *renderDevice ) noexcept
-    : m_scenePass( renderDevice )
+Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
+    : WithRenderDevice( device )
 {
     // Simulation renders at the fixed size. This might change in the future
-    m_scenePass.handle( Event { .type = Event::Type::WINDOW_RESIZE, .extent = m_simulationExtent } );
+    // m_scenePass.handle( Event { .type = Event::Type::WINDOW_RESIZE, .extent = m_simulationExtent } );
+
+    const auto N = getRenderDevice()->getInFlightFrameCount();
+    m_framegraphs.resize( N );
+    m_outputTextures.resize( N );
+    for ( int i = 0; i < N; ++i ) {
+        auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
+            device,
+            VkExtent2D {
+                .width = uint32_t( m_simulationExtent.width ),
+                .height = uint32_t( m_simulationExtent.height ),
+            }
+        );
+        m_framegraphs[ i ] = framegraph;
+        m_outputTextures[ i ] = crimild::alloc< ImGuiVulkanTexture >(
+            framegraph->getOutput()->getImageView(),
+            framegraph->getOutput()->getSampler()
+        );
+    }
+}
+
+Simulation::~Simulation( void ) noexcept
+{
+    getRenderDevice()->flush();
 }
 
 crimild::Event Simulation::handle( const crimild::Event &e ) noexcept
 {
-    return m_scenePass.handle( e );
+    // return m_scenePass.handle( e );
+    return e;
 }
 
 void Simulation::onRender( void ) noexcept
 {
-    static auto debouncedResize = concurrency::debounce(
-        [ this ]( Event e ) {
-            m_descriptorSets.clear();
-        },
-        500
-    );
+    // static auto debouncedResize = concurrency::debounce(
+    //     [ this ]( Event e ) {
+    //         m_descriptorSets.clear();
+    //     },
+    //     500
+    // );
 
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
     bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
-    if ( !isMinimized ) {
-        if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
-            m_extent.width = renderSize.x;
-            m_extent.height = renderSize.y;
-            debouncedResize(
-                Event {
-                    .type = Event::Type::WINDOW_RESIZE,
-                    .extent = m_extent,
-                }
-            );
-        }
-    }
+    m_extent.width = renderSize.x;
+    m_extent.height = renderSize.y;
+    // if ( !isMinimized ) {
+    //     if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
+    //         m_extent.width = renderSize.x;
+    //         m_extent.height = renderSize.y;
+    //         debouncedResize(
+    //             Event {
+    //                 .type = Event::Type::WINDOW_RESIZE,
+    //                 .extent = m_extent,
+    //             }
+    //         );
+    //     }
+    // }
 
-    auto currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
+    auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
 
-    const auto att = m_scenePass.getColorAttachment();
-    if ( !att->descriptorSets.empty() ) {
-        if ( !m_descriptorSets.contains( att ) ) {
-            auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
-            for ( int i = 0; i < ds.size(); ++i ) {
-                ds[ i ] = ImGui_ImplVulkan_AddTexture(
-                    att->sampler,
-                    ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                );
-            }
-            m_descriptorSets[ att ] = ds;
-        }
-        auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
+    // const auto att = m_scenePass.getColorAttachment();
+    // if ( !att->descriptorSets.empty() ) {
+    // if ( !m_descriptorSets.contains( att ) ) {
+    //     auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
+    //     for ( int i = 0; i < ds.size(); ++i ) {
+    //         ds[ i ] = ImGui_ImplVulkan_AddTexture(
+    //             att->sampler,
+    //             ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
+    //             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    //         );
+    //     }
+    //     m_descriptorSets[ att ] = ds;
+    // }
+    // auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
+
+    if ( !m_outputTextures.empty() ) {
+        auto tex_id = m_outputTextures[ currentFrameIdx ]->getDescriptorSet();
         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
@@ -114,5 +144,11 @@ void Simulation::onRender( void ) noexcept
     if ( camera != nullptr ) {
         camera->setAspectRatio( m_extent.width / m_extent.height );
     }
-    m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
+    // m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
+    m_framegraphs[ currentFrameIdx ]->render(
+        crimild::Simulation::getInstance()->getScene(),
+        camera
+    );
+    
+    getRenderDevice()->flush();
 }

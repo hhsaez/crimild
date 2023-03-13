@@ -28,32 +28,63 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 
+#include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
 
 namespace crimild {
 
     namespace vulkan {
-    
+
         class Image;
 
         class ImageView
             : public SharedObject,
-              public WithConstRenderDevice {
+              public Named,
+              public WithRenderDevice,
+              public WithHandle< VkImageView > {
         public:
-            ImageView( const RenderDevice *rd, const SharedPointer< vulkan::Image > &image ) noexcept;
-            ImageView( const RenderDevice *rd, const VkImageViewCreateInfo &createInfo ) noexcept;
+            static auto createInfo( void ) noexcept
+            {
+                return VkImageViewCreateInfo {
+                    .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = 0,
+                    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    .subresourceRange = {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1,
+                    },
+                };
+            }
+
+        public:
+            ImageView(
+                RenderDevice *rd,
+                std::string name,
+                std::shared_ptr< Image > const &image
+            ) noexcept;
+
+            ImageView(
+                RenderDevice *rd,
+                std::string name,
+                std::shared_ptr< Image > const &image,
+                const VkImageViewCreateInfo &createInfo
+            ) noexcept;
+
             virtual ~ImageView( void ) noexcept;
 
-            operator VkImageView() const noexcept { return m_imageView; }
-
-            void setName( std::string_view name ) noexcept;
+            inline std::shared_ptr< Image > &getImage( void ) noexcept
+            {
+                return m_image;
+            }
 
         private:
-            VkImageView m_imageView = VK_NULL_HANDLE;
+            std::shared_ptr< vulkan::Image > m_image;
         };
-
     }
 
 }

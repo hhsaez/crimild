@@ -663,7 +663,7 @@ void LocalLightingPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
-            *m_outputAttachment->imageViews[ i ],
+            m_outputAttachment->imageViews[ i ]->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {
@@ -817,7 +817,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
             imageInfos.push_back(
                 VkDescriptorImageInfo {
                     .sampler = att->sampler,
-                    .imageView = *att->imageViews[ i ],
+                    .imageView = att->imageViews[ i ]->getHandle(),
                     .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 }
             );
@@ -1071,7 +1071,7 @@ static void createLightDescriptors(
 
         const auto imageInfo = VkDescriptorImageInfo {
             .sampler = shadowMap->sampler,
-            .imageView = *shadowMap->imageViews[ i ],
+            .imageView = shadowMap->imageViews[ i ]->getHandle(),
             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
 

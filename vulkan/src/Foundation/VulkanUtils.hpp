@@ -48,6 +48,8 @@ namespace crimild {
 
     namespace vulkan {
 
+        class RenderDevice;
+
         namespace utils {
 
             static const VkPrimitiveTopology VULKAN_PRIMITIVE_TOPOLOGIES[] = {
@@ -84,10 +86,10 @@ namespace crimild {
             VkIndexType getIndexType( const IndexBuffer *indexBuffer ) noexcept;
             VkCompareOp getCompareOp( const CompareOp &compareOp ) noexcept;
             VkSamplerAddressMode getSamplerAddressMode( Texture::WrapMode wrapMode ) noexcept; //< Deprecated
-            VkSamplerAddressMode getSamplerAddressMode( Sampler::WrapMode wrapMode ) noexcept;
+            VkSamplerAddressMode getSamplerAddressMode( crimild::Sampler::WrapMode wrapMode ) noexcept;
             VkBorderColor getBorderColor( Texture::BorderColor borderColor ) noexcept; //< Deprecated
-            VkBorderColor getBorderColor( Sampler::BorderColor borderColor ) noexcept;
-            VkFilter getSamplerFilter( Sampler::Filter filter ) noexcept;
+            VkBorderColor getBorderColor( crimild::Sampler::BorderColor borderColor ) noexcept;
+            VkFilter getSamplerFilter( crimild::Sampler::Filter filter ) noexcept;
             VkFormat getFormat( Format format ) noexcept;
             Format getFormat( VkFormat format ) noexcept; //< Reversed
             crimild::Bool formatIsColor( Format format ) noexcept;
@@ -275,6 +277,43 @@ namespace crimild {
             //@}
 
         }
+
+        class WithRenderDevice {
+        public:
+            WithRenderDevice( RenderDevice *rd ) noexcept
+                : m_renderDevice( rd )
+            {
+                // no-op
+            }
+
+            virtual ~WithRenderDevice( void ) noexcept
+            {
+                m_renderDevice = nullptr;
+            }
+
+            [[nodiscard]] inline RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
+            [[nodiscard]] inline const RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+
+        private:
+            RenderDevice *m_renderDevice = nullptr;
+        };
+
+        template< typename HandleType >
+        class WithHandle {
+        public:
+            virtual ~WithHandle( void ) noexcept
+            {
+                m_handle = VK_NULL_HANDLE;
+            }
+
+            [[nodiscard]] inline HandleType getHandle( void ) const noexcept { return m_handle; }
+
+        protected:
+            inline void setHandle( HandleType handle ) noexcept { m_handle = handle; }
+
+        private:
+            HandleType m_handle = VK_NULL_HANDLE;
+        };
 
     }
 

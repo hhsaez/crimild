@@ -178,7 +178,7 @@ void Scene::onRender( void ) noexcept
                 for ( int i = 0; i < ds.size(); ++i ) {
                     ds[ i ] = ImGui_ImplVulkan_AddTexture(
                         att->sampler,
-                        ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
+                        att->imageViews[ currentFrameIdx ]->getHandle(),
                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                     );
                 }
@@ -238,7 +238,7 @@ void Scene::onRender( void ) noexcept
     auto transitionAttachment = [ & ]( const auto att ) {
         getRenderDevice()->transitionImageLayout(
             commandBuffer,
-            *att->images[ currentFrameIndex ],
+            att->images[ currentFrameIndex ]->getHandle(),
             att->format,
             getRenderDevice()->formatIsColor( att->format )
                 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL

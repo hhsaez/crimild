@@ -47,7 +47,9 @@ namespace crimild {
 
     namespace vulkan {
 
+        class CommandBuffer;
         class PhysicalDevice;
+        class RenderDeviceCache;
         class ShadowMap;
         class VulkanSurface;
 
@@ -61,16 +63,9 @@ namespace crimild {
 
             [[nodiscard]] inline const VkDevice &getHandle( void ) const noexcept { return m_handle; }
 
+            [[nodiscard]] inline VkAllocationCallbacks *getAllocator( void ) const noexcept { return nullptr; }
+
             [[nodiscard]] inline const PhysicalDevice *getPhysicalDevice( void ) const noexcept { return m_physicalDevice; }
-            [[nodiscard]] inline const VulkanSurface *getSurface( void ) const noexcept { return m_surface; }
-
-            [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
-            [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
-            [[nodiscard]] inline const std::vector< SharedPointer< vulkan::ImageView > > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
-            [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
-
-            [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
-            [[nodiscard]] inline const SharedPointer< vulkan::ImageView > &getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
 
             /**
              * \brief Get the total number of frames active at any given point in time
@@ -88,14 +83,66 @@ namespace crimild {
             inline uint32_t getPresentQueueFamily( void ) const noexcept { return m_presentQueueFamily; }
             inline VkQueue getPresentQueue( void ) const noexcept { return m_presentQueueHandle; }
 
+            inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
+
             void handle( const Event &e ) noexcept;
 
             bool beginRender( bool isPresenting = true ) noexcept;
             bool endRender( bool isPresenting = true ) noexcept;
 
-            void flush( void ) noexcept;
+            inline void setObjectName( VkImage handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
+            inline void setObjectName( VkImageView handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
+            inline void setObjectName( VkSampler handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
+            inline void setObjectName( VkCommandBuffer handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT, name ); }
+            inline void setObjectName( VkDescriptorSetLayout handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
+            inline void setObjectName( VkDescriptorSet handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT, name ); }
+            inline void setObjectName( VkDescriptorPool handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
+            inline void setObjectName( VkRenderPass handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, name ); }
+            inline void setObjectName( VkPipeline handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, name ); }
+            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string_view name ) const noexcept;
 
-            inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
+            [[nodiscard]] inline RenderDeviceCache *getCache( void ) noexcept
+            {
+                return m_caches[ getCurrentFrameIndex() ].get();
+            }
+
+            void submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
+
+        private:
+            VkDevice m_handle = VK_NULL_HANDLE;
+            PhysicalDevice *m_physicalDevice = nullptr;
+
+            uint32_t m_graphicsQueueFamily = -1;
+            VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
+            uint32_t m_computeQueueFamily = -1;
+            VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
+            uint32_t m_presentQueueFamily = -1;
+            VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
+
+            // To use the right pair of semaphores every time, we also keep track of the current frame
+            uint8_t m_currentFrame = 0;
+
+            ShaderCompiler m_shaderCompiler;
+
+            std::vector< std::shared_ptr< RenderDeviceCache > > m_caches;
+
+            /////////////////////////////////
+            // MOSTLY DEPRECATED FROM HERE //
+            /////////////////////////////////
+        public:
+            [[nodiscard]] inline const VulkanSurface *getSurface( void ) const noexcept { return m_surface; }
+
+            [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
+            [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
+            [[nodiscard]] inline const std::vector< SharedPointer< vulkan::ImageView > > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
+            [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
+
+            [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
+            [[nodiscard]] inline const SharedPointer< vulkan::ImageView > &getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
+
+            inline VkCommandPool getCommandPool( void ) const noexcept { return m_commandPool; }
+
+            void flush( void ) noexcept;
 
             void createDescriptorSetLayout(
                 const std::vector< VkDescriptorSetLayoutBinding > &bindings,
@@ -205,15 +252,6 @@ namespace crimild {
                 return m_descriptorSets.contains( id ) ? m_descriptorSets.at( id ).data() : nullptr;
             }
 
-            inline void setObjectName( VkImage handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
-            inline void setObjectName( VkImageView handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
-            inline void setObjectName( VkSampler handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT, name ); }
-            inline void setObjectName( VkDescriptorSetLayout handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name ); }
-            inline void setObjectName( VkDescriptorPool handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT, name ); }
-            inline void setObjectName( VkRenderPass handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT, name ); }
-            inline void setObjectName( VkPipeline handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, name ); }
-            void setObjectName( UInt64 handle, VkDebugReportObjectTypeEXT objectType, std::string_view name ) const noexcept;
-
             void createImage( const VkImageCreateInfo &createInfo, VkImage &image ) const noexcept;
             void destroyImage( VkImage &image ) const noexcept;
 
@@ -290,8 +328,8 @@ namespace crimild {
                 VkFormat format,
                 FramebufferAttachment &out,
                 bool useDeviceImages = false
-            ) const;
-            void destroyFramebufferAttachment( FramebufferAttachment &att ) const;
+            );
+            void destroyFramebufferAttachment( FramebufferAttachment &att );
 
             /**
              * \brief Flushes attachments contents and makes it read-only
@@ -319,21 +357,10 @@ namespace crimild {
             VkCommandBuffer beginSingleTimeCommands( void ) const noexcept;
             void endSingleTimeCommands( VkCommandBuffer commandBuffer ) const noexcept;
 
-        private:
-            // TODO(hernan): rename to m_device
-            VkDevice m_handle = VK_NULL_HANDLE;
-            PhysicalDevice *m_physicalDevice = nullptr;
-
+        public:
             VulkanSurface *m_surface = nullptr;
 
             Extent2D m_extent;
-
-            uint32_t m_graphicsQueueFamily = -1;
-            VkQueue m_graphicsQueueHandle = VK_NULL_HANDLE;
-            uint32_t m_computeQueueFamily = -1;
-            VkQueue m_computeQueueHandle = VK_NULL_HANDLE;
-            uint32_t m_presentQueueFamily = -1;
-            VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
 
             VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
             VkExtent2D m_swapchainExtent;
@@ -351,11 +378,6 @@ namespace crimild {
 
             // Last image index provided by the swapchain
             uint32_t m_imageIndex = 0;
-
-            // To use the right pair of semaphores every time, we also keep track of the current frame
-            uint8_t m_currentFrame = 0;
-
-            ShaderCompiler m_shaderCompiler;
 
             // TODO: Move these to RenderDeviceCache
             std::unordered_map< Size, std::vector< VkBuffer > > m_buffers;

@@ -36,14 +36,14 @@ namespace crimild {
 
         namespace initializers {
 
-            inline constexpr VkMemoryAllocateInfo memoryAllocateInfo( void ) noexcept
+            [[deprecated]] inline constexpr VkMemoryAllocateInfo memoryAllocateInfo( void ) noexcept
             {
                 return VkMemoryAllocateInfo {
                     .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
                 };
             }
 
-            inline constexpr VkImageCreateInfo imageCreateInfo( VkImageType imageType = VK_IMAGE_TYPE_2D ) noexcept
+            [[deprecated]] inline constexpr VkImageCreateInfo imageCreateInfo( VkImageType imageType = VK_IMAGE_TYPE_2D ) noexcept
             {
                 return VkImageCreateInfo {
                     .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -58,7 +58,7 @@ namespace crimild {
                 };
             }
 
-            inline constexpr VkImageCreateInfo imageCubeCreateInfo( void ) noexcept
+            [[deprecated]] inline constexpr VkImageCreateInfo imageCubeCreateInfo( void ) noexcept
             {
                 auto createInfo = imageCreateInfo();
                 createInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -67,7 +67,7 @@ namespace crimild {
                 return createInfo;
             }
 
-            inline constexpr VkImageViewCreateInfo imageViewCreateInfo( VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D ) noexcept
+            [[deprecated]] inline constexpr VkImageViewCreateInfo imageViewCreateInfo( VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D ) noexcept
             {
                 return VkImageViewCreateInfo {
                     .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -84,29 +84,7 @@ namespace crimild {
                 };
             }
 
-            inline constexpr VkSamplerCreateInfo samplerCreateInfo( void ) noexcept
-            {
-                return VkSamplerCreateInfo {
-                    .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-                    .magFilter = VK_FILTER_NEAREST,
-                    .minFilter = VK_FILTER_NEAREST,
-                    .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-                    .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                    .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                    .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-                    .mipLodBias = 0,
-                    .anisotropyEnable = VK_TRUE,
-                    .maxAnisotropy = 1,
-                    .compareEnable = VK_FALSE,
-                    .compareOp = VK_COMPARE_OP_ALWAYS,
-                    .minLod = 0,
-                    .maxLod = 1,
-                    .borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-                    .unnormalizedCoordinates = VK_FALSE,
-                };
-            }
-
-            inline constexpr VkImageCopy imageCopy( void ) noexcept
+            [[deprecated]] inline constexpr VkImageCopy imageCopy( void ) noexcept
             {
                 VkImageCopy copyRegion = {};
                 copyRegion.srcSubresource.baseArrayLayer = 0;
@@ -120,7 +98,7 @@ namespace crimild {
                 return copyRegion;
             }
 
-            inline constexpr VkRenderPassBeginInfo renderPassBeginInfo( void ) noexcept
+            [[deprecated]] inline constexpr VkRenderPassBeginInfo renderPassBeginInfo( void ) noexcept
             {
                 return VkRenderPassBeginInfo {
                     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -129,7 +107,7 @@ namespace crimild {
                 };
             }
 
-            inline constexpr VkFramebufferCreateInfo framebufferCreateInfo( void ) noexcept
+            [[deprecated]] inline constexpr VkFramebufferCreateInfo framebufferCreateInfo( void ) noexcept
             {
                 return VkFramebufferCreateInfo {
                     .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,

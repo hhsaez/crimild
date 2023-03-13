@@ -28,48 +28,82 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 
+#include "Foundation/Named.hpp"
+#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 
-namespace crimild {
+namespace crimild::vulkan {
 
-    namespace vulkan {
+    class RenderTarget;
 
-        class Framebuffer;
-        struct FramebufferAttachment;
+    class RenderPass
+        : public SharedObject,
+          public Named,
+          public WithRenderDevice,
+          public WithHandle< VkRenderPass > {
+    public:
+        RenderPass(
+            RenderDevice *device,
+            std::string name,
+            std::vector< std::shared_ptr< RenderTarget > > &renderTargets,
+            VkAttachmentLoadOp loadOp
+        ) noexcept;
 
-        class RenderPass
-            : public SharedObject,
-              public WithConstRenderDevice {
-        public:
-            RenderPass(
-                const RenderDevice *rd,
-                const std::vector< const FramebufferAttachment * > &attachments,
-                bool clearAttachments = false
-            ) noexcept;
+        RenderPass(
+            RenderDevice *device,
+            std::string name,
+            const VkRenderPassCreateInfo &createInfo
+        ) noexcept;
 
-            RenderPass(
-                const vulkan::RenderDevice *rd,
-                const VkRenderPassCreateInfo &createInfo
-            ) noexcept;
+        virtual ~RenderPass( void ) noexcept;
 
-            virtual ~RenderPass( void ) noexcept;
+        inline const std::vector< VkClearValue > &getClearValues( void ) const noexcept { return m_clearValues; }
 
-            operator VkRenderPass() const noexcept { return m_renderPass; }
-                  
-            void setName( std::string_view name ) const noexcept;
+    private:
+        std::vector< VkClearValue > m_clearValues;
+    };
 
-            void begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::Framebuffer > &framebuffer ) const noexcept;
-            void begin( VkCommandBuffer commandBuffer, const VkRenderPassBeginInfo &beginInfo ) const noexcept;
-            void end( VkCommandBuffer commandBuffer ) const noexcept;
+    class FramebufferDEPRECATED;
+    struct FramebufferAttachment;
 
-        private:
-            VkRenderPass m_renderPass = VK_NULL_HANDLE;
-            std::vector< VkClearValue > m_clearValues;
-            VkRect2D m_renderArea;
-        };
+    class [[deprecated]] RenderPassDEPRECATED
+        : public SharedObject,
+          public WithConstRenderDevice {
+    public:
+        RenderPassDEPRECATED(
+            RenderDevice *device,
+            std::string name,
+            std::vector< std::shared_ptr< RenderTarget > > &renderTargets,
+            VkAttachmentLoadOp loadOp
+        ) noexcept;
 
-    }
+        RenderPassDEPRECATED(
+            const RenderDevice *rd,
+            const std::vector< const FramebufferAttachment * > &attachments,
+            bool clearAttachments = false
+        ) noexcept;
+
+        RenderPassDEPRECATED(
+            const vulkan::RenderDevice *rd,
+            const VkRenderPassCreateInfo &createInfo
+        ) noexcept;
+
+        virtual ~RenderPassDEPRECATED( void ) noexcept;
+
+        operator VkRenderPass() const noexcept { return m_renderPass; }
+
+        void setName( std::string_view name ) const noexcept;
+
+        void begin( VkCommandBuffer commandBuffer, const SharedPointer< vulkan::FramebufferDEPRECATED > &framebuffer ) const noexcept;
+        void begin( VkCommandBuffer commandBuffer, const VkRenderPassBeginInfo &beginInfo ) const noexcept;
+        void end( VkCommandBuffer commandBuffer ) const noexcept;
+
+    private:
+        VkRenderPass m_renderPass = VK_NULL_HANDLE;
+        std::vector< VkClearValue > m_clearValues;
+        VkRect2D m_renderArea;
+    };
 
 }
 

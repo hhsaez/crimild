@@ -28,9 +28,10 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_
 
+#include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
+#include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 
 namespace crimild {
 
@@ -38,9 +39,40 @@ namespace crimild {
 
         class Image
             : public SharedObject,
+              public Named,
               public WithConstRenderDevice {
         public:
-            Image( const RenderDevice *rd, const VkImageCreateInfo &createInfo ) noexcept;
+            static constexpr const auto CREATE_INFO = VkImageCreateInfo {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+                .flags = 0,
+                .imageType = VK_IMAGE_TYPE_2D,
+                .mipLevels = 1,
+                .arrayLayers = 1,
+                .samples = VK_SAMPLE_COUNT_1_BIT,
+                .tiling = VK_IMAGE_TILING_OPTIMAL,
+                .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            };
+
+        public:
+            Image(
+                const RenderDevice *device,
+                const VkImageCreateInfo &createInfo,
+                std::string name = "Image"
+            ) noexcept;
+
+            Image(
+                const RenderDevice *device,
+                const crimild::Image *source
+            ) noexcept;
+
+            Image(
+                const RenderDevice *device,
+                const VkExtent2D &extent,
+                VkFormat format,
+                VkImageUsageFlags usage,
+                std::string name = "Image"
+            ) noexcept;
 
             /**
                 \brief Constructs an image from an already allocated resource
@@ -49,16 +81,19 @@ namespace crimild {
 
                 \remarks Internal use only
             */
-            Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent ) noexcept;
+            Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name = "Image" ) noexcept;
 
             virtual ~Image( void ) noexcept;
 
-            operator VkImage() const noexcept { return m_image; }
+            inline VkImage getHandle( void ) const noexcept { return m_handle; }
 
             inline VkExtent3D getExtent( void ) const noexcept { return m_extent; }
             inline VkFormat getFormat( void ) const noexcept { return m_format; }
 
-            void setName( std::string_view name ) noexcept;
+            inline uint32_t getMipLevels( void ) const noexcept { return m_mipLevels; }
+            inline uint32_t getArrayLayers( void ) const noexcept { return m_arrayLayers; }
+
+            inline VkImageAspectFlags getAspectFlags( void ) const noexcept { return m_aspectFlags; }
 
             void allocateMemory( void ) noexcept;
             void allocateMemory( const VkMemoryAllocateInfo &allocateInfo ) noexcept;
@@ -72,13 +107,14 @@ namespace crimild {
             void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src, const VkImageCopy &copyRegion ) noexcept;
 
         private:
-            VkImage m_image = VK_NULL_HANDLE;
+            VkImage m_handle = VK_NULL_HANDLE;
             VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
             VkFormat m_format = VK_FORMAT_UNDEFINED;
             VkExtent3D m_extent = { 1, 1, 1 };
             uint32_t m_mipLevels = 1;
             uint32_t m_arrayLayers = 1;
+            VkImageAspectFlags m_aspectFlags;
 
             mutable VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 

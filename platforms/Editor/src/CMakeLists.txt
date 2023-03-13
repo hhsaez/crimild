@@ -9,6 +9,7 @@ target_sources(
 	
 	PRIVATE
     Foundation/GLFWUtils.hpp
+    Foundation/ImGuiUtils.cpp
     Foundation/ImGuiUtils.hpp
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp

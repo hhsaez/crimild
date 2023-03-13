@@ -34,6 +34,12 @@ namespace crimild {
 
     namespace vulkan {
 
+        /**
+         * \brief Traverses a scene, fetching renderable objects
+         *
+         * \todo This visitor does not need to modify nodes, so it should be a ConstVisitor
+         * (which is not implemented yet)
+         */
         class FetchSceneRenderState : public NodeVisitor {
         public:
             using Result = SceneRenderState;

@@ -219,7 +219,7 @@ void ClearPass::init( void ) noexcept
         std::vector< VkImageView > imageViews;
         imageViews.reserve( m_attachments.size() );
         for ( auto att : m_attachments ) {
-            imageViews.push_back( *att->imageViews[ i ] );
+            imageViews.push_back( att->imageViews[ i ]->getHandle() );
         }
 
         auto createInfo = VkFramebufferCreateInfo {

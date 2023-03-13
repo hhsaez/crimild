@@ -31,7 +31,6 @@
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Rendering/VulkanWithRenderDevice.hpp"
 
 namespace crimild {
 
@@ -43,7 +42,9 @@ namespace crimild {
         class ImageView;
         class RenderDevice;
 
-        class ShadowMap : public SharedObject, public WithRenderDevice {
+        class ShadowMap
+            : public SharedObject,
+              public WithRenderDevice {
         public:
             static constexpr uint32_t DIRECTIONAL_LIGHT_CASCADES = 4;
 

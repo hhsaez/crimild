@@ -472,8 +472,8 @@ void SceneDebugPass::init( void ) noexcept
     m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 2 > {
-            *m_colorAttachment.imageViews[ i ],
-            *m_depthAttachment.imageViews[ i ],
+            m_colorAttachment.imageViews[ i ]->getHandle(),
+            m_depthAttachment.imageViews[ i ]->getHandle(),
         };
 
         auto createInfo = VkFramebufferCreateInfo {

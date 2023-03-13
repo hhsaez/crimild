@@ -44,7 +44,7 @@ namespace crimild {
 
         class RenderDevice;
 
-        class GraphicsPipeline {
+        class GraphicsPipeline : public SharedObject {
         public:
             struct Descriptor {
                 Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
