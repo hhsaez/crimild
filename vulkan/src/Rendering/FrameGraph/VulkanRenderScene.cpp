@@ -28,6 +28,7 @@
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 
 #include "Rendering/FrameGraph/VulkanRenderGBuffer.hpp"
+#include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -40,14 +41,6 @@ using namespace crimild::vulkan::framegraph;
 RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
     : RenderBase( device, "RenderScene", extent )
 {
-    // auto sceneDepth = crimild::alloc< RenderTarget >( "Scene/Depth", VK_FORMAT_D32_SFLOAT, extent );
-    // auto sceneColorHDR = crimild::alloc< RenderTarget >( "Scene/Color/HDR", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    // auto sceneColor = crimild::alloc< RenderTarget >( "Scene/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-
-    // m_skinning = crimild::alloc< ComputeSkinnedMeshes >();
-
-    // m_shadows = crimild::alloc< RenderShadows >();
-
     m_depthTarget = crimild::alloc< RenderTarget >( device, "Scene/Depth", VK_FORMAT_D32_SFLOAT, extent );
 
     auto gBufferTargets = std::vector< std::shared_ptr< RenderTarget > > {
@@ -60,6 +53,8 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
 
     m_colorTarget = gBufferTargets[ 1 ]; // TODO
     m_colorTarget->setClearValue( VkClearValue { .color = { .float32 = { 1, 0, 1, 1 } } } );
+
+    m_shadows = crimild::alloc< RenderShadowMaps >( device );
 
     m_gBuffer = crimild::alloc< RenderGBuffer >( device, extent, gBufferTargets );
     // m_gBuffer->invalidates( { m_colorTarget } );
@@ -95,5 +90,17 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
         camera->setAspectRatio( float( getExtent().width ) / float( getExtent().height ) );
     }
 
+    // m_shadows->execute( {}, renderState, camera, {} );
+
+    // m_gBuffer->execute(
+    //     {},
+    //     renderState,
+    //     camera,
+    //     Barriers {
+    //         .images = { m_colorTarget->getImage() },
+    //     }
+    // );
+
+    m_shadows->render( renderState, camera );
     m_gBuffer->render( renderState.litRenderables, camera );
 }

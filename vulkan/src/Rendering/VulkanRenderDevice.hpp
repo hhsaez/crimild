@@ -50,7 +50,7 @@ namespace crimild {
         class CommandBuffer;
         class PhysicalDevice;
         class RenderDeviceCache;
-        class ShadowMap;
+        class ShadowMapDEPRECATED;
         class VulkanSurface;
 
         class RenderDevice
@@ -104,6 +104,11 @@ namespace crimild {
             [[nodiscard]] inline RenderDeviceCache *getCache( void ) noexcept
             {
                 return m_caches[ getCurrentFrameIndex() ].get();
+            }
+
+            [[nodiscard]] inline RenderDeviceCache *getCache( uint32_t frameIndex ) noexcept
+            {
+                return m_caches[ frameIndex ].get();
             }
 
             void submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
@@ -213,7 +218,7 @@ namespace crimild {
              *
              * A new ShadowMap instance will be created if needed.
              */
-            ShadowMap *getShadowMap( const Light *light ) noexcept;
+            ShadowMapDEPRECATED *getShadowMap( const Light *light ) noexcept;
 
             /**
              * \brief Get shadow map for a given light
@@ -224,7 +229,7 @@ namespace crimild {
              * Might return nullptr if the light was never bound before, since this is
              * a const function and has no side effect.
              */
-            const ShadowMap *getShadowMap( const Light *light ) const noexcept;
+            const ShadowMapDEPRECATED *getShadowMap( const Light *light ) const noexcept;
 
             // TODO: Move to RenderDeviceCache class instead. Retrieve using getRenderDevice()->getCache()->getImage(...);
             inline VkImage getImage( Size id, Index frameIndex ) const noexcept
@@ -395,10 +400,10 @@ namespace crimild {
                 SharedPointer< vulkan::ImageView > imageView;
             } m_depthStencilResources;
 
-            std::unordered_map< const Light *, SharedPointer< ShadowMap > > m_shadowMaps;
-            std::shared_ptr< ShadowMap > m_fallbackDirectionalShadowMap;
-            std::shared_ptr< ShadowMap > m_fallbackPointShadowMap;
-            std::shared_ptr< ShadowMap > m_fallbackSpotShadowMap;
+            std::unordered_map< const Light *, SharedPointer< ShadowMapDEPRECATED > > m_shadowMaps;
+            std::shared_ptr< ShadowMapDEPRECATED > m_fallbackDirectionalShadowMap;
+            std::shared_ptr< ShadowMapDEPRECATED > m_fallbackPointShadowMap;
+            std::shared_ptr< ShadowMapDEPRECATED > m_fallbackSpotShadowMap;
         };
 
     }

@@ -135,17 +135,17 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
     m_fallbackDirectionalShadowMap = [ this ] {
         auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-        return crimild::alloc< ShadowMap >( this, light.get() );
+        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
     }();
 
     m_fallbackPointShadowMap = [ this ] {
         auto light = crimild::alloc< Light >( Light::Type::POINT );
-        return crimild::alloc< ShadowMap >( this, light.get() );
+        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
     }();
 
     m_fallbackSpotShadowMap = [ this ] {
         auto light = crimild::alloc< Light >( Light::Type::SPOT );
-        return crimild::alloc< ShadowMap >( this, light.get() );
+        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
     }();
 
     for ( int i = 0; i < getInFlightFrameCount(); ++i ) {
@@ -2515,15 +2515,15 @@ void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
     );
 }
 
-vulkan::ShadowMap *RenderDevice::getShadowMap( const Light *light ) noexcept
+vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *light ) noexcept
 {
     if ( !m_shadowMaps.contains( light ) ) {
-        m_shadowMaps[ light ] = crimild::alloc< ShadowMap >( this, light );
+        m_shadowMaps[ light ] = crimild::alloc< ShadowMapDEPRECATED >( this, light );
     }
     return m_shadowMaps[ light ].get();
 }
 
-const vulkan::ShadowMap *RenderDevice::getShadowMap( const Light *light ) const noexcept
+const vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *light ) const noexcept
 {
     if ( !m_shadowMaps.contains( light ) ) {
         switch ( light->getType() ) {

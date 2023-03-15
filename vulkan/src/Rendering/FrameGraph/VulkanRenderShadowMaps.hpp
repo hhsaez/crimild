@@ -25,46 +25,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SHADOW_MAPS
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SHADOW_MAPS
 
-#include "Rendering/FrameGraph/VulkanRenderBase.hpp"
-#include "Rendering/VulkanSceneRenderState.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneBase.hpp"
 
 namespace crimild {
 
-    class Camera;
-    class Node;
-
     namespace vulkan {
-
-        class RenderTarget;
 
         namespace framegraph {
 
-            class RenderGBuffer;
-            class RenderShadowMaps;
-
-            class RenderScene : public RenderBase {
+            class RenderShadowMaps : public RenderSceneBase {
             public:
-                RenderScene( RenderDevice *device, const VkExtent2D &extent );
-                virtual ~RenderScene( void ) = default;
+                RenderShadowMaps( RenderDevice *device ) noexcept;
+                virtual ~RenderShadowMaps( void ) = default;
 
-                void render( Node *scene, Camera *camera ) noexcept;
-
-                inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept { return m_colorTarget; }
-                inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_colorTarget; }
-
-            protected:
-                virtual void onResize( void ) noexcept override;
+                virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept override;
 
             private:
-                std::shared_ptr< RenderTarget > m_depthTarget;
-                std::shared_ptr< RenderTarget > m_colorTarget;
-                std::vector< std::shared_ptr< RenderTarget > > m_gBufferTargets;
-
-                std::shared_ptr< RenderShadowMaps > m_shadows;
-                std::shared_ptr< RenderGBuffer > m_gBuffer;
+                std::vector< std::shared_ptr< RenderSceneBase > > m_renderers;
             };
 
         }

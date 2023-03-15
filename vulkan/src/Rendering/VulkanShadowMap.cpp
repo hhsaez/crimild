@@ -28,18 +28,103 @@
 #include "Rendering/VulkanShadowMap.hpp"
 
 #include "Foundation/Log.hpp"
+#include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanSampler.hpp"
-#include "SceneGraph/Light.hpp"
 
 #include <array>
 
 using namespace crimild;
 using namespace crimild::vulkan;
 
-vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) noexcept
+vulkan::ShadowMap::ShadowMap( RenderDevice *device, std::string name, Light::Type lightType ) noexcept
+    : WithRenderDevice( device ),
+      Named( name )
+{
+    const bool lightIsPoint = lightType == Light::Type::POINT;
+    const bool lightIsDirectional = lightType == Light::Type::DIRECTIONAL;
+
+    m_extent = lightIsPoint ? VkExtent3D { 1024, 1024, 1 } : VkExtent3D { 2048, 2048, 1 };
+    m_format = lightIsPoint ? VK_FORMAT_R32_SFLOAT : VK_FORMAT_D32_SFLOAT;
+    m_layerCount = lightIsPoint ? 6 : ( lightIsDirectional ? DIRECTIONAL_LIGHT_CASCADES : 1 );
+    m_aspect = device->formatIsColor( m_format ) ? VK_IMAGE_ASPECT_COLOR_BIT : VK_IMAGE_ASPECT_DEPTH_BIT;
+    m_lightSpaceMatrices.resize( m_layerCount, Matrix4f::Constants::IDENTITY );
+    m_splits.resize( m_layerCount, 1 );
+
+    m_image = crimild::alloc< vulkan::Image >(
+        device,
+        [ & ] {
+            auto createInfo = vulkan::Image::createInfo();
+            createInfo.extent = m_extent;
+            createInfo.format = m_format;
+            // This image should not be used as an attachment. We'll render into a temp attachment and then
+            // copy the resulting image into this one.
+            createInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            createInfo.arrayLayers = m_layerCount;
+            if ( lightIsPoint ) {
+                createInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+            }
+            return createInfo;
+        }(),
+        getName() + "/Image"
+    );
+    m_image->allocateMemory();
+    m_image->transitionLayout( VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+
+    m_imageView = crimild::alloc< vulkan::ImageView >(
+        device,
+        getName() + "/ImageView",
+        m_image,
+        [ & ] {
+            auto createInfo = vulkan::ImageView::createInfo();
+            createInfo.viewType = [ & ] {
+                if ( lightIsDirectional ) {
+                    return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+                } else if ( lightIsPoint ) {
+                    return VK_IMAGE_VIEW_TYPE_CUBE;
+                } else {
+                    return VK_IMAGE_VIEW_TYPE_2D;
+                }
+            }();
+            createInfo.image = m_image->getHandle();
+            createInfo.format = m_format;
+            createInfo.subresourceRange.aspectMask = m_aspect;
+            createInfo.subresourceRange.layerCount = m_layerCount;
+            if ( lightIsPoint ) {
+                createInfo.components = { .r = VK_COMPONENT_SWIZZLE_R };
+            }
+            return createInfo;
+        }()
+    );
+
+    m_sampler = crimild::alloc< Sampler >(
+        device,
+        getName() + "/Sampler",
+        VK_FILTER_LINEAR,
+        VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+    );
+
+    m_descriptorSet = crimild::alloc< DescriptorSet >(
+        device,
+        getName() + "/DescriptorSet",
+        std::vector< Descriptor > {
+            {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .sampler = m_sampler,
+                .imageView = m_imageView,
+            },
+        }
+    );
+}
+
+//////////////////////////
+// Deprecated from Here //
+//////////////////////////
+
+vulkan::ShadowMapDEPRECATED::ShadowMapDEPRECATED( RenderDevice *renderDevice, const Light *light ) noexcept
     : WithRenderDevice( renderDevice )
 {
     CRIMILD_LOG_TRACE();
@@ -227,7 +312,7 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *renderDevice, const Light *light ) n
     }
 }
 
-vulkan::ShadowMap::~ShadowMap( void ) noexcept
+vulkan::ShadowMapDEPRECATED::~ShadowMapDEPRECATED( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 

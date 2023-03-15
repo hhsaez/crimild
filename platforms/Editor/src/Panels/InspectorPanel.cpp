@@ -28,6 +28,8 @@
 #include "Panels/InspectorPanel.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
 
@@ -249,38 +251,24 @@ namespace crimild::editor::panels {
 
     class LightPropertiesSection
         : public Inspector::Section,
-          public vulkan::WithConstRenderDevice {
+          public vulkan::WithRenderDevice {
     public:
-        LightPropertiesSection( const vulkan::RenderDevice *renderDevice )
-            : vulkan::WithConstRenderDevice( renderDevice )
+        LightPropertiesSection( vulkan::RenderDevice *renderDevice )
+            : vulkan::WithRenderDevice( renderDevice )
         {
             // no-op
         }
 
         virtual ~LightPropertiesSection( void ) noexcept
         {
-            auto layersToDelete = m_shadowMapLayers;
+            auto toDelete = m_inFLightShadowMaps;
             concurrency::sync_frame(
-                [ layersToDelete, renderDevice = getRenderDevice() ] {
-                    for ( auto &layer : layersToDelete ) {
-                        for ( auto ds : layer.descriptorSets ) {
-                            ImGui_ImplVulkan_RemoveTexture( ds );
-                        }
-                        for ( auto &imageView : layer.imageViews ) {
-                            vkDestroyImageView( renderDevice->getHandle(), imageView, nullptr );
-                        }
-                    }
+                [ toDelete ]() mutable {
+                    // Delay destruction until next frame
+                    toDelete.clear();
                 }
             );
-            // for ( auto &layer : m_shadowMapLayers ) {
-            //     for ( auto ds : layer.descriptorSets ) {
-            //         ImGui_ImplVulkan_RemoveTexture( ds );
-            //     }
-            //     for ( auto &imageView : layer.imageViews ) {
-            //         vkDestroyImageView( getRenderDevice()->getHandle(), imageView, nullptr );
-            //     }
-            // }
-            m_shadowMapLayers.clear();
+            m_inFLightShadowMaps.clear();
         }
 
         virtual void render( crimild::Node *node ) noexcept override
@@ -335,77 +323,64 @@ namespace crimild::editor::panels {
                 light->setCastShadows( castShadows );
 
                 if ( castShadows ) {
-                    const auto *shadowMap = getRenderDevice()->getShadowMap( light );
-                    if ( shadowMap != nullptr ) {
-                        renderShadowMap( shadowMap );
-                    } else {
-                        ImGui::Text( "No shadow map available" );
+                    if ( m_inFLightShadowMaps.empty() ) {
+                        configureShadowMapLayers( light );
                     }
+                    renderShadowMap();
                 }
             }
         }
 
     private:
-        void renderShadowMap( const vulkan::ShadowMap *shadowMap ) noexcept
+        void renderShadowMap( void ) noexcept
         {
-            if ( m_shadowMapLayers.empty() ) {
-                configureShadowMapLayers( shadowMap );
-            }
+            const auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
+            auto &layers = m_inFLightShadowMaps[ currentFrameIdx ];
 
             // All shadow maps images will be rendered as squares.
             ImVec2 imageSize = ImGui::GetContentRegionAvail();
+            imageSize.x = 0.8f * imageSize.x / layers.size();
             imageSize.y = imageSize.x;
 
-            const auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
-
-            for ( uint32_t i = 0; i < m_shadowMapLayers.size(); i++ ) {
-                ImTextureID tex_id = m_shadowMapLayers[ i ].descriptorSets[ currentFrameIdx ];
+            for ( uint32_t i = 0; i < layers.size(); i++ ) {
+                if ( i > 0 ) {
+                    ImGui::SameLine();
+                }
+                ImTextureID tex_id = layers[ i ]->getDescriptorSet();
                 ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
                 ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
                 ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-                ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+                ImVec4 border_col = ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ); // 50% opaque white
                 ImGui::Image( tex_id, imageSize, uv_min, uv_max, tint_col, border_col );
             }
         }
 
-        void configureShadowMapLayers( const vulkan::ShadowMap *shadowMap ) noexcept
+        void configureShadowMapLayers( const Light *light ) noexcept
         {
-            m_shadowMapLayers.resize( shadowMap->imageLayerCount );
+            const auto N = getRenderDevice()->getInFlightFrameCount();
+            m_inFLightShadowMaps.resize( N );
 
-            for ( uint32_t layerId = 0; layerId < m_shadowMapLayers.size(); ++layerId ) {
-                auto &imageViews = m_shadowMapLayers[ layerId ].imageViews;
-
-                // Create image views for each layer
-                imageViews.resize( getRenderDevice()->getInFlightFrameCount(), VK_NULL_HANDLE );
-                for ( uint32_t viewId = 0; viewId < imageViews.size(); viewId++ ) {
-                    getRenderDevice()->createImageView(
-                        shadowMap->images[ viewId ]->getHandle(),
-                        shadowMap->imageFormat,
-                        shadowMap->imageAspect,
-                        layerId,
-                        imageViews[ viewId ]
+            for ( uint32_t frameIndex = 0; frameIndex < N; ++frameIndex ) {
+                auto &shadowMap = getRenderDevice()->getCache( frameIndex )->getShadowMap( light );
+                const uint32_t layerCount = shadowMap->getLayerCount();
+                m_inFLightShadowMaps[ frameIndex ].resize( layerCount );
+                for ( uint32_t layerIndex = 0; layerIndex < layerCount; ++layerIndex ) {
+                    auto imageView = crimild::alloc< vulkan::ImageView >(
+                        getRenderDevice(),
+                        shadowMap->getImageView()->getName() + "/Inspector",
+                        shadowMap->getImage(),
+                        layerIndex
                     );
-                }
-
-                auto &descriptorSets = m_shadowMapLayers[ layerId ].descriptorSets;
-                descriptorSets.resize( getRenderDevice()->getInFlightFrameCount(), VK_NULL_HANDLE );
-                for ( uint32_t i = 0; i < descriptorSets.size(); ++i ) {
-                    descriptorSets[ i ] = ImGui_ImplVulkan_AddTexture(
-                        shadowMap->sampler,
-                        imageViews[ i ],
-                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    m_inFLightShadowMaps[ frameIndex ][ layerIndex ] = crimild::alloc< ImGuiVulkanTexture >(
+                        imageView,
+                        shadowMap->getSampler()
                     );
                 }
             }
         }
 
     private:
-        struct ShadowMapLayer {
-            std::vector< VkImageView > imageViews;
-            std::vector< VkDescriptorSet > descriptorSets;
-        };
-
-        std::vector< ShadowMapLayer > m_shadowMapLayers;
+        std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_inFLightShadowMaps;
     };
 
 }

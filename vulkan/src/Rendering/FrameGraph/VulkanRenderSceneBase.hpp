@@ -25,46 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_BASE
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_BASE
 
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
 
 namespace crimild {
 
-    class Camera;
-    class Node;
-
     namespace vulkan {
-
-        class RenderTarget;
 
         namespace framegraph {
 
-            class RenderGBuffer;
-            class RenderShadowMaps;
-
-            class RenderScene : public RenderBase {
-            public:
-                RenderScene( RenderDevice *device, const VkExtent2D &extent );
-                virtual ~RenderScene( void ) = default;
-
-                void render( Node *scene, Camera *camera ) noexcept;
-
-                inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept { return m_colorTarget; }
-                inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_colorTarget; }
-
+            class RenderSceneBase : public RenderBase {
             protected:
-                virtual void onResize( void ) noexcept override;
+                RenderSceneBase( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept
+                    : RenderBase( device, name, extent )
+                {
+                    // no-op
+                }
 
-            private:
-                std::shared_ptr< RenderTarget > m_depthTarget;
-                std::shared_ptr< RenderTarget > m_colorTarget;
-                std::vector< std::shared_ptr< RenderTarget > > m_gBufferTargets;
+            public:
+                virtual ~RenderSceneBase( void ) = default;
 
-                std::shared_ptr< RenderShadowMaps > m_shadows;
-                std::shared_ptr< RenderGBuffer > m_gBuffer;
+                virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept = 0;
             };
 
         }

@@ -278,6 +278,8 @@ void RenderGBuffer::bindMaterial( const materials::PrincipledBSDF *material ) no
             ) }
     );
 
+    // TODO: Only create a new pipeline for materials that provide custom shaders.
+    // Otherwise, have a fallback one that can be reused.
     if ( auto program = material->getProgram() ) {
         getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
     }

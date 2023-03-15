@@ -40,8 +40,6 @@ Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
     : WithRenderDevice( device )
 {
     // Simulation renders at the fixed size. This might change in the future
-    // m_scenePass.handle( Event { .type = Event::Type::WINDOW_RESIZE, .extent = m_simulationExtent } );
-
     const auto N = getRenderDevice()->getInFlightFrameCount();
     m_framegraphs.resize( N );
     m_outputTextures.resize( N );
@@ -68,53 +66,17 @@ Simulation::~Simulation( void ) noexcept
 
 crimild::Event Simulation::handle( const crimild::Event &e ) noexcept
 {
-    // return m_scenePass.handle( e );
     return e;
 }
 
 void Simulation::onRender( void ) noexcept
 {
-    // static auto debouncedResize = concurrency::debounce(
-    //     [ this ]( Event e ) {
-    //         m_descriptorSets.clear();
-    //     },
-    //     500
-    // );
-
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
     bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
     m_extent.width = renderSize.x;
     m_extent.height = renderSize.y;
-    // if ( !isMinimized ) {
-    //     if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
-    //         m_extent.width = renderSize.x;
-    //         m_extent.height = renderSize.y;
-    //         debouncedResize(
-    //             Event {
-    //                 .type = Event::Type::WINDOW_RESIZE,
-    //                 .extent = m_extent,
-    //             }
-    //         );
-    //     }
-    // }
 
     auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
-
-    // const auto att = m_scenePass.getColorAttachment();
-    // if ( !att->descriptorSets.empty() ) {
-    // if ( !m_descriptorSets.contains( att ) ) {
-    //     auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
-    //     for ( int i = 0; i < ds.size(); ++i ) {
-    //         ds[ i ] = ImGui_ImplVulkan_AddTexture(
-    //             att->sampler,
-    //             ( VkImageView ) *att->imageViews[ currentFrameIdx ].get(),
-    //             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    //         );
-    //     }
-    //     m_descriptorSets[ att ] = ds;
-    // }
-    // auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
-
     if ( !m_outputTextures.empty() ) {
         auto tex_id = m_outputTextures[ currentFrameIdx ]->getDescriptorSet();
         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
@@ -144,11 +106,10 @@ void Simulation::onRender( void ) noexcept
     if ( camera != nullptr ) {
         camera->setAspectRatio( m_extent.width / m_extent.height );
     }
-    // m_scenePass.render( crimild::Simulation::getInstance()->getScene(), camera );
     m_framegraphs[ currentFrameIdx ]->render(
         crimild::Simulation::getInstance()->getScene(),
         camera
     );
-    
+
     getRenderDevice()->flush();
 }

@@ -28,9 +28,11 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
 #define CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
 
+#include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
+#include "SceneGraph/Light.hpp"
 
 namespace crimild {
 
@@ -38,19 +40,63 @@ namespace crimild {
 
     namespace vulkan {
 
+        class DescriptorSet;
         class Image;
         class ImageView;
         class RenderDevice;
+        class Sampler;
 
         class ShadowMap
+            : public SharedObject,
+              public Named,
+              public WithRenderDevice {
+        public:
+            static constexpr uint32_t DIRECTIONAL_LIGHT_CASCADES = 4;
+
+        public:
+            ShadowMap( RenderDevice *device, std::string name, Light::Type lightType ) noexcept;
+            virtual ~ShadowMap( void ) = default;
+
+            inline std::shared_ptr< Image > &getImage( void ) noexcept { return m_image; }
+            inline std::shared_ptr< ImageView > &getImageView( void ) noexcept { return m_imageView; }
+            inline std::shared_ptr< Sampler > &getSampler( void ) noexcept { return m_sampler; }
+
+            inline uint32_t getLayerCount( void ) const noexcept { return m_layerCount; }
+
+            inline const Matrix4f &getLightSpaceMatrix( uint32_t index ) const noexcept { return m_lightSpaceMatrices[ index ]; }
+            inline void setLightSpaceMatrix( uint32_t index, const Matrix4f &m ) noexcept { m_lightSpaceMatrices[ index ] = m; }
+
+            inline const float getSplit( uint32_t index ) const noexcept { return m_splits[ index ]; }
+            inline void setSplit( uint32_t index, float value ) noexcept { m_splits[ index ] = value; }
+
+        private:
+            VkExtent3D m_extent;
+            VkFormat m_format;
+            VkImageAspectFlagBits m_aspect;
+            uint32_t m_layerCount;
+
+            std::shared_ptr< Image > m_image;
+            std::shared_ptr< ImageView > m_imageView;
+            std::shared_ptr< Sampler > m_sampler;
+            std::shared_ptr< DescriptorSet > m_descriptorSet;
+
+            std::vector< Matrix4f > m_lightSpaceMatrices;
+            std::vector< float > m_splits;
+        };
+
+        //////////////////////////
+        // Deprecated from Here //
+        //////////////////////////
+
+        class [[deprecated]] ShadowMapDEPRECATED
             : public SharedObject,
               public WithRenderDevice {
         public:
             static constexpr uint32_t DIRECTIONAL_LIGHT_CASCADES = 4;
 
         public:
-            ShadowMap( RenderDevice *rd, const Light *light ) noexcept;
-            virtual ~ShadowMap( void ) noexcept;
+            ShadowMapDEPRECATED( RenderDevice *rd, const Light *light ) noexcept;
+            virtual ~ShadowMapDEPRECATED( void ) noexcept;
 
             VkFormat imageFormat = VK_FORMAT_D32_SFLOAT;
             VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_DEPTH_BIT;

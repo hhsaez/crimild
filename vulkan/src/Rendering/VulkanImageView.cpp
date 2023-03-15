@@ -35,7 +35,8 @@ using namespace crimild;
 vulkan::ImageView::ImageView(
     vulkan::RenderDevice *device,
     std::string name,
-    std::shared_ptr< vulkan::Image > const &image
+    std::shared_ptr< vulkan::Image > const &image,
+    uint32_t baseArrayLayer
 ) noexcept
     : vulkan::ImageView(
         device,
@@ -45,6 +46,7 @@ vulkan::ImageView::ImageView(
             auto info = createInfo();
             info.image = image->getHandle();
             info.subresourceRange.aspectMask = image->getAspectFlags();
+            info.subresourceRange.baseArrayLayer = baseArrayLayer;
             info.format = image->getFormat();
             return info;
         }()
