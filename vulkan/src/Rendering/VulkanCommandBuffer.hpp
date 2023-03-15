@@ -76,6 +76,11 @@ namespace crimild::vulkan {
 
         void beginRenderPass( std::shared_ptr< RenderPass > &renderPass, std::shared_ptr< Framebuffer > &framebuffer ) noexcept;
 
+        void setViewport( const VkViewport &viewport ) noexcept;
+        void setScissor( const VkRect2D &scissor ) noexcept;
+
+        void setDepthBias( float constant, float clamp, float slope ) noexcept;
+
         void bindPipeline( std::shared_ptr< GraphicsPipeline > &pipeline ) noexcept;
         void bindDescriptorSet( uint32_t index, std::shared_ptr< DescriptorSet > &descriptorSet ) noexcept;
 
@@ -100,7 +105,15 @@ namespace crimild::vulkan {
 
         void flush( std::unordered_set< std::shared_ptr< Image > > &images ) noexcept;
 
+        void transitionImageLayout( vulkan::Image *image, VkImageLayout newLayout ) const noexcept;
+        void transitionImageLayout( vulkan::Image *image, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
+
+        void copy( const vulkan::Image *src, const vulkan::Image *dst, uint32_t dstBaseArrayLayer = 0 ) noexcept;
+
         void end( void ) const noexcept;
+
+    private:
+        void transitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount, uint32_t baseArrayLayer = 0 ) const noexcept;
 
     private:
         std::unordered_set< std::shared_ptr< SharedObject > > m_boundObjects;

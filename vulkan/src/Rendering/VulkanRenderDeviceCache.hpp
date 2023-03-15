@@ -35,15 +35,10 @@ namespace crimild {
 
     class IndexBuffer;
     class ImageView;
+    class Light;
     class Sampler;
     class UniformBuffer;
     class VertexBuffer;
-
-    namespace materials {
-
-        class PrincipledBSDF;
-
-    }
 
 }
 
@@ -53,6 +48,7 @@ namespace crimild::vulkan {
     class Image;
     class ImageView;
     class Sampler;
+    class ShadowMap;
 
     /**
      * \todo Each instance of RenderDeviceCache keeps a copy of everything bound to it. This is
@@ -78,12 +74,16 @@ namespace crimild::vulkan {
         std::shared_ptr< ImageView > &bind( crimild::ImageView *imageView ) noexcept;
         std::shared_ptr< Sampler > &bind( crimild::Sampler *sampler ) noexcept;
 
+        void setShadowMap( const Light *light, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept;
+        std::shared_ptr< ShadowMap > &getShadowMap( const Light *light ) noexcept;
+
     private:
         std::unordered_set< const SharedObject * > m_boundObjects;
         std::unordered_map< const SharedObject *, std::shared_ptr< Buffer > > m_buffers;
         std::unordered_map< const SharedObject *, std::shared_ptr< Image > > m_images;
         std::unordered_map< const SharedObject *, std::shared_ptr< ImageView > > m_imageViews;
         std::unordered_map< const SharedObject *, std::shared_ptr< Sampler > > m_samplers;
+        std::unordered_map< const SharedObject *, std::shared_ptr< ShadowMap > > m_shadowMaps;
 
         std::unordered_set< const SharedObject * > m_boundObjectsToDelete;
     };

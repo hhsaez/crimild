@@ -42,17 +42,20 @@ namespace crimild {
               public Named,
               public WithConstRenderDevice {
         public:
-            static constexpr const auto CREATE_INFO = VkImageCreateInfo {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-                .flags = 0,
-                .imageType = VK_IMAGE_TYPE_2D,
-                .mipLevels = 1,
-                .arrayLayers = 1,
-                .samples = VK_SAMPLE_COUNT_1_BIT,
-                .tiling = VK_IMAGE_TILING_OPTIMAL,
-                .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            };
+            static auto createInfo( void ) noexcept
+            {
+                return VkImageCreateInfo {
+                    .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+                    .flags = 0,
+                    .imageType = VK_IMAGE_TYPE_2D,
+                    .mipLevels = 1,
+                    .arrayLayers = 1,
+                    .samples = VK_SAMPLE_COUNT_1_BIT,
+                    .tiling = VK_IMAGE_TILING_OPTIMAL,
+                    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                    .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                };
+            }
 
         public:
             Image(
@@ -105,6 +108,9 @@ namespace crimild {
 
             void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src ) noexcept;
             void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src, const VkImageCopy &copyRegion ) noexcept;
+
+            inline void setLayout( VkImageLayout layout ) noexcept { m_layout = layout; }
+            inline VkImageLayout getLayout( void ) const noexcept { return m_layout; }
 
         private:
             VkImage m_handle = VK_NULL_HANDLE;

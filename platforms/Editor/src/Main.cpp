@@ -672,6 +672,9 @@ int main( int argc, char **argv )
     }
     
     crimild::PrefabNode::cleanup();
+    
+    jobScheduler.executeDelayedJobs();
+    crimild::MessageQueue::getInstance()->dispatchDeferredMessages();
 
     jobScheduler.stop();
     crimild::MessageQueue::getInstance()->clear();

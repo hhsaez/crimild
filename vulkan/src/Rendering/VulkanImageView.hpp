@@ -65,7 +65,8 @@ namespace crimild {
             ImageView(
                 RenderDevice *rd,
                 std::string name,
-                std::shared_ptr< Image > const &image
+                std::shared_ptr< Image > const &image,
+                uint32_t baseArrayLayer = 0
             ) noexcept;
 
             ImageView(

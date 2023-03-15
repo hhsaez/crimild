@@ -35,17 +35,17 @@ using namespace crimild;
 
 vulkan::Image::Image(
     const vulkan::RenderDevice *device,
-    const VkImageCreateInfo &createInfo,
+    const VkImageCreateInfo &info,
     std::string name
 ) noexcept
     : WithConstRenderDevice( device ),
       Named( name )
 {
-    m_format = createInfo.format;
-    m_extent = createInfo.extent;
-    m_layout = createInfo.initialLayout;
-    m_mipLevels = createInfo.mipLevels;
-    m_arrayLayers = createInfo.arrayLayers;
+    m_format = info.format;
+    m_extent = info.extent;
+    m_layout = info.initialLayout;
+    m_mipLevels = info.mipLevels;
+    m_arrayLayers = info.arrayLayers;
     m_aspectFlags =
         device->formatIsColor( getFormat() )
             ? VK_IMAGE_ASPECT_COLOR_BIT
@@ -56,7 +56,7 @@ vulkan::Image::Image(
     CRIMILD_VULKAN_CHECK(
         vkCreateImage(
             getRenderDevice()->getHandle(),
-            &createInfo,
+            &info,
             getRenderDevice()->getAllocator(),
             &m_handle
         )
@@ -75,11 +75,11 @@ vulkan::Image::Image(
     : vulkan::Image::Image(
         device,
         [ & ] {
-            auto createInfo = CREATE_INFO;
-            createInfo.extent = { extent.width, extent.height, 1 };
-            createInfo.format = format;
-            createInfo.usage = usage;
-            return createInfo;
+            auto info = createInfo();
+            info.extent = { extent.width, extent.height, 1 };
+            info.format = format;
+            info.usage = usage;
+            return info;
         }(),
         name
     )

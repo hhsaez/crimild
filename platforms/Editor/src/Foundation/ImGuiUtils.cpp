@@ -33,6 +33,8 @@
 using namespace crimild;
 
 ImGuiVulkanTexture::ImGuiVulkanTexture( std::shared_ptr< vulkan::ImageView > const &imageView, std::shared_ptr< vulkan::Sampler > const &sampler ) noexcept
+    : m_imageView( imageView ),
+      m_sampler( sampler )
 {
     m_descriptorSet = ImGui_ImplVulkan_AddTexture(
         sampler->getHandle(),

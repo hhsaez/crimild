@@ -21,6 +21,8 @@ target_sources(
     Rendering/FrameGraph/VulkanRenderGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp
     Rendering/FrameGraph/VulkanRenderScene.hpp
+    Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
+    Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
     Rendering/RenderPasses/VulkanBlitPass.cpp
     Rendering/RenderPasses/VulkanBlitPass.hpp
     Rendering/RenderPasses/VulkanClearPass.cpp

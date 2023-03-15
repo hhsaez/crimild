@@ -93,7 +93,7 @@ Event GenerateDirectionalLightsShadowMaps::handle( const Event &e ) noexcept
     return e;
 }
 
-static void computeLightSpaceMatrix( const Camera *camera, const Light *light, vulkan::ShadowMap *shadowMap, uint32_t cascadeId )
+static void computeLightSpaceMatrix( const Camera *camera, const Light *light, vulkan::ShadowMapDEPRECATED *shadowMap, uint32_t cascadeId )
 {
     Array< Real > cascadeSplits( 4 );
 

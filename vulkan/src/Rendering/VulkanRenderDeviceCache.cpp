@@ -37,6 +37,8 @@
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanSampler.hpp"
+#include "Rendering/VulkanShadowMap.hpp"
+#include "SceneGraph/Light.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -188,4 +190,20 @@ std::shared_ptr< vulkan::Sampler > &RenderDeviceCache::bind( crimild::Sampler *s
         m_boundObjects.insert( source );
     }
     return m_samplers.at( source );
+}
+
+void RenderDeviceCache::setShadowMap( const Light *light, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept
+{
+    m_boundObjects.insert( light );
+    m_shadowMaps[ light ] = shadowMap;
+}
+
+std::shared_ptr< vulkan::ShadowMap > &RenderDeviceCache::getShadowMap( const Light *light ) noexcept
+{
+    if ( !m_boundObjects.contains( light ) ) {
+        std::string name = !light->getName().empty() ? light->getName() + "/ShadowMap" : "ShadowMap";
+        m_shadowMaps[ light ] = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
+        m_boundObjects.insert( light );
+    }
+    return m_shadowMaps.at( light );
 }

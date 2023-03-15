@@ -58,6 +58,7 @@ namespace crimild::editor::panels {
         virtual const char *getTitle( void ) const noexcept override { return "Inspector"; }
 
         inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
+        inline vulkan::RenderDevice *getRenderDevice( void ) noexcept { return m_renderDevice; }
 
     protected:
         virtual void onRender( void ) noexcept override;
