@@ -85,7 +85,7 @@ namespace crimild::vulkan {
         void bindDescriptorSet( uint32_t index, std::shared_ptr< DescriptorSet > &descriptorSet ) noexcept;
 
         template< typename ConstantType >
-        void pushConstants( VkShaderStageFlags stage, uint32_t index, ConstantType &value ) noexcept
+        void pushConstants( VkShaderStageFlags stage, uint32_t index, const ConstantType &value ) noexcept
         {
             // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
             // use normal uniforms instead.
