@@ -131,6 +131,8 @@ namespace crimild {
 
             std::vector< std::shared_ptr< RenderDeviceCache > > m_caches;
 
+            std::unordered_map< VkQueue, std::vector< std::shared_ptr< CommandBuffer > > > m_commandsToSubmit;
+
             /////////////////////////////////
             // MOSTLY DEPRECATED FROM HERE //
             /////////////////////////////////
