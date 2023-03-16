@@ -732,6 +732,8 @@ bool RenderDevice::beginRender( bool isPresenting ) noexcept
 {
     CRIMILD_VULKAN_CHECK( vkWaitForFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ], VK_TRUE, UINT64_MAX ) );
 
+    m_commandsToSubmit.clear();
+
     if ( isPresenting ) {
         const auto ret = vkAcquireNextImageKHR(
             getHandle(),
@@ -790,6 +792,30 @@ bool RenderDevice::beginRender( bool isPresenting ) noexcept
 
 bool RenderDevice::endRender( bool present ) noexcept
 {
+    for ( auto &[ queue, commandBuffers ] : m_commandsToSubmit ) {
+        std::vector< VkCommandBuffer > commandBufferHandlers;
+        std::transform(
+            commandBuffers.begin(),
+            commandBuffers.end(),
+            std::back_inserter( commandBufferHandlers ),
+            []( auto cb ) { return cb->getHandle(); }
+        );
+        auto submitInfo = VkSubmitInfo {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
+            .pCommandBuffers = commandBufferHandlers.data(),
+        };
+
+        CRIMILD_VULKAN_CHECK(
+            vkQueueSubmit(
+                queue,
+                1,
+                &submitInfo,
+                nullptr
+            )
+        );
+    }
+
     auto commandBuffer = getCurrentCommandBuffer();
     vkEndCommandBuffer( commandBuffer );
 
@@ -2542,28 +2568,5 @@ const vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *ligh
 
 void RenderDevice::submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
 {
-    const auto handle = commandBuffer->getHandle();
-    auto submitInfo = VkSubmitInfo {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &handle,
-    };
-
-    CRIMILD_VULKAN_CHECK(
-        vkQueueSubmit(
-            getGraphicsQueue(),
-            1,
-            &submitInfo,
-            nullptr
-        )
-    );
-
-    // TODO: Waiting should be optional
-    // Also, if not waiting, we should keep track of which command buffers are in flight and
-    // retain ownership of them. We might need fences or another way to check if they finished.
-    CRIMILD_VULKAN_CHECK(
-        vkQueueWaitIdle(
-            getGraphicsQueue()
-        )
-    );
+    m_commandsToSubmit[ getGraphicsQueue() ].push_back( commandBuffer );
 }
