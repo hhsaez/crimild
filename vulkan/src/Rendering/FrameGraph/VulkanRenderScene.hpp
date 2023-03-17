@@ -42,7 +42,9 @@ namespace crimild {
 
         namespace framegraph {
 
+            class ComputeSceneLighting;
             class RenderGBuffer;
+            class RenderSceneLighting;
             class RenderShadowMaps;
 
             class RenderScene : public RenderBase {
@@ -65,6 +67,9 @@ namespace crimild {
 
                 std::shared_ptr< RenderShadowMaps > m_shadows;
                 std::shared_ptr< RenderGBuffer > m_gBuffer;
+                std::shared_ptr< RenderSceneLighting > m_lighting;
+
+                std::shared_ptr< ComputeSceneLighting > m_compute;
             };
 
         }

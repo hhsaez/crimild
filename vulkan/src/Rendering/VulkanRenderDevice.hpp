@@ -111,6 +111,7 @@ namespace crimild {
                 return m_caches[ frameIndex ].get();
             }
 
+            void submitComputeCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
             void submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
 
         private:

@@ -48,6 +48,7 @@ namespace crimild {
 
     namespace vulkan {
 
+        class CommandBuffer;
         class RenderDevice;
 
         namespace utils {
@@ -313,6 +314,23 @@ namespace crimild {
 
         private:
             HandleType m_handle = VK_NULL_HANDLE;
+        };
+
+        class WithCommandBuffer {
+        protected:
+            WithCommandBuffer( std::shared_ptr< CommandBuffer > const &commandBuffer )
+                : m_commandBuffer( commandBuffer )
+            {
+                // no-op
+            }
+
+        public:
+            virtual ~WithCommandBuffer( void ) = default;
+
+            inline std::shared_ptr< CommandBuffer > &getCommandBuffer( void ) noexcept { return m_commandBuffer; }
+
+        private:
+            std::shared_ptr< CommandBuffer > m_commandBuffer;
         };
 
     }

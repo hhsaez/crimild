@@ -24,3 +24,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_SCENE_LIGHTING
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_SCENE_LIGHTING
+
+#include "Rendering/FrameGraph/VulkanComputeBase.hpp"
+
+namespace crimild::vulkan {
+
+    class CommandBuffer;
+    class ComputePipeline;
+    class DescriptorSet;
+    class RenderTarget;
+
+    namespace framegraph {
+
+        class ComputeSceneLighting : public ComputeBase {
+        public:
+            ComputeSceneLighting(
+                RenderDevice *device,
+                const std::vector< std::shared_ptr< RenderTarget > > &inputs,
+                std::shared_ptr< RenderTarget > &output
+            ) noexcept;
+
+            virtual ~ComputeSceneLighting( void ) = default;
+
+            void execute( void ) noexcept;
+
+        private:
+            std::vector< std::shared_ptr< RenderTarget > > m_inputs;
+            std::shared_ptr< RenderTarget > m_output;
+
+            std::shared_ptr< ComputePipeline > m_pipeline;
+            std::shared_ptr< DescriptorSet > m_descriptorSet;
+
+            std::shared_ptr< CommandBuffer > m_commandBuffer;
+        };
+
+    }
+
+}
+
+#endif
