@@ -31,6 +31,7 @@
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/VulkanBuffer.hpp"
+#include "Rendering/VulkanComputePipeline.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
@@ -164,6 +165,21 @@ void CommandBuffer::setDepthBias( float constant, float clamp, float slope ) noe
     vkCmdSetDepthBias( getHandle(), constant, clamp, slope );
 }
 
+void CommandBuffer::bindPipeline( std::shared_ptr< ComputePipeline > &pipeline ) noexcept
+{
+    m_pipeline = pipeline->getHandle();
+    m_pipelineLayout = pipeline->getPipelineLayout();
+    m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+
+    vkCmdBindPipeline(
+        getHandle(),
+        m_pipelineBindPoint,
+        m_pipeline
+    );
+
+    m_boundObjects.insert( pipeline );
+}
+
 void CommandBuffer::bindPipeline( std::shared_ptr< GraphicsPipeline > &pipeline ) noexcept
 {
     m_pipeline = pipeline->getHandle();
@@ -178,6 +194,7 @@ void CommandBuffer::bindPipeline( std::shared_ptr< GraphicsPipeline > &pipeline 
 
     m_boundObjects.insert( pipeline );
 }
+
 void CommandBuffer::bindDescriptorSet( uint32_t index, std::shared_ptr< DescriptorSet > &descriptorSet ) noexcept
 {
     std::array< VkDescriptorSet, 1 > descriptorSets = { descriptorSet->getHandle() };
@@ -195,6 +212,11 @@ void CommandBuffer::bindDescriptorSet( uint32_t index, std::shared_ptr< Descript
     m_boundObjects.insert( descriptorSet );
 
     descriptorSet->updateDescriptors();
+}
+
+void CommandBuffer::draw( uint32_t count ) noexcept
+{
+    vkCmdDraw( getHandle(), count, 1, 0, 0 );
 }
 
 void CommandBuffer::drawPrimitive( const std::shared_ptr< Primitive > &primitive ) noexcept
@@ -437,6 +459,11 @@ void CommandBuffer::copy( const vulkan::Image *src, const vulkan::Image *dst, ui
         1,
         &copyRegion
     );
+}
+
+void CommandBuffer::dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ ) noexcept
+{
+    vkCmdDispatch( getHandle(), groupCountX, groupCountY, groupCountZ );
 }
 
 void CommandBuffer::end( void ) const noexcept

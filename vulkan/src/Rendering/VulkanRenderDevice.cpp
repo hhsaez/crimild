@@ -156,6 +156,7 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 RenderDevice::~RenderDevice( void ) noexcept
 {
     m_caches.clear();
+    m_commandsToSubmit.clear();
 
     m_shadowMaps.clear();
     m_fallbackDirectionalShadowMap = nullptr;
@@ -2569,4 +2570,9 @@ const vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *ligh
 void RenderDevice::submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
 {
     m_commandsToSubmit[ getGraphicsQueue() ].push_back( commandBuffer );
+}
+
+void RenderDevice::submitComputeCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
+{
+    m_commandsToSubmit[ getComputeQueue() ].push_back( commandBuffer );
 }

@@ -15,12 +15,17 @@ target_sources(
     Foundation/VulkanInitializers.hpp
     Foundation/VulkanUtils.cpp
     Foundation/VulkanUtils.hpp
+    Rendering/FrameGraph/VulkanComputeBase.hpp
+    Rendering/FrameGraph/VulkanComputeSceneLighting.hpp
+    Rendering/FrameGraph/VulkanComputeSceneLighting.cpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
     Rendering/FrameGraph/VulkanRenderGBuffer.cpp
     Rendering/FrameGraph/VulkanRenderGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp
     Rendering/FrameGraph/VulkanRenderScene.hpp
+    Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
+    Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
     Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
     Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
     Rendering/RenderPasses/VulkanBlitPass.cpp
@@ -63,6 +68,8 @@ target_sources(
     Rendering/VulkanBuffer.hpp
     Rendering/VulkanCommandBuffer.cpp
     Rendering/VulkanCommandBuffer.hpp
+    Rendering/VulkanComputePipeline.cpp
+    Rendering/VulkanComputePipeline.hpp
     Rendering/VulkanDescriptor.hpp
     Rendering/VulkanDescriptorPool.cpp
     Rendering/VulkanDescriptorPool.hpp
@@ -96,6 +103,8 @@ target_sources(
     Rendering/VulkanSceneRenderState.hpp
     Rendering/VulkanShaderCompiler.cpp
     Rendering/VulkanShaderCompiler.hpp
+    Rendering/VulkanShaderModule.cpp
+    Rendering/VulkanShaderModule.hpp
     Rendering/VulkanShadowMap.cpp
     Rendering/VulkanShadowMap.hpp
     Rendering/VulkanSurface.cpp

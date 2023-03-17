@@ -76,9 +76,17 @@ DescriptorSet::DescriptorSet(
 
     setHandle( handle );
 
+    // Create arrays that will store descriptor writes and other objects
+    // Reserve as many elements as inputs descriptors so they're not
+    // resized along the way. Otherwise, resizing will change the internal
+    // pointers and lead to errors due to invalid references.
     std::vector< VkWriteDescriptorSet > writes;
+    writes.reserve( m_descriptors.size() );
     std::vector< VkDescriptorImageInfo > imageInfos;
+    imageInfos.reserve( m_descriptors.size() );
     std::vector< VkDescriptorBufferInfo > bufferInfos;
+    bufferInfos.reserve( m_descriptors.size() );
+
     for ( auto &descriptor : m_descriptors ) {
         switch ( descriptor.type ) {
             case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER: {
@@ -105,8 +113,32 @@ DescriptorSet::DescriptorSet(
                 break;
             }
 
+            case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE: {
+                assert( descriptor.imageView->getHandle() != VK_NULL_HANDLE );
+                imageInfos.push_back(
+                    VkDescriptorImageInfo {
+                        .sampler = descriptor.sampler->getHandle(),
+                        .imageView = descriptor.imageView->getHandle(),
+                        .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+                    }
+                );
+                writes.push_back(
+                    VkWriteDescriptorSet {
+                        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                        .dstSet = getHandle(),
+                        .dstBinding = uint32_t( writes.size() ),
+                        .dstArrayElement = 0,
+                        .descriptorCount = 1,
+                        .descriptorType = descriptor.type,
+                        .pImageInfo = &imageInfos.back(),
+                        .pBufferInfo = nullptr,
+                        .pTexelBufferView = nullptr,
+                    }
+                );
+                break;
+            }
             case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: {
-                imageInfos.emplace_back(
+                imageInfos.push_back(
                     VkDescriptorImageInfo {
                         .sampler = descriptor.sampler->getHandle(),
                         .imageView = descriptor.imageView->getHandle(),
@@ -116,7 +148,7 @@ DescriptorSet::DescriptorSet(
                                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
                     }
                 );
-                writes.emplace_back(
+                writes.push_back(
                     VkWriteDescriptorSet {
                         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                         .dstSet = getHandle(),

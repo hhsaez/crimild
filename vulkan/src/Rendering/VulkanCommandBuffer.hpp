@@ -40,6 +40,7 @@ namespace crimild {
 
 namespace crimild::vulkan {
 
+    class ComputePipeline;
     class DescriptorSet;
     class Framebuffer;
     class GraphicsPipeline;
@@ -81,7 +82,9 @@ namespace crimild::vulkan {
 
         void setDepthBias( float constant, float clamp, float slope ) noexcept;
 
+        void bindPipeline( std::shared_ptr< ComputePipeline > &pipeline ) noexcept;
         void bindPipeline( std::shared_ptr< GraphicsPipeline > &pipeline ) noexcept;
+
         void bindDescriptorSet( uint32_t index, std::shared_ptr< DescriptorSet > &descriptorSet ) noexcept;
 
         template< typename ConstantType >
@@ -99,6 +102,7 @@ namespace crimild::vulkan {
             );
         }
 
+        void draw( uint32_t count ) noexcept;
         void drawPrimitive( const std::shared_ptr< Primitive > &primitive ) noexcept;
 
         void endRenderPass( void ) noexcept;
@@ -109,6 +113,8 @@ namespace crimild::vulkan {
         void transitionImageLayout( vulkan::Image *image, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
 
         void copy( const vulkan::Image *src, const vulkan::Image *dst, uint32_t dstBaseArrayLayer = 0 ) noexcept;
+
+        void dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ ) noexcept;
 
         void end( void ) const noexcept;
 

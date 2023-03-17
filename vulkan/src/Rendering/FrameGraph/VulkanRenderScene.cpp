@@ -27,7 +27,9 @@
 
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 
+#include "Rendering/FrameGraph/VulkanComputeSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderGBuffer.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
@@ -51,18 +53,37 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         crimild::alloc< RenderTarget >( device, "Scene/Material", VK_FORMAT_R32G32B32A32_SFLOAT, extent ),
     };
 
-    m_colorTarget = gBufferTargets[ 1 ]; // TODO
-    m_colorTarget->setClearValue( VkClearValue { .color = { .float32 = { 1, 0, 1, 1 } } } );
+    m_colorTarget = crimild::alloc< RenderTarget >( device, "Scene/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_colorTarget->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
 
     m_shadows = crimild::alloc< RenderShadowMaps >( device );
 
     m_gBuffer = crimild::alloc< RenderGBuffer >( device, extent, gBufferTargets );
     // m_gBuffer->invalidates( { m_colorTarget } );
-    m_gBuffer->flushes( { m_colorTarget } );
+    // m_gBuffer->flushes( gBufferTargets );
 
-    // m_lighting = crimild::alloc< ComputeLighting >();
-    // m_lighting->reads( gBufferTargets );
-    // m_lighting->writes( sceneColor );
+    m_lighting = crimild::alloc< RenderSceneLighting >(
+        device,
+        extent,
+        std::vector< std::shared_ptr< RenderTarget > > {
+            gBufferTargets[ 1 ],
+            gBufferTargets[ 2 ],
+            gBufferTargets[ 3 ],
+            gBufferTargets[ 4 ],
+        },
+        m_colorTarget
+    );
+
+    // m_compute = crimild::alloc< ComputeSceneLighting >(
+    //     device,
+    //     std::vector< std::shared_ptr< RenderTarget > > {
+    //         gBufferTargets[ 1 ],
+    //         gBufferTargets[ 2 ],
+    //         gBufferTargets[ 3 ],
+    //         gBufferTargets[ 4 ],
+    //     },
+    //     m_colorTarget
+    // );
 
     // m_unlit = crimild::alloc< RenderUnlit >();
     // m_unlit->reads( { sceneDepth, sceneColorHDR } );
@@ -103,4 +124,6 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
 
     m_shadows->render( renderState, camera );
     m_gBuffer->render( renderState.litRenderables, camera );
+    m_lighting->render( renderState, camera );
+    // m_compute->execute();
 }

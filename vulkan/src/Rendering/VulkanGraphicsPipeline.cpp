@@ -31,6 +31,7 @@
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanShaderModule.hpp"
 
 using namespace crimild;
 using namespace crimild::vulkan;
@@ -39,89 +40,89 @@ namespace crimild {
 
     namespace vulkan {
 
-        class ShaderModule {
-        public:
-            ShaderModule( RenderDevice *renderDevice, SharedPointer< Shader > const &shader ) noexcept
-                : m_renderDevice( renderDevice )
-            {
-                CRIMILD_LOG_DEBUG( "Creating shader module for stage ", shader->getStageDescription() );
+        // class ShaderModule {
+        // public:
+        //     ShaderModule( RenderDevice *renderDevice, SharedPointer< Shader > const &shader ) noexcept
+        //         : m_renderDevice( renderDevice )
+        //     {
+        //         CRIMILD_LOG_DEBUG( "Creating shader module for stage ", shader->getStageDescription() );
 
-                assert( shader != nullptr && "Shader instance is null" );
+        //         assert( shader != nullptr && "Shader instance is null" );
 
-                auto code = shader->getData();
-                if ( shader->getDataType() == Shader::DataType::INLINE ) {
-                    auto source = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
-                    if ( !renderDevice->getShaderCompiler().compile( shader->getStage(), source, code ) ) {
-                        CRIMILD_LOG_FATAL( "Failed to create shader module" );
-                        exit( EXIT_FAILURE );
-                    }
-                }
+        //         auto code = shader->getData();
+        //         if ( shader->getDataType() == Shader::DataType::INLINE ) {
+        //             auto source = std::string( reinterpret_cast< const char * >( code.data() ), code.size() );
+        //             if ( !renderDevice->getShaderCompiler().compile( shader->getStage(), source, code ) ) {
+        //                 CRIMILD_LOG_FATAL( "Failed to create shader module" );
+        //                 exit( EXIT_FAILURE );
+        //             }
+        //         }
 
-                auto createInfo = VkShaderModuleCreateInfo {
-                    .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-                    .codeSize = code.size(),
-                    .pCode = reinterpret_cast< const uint32_t * >( code.data() ),
-                };
+        //         auto createInfo = VkShaderModuleCreateInfo {
+        //             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        //             .codeSize = code.size(),
+        //             .pCode = reinterpret_cast< const uint32_t * >( code.data() ),
+        //         };
 
-                if ( vkCreateShaderModule( renderDevice->getHandle(), &createInfo, nullptr, &m_handle ) != VK_SUCCESS ) {
-                    CRIMILD_LOG_FATAL( "Failed to create shader module" );
-                    exit( EXIT_FAILURE );
-                }
+        //         if ( vkCreateShaderModule( renderDevice->getHandle(), &createInfo, nullptr, &m_handle ) != VK_SUCCESS ) {
+        //             CRIMILD_LOG_FATAL( "Failed to create shader module" );
+        //             exit( EXIT_FAILURE );
+        //         }
 
-                m_stage = utils::getVulkanShaderStageFlag( shader->getStage() );
-                m_entryPointName = shader->getEntryPointName();
-            }
+        //         m_stage = utils::getVulkanShaderStageFlag( shader->getStage() );
+        //         m_entryPointName = shader->getEntryPointName();
+        //     }
 
-            ~ShaderModule( void ) noexcept
-            {
-                vkDestroyShaderModule( m_renderDevice->getHandle(), m_handle, nullptr );
-                m_handle = VK_NULL_HANDLE;
-            }
+        //     ~ShaderModule( void ) noexcept
+        //     {
+        //         vkDestroyShaderModule( m_renderDevice->getHandle(), m_handle, nullptr );
+        //         m_handle = VK_NULL_HANDLE;
+        //     }
 
-            inline VkShaderModule getHandle( void ) const noexcept { return m_handle; }
-            inline VkShaderStageFlagBits getStage( void ) const noexcept { return m_stage; }
-            inline const char *getEntryPointName( void ) const noexcept { return m_entryPointName.c_str(); }
+        //     inline VkShaderModule getHandle( void ) const noexcept { return m_handle; }
+        //     inline VkShaderStageFlagBits getStage( void ) const noexcept { return m_stage; }
+        //     inline const char *getEntryPointName( void ) const noexcept { return m_entryPointName.c_str(); }
 
-        private:
-            RenderDevice *m_renderDevice = nullptr;
-            VkShaderModule m_handle = VK_NULL_HANDLE;
-            VkShaderStageFlagBits m_stage;
-            std::string m_entryPointName;
-        };
+        // private:
+        //     RenderDevice *m_renderDevice = nullptr;
+        //     VkShaderModule m_handle = VK_NULL_HANDLE;
+        //     VkShaderStageFlagBits m_stage;
+        //     std::string m_entryPointName;
+        // };
 
-        static std::vector< std::unique_ptr< ShaderModule > > createShaderModules( RenderDevice *renderDevice, const ShaderProgram *program ) noexcept
-        {
-            CRIMILD_LOG_TRACE();
+        // static std::vector< std::unique_ptr< ShaderModule > > createShaderModules( RenderDevice *renderDevice, const ShaderProgram *program ) noexcept
+        // {
+        //     CRIMILD_LOG_TRACE();
 
-            std::vector< std::unique_ptr< ShaderModule > > modules;
-            assert( program != nullptr && "Invalid shader program instance" );
-            assert( !program->getShaders().empty() && "Invalid shader program" );
-            program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
-                modules.push_back( std::make_unique< ShaderModule >( renderDevice, shader ) );
-            } );
+        //     std::vector< std::unique_ptr< ShaderModule > > modules;
+        //     assert( program != nullptr && "Invalid shader program instance" );
+        //     assert( !program->getShaders().empty() && "Invalid shader program" );
+        //     program->getShaders().each( [ &modules, renderDevice ]( SharedPointer< Shader > &shader ) {
+        //         modules.push_back( std::make_unique< ShaderModule >( renderDevice, shader ) );
+        //     } );
 
-            // Reset preprocessor after building shader modules to prevent garbage code to be used unintentionally
-            renderDevice->getShaderCompiler().resetPreprocessor();
+        //     // Reset preprocessor after building shader modules to prevent garbage code to be used unintentionally
+        //     renderDevice->getShaderCompiler().resetPreprocessor();
 
-            return modules;
-        }
+        //     return modules;
+        // }
 
-        static std::vector< VkPipelineShaderStageCreateInfo > createShaderStages( const std::vector< std::unique_ptr< ShaderModule > > &modules ) noexcept
-        {
-            CRIMILD_LOG_TRACE();
+        // static std::vector< VkPipelineShaderStageCreateInfo > createShaderStages( const std::vector< std::unique_ptr< ShaderModule > > &modules ) noexcept
+        // {
+        //     CRIMILD_LOG_TRACE();
 
-            std::vector< VkPipelineShaderStageCreateInfo > shaderStages;
-            for ( const auto &module : modules ) {
-                auto stage = VkPipelineShaderStageCreateInfo {
-                    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                    .stage = module->getStage(),
-                    .module = module->getHandle(),
-                    .pName = module->getEntryPointName(),
-                };
-                shaderStages.push_back( stage );
-            }
-            return shaderStages;
-        }
+        //     std::vector< VkPipelineShaderStageCreateInfo > shaderStages;
+        //     for ( const auto &module : modules ) {
+        //         auto stage = VkPipelineShaderStageCreateInfo {
+        //             .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        //             .stage = module->getStage(),
+        //             .module = module->getHandle(),
+        //             .pName = module->getEntryPointName(),
+        //         };
+        //         shaderStages.push_back( stage );
+        //     }
+        //     return shaderStages;
+        // }
 
         static std::vector< VkVertexInputBindingDescription > getVertexInputBindingDescriptions( const std::vector< VertexLayout > &vertexLayouts ) noexcept
         {
@@ -578,8 +579,11 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
 
     // WARNING: all of these config params are used when creating the graphicsPipeline and
     // they must be alive when vkCreatePipeline is called. Beware of scopes!
-    auto shaderModules = createShaderModules( renderDevice, descriptor.program );
-    auto shaderStages = createShaderStages( shaderModules );
+    auto shaderModules = ShaderModule::createShaderModulesFromProgram( renderDevice, descriptor.program );
+    std::vector< VkPipelineShaderStageCreateInfo > shaderStages;
+    for ( auto &module : shaderModules ) {
+        shaderStages.push_back( module->getShaderStageCreateInfo() );
+    }
     auto vertexBindingDescriptions = getVertexInputBindingDescriptions( descriptor.vertexLayouts );
     auto vertexAttributeDescriptions = getVertexInputAttributeDescriptions( renderDevice, descriptor.vertexLayouts );
     auto vertexInputInfo = createVertexInput( vertexBindingDescriptions, vertexAttributeDescriptions );
