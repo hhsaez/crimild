@@ -125,7 +125,7 @@ void RenderGBuffer::bindMaterial( const materials::PrincipledBSDF *material ) no
         // Already bound
         // TODO: This should be handled in a different way. What if texture changes?
         // Also, update only when material changes.
-        // TODO: Update material uniforms
+        m_resources.materials[ material ].uniforms->setValue( material->getProps() );
         return;
     }
 

@@ -16,16 +16,18 @@ target_sources(
     Foundation/VulkanUtils.cpp
     Foundation/VulkanUtils.hpp
     Rendering/FrameGraph/VulkanComputeBase.hpp
-    Rendering/FrameGraph/VulkanComputeSceneLighting.hpp
     Rendering/FrameGraph/VulkanComputeSceneLighting.cpp
+    Rendering/FrameGraph/VulkanComputeSceneLighting.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
     Rendering/FrameGraph/VulkanRenderGBuffer.cpp
     Rendering/FrameGraph/VulkanRenderGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp
     Rendering/FrameGraph/VulkanRenderScene.hpp
-    Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
     Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
+    Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
+    Rendering/FrameGraph/VulkanRenderSceneUnlit.cpp
+    Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp
     Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
     Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
     Rendering/RenderPasses/VulkanBlitPass.cpp
