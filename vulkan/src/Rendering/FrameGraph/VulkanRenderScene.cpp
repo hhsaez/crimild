@@ -30,6 +30,7 @@
 #include "Rendering/FrameGraph/VulkanComputeSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderGBuffer.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp"
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
@@ -73,6 +74,10 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         },
         m_colorTarget
     );
+
+    m_unlit = crimild::alloc< RenderSceneUnlit >( device, extent, m_depthTarget, m_colorTarget );
+
+    m_environment = crimild::alloc< RenderSceneUnlit >( device, extent, m_depthTarget, m_colorTarget );
 
     // m_compute = crimild::alloc< ComputeSceneLighting >(
     //     device,
@@ -125,5 +130,7 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
     m_shadows->render( renderState, camera );
     m_gBuffer->render( renderState.litRenderables, camera );
     m_lighting->render( renderState, camera );
+    m_unlit->render( renderState.unlitRenderables, camera );
+    m_unlit->render( renderState.envRenderables, camera );
     // m_compute->execute();
 }
