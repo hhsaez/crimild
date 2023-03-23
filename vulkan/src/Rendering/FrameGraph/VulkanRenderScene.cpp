@@ -28,7 +28,7 @@
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 
 #include "Rendering/FrameGraph/VulkanComputeSceneLighting.hpp"
-#include "Rendering/FrameGraph/VulkanRenderGBuffer.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp"
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
@@ -46,7 +46,10 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
 {
     m_depthTarget = crimild::alloc< RenderTarget >( device, "Scene/Depth", VK_FORMAT_D32_SFLOAT, extent );
 
-    auto gBufferTargets = std::vector< std::shared_ptr< RenderTarget > > {
+    m_colorTarget = crimild::alloc< RenderTarget >( device, "Scene/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_colorTarget->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
+
+    m_gBufferTargets = std::vector< std::shared_ptr< RenderTarget > > {
         m_depthTarget,
         crimild::alloc< RenderTarget >( device, "Scene/Albedo", VK_FORMAT_R32G32B32A32_SFLOAT, extent ),
         crimild::alloc< RenderTarget >( device, "Scene/Position", VK_FORMAT_R32G32B32A32_SFLOAT, extent ),
@@ -54,12 +57,9 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         crimild::alloc< RenderTarget >( device, "Scene/Material", VK_FORMAT_R32G32B32A32_SFLOAT, extent ),
     };
 
-    m_colorTarget = crimild::alloc< RenderTarget >( device, "Scene/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    m_colorTarget->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
-
     m_shadows = crimild::alloc< RenderShadowMaps >( device );
 
-    m_gBuffer = crimild::alloc< RenderGBuffer >( device, extent, gBufferTargets );
+    m_gBuffer = crimild::alloc< RenderSceneGBuffer >( device, extent, m_gBufferTargets );
     // m_gBuffer->invalidates( { m_colorTarget } );
     // m_gBuffer->flushes( gBufferTargets );
 
@@ -67,10 +67,10 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         device,
         extent,
         std::vector< std::shared_ptr< RenderTarget > > {
-            gBufferTargets[ 1 ],
-            gBufferTargets[ 2 ],
-            gBufferTargets[ 3 ],
-            gBufferTargets[ 4 ],
+            m_gBufferTargets[ 1 ],
+            m_gBufferTargets[ 2 ],
+            m_gBufferTargets[ 3 ],
+            m_gBufferTargets[ 4 ],
         },
         m_colorTarget
     );
@@ -89,14 +89,6 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
     //     },
     //     m_colorTarget
     // );
-
-    // m_unlit = crimild::alloc< RenderUnlit >();
-    // m_unlit->reads( { sceneDepth, sceneColorHDR } );
-    // m_unlit->writes( { sceneDepth, sceneColorHDR } );
-
-    // m_tonemapping = crimild::alloc< ComputeTonemapping >();
-    // m_tonemapping->reads( { sceneColorHDR } );
-    // m_tonemapping->writes( { sceneColor } );
 }
 
 void RenderScene::onResize( void ) noexcept
@@ -116,21 +108,101 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
         camera->setAspectRatio( float( getExtent().width ) / float( getExtent().height ) );
     }
 
-    // m_shadows->execute( {}, renderState, camera, {} );
-
-    // m_gBuffer->execute(
-    //     {},
-    //     renderState,
-    //     camera,
-    //     Barriers {
-    //         .images = { m_colorTarget->getImage() },
-    //     }
-    // );
-
+    // Execute shadow pass. No need to add sync objects since render pass will
+    // leave all attachments in the correct layout
     m_shadows->render( renderState, camera );
-    m_gBuffer->render( renderState.litRenderables, camera );
-    m_lighting->render( renderState, camera );
-    m_unlit->render( renderState.unlitRenderables, camera );
-    m_unlit->render( renderState.envRenderables, camera );
+
+    m_gBuffer->render(
+        renderState.litRenderables,
+        camera,
+        {
+            .pre = {
+                // No need to add barriers here since render pass dependencies will deal with
+                // any layout transition.
+            },
+            .post = {
+                // Barriers for layout transitions will be added later (see below) in order to
+                // wait for them only when they're going to be used.
+            },
+        }
+    );
+
+    m_lighting->render(
+        renderState,
+        camera,
+        {
+            .pre = {
+                // Make sure all G-Buffer targets are in the correct layout
+                // Do it here to avoid waiting before they are actually needed
+                .imageMemoryBarriers = {
+                    ImageMemoryBarrier {
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = 0,
+                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .imageView = m_gBufferTargets[ 1 ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = 0,
+                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .imageView = m_gBufferTargets[ 2 ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = 0,
+                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .imageView = m_gBufferTargets[ 3 ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = 0,
+                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .imageView = m_gBufferTargets[ 4 ]->getImageView(),
+                    },
+                },
+            },
+        }
+    );
+
+    m_unlit->render(
+        renderState.unlitRenderables,
+        camera
+    );
+
+    m_environment->render(
+        renderState.envRenderables,
+        camera,
+        {
+            .post = {
+                .imageMemoryBarriers = {
+                    // Since this is the last pass, make sure the color target is
+                    // in the correct layout and can be read later on.
+                    ImageMemoryBarrier {
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = 0,
+                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .imageView = m_colorTarget->getImageView(),
+                    },
+                },
+            },
+
+        }
+    );
+
     // m_compute->execute();
 }

@@ -174,7 +174,11 @@ namespace crimild::vulkan::framegraph {
             m_resources = {};
         }
 
-        virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept override
+        virtual void render(
+            const SceneRenderState &renderState,
+            const Camera *camera,
+            SyncOptions const &options = {}
+        ) noexcept override
         {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
@@ -201,7 +205,7 @@ namespace crimild::vulkan::framegraph {
                         }
 
                         // Transition back to read after render.
-                        m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+                        m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
                     }
                 } else {
                     // Set default shadow map for this light
@@ -545,7 +549,11 @@ namespace crimild::vulkan::framegraph {
             m_resources = {};
         }
 
-        virtual void render( const SceneRenderState &renderState, const Camera * ) noexcept override
+        virtual void render(
+            const SceneRenderState &renderState,
+            const Camera *,
+            SyncOptions const &options = {}
+        ) noexcept override
         {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
@@ -886,7 +894,11 @@ namespace crimild::vulkan::framegraph {
             m_resources = {};
         }
 
-        virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept override
+        virtual void render(
+            const SceneRenderState &renderState,
+            const Camera *camera,
+            SyncOptions const &options = {}
+        ) noexcept override
         {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
@@ -912,7 +924,7 @@ namespace crimild::vulkan::framegraph {
                         );
 
                         // Transition back to read after render.
-                        m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+                        m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
                     }
                 } else {
                     // Set default shadow map for this light
@@ -1025,9 +1037,13 @@ RenderShadowMaps::RenderShadowMaps( RenderDevice *device ) noexcept
     // no-op
 }
 
-void RenderShadowMaps::render( const SceneRenderState &renderState, const Camera *camera ) noexcept
+void RenderShadowMaps::render(
+    const SceneRenderState &renderState,
+    const Camera *camera,
+    SyncOptions const &options
+) noexcept
 {
     for ( auto &renderer : m_renderers ) {
-        renderer->render( renderState, camera );
+        renderer->render( renderState, camera, options );
     }
 }

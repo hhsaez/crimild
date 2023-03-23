@@ -31,6 +31,7 @@
 #include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 
 namespace crimild {
 
@@ -71,11 +72,14 @@ namespace crimild::vulkan {
 
         void reset( void ) noexcept;
 
-        void begin( VkCommandBufferUsageFlags usage = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) noexcept;
-
-        void invalidate( std::unordered_set< std::shared_ptr< Image > > &images ) noexcept;
+        void begin(
+            SyncOptions const &options = {},
+            VkCommandBufferUsageFlags usage = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+        ) noexcept;
 
         void beginRenderPass( std::shared_ptr< RenderPass > &renderPass, std::shared_ptr< Framebuffer > &framebuffer ) noexcept;
+
+        void pipelineBarrier( ImageMemoryBarrier const &barrier ) noexcept;
 
         void setViewport( const VkViewport &viewport ) noexcept;
         void setScissor( const VkRect2D &scissor ) noexcept;
@@ -107,8 +111,6 @@ namespace crimild::vulkan {
 
         void endRenderPass( void ) noexcept;
 
-        void flush( std::unordered_set< std::shared_ptr< Image > > &images ) noexcept;
-
         void transitionImageLayout( vulkan::Image *image, VkImageLayout newLayout ) const noexcept;
         void transitionImageLayout( vulkan::Image *image, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
 
@@ -116,7 +118,7 @@ namespace crimild::vulkan {
 
         void dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ ) noexcept;
 
-        void end( void ) const noexcept;
+        void end( SyncOptions const &options = {} ) noexcept;
 
     private:
         void transitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, crimild::UInt32 mipLevels, crimild::UInt32 layerCount, uint32_t baseArrayLayer = 0 ) const noexcept;

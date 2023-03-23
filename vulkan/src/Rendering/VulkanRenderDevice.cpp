@@ -2569,7 +2569,23 @@ const vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *ligh
 
 void RenderDevice::submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
 {
-    m_commandsToSubmit[ getGraphicsQueue() ].push_back( commandBuffer );
+    // m_commandsToSubmit[ getGraphicsQueue() ].push_back( commandBuffer );
+
+    std::vector< VkCommandBuffer > commandBufferHandlers = { commandBuffer->getHandle() };
+    auto submitInfo = VkSubmitInfo {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
+        .pCommandBuffers = commandBufferHandlers.data(),
+    };
+
+    CRIMILD_VULKAN_CHECK(
+        vkQueueSubmit(
+            getGraphicsQueue(),
+            1,
+            &submitInfo,
+            nullptr
+        )
+    );
 }
 
 void RenderDevice::submitComputeCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept

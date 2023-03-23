@@ -20,10 +20,10 @@ target_sources(
     Rendering/FrameGraph/VulkanComputeSceneLighting.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
-    Rendering/FrameGraph/VulkanRenderGBuffer.cpp
-    Rendering/FrameGraph/VulkanRenderGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp
     Rendering/FrameGraph/VulkanRenderScene.hpp
+    Rendering/FrameGraph/VulkanRenderSceneGBuffer.cpp
+    Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
     Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
     Rendering/FrameGraph/VulkanRenderSceneUnlit.cpp
@@ -111,6 +111,7 @@ target_sources(
     Rendering/VulkanShadowMap.hpp
     Rendering/VulkanSurface.cpp
     Rendering/VulkanSurface.hpp
+    Rendering/VulkanSynchronization.hpp
     Visitors/VulkanFetchSceneRenderState.cpp
     Visitors/VulkanFetchSceneRenderState.hpp
 )

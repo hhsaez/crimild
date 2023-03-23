@@ -64,7 +64,7 @@ namespace crimild::vulkan::framegraph {
 
         virtual ~RenderSceneLighting( void ) = default;
 
-        virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept override;
+        virtual void render( const SceneRenderState &renderState, const Camera *camera, SyncOptions const &options = {} ) noexcept override;
 
     private:
         std::shared_ptr< DescriptorSet > getDirectionalLightDescriptors( const Light *light ) noexcept;

@@ -64,7 +64,6 @@ namespace crimild::vulkan::framegraph {
     private:
         VkExtent2D m_extent = { .width = 1, .height = 1 };
     };
-
 }
 
 #endif

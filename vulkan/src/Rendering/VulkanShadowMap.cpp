@@ -45,6 +45,7 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *device, std::string name, Light::Typ
 {
     const bool lightIsPoint = lightType == Light::Type::POINT;
     const bool lightIsDirectional = lightType == Light::Type::DIRECTIONAL;
+    const bool lightIsSpot = lightType == Light::Type::SPOT;
 
     m_extent = lightIsPoint ? VkExtent3D { 1024, 1024, 1 } : VkExtent3D { 2048, 2048, 1 };
     m_format = lightIsPoint ? VK_FORMAT_R32_SFLOAT : VK_FORMAT_D32_SFLOAT;
@@ -65,6 +66,9 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *device, std::string name, Light::Typ
             createInfo.arrayLayers = m_layerCount;
             if ( lightIsPoint ) {
                 createInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+            } else if ( lightIsDirectional || lightIsSpot ) {
+                // For depth-stencil images, the Vulkan spec requires us to add the attachment use flag
+                createInfo.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             }
             return createInfo;
         }(),
