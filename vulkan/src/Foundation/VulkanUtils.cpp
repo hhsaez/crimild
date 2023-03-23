@@ -874,21 +874,21 @@ crimild::Bool utils::copyToBuffer( const VkDevice &device, VkDeviceMemory &buffe
     return true;
 }
 
-VkImageType utils::getImageType( Image *image ) noexcept
+VkImageType utils::getImageType( crimild::Image *image ) noexcept
 {
     switch ( image->type ) {
-        case Image::Type::IMAGE_1D:
+        case crimild::Image::Type::IMAGE_1D:
             return VK_IMAGE_TYPE_1D;
-        case Image::Type::IMAGE_2D:
+        case crimild::Image::Type::IMAGE_2D:
             return VK_IMAGE_TYPE_2D;
-        case Image::Type::IMAGE_3D:
+        case crimild::Image::Type::IMAGE_3D:
             return VK_IMAGE_TYPE_3D;
         default:
             return VK_IMAGE_TYPE_2D;
     }
 }
 
-VkImageAspectFlags utils::getImageAspectFlags( Image *image ) noexcept
+VkImageAspectFlags utils::getImageAspectFlags( crimild::Image *image ) noexcept
 {
     VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
     if ( utils::formatIsDepthStencil( image->format ) ) {
@@ -924,13 +924,13 @@ VkImageViewType utils::getImageViewType( const ImageView *imageView ) noexcept
 
     // Match image style
     switch ( imageView->image->type ) {
-        case Image::Type::IMAGE_1D:
+        case crimild::Image::Type::IMAGE_1D:
             return VK_IMAGE_VIEW_TYPE_1D;
-        case Image::Type::IMAGE_2D:
+        case crimild::Image::Type::IMAGE_2D:
             return VK_IMAGE_VIEW_TYPE_2D;
-        case Image::Type::IMAGE_2D_CUBEMAP:
+        case crimild::Image::Type::IMAGE_2D_CUBEMAP:
             return VK_IMAGE_VIEW_TYPE_CUBE;
-        case Image::Type::IMAGE_3D:
+        case crimild::Image::Type::IMAGE_3D:
             return VK_IMAGE_VIEW_TYPE_3D;
         default:
             return VK_IMAGE_VIEW_TYPE_2D;

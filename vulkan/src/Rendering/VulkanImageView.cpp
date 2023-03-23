@@ -76,6 +76,8 @@ vulkan::ImageView::ImageView(
     setHandle( handle );
 
     device->setObjectName( handle, name );
+
+    m_subresourceRange = createInfo.subresourceRange;
 }
 
 vulkan::ImageView::~ImageView( void ) noexcept

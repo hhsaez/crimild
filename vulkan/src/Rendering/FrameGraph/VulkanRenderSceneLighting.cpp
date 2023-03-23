@@ -799,7 +799,11 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getSpotLightDescri
     return m_resources.lights.spot.descriptorSets[ light ];
 }
 
-void RenderSceneLighting::render( const SceneRenderState &renderState, const Camera *camera ) noexcept
+void RenderSceneLighting::render(
+    const SceneRenderState &renderState,
+    const Camera *camera,
+    SyncOptions const &options
+) noexcept
 {
     // Update camera uniforms
     if ( camera != nullptr ) {
@@ -818,8 +822,7 @@ void RenderSceneLighting::render( const SceneRenderState &renderState, const Cam
     auto &cmds = getCommandBuffer();
     cmds->reset();
 
-    cmds->begin();
-    // cmds->invalidate( m_imagesToInvalidate );
+    cmds->begin( options );
     cmds->beginRenderPass( m_resources.common.renderPass, m_resources.common.framebuffer );
 
     // Directional lighting
@@ -852,8 +855,7 @@ void RenderSceneLighting::render( const SceneRenderState &renderState, const Cam
     }
 
     cmds->endRenderPass();
-    // cmds->flush( m_imagesToFlush );
-    cmds->end();
+    cmds->end( options );
 
     getRenderDevice()->submitGraphicsCommands( cmds );
 }

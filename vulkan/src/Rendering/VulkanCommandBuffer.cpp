@@ -36,6 +36,7 @@
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
@@ -93,7 +94,7 @@ void CommandBuffer::reset( void ) noexcept
     m_boundObjects.clear();
 }
 
-void CommandBuffer::begin( VkCommandBufferUsageFlags flags ) noexcept
+void CommandBuffer::begin( SyncOptions const &options, VkCommandBufferUsageFlags flags ) noexcept
 {
     // TODO: set pInheritanceInfo for secondary buffers
     auto beginInfo = VkCommandBufferBeginInfo {
@@ -104,30 +105,40 @@ void CommandBuffer::begin( VkCommandBufferUsageFlags flags ) noexcept
     CRIMILD_VULKAN_CHECK(
         vkBeginCommandBuffer( getHandle(), &beginInfo )
     );
+
+    for ( auto &barrier : options.pre.imageMemoryBarriers ) {
+        pipelineBarrier( barrier );
+    }
 }
 
-void CommandBuffer::invalidate( std::unordered_set< std::shared_ptr< Image > > &images ) noexcept
+void CommandBuffer::pipelineBarrier( ImageMemoryBarrier const &info ) noexcept
 {
-    for ( auto &image : images ) {
-        const auto isColor = getRenderDevice()->formatIsColor( image->getFormat() );
-        const auto oldLayout =
-            isColor
-                ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-        const auto newLayout =
-            isColor
-                ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        transitionImageLayout(
-            image->getHandle(),
-            image->getFormat(),
-            oldLayout,
-            newLayout,
-            image->getMipLevels(),
-            image->getArrayLayers()
-        );
-        image->setLayout( newLayout );
-    }
+    auto barrier = VkImageMemoryBarrier {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .srcAccessMask = info.srcAccessMask,
+        .dstAccessMask = info.dstAccessMask,
+        .oldLayout = info.oldLayout,
+        .newLayout = info.newLayout,
+        .srcQueueFamilyIndex = info.srcQueueFamily,
+        .dstQueueFamilyIndex = info.dstQueueFamily,
+        .image = info.imageView->getImage()->getHandle(),
+        .subresourceRange = info.imageView->getSubresourceRange(),
+    };
+
+    vkCmdPipelineBarrier(
+        getHandle(),
+        info.srcStageMask,
+        info.dstStageMask,
+        0,
+        0,
+        nullptr,
+        0,
+        nullptr,
+        1,
+        &barrier
+    );
+
+    m_boundObjects.insert( info.imageView );
 }
 
 void CommandBuffer::beginRenderPass( std::shared_ptr< RenderPass > &renderPass, std::shared_ptr< Framebuffer > &framebuffer ) noexcept
@@ -252,30 +263,6 @@ void CommandBuffer::drawPrimitive( const std::shared_ptr< Primitive > &primitive
 void CommandBuffer::endRenderPass( void ) noexcept
 {
     vkCmdEndRenderPass( getHandle() );
-}
-
-void CommandBuffer::flush( std::unordered_set< std::shared_ptr< Image > > &images ) noexcept
-{
-    for ( auto &image : images ) {
-        const auto isColor = getRenderDevice()->formatIsColor( image->getFormat() );
-        const auto oldLayout =
-            isColor
-                ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        const auto newLayout =
-            isColor
-                ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-        transitionImageLayout(
-            image->getHandle(),
-            image->getFormat(),
-            oldLayout,
-            newLayout,
-            image->getMipLevels(),
-            image->getArrayLayers()
-        );
-        image->setLayout( newLayout );
-    }
 }
 
 void CommandBuffer::transitionImageLayout( vulkan::Image *image, VkImageLayout newLayout ) const noexcept
@@ -466,8 +453,12 @@ void CommandBuffer::dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32
     vkCmdDispatch( getHandle(), groupCountX, groupCountY, groupCountZ );
 }
 
-void CommandBuffer::end( void ) const noexcept
+void CommandBuffer::end( SyncOptions const &options ) noexcept
 {
+    for ( auto &barrier : options.post.imageMemoryBarriers ) {
+        pipelineBarrier( barrier );
+    }
+
     CRIMILD_VULKAN_CHECK(
         vkEndCommandBuffer( getHandle() )
     );

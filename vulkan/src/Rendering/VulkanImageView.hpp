@@ -83,8 +83,11 @@ namespace crimild {
                 return m_image;
             }
 
+            inline VkImageSubresourceRange getSubresourceRange( void ) const noexcept { return m_subresourceRange; }
+
         private:
             std::shared_ptr< vulkan::Image > m_image;
+            VkImageSubresourceRange m_subresourceRange;
         };
     }
 

@@ -30,6 +30,7 @@
 
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 
 namespace crimild {
 
@@ -48,7 +49,11 @@ namespace crimild {
             public:
                 virtual ~RenderSceneBase( void ) = default;
 
-                virtual void render( const SceneRenderState &renderState, const Camera *camera ) noexcept = 0;
+                virtual void render(
+                    const SceneRenderState &renderState,
+                    const Camera *camera,
+                    SyncOptions const &options = {}
+                ) noexcept = 0;
             };
 
         }

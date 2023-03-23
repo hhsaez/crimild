@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/FrameGraph/VulkanRenderGBuffer.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp"
 
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -43,12 +43,12 @@
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;
 
-RenderGBuffer::RenderGBuffer(
+RenderSceneGBuffer::RenderSceneGBuffer(
     RenderDevice *device,
     const VkExtent2D &extent,
     const std::vector< std::shared_ptr< RenderTarget > > &renderTargets
 ) noexcept
-    : RenderBase( device, "RenderGBuffer", extent ),
+    : RenderBase( device, "RenderSceneGBuffer", extent ),
       m_renderTargets( renderTargets ),
       m_commandBuffer(
           crimild::alloc< CommandBuffer >(
@@ -62,19 +62,19 @@ RenderGBuffer::RenderGBuffer(
     createMaterialResources();
 }
 
-RenderGBuffer::~RenderGBuffer( void ) noexcept
+RenderSceneGBuffer::~RenderSceneGBuffer( void ) noexcept
 {
     destroyMaterialResources();
     destroyRenderPassResources();
 }
 
-void RenderGBuffer::onResize( void ) noexcept
+void RenderSceneGBuffer::onResize( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
     assert( false && "Method not implemented yet" );
 }
 
-void RenderGBuffer::createRenderPassResources( void ) noexcept
+void RenderSceneGBuffer::createRenderPassResources( void ) noexcept
 {
     m_resources.renderPass.renderPass = crimild::alloc< RenderPass >(
         getRenderDevice(),
@@ -109,17 +109,17 @@ void RenderGBuffer::createRenderPassResources( void ) noexcept
     );
 }
 
-void RenderGBuffer::destroyRenderPassResources( void ) noexcept
+void RenderSceneGBuffer::destroyRenderPassResources( void ) noexcept
 {
     m_resources.renderPass = {};
 }
 
-void RenderGBuffer::createMaterialResources( void ) noexcept
+void RenderSceneGBuffer::createMaterialResources( void ) noexcept
 {
     // TODO?
 }
 
-void RenderGBuffer::bindMaterial( const materials::PrincipledBSDF *material ) noexcept
+void RenderSceneGBuffer::bindMaterial( const materials::PrincipledBSDF *material ) noexcept
 {
     if ( m_resources.materials.contains( material ) ) {
         // Already bound
@@ -315,28 +315,15 @@ void RenderGBuffer::bindMaterial( const materials::PrincipledBSDF *material ) no
     m_resources.materials[ material ].pipeline = pipeline;
 }
 
-void RenderGBuffer::destroyMaterialResources( void ) noexcept
+void RenderSceneGBuffer::destroyMaterialResources( void ) noexcept
 {
     m_resources.materials.clear();
 }
 
-void RenderGBuffer::invalidates( std::vector< std::shared_ptr< RenderTarget > > const &renderTargets ) noexcept
-{
-    for ( auto &rt : renderTargets ) {
-        m_imagesToInvalidate.insert( rt->getImage() );
-    }
-}
-
-void RenderGBuffer::flushes( std::vector< std::shared_ptr< RenderTarget > > const &renderTargets ) noexcept
-{
-    for ( auto &rt : renderTargets ) {
-        m_imagesToFlush.insert( rt->getImage() );
-    }
-}
-
-void RenderGBuffer::render(
+void RenderSceneGBuffer::render(
     const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables,
-    const Camera *camera
+    const Camera *camera,
+    const SyncOptions &options
 ) noexcept
 {
     if ( camera != nullptr ) {
@@ -352,8 +339,7 @@ void RenderGBuffer::render(
     auto cmds = getCommandBuffer();
     cmds->reset();
 
-    cmds->begin();
-    cmds->invalidate( m_imagesToInvalidate );
+    cmds->begin( options );
     cmds->beginRenderPass( m_resources.renderPass.renderPass, m_resources.renderPass.framebuffer );
 
     // TODO: add support for instancing
@@ -376,8 +362,7 @@ void RenderGBuffer::render(
     }
 
     cmds->endRenderPass();
-    cmds->flush( m_imagesToFlush );
-    cmds->end();
+    cmds->end( options );
 
     getRenderDevice()->submitGraphicsCommands( cmds );
 }

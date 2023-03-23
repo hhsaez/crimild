@@ -48,8 +48,11 @@ namespace crimild {
 
     namespace vulkan {
 
+        class Buffer;
         class CommandBuffer;
+        class Image;
         class RenderDevice;
+        class RenderTarget;
 
         namespace utils {
 
@@ -231,8 +234,8 @@ namespace crimild {
                 crimild::UInt32 flags = 0;
             };
 
-            VkImageType getImageType( Image *image ) noexcept;
-            VkImageAspectFlags getImageAspectFlags( Image *image ) noexcept;
+            VkImageType getImageType( crimild::Image *image ) noexcept;
+            VkImageAspectFlags getImageAspectFlags( crimild::Image *image ) noexcept;
 
             //@}
 

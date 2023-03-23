@@ -65,7 +65,8 @@ namespace crimild::vulkan::framegraph {
 
         virtual void render(
             const SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables,
-            const Camera *camera
+            const Camera *camera,
+            SyncOptions const &options = {}
         ) noexcept;
 
     private:

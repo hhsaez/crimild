@@ -9,7 +9,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the copyright holders nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
@@ -25,35 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SHADOW_MAPS
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SHADOW_MAPS
+#ifndef CRIMILD_VULKAN_RENDERING_SYNCHRONIZATION
+#define CRIMILD_VULKAN_RENDERING_SYNCHRONIZATION
 
-#include "Rendering/FrameGraph/VulkanRenderSceneBase.hpp"
+#include "Foundation/VulkanUtils.hpp"
 
-namespace crimild {
+namespace crimild::vulkan {
 
-    namespace vulkan {
+    class ImageView;
 
-        namespace framegraph {
+    struct ImageMemoryBarrier {
+        VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 
-            class RenderShadowMaps : public RenderSceneBase {
-            public:
-                RenderShadowMaps( RenderDevice *device ) noexcept;
-                virtual ~RenderShadowMaps( void ) = default;
+        VkAccessFlags srcAccessMask = 0;
+        VkAccessFlags dstAccessMask = 0;
 
-                virtual void render(
-                    const SceneRenderState &renderState,
-                    const Camera *camera,
-                    SyncOptions const &options = {}
-                ) noexcept override;
+        VkImageLayout oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkImageLayout newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            private:
-                std::vector< std::shared_ptr< RenderSceneBase > > m_renderers;
-            };
+        uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED;
+        uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED;
 
-        }
+        std::shared_ptr< vulkan::ImageView > imageView;
+    };
 
-    }
+    struct PipelineBarriers {
+        std::vector< ImageMemoryBarrier > imageMemoryBarriers;
+    };
+
+    struct SyncOptions {
+        PipelineBarriers pre;
+        PipelineBarriers post;
+    };
 
 }
 

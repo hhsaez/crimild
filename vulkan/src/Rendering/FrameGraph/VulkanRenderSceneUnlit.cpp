@@ -266,7 +266,8 @@ void RenderSceneUnlit::bindMaterial( const UnlitMaterial *material ) noexcept
 
 void RenderSceneUnlit::render(
     const SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables,
-    const Camera *camera
+    const Camera *camera,
+    SyncOptions const &options
 ) noexcept
 {
     // Update camera uniforms
@@ -282,8 +283,7 @@ void RenderSceneUnlit::render(
     auto &cmds = getCommandBuffer();
     cmds->reset();
 
-    cmds->begin();
-    // cmds->invalidate( m_imagesToInvalidate );
+    cmds->begin( options );
     cmds->beginRenderPass( m_resources.common.renderPass, m_resources.common.framebuffer );
 
     // TODO: add support for instancing
@@ -306,8 +306,7 @@ void RenderSceneUnlit::render(
     }
 
     cmds->endRenderPass();
-    // cmds->flush( m_imagesToFlush );
-    cmds->end();
+    cmds->end( options );
 
     getRenderDevice()->submitGraphicsCommands( cmds );
 }

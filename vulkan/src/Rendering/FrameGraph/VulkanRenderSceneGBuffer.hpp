@@ -25,12 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_GBUFFER
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_GBUFFER
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
 
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 
 namespace crimild {
 
@@ -54,24 +55,22 @@ namespace crimild {
 
         namespace framegraph {
 
-            class RenderGBuffer : public RenderBase {
+            class RenderSceneGBuffer : public RenderBase {
             public:
-                RenderGBuffer(
+                RenderSceneGBuffer(
                     RenderDevice *device,
                     const VkExtent2D &extent,
                     const std::vector< std::shared_ptr< RenderTarget > > &renderTargets
                 ) noexcept;
 
-                virtual ~RenderGBuffer( void ) noexcept;
+                virtual ~RenderSceneGBuffer( void ) noexcept;
 
                 inline std::vector< std::shared_ptr< RenderTarget > > &getRenderTargets( void ) noexcept { return m_renderTargets; }
 
-                void invalidates( std::vector< std::shared_ptr< RenderTarget > > const &renderTargets ) noexcept;
-                void flushes( std::vector< std::shared_ptr< RenderTarget > > const &renderTargets ) noexcept;
-
                 void render(
                     const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables,
-                    const Camera *camera
+                    const Camera *camera,
+                    const SyncOptions &sync = {}
                 ) noexcept;
 
             protected:
@@ -89,9 +88,6 @@ namespace crimild {
 
             private:
                 std::vector< std::shared_ptr< RenderTarget > > m_renderTargets;
-
-                std::unordered_set< std::shared_ptr< Image > > m_imagesToInvalidate;
-                std::unordered_set< std::shared_ptr< Image > > m_imagesToFlush;
 
                 struct Resources {
                     struct RenderPassResources {
