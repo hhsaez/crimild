@@ -27,7 +27,6 @@
 
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 
-#include "Rendering/FrameGraph/VulkanComputeSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp"
@@ -41,18 +40,18 @@
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;
 
-RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
-    : RenderBase( device, "RenderScene", extent )
+RenderScene::RenderScene( RenderDevice *device, std::string name, const VkExtent2D &extent )
+    : RenderBase( device, name, extent )
 {
-    m_renderTargets[ "Scene/Depth" ] = crimild::alloc< RenderTarget >( device, "Scene/Depth", VK_FORMAT_D32_SFLOAT, extent );
-    m_renderTargets[ "Scene/Color" ] = crimild::alloc< RenderTarget >( device, "Scene/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    m_renderTargets[ "Scene/Albedo" ] = crimild::alloc< RenderTarget >( device, "Scene/Albedo", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    m_renderTargets[ "Scene/Position" ] = crimild::alloc< RenderTarget >( device, "Scene/Position", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    m_renderTargets[ "Scene/Normal" ] = crimild::alloc< RenderTarget >( device, "Scene/Normal", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-    m_renderTargets[ "Scene/Material" ] = crimild::alloc< RenderTarget >( device, "Scene/Material", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Depth" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Depth", VK_FORMAT_D32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Color" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Albedo" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Albedo", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Position" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Position", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Normal" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Normal", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
+    m_renderTargets[ getName() + "/Targets/Material" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Material", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
 
     // Set scene color to opaque
-    m_renderTargets[ "Scene/Color" ]->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
+    m_renderTargets[ getName() + "/Targets/Color" ]->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
 
     m_shadows = crimild::alloc< RenderShadowMaps >( device );
 
@@ -60,11 +59,11 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         device,
         extent,
         std::vector< std::shared_ptr< RenderTarget > > {
-            m_renderTargets[ "Scene/Depth" ],
-            m_renderTargets[ "Scene/Albedo" ],
-            m_renderTargets[ "Scene/Position" ],
-            m_renderTargets[ "Scene/Normal" ],
-            m_renderTargets[ "Scene/Material" ],
+            m_renderTargets[ getName() + "/Targets/Depth" ],
+            m_renderTargets[ getName() + "/Targets/Albedo" ],
+            m_renderTargets[ getName() + "/Targets/Position" ],
+            m_renderTargets[ getName() + "/Targets/Normal" ],
+            m_renderTargets[ getName() + "/Targets/Material" ],
         }
     );
 
@@ -72,26 +71,26 @@ RenderScene::RenderScene( RenderDevice *device, const VkExtent2D &extent )
         device,
         extent,
         std::vector< std::shared_ptr< RenderTarget > > {
-            m_renderTargets[ "Scene/Albedo" ],
-            m_renderTargets[ "Scene/Position" ],
-            m_renderTargets[ "Scene/Normal" ],
-            m_renderTargets[ "Scene/Material" ],
+            m_renderTargets[ getName() + "/Targets/Albedo" ],
+            m_renderTargets[ getName() + "/Targets/Position" ],
+            m_renderTargets[ getName() + "/Targets/Normal" ],
+            m_renderTargets[ getName() + "/Targets/Material" ],
         },
-        m_renderTargets[ "Scene/Color" ]
+        m_renderTargets[ getName() + "/Targets/Color" ]
     );
 
     m_unlit = crimild::alloc< RenderSceneUnlit >(
         device,
         extent,
-        m_renderTargets[ "Scene/Depth" ],
-        m_renderTargets[ "Scene/Color" ]
+        m_renderTargets[ getName() + "/Targets/Depth" ],
+        m_renderTargets[ getName() + "/Targets/Color" ]
     );
 
     m_environment = crimild::alloc< RenderSceneUnlit >(
         device,
         extent,
-        m_renderTargets[ "Scene/Depth" ],
-        m_renderTargets[ "Scene/Color" ]
+        m_renderTargets[ getName() + "/Targets/Depth" ],
+        m_renderTargets[ getName() + "/Targets/Color" ]
     );
 }
 
@@ -100,7 +99,7 @@ void RenderScene::onResize( void ) noexcept
     // TODO
 }
 
-void RenderScene::render( Node *scene, Camera *camera ) noexcept
+void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &options ) noexcept
 {
     const auto renderState =
         scene != nullptr
@@ -146,7 +145,7 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = m_renderTargets[ "Scene/Albedo" ]->getImageView(),
+                        .imageView = m_renderTargets[ getName() + "/Targets/Albedo" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
                         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -155,7 +154,7 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = m_renderTargets[ "Scene/Position" ]->getImageView(),
+                        .imageView = m_renderTargets[ getName() + "/Targets/Position" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
                         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -164,7 +163,7 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = m_renderTargets[ "Scene/Normal" ]->getImageView(),
+                        .imageView = m_renderTargets[ getName() + "/Targets/Normal" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
                         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -173,7 +172,7 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = m_renderTargets[ "Scene/Material" ]->getImageView(),
+                        .imageView = m_renderTargets[ getName() + "/Targets/Material" ]->getImageView(),
                     },
                 },
             },
@@ -200,13 +199,13 @@ void RenderScene::render( Node *scene, Camera *camera ) noexcept
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                         .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                        .imageView = m_renderTargets[ "Scene/Color" ]->getImageView(),
+                        .imageView = m_renderTargets[ getName() + "/Targets/Color" ]->getImageView(),
                     },
                 },
             },
-            .signal = {
-                getSemaphore(),
-            },
+
+            // This is the last pass, so signal semaphores if needed.
+            .signal = options.signal,
         }
     );
 }

@@ -60,6 +60,7 @@ namespace crimild::vulkan {
 
             void execute( SyncOptions const &options ) noexcept;
 
+            inline std::shared_ptr< RenderTarget > &getInput( void ) noexcept { return m_input; }
             inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
 
         private:

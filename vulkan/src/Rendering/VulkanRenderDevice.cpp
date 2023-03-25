@@ -45,8 +45,6 @@
 using namespace crimild;
 using namespace crimild::vulkan;
 
-const int CRIMILD_MAX_FRAMES_IN_FLIGHT = 2;
-
 RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface, const Extent2D &extent ) noexcept
     : m_physicalDevice( physicalDevice ),
       m_surface( surface ),
@@ -141,26 +139,6 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
     createCommandPool( m_commandPool );
 
-    createSwapchain();
-    createDepthStencilResources();
-    createSyncObjects();
-    createCommandBuffers();
-
-    m_fallbackDirectionalShadowMap = [ this ] {
-        auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
-    }();
-
-    m_fallbackPointShadowMap = [ this ] {
-        auto light = crimild::alloc< Light >( Light::Type::POINT );
-        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
-    }();
-
-    m_fallbackSpotShadowMap = [ this ] {
-        auto light = crimild::alloc< Light >( Light::Type::SPOT );
-        return crimild::alloc< ShadowMapDEPRECATED >( this, light.get() );
-    }();
-
     for ( int i = 0; i < getInFlightFrameCount(); ++i ) {
         m_caches.emplace_back( crimild::alloc< RenderDeviceCache >( this ) );
     }
@@ -169,12 +147,6 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 RenderDevice::~RenderDevice( void ) noexcept
 {
     m_caches.clear();
-    m_commandsToSubmit.clear();
-
-    m_shadowMaps.clear();
-    m_fallbackDirectionalShadowMap = nullptr;
-    m_fallbackPointShadowMap = nullptr;
-    m_fallbackSpotShadowMap = nullptr;
 
     m_descriptorSets.clear();
 
@@ -223,11 +195,6 @@ RenderDevice::~RenderDevice( void ) noexcept
     }
     m_memories.clear();
 
-    destroyCommandBuffers();
-    destroySyncObjects();
-    destroyDepthStencilResources();
-    destroySwapchain();
-
     destroyCommandPool( m_commandPool );
 
     CRIMILD_LOG_TRACE();
@@ -248,20 +215,20 @@ void RenderDevice::handle( const Event &e ) noexcept
     switch ( e.type ) {
         case Event::Type::WINDOW_RESIZE: {
             m_extent = e.extent;
-            vkDeviceWaitIdle( m_handle );
+            // vkDeviceWaitIdle( m_handle );
 
-            destroyCommandBuffers();
-            destroySyncObjects();
-            destroyDepthStencilResources();
-            destroySwapchain();
+            // destroyCommandBuffers();
+            // destroySyncObjects();
+            // destroyDepthStencilResources();
+            // destroySwapchain();
 
-            createSwapchain();
-            createDepthStencilResources();
-            createSyncObjects();
-            createCommandBuffers();
+            // createSwapchain();
+            // createDepthStencilResources();
+            // createSyncObjects();
+            // createCommandBuffers();
 
-            m_imageIndex = 0;
-            m_currentFrame = 0;
+            // m_imageIndex = 0;
+            // m_currentFrame = 0;
 
             break;
         }
@@ -381,274 +348,274 @@ void RenderDevice::destroySampler( VkSampler &sampler ) const noexcept
     sampler = VK_NULL_HANDLE;
 }
 
-void RenderDevice::createSwapchain( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
+// void RenderDevice::createSwapchain( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
 
-    auto swapchainSupport = utils::querySwapchainSupportDetails( m_physicalDevice->getHandle(), m_surface->getHandle() );
-    auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
-    auto presentMode = utils::choosePresentationMode( swapchainSupport.presentModes );
+//     auto swapchainSupport = utils::querySwapchainSupportDetails( m_physicalDevice->getHandle(), m_surface->getHandle() );
+//     auto surfaceFormat = utils::chooseSurfaceFormat( swapchainSupport.formats );
+//     auto presentMode = utils::choosePresentationMode( swapchainSupport.presentModes );
 
-    m_swapchainExtent = utils::chooseExtent(
-        swapchainSupport.capabilities,
-        VkExtent2D {
-            .width = crimild::UInt32( m_extent.width ),
-            .height = crimild::UInt32( m_extent.height ),
-        }
-    );
-    m_swapchainFormat = surfaceFormat.format;
+//     m_swapchainExtent = utils::chooseExtent(
+//         swapchainSupport.capabilities,
+//         VkExtent2D {
+//             .width = crimild::UInt32( m_extent.width ),
+//             .height = crimild::UInt32( m_extent.height ),
+//         }
+//     );
+//     m_swapchainFormat = surfaceFormat.format;
 
-    // The Vulkan implementation defines a minimum number of images to work with.
-    // We request one more image than the minimum. Also, make sure not to exceed the
-    // maximum number of images (a value of 0 means there's no maximum)
-    auto imageCount = swapchainSupport.capabilities.minImageCount + 1;
-    if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
-        imageCount = std::min(
-            swapchainSupport.capabilities.maxImageCount,
-            imageCount
-        );
-    }
+//     // The Vulkan implementation defines a minimum number of images to work with.
+//     // We request one more image than the minimum. Also, make sure not to exceed the
+//     // maximum number of images (a value of 0 means there's no maximum)
+//     auto imageCount = swapchainSupport.capabilities.minImageCount + 1;
+//     if ( swapchainSupport.capabilities.maxImageCount > 0 ) {
+//         imageCount = std::min(
+//             swapchainSupport.capabilities.maxImageCount,
+//             imageCount
+//         );
+//     }
 
-    auto createInfo = VkSwapchainCreateInfoKHR {
-        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        .surface = m_surface->getHandle(),
-        .minImageCount = imageCount,
-        .imageFormat = surfaceFormat.format,
-        .imageColorSpace = surfaceFormat.colorSpace,
-        .imageExtent = m_swapchainExtent,
-        .imageArrayLayers = 1, // This may change for stereoscopic rendering (VR)
-    };
+//     auto createInfo = VkSwapchainCreateInfoKHR {
+//         .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+//         .surface = m_surface->getHandle(),
+//         .minImageCount = imageCount,
+//         .imageFormat = surfaceFormat.format,
+//         .imageColorSpace = surfaceFormat.colorSpace,
+//         .imageExtent = m_swapchainExtent,
+//         .imageArrayLayers = 1, // This may change for stereoscopic rendering (VR)
+//     };
 
-    // Images created by the swapchain are usually used as color attachments
-    // It might be possible to used the for other purposes, like sampling or
-    // to copy to or from them to other surfaces.
-    // VK_IMAGE_USAGE_TRANSFER_SRC_BIT is requried for taking screenshots.
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+//     // Images created by the swapchain are usually used as color attachments
+//     // It might be possible to used the for other purposes, like sampling or
+//     // to copy to or from them to other surfaces.
+//     // VK_IMAGE_USAGE_TRANSFER_SRC_BIT is requried for taking screenshots.
+//     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-    auto indices = utils::findQueueFamilies( m_physicalDevice->getHandle(), m_surface->getHandle() );
-    uint32_t queueFamilyIndices[] = {
-        indices.graphicsFamily[ 0 ],
-        indices.presentFamily[ 0 ],
-    };
+//     auto indices = utils::findQueueFamilies( m_physicalDevice->getHandle(), m_surface->getHandle() );
+//     uint32_t queueFamilyIndices[] = {
+//         indices.graphicsFamily[ 0 ],
+//         indices.presentFamily[ 0 ],
+//     };
 
-    if ( indices.graphicsFamily != indices.presentFamily ) {
-        // If the graphics and present families don't match we need to
-        // share images since they're not exclusive to queues
-        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
-        createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    } else {
-        // If they are the same, the queue can have exclusive access to images
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0;
-        createInfo.pQueueFamilyIndices = nullptr;
-    }
+//     if ( indices.graphicsFamily != indices.presentFamily ) {
+//         // If the graphics and present families don't match we need to
+//         // share images since they're not exclusive to queues
+//         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+//         createInfo.queueFamilyIndexCount = 2;
+//         createInfo.pQueueFamilyIndices = queueFamilyIndices;
+//     } else {
+//         // If they are the same, the queue can have exclusive access to images
+//         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+//         createInfo.queueFamilyIndexCount = 0;
+//         createInfo.pQueueFamilyIndices = nullptr;
+//     }
 
-    // This can be used to rotate images or flip them horizontally
-    createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
+//     // This can be used to rotate images or flip them horizontally
+//     createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
 
-    // Use for blending with other windows in the window system
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+//     // Use for blending with other windows in the window system
+//     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-    createInfo.presentMode = presentMode;
+//     createInfo.presentMode = presentMode;
 
-    // Ignore pixels that are obscured by other windows
-    createInfo.clipped = VK_TRUE;
+//     // Ignore pixels that are obscured by other windows
+//     createInfo.clipped = VK_TRUE;
 
-    // This is used during the recreation of a swapchain (maybe due to window is resized)
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
+//     // This is used during the recreation of a swapchain (maybe due to window is resized)
+//     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    CRIMILD_VULKAN_CHECK(
-        vkCreateSwapchainKHR(
-            getHandle(),
-            &createInfo,
-            nullptr,
-            &m_swapchain
-        )
-    );
+//     CRIMILD_VULKAN_CHECK(
+//         vkCreateSwapchainKHR(
+//             getHandle(),
+//             &createInfo,
+//             nullptr,
+//             &m_swapchain
+//         )
+//     );
 
-    CRIMILD_LOG_TRACE();
+//     CRIMILD_LOG_TRACE();
 
-    vkGetSwapchainImagesKHR(
-        getHandle(),
-        m_swapchain,
-        &imageCount,
-        nullptr
-    );
+//     vkGetSwapchainImagesKHR(
+//         getHandle(),
+//         m_swapchain,
+//         &imageCount,
+//         nullptr
+//     );
 
-    std::vector< VkImage > images( imageCount );
-    vkGetSwapchainImagesKHR(
-        getHandle(),
-        m_swapchain,
-        &imageCount,
-        images.data()
-    );
+//     std::vector< VkImage > images( imageCount );
+//     vkGetSwapchainImagesKHR(
+//         getHandle(),
+//         m_swapchain,
+//         &imageCount,
+//         images.data()
+//     );
 
-    m_swapchainImages.clear();
-    for ( auto &image : images ) {
-        m_swapchainImages.push_back(
-            crimild::alloc< vulkan::Image >(
-                this,
-                image,
-                VkExtent3D { m_swapchainExtent.width, m_swapchainExtent.height, 1 }
-            )
-        );
-    }
+//     m_swapchainImages.clear();
+//     for ( auto &image : images ) {
+//         m_swapchainImages.push_back(
+//             crimild::alloc< vulkan::Image >(
+//                 this,
+//                 image,
+//                 VkExtent3D { m_swapchainExtent.width, m_swapchainExtent.height, 1 }
+//             )
+//         );
+//     }
 
-    CRIMILD_LOG_TRACE();
+//     CRIMILD_LOG_TRACE();
 
-    m_swapchainImageViews.clear();
-    for ( auto &image : m_swapchainImages ) {
-        m_swapchainImageViews.push_back(
-            [ & ] {
-                auto createInfo = vulkan::initializers::imageViewCreateInfo();
-                createInfo.image = image->getHandle();
-                createInfo.format = m_swapchainFormat; // VK_FORMAT_B8G8R8A8_UNORM
-                auto imageView = crimild::alloc< vulkan::ImageView >( this, "RenderDevice::swapchainImageView", image, createInfo );
-                return imageView;
-            }()
-        );
-    }
+//     m_swapchainImageViews.clear();
+//     for ( auto &image : m_swapchainImages ) {
+//         m_swapchainImageViews.push_back(
+//             [ & ] {
+//                 auto createInfo = vulkan::initializers::imageViewCreateInfo();
+//                 createInfo.image = image->getHandle();
+//                 createInfo.format = m_swapchainFormat; // VK_FORMAT_B8G8R8A8_UNORM
+//                 auto imageView = crimild::alloc< vulkan::ImageView >( this, "RenderDevice::swapchainImageView", image, createInfo );
+//                 return imageView;
+//             }()
+//         );
+//     }
 
-    CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", m_swapchainExtent.width, "x", m_swapchainExtent.height );
-}
+//     CRIMILD_LOG_INFO( "Created Vulkan Swapchain with extents ", m_swapchainExtent.width, "x", m_swapchainExtent.height );
+// }
 
-void RenderDevice::destroySwapchain( void ) noexcept
-{
-    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image views" );
-    m_swapchainImageViews.clear();
+// void RenderDevice::destroySwapchain( void ) noexcept
+// {
+//     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image views" );
+//     m_swapchainImageViews.clear();
 
-    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image" );
-    m_swapchainImages.clear();
+//     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain image" );
+//     m_swapchainImages.clear();
 
-    CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain" );
+//     CRIMILD_LOG_DEBUG( "Destroying Vulkan swapchain" );
 
-    vkDestroySwapchainKHR( getHandle(), m_swapchain, nullptr );
-    m_swapchain = VK_NULL_HANDLE;
-}
+//     vkDestroySwapchainKHR( getHandle(), m_swapchain, nullptr );
+//     m_swapchain = VK_NULL_HANDLE;
+// }
 
-void RenderDevice::createDepthStencilResources( void ) noexcept
-{
-    m_depthStencilResources.format = m_physicalDevice->findSupportedFormat(
-        {
-            // Important: These formats must be sorted by priority
-            // Only the very first one that is found is going to
-            // be used in the end.
-            VK_FORMAT_D32_SFLOAT_S8_UINT,
-            VK_FORMAT_D24_UNORM_S8_UINT,
-            VK_FORMAT_D32_SFLOAT,
-        },
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    );
+// void RenderDevice::createDepthStencilResources( void ) noexcept
+// {
+//     m_depthStencilResources.format = m_physicalDevice->findSupportedFormat(
+//         {
+//             // Important: These formats must be sorted by priority
+//             // Only the very first one that is found is going to
+//             // be used in the end.
+//             VK_FORMAT_D32_SFLOAT_S8_UINT,
+//             VK_FORMAT_D24_UNORM_S8_UINT,
+//             VK_FORMAT_D32_SFLOAT,
+//         },
+//         VK_IMAGE_TILING_OPTIMAL,
+//         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+//     );
 
-    m_depthStencilResources.image = [ & ] {
-        auto image = crimild::alloc< vulkan::Image >(
-            this,
-            [ & ] {
-                auto createInfo = vulkan::initializers::imageCreateInfo();
-                createInfo.extent = { m_swapchainExtent.width, m_swapchainExtent.height, 1 };
-                createInfo.format = m_depthStencilResources.format;
-                createInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-                return createInfo;
-            }()
-        );
-        return image;
-        image->allocateMemory();
-    }();
-    m_depthStencilResources.imageView = crimild::alloc< vulkan::ImageView >(
-        this,
-        "DepthStencil/ImageView",
-        m_depthStencilResources.image,
-        [ & ] {
-            auto createInfo = vulkan::initializers::imageViewCreateInfo();
-            createInfo.image = m_depthStencilResources.image->getHandle();
-            createInfo.format = m_depthStencilResources.format;
-            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-            return createInfo;
-        }()
-    );
-}
+//     m_depthStencilResources.image = [ & ] {
+//         auto image = crimild::alloc< vulkan::Image >(
+//             this,
+//             [ & ] {
+//                 auto createInfo = vulkan::initializers::imageCreateInfo();
+//                 createInfo.extent = { m_swapchainExtent.width, m_swapchainExtent.height, 1 };
+//                 createInfo.format = m_depthStencilResources.format;
+//                 createInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+//                 return createInfo;
+//             }()
+//         );
+//         return image;
+//         image->allocateMemory();
+//     }();
+//     m_depthStencilResources.imageView = crimild::alloc< vulkan::ImageView >(
+//         this,
+//         "DepthStencil/ImageView",
+//         m_depthStencilResources.image,
+//         [ & ] {
+//             auto createInfo = vulkan::initializers::imageViewCreateInfo();
+//             createInfo.image = m_depthStencilResources.image->getHandle();
+//             createInfo.format = m_depthStencilResources.format;
+//             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+//             return createInfo;
+//         }()
+//     );
+// }
 
-void RenderDevice::destroyDepthStencilResources( void ) noexcept
-{
-    m_depthStencilResources.imageView = nullptr;
-    m_depthStencilResources.image = nullptr;
-    m_depthStencilResources.format = VK_FORMAT_UNDEFINED;
-}
+// void RenderDevice::destroyDepthStencilResources( void ) noexcept
+// {
+//     m_depthStencilResources.imageView = nullptr;
+//     m_depthStencilResources.image = nullptr;
+//     m_depthStencilResources.format = VK_FORMAT_UNDEFINED;
+// }
 
-void RenderDevice::createSyncObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
+// void RenderDevice::createSyncObjects( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
 
-    m_imageAvailableSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
-    m_renderFinishedSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
-    m_inFlightFences.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
-    m_imagesInFlight.resize( m_swapchainImages.size(), VK_NULL_HANDLE );
+//     m_imageAvailableSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+//     m_renderFinishedSemaphores.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+//     m_inFlightFences.resize( CRIMILD_MAX_FRAMES_IN_FLIGHT );
+//     m_imagesInFlight.resize( m_swapchainImages.size(), VK_NULL_HANDLE );
 
-    auto createInfo = VkSemaphoreCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-    };
+//     auto createInfo = VkSemaphoreCreateInfo {
+//         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+//     };
 
-    auto fenceInfo = VkFenceCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-        .flags = VK_FENCE_CREATE_SIGNALED_BIT,
-    };
+//     auto fenceInfo = VkFenceCreateInfo {
+//         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+//         .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+//     };
 
-    for ( int i = 0; i < CRIMILD_MAX_FRAMES_IN_FLIGHT; ++i ) {
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSemaphore(
-                m_handle,
-                &createInfo,
-                nullptr,
-                &m_imageAvailableSemaphores[ i ]
-            )
-        );
+//     for ( int i = 0; i < CRIMILD_MAX_FRAMES_IN_FLIGHT; ++i ) {
+//         CRIMILD_VULKAN_CHECK(
+//             vkCreateSemaphore(
+//                 m_handle,
+//                 &createInfo,
+//                 nullptr,
+//                 &m_imageAvailableSemaphores[ i ]
+//             )
+//         );
 
-        CRIMILD_VULKAN_CHECK(
-            vkCreateSemaphore(
-                m_handle,
-                &createInfo,
-                nullptr,
-                &m_renderFinishedSemaphores[ i ]
-            )
-        );
+//         CRIMILD_VULKAN_CHECK(
+//             vkCreateSemaphore(
+//                 m_handle,
+//                 &createInfo,
+//                 nullptr,
+//                 &m_renderFinishedSemaphores[ i ]
+//             )
+//         );
 
-        CRIMILD_VULKAN_CHECK(
-            vkCreateFence(
-                m_handle,
-                &fenceInfo,
-                nullptr,
-                &m_inFlightFences[ i ]
-            )
-        );
-    }
-}
+//         CRIMILD_VULKAN_CHECK(
+//             vkCreateFence(
+//                 m_handle,
+//                 &fenceInfo,
+//                 nullptr,
+//                 &m_inFlightFences[ i ]
+//             )
+//         );
+//     }
+// }
 
-void RenderDevice::destroySyncObjects( void ) noexcept
-{
-    CRIMILD_LOG_TRACE();
+// void RenderDevice::destroySyncObjects( void ) noexcept
+// {
+//     CRIMILD_LOG_TRACE();
 
-    // Wait for all operations to complete before destroying sync objects
-    vkDeviceWaitIdle( m_handle );
+//     // Wait for all operations to complete before destroying sync objects
+//     vkDeviceWaitIdle( m_handle );
 
-    for ( auto &s : m_imageAvailableSemaphores ) {
-        vkDestroySemaphore( m_handle, s, nullptr );
-    }
-    m_imageAvailableSemaphores.clear();
+//     for ( auto &s : m_imageAvailableSemaphores ) {
+//         vkDestroySemaphore( m_handle, s, nullptr );
+//     }
+//     m_imageAvailableSemaphores.clear();
 
-    for ( auto &s : m_renderFinishedSemaphores ) {
-        vkDestroySemaphore( m_handle, s, nullptr );
-    }
-    m_renderFinishedSemaphores.clear();
+//     for ( auto &s : m_renderFinishedSemaphores ) {
+//         vkDestroySemaphore( m_handle, s, nullptr );
+//     }
+//     m_renderFinishedSemaphores.clear();
 
-    for ( auto &f : m_inFlightFences ) {
-        vkDestroyFence( m_handle, f, nullptr );
-    }
-    m_inFlightFences.clear();
+//     for ( auto &f : m_inFlightFences ) {
+//         vkDestroyFence( m_handle, f, nullptr );
+//     }
+//     m_inFlightFences.clear();
 
-    m_imagesInFlight.clear();
-}
+//     m_imagesInFlight.clear();
+// }
 
 void RenderDevice::createCommandPool( VkCommandPool &commandPool ) noexcept
 {
@@ -685,214 +652,6 @@ void RenderDevice::destroyCommandPool( VkCommandPool &commandPool ) noexcept
         );
         m_commandPool = VK_NULL_HANDLE;
     }
-}
-
-void RenderDevice::createCommandBuffers( void ) noexcept
-{
-    // Allocate one command buffer per swapchain image
-    m_commandBuffers.resize( m_swapchainImages.size() );
-    for ( auto &commandBuffer : m_commandBuffers ) {
-        createCommandBuffer( commandBuffer );
-    }
-}
-
-void RenderDevice::destroyCommandBuffers( void ) noexcept
-{
-    for ( auto &commandBuffer : m_commandBuffers ) {
-        destroyCommandBuffer( commandBuffer );
-    }
-}
-
-void RenderDevice::createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
-{
-    CRIMILD_LOG_TRACE();
-
-    auto allocInfo = VkCommandBufferAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .commandPool = m_commandPool,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = 1,
-    };
-
-    CRIMILD_VULKAN_CHECK(
-        vkAllocateCommandBuffers(
-            m_handle,
-            &allocInfo,
-            &commandBuffer
-        )
-    );
-}
-
-void RenderDevice::destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept
-{
-    if ( commandBuffer == VK_NULL_HANDLE ) {
-        return;
-    }
-
-    CRIMILD_LOG_TRACE();
-
-    // renderDevice->waitIdle();
-    vkFreeCommandBuffers(
-        m_handle,
-        m_commandPool,
-        1,
-        &commandBuffer
-    );
-
-    commandBuffer = VK_NULL_HANDLE;
-}
-
-bool RenderDevice::beginRender( bool isPresenting ) noexcept
-{
-    CRIMILD_VULKAN_CHECK( vkWaitForFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ], VK_TRUE, UINT64_MAX ) );
-
-    m_commandsToSubmit.clear();
-
-    if ( isPresenting ) {
-        const auto ret = vkAcquireNextImageKHR(
-            getHandle(),
-            m_swapchain,
-            std::numeric_limits< uint64_t >::max(), // disable timeout
-
-            // Will signal these semaphores, so render commands recorded below can be executed.
-            // That's why we acquire the next image as soon as possible, so this operation
-            // is completelly (hopefully) by the time we submit commands.
-            m_imageAvailableSemaphores[ m_currentFrame ],
-            VK_NULL_HANDLE,
-            &m_imageIndex
-        );
-        if ( ret == VK_ERROR_OUT_OF_DATE_KHR ) {
-            // TODO: swapchain needs to be recreated
-            return false;
-        }
-
-        if ( ret != VK_SUCCESS ) {
-            // no available image index. Skip frame
-            return false;
-        }
-    }
-
-    // Wait for any previous frame that is using the image that we've just been assigned for the new frame
-    if ( m_imagesInFlight[ m_imageIndex ] != VK_NULL_HANDLE ) {
-        vkWaitForFences( m_handle, 1, &m_imagesInFlight[ m_imageIndex ], VK_TRUE, UINT64_MAX );
-    }
-    m_imagesInFlight[ m_imageIndex ] = m_inFlightFences[ m_currentFrame ];
-
-    auto commandBuffer = getCurrentCommandBuffer();
-
-    CRIMILD_VULKAN_CHECK(
-        vkResetCommandBuffer(
-            commandBuffer,
-            VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT
-        )
-    );
-
-    const auto beginInfo = VkCommandBufferBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .pNext = nullptr,
-        .flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
-        .pInheritanceInfo = nullptr,
-    };
-
-    CRIMILD_VULKAN_CHECK(
-        vkBeginCommandBuffer(
-            commandBuffer,
-            &beginInfo
-        )
-    );
-
-    return true;
-}
-
-bool RenderDevice::endRender( bool present ) noexcept
-{
-    for ( auto &[ queue, commandBuffers ] : m_commandsToSubmit ) {
-        std::vector< VkCommandBuffer > commandBufferHandlers;
-        std::transform(
-            commandBuffers.begin(),
-            commandBuffers.end(),
-            std::back_inserter( commandBufferHandlers ),
-            []( auto cb ) { return cb->getHandle(); }
-        );
-        auto submitInfo = VkSubmitInfo {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
-            .pCommandBuffers = commandBufferHandlers.data(),
-        };
-
-        CRIMILD_VULKAN_CHECK(
-            vkQueueSubmit(
-                queue,
-                1,
-                &submitInfo,
-                nullptr
-            )
-        );
-    }
-
-    auto commandBuffer = getCurrentCommandBuffer();
-    vkEndCommandBuffer( commandBuffer );
-
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    if ( present ) {
-        VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        submitInfo.pWaitDstStageMask = &waitStageMask;
-        // Wait for an image to be available. Hopefully, by the time we're submitting commands
-        // the semaphore is already signaled since we call vkAcquireNextImage in beginRender().
-        VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[ m_currentFrame ] };
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-    }
-
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[ m_currentFrame ] };
-    if ( present ) {
-        // Signal these semaphores when all commands are executed
-        // That way the queue can present the frame
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-    }
-
-    vkResetFences( m_handle, 1, &m_inFlightFences[ m_currentFrame ] );
-
-    CRIMILD_VULKAN_CHECK(
-        vkQueueSubmit(
-            m_graphicsQueueHandle,
-            1,
-            &submitInfo,
-            m_inFlightFences[ m_currentFrame ]
-        )
-    );
-
-    if ( present ) {
-        VkSwapchainKHR swapchains[] = { m_swapchain };
-
-        auto presentInfo = VkPresentInfoKHR {
-            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-            .waitSemaphoreCount = 1,
-            // Wait for commands to be executed before presenting.
-            .pWaitSemaphores = signalSemaphores,
-            .swapchainCount = 1,
-            .pSwapchains = swapchains,
-            .pImageIndices = &m_imageIndex,
-            .pResults = nullptr,
-        };
-
-        auto ret = vkQueuePresentKHR( m_presentQueueHandle, &presentInfo );
-        if ( ret == VK_ERROR_OUT_OF_DATE_KHR || ret == VK_SUBOPTIMAL_KHR ) {
-            // swapchain needs to be recreated
-            return false;
-        }
-    }
-
-    // Advance to the next frame
-    m_currentFrame = ( m_currentFrame + 1 ) % CRIMILD_MAX_FRAMES_IN_FLIGHT;
-
-    return true;
 }
 
 void RenderDevice::createBuffer(
@@ -984,7 +743,7 @@ bool RenderDevice::bind( const UniformBuffer *uniformBuffer ) noexcept
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
-    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+    for ( size_t i = 0; i < getInFlightFrameCount(); ++i ) {
         VkBuffer bufferHandler;
         VkDeviceMemory bufferMemory;
 
@@ -1092,7 +851,7 @@ VkBuffer RenderDevice::bind( const VertexBuffer *vertexBuffer ) noexcept
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+    for ( size_t i = 0; i < getInFlightFrameCount(); ++i ) {
         VkBuffer bufferHandler;
         VkDeviceMemory bufferMemory;
 
@@ -1169,7 +928,7 @@ VkBuffer RenderDevice::bind( const IndexBuffer *indexBuffer ) noexcept
 
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-    for ( size_t i = 0; i < getSwapchainImageCount(); ++i ) {
+    for ( size_t i = 0; i < getInFlightFrameCount(); ++i ) {
         VkBuffer bufferHandler;
         VkDeviceMemory bufferMemory;
 
@@ -1333,6 +1092,11 @@ void RenderDevice::transitionImageLayout( VkCommandBuffer commandBuffer, VkImage
         sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     } else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    } else if ( oldLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
         sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
@@ -1842,10 +1606,10 @@ VkImage RenderDevice::bind( const crimild::Image *image ) noexcept
 
     uint32_t width = image->extent.width;
     uint32_t height = image->extent.height;
-    if ( image->extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-        width *= m_swapchainExtent.width;
-        height *= m_swapchainExtent.height;
-    }
+    // if ( image->extent.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+    //     width *= m_swapchainExtent.width;
+    //     height *= m_swapchainExtent.height;
+    // }
 
     auto mipLevels = image->getMipLevels();
     auto arrayLayers = image->getLayerCount();
@@ -2254,13 +2018,13 @@ VkViewport RenderDevice::getViewport( const ViewportDimensions &viewport ) const
     auto minD = viewport.depthRange.x;
     auto maxD = viewport.depthRange.y;
 
-    if ( viewport.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-        const auto extent = getSwapchainExtent();
-        x *= extent.width;
-        y *= extent.height;
-        w *= extent.width;
-        h *= extent.height;
-    }
+    // if ( viewport.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+    //     const auto extent = getSwapchainExtent();
+    //     x *= extent.width;
+    //     y *= extent.height;
+    //     w *= extent.width;
+    //     h *= extent.height;
+    // }
 
     // Because Vulkan's coordinate system is different from Crimild's one,
     // we need to specify the viewport in a different way than usual.
@@ -2295,13 +2059,13 @@ VkRect2D RenderDevice::getScissor( const ViewportDimensions &scissor ) const noe
     auto w = scissor.dimensions.size.width;
     auto h = scissor.dimensions.size.height;
 
-    if ( scissor.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
-        const auto extent = getSwapchainExtent();
-        x *= extent.width;
-        y *= extent.height;
-        w *= extent.width;
-        h *= extent.height;
-    }
+    // if ( scissor.scalingMode == ScalingMode::SWAPCHAIN_RELATIVE ) {
+    //     const auto extent = getSwapchainExtent();
+    //     x *= extent.width;
+    //     y *= extent.height;
+    //     w *= extent.width;
+    //     h *= extent.height;
+    // }
 
     return VkRect2D {
         .offset = {
@@ -2319,7 +2083,7 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
 {
     CRIMILD_LOG_TRACE();
 
-    const auto swapchainImageCount = getSwapchainImageCount();
+    const auto swapchainImageCount = getInFlightFrameCount();
 
     const auto isColorAttachment = formatIsColor( format );
     const auto isDepthStencilAttachment = formatIsDepthStencil( format );
@@ -2337,26 +2101,26 @@ void RenderDevice::createFramebufferAttachment( std::string name, const VkExtent
     out.images.resize( swapchainImageCount );
     out.imageViews.resize( swapchainImageCount );
 
-    if ( usingDeviceResources ) {
-        if ( isColorAttachment ) {
-            for ( size_t i = 0; i < swapchainImageCount; ++i ) {
-                out.images[ i ] = m_swapchainImages[ i ];
-                out.imageViews[ i ] = m_swapchainImageViews[ i ];
-            }
-        } else {
-            // Use the same depth/stencil image for all attachments
-            // Not sure if this is correct
-            for ( size_t i = 0; i < swapchainImageCount; ++i ) {
-                out.images[ i ] = m_depthStencilResources.image;
-                out.imageViews[ i ] = m_depthStencilResources.imageView;
-            }
-        }
-        // Set this flag so resources are not deleted when destroying the attachment
-        out.usesDeviceResources = true;
+    // if ( usingDeviceResources ) {
+    //     if ( isColorAttachment ) {
+    //         for ( size_t i = 0; i < swapchainImageCount; ++i ) {
+    //             out.images[ i ] = m_swapchainImages[ i ];
+    //             out.imageViews[ i ] = m_swapchainImageViews[ i ];
+    //         }
+    //     } else {
+    //         // Use the same depth/stencil image for all attachments
+    //         // Not sure if this is correct
+    //         for ( size_t i = 0; i < swapchainImageCount; ++i ) {
+    //             out.images[ i ] = m_depthStencilResources.image;
+    //             out.imageViews[ i ] = m_depthStencilResources.imageView;
+    //         }
+    //     }
+    //     // Set this flag so resources are not deleted when destroying the attachment
+    //     out.usesDeviceResources = true;
 
-        // No need to continue, since this attachment can only be used for presentation
-        return;
-    }
+    //     // No need to continue, since this attachment can only be used for presentation
+    //     return;
+    // }
 
     for ( size_t i = 0; i < swapchainImageCount; ++i ) {
         out.images[ i ] = [ & ] {
@@ -2537,22 +2301,22 @@ void RenderDevice::destroyFramebufferAttachment( FramebufferAttachment &att )
 
 void RenderDevice::flush( const FramebufferAttachment &att ) const noexcept
 {
-    const auto currentFrameIndex = getCurrentFrameIndex();
-    auto commandBuffer = getCurrentCommandBuffer();
-    const auto isColorAttachment = formatIsColor( att.format );
-    transitionImageLayout(
-        commandBuffer,
-        att.images[ currentFrameIndex ]->getHandle(),
-        att.format,
-        isColorAttachment
-            ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-            : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        isColorAttachment
-            ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-            : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-        att.mipLevels,
-        att.layerCount
-    );
+    // const auto currentFrameIndex = getCurrentFrameIndex();
+    // auto commandBuffer = getInFlightFrameCount();
+    // const auto isColorAttachment = formatIsColor( att.format );
+    // transitionImageLayout(
+    //     commandBuffer,
+    //     att.images[ currentFrameIndex ]->getHandle(),
+    //     att.format,
+    //     isColorAttachment
+    //         ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    //         : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //     isColorAttachment
+    //         ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    //         : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+    //     att.mipLevels,
+    //     att.layerCount
+    // );
 }
 
 vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *light ) noexcept

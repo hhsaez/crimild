@@ -68,14 +68,14 @@ namespace crimild {
 
             [[nodiscard]] inline const PhysicalDevice *getPhysicalDevice( void ) const noexcept { return m_physicalDevice; }
 
+            inline void setInFlightFrameCount( uint32_t count ) noexcept { m_inFlightFrameCount = count; }
             /**
              * \brief Get the total number of frames active at any given point in time
-             *
-             * This value is the same as the number of swapchain images.
              */
-            [[nodiscard]] inline size_t getInFlightFrameCount( void ) const noexcept { return m_swapchainImages.size(); }
-            [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_imageIndex; }
-            [[nodiscard]] inline VkCommandBuffer getCurrentCommandBuffer( void ) const noexcept { return m_commandBuffers[ m_imageIndex ]; }
+            [[nodiscard]] inline uint32_t getInFlightFrameCount( void ) const noexcept { return m_inFlightFrameCount; }
+
+            inline void setCurrentFrameIndex( uint8_t index ) noexcept { m_currentFrameIndex = index; }
+            [[nodiscard]] inline uint8_t getCurrentFrameIndex( void ) const noexcept { return m_currentFrameIndex; }
 
             inline uint32_t getGraphicsQueueFamily( void ) const noexcept { return m_graphicsQueueFamily; }
             inline VkQueue getGraphicsQueue( void ) const noexcept { return m_graphicsQueueHandle; }
@@ -87,9 +87,6 @@ namespace crimild {
             inline ShaderCompiler &getShaderCompiler( void ) noexcept { return m_shaderCompiler; }
 
             void handle( const Event &e ) noexcept;
-
-            bool beginRender( bool isPresenting = true ) noexcept;
-            bool endRender( bool isPresenting = true ) noexcept;
 
             inline void setObjectName( VkImage handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, name ); }
             inline void setObjectName( VkImageView handle, std::string_view name ) const noexcept { setObjectName( UInt64( handle ), VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT, name ); }
@@ -143,14 +140,12 @@ namespace crimild {
             uint32_t m_presentQueueFamily = -1;
             VkQueue m_presentQueueHandle = VK_NULL_HANDLE;
 
-            // To use the right pair of semaphores every time, we also keep track of the current frame
-            uint8_t m_currentFrame = 0;
+            uint32_t m_inFlightFrameCount = 2;
+            uint8_t m_currentFrameIndex = 0;
 
             ShaderCompiler m_shaderCompiler;
 
             std::vector< std::shared_ptr< RenderDeviceCache > > m_caches;
-
-            std::unordered_map< VkQueue, std::vector< std::shared_ptr< CommandBuffer > > > m_commandsToSubmit;
 
             /////////////////////////////////
             // MOSTLY DEPRECATED FROM HERE //
@@ -158,13 +153,13 @@ namespace crimild {
         public:
             [[nodiscard]] inline const VulkanSurface *getSurface( void ) const noexcept { return m_surface; }
 
-            [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
-            [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
-            [[nodiscard]] inline const std::vector< SharedPointer< vulkan::ImageView > > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
-            [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
+            // [[nodiscard]] inline const VkExtent2D &getSwapchainExtent( void ) const noexcept { return m_swapchainExtent; }
+            // [[nodiscard]] inline const VkFormat &getSwapchainFormat( void ) const noexcept { return m_swapchainFormat; }
+            // [[nodiscard]] inline const std::vector< SharedPointer< vulkan::ImageView > > &getSwapchainImageViews( void ) const noexcept { return m_swapchainImageViews; }
+            // [[nodiscard]] inline size_t getSwapchainImageCount( void ) const noexcept { return m_swapchainImages.size(); }
 
-            [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
-            [[nodiscard]] inline const SharedPointer< vulkan::ImageView > &getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
+            // [[nodiscard]] inline VkFormat getDepthStencilFormat( void ) const noexcept { return m_depthStencilResources.format; }
+            // [[nodiscard]] inline const SharedPointer< vulkan::ImageView > &getDepthStencilImageView( void ) const noexcept { return m_depthStencilResources.imageView; }
 
             inline VkCommandPool getCommandPool( void ) const noexcept { return m_commandPool; }
 
@@ -363,22 +358,8 @@ namespace crimild {
             void flush( const FramebufferAttachment &att ) const noexcept;
 
         private:
-            void createSwapchain( void ) noexcept;
-            void destroySwapchain( void ) noexcept;
-
-            void createDepthStencilResources( void ) noexcept;
-            void destroyDepthStencilResources( void ) noexcept;
-
-            void createSyncObjects( void ) noexcept;
-            void destroySyncObjects( void ) noexcept;
-
             void createCommandPool( VkCommandPool &commandPool ) noexcept;
             void destroyCommandPool( VkCommandPool &commandPool ) noexcept;
-
-            void createCommandBuffers( void ) noexcept;
-            void destroyCommandBuffers( void ) noexcept;
-            void createCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
-            void destroyCommandBuffer( VkCommandBuffer &commandBuffer ) noexcept;
 
             VkCommandBuffer beginSingleTimeCommands( void ) const noexcept;
             void endSingleTimeCommands( VkCommandBuffer commandBuffer ) const noexcept;
@@ -388,22 +369,22 @@ namespace crimild {
 
             Extent2D m_extent;
 
-            VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
-            VkExtent2D m_swapchainExtent;
-            VkFormat m_swapchainFormat = VK_FORMAT_UNDEFINED;
-            std::vector< SharedPointer< vulkan::Image > > m_swapchainImages;
-            std::vector< SharedPointer< vulkan::ImageView > > m_swapchainImageViews;
+            // VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+            // VkExtent2D m_swapchainExtent;
+            // VkFormat m_swapchainFormat = VK_FORMAT_UNDEFINED;
+            // std::vector< SharedPointer< vulkan::Image > > m_swapchainImages;
+            // std::vector< SharedPointer< vulkan::ImageView > > m_swapchainImageViews;
 
-            std::vector< VkSemaphore > m_imageAvailableSemaphores;
-            std::vector< VkSemaphore > m_renderFinishedSemaphores;
-            std::vector< VkFence > m_inFlightFences;
-            std::vector< VkFence > m_imagesInFlight;
+            // std::vector< VkSemaphore > m_imageAvailableSemaphores;
+            // std::vector< VkSemaphore > m_renderFinishedSemaphores;
+            // std::vector< VkFence > m_inFlightFences;
+            // std::vector< VkFence > m_imagesInFlight;
 
             VkCommandPool m_commandPool = VK_NULL_HANDLE;
             std::vector< VkCommandBuffer > m_commandBuffers;
 
             // Last image index provided by the swapchain
-            uint32_t m_imageIndex = 0;
+            // uint32_t m_imageIndex = 0;
 
             // TODO: Move these to RenderDeviceCache
             std::unordered_map< Size, std::vector< VkBuffer > > m_buffers;
@@ -415,11 +396,11 @@ namespace crimild {
             std::unordered_map< Size, VkDescriptorSetLayout > m_descriptorSetLayouts;
             std::unordered_map< Size, std::vector< VkDescriptorSet > > m_descriptorSets;
 
-            struct DepthStencilResources {
-                VkFormat format = VK_FORMAT_UNDEFINED;
-                SharedPointer< vulkan::Image > image;
-                SharedPointer< vulkan::ImageView > imageView;
-            } m_depthStencilResources;
+            // struct DepthStencilResources {
+            //     VkFormat format = VK_FORMAT_UNDEFINED;
+            //     SharedPointer< vulkan::Image > image;
+            //     SharedPointer< vulkan::ImageView > imageView;
+            // } m_depthStencilResources;
 
             std::unordered_map< const Light *, SharedPointer< ShadowMapDEPRECATED > > m_shadowMaps;
             std::shared_ptr< ShadowMapDEPRECATED > m_fallbackDirectionalShadowMap;

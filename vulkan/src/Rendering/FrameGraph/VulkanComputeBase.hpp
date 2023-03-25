@@ -31,14 +31,20 @@
 #include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VulkanSemaphore.hpp"
 
 namespace crimild::vulkan::framegraph {
 
-    class ComputeBase : public SharedObject, public WithRenderDevice, public Named {
+    class ComputeBase
+        : public SharedObject,
+          public WithRenderDevice,
+          public Named,
+          public WithSemaphore {
     protected:
         ComputeBase( RenderDevice *device, std::string name ) noexcept
             : WithRenderDevice( device ),
-              Named( name )
+              Named( name ),
+              WithSemaphore( device, name + "/Semaphore" )
         {
             // no-op
         }

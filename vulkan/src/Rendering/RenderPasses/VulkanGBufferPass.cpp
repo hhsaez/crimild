@@ -79,225 +79,225 @@ Event GBufferPass::handle( const Event &e ) noexcept
 
 void GBufferPass::render( const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables, const Camera *camera ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = 0,
+    //     .pClearValues = nullptr,
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    if ( camera != nullptr ) {
-        if ( m_renderPassObjects.uniforms != nullptr ) {
-            m_renderPassObjects.uniforms->setValue(
-                RenderPassObjects::Uniforms {
-                    .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() }
-            );
-            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-        }
-    }
+    // if ( camera != nullptr ) {
+    //     if ( m_renderPassObjects.uniforms != nullptr ) {
+    //         m_renderPassObjects.uniforms->setValue(
+    //             RenderPassObjects::Uniforms {
+    //                 .view = camera->getViewMatrix(),
+    //                 .proj = camera->getProjectionMatrix() }
+    //         );
+    //         getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+    //     }
+    // }
 
-    for ( auto &[ material, primitives ] : sceneRenderables ) {
-        for ( auto &[ primitive, renderables ] : primitives ) {
-            for ( auto &renderable : renderables ) {
-                bind( material.get() );
+    // for ( auto &[ material, primitives ] : sceneRenderables ) {
+    //     for ( auto &[ primitive, renderables ] : primitives ) {
+    //         for ( auto &renderable : renderables ) {
+    //             bind( material.get() );
 
-                vkCmdBindPipeline(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getHandle()
-                );
+    //             vkCmdBindPipeline(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getHandle()
+    //             );
 
-                vkCmdBindDescriptorSets(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    0,
-                    1,
-                    &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                    0,
-                    nullptr
-                );
+    //             vkCmdBindDescriptorSets(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 0,
+    //                 1,
+    //                 &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //                 0,
+    //                 nullptr
+    //             );
 
-                vkCmdBindDescriptorSets(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    1,
-                    1,
-                    &m_materialObjects.descriptorSets[ material.get() ][ currentFrameIndex ],
-                    0,
-                    nullptr
-                );
+    //             vkCmdBindDescriptorSets(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 1,
+    //                 1,
+    //                 &m_materialObjects.descriptorSets[ material.get() ][ currentFrameIndex ],
+    //                 0,
+    //                 nullptr
+    //             );
 
-                // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
-                // use normal uniforms instead.
-                vkCmdPushConstants(
-                    commandBuffer,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    VK_SHADER_STAGE_VERTEX_BIT,
-                    0,
-                    sizeof( SceneRenderState::Renderable ),
-                    &renderable
-                );
+    //             // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+    //             // use normal uniforms instead.
+    //             vkCmdPushConstants(
+    //                 commandBuffer,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 VK_SHADER_STAGE_VERTEX_BIT,
+    //                 0,
+    //                 sizeof( SceneRenderState::Renderable ),
+    //                 &renderable
+    //             );
 
-                drawPrimitive( commandBuffer, primitive.get() );
-            }
-        }
-    }
+    //             drawPrimitive( commandBuffer, primitive.get() );
+    //         }
+    //     }
+    // }
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 }
 
 void GBufferPass::init( void ) noexcept
 {
-    CRIMILD_LOG_TRACE();
+    // CRIMILD_LOG_TRACE();
 
-    m_renderArea = VkRect2D {
-        .offset = { 0, 0 },
-        .extent = m_attachments.front()->extent,
-    };
+    // m_renderArea = VkRect2D {
+    //     .offset = { 0, 0 },
+    //     .extent = m_attachments.front()->extent,
+    // };
 
-    const auto extent = m_renderArea.extent;
+    // const auto extent = m_renderArea.extent;
 
-    std::vector< VkAttachmentDescription > attachmentDescriptions;
-    std::vector< VkAttachmentReference > colorReferences;
-    std::vector< VkAttachmentReference > depthStencilReferences;
+    // std::vector< VkAttachmentDescription > attachmentDescriptions;
+    // std::vector< VkAttachmentReference > colorReferences;
+    // std::vector< VkAttachmentReference > depthStencilReferences;
 
-    attachmentDescriptions.reserve( m_attachments.size() );
-    colorReferences.reserve( m_attachments.size() );
-    depthStencilReferences.reserve( m_attachments.size() );
+    // attachmentDescriptions.reserve( m_attachments.size() );
+    // colorReferences.reserve( m_attachments.size() );
+    // depthStencilReferences.reserve( m_attachments.size() );
 
-    for ( uint32_t i = 0; i < m_attachments.size(); ++i ) {
-        const auto &att = m_attachments[ i ];
-        const auto isColorAttachment = getRenderDevice()->formatIsColor( att->format );
-        const auto isDepthStencilAttachment = getRenderDevice()->formatIsDepthStencil( att->format );
-        attachmentDescriptions.push_back(
-            VkAttachmentDescription {
-                .format = att->format,
-                .samples = VK_SAMPLE_COUNT_1_BIT,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                // Use STORE here since we could access the contents of these attachments outside
-                // of the current render pass.
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                .stencilLoadOp = isDepthStencilAttachment ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                .stencilStoreOp = isDepthStencilAttachment ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                .initialLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                // Final layout is ready for use in another pass (not presentation, though)
-                .finalLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            }
-        );
+    // for ( uint32_t i = 0; i < m_attachments.size(); ++i ) {
+    //     const auto &att = m_attachments[ i ];
+    //     const auto isColorAttachment = getRenderDevice()->formatIsColor( att->format );
+    //     const auto isDepthStencilAttachment = getRenderDevice()->formatIsDepthStencil( att->format );
+    //     attachmentDescriptions.push_back(
+    //         VkAttachmentDescription {
+    //             .format = att->format,
+    //             .samples = VK_SAMPLE_COUNT_1_BIT,
+    //             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+    //             // Use STORE here since we could access the contents of these attachments outside
+    //             // of the current render pass.
+    //             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+    //             .stencilLoadOp = isDepthStencilAttachment ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    //             .stencilStoreOp = isDepthStencilAttachment ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    //             .initialLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //             // Final layout is ready for use in another pass (not presentation, though)
+    //             .finalLayout = isColorAttachment ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //         }
+    //     );
 
-        if ( isColorAttachment ) {
-            colorReferences.push_back(
-                VkAttachmentReference {
-                    .attachment = i,
-                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                }
-            );
-        } else {
-            depthStencilReferences.push_back(
-                VkAttachmentReference {
-                    .attachment = i,
-                    .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                }
-            );
-        }
-    }
+    //     if ( isColorAttachment ) {
+    //         colorReferences.push_back(
+    //             VkAttachmentReference {
+    //                 .attachment = i,
+    //                 .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //             }
+    //         );
+    //     } else {
+    //         depthStencilReferences.push_back(
+    //             VkAttachmentReference {
+    //                 .attachment = i,
+    //                 .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //             }
+    //         );
+    //     }
+    // }
 
-    auto subpass = VkSubpassDescription {
-        .flags = 0,
-        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .inputAttachmentCount = 0,
-        .pInputAttachments = nullptr,
-        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-        .pColorAttachments = colorReferences.data(),
-        .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = depthStencilReferences.data(),
-        .preserveAttachmentCount = 0,
-        .pPreserveAttachments = nullptr,
-    };
+    // auto subpass = VkSubpassDescription {
+    //     .flags = 0,
+    //     .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     .inputAttachmentCount = 0,
+    //     .pInputAttachments = nullptr,
+    //     .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+    //     .pColorAttachments = colorReferences.data(),
+    //     .pResolveAttachments = nullptr,
+    //     .pDepthStencilAttachment = depthStencilReferences.data(),
+    //     .preserveAttachmentCount = 0,
+    //     .pPreserveAttachments = nullptr,
+    // };
 
-    auto dependencies = std::array< VkSubpassDependency, 2 > {
-        VkSubpassDependency {
-            .srcSubpass = VK_SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        },
-        VkSubpassDependency {
-            .srcSubpass = 0,
-            .dstSubpass = VK_SUBPASS_EXTERNAL,
-            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        }
-    };
+    // auto dependencies = std::array< VkSubpassDependency, 2 > {
+    //     VkSubpassDependency {
+    //         .srcSubpass = VK_SUBPASS_EXTERNAL,
+    //         .dstSubpass = 0,
+    //         .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+    //         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    //         .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+    //         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    //         .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+    //     },
+    //     VkSubpassDependency {
+    //         .srcSubpass = 0,
+    //         .dstSubpass = VK_SUBPASS_EXTERNAL,
+    //         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    //         .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+    //         .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    //         .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+    //         .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+    //     }
+    // };
 
-    auto createInfo = VkRenderPassCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = static_cast< crimild::UInt32 >( attachmentDescriptions.size() ),
-        .pAttachments = attachmentDescriptions.data(),
-        .subpassCount = 1,
-        .pSubpasses = &subpass,
-        .dependencyCount = crimild::UInt32( dependencies.size() ),
-        .pDependencies = dependencies.data(),
-    };
+    // auto createInfo = VkRenderPassCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    //     .attachmentCount = static_cast< crimild::UInt32 >( attachmentDescriptions.size() ),
+    //     .pAttachments = attachmentDescriptions.data(),
+    //     .subpassCount = 1,
+    //     .pSubpasses = &subpass,
+    //     .dependencyCount = crimild::UInt32( dependencies.size() ),
+    //     .pDependencies = dependencies.data(),
+    // };
 
-    CRIMILD_VULKAN_CHECK(
-        vkCreateRenderPass(
-            getRenderDevice()->getHandle(),
-            &createInfo,
-            nullptr,
-            &m_renderPass
-        )
-    );
+    // CRIMILD_VULKAN_CHECK(
+    //     vkCreateRenderPass(
+    //         getRenderDevice()->getHandle(),
+    //         &createInfo,
+    //         nullptr,
+    //         &m_renderPass
+    //     )
+    // );
 
-    getRenderDevice()->setObjectName( m_renderPass, "GBuffer" );
+    // getRenderDevice()->setObjectName( m_renderPass, "GBuffer" );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
-    for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        std::vector< VkImageView > imageViews;
-        imageViews.reserve( m_attachments.size() );
-        for ( auto att : m_attachments ) {
-            imageViews.push_back( att->imageViews[ i ]->getHandle() );
-        }
+    // m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    // for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+    //     std::vector< VkImageView > imageViews;
+    //     imageViews.reserve( m_attachments.size() );
+    //     for ( auto att : m_attachments ) {
+    //         imageViews.push_back( att->imageViews[ i ]->getHandle() );
+    //     }
 
-        auto createInfo = VkFramebufferCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .pNext = nullptr,
-            .renderPass = m_renderPass,
-            .attachmentCount = uint32_t( imageViews.size() ),
-            .pAttachments = imageViews.data(),
-            .width = extent.width,
-            .height = extent.height,
-            .layers = 1,
-        };
+    //     auto createInfo = VkFramebufferCreateInfo {
+    //         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+    //         .pNext = nullptr,
+    //         .renderPass = m_renderPass,
+    //         .attachmentCount = uint32_t( imageViews.size() ),
+    //         .pAttachments = imageViews.data(),
+    //         .width = extent.width,
+    //         .height = extent.height,
+    //         .layers = 1,
+    //     };
 
-        CRIMILD_VULKAN_CHECK(
-            vkCreateFramebuffer(
-                getRenderDevice()->getHandle(),
-                &createInfo,
-                nullptr,
-                &m_framebuffers[ i ]
-            )
-        );
-    }
+    //     CRIMILD_VULKAN_CHECK(
+    //         vkCreateFramebuffer(
+    //             getRenderDevice()->getHandle(),
+    //             &createInfo,
+    //             nullptr,
+    //             &m_framebuffers[ i ]
+    //         )
+    //     );
+    // }
 
-    createRenderPassObjects();
-    createMaterialObjects();
+    // createRenderPassObjects();
+    // createMaterialObjects();
 }
 
 void GBufferPass::clear( void ) noexcept
@@ -320,78 +320,78 @@ void GBufferPass::clear( void ) noexcept
 
 void GBufferPass::createRenderPassObjects( void ) noexcept
 {
-    CRIMILD_LOG_TRACE();
+    // CRIMILD_LOG_TRACE();
 
-    m_renderPassObjects.uniforms = [ & ] {
-        auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
-        ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        getRenderDevice()->bind( ubo.get() );
-        return ubo;
-    }();
+    // m_renderPassObjects.uniforms = [ & ] {
+    //     auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
+    //     ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+    //     getRenderDevice()->bind( ubo.get() );
+    //     return ubo;
+    // }();
 
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
+    // VkDescriptorPoolSize poolSize {
+    //     .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //     .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    // };
 
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-    };
+    // auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    //     .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    //     .poolSizeCount = 1,
+    //     .pPoolSizes = &poolSize,
+    // };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
+    // CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
 
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr,
-    };
+    // const auto layoutBinding = VkDescriptorSetLayoutBinding {
+    //     .binding = 0,
+    //     .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //     .descriptorCount = 1,
+    //     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+    //     .pImmutableSamplers = nullptr,
+    // };
 
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
-    };
+    // auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    //     .bindingCount = 1,
+    //     .pBindings = &layoutBinding,
+    // };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
+    // CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    // std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
 
-    const auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = m_renderPassObjects.pool,
-        .descriptorSetCount = uint32_t( layouts.size() ),
-        .pSetLayouts = layouts.data(),
-    };
+    // const auto allocInfo = VkDescriptorSetAllocateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    //     .descriptorPool = m_renderPassObjects.pool,
+    //     .descriptorSetCount = uint32_t( layouts.size() ),
+    //     .pSetLayouts = layouts.data(),
+    // };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
+    // m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    // CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
-    for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
-            .offset = 0,
-            .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
-        };
+    // for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
+    //     const auto bufferInfo = VkDescriptorBufferInfo {
+    //         .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
+    //         .offset = 0,
+    //         .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
+    //     };
 
-        const auto descriptorWrite = VkWriteDescriptorSet {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = m_renderPassObjects.descriptorSets[ i ],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorCount = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .pImageInfo = nullptr,
-            .pBufferInfo = &bufferInfo,
-            .pTexelBufferView = nullptr,
-        };
+    //     const auto descriptorWrite = VkWriteDescriptorSet {
+    //         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    //         .dstSet = m_renderPassObjects.descriptorSets[ i ],
+    //         .dstBinding = 0,
+    //         .dstArrayElement = 0,
+    //         .descriptorCount = 1,
+    //         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //         .pImageInfo = nullptr,
+    //         .pBufferInfo = &bufferInfo,
+    //         .pTexelBufferView = nullptr,
+    //     };
 
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-    }
+    //     vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
+    // }
 }
 
 void GBufferPass::destroyRenderPassObjects( void ) noexcept
@@ -440,253 +440,253 @@ void GBufferPass::createMaterialObjects( void ) noexcept
 
 void GBufferPass::bind( const materials::PrincipledBSDF *material ) noexcept
 {
-    if ( m_materialObjects.pipelines.contains( material ) ) {
-        // Already bound
-        // TODO: This should be handled in a different way. What if texture changes?
-        // Also, update only when material changes.
-        m_materialObjects.uniforms[ material ]->setValue( material->getProps() );
-        getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
-        return;
-    }
+    // if ( m_materialObjects.pipelines.contains( material ) ) {
+    //     // Already bound
+    //     // TODO: This should be handled in a different way. What if texture changes?
+    //     // Also, update only when material changes.
+    //     m_materialObjects.uniforms[ material ]->setValue( material->getProps() );
+    //     getRenderDevice()->update( m_materialObjects.uniforms[ material ].get() );
+    //     return;
+    // }
 
-    // create pipeline
-    auto program = std::make_unique< ShaderProgram >();
-    program->setShaders(
-        Array< SharedPointer< Shader > > {
-            crimild::alloc< Shader >(
-                Shader::Stage::VERTEX,
-                R"(
-                    layout ( location = 0 ) in vec3 inPosition;
-                    layout ( location = 1 ) in vec3 inNormal;
-                    layout ( location = 2 ) in vec2 inTexCoord;
+    // // create pipeline
+    // auto program = std::make_unique< ShaderProgram >();
+    // program->setShaders(
+    //     Array< SharedPointer< Shader > > {
+    //         crimild::alloc< Shader >(
+    //             Shader::Stage::VERTEX,
+    //             R"(
+    //                 layout ( location = 0 ) in vec3 inPosition;
+    //                 layout ( location = 1 ) in vec3 inNormal;
+    //                 layout ( location = 2 ) in vec2 inTexCoord;
 
-                    layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
-                        mat4 view;
-                        mat4 proj;
-                    };
+    //                 layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
+    //                     mat4 view;
+    //                     mat4 proj;
+    //                 };
 
-                    layout ( push_constant ) uniform GeometryUniforms {
-                        mat4 model;
-                    };
+    //                 layout ( push_constant ) uniform GeometryUniforms {
+    //                     mat4 model;
+    //                 };
 
-                    layout ( location = 0 ) out vec3 outPosition;
-                    layout ( location = 1 ) out vec3 outNormal;
-                    layout ( location = 2 ) out vec2 outTexCoord;
-                    layout ( location = 3 ) out vec3 outScale;
-                    layout ( location = 4 ) out vec3 outModelPosition;
-                    layout ( location = 5 ) out vec3 outModelNormal;
-                    layout ( location = 6 ) out vec3 outViewPosition;
+    //                 layout ( location = 0 ) out vec3 outPosition;
+    //                 layout ( location = 1 ) out vec3 outNormal;
+    //                 layout ( location = 2 ) out vec2 outTexCoord;
+    //                 layout ( location = 3 ) out vec3 outScale;
+    //                 layout ( location = 4 ) out vec3 outModelPosition;
+    //                 layout ( location = 5 ) out vec3 outModelNormal;
+    //                 layout ( location = 6 ) out vec3 outViewPosition;
 
-                    void main()
-                    {
-                        gl_Position = proj * view * model * vec4( inPosition, 1.0 );
+    //                 void main()
+    //                 {
+    //                     gl_Position = proj * view * model * vec4( inPosition, 1.0 );
 
-                        outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
-                        outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
-                        outTexCoord = inTexCoord;
+    //                     outPosition = ( model * vec4( inPosition, 1.0 ) ).xyz;
+    //                     outNormal = inverse( transpose( mat3( model ) ) ) * inNormal;
+    //                     outTexCoord = inTexCoord;
 
-                        outScale = vec3(
-                            length( model[ 0 ].xyz ),
-                            length( model[ 1 ].xyz ),
-                            length( model[ 2 ].xyz ) );
+    //                     outScale = vec3(
+    //                         length( model[ 0 ].xyz ),
+    //                         length( model[ 1 ].xyz ),
+    //                         length( model[ 2 ].xyz ) );
 
-                        outModelPosition = inPosition;
-                        outModelNormal = inNormal;
+    //                     outModelPosition = inPosition;
+    //                     outModelNormal = inNormal;
 
-                        outViewPosition = ( view * model * vec4( inPosition, 1 ) ).xyz;
-                    }
-                )"
-            ),
-            crimild::alloc< Shader >(
-                Shader::Stage::FRAGMENT,
-                R"(
-                    layout ( location = 0 ) in vec3 inPosition;
-                    layout ( location = 1 ) in vec3 inNormal;
-                    layout ( location = 2 ) in vec2 inTexCoord;
-                    layout ( location = 3 ) in vec3 inScale;
-                    layout ( location = 4 ) in vec3 inModelPosition;
-                    layout ( location = 5 ) in vec3 inModelNormal;
-                    layout ( location = 6 ) in vec3 inViewPosition;
+    //                     outViewPosition = ( view * model * vec4( inPosition, 1 ) ).xyz;
+    //                 }
+    //             )"
+    //         ),
+    //         crimild::alloc< Shader >(
+    //             Shader::Stage::FRAGMENT,
+    //             R"(
+    //                 layout ( location = 0 ) in vec3 inPosition;
+    //                 layout ( location = 1 ) in vec3 inNormal;
+    //                 layout ( location = 2 ) in vec2 inTexCoord;
+    //                 layout ( location = 3 ) in vec3 inScale;
+    //                 layout ( location = 4 ) in vec3 inModelPosition;
+    //                 layout ( location = 5 ) in vec3 inModelNormal;
+    //                 layout ( location = 6 ) in vec3 inViewPosition;
 
-                    layout( set = 1, binding = 0 ) uniform MaterialUniform
-                    {
-                        vec3 albedo;
-                        float metallic;
-                        float roughness;
-                        float ambientOcclusion;
-                        float transmission;
-                        float indexOfRefraction;
-                        vec3 emissive;
-                    } uMaterial;
+    //                 layout( set = 1, binding = 0 ) uniform MaterialUniform
+    //                 {
+    //                     vec3 albedo;
+    //                     float metallic;
+    //                     float roughness;
+    //                     float ambientOcclusion;
+    //                     float transmission;
+    //                     float indexOfRefraction;
+    //                     vec3 emissive;
+    //                 } uMaterial;
 
-                    layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
+    //                 layout( set = 1, binding = 1 ) uniform sampler2D uAlbedoMap;
 
-                    layout ( location = 0 ) out vec4 outAlbedo;
-                    layout ( location = 1 ) out vec4 outPosition;
-                    layout ( location = 2 ) out vec4 outNormal;
-                    layout ( location = 3 ) out vec4 outMaterial;
+    //                 layout ( location = 0 ) out vec4 outAlbedo;
+    //                 layout ( location = 1 ) out vec4 outPosition;
+    //                 layout ( location = 2 ) out vec4 outNormal;
+    //                 layout ( location = 3 ) out vec4 outMaterial;
 
-                    struct Fragment {
-                        vec3 albedo;
-                        vec3 position;
-                        vec3 modelPosition;
-                        vec3 normal;
-                        vec3 modelNormal;
-                        vec2 uv;
-                        vec3 scale;
-                        float depth;
-                        float metallic;
-                        float roughness;
-                        float ambientOcclusion;
-                    };
+    //                 struct Fragment {
+    //                     vec3 albedo;
+    //                     vec3 position;
+    //                     vec3 modelPosition;
+    //                     vec3 normal;
+    //                     vec3 modelNormal;
+    //                     vec2 uv;
+    //                     vec3 scale;
+    //                     float depth;
+    //                     float metallic;
+    //                     float roughness;
+    //                     float ambientOcclusion;
+    //                 };
 
-                    #include <frag_main>
+    //                 #include <frag_main>
 
-                    void main()
-                    {
-                        Fragment frag;
+    //                 void main()
+    //                 {
+    //                     Fragment frag;
 
-                        frag.albedo = uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
-                        frag.position = inPosition;
-                        frag.normal = inNormal;
-                        frag.uv = inTexCoord;
-                        frag.modelPosition = inModelPosition;
-                        frag.modelNormal = inModelNormal;
-                        frag.scale = inScale;
-                        frag.depth = gl_FragCoord.z;
+    //                     frag.albedo = uMaterial.albedo * pow( texture( uAlbedoMap, inTexCoord ).rgb, vec3( 2.2 ) );
+    //                     frag.position = inPosition;
+    //                     frag.normal = inNormal;
+    //                     frag.uv = inTexCoord;
+    //                     frag.modelPosition = inModelPosition;
+    //                     frag.modelNormal = inModelNormal;
+    //                     frag.scale = inScale;
+    //                     frag.depth = gl_FragCoord.z;
 
-                        frag.metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
-                        frag.roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;
-                        frag.ambientOcclusion = uMaterial.ambientOcclusion;// * texture( uAmbientOcclusionMap, inTexCoord ).r;
+    //                     frag.metallic = uMaterial.metallic;// * texture( uMetallicMap, inTexCoord ).r;
+    //                     frag.roughness = uMaterial.roughness;// * texture( uRoughnessMap, inTexCoord ).r;
+    //                     frag.ambientOcclusion = uMaterial.ambientOcclusion;// * texture( uAmbientOcclusionMap, inTexCoord ).r;
 
-                        // Clamp metallic and roughness
-                        frag.metallic = clamp( frag.metallic, 0.0, 1.0 );
-                        frag.roughness = clamp( frag.roughness, 0.05, 0.999 );
+    //                     // Clamp metallic and roughness
+    //                     frag.metallic = clamp( frag.metallic, 0.0, 1.0 );
+    //                     frag.roughness = clamp( frag.roughness, 0.05, 0.999 );
 
-                        frag_main( frag );
+    //                     frag_main( frag );
 
-                        outAlbedo = vec4( frag.albedo, 1.0 );
-                        outPosition = vec4( frag.position, inViewPosition.z );
-                        outNormal = vec4( frag.normal, 1.0 );
-                        outMaterial = vec4( frag.metallic, frag.roughness, frag.ambientOcclusion, 1.0 );
-                    }
-                )"
-            ) }
-    );
+    //                     outAlbedo = vec4( frag.albedo, 1.0 );
+    //                     outPosition = vec4( frag.position, inViewPosition.z );
+    //                     outNormal = vec4( frag.normal, 1.0 );
+    //                     outMaterial = vec4( frag.metallic, frag.roughness, frag.ambientOcclusion, 1.0 );
+    //                 }
+    //             )"
+    //         ) }
+    // );
 
-    if ( auto program = material->getProgram() ) {
-        getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
-    }
+    // if ( auto program = material->getProgram() ) {
+    //     getRenderDevice()->getShaderCompiler().addChunks( program->getShaders() );
+    // }
 
-    const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
+    // const auto viewport = ViewportDimensions::fromExtent( m_renderArea.extent.width, m_renderArea.extent.height );
 
-    auto pipeline = std::make_unique< GraphicsPipeline >(
-        getRenderDevice(),
-        m_renderPass,
-        GraphicsPipeline::Descriptor {
-            .primitiveType = Primitive::Type::TRIANGLES,
-            .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
-                m_renderPassObjects.layout,
-                m_materialObjects.descriptorSetLayout,
-            },
-            .program = program.get(),
-            .vertexLayouts = { VertexLayout::P3_N3_TC2 },
-            .colorAttachmentCount = 4,
-            .viewport = viewport,
-            .scissor = viewport,
-            .pushConstantRanges = {
-                VkPushConstantRange {
-                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-                    .offset = 0,
-                    .size = sizeof( SceneRenderState::Renderable ),
-                },
-            },
-        }
-    );
+    // auto pipeline = std::make_unique< GraphicsPipeline >(
+    //     getRenderDevice(),
+    //     m_renderPass,
+    //     GraphicsPipeline::Descriptor {
+    //         .primitiveType = Primitive::Type::TRIANGLES,
+    //         .descriptorSetLayouts = std::vector< VkDescriptorSetLayout > {
+    //             m_renderPassObjects.layout,
+    //             m_materialObjects.descriptorSetLayout,
+    //         },
+    //         .program = program.get(),
+    //         .vertexLayouts = { VertexLayout::P3_N3_TC2 },
+    //         .colorAttachmentCount = 4,
+    //         .viewport = viewport,
+    //         .scissor = viewport,
+    //         .pushConstantRanges = {
+    //             VkPushConstantRange {
+    //                 .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+    //                 .offset = 0,
+    //                 .size = sizeof( SceneRenderState::Renderable ),
+    //             },
+    //         },
+    //     }
+    // );
 
-    getRenderDevice()->setObjectName( pipeline->getHandle(), "GBufferPass" );
+    // getRenderDevice()->setObjectName( pipeline->getHandle(), "GBufferPass" );
 
-    // m_materialObjects.pipelines.insert( material, std::move( pipeline ) );
-    m_materialObjects.pipelines[ material ] = std::move( pipeline );
+    // // m_materialObjects.pipelines.insert( material, std::move( pipeline ) );
+    // m_materialObjects.pipelines[ material ] = std::move( pipeline );
 
-    // create descriptors
-    const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-        VkDescriptorPoolSize {
-            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        },
-    };
+    // // create descriptors
+    // const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
+    //     VkDescriptorPoolSize {
+    //         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //         .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    //     },
+    //     VkDescriptorPoolSize {
+    //         .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    //         .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    //     },
+    // };
 
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        .poolSizeCount = uint32_t( poolSizes.size() ),
-        .pPoolSizes = poolSizes.data(),
-    };
+    // auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    //     .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    //     .poolSizeCount = uint32_t( poolSizes.size() ),
+    //     .pPoolSizes = poolSizes.data(),
+    // };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
+    // CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_materialObjects.descriptorPools[ material ] ) );
 
-    m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( material->getProps() );
-    getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
+    // m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( material->getProps() );
+    // getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+    // std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
 
-    const auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = m_materialObjects.descriptorPools[ material ],
-        .descriptorSetCount = uint32_t( layouts.size() ),
-        .pSetLayouts = layouts.data(),
-    };
+    // const auto allocInfo = VkDescriptorSetAllocateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    //     .descriptorPool = m_materialObjects.descriptorPools[ material ],
+    //     .descriptorSetCount = uint32_t( layouts.size() ),
+    //     .pSetLayouts = layouts.data(),
+    // };
 
-    m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
+    // m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
+    // CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
-    auto imageView = getRenderDevice()->bind( material->getAlbedoMap()->imageView.get() );
-    auto sampler = getRenderDevice()->bind( material->getAlbedoMap()->sampler.get() );
+    // auto imageView = getRenderDevice()->bind( material->getAlbedoMap()->imageView.get() );
+    // auto sampler = getRenderDevice()->bind( material->getAlbedoMap()->sampler.get() );
 
-    for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
-            .offset = 0,
-            .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
-        };
+    // for ( size_t i = 0; i < m_materialObjects.descriptorSets[ material ].size(); ++i ) {
+    //     const auto bufferInfo = VkDescriptorBufferInfo {
+    //         .buffer = getRenderDevice()->getHandle( m_materialObjects.uniforms[ material ].get(), i ),
+    //         .offset = 0,
+    //         .range = m_materialObjects.uniforms[ material ]->getBufferView()->getLength(),
+    //     };
 
-        const auto imageInfo = VkDescriptorImageInfo {
-            .sampler = sampler,
-            .imageView = imageView,
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        };
+    //     const auto imageInfo = VkDescriptorImageInfo {
+    //         .sampler = sampler,
+    //         .imageView = imageView,
+    //         .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    //     };
 
-        const auto writes = std::array< VkWriteDescriptorSet, 2 > {
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorCount = 1,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .pImageInfo = nullptr,
-                .pBufferInfo = &bufferInfo,
-                .pTexelBufferView = nullptr,
-            },
-            VkWriteDescriptorSet {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
-                .dstBinding = 1,
-                .dstArrayElement = 0,
-                .descriptorCount = 1,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .pImageInfo = &imageInfo,
-                .pBufferInfo = nullptr,
-                .pTexelBufferView = nullptr,
-            },
-        };
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
-    }
+    //     const auto writes = std::array< VkWriteDescriptorSet, 2 > {
+    //         VkWriteDescriptorSet {
+    //             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    //             .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+    //             .dstBinding = 0,
+    //             .dstArrayElement = 0,
+    //             .descriptorCount = 1,
+    //             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //             .pImageInfo = nullptr,
+    //             .pBufferInfo = &bufferInfo,
+    //             .pTexelBufferView = nullptr,
+    //         },
+    //         VkWriteDescriptorSet {
+    //             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    //             .dstSet = m_materialObjects.descriptorSets[ material ][ i ],
+    //             .dstBinding = 1,
+    //             .dstArrayElement = 0,
+    //             .descriptorCount = 1,
+    //             .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    //             .pImageInfo = &imageInfo,
+    //             .pBufferInfo = nullptr,
+    //             .pTexelBufferView = nullptr,
+    //         },
+    //     };
+    //     vkUpdateDescriptorSets( getRenderDevice()->getHandle(), writes.size(), writes.data(), 0, nullptr );
+    // }
 }
 
 void GBufferPass::destroyMaterialObjects( void ) noexcept

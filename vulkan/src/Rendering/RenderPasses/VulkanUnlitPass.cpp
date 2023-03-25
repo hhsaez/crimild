@@ -84,81 +84,81 @@ Event UnlitPass::handle( const Event &e ) noexcept
 
 void UnlitPass::render( const SceneRenderState::RenderableSet< UnlitMaterial > &sceneRenderables, const Camera *camera ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = 0,
+    //     .pClearValues = nullptr,
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    if ( camera != nullptr ) {
-        if ( m_renderPassObjects.uniforms != nullptr ) {
-            m_renderPassObjects.uniforms->setValue(
-                RenderPassObjects::Uniforms {
-                    .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() }
-            );
-            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-        }
-    }
+    // if ( camera != nullptr ) {
+    //     if ( m_renderPassObjects.uniforms != nullptr ) {
+    //         m_renderPassObjects.uniforms->setValue(
+    //             RenderPassObjects::Uniforms {
+    //                 .view = camera->getViewMatrix(),
+    //                 .proj = camera->getProjectionMatrix() }
+    //         );
+    //         getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+    //     }
+    // }
 
-    for ( auto &[ material, primitives ] : sceneRenderables ) {
-        for ( auto &[ primitive, renderables ] : primitives ) {
-            for ( auto &renderable : renderables ) {
-                bind( material.get() );
+    // for ( auto &[ material, primitives ] : sceneRenderables ) {
+    //     for ( auto &[ primitive, renderables ] : primitives ) {
+    //         for ( auto &renderable : renderables ) {
+    //             bind( material.get() );
 
-                vkCmdBindPipeline(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getHandle()
-                );
+    //             vkCmdBindPipeline(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getHandle()
+    //             );
 
-                vkCmdBindDescriptorSets(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    0,
-                    1,
-                    &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                    0,
-                    nullptr
-                );
+    //             vkCmdBindDescriptorSets(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 0,
+    //                 1,
+    //                 &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //                 0,
+    //                 nullptr
+    //             );
 
-                vkCmdBindDescriptorSets(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    1,
-                    1,
-                    &m_materialObjects.descriptorSets[ material.get() ][ currentFrameIndex ],
-                    0,
-                    nullptr
-                );
+    //             vkCmdBindDescriptorSets(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 1,
+    //                 1,
+    //                 &m_materialObjects.descriptorSets[ material.get() ][ currentFrameIndex ],
+    //                 0,
+    //                 nullptr
+    //             );
 
-                // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
-                // use normal uniforms instead.
-                vkCmdPushConstants(
-                    commandBuffer,
-                    m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
-                    VK_SHADER_STAGE_VERTEX_BIT,
-                    0,
-                    sizeof( SceneRenderState::Renderable ),
-                    &renderable
-                );
+    //             // Vulkan spec only requires a minimum of 128 bytes. Anything larger should
+    //             // use normal uniforms instead.
+    //             vkCmdPushConstants(
+    //                 commandBuffer,
+    //                 m_materialObjects.pipelines[ material.get() ]->getPipelineLayout(),
+    //                 VK_SHADER_STAGE_VERTEX_BIT,
+    //                 0,
+    //                 sizeof( SceneRenderState::Renderable ),
+    //                 &renderable
+    //             );
 
-                drawPrimitive( commandBuffer, primitive.get() );
-            }
-        }
-    }
+    //             drawPrimitive( commandBuffer, primitive.get() );
+    //         }
+    //     }
+    // }
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 }
 
 void UnlitPass::init( void ) noexcept
@@ -279,7 +279,7 @@ void UnlitPass::init( void ) noexcept
         )
     );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_framebuffers.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         std::vector< VkImageView > imageViews;
         if ( m_colorAttachment != nullptr ) {
@@ -345,12 +345,12 @@ void UnlitPass::createRenderPassObjects( void ) noexcept
 
     VkDescriptorPoolSize poolSize {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
     };
@@ -373,7 +373,7 @@ void UnlitPass::createRenderPassObjects( void ) noexcept
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -382,7 +382,7 @@ void UnlitPass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
@@ -590,17 +590,17 @@ void UnlitPass::bind( const Material *aMaterial ) noexcept
     const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         },
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         },
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
     };
@@ -610,7 +610,7 @@ void UnlitPass::bind( const Material *aMaterial ) noexcept
     m_materialObjects.uniforms[ material ] = std::make_unique< UniformBuffer >( material->getColor() );
     getRenderDevice()->bind( m_materialObjects.uniforms[ material ].get() );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_materialObjects.descriptorSetLayout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_materialObjects.descriptorSetLayout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -619,7 +619,7 @@ void UnlitPass::bind( const Material *aMaterial ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getSwapchainImageCount() );
+    m_materialObjects.descriptorSets[ material ].resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_materialObjects.descriptorSets[ material ].data() ) );
 
     auto imageView = getRenderDevice()->bind( material->getTexture()->imageView.get() );

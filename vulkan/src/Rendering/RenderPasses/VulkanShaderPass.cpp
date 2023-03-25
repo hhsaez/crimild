@@ -128,22 +128,22 @@ Event ShaderPass::handle( const Event &e ) noexcept
 
 void ShaderPass::render( void ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    beginRenderPass( commandBuffer, currentFrameIndex );
+    // beginRenderPass( commandBuffer, currentFrameIndex );
 
-    vkCmdBindPipeline(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle()
-    );
+    // vkCmdBindPipeline(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getHandle()
+    // );
 
-    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_descriptorSets[ currentFrameIndex ], 0, nullptr );
+    // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &m_descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-    vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
+    // vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
 
-    endRenderPass( commandBuffer );
+    // endRenderPass( commandBuffer );
 }
 
 void ShaderPass::init( void ) noexcept
@@ -232,7 +232,7 @@ void ShaderPass::init( void ) noexcept
         )
     );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_framebuffers.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
             m_colorAttachment->imageViews[ i ]->getHandle(),
@@ -335,7 +335,7 @@ void ShaderPass::createDescriptorPool( void ) noexcept
         poolSizes.push_back(
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             }
         );
     }
@@ -343,14 +343,14 @@ void ShaderPass::createDescriptorPool( void ) noexcept
         poolSizes.push_back(
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             }
         );
     }
 
     auto createInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
     };
@@ -425,7 +425,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
 {
     CRIMILD_LOG_TRACE();
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_descriptorSetLayout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_descriptorSetLayout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -434,7 +434,7 @@ void ShaderPass::createDescriptorSets( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_descriptorSets.size(); ++i ) {

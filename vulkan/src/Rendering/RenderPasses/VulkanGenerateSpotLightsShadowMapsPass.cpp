@@ -91,28 +91,28 @@ void GenerateSpotLightsShadowMaps::render(
     const Camera *camera
 ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
-        if ( light->castShadows() ) {
-            if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
-                auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
+    // for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
+    //     if ( light->castShadows() ) {
+    //         if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
+    //             auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
 
-                // Transition to transfer so we can write into the image after render.
-                shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+    //             // Transition to transfer so we can write into the image after render.
+    //             shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-                // Use a perspective projection for light space matrix when using
-                // spot lights, using the radius as limit.
-                shadowMap->lightSpaceMatrices[ 0 ] = perspective( 90, 1, 0.01f, light->getRadius() ) * light->getWorld().invMat;
+    //             // Use a perspective projection for light space matrix when using
+    //             // spot lights, using the radius as limit.
+    //             shadowMap->lightSpaceMatrices[ 0 ] = perspective( 90, 1, 0.01f, light->getRadius() ) * light->getWorld().invMat;
 
-                renderShadowMap( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ 0 ], shadowMapImage );
+    //             renderShadowMap( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ 0 ], shadowMapImage );
 
-                // Transition back to read after render.
-                shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
-            }
-        }
-    }
+    //             // Transition back to read after render.
+    //             shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+    //         }
+    //     }
+    // }
 }
 
 void GenerateSpotLightsShadowMaps::renderShadowMap(
@@ -122,81 +122,81 @@ void GenerateSpotLightsShadowMaps::renderShadowMap(
     SharedPointer< vulkan::Image > const &shadowMapImage
 ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    m_renderPass->begin( commandBuffer, m_framebuffers[ currentFrameIndex ] );
+    // m_renderPass->begin( commandBuffer, m_framebuffers[ currentFrameIndex ] );
 
-    // Set the rendering viewport, but keep in mind that it will be reversed
-    // after rendering (because of Vulkan's coordinate system). This sounds
-    // counter-intuitive at first, but it makes things easier when applying shadows,
-    // since we don't need to transform coordinate (see LocalLightingPass).
-    const auto viewport = VkViewport {
-        .width = float( m_shadowAttachment.extent.width ),
-        .height = float( m_shadowAttachment.extent.height ),
-        .minDepth = 0.0f,
-        .maxDepth = 1.0f,
-    };
-    vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
+    // // Set the rendering viewport, but keep in mind that it will be reversed
+    // // after rendering (because of Vulkan's coordinate system). This sounds
+    // // counter-intuitive at first, but it makes things easier when applying shadows,
+    // // since we don't need to transform coordinate (see LocalLightingPass).
+    // const auto viewport = VkViewport {
+    //     .width = float( m_shadowAttachment.extent.width ),
+    //     .height = float( m_shadowAttachment.extent.height ),
+    //     .minDepth = 0.0f,
+    //     .maxDepth = 1.0f,
+    // };
+    // vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
 
-    const auto scissor = VkRect2D {
-        .offset = { 0, 0 },
-        .extent = m_shadowAttachment.extent,
-    };
-    vkCmdSetScissor( commandBuffer, 0, 1, &scissor );
+    // const auto scissor = VkRect2D {
+    //     .offset = { 0, 0 },
+    //     .extent = m_shadowAttachment.extent,
+    // };
+    // vkCmdSetScissor( commandBuffer, 0, 1, &scissor );
 
-    // Set depth bias (aka "Polygon offset")
-    // Required to avoid shadow mapping artifacts
-    vkCmdSetDepthBias(
-        commandBuffer,
-        // Constant depth bias factor (always applied)
-        1.25f,
-        0.0f,
-        // Slope depth bias factor, applied depending on polygon's slope
-        1.75f
-    );
+    // // Set depth bias (aka "Polygon offset")
+    // // Required to avoid shadow mapping artifacts
+    // vkCmdSetDepthBias(
+    //     commandBuffer,
+    //     // Constant depth bias factor (always applied)
+    //     1.25f,
+    //     0.0f,
+    //     // Slope depth bias factor, applied depending on polygon's slope
+    //     1.75f
+    // );
 
-    vkCmdBindPipeline(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle()
-    );
+    // vkCmdBindPipeline(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getHandle()
+    // );
 
-    for ( auto &[ primitive, renderables ] : shadowCasters ) {
-        for ( const auto &renderable : renderables ) {
-            const auto mvp = lightSpaceMatrix * renderable.model;
-            vkCmdPushConstants(
-                commandBuffer,
-                m_pipeline->getPipelineLayout(),
-                VK_SHADER_STAGE_VERTEX_BIT,
-                0,
-                sizeof( Matrix4f ),
-                &mvp
-            );
+    // for ( auto &[ primitive, renderables ] : shadowCasters ) {
+    //     for ( const auto &renderable : renderables ) {
+    //         const auto mvp = lightSpaceMatrix * renderable.model;
+    //         vkCmdPushConstants(
+    //             commandBuffer,
+    //             m_pipeline->getPipelineLayout(),
+    //             VK_SHADER_STAGE_VERTEX_BIT,
+    //             0,
+    //             sizeof( Matrix4f ),
+    //             &mvp
+    //         );
 
-            drawPrimitive( commandBuffer, primitive.get() );
-        }
-    }
+    //         drawPrimitive( commandBuffer, primitive.get() );
+    //     }
+    // }
 
-    m_renderPass->end( commandBuffer );
+    // m_renderPass->end( commandBuffer );
 
-    m_shadowAttachment.images[ currentFrameIndex ]->transitionLayout(
-        commandBuffer,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-    );
+    // m_shadowAttachment.images[ currentFrameIndex ]->transitionLayout(
+    //     commandBuffer,
+    //     VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+    // );
 
-    auto copyRegion = vulkan::initializers::imageCopy();
-    copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    copyRegion.extent = shadowMapImage->getExtent();
-    shadowMapImage->copy( commandBuffer, m_shadowAttachment.images[ currentFrameIndex ], copyRegion );
+    // auto copyRegion = vulkan::initializers::imageCopy();
+    // copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    // copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    // copyRegion.extent = shadowMapImage->getExtent();
+    // shadowMapImage->copy( commandBuffer, m_shadowAttachment.images[ currentFrameIndex ], copyRegion );
 
-    m_shadowAttachment.images[ currentFrameIndex ]->transitionLayout(
-        commandBuffer,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    );
+    // m_shadowAttachment.images[ currentFrameIndex ]->transitionLayout(
+    //     commandBuffer,
+    //     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    // );
 }
 
 void GenerateSpotLightsShadowMaps::init( void ) noexcept

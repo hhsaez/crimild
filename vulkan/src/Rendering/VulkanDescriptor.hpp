@@ -48,6 +48,7 @@ namespace crimild::vulkan {
         std::shared_ptr< ImageView > imageView;
         std::shared_ptr< Sampler > sampler;
         VkShaderStageFlags stage = VK_SHADER_STAGE_ALL;
+        VkImageLayout imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     };
 
 }
