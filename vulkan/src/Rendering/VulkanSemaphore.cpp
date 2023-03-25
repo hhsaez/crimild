@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holder nor the
+ *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,47 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
-
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 
-namespace crimild::vulkan::framegraph {
+#include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
 
-    class RenderBase
-        : public SharedObject,
-          public Named,
-          public WithRenderDevice,
-          public WithSemaphore {
-    protected:
-        RenderBase(
-            RenderDevice *device,
-            std::string name,
-            const VkExtent2D &extent
-        ) noexcept;
+using namespace crimild::vulkan;
 
-    public:
-        virtual ~RenderBase( void ) = default;
-
-        inline VkExtent2D getExtent( void ) const noexcept { return m_extent; }
-        inline void setExtent( const VkExtent2D &extent ) noexcept
-        {
-            bool needsResizing = m_extent.width != extent.width || m_extent.height != extent.height;
-            m_extent = extent;
-            if ( needsResizing ) {
-                onResize();
-            }
-        }
-
-    protected:
-        virtual void onResize( void ) noexcept { }
-
-    private:
-        VkExtent2D m_extent = { .width = 1, .height = 1 };
+Semaphore::Semaphore( RenderDevice *device, std::string name ) noexcept
+    : WithRenderDevice( device ),
+      Named( name )
+{
+    const auto createInfo = VkSemaphoreCreateInfo {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
     };
+
+    VkSemaphore handle;
+    CRIMILD_VULKAN_CHECK(
+        vkCreateSemaphore(
+            getRenderDevice()->getHandle(),
+            &createInfo,
+            getRenderDevice()->getAllocator(),
+            &handle
+        )
+    );
+    setHandle( handle );
+
+    getRenderDevice()->setObjectName(
+        uint64_t( getHandle() ),
+        VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
+        name
+    );
 }
 
-#endif
+Semaphore::~Semaphore( void ) noexcept
+{
+    vkDestroySemaphore( getRenderDevice()->getHandle(), getHandle(), getRenderDevice()->getAllocator() );
+    setHandle( VK_NULL_HANDLE );
+}

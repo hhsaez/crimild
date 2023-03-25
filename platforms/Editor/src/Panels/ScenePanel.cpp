@@ -29,10 +29,15 @@
 
 #include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp"
+#include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 #include "Rendering/VulkanImageView.hpp"
+#include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderTarget.hpp"
 #include "Simulation/Editor.hpp"
 
 using namespace crimild;
+using namespace crimild::vulkan::framegraph;
 using namespace crimild::editor::panels;
 
 void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float width, float height )
@@ -89,120 +94,251 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
     selectedNode->perform( UpdateWorldState() );
 }
 
-Scene::Scene( vulkan::RenderDevice *renderDevice ) noexcept
-    : m_renderDevice( renderDevice ),
-      m_scenePass( renderDevice ),
-      m_sceneDebugPass( renderDevice ),
-      m_sceneDebugOverlayPass(
-          renderDevice,
-          "Editor",
-          {
-              m_scenePass.getColorAttachment(),
-              m_sceneDebugPass.getColorAttachment(),
-          }
-      )
+Scene::Scene( vulkan::RenderDevice *device ) noexcept
+    : WithRenderDevice( device ) //,
+//   m_scenePass( renderDevice ),
+//   m_sceneDebugPass( renderDevice ),
+//   m_sceneDebugOverlayPass(
+//       renderDevice,
+//       "Editor",
+//       {
+//           m_scenePass.getColorAttachment(),
+//           m_sceneDebugPass.getColorAttachment(),
+//       }
+//   )
 {
+    const auto N = getRenderDevice()->getInFlightFrameCount();
+    m_framegraphs.resize( N );
+    m_debugTargets.resize( N );
+    m_outputTextures.resize( N );
+    for ( int i = 0; i < N; ++i ) {
+        auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
+            device,
+            VkExtent2D {
+                .width = uint32_t( m_extent.width ),
+                .height = uint32_t( m_extent.height ),
+            }
+        );
+        m_framegraphs[ i ] = framegraph;
+        m_outputTextures[ i ].push_back(
+            crimild::alloc< ImGuiVulkanTexture >(
+                "Scene",
+                framegraph->getOutput()->getImageView(),
+                framegraph->getOutput()->getSampler()
+            )
+        );
+
+        m_debugTargets[ i ] = {
+            // crimild::alloc< vulkan::framegraph::ComputeImageFromChannels >(
+            //     device,
+            //     "Scene/Depth",
+            //     m_framegraphs[ i ]->getRenderTarget( "Scene/Depth" ),
+            //     "depth"
+            // )
+            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Albedo" ), "rgb" ),
+//            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Position" ), "rgb" ),
+//            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Normal" ), "rgb" ),
+        };
+
+        for ( auto &debugTarget : m_debugTargets[ i ] ) {
+            m_outputTextures[ i ].push_back(
+                crimild::alloc< ImGuiVulkanTexture >(
+                    debugTarget->getName(),
+                    debugTarget->getOutput()->getImageView(),
+                    debugTarget->getOutput()->getSampler()
+                )
+            );
+        }
+    }
+
     m_editorCamera = std::make_unique< Camera >();
     m_cameraTranslation = translation( 10, 10, 10 );
     m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
 
-    m_debugPasses = {
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Depth", m_scenePass.getAttachment( 0 ), "depth" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Albedo", m_scenePass.getAttachment( 1 ), "rgb" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Position", m_scenePass.getAttachment( 2 ), "rgb" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Normal", m_scenePass.getAttachment( 3 ), "rgb" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Metallic", m_scenePass.getAttachment( 4 ), "r" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Roughness", m_scenePass.getAttachment( 4 ), "g" ),
-        crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Ambient Occlusion", m_scenePass.getAttachment( 4 ), "b" ),
-    };
+    // m_debugPasses = {
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Depth", m_scenePass.getAttachment( 0 ), "depth" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Albedo", m_scenePass.getAttachment( 1 ), "rgb" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Position", m_scenePass.getAttachment( 2 ), "rgb" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Normal", m_scenePass.getAttachment( 3 ), "rgb" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Metallic", m_scenePass.getAttachment( 4 ), "r" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Roughness", m_scenePass.getAttachment( 4 ), "g" ),
+    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Ambient Occlusion", m_scenePass.getAttachment( 4 ), "b" ),
+    // };
 
-    m_selectedAttachment = 0;
-    m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
-    m_attachments.push_back( m_scenePass.getColorAttachment() );
-    for ( const auto &pass : m_debugPasses ) {
-        m_attachments.push_back( pass->getColorAttachment() );
-    }
-    m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
+    // m_selectedAttachment = 0;
+    // m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
+    // m_attachments.push_back( m_scenePass.getColorAttachment() );
+    // for ( const auto &pass : m_debugPasses ) {
+    //     m_attachments.push_back( pass->getColorAttachment() );
+    // }
+    // m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
 }
 
 Event Scene::handle( const Event &e ) noexcept
 {
-    m_scenePass.handle( e );
-    m_sceneDebugPass.handle( e );
-    m_sceneDebugOverlayPass.handle( e );
-    for ( auto &pass : m_debugPasses ) {
-        pass->handle( e );
-    }
+    // m_scenePass.handle( e );
+    // m_sceneDebugPass.handle( e );
+    // m_sceneDebugOverlayPass.handle( e );
+    // for ( auto &pass : m_debugPasses ) {
+    //     pass->handle( e );
+    // }
     return e;
 }
 
 void Scene::onRender( void ) noexcept
 {
-    static auto debouncedResize = concurrency::debounce(
-        [ this ]( Event e ) {
-            m_scenePass.handle( e );
-            m_sceneDebugPass.handle( e );
-            m_sceneDebugOverlayPass.handle( e );
-            for ( auto &pass : m_debugPasses ) {
-                pass->handle( e );
-            }
-            m_descriptorSets.clear();
-        },
-        500
-    );
+    // static auto debouncedResize = concurrency::debounce(
+    //     [ this ]( Event e ) {
+    //         m_scenePass.handle( e );
+    //         m_sceneDebugPass.handle( e );
+    //         m_sceneDebugOverlayPass.handle( e );
+    //         for ( auto &pass : m_debugPasses ) {
+    //             pass->handle( e );
+    //         }
+    //         m_descriptorSets.clear();
+    //     },
+    //     500
+    // );
+
+    // ImVec2 windowPos = ImGui::GetWindowPos();
+    // ImVec2 renderSize = ImGui::GetContentRegionAvail();
+    // bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
+    // if ( !isMinimized ) {
+    //     if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
+    //         m_extent.width = renderSize.x;
+    //         m_extent.height = renderSize.y;
+    //         debouncedResize(
+    //             Event {
+    //                 .type = Event::Type::WINDOW_RESIZE,
+    //                 .extent = m_extent,
+    //             }
+    //         );
+    //     }
+    // }
+
+    // uint32_t currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
+
+    // if ( !m_attachments.empty() ) {
+    //     const auto att = m_attachments[ m_selectedAttachment ];
+    //     if ( !att->descriptorSets.empty() ) {
+    //         if ( !m_descriptorSets.contains( att ) ) {
+    //             auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
+    //             for ( int i = 0; i < ds.size(); ++i ) {
+    //                 ds[ i ] = ImGui_ImplVulkan_AddTexture(
+    //                     att->sampler,
+    //                     att->imageViews[ currentFrameIdx ]->getHandle(),
+    //                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    //                 );
+    //             }
+    //             m_descriptorSets[ att ] = ds;
+    //         }
+    //         auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
+    //         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+    //         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+    //         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+    //         ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+    //         ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
+    //     } else {
+    //         ImGui::Text( "No scene attachments found" );
+    //     }
+
+    //     ImGui::SetCursorPos( ImVec2( 20, 40 ) );
+    //     ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) );
+    //     static ImGuiComboFlags flags = 0;
+    //     if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
+    //         for ( size_t i = 0; i < m_attachments.size(); ++i ) {
+    //             const auto &att = m_attachments[ i ];
+    //             const auto isSelected = i == m_selectedAttachment;
+    //             if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
+    //                 m_selectedAttachment = i;
+    //             }
+    //             if ( isSelected ) {
+    //                 ImGui::SetItemDefaultFocus();
+    //             }
+    //         }
+    //         ImGui::EndCombo();
+    //     }
+    //     ImGui::EndChild();
+    // }
+
+    // if ( isMinimized ) {
+    //     return;
+    // }
+
+    // if ( auto editor = Editor::getInstance() ) {
+    //     if ( auto selected = editor->getSelectedObject< Node >() ) {
+    //         // TODO: Fix gizmo position
+    //         drawGizmo(
+    //             selected,
+    //             m_editorCamera.get(),
+    //             windowPos.x,
+    //             windowPos.y,
+    //             m_extent.width,
+    //             m_extent.height
+    //         );
+    //     }
+    // }
+
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+
+    // auto transitionAttachment = [ & ]( const auto att ) {
+    //     getRenderDevice()->transitionImageLayout(
+    //         commandBuffer,
+    //         att->images[ currentFrameIndex ]->getHandle(),
+    //         att->format,
+    //         getRenderDevice()->formatIsColor( att->format )
+    //             ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    //             : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //         getRenderDevice()->formatIsColor( att->format )
+    //             ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    //             : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+    //         att->mipLevels,
+    //         att->layerCount
+    //     );
+    // };
+
+    // auto scene = Simulation::getInstance()->getScene();
+
+    // m_scenePass.render( scene, m_editorCamera.get() );
+
+    // for ( auto &pass : m_debugPasses ) {
+    //     pass->render( scene, m_editorCamera.get() );
+    // }
+
+    // m_sceneDebugPass.render( scene, m_editorCamera.get() );
+    // transitionAttachment( m_sceneDebugPass.getColorAttachment() );
+
+    // m_sceneDebugOverlayPass.render();
+    // transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
 
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
     bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
-    if ( !isMinimized ) {
-        if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
-            m_extent.width = renderSize.x;
-            m_extent.height = renderSize.y;
-            debouncedResize(
-                Event {
-                    .type = Event::Type::WINDOW_RESIZE,
-                    .extent = m_extent,
-                }
-            );
-        }
-    }
+    m_extent.width = renderSize.x;
+    m_extent.height = renderSize.y;
 
-    uint32_t currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
-
-    if ( !m_attachments.empty() ) {
-        const auto att = m_attachments[ m_selectedAttachment ];
-        if ( !att->descriptorSets.empty() ) {
-            if ( !m_descriptorSets.contains( att ) ) {
-                auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
-                for ( int i = 0; i < ds.size(); ++i ) {
-                    ds[ i ] = ImGui_ImplVulkan_AddTexture(
-                        att->sampler,
-                        att->imageViews[ currentFrameIdx ]->getHandle(),
-                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                    );
-                }
-                m_descriptorSets[ att ] = ds;
-            }
-            auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
-            ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-            ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-            ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-            ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-            ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-        } else {
-            ImGui::Text( "No scene attachments found" );
-        }
+    auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
+    if ( !m_outputTextures.empty() ) {
+        auto &textures = m_outputTextures[ currentFrameIdx ];
+        auto tex_id = textures[ m_selectedTexture ]->getDescriptorSet();
+        ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
+        ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
+        ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
+        ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
+        ImGui::Image( tex_id, renderSize, uv_min, uv_max, tint_col, border_col );
 
         ImGui::SetCursorPos( ImVec2( 20, 40 ) );
         ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) );
         static ImGuiComboFlags flags = 0;
-        if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
-            for ( size_t i = 0; i < m_attachments.size(); ++i ) {
-                const auto &att = m_attachments[ i ];
-                const auto isSelected = i == m_selectedAttachment;
-                if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
-                    m_selectedAttachment = i;
+        if ( ImGui::BeginCombo( "##scenePanelOutput", textures[ m_selectedTexture ]->getName().c_str(), flags ) ) {
+            for ( size_t i = 0; i < textures.size(); ++i ) {
+                const auto &texture = textures[ i ];
+                const auto isSelected = i == m_selectedTexture;
+                if ( ImGui::Selectable( texture->getName().c_str(), isSelected ) ) {
+                    m_selectedTexture = i;
                 }
                 if ( isSelected ) {
                     ImGui::SetItemDefaultFocus();
@@ -211,6 +347,8 @@ void Scene::onRender( void ) noexcept
             ImGui::EndCombo();
         }
         ImGui::EndChild();
+    } else {
+        ImGui::Text( "No scene attachments found" );
     }
 
     if ( isMinimized ) {
@@ -231,37 +369,22 @@ void Scene::onRender( void ) noexcept
         }
     }
 
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // Update editor camera aspect ratio based on current window's size
+    m_editorCamera->setAspectRatio( m_extent.width / m_extent.height );
 
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    m_framegraphs[ currentFrameIdx ]->render(
+        crimild::Simulation::getInstance()->getScene(),
+        m_editorCamera.get()
+    );
 
-    auto transitionAttachment = [ & ]( const auto att ) {
-        getRenderDevice()->transitionImageLayout(
-            commandBuffer,
-            att->images[ currentFrameIndex ]->getHandle(),
-            att->format,
-            getRenderDevice()->formatIsColor( att->format )
-                ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            getRenderDevice()->formatIsColor( att->format )
-                ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-            att->mipLevels,
-            att->layerCount
+    // TODO: Remove htis. Add fence/semaphore for waiting for render graph to complete render
+    // getRenderDevice()->flush();
+
+    for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
+        debugTarget->execute(
+            {
+                .wait = { m_framegraphs[ currentFrameIdx ]->getSemaphore() },
+            }
         );
-    };
-
-    auto scene = Simulation::getInstance()->getScene();
-
-    m_scenePass.render( scene, m_editorCamera.get() );
-
-    for ( auto &pass : m_debugPasses ) {
-        pass->render( scene, m_editorCamera.get() );
     }
-
-    m_sceneDebugPass.render( scene, m_editorCamera.get() );
-    transitionAttachment( m_sceneDebugPass.getColorAttachment() );
-
-    m_sceneDebugOverlayPass.render();
-    transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
 }

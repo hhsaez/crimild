@@ -33,6 +33,7 @@ using namespace crimild::vulkan::framegraph;
 RenderBase::RenderBase( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept
     : Named( name ),
       WithRenderDevice( device ),
+      WithSemaphore( device, name + "/Semaphore" ),
       m_extent( extent )
 {
     // no-op

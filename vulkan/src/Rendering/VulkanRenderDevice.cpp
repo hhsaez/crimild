@@ -28,10 +28,12 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 
 #include "Rendering/VulkanCommandBuffer.hpp"
+#include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDeviceCache.hpp"
+#include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
 #include "Rendering/VulkanSurface.hpp"
 #include "SceneGraph/Light.hpp"
@@ -123,8 +125,19 @@ RenderDevice::RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surfa
 
     // Fetch device queues
     vkGetDeviceQueue( m_handle, indices.graphicsFamily[ 0 ], 0, &m_graphicsQueueHandle );
+    setObjectName( uint64_t( m_graphicsQueueHandle ), VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT, "GraphicsQueue" );
+
     vkGetDeviceQueue( m_handle, indices.computeFamily[ 0 ], 0, &m_computeQueueHandle );
+    setObjectName(
+        uint64_t( m_computeQueueHandle ),
+        VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
+        m_computeQueueHandle == m_graphicsQueueHandle ? "GraphicsComputeQueue" : "ComputeQueue"
+    );
+
     vkGetDeviceQueue( m_handle, indices.presentFamily[ 0 ], 0, &m_presentQueueHandle );
+    if ( m_presentQueueHandle != m_graphicsQueueHandle && m_presentQueueHandle != m_computeQueueHandle ) {
+        setObjectName( uint64_t( m_presentQueueHandle ), VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT, "PresentQueue" );
+    }
 
     createCommandPool( m_commandPool );
 
@@ -2567,28 +2580,63 @@ const vulkan::ShadowMapDEPRECATED *RenderDevice::getShadowMap( const Light *ligh
     return m_shadowMaps.at( light ).get();
 }
 
-void RenderDevice::submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
+void RenderDevice::submitGraphicsCommands(
+    std::shared_ptr< CommandBuffer > &commandBuffer,
+    const std::vector< std::shared_ptr< Semaphore > > &wait,
+    const std::vector< std::shared_ptr< Semaphore > > &signal
+) noexcept
 {
-    // m_commandsToSubmit[ getGraphicsQueue() ].push_back( commandBuffer );
+    submitCommands( getGraphicsQueue(), commandBuffer, wait, signal );
+}
 
+void RenderDevice::submitComputeCommands(
+    std::shared_ptr< CommandBuffer > &commandBuffer,
+    const std::vector< std::shared_ptr< Semaphore > > &wait,
+    const std::vector< std::shared_ptr< Semaphore > > &signal
+) noexcept
+{
+    submitCommands( getComputeQueue(), commandBuffer, wait, signal );
+}
+
+void RenderDevice::submitCommands(
+    VkQueue queue,
+    std::shared_ptr< CommandBuffer > &commandBuffer,
+    const std::vector< std::shared_ptr< Semaphore > > &wait,
+    const std::vector< std::shared_ptr< Semaphore > > &signal
+) noexcept
+{
     std::vector< VkCommandBuffer > commandBufferHandlers = { commandBuffer->getHandle() };
+
+    std::vector< VkSemaphore > waitSemaphores;
+    for ( auto &semaphore : wait ) {
+        waitSemaphores.push_back( semaphore->getHandle() );
+    }
+
+    std::vector< VkSemaphore > signalSemaphores;
+    for ( auto &semaphore : signal ) {
+        signalSemaphores.push_back( semaphore->getHandle() );
+    }
+
+    // TODO: check if this is the correct flag
+    VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
         .pCommandBuffers = commandBufferHandlers.data(),
+        .pWaitDstStageMask = &waitStageMask,
+        .waitSemaphoreCount = uint32_t( waitSemaphores.size() ),
+        .pWaitSemaphores = waitSemaphores.data(),
+        .signalSemaphoreCount = uint32_t( signalSemaphores.size() ),
+        .pSignalSemaphores = signalSemaphores.data(),
     };
 
     CRIMILD_VULKAN_CHECK(
         vkQueueSubmit(
-            getGraphicsQueue(),
+            queue,
             1,
             &submitInfo,
-            nullptr
+            commandBuffer->getFence()->getHandle()
         )
     );
-}
-
-void RenderDevice::submitComputeCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept
-{
-    m_commandsToSubmit[ getComputeQueue() ].push_back( commandBuffer );
 }

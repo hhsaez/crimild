@@ -372,6 +372,7 @@ namespace crimild::editor::panels {
                         layerIndex
                     );
                     m_inFLightShadowMaps[ frameIndex ][ layerIndex ] = crimild::alloc< ImGuiVulkanTexture >(
+                        imageView->getName(),
                         imageView,
                         shadowMap->getSampler()
                     );

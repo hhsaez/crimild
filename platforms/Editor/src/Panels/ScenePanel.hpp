@@ -28,16 +28,23 @@
 #ifndef CRIMILD_EDITOR_PANELS_SCENE
 #define CRIMILD_EDITOR_PANELS_SCENE
 
+#include "Foundation/VulkanUtils.hpp"
 #include "Panels/Panel.hpp"
 
-#include <Crimild.hpp>
-#include <Crimild_Vulkan.hpp>
 #include <unordered_map>
+
+namespace crimild::vulkan::framegraph {
+
+    class ComputeImageFromChannels;
+    class RenderScene;
+
+}
 
 namespace crimild::editor::panels {
 
     class Scene
         : public Panel,
+          public vulkan::WithRenderDevice,
           public DynamicSingleton< Scene > {
     public:
         Scene( vulkan::RenderDevice *renderDevice ) noexcept;
@@ -51,28 +58,20 @@ namespace crimild::editor::panels {
         virtual void onRender( void ) noexcept override;
 
     private:
-        inline const vulkan::RenderDevice *getRenderDevice( void ) const noexcept { return m_renderDevice; }
-
-    private:
-        vulkan::RenderDevice *m_renderDevice = nullptr;
-
-        Extent2D m_extent = Extent2D { .width = 1280.0, .height = 695.0 };
+        Extent2D m_extent = Extent2D { .width = 1280.0, .height = 1280.0 };
         Event m_lastResizeEvent = Event {};
-        vulkan::ScenePass m_scenePass;
 
-        vulkan::SceneDebugPass m_sceneDebugPass;
-        vulkan::OverlayPass m_sceneDebugOverlayPass;
-        std::vector< SharedPointer< vulkan::DebugAttachmentPass > > m_debugPasses;
+        std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_framegraphs;
+        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::ComputeImageFromChannels > > > m_debugTargets;
+
+        std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
+        size_t m_selectedTexture = 0;
 
         std::unique_ptr< Camera > m_editorCamera;
         bool m_editorCameraEnabled = false;
         Vector2i m_lastMousePos = Vector2i { 0, 0 };
         Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
         Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
-
-        std::vector< const vulkan::FramebufferAttachment * > m_attachments;
-        std::unordered_map< const vulkan::FramebufferAttachment *, std::vector< VkDescriptorSet > > m_descriptorSets;
-        size_t m_selectedAttachment = 0;
     };
 
 }

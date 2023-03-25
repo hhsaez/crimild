@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/FrameGraph/VulkanComputeSceneLighting.hpp"
+#include "Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
@@ -34,24 +34,54 @@
 #include "Rendering/VulkanDescriptorPool.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 
 using namespace crimild::vulkan::framegraph;
 
-ComputeSceneLighting::ComputeSceneLighting(
+ComputeImageFromChannels::ComputeImageFromChannels(
     RenderDevice *device,
-    const std::vector< std::shared_ptr< RenderTarget > > &inputs,
-    std::shared_ptr< RenderTarget > &output
+    std::shared_ptr< RenderTarget > const &input,
+    std::string channels
 ) noexcept
-    : ComputeBase( device, "ComputeSceneLighting" ),
-      m_inputs( inputs ),
-      m_output( output ),
-      m_commandBuffer(
+    : ComputeImageFromChannels(
+        device,
+        input->getName(),
+        input,
+        channels
+    )
+{
+    // no-op
+}
+
+ComputeImageFromChannels::ComputeImageFromChannels(
+    RenderDevice *device,
+    std::string name,
+    std::shared_ptr< RenderTarget > const &input,
+    std::string channels
+) noexcept
+    : ComputeBase( device, name ),
+      WithCommandBuffer(
           crimild::alloc< CommandBuffer >(
               device,
               getName() + "/CommandBuffer",
               VK_COMMAND_BUFFER_LEVEL_PRIMARY
+          )
+      ),
+      m_input( input ),
+      m_output(
+          crimild::alloc< RenderTarget >(
+              device,
+              name,
+              input->getImage()->getFormat(),
+              [ & ] {
+                  auto imageExtent = input->getImage()->getExtent();
+                  return VkExtent2D {
+                      .width = imageExtent.width,
+                      .height = imageExtent.height,
+                  };
+              }()
           )
       )
 {
@@ -59,21 +89,19 @@ ComputeSceneLighting::ComputeSceneLighting(
     descriptors.push_back(
         Descriptor {
             .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .imageView = output->getImageView(),
-            .sampler = output->getSampler(),
+            .imageView = m_output->getImageView(),
+            .sampler = m_output->getSampler(),
             .stage = VK_SHADER_STAGE_COMPUTE_BIT,
         }
     );
-    for ( auto &target : inputs ) {
-        descriptors.push_back(
-            Descriptor {
-                .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                .imageView = target->getImageView(),
-                .sampler = target->getSampler(),
-                .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-            }
-        );
-    }
+    descriptors.push_back(
+        Descriptor {
+            .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .imageView = input->getImageView(),
+            .sampler = input->getSampler(),
+            .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+        }
+    );
 
     auto descriptorSetLayout = crimild::alloc< DescriptorSetLayout >(
         getRenderDevice(),
@@ -101,7 +129,6 @@ ComputeSceneLighting::ComputeSceneLighting(
                         {
                             ivec2 uv = ivec2( gl_GlobalInvocationID.xy );
                             vec3 pixel = imageLoad( gBufferImage0, uv ).rgb;
-                            // vec3 pixel = vec3( 1.0, 0.0, 1.0 );
                             imageStore( outputImage, uv, vec4( pixel, 1 ) );
                         }
                     )"
@@ -126,17 +153,18 @@ ComputeSceneLighting::ComputeSceneLighting(
         descriptorSetLayout,
         descriptors
     );
+
+    // Command buffer only needs to be recorded once, right?
+    auto &cmds = getCommandBuffer();
+    cmds->reset();
+    cmds->begin();
+    cmds->bindPipeline( m_pipeline );
+    cmds->bindDescriptorSet( 0, m_descriptorSet );
+    cmds->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
+    cmds->end();
 }
 
-void ComputeSceneLighting::execute( void ) noexcept
+void ComputeImageFromChannels::execute( SyncOptions const &options ) noexcept
 {
-    // Command buffer only needs to be recorded once, right?
-    m_commandBuffer->reset();
-    m_commandBuffer->begin();
-    m_commandBuffer->bindPipeline( m_pipeline );
-    m_commandBuffer->bindDescriptorSet( 0, m_descriptorSet );
-    m_commandBuffer->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
-    m_commandBuffer->end();
-
-    getRenderDevice()->submitComputeCommands( m_commandBuffer );
+    getRenderDevice()->submitComputeCommands( getCommandBuffer(), options.wait, options.signal );
 }

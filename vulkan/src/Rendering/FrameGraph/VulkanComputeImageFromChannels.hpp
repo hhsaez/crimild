@@ -25,47 +25,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
-#include "Rendering/VulkanSemaphore.hpp"
+#include "Rendering/FrameGraph/VulkanComputeBase.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 
-namespace crimild::vulkan::framegraph {
+namespace crimild::vulkan {
 
-    class RenderBase
-        : public SharedObject,
-          public Named,
-          public WithRenderDevice,
-          public WithSemaphore {
-    protected:
-        RenderBase(
-            RenderDevice *device,
-            std::string name,
-            const VkExtent2D &extent
-        ) noexcept;
+    class ComputePipeline;
+    class DescriptorSet;
+    class RenderTarget;
 
-    public:
-        virtual ~RenderBase( void ) = default;
+    namespace framegraph {
 
-        inline VkExtent2D getExtent( void ) const noexcept { return m_extent; }
-        inline void setExtent( const VkExtent2D &extent ) noexcept
-        {
-            bool needsResizing = m_extent.width != extent.width || m_extent.height != extent.height;
-            m_extent = extent;
-            if ( needsResizing ) {
-                onResize();
-            }
-        }
+        class ComputeImageFromChannels
+            : public ComputeBase,
+              public WithCommandBuffer {
+        public:
+            ComputeImageFromChannels(
+                RenderDevice *device,
+                std::shared_ptr< RenderTarget > const &input,
+                std::string channels
+            ) noexcept;
 
-    protected:
-        virtual void onResize( void ) noexcept { }
+            ComputeImageFromChannels(
+                RenderDevice *device,
+                std::string name,
+                std::shared_ptr< RenderTarget > const &input,
+                std::string channels
+            ) noexcept;
 
-    private:
-        VkExtent2D m_extent = { .width = 1, .height = 1 };
-    };
+            virtual ~ComputeImageFromChannels( void ) = default;
+
+            void execute( SyncOptions const &options ) noexcept;
+
+            inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
+
+        private:
+            std::shared_ptr< RenderTarget > m_input;
+            std::shared_ptr< RenderTarget > m_output;
+
+            std::shared_ptr< ComputePipeline > m_pipeline;
+            std::shared_ptr< DescriptorSet > m_descriptorSet;
+        };
+
+    }
+
 }
 
 #endif
