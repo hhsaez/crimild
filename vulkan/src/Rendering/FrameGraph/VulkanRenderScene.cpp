@@ -133,14 +133,14 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
     m_lighting->render(
         renderState,
         camera,
-        {
+        SyncOptions {
             .pre = {
                 // Make sure all G-Buffer targets are in the correct layout
                 // Do it here to avoid waiting before they are actually needed
                 .imageMemoryBarriers = {
                     ImageMemoryBarrier {
-                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcAccessMask = 0,
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -148,8 +148,8 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
                         .imageView = m_renderTargets[ getName() + "/Targets/Albedo" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
-                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcAccessMask = 0,
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -157,8 +157,8 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
                         .imageView = m_renderTargets[ getName() + "/Targets/Position" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
-                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcAccessMask = 0,
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -166,8 +166,8 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
                         .imageView = m_renderTargets[ getName() + "/Targets/Normal" ]->getImageView(),
                     },
                     ImageMemoryBarrier {
-                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcAccessMask = 0,
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -193,8 +193,8 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
                     // Since this is the last pass, make sure the color target is
                     // in the correct layout and can be read later on.
                     ImageMemoryBarrier {
-                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                         .srcAccessMask = 0,
                         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
                         .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,

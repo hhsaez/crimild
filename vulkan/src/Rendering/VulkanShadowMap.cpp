@@ -117,8 +117,8 @@ vulkan::ShadowMap::ShadowMap( RenderDevice *device, std::string name, Light::Typ
         std::vector< Descriptor > {
             {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .sampler = m_sampler,
                 .imageView = m_imageView,
+                .sampler = m_sampler,
             },
         }
     );

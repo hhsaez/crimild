@@ -31,10 +31,9 @@
 #include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/VulkanDescriptor.hpp"
 
 namespace crimild::vulkan {
-
-    class Descriptor;
 
     class DescriptorPool
         : public SharedObject,
