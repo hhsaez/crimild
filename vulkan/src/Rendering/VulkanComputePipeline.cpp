@@ -74,9 +74,9 @@ ComputePipeline::ComputePipeline(
 
     VkComputePipelineCreateInfo info {
         .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-        .layout = m_pipelineLayout,
         .flags = 0,
         .stage = shaderStageInfo,
+        .layout = m_pipelineLayout,
     };
 
     VkPipeline handle;

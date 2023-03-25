@@ -57,12 +57,12 @@ vulkan::Framebuffer::Framebuffer(
     auto createInfo = VkFramebufferCreateInfo {
         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
         .pNext = nullptr,
-        .layers = 1,
         .renderPass = renderPass->getHandle(),
         .attachmentCount = uint32_t( attachments.size() ),
         .pAttachments = attachments.data(),
         .width = extent.width,
         .height = extent.height,
+        .layers = 1,
     };
 
     VkFramebuffer handle;

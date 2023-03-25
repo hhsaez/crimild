@@ -390,13 +390,12 @@ void Scene::onRender( void ) noexcept
     for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
         debugTarget->execute(
             {
-                .wait = { debugTarget->getSemaphore() },
                 .pre = {
                     // Transition target image to general layout so it can be written
                     .imageMemoryBarriers = {
                         vulkan::ImageMemoryBarrier {
-                            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                             .srcStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                             .srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
                             .dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
                             .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -409,8 +408,8 @@ void Scene::onRender( void ) noexcept
                     // Transition target image to shader read
                     .imageMemoryBarriers = {
                         vulkan::ImageMemoryBarrier {
-                            .dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                             .srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                            .dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                             .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
                             .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
                             .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
@@ -419,6 +418,7 @@ void Scene::onRender( void ) noexcept
                         },
                     },
                 },
+                .wait = { debugTarget->getSemaphore() },
             }
         );
     }

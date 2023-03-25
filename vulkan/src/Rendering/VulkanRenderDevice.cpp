@@ -2386,11 +2386,11 @@ void RenderDevice::submitCommands(
 
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
-        .pCommandBuffers = commandBufferHandlers.data(),
-        .pWaitDstStageMask = &waitStageMask,
         .waitSemaphoreCount = uint32_t( waitSemaphores.size() ),
         .pWaitSemaphores = waitSemaphores.data(),
+        .pWaitDstStageMask = &waitStageMask,
+        .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
+        .pCommandBuffers = commandBufferHandlers.data(),
         .signalSemaphoreCount = uint32_t( signalSemaphores.size() ),
         .pSignalSemaphores = signalSemaphores.data(),
     };

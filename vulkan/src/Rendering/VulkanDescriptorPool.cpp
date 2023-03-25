@@ -27,7 +27,6 @@
 
 #include "Rendering/VulkanDescriptorPool.hpp"
 
-#include "Rendering/VulkanDescriptor.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild::vulkan;
