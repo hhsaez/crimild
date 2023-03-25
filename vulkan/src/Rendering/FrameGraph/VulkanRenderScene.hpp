@@ -29,7 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
 
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
-#include "Rendering/VulkanSceneRenderState.hpp"
+#include "Rendering/VulkanSceneRenderState.hpp" 1
 
 namespace crimild {
 
@@ -55,16 +55,31 @@ namespace crimild {
 
                 void render( Node *scene, Camera *camera ) noexcept;
 
-                inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept { return m_colorTarget; }
-                inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_colorTarget; }
+                inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
+                {
+                    return getRenderTarget( "Scene/Color" );
+                }
+
+                inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept
+                {
+                    return getRenderTarget( "Scene/Color" );
+                }
+
+                inline const std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) const noexcept
+                {
+                    return m_renderTargets.at( name );
+                }
+
+                inline std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) noexcept
+                {
+                    return m_renderTargets.at( name );
+                }
 
             protected:
                 virtual void onResize( void ) noexcept override;
 
             private:
-                std::shared_ptr< RenderTarget > m_depthTarget;
-                std::shared_ptr< RenderTarget > m_colorTarget;
-                std::vector< std::shared_ptr< RenderTarget > > m_gBufferTargets;
+                std::unordered_map< std::string, std::shared_ptr< RenderTarget > > m_renderTargets;
 
                 std::shared_ptr< RenderShadowMaps > m_shadows;
                 std::shared_ptr< RenderSceneGBuffer > m_gBuffer;

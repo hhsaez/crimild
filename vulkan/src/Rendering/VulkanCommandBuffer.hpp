@@ -43,6 +43,7 @@ namespace crimild::vulkan {
 
     class ComputePipeline;
     class DescriptorSet;
+    class Fence;
     class Framebuffer;
     class GraphicsPipeline;
     class Image;
@@ -69,6 +70,8 @@ namespace crimild::vulkan {
         ) noexcept;
 
         virtual ~CommandBuffer( void ) noexcept;
+
+        inline std::shared_ptr< Fence > &getFence( void ) noexcept { return m_fence; }
 
         void reset( void ) noexcept;
 
@@ -129,6 +132,8 @@ namespace crimild::vulkan {
         VkPipeline m_pipeline = VK_NULL_HANDLE;
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipelineBindPoint m_pipelineBindPoint;
+
+        std::shared_ptr< Fence > m_fence;
     };
 
 }

@@ -53,6 +53,7 @@ Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
         );
         m_framegraphs[ i ] = framegraph;
         m_outputTextures[ i ] = crimild::alloc< ImGuiVulkanTexture >(
+            "Scene",
             framegraph->getOutput()->getImageView(),
             framegraph->getOutput()->getSampler()
         );
@@ -110,6 +111,4 @@ void Simulation::onRender( void ) noexcept
         crimild::Simulation::getInstance()->getScene(),
         camera
     );
-
-    getRenderDevice()->flush();
 }

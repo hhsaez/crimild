@@ -33,6 +33,7 @@
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanComputePipeline.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
+#include "Rendering/VulkanFence.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 #include "Rendering/VulkanImage.hpp"
@@ -48,7 +49,8 @@ using namespace crimild::vulkan;
 
 CommandBuffer::CommandBuffer( RenderDevice *device, std::string name, VkCommandBufferLevel level ) noexcept
     : Named( name ),
-      WithRenderDevice( device )
+      WithRenderDevice( device ),
+      m_fence( crimild::alloc< Fence >( device, name + "/Fence" ) )
 {
     auto allocInfo = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -84,6 +86,19 @@ CommandBuffer::~CommandBuffer( void ) noexcept
 
 void CommandBuffer::reset( void ) noexcept
 {
+    std::array< VkFence, 1 > fences = { m_fence->getHandle() };
+    CRIMILD_VULKAN_CHECK(
+        vkWaitForFences(
+            getRenderDevice()->getHandle(),
+            fences.size(),
+            fences.data(),
+            VK_TRUE,
+            UINT64_MAX
+        )
+    );
+
+    vkResetFences( getRenderDevice()->getHandle(), fences.size(), fences.data() );
+
     CRIMILD_VULKAN_CHECK(
         vkResetCommandBuffer(
             getHandle(),

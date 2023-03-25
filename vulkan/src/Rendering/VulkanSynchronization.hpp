@@ -33,6 +33,7 @@
 namespace crimild::vulkan {
 
     class ImageView;
+    class Semaphore;
 
     struct ImageMemoryBarrier {
         VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -57,6 +58,8 @@ namespace crimild::vulkan {
     struct SyncOptions {
         PipelineBarriers pre;
         PipelineBarriers post;
+        std::vector< std::shared_ptr< Semaphore > > wait;
+        std::vector< std::shared_ptr< Semaphore > > signal;
     };
 
 }

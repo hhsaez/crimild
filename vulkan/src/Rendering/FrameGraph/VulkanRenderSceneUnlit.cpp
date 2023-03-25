@@ -308,5 +308,5 @@ void RenderSceneUnlit::render(
     cmds->endRenderPass();
     cmds->end( options );
 
-    getRenderDevice()->submitGraphicsCommands( cmds );
+    getRenderDevice()->submitGraphicsCommands( cmds, options.wait, options.signal );
 }

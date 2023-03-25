@@ -670,9 +670,9 @@ int main( int argc, char **argv )
             ImGui::RenderPlatformWindowsDefault();
         }
     }
-    
+
     crimild::PrefabNode::cleanup();
-    
+
     jobScheduler.executeDelayedJobs();
     crimild::MessageQueue::getInstance()->dispatchDeferredMessages();
 

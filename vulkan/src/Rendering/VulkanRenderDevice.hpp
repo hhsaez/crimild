@@ -50,6 +50,7 @@ namespace crimild {
         class CommandBuffer;
         class PhysicalDevice;
         class RenderDeviceCache;
+        class Semaphore;
         class ShadowMapDEPRECATED;
         class VulkanSurface;
 
@@ -111,8 +112,25 @@ namespace crimild {
                 return m_caches[ frameIndex ].get();
             }
 
-            void submitComputeCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
-            void submitGraphicsCommands( std::shared_ptr< CommandBuffer > &commandBuffer ) noexcept;
+            void submitComputeCommands(
+                std::shared_ptr< CommandBuffer > &commandBuffer,
+                const std::vector< std::shared_ptr< Semaphore > > &wait = {},
+                const std::vector< std::shared_ptr< Semaphore > > &signal = {}
+            ) noexcept;
+
+            void submitGraphicsCommands(
+                std::shared_ptr< CommandBuffer > &commandBuffer,
+                const std::vector< std::shared_ptr< Semaphore > > &wait = {},
+                const std::vector< std::shared_ptr< Semaphore > > &signal = {}
+            ) noexcept;
+
+        private:
+            void submitCommands(
+                VkQueue queue,
+                std::shared_ptr< CommandBuffer > &commandBuffer,
+                const std::vector< std::shared_ptr< Semaphore > > &wait = {},
+                const std::vector< std::shared_ptr< Semaphore > > &signal = {}
+            ) noexcept;
 
         private:
             VkDevice m_handle = VK_NULL_HANDLE;

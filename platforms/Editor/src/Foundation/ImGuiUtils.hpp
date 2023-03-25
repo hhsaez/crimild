@@ -44,6 +44,7 @@
 #include "GraphEditor.h"
 // clang-format on
 
+#include "Foundation/Named.hpp"
 #include "Foundation/SharedObject.hpp"
 
 namespace crimild {
@@ -58,9 +59,12 @@ namespace crimild {
     /**
      * Retains ownership of bound resources so they don't get deleted before time.
      */
-    class ImGuiVulkanTexture : public SharedObject {
+    class ImGuiVulkanTexture
+        : public SharedObject,
+          public Named {
     public:
         ImGuiVulkanTexture(
+            std::string name,
             std::shared_ptr< vulkan::ImageView > const &imageView,
             std::shared_ptr< vulkan::Sampler > const &sampelr
         ) noexcept;
