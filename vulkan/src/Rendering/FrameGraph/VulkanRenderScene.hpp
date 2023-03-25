@@ -29,7 +29,8 @@
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE
 
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
-#include "Rendering/VulkanSceneRenderState.hpp" 1
+#include "Rendering/VulkanSceneRenderState.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 
 namespace crimild {
 
@@ -50,19 +51,19 @@ namespace crimild {
 
             class RenderScene : public RenderBase {
             public:
-                RenderScene( RenderDevice *device, const VkExtent2D &extent );
+                RenderScene( RenderDevice *device, std::string name, const VkExtent2D &extent );
                 virtual ~RenderScene( void ) = default;
 
-                void render( Node *scene, Camera *camera ) noexcept;
+                void render( Node *scene, Camera *camera, SyncOptions const &options = {} ) noexcept;
 
                 inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
                 {
-                    return getRenderTarget( "Scene/Color" );
+                    return getRenderTarget( getName() + "/Targets/Color" );
                 }
 
                 inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept
                 {
-                    return getRenderTarget( "Scene/Color" );
+                    return getRenderTarget( getName() + "/Targets/Color" );
                 }
 
                 inline const std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) const noexcept

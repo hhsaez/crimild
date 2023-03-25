@@ -168,296 +168,296 @@ Event SelectionOutlinePass::handle( const Event &e ) noexcept
 
 void SelectionOutlinePass::render( Node *selectedScene, Camera *camera ) noexcept
 {
-    if ( selectedScene == nullptr ) {
-        return;
-    }
+    // if ( selectedScene == nullptr ) {
+    //     return;
+    // }
 
-    RenderableSet renderables;
+    // RenderableSet renderables;
 
-    selectedScene->perform(
-        ApplyToGeometries(
-            [ & ]( Geometry *geometry ) {
-                renderables.addGeometry( geometry );
-            }
-        )
-    );
+    // selectedScene->perform(
+    //     ApplyToGeometries(
+    //         [ & ]( Geometry *geometry ) {
+    //             renderables.addGeometry( geometry );
+    //         }
+    //     )
+    // );
 
-    // Set correct aspect ratio for camera before rendering
-    camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
+    // // Set correct aspect ratio for camera before rendering
+    // camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
-    if ( m_renderPassObjects.uniforms != nullptr ) {
-        m_renderPassObjects.uniforms->setValue(
-            RenderPassObjects::Uniforms {
-                .view = camera->getViewMatrix(),
-                .proj = camera->getProjectionMatrix() }
-        );
-        getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-    }
+    // if ( m_renderPassObjects.uniforms != nullptr ) {
+    //     m_renderPassObjects.uniforms->setValue(
+    //         RenderPassObjects::Uniforms {
+    //             .view = camera->getViewMatrix(),
+    //             .proj = camera->getProjectionMatrix() }
+    //     );
+    //     getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+    // }
 
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = 0,
+    //     .pClearValues = nullptr,
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    // Render to stencil buffer
-    renderables.eachGeometry(
-        [ & ]( Geometry *geometry ) {
-            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_stencilPipeline.pipeline->getHandle()
-                    );
+    // // Render to stencil buffer
+    // renderables.eachGeometry(
+    //     [ & ]( Geometry *geometry ) {
+    //         if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+    //             if ( auto material = ms->first() ) {
+    //                 vkCmdBindPipeline(
+    //                     commandBuffer,
+    //                     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                     m_stencilPipeline.pipeline->getHandle()
+    //                 );
 
-                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_stencilPipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
+    //                 vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_stencilPipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-                    bindGeometryDescriptors( commandBuffer, currentFrameIndex, m_stencilPipeline.pipeline->getPipelineLayout(), geometry );
-                    drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
-                }
-            }
-        }
-    );
+    //                 bindGeometryDescriptors( commandBuffer, currentFrameIndex, m_stencilPipeline.pipeline->getPipelineLayout(), geometry );
+    //                 drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+    //             }
+    //         }
+    //     }
+    // );
 
-    // Render outline
-    renderables.eachGeometry(
-        [ & ]( Geometry *geometry ) {
-            if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                if ( auto material = ms->first() ) {
-                    vkCmdBindPipeline(
-                        commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_outlinePipeline.pipeline->getHandle()
-                    );
+    // // Render outline
+    // renderables.eachGeometry(
+    //     [ & ]( Geometry *geometry ) {
+    //         if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+    //             if ( auto material = ms->first() ) {
+    //                 vkCmdBindPipeline(
+    //                     commandBuffer,
+    //                     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                     m_outlinePipeline.pipeline->getHandle()
+    //                 );
 
-                    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_outlinePipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
+    //                 vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_outlinePipeline.pipeline->getPipelineLayout(), 0, 1, &m_renderPassObjects.descriptorSets[ currentFrameIndex ], 0, nullptr );
 
-                    bindGeometryDescriptors( commandBuffer, currentFrameIndex, m_outlinePipeline.pipeline->getPipelineLayout(), geometry );
-                    drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
-                }
-            }
-        }
-    );
+    //                 bindGeometryDescriptors( commandBuffer, currentFrameIndex, m_outlinePipeline.pipeline->getPipelineLayout(), geometry );
+    //                 drawPrimitive( commandBuffer, currentFrameIndex, geometry->anyPrimitive() );
+    //             }
+    //         }
+    //     }
+    // );
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 }
 
 void SelectionOutlinePass::init( void ) noexcept
 {
-    CRIMILD_LOG_TRACE();
+    // CRIMILD_LOG_TRACE();
 
-    m_renderArea = VkRect2D {
-        .offset = {
-            0,
-            0,
-        },
-        .extent = getRenderDevice()->getSwapchainExtent(),
-    };
+    // m_renderArea = VkRect2D {
+    //     .offset = {
+    //         0,
+    //         0,
+    //     },
+    //     .extent = getRenderDevice()->getSwapchainExtent(),
+    // };
 
-    createRenderPassObjects();
-    createGeometryObjects();
+    // createRenderPassObjects();
+    // createGeometryObjects();
 
-    auto attachments = std::array< VkAttachmentDescription, 2 > {
-        VkAttachmentDescription {
-            .format = getRenderDevice()->getSwapchainFormat(),
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Don't clear input. Just load it as it is
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
-        VkAttachmentDescription {
-            .format = getRenderDevice()->getDepthStencilFormat(),
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            // Don't clear input. Just load it as it is
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        }
-    };
+    // auto attachments = std::array< VkAttachmentDescription, 2 > {
+    //     VkAttachmentDescription {
+    //         .format = getRenderDevice()->getSwapchainFormat(),
+    //         .samples = VK_SAMPLE_COUNT_1_BIT,
+    //         // Don't clear input. Just load it as it is
+    //         .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+    //         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+    //         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    //         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    //         .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //         .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //     },
+    //     VkAttachmentDescription {
+    //         .format = getRenderDevice()->getDepthStencilFormat(),
+    //         .samples = VK_SAMPLE_COUNT_1_BIT,
+    //         // Don't clear input. Just load it as it is
+    //         .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+    //         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+    //         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+    //         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    //         .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //         .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //     }
+    // };
 
-    auto colorReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        },
-    };
+    // auto colorReferences = std::array< VkAttachmentReference, 1 > {
+    //     VkAttachmentReference {
+    //         .attachment = 0,
+    //         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //     },
+    // };
 
-    auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
-        VkAttachmentReference {
-            .attachment = 1,
-            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        },
-    };
+    // auto depthStencilReferences = std::array< VkAttachmentReference, 1 > {
+    //     VkAttachmentReference {
+    //         .attachment = 1,
+    //         .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    //     },
+    // };
 
-    auto subpass = VkSubpassDescription {
-        .flags = 0,
-        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .inputAttachmentCount = 0,
-        .pInputAttachments = nullptr,
-        .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
-        .pColorAttachments = colorReferences.data(),
-        .pResolveAttachments = nullptr,
-        .pDepthStencilAttachment = depthStencilReferences.data(),
-        .preserveAttachmentCount = 0,
-        .pPreserveAttachments = nullptr,
-    };
+    // auto subpass = VkSubpassDescription {
+    //     .flags = 0,
+    //     .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     .inputAttachmentCount = 0,
+    //     .pInputAttachments = nullptr,
+    //     .colorAttachmentCount = crimild::UInt32( colorReferences.size() ),
+    //     .pColorAttachments = colorReferences.data(),
+    //     .pResolveAttachments = nullptr,
+    //     .pDepthStencilAttachment = depthStencilReferences.data(),
+    //     .preserveAttachmentCount = 0,
+    //     .pPreserveAttachments = nullptr,
+    // };
 
-    auto dependencies = std::array< VkSubpassDependency, 2 > {
-        VkSubpassDependency {
-            .srcSubpass = VK_SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        },
-        VkSubpassDependency {
-            .srcSubpass = 0,
-            .dstSubpass = VK_SUBPASS_EXTERNAL,
-            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-            .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-        }
-    };
+    // auto dependencies = std::array< VkSubpassDependency, 2 > {
+    //     VkSubpassDependency {
+    //         .srcSubpass = VK_SUBPASS_EXTERNAL,
+    //         .dstSubpass = 0,
+    //         .srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+    //         .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    //         .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+    //         .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    //         .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+    //     },
+    //     VkSubpassDependency {
+    //         .srcSubpass = 0,
+    //         .dstSubpass = VK_SUBPASS_EXTERNAL,
+    //         .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    //         .dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+    //         .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    //         .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+    //         .dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+    //     }
+    // };
 
-    auto createInfo = VkRenderPassCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
-        .pAttachments = attachments.data(),
-        .subpassCount = 1,
-        .pSubpasses = &subpass,
-        .dependencyCount = crimild::UInt32( dependencies.size() ),
-        .pDependencies = dependencies.data(),
-    };
+    // auto createInfo = VkRenderPassCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    //     .attachmentCount = static_cast< crimild::UInt32 >( attachments.size() ),
+    //     .pAttachments = attachments.data(),
+    //     .subpassCount = 1,
+    //     .pSubpasses = &subpass,
+    //     .dependencyCount = crimild::UInt32( dependencies.size() ),
+    //     .pDependencies = dependencies.data(),
+    // };
 
-    CRIMILD_VULKAN_CHECK(
-        vkCreateRenderPass(
-            getRenderDevice()->getHandle(),
-            &createInfo,
-            nullptr,
-            &m_renderPass
-        )
-    );
+    // CRIMILD_VULKAN_CHECK(
+    //     vkCreateRenderPass(
+    //         getRenderDevice()->getHandle(),
+    //         &createInfo,
+    //         nullptr,
+    //         &m_renderPass
+    //     )
+    // );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
-    for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
-        const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
+    // m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    // for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
+    //     const auto &imageView = getRenderDevice()->getSwapchainImageViews()[ i ];
 
-        auto attachments = std::array< VkImageView, 2 > {
-            imageView->getHandle(),
-            getRenderDevice()->getDepthStencilImageView()->getHandle(),
-        };
+    //     auto attachments = std::array< VkImageView, 2 > {
+    //         imageView->getHandle(),
+    //         getRenderDevice()->getDepthStencilImageView()->getHandle(),
+    //     };
 
-        auto createInfo = VkFramebufferCreateInfo {
-            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .pNext = nullptr,
-            .renderPass = m_renderPass,
-            .attachmentCount = uint32_t( attachments.size() ),
-            .pAttachments = attachments.data(),
-            .width = getRenderDevice()->getSwapchainExtent().width,
-            .height = getRenderDevice()->getSwapchainExtent().height,
-            .layers = 1,
-        };
+    //     auto createInfo = VkFramebufferCreateInfo {
+    //         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+    //         .pNext = nullptr,
+    //         .renderPass = m_renderPass,
+    //         .attachmentCount = uint32_t( attachments.size() ),
+    //         .pAttachments = attachments.data(),
+    //         .width = getRenderDevice()->getSwapchainExtent().width,
+    //         .height = getRenderDevice()->getSwapchainExtent().height,
+    //         .layers = 1,
+    //     };
 
-        CRIMILD_VULKAN_CHECK(
-            vkCreateFramebuffer(
-                getRenderDevice()->getHandle(),
-                &createInfo,
-                nullptr,
-                &m_framebuffers[ i ]
-            )
-        );
-    }
+    //     CRIMILD_VULKAN_CHECK(
+    //         vkCreateFramebuffer(
+    //             getRenderDevice()->getHandle(),
+    //             &createInfo,
+    //             nullptr,
+    //             &m_framebuffers[ i ]
+    //         )
+    //     );
+    // }
 
-    m_stencilPipeline.pipeline = std::make_unique< GraphicsPipeline >(
-        getRenderDevice(),
-        m_renderPass,
-        std::vector< VkDescriptorSetLayout > {
-            m_renderPassObjects.layout,
-            m_geometryObjects.descriptorSetLayout,
-        },
-        m_stencilPipeline.program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-        DepthStencilState {
-            .stencilTestEnable = true,
-            .front = {
-                .failOp = StencilOp::REPLACE,
-                .passOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::REPLACE,
-                .compareOp = CompareOp::ALWAYS,
-                .compareMask = 0xff,
-                .writeMask = 0xff,
-                .reference = 1,
-            },
-            .back = {
-                .failOp = StencilOp::REPLACE,
-                .passOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::REPLACE,
-                .compareOp = CompareOp::ALWAYS,
-                .compareMask = 0xff,
-                .writeMask = 0xff,
-                .reference = 1,
-            },
-        },
-        RasterizationState {},
-        ColorBlendState {
-            .enable = true,
-        }
-    );
-    getRenderDevice()->setObjectName( m_stencilPipeline.pipeline->getHandle(), "SelectionOutlinePass/Stencil" );
+    // m_stencilPipeline.pipeline = std::make_unique< GraphicsPipeline >(
+    //     getRenderDevice(),
+    //     m_renderPass,
+    //     std::vector< VkDescriptorSetLayout > {
+    //         m_renderPassObjects.layout,
+    //         m_geometryObjects.descriptorSetLayout,
+    //     },
+    //     m_stencilPipeline.program.get(),
+    //     std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+    //     DepthStencilState {
+    //         .stencilTestEnable = true,
+    //         .front = {
+    //             .failOp = StencilOp::REPLACE,
+    //             .passOp = StencilOp::REPLACE,
+    //             .depthFailOp = StencilOp::REPLACE,
+    //             .compareOp = CompareOp::ALWAYS,
+    //             .compareMask = 0xff,
+    //             .writeMask = 0xff,
+    //             .reference = 1,
+    //         },
+    //         .back = {
+    //             .failOp = StencilOp::REPLACE,
+    //             .passOp = StencilOp::REPLACE,
+    //             .depthFailOp = StencilOp::REPLACE,
+    //             .compareOp = CompareOp::ALWAYS,
+    //             .compareMask = 0xff,
+    //             .writeMask = 0xff,
+    //             .reference = 1,
+    //         },
+    //     },
+    //     RasterizationState {},
+    //     ColorBlendState {
+    //         .enable = true,
+    //     }
+    // );
+    // getRenderDevice()->setObjectName( m_stencilPipeline.pipeline->getHandle(), "SelectionOutlinePass/Stencil" );
 
-    m_outlinePipeline.pipeline = std::make_unique< GraphicsPipeline >(
-        getRenderDevice(),
-        m_renderPass,
-        std::vector< VkDescriptorSetLayout > {
-            m_renderPassObjects.layout,
-            m_geometryObjects.descriptorSetLayout,
-        },
-        m_outlinePipeline.program.get(),
-        std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
-        DepthStencilState {
-            .depthTestEnable = false,
-            .stencilTestEnable = true,
-            .front = {
-                .failOp = StencilOp::KEEP,
-                .passOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::KEEP,
-                .compareOp = CompareOp::NOT_EQUAL,
-                .compareMask = 0xff,
-                .writeMask = 0xff,
-                .reference = 1,
-            },
-            .back = {
-                .failOp = StencilOp::KEEP,
-                .passOp = StencilOp::REPLACE,
-                .depthFailOp = StencilOp::KEEP,
-                .compareOp = CompareOp::NOT_EQUAL,
-                .compareMask = 0xff,
-                .writeMask = 0xff,
-                .reference = 1,
-            },
-        }
-    );
-    getRenderDevice()->setObjectName( m_outlinePipeline.pipeline->getHandle(), "SelectionOutlinePass/Outline" );
+    // m_outlinePipeline.pipeline = std::make_unique< GraphicsPipeline >(
+    //     getRenderDevice(),
+    //     m_renderPass,
+    //     std::vector< VkDescriptorSetLayout > {
+    //         m_renderPassObjects.layout,
+    //         m_geometryObjects.descriptorSetLayout,
+    //     },
+    //     m_outlinePipeline.program.get(),
+    //     std::vector< VertexLayout > { VertexLayout::P3_N3_TC2 },
+    //     DepthStencilState {
+    //         .depthTestEnable = false,
+    //         .stencilTestEnable = true,
+    //         .front = {
+    //             .failOp = StencilOp::KEEP,
+    //             .passOp = StencilOp::REPLACE,
+    //             .depthFailOp = StencilOp::KEEP,
+    //             .compareOp = CompareOp::NOT_EQUAL,
+    //             .compareMask = 0xff,
+    //             .writeMask = 0xff,
+    //             .reference = 1,
+    //         },
+    //         .back = {
+    //             .failOp = StencilOp::KEEP,
+    //             .passOp = StencilOp::REPLACE,
+    //             .depthFailOp = StencilOp::KEEP,
+    //             .compareOp = CompareOp::NOT_EQUAL,
+    //             .compareMask = 0xff,
+    //             .writeMask = 0xff,
+    //             .reference = 1,
+    //         },
+    //     }
+    // );
+    // getRenderDevice()->setObjectName( m_outlinePipeline.pipeline->getHandle(), "SelectionOutlinePass/Outline" );
 }
 
 void SelectionOutlinePass::clear( void ) noexcept
@@ -483,78 +483,78 @@ void SelectionOutlinePass::clear( void ) noexcept
 
 void SelectionOutlinePass::createRenderPassObjects( void ) noexcept
 {
-    CRIMILD_LOG_TRACE();
+    // CRIMILD_LOG_TRACE();
 
-    m_renderPassObjects.uniforms = [ & ] {
-        auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
-        ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        getRenderDevice()->bind( ubo.get() );
-        return ubo;
-    }();
+    // m_renderPassObjects.uniforms = [ & ] {
+    //     auto ubo = std::make_unique< UniformBuffer >( RenderPassObjects::Uniforms {} );
+    //     ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+    //     getRenderDevice()->bind( ubo.get() );
+    //     return ubo;
+    // }();
 
-    VkDescriptorPoolSize poolSize {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-    };
+    // VkDescriptorPoolSize poolSize {
+    //     .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //     .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    // };
 
-    auto poolCreateInfo = VkDescriptorPoolCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
-    };
+    // auto poolCreateInfo = VkDescriptorPoolCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    //     .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+    //     .poolSizeCount = 1,
+    //     .pPoolSizes = &poolSize,
+    // };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
+    // CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_renderPassObjects.pool ) );
 
-    const auto layoutBinding = VkDescriptorSetLayoutBinding {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = nullptr,
-    };
+    // const auto layoutBinding = VkDescriptorSetLayoutBinding {
+    //     .binding = 0,
+    //     .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //     .descriptorCount = 1,
+    //     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+    //     .pImmutableSamplers = nullptr,
+    // };
 
-    auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &layoutBinding,
-    };
+    // auto layoutCreateInfo = VkDescriptorSetLayoutCreateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    //     .bindingCount = 1,
+    //     .pBindings = &layoutBinding,
+    // };
 
-    CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
+    // CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    // std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
 
-    const auto allocInfo = VkDescriptorSetAllocateInfo {
-        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        .descriptorPool = m_renderPassObjects.pool,
-        .descriptorSetCount = uint32_t( layouts.size() ),
-        .pSetLayouts = layouts.data(),
-    };
+    // const auto allocInfo = VkDescriptorSetAllocateInfo {
+    //     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    //     .descriptorPool = m_renderPassObjects.pool,
+    //     .descriptorSetCount = uint32_t( layouts.size() ),
+    //     .pSetLayouts = layouts.data(),
+    // };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
-    CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
+    // m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    // CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
-    for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
-        const auto bufferInfo = VkDescriptorBufferInfo {
-            .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
-            .offset = 0,
-            .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
-        };
+    // for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
+    //     const auto bufferInfo = VkDescriptorBufferInfo {
+    //         .buffer = getRenderDevice()->getHandle( m_renderPassObjects.uniforms.get(), i ),
+    //         .offset = 0,
+    //         .range = m_renderPassObjects.uniforms->getBufferView()->getLength(),
+    //     };
 
-        const auto descriptorWrite = VkWriteDescriptorSet {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = m_renderPassObjects.descriptorSets[ i ],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorCount = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .pImageInfo = nullptr,
-            .pBufferInfo = &bufferInfo,
-            .pTexelBufferView = nullptr,
-        };
+    //     const auto descriptorWrite = VkWriteDescriptorSet {
+    //         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    //         .dstSet = m_renderPassObjects.descriptorSets[ i ],
+    //         .dstBinding = 0,
+    //         .dstArrayElement = 0,
+    //         .descriptorCount = 1,
+    //         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //         .pImageInfo = nullptr,
+    //         .pBufferInfo = &bufferInfo,
+    //         .pTexelBufferView = nullptr,
+    //     };
 
-        vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
-    }
+    //     vkUpdateDescriptorSets( getRenderDevice()->getHandle(), 1, &descriptorWrite, 0, nullptr );
+    // }
 }
 
 void SelectionOutlinePass::destroyRenderPassObjects( void ) noexcept
@@ -597,12 +597,12 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
     if ( !m_geometryObjects.descriptorSets.contains( geometry ) ) {
         VkDescriptorPoolSize poolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         };
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
         };
@@ -612,7 +612,7 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
         m_geometryObjects.uniforms[ geometry ] = std::make_unique< UniformBuffer >( Matrix4 {} );
         getRenderDevice()->bind( m_geometryObjects.uniforms[ geometry ].get() );
 
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_geometryObjects.descriptorSetLayout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_geometryObjects.descriptorSetLayout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -621,7 +621,7 @@ void SelectionOutlinePass::bindGeometryDescriptors( VkCommandBuffer cmds, Index 
             .pSetLayouts = layouts.data(),
         };
 
-        m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getSwapchainImageCount() );
+        m_geometryObjects.descriptorSets[ geometry ].resize( getRenderDevice()->getInFlightFrameCount() );
         CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_geometryObjects.descriptorSets[ geometry ].data() ) );
 
         for ( size_t i = 0; i < m_geometryObjects.descriptorSets[ geometry ].size(); ++i ) {

@@ -272,99 +272,99 @@ Event SceneDebugPass::handle( const Event &e ) noexcept
 
 void SceneDebugPass::render( Node *scene, Camera *camera ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    const auto clearValues = std::array< VkClearValue, 2 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                },
-            },
-        },
-        VkClearValue {
-            .depthStencil = {
-                1,
-                0,
-            },
-        },
-    };
+    // const auto clearValues = std::array< VkClearValue, 2 > {
+    //     VkClearValue {
+    //         .color = {
+    //             .float32 = {
+    //                 0.0f,
+    //                 0.0f,
+    //                 0.0f,
+    //                 0.0f,
+    //             },
+    //         },
+    //     },
+    //     VkClearValue {
+    //         .depthStencil = {
+    //             1,
+    //             0,
+    //         },
+    //     },
+    // };
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
-        .pClearValues = clearValues.data(),
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = static_cast< crimild::UInt32 >( clearValues.size() ),
+    //     .pClearValues = clearValues.data(),
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    if ( scene != nullptr && camera != nullptr ) {
-        // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
+    // if ( scene != nullptr && camera != nullptr ) {
+    //     // Set correct aspect ratio for camera before rendering
+    //     camera->setAspectRatio( float( m_renderArea.extent.width ) / float( m_renderArea.extent.height ) );
 
-        if ( m_renderPassObjects.uniforms != nullptr ) {
-            m_renderPassObjects.uniforms->setValue(
-                RenderPassObjects::Uniforms {
-                    .view = camera->getViewMatrix(),
-                    .proj = camera->getProjectionMatrix() }
-            );
-            getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
-        }
+    //     if ( m_renderPassObjects.uniforms != nullptr ) {
+    //         m_renderPassObjects.uniforms->setValue(
+    //             RenderPassObjects::Uniforms {
+    //                 .view = camera->getViewMatrix(),
+    //                 .proj = camera->getProjectionMatrix() }
+    //         );
+    //         getRenderDevice()->update( m_renderPassObjects.uniforms.get() );
+    //     }
 
-        scene->perform( DebugVisitor( camera ) );
+    //     scene->perform( DebugVisitor( camera ) );
 
-        m_inFlightPrimitives[ currentFrameIndex ].clear();
+    //     m_inFlightPrimitives[ currentFrameIndex ].clear();
 
-        DebugDrawManager::eachRenderable(
-            [ & ]( auto renderable ) {
-                vkCmdBindPipeline(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_pipeline->getHandle()
-                );
+    //     DebugDrawManager::eachRenderable(
+    //         [ & ]( auto renderable ) {
+    //             vkCmdBindPipeline(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_pipeline->getHandle()
+    //             );
 
-                vkCmdBindDescriptorSets(
-                    commandBuffer,
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    m_pipeline->getPipelineLayout(),
-                    0,
-                    1,
-                    &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-                    0,
-                    nullptr
-                );
+    //             vkCmdBindDescriptorSets(
+    //                 commandBuffer,
+    //                 VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                 m_pipeline->getPipelineLayout(),
+    //                 0,
+    //                 1,
+    //                 &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //                 0,
+    //                 nullptr
+    //             );
 
-                PerModelUniforms model;
-                model.world = renderable.world.mat;
-                model.color = renderable.color;
-                vkCmdPushConstants(
-                    commandBuffer,
-                    m_pipeline->getPipelineLayout(),
-                    VK_SHADER_STAGE_VERTEX_BIT,
-                    0,
-                    sizeof( PerModelUniforms ),
-                    &model
-                );
+    //             PerModelUniforms model;
+    //             model.world = renderable.world.mat;
+    //             model.color = renderable.color;
+    //             vkCmdPushConstants(
+    //                 commandBuffer,
+    //                 m_pipeline->getPipelineLayout(),
+    //                 VK_SHADER_STAGE_VERTEX_BIT,
+    //                 0,
+    //                 sizeof( PerModelUniforms ),
+    //                 &model
+    //             );
 
-                auto primitive = renderable.primitive;
-                drawPrimitive( commandBuffer, currentFrameIndex, primitive.get() );
+    //             auto primitive = renderable.primitive;
+    //             drawPrimitive( commandBuffer, currentFrameIndex, primitive.get() );
 
-                // Keep track of primitive, since DebugDrawManager might destroy it when resetting
-                m_inFlightPrimitives[ currentFrameIndex ].insert( primitive );
-            }
-        );
+    //             // Keep track of primitive, since DebugDrawManager might destroy it when resetting
+    //             m_inFlightPrimitives[ currentFrameIndex ].insert( primitive );
+    //         }
+    //     );
 
-        DebugDrawManager::reset();
-    }
+    //     DebugDrawManager::reset();
+    // }
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 }
 
 void SceneDebugPass::init( void ) noexcept
@@ -469,7 +469,7 @@ void SceneDebugPass::init( void ) noexcept
     getRenderDevice()->createFramebufferAttachment( "Scene/Debug", extent, colorFormat, m_colorAttachment );
     getRenderDevice()->createFramebufferAttachment( "Scene/Debug/Depth", extent, depthFormat, m_depthAttachment );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_framebuffers.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 2 > {
             m_colorAttachment.imageViews[ i ]->getHandle(),
@@ -524,7 +524,7 @@ void SceneDebugPass::init( void ) noexcept
     );
     getRenderDevice()->setObjectName( m_pipeline->getHandle(), "SceneDebugPass" );
 
-    m_inFlightPrimitives.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_inFlightPrimitives.resize( getRenderDevice()->getInFlightFrameCount() );
 }
 
 void SceneDebugPass::clear( void ) noexcept
@@ -562,12 +562,12 @@ void SceneDebugPass::createRenderPassObjects( void ) noexcept
 
     VkDescriptorPoolSize poolSize {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = 1,
         .pPoolSizes = &poolSize,
     };
@@ -590,7 +590,7 @@ void SceneDebugPass::createRenderPassObjects( void ) noexcept
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -599,7 +599,7 @@ void SceneDebugPass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {

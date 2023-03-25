@@ -12,14 +12,14 @@ target_sources(
 
     PRIVATE
     Crimild_Vulkan.cpp
+    
     Foundation/VulkanInitializers.hpp
     Foundation/VulkanUtils.cpp
     Foundation/VulkanUtils.hpp
+
     Rendering/FrameGraph/VulkanComputeBase.hpp
     Rendering/FrameGraph/VulkanComputeImageFromChannels.cpp
     Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp
-    Rendering/FrameGraph/VulkanComputeSceneLighting.cpp
-    Rendering/FrameGraph/VulkanComputeSceneLighting.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp

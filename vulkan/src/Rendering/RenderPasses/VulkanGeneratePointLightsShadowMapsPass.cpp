@@ -167,27 +167,27 @@ void GeneratePointLightsShadowMaps::render(
     const Camera *
 ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    for ( const auto &light : lights.at( Light::Type::POINT ) ) {
-        if ( light->castShadows() ) {
-            if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
-                auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
+    // for ( const auto &light : lights.at( Light::Type::POINT ) ) {
+    //     if ( light->castShadows() ) {
+    //         if ( auto shadowMap = getRenderDevice()->getShadowMap( light.get() ) ) {
+    //             auto &shadowMapImage = shadowMap->images[ currentFrameIndex ];
 
-                // Transition to transfer so we can write into the image after render.
-                shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+    //             // Transition to transfer so we can write into the image after render.
+    //             shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-                for ( uint32_t layerIndex = 0; layerIndex < shadowMap->imageLayerCount; ++layerIndex ) {
-                    shadowMap->lightSpaceMatrices[ layerIndex ] = computeLightSpaceMatrix( light.get(), layerIndex );
-                    renderShadowMapImage( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
-                }
+    //             for ( uint32_t layerIndex = 0; layerIndex < shadowMap->imageLayerCount; ++layerIndex ) {
+    //                 shadowMap->lightSpaceMatrices[ layerIndex ] = computeLightSpaceMatrix( light.get(), layerIndex );
+    //                 renderShadowMapImage( light.get(), shadowCasters, shadowMap->lightSpaceMatrices[ layerIndex ], shadowMapImage, layerIndex );
+    //             }
 
-                // Transition back to read after render.
-                shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
-            }
-        }
-    }
+    //             // Transition back to read after render.
+    //             shadowMapImage->transitionLayout( commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+    //         }
+    //     }
+    // }
 }
 
 void GeneratePointLightsShadowMaps::renderShadowMapImage(
@@ -198,82 +198,82 @@ void GeneratePointLightsShadowMaps::renderShadowMapImage(
     uint32_t layerIndex
 ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    m_renderPass->begin( commandBuffer, m_framebuffers[ currentFrameIndex ] );
+    // m_renderPass->begin( commandBuffer, m_framebuffers[ currentFrameIndex ] );
 
-    // Bind light, creating objects if needed.
-    bindLight( light );
+    // // Bind light, creating objects if needed.
+    // bindLight( light );
 
-    // Update light uniforms for this layer.
-    if ( auto uniforms = m_lightObjects.lights[ light ][ layerIndex ].uniforms.get() ) {
-        const auto lightPos = location( light->getWorld() );
-        uniforms->setValue(
-            LightObjects::PerLayer::Uniforms {
-                .lightSpaceMatrix = lightSpaceMatrix,
-                .lightPosition = lightPos,
-            }
-        );
-        getRenderDevice()->update( uniforms );
-    }
+    // // Update light uniforms for this layer.
+    // if ( auto uniforms = m_lightObjects.lights[ light ][ layerIndex ].uniforms.get() ) {
+    //     const auto lightPos = location( light->getWorld() );
+    //     uniforms->setValue(
+    //         LightObjects::PerLayer::Uniforms {
+    //             .lightSpaceMatrix = lightSpaceMatrix,
+    //             .lightPosition = lightPos,
+    //         }
+    //     );
+    //     getRenderDevice()->update( uniforms );
+    // }
 
-    vkCmdBindPipeline(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle()
-    );
+    // vkCmdBindPipeline(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getHandle()
+    // );
 
-    vkCmdBindDescriptorSets(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        0,
-        1,
-        &m_lightObjects.lights[ light ][ layerIndex ].descriptorSets[ currentFrameIndex ],
-        0,
-        nullptr
-    );
+    // vkCmdBindDescriptorSets(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getPipelineLayout(),
+    //     0,
+    //     1,
+    //     &m_lightObjects.lights[ light ][ layerIndex ].descriptorSets[ currentFrameIndex ],
+    //     0,
+    //     nullptr
+    // );
 
-    for ( auto &[ primitive, renderables ] : shadowCasters ) {
-        for ( const auto &renderable : renderables ) {
-            const auto uniforms = PerGeometryUniforms {
-                .model = renderable.model,
-            };
+    // for ( auto &[ primitive, renderables ] : shadowCasters ) {
+    //     for ( const auto &renderable : renderables ) {
+    //         const auto uniforms = PerGeometryUniforms {
+    //             .model = renderable.model,
+    //         };
 
-            vkCmdPushConstants(
-                commandBuffer,
-                m_pipeline->getPipelineLayout(),
-                VK_SHADER_STAGE_VERTEX_BIT,
-                0,
-                sizeof( PerGeometryUniforms ),
-                &uniforms
-            );
+    //         vkCmdPushConstants(
+    //             commandBuffer,
+    //             m_pipeline->getPipelineLayout(),
+    //             VK_SHADER_STAGE_VERTEX_BIT,
+    //             0,
+    //             sizeof( PerGeometryUniforms ),
+    //             &uniforms
+    //         );
 
-            drawPrimitive( commandBuffer, primitive.get() );
-        }
-    }
+    //         drawPrimitive( commandBuffer, primitive.get() );
+    //     }
+    // }
 
-    m_renderPass->end( commandBuffer );
+    // m_renderPass->end( commandBuffer );
 
-    m_colorAttachment.images[ currentFrameIndex ]->transitionLayout(
-        commandBuffer,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-    );
+    // m_colorAttachment.images[ currentFrameIndex ]->transitionLayout(
+    //     commandBuffer,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+    // );
 
-    auto copyRegion = vulkan::initializers::imageCopy();
-    copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    copyRegion.dstSubresource.baseArrayLayer = layerIndex;
-    copyRegion.extent = shadowMapImage->getExtent();
-    shadowMapImage->copy( commandBuffer, m_colorAttachment.images[ currentFrameIndex ], copyRegion );
+    // auto copyRegion = vulkan::initializers::imageCopy();
+    // copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    // copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    // copyRegion.dstSubresource.baseArrayLayer = layerIndex;
+    // copyRegion.extent = shadowMapImage->getExtent();
+    // shadowMapImage->copy( commandBuffer, m_colorAttachment.images[ currentFrameIndex ], copyRegion );
 
-    m_colorAttachment.images[ currentFrameIndex ]->transitionLayout(
-        commandBuffer,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    );
+    // m_colorAttachment.images[ currentFrameIndex ]->transitionLayout(
+    //     commandBuffer,
+    //     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    // );
 }
 
 void GeneratePointLightsShadowMaps::init( void ) noexcept
@@ -455,20 +455,20 @@ void GeneratePointLightsShadowMaps::bindLight( const Light *light ) noexcept
         auto poolSizes = std::vector< VkDescriptorPoolSize > {
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             },
         };
 
         auto poolCreateInfo = VkDescriptorPoolCreateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             .poolSizeCount = uint32_t( poolSizes.size() ),
             .pPoolSizes = poolSizes.data(),
         };
 
         CRIMILD_VULKAN_CHECK( vkCreateDescriptorPool( getRenderDevice()->getHandle(), &poolCreateInfo, nullptr, &m_lightObjects.lights[ light ][ layerIndex ].pool ) );
 
-        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_lightObjects.layout );
+        std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_lightObjects.layout );
 
         const auto allocInfo = VkDescriptorSetAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -477,7 +477,7 @@ void GeneratePointLightsShadowMaps::bindLight( const Light *light ) noexcept
             .pSetLayouts = layouts.data(),
         };
 
-        m_lightObjects.lights[ light ][ layerIndex ].descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+        m_lightObjects.lights[ light ][ layerIndex ].descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
         CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_lightObjects.lights[ light ][ layerIndex ].descriptorSets.data() ) );
 
         for ( size_t i = 0; i < m_lightObjects.lights[ light ][ layerIndex ].descriptorSets.size(); ++i ) {

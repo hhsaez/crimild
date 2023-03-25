@@ -117,9 +117,9 @@ DescriptorSet::DescriptorSet(
                 assert( descriptor.imageView->getHandle() != VK_NULL_HANDLE );
                 imageInfos.push_back(
                     VkDescriptorImageInfo {
-                        .sampler = descriptor.sampler->getHandle(),
+                        .sampler = VK_NULL_HANDLE,
                         .imageView = descriptor.imageView->getHandle(),
-                        .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+                        .imageLayout = descriptor.imageLayout,
                     }
                 );
                 writes.push_back(

@@ -34,6 +34,7 @@
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
+#include "Rendering/VulkanSynchronization.hpp"
 #include "Simulation/Editor.hpp"
 
 using namespace crimild;
@@ -112,8 +113,10 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
     m_debugTargets.resize( N );
     m_outputTextures.resize( N );
     for ( int i = 0; i < N; ++i ) {
+        auto prefix = StringUtils::toString( i );
         auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
             device,
+            prefix + "/RenderScene",
             VkExtent2D {
                 .width = uint32_t( m_extent.width ),
                 .height = uint32_t( m_extent.height ),
@@ -135,9 +138,9 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
             //     m_framegraphs[ i ]->getRenderTarget( "Scene/Depth" ),
             //     "depth"
             // )
-            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Albedo" ), "rgb" ),
-//            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Position" ), "rgb" ),
-//            crimild::alloc< ComputeImageFromChannels >( device, m_framegraphs[ i ]->getRenderTarget( "Scene/Normal" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Albedo", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Albedo" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Position", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Position" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Normal", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Normal" ), "rgb" ),
         };
 
         for ( auto &debugTarget : m_debugTargets[ i ] ) {
@@ -372,18 +375,50 @@ void Scene::onRender( void ) noexcept
     // Update editor camera aspect ratio based on current window's size
     m_editorCamera->setAspectRatio( m_extent.width / m_extent.height );
 
+    std::vector< std::shared_ptr< vulkan::Semaphore > > signals;
+    for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
+        signals.push_back( debugTarget->getSemaphore() );
+    }
     m_framegraphs[ currentFrameIdx ]->render(
         crimild::Simulation::getInstance()->getScene(),
-        m_editorCamera.get()
+        m_editorCamera.get(),
+        {
+            .signal = signals,
+        }
     );
-
-    // TODO: Remove htis. Add fence/semaphore for waiting for render graph to complete render
-    // getRenderDevice()->flush();
 
     for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
         debugTarget->execute(
             {
-                .wait = { m_framegraphs[ currentFrameIdx ]->getSemaphore() },
+                .wait = { debugTarget->getSemaphore() },
+                .pre = {
+                    // Transition target image to general layout so it can be written
+                    .imageMemoryBarriers = {
+                        vulkan::ImageMemoryBarrier {
+                            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                            .srcStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            .srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                            .dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                            .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+                            .imageView = debugTarget->getOutput()->getImageView(),
+                        },
+                    },
+                },
+                .post = {
+                    // Transition target image to shader read
+                    .imageMemoryBarriers = {
+                        vulkan::ImageMemoryBarrier {
+                            .dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            .srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                            .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+                            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                            .imageView = debugTarget->getOutput()->getImageView(),
+                        },
+                    },
+                },
             }
         );
     }

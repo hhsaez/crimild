@@ -90,16 +90,16 @@ ComputeImageFromChannels::ComputeImageFromChannels(
         Descriptor {
             .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .imageView = m_output->getImageView(),
-            .sampler = m_output->getSampler(),
             .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
         }
     );
     descriptors.push_back(
         Descriptor {
             .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .imageView = input->getImageView(),
-            .sampler = input->getSampler(),
             .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         }
     );
 
@@ -153,18 +153,17 @@ ComputeImageFromChannels::ComputeImageFromChannels(
         descriptorSetLayout,
         descriptors
     );
-
-    // Command buffer only needs to be recorded once, right?
-    auto &cmds = getCommandBuffer();
-    cmds->reset();
-    cmds->begin();
-    cmds->bindPipeline( m_pipeline );
-    cmds->bindDescriptorSet( 0, m_descriptorSet );
-    cmds->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
-    cmds->end();
 }
 
 void ComputeImageFromChannels::execute( SyncOptions const &options ) noexcept
 {
+    auto &cmds = getCommandBuffer();
+    cmds->reset();
+    cmds->begin( options );
+    cmds->bindPipeline( m_pipeline );
+    cmds->bindDescriptorSet( 0, m_descriptorSet );
+    cmds->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
+    cmds->end( options );
+
     getRenderDevice()->submitComputeCommands( getCommandBuffer(), options.wait, options.signal );
 }

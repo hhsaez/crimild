@@ -44,8 +44,10 @@ Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
     m_framegraphs.resize( N );
     m_outputTextures.resize( N );
     for ( int i = 0; i < N; ++i ) {
+        auto prefix = StringUtils::toString( i );
         auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
             device,
+            prefix + "/RenderSimulation",
             VkExtent2D {
                 .width = uint32_t( m_simulationExtent.width ),
                 .height = uint32_t( m_simulationExtent.height ),
@@ -53,7 +55,7 @@ Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
         );
         m_framegraphs[ i ] = framegraph;
         m_outputTextures[ i ] = crimild::alloc< ImGuiVulkanTexture >(
-            "Scene",
+            prefix + "/RenderSimulationOutput",
             framegraph->getOutput()->getImageView(),
             framegraph->getOutput()->getSampler()
         );

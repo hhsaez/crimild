@@ -495,85 +495,85 @@ Event LocalLightingPass::handle( const Event &e ) noexcept
 
 void LocalLightingPass::render( const SceneRenderState::Lights &lights, Camera *camera ) noexcept
 {
-    updateCameraUniforms( camera );
+    // updateCameraUniforms( camera );
 
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = 0,
-        .pClearValues = nullptr,
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = 0,
+    //     .pClearValues = nullptr,
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    vkCmdBindPipeline(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_directionalLights.pipeline->getHandle()
-    );
-    vkCmdBindDescriptorSets(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_directionalLights.pipeline->getPipelineLayout(),
-        0,
-        1,
-        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-        0,
-        nullptr
-    );
-    for ( const auto &light : lights.at( Light::Type::DIRECTIONAL ) ) {
-        bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
-        vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
-    }
+    // vkCmdBindPipeline(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_directionalLights.pipeline->getHandle()
+    // );
+    // vkCmdBindDescriptorSets(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_directionalLights.pipeline->getPipelineLayout(),
+    //     0,
+    //     1,
+    //     &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //     0,
+    //     nullptr
+    // );
+    // for ( const auto &light : lights.at( Light::Type::DIRECTIONAL ) ) {
+    //     bindDirectionalLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
+    //     vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
+    // }
 
-    for ( const auto &light : lights.at( Light::Type::POINT ) ) {
-        // TODO: Use instancing to render all lights in one call
-        vkCmdBindPipeline(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pointLights.pipeline->getHandle()
-        );
-        vkCmdBindDescriptorSets(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pointLights.pipeline->getPipelineLayout(),
-            0,
-            1,
-            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-            0,
-            nullptr
-        );
-        bindPointLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
-        drawPrimitive( commandBuffer, m_lightVolume.get() );
-    }
+    // for ( const auto &light : lights.at( Light::Type::POINT ) ) {
+    //     // TODO: Use instancing to render all lights in one call
+    //     vkCmdBindPipeline(
+    //         commandBuffer,
+    //         VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //         m_pointLights.pipeline->getHandle()
+    //     );
+    //     vkCmdBindDescriptorSets(
+    //         commandBuffer,
+    //         VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //         m_pointLights.pipeline->getPipelineLayout(),
+    //         0,
+    //         1,
+    //         &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //         0,
+    //         nullptr
+    //     );
+    //     bindPointLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
+    //     drawPrimitive( commandBuffer, m_lightVolume.get() );
+    // }
 
-    for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
-        // TODO: Use instancing to render all lights in one call
-        vkCmdBindPipeline(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_spotLights.pipeline->getHandle()
-        );
-        vkCmdBindDescriptorSets(
-            commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_spotLights.pipeline->getPipelineLayout(),
-            0,
-            1,
-            &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-            0,
-            nullptr
-        );
-        bindSpotLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
-        drawPrimitive( commandBuffer, m_lightVolume.get() );
-    }
+    // for ( const auto &light : lights.at( Light::Type::SPOT ) ) {
+    //     // TODO: Use instancing to render all lights in one call
+    //     vkCmdBindPipeline(
+    //         commandBuffer,
+    //         VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //         m_spotLights.pipeline->getHandle()
+    //     );
+    //     vkCmdBindDescriptorSets(
+    //         commandBuffer,
+    //         VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //         m_spotLights.pipeline->getPipelineLayout(),
+    //         0,
+    //         1,
+    //         &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //         0,
+    //         nullptr
+    //     );
+    //     bindSpotLightDescriptors( commandBuffer, currentFrameIndex, light.get() );
+    //     drawPrimitive( commandBuffer, m_lightVolume.get() );
+    // }
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 }
 
 void LocalLightingPass::init( void ) noexcept
@@ -660,7 +660,7 @@ void LocalLightingPass::init( void ) noexcept
         )
     );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
             m_outputAttachment->imageViews[ i ]->getHandle(),
@@ -728,21 +728,21 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
     auto poolSizes = std::vector< VkDescriptorPoolSize > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         },
     };
     for ( const auto &att : m_inputAttachments ) {
         poolSizes.push_back(
             VkDescriptorPoolSize {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+                .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
             }
         );
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
     };
@@ -779,7 +779,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -788,7 +788,7 @@ void LocalLightingPass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
@@ -1011,17 +1011,17 @@ static void createLightDescriptors(
     const auto poolSizes = std::array< VkDescriptorPoolSize, 2 > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( renderDevice->getInFlightFrameCount() ),
         },
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( renderDevice->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( renderDevice->getInFlightFrameCount() ),
         },
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( renderDevice->getSwapchainImageCount() ),
+        .maxSets = uint32_t( renderDevice->getInFlightFrameCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
     };
@@ -1039,7 +1039,7 @@ static void createLightDescriptors(
     renderDevice->bind( lightObjects.uniforms[ light ].get() );
 
     std::vector< VkDescriptorSetLayout > layouts(
-        renderDevice->getSwapchainImageCount(),
+        renderDevice->getInFlightFrameCount(),
         lightObjects.descriptorSetLayout
     );
 
@@ -1050,7 +1050,7 @@ static void createLightDescriptors(
         .pSetLayouts = layouts.data(),
     };
 
-    lightObjects.descriptorSets[ light ].resize( renderDevice->getSwapchainImageCount() );
+    lightObjects.descriptorSets[ light ].resize( renderDevice->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK(
         vkAllocateDescriptorSets(
             renderDevice->getHandle(),

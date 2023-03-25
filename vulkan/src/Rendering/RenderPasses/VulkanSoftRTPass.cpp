@@ -99,66 +99,66 @@ Event SoftRTPass::handle( const Event &e ) noexcept
 
 void SoftRTPass::render( Node *scene, Camera *camera ) noexcept
 {
-    const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-    auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
+    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
+    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
 
-    renderScene( scene, camera );
-    updateImage( currentFrameIndex );
+    // renderScene( scene, camera );
+    // updateImage( currentFrameIndex );
 
-    const auto clearValues = std::array< VkClearValue, 1 > {
-        VkClearValue {
-            .color = {
-                .float32 = {
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    1.0f,
-                },
-            },
-        },
-    };
+    // const auto clearValues = std::array< VkClearValue, 1 > {
+    //     VkClearValue {
+    //         .color = {
+    //             .float32 = {
+    //                 0.0f,
+    //                 0.0f,
+    //                 0.0f,
+    //                 1.0f,
+    //             },
+    //         },
+    //     },
+    // };
 
-    auto renderPassInfo = VkRenderPassBeginInfo {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = m_renderPass,
-        .framebuffer = m_framebuffers[ currentFrameIndex ],
-        .renderArea = m_renderArea,
-        .clearValueCount = clearValues.size(),
-        .pClearValues = clearValues.data(),
-    };
+    // auto renderPassInfo = VkRenderPassBeginInfo {
+    //     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    //     .renderPass = m_renderPass,
+    //     .framebuffer = m_framebuffers[ currentFrameIndex ],
+    //     .renderArea = m_renderArea,
+    //     .clearValueCount = clearValues.size(),
+    //     .pClearValues = clearValues.data(),
+    // };
 
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    // vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    vkCmdBindPipeline(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getHandle()
-    );
+    // vkCmdBindPipeline(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getHandle()
+    // );
 
-    vkCmdBindDescriptorSets(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getPipelineLayout(),
-        0,
-        1,
-        &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
-        0,
-        nullptr
-    );
+    // vkCmdBindDescriptorSets(
+    //     commandBuffer,
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     m_pipeline->getPipelineLayout(),
+    //     0,
+    //     1,
+    //     &m_renderPassObjects.descriptorSets[ currentFrameIndex ],
+    //     0,
+    //     nullptr
+    // );
 
-    vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
+    // vkCmdDraw( commandBuffer, 6, 1, 0, 0 );
 
-    vkCmdEndRenderPass( commandBuffer );
+    // vkCmdEndRenderPass( commandBuffer );
 
-    getRenderDevice()->transitionImageLayout(
-        commandBuffer,
-        m_colorAttachment.images[ currentFrameIndex ]->getHandle(),
-        m_colorAttachment.format,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        m_colorAttachment.mipLevels,
-        m_colorAttachment.layerCount
-    );
+    // getRenderDevice()->transitionImageLayout(
+    //     commandBuffer,
+    //     m_colorAttachment.images[ currentFrameIndex ]->getHandle(),
+    //     m_colorAttachment.format,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    //     m_colorAttachment.mipLevels,
+    //     m_colorAttachment.layerCount
+    // );
 }
 
 void SoftRTPass::init( void ) noexcept
@@ -242,7 +242,7 @@ void SoftRTPass::init( void ) noexcept
         )
     );
 
-    m_framebuffers.resize( getRenderDevice()->getSwapchainImageViews().size() );
+    m_framebuffers.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( uint8_t i = 0; i < m_framebuffers.size(); ++i ) {
         auto attachments = std::array< VkImageView, 1 > {
             m_colorAttachment.imageViews[ i ]->getHandle(),
@@ -362,13 +362,13 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
     const auto poolSizes = std::array< VkDescriptorPoolSize, 1 > {
         VkDescriptorPoolSize {
             .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+            .descriptorCount = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         },
     };
 
     auto poolCreateInfo = VkDescriptorPoolCreateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .maxSets = uint32_t( getRenderDevice()->getSwapchainImageCount() ),
+        .maxSets = uint32_t( getRenderDevice()->getInFlightFrameCount() ),
         .poolSizeCount = uint32_t( poolSizes.size() ),
         .pPoolSizes = poolSizes.data(),
     };
@@ -393,7 +393,7 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
 
     CRIMILD_VULKAN_CHECK( vkCreateDescriptorSetLayout( getRenderDevice()->getHandle(), &layoutCreateInfo, nullptr, &m_renderPassObjects.layout ) );
 
-    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getSwapchainImageCount(), m_renderPassObjects.layout );
+    std::vector< VkDescriptorSetLayout > layouts( getRenderDevice()->getInFlightFrameCount(), m_renderPassObjects.layout );
 
     const auto allocInfo = VkDescriptorSetAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -402,7 +402,7 @@ void SoftRTPass::createRenderPassObjects( void ) noexcept
         .pSetLayouts = layouts.data(),
     };
 
-    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_renderPassObjects.descriptorSets.resize( getRenderDevice()->getInFlightFrameCount() );
     CRIMILD_VULKAN_CHECK( vkAllocateDescriptorSets( getRenderDevice()->getHandle(), &allocInfo, m_renderPassObjects.descriptorSets.data() ) );
 
     for ( size_t i = 0; i < m_renderPassObjects.descriptorSets.size(); ++i ) {
@@ -465,7 +465,7 @@ void SoftRTPass::createImageResources( void ) noexcept
         .unnormalizedCoordinates = VK_FALSE,
     };
 
-    m_imageResources.resize( getRenderDevice()->getSwapchainImageCount() );
+    m_imageResources.resize( getRenderDevice()->getInFlightFrameCount() );
     for ( size_t i = 0; i < m_imageResources.size(); ++i ) {
         getRenderDevice()->createImage(
             m_renderArea.extent.width,
