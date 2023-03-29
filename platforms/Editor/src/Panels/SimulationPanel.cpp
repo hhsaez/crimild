@@ -89,7 +89,7 @@ void Simulation::onRender( void ) noexcept
         const auto aspect = m_simulationExtent.width / m_simulationExtent.height;
         auto available = ImGui::GetContentRegionAvail();
         auto imageSize = available;
-        if ( imageSize.x > aspect * imageSize.y ) {
+        if ( imageSize.x >= aspect * imageSize.y ) {
             imageSize.x = aspect * imageSize.y;
             ImGui::SetCursorPosX( 0.5f * ( available.x - imageSize.x ) );
         } else {

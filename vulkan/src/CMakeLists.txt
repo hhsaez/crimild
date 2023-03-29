@@ -28,6 +28,8 @@ target_sources(
     Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp
     Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
     Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
+    Rendering/FrameGraph/VulkanRenderSceneRT.cpp
+    Rendering/FrameGraph/VulkanRenderSceneRT.hpp
     Rendering/FrameGraph/VulkanRenderSceneUnlit.cpp
     Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp
     Rendering/FrameGraph/VulkanRenderShadowMaps.cpp

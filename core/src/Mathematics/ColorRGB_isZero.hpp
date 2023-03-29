@@ -36,7 +36,7 @@ namespace crimild {
     template< typename T >
     [[nodiscard]] inline constexpr Bool isZero( const ColorRGBImpl< T > &t ) noexcept
     {
-        return isZero( t.r ) || isZero( t.g ) || isZero( t.b );
+        return isZero( t.r ) && isZero( t.g ) && isZero( t.b );
     }
 
 }

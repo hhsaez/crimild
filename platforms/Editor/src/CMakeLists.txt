@@ -13,8 +13,10 @@ target_sources(
     Foundation/ImGuiUtils.hpp
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp
+    
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
+    
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
     Panels/InspectorPanel.cpp
@@ -30,19 +32,25 @@ target_sources(
     Panels/SceneHierarchyPanel.hpp
     Panels/ScenePanel.cpp
     Panels/ScenePanel.hpp
+    Panels/SceneRTPanel.cpp
+    Panels/SceneRTPanel.hpp
     Panels/SimulationPanel.cpp
     Panels/SimulationPanel.hpp
     Panels/TimelinePanel.cpp
     Panels/TimelinePanel.hpp
+    
     Rendering/STBImageManager.cpp
     Rendering/STBImageManager.hpp
+    
     SceneGraph/PrefabNode.cpp
     SceneGraph/PrefabNode.hpp
     Simulation/Editor.hpp
+    
     Simulation/Editor.cpp
     Simulation/Project.hpp
     Simulation/Project.cpp
-	Main.cpp
+	
+    Main.cpp
 
     PRIVATE
 	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui.cpp

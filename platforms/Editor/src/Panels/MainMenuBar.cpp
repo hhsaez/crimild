@@ -36,6 +36,7 @@
 #include "Panels/ProjectPanel.hpp"
 #include "Panels/SceneHierarchyPanel.hpp"
 #include "Panels/ScenePanel.hpp"
+#include "Panels/SceneRTPanel.hpp"
 #include "Panels/SimulationPanel.hpp"
 #include "Panels/TimelinePanel.hpp"
 #include "Simulation/Editor.hpp"
@@ -426,13 +427,10 @@ void MainMenuBar::renderWorkspaceMenu( void ) noexcept
 
         renderWorkspaceMenuItem< panels::Behaviors >();
         renderWorkspaceMenuItem< panels::Timeline >();
+
         ImGui::Separator();
 
-        ImGui::BeginDisabled();
-        if ( ImGui::MenuItem( "Render..." ) ) {
-            // TODO
-        }
-        ImGui::EndDisabled();
+        renderWorkspaceMenuItem< panels::SceneRT >();
 
         ImGui::Separator();
 

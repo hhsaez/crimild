@@ -83,6 +83,11 @@ namespace crimild {
                 return m_image;
             }
 
+            inline const std::shared_ptr< Image > &getImage( void ) const noexcept
+            {
+                return m_image;
+            }
+
             inline VkImageSubresourceRange getSubresourceRange( void ) const noexcept { return m_subresourceRange; }
 
         private:
