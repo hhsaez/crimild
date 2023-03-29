@@ -41,7 +41,15 @@ using namespace crimild;
 using namespace crimild::vulkan::framegraph;
 using namespace crimild::editor::panels;
 
-void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float width, float height )
+void drawGizmo(
+    Node *selectedNode,
+    Camera *camera,
+    float x,
+    float y,
+    float width,
+    float height,
+    bool canInteract
+)
 {
     if ( selectedNode == nullptr ) {
         return;
@@ -49,12 +57,15 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
 
     static ImGuizmo::OPERATION gizmoOperation( ImGuizmo::TRANSLATE );
     static ImGuizmo::MODE gizmoMode( ImGuizmo::WORLD );
-    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_W ) ) )
-        gizmoOperation = ImGuizmo::TRANSLATE;
-    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_E ) ) )
-        gizmoOperation = ImGuizmo::ROTATE;
-    if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_R ) ) )
-        gizmoOperation = ImGuizmo::SCALE;
+
+    if ( canInteract && ImGui::IsWindowFocused() ) {
+        if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_W ) ) )
+            gizmoOperation = ImGuizmo::TRANSLATE;
+        if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_E ) ) )
+            gizmoOperation = ImGuizmo::ROTATE;
+        if ( ImGui::IsKeyPressed( ImGuiKey( CRIMILD_INPUT_KEY_R ) ) )
+            gizmoOperation = ImGuizmo::SCALE;
+    }
 
     ImGuizmo::BeginFrame();
 
@@ -96,17 +107,7 @@ void drawGizmo( Node *selectedNode, Camera *camera, float x, float y, float widt
 }
 
 Scene::Scene( vulkan::RenderDevice *device ) noexcept
-    : WithRenderDevice( device ) //,
-//   m_scenePass( renderDevice ),
-//   m_sceneDebugPass( renderDevice ),
-//   m_sceneDebugOverlayPass(
-//       renderDevice,
-//       "Editor",
-//       {
-//           m_scenePass.getColorAttachment(),
-//           m_sceneDebugPass.getColorAttachment(),
-//       }
-//   )
+    : WithRenderDevice( device )
 {
     const auto N = getRenderDevice()->getInFlightFrameCount();
     m_framegraphs.resize( N );
@@ -118,8 +119,12 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
             device,
             prefix + "/RenderScene",
             VkExtent2D {
-                .width = uint32_t( m_extent.width ),
-                .height = uint32_t( m_extent.height ),
+                // Render using a squared aspect ratio, so we don't need to
+                // resize images when windows does. The end result might be
+                // a bit pixelated, but it's faster. And we can always render to
+                // a bigger buffer
+                .width = 1280,
+                .height = 1280,
             }
         );
         m_framegraphs[ i ] = framegraph;
@@ -158,165 +163,15 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
     m_cameraTranslation = translation( 10, 10, 10 );
     m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
     m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
-
-    // m_debugPasses = {
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Depth", m_scenePass.getAttachment( 0 ), "depth" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Albedo", m_scenePass.getAttachment( 1 ), "rgb" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Position", m_scenePass.getAttachment( 2 ), "rgb" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Normal", m_scenePass.getAttachment( 3 ), "rgb" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Metallic", m_scenePass.getAttachment( 4 ), "r" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Roughness", m_scenePass.getAttachment( 4 ), "g" ),
-    //     crimild::alloc< vulkan::DebugAttachmentPass >( renderDevice, "Scene/Ambient Occlusion", m_scenePass.getAttachment( 4 ), "b" ),
-    // };
-
-    // m_selectedAttachment = 0;
-    // m_attachments.push_back( m_sceneDebugOverlayPass.getColorAttachment() );
-    // m_attachments.push_back( m_scenePass.getColorAttachment() );
-    // for ( const auto &pass : m_debugPasses ) {
-    //     m_attachments.push_back( pass->getColorAttachment() );
-    // }
-    // m_attachments.push_back( m_sceneDebugPass.getColorAttachment() );
 }
 
 Event Scene::handle( const Event &e ) noexcept
 {
-    // m_scenePass.handle( e );
-    // m_sceneDebugPass.handle( e );
-    // m_sceneDebugOverlayPass.handle( e );
-    // for ( auto &pass : m_debugPasses ) {
-    //     pass->handle( e );
-    // }
     return e;
 }
 
 void Scene::onRender( void ) noexcept
 {
-    // static auto debouncedResize = concurrency::debounce(
-    //     [ this ]( Event e ) {
-    //         m_scenePass.handle( e );
-    //         m_sceneDebugPass.handle( e );
-    //         m_sceneDebugOverlayPass.handle( e );
-    //         for ( auto &pass : m_debugPasses ) {
-    //             pass->handle( e );
-    //         }
-    //         m_descriptorSets.clear();
-    //     },
-    //     500
-    // );
-
-    // ImVec2 windowPos = ImGui::GetWindowPos();
-    // ImVec2 renderSize = ImGui::GetContentRegionAvail();
-    // bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
-    // if ( !isMinimized ) {
-    //     if ( m_extent.width != renderSize.x || m_extent.height != renderSize.y ) {
-    //         m_extent.width = renderSize.x;
-    //         m_extent.height = renderSize.y;
-    //         debouncedResize(
-    //             Event {
-    //                 .type = Event::Type::WINDOW_RESIZE,
-    //                 .extent = m_extent,
-    //             }
-    //         );
-    //     }
-    // }
-
-    // uint32_t currentFrameIdx = m_scenePass.getRenderDevice()->getCurrentFrameIndex();
-
-    // if ( !m_attachments.empty() ) {
-    //     const auto att = m_attachments[ m_selectedAttachment ];
-    //     if ( !att->descriptorSets.empty() ) {
-    //         if ( !m_descriptorSets.contains( att ) ) {
-    //             auto ds = std::vector< VkDescriptorSet >( m_scenePass.getRenderDevice()->getInFlightFrameCount() );
-    //             for ( int i = 0; i < ds.size(); ++i ) {
-    //                 ds[ i ] = ImGui_ImplVulkan_AddTexture(
-    //                     att->sampler,
-    //                     att->imageViews[ currentFrameIdx ]->getHandle(),
-    //                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    //                 );
-    //             }
-    //             m_descriptorSets[ att ] = ds;
-    //         }
-    //         auto tex_id = m_descriptorSets.at( att )[ currentFrameIdx ];
-    //         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
-    //         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
-    //         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
-    //         ImVec4 border_col = ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ); // 50% opaque white
-    //         ImGui::Image( tex_id, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col );
-    //     } else {
-    //         ImGui::Text( "No scene attachments found" );
-    //     }
-
-    //     ImGui::SetCursorPos( ImVec2( 20, 40 ) );
-    //     ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) );
-    //     static ImGuiComboFlags flags = 0;
-    //     if ( ImGui::BeginCombo( "##scenePanelOutput", m_attachments[ m_selectedAttachment ]->name.c_str(), flags ) ) {
-    //         for ( size_t i = 0; i < m_attachments.size(); ++i ) {
-    //             const auto &att = m_attachments[ i ];
-    //             const auto isSelected = i == m_selectedAttachment;
-    //             if ( ImGui::Selectable( att->name.c_str(), isSelected ) ) {
-    //                 m_selectedAttachment = i;
-    //             }
-    //             if ( isSelected ) {
-    //                 ImGui::SetItemDefaultFocus();
-    //             }
-    //         }
-    //         ImGui::EndCombo();
-    //     }
-    //     ImGui::EndChild();
-    // }
-
-    // if ( isMinimized ) {
-    //     return;
-    // }
-
-    // if ( auto editor = Editor::getInstance() ) {
-    //     if ( auto selected = editor->getSelectedObject< Node >() ) {
-    //         // TODO: Fix gizmo position
-    //         drawGizmo(
-    //             selected,
-    //             m_editorCamera.get(),
-    //             windowPos.x,
-    //             windowPos.y,
-    //             m_extent.width,
-    //             m_extent.height
-    //         );
-    //     }
-    // }
-
-    // auto commandBuffer = getRenderDevice()->getCurrentCommandBuffer();
-
-    // const auto currentFrameIndex = getRenderDevice()->getCurrentFrameIndex();
-
-    // auto transitionAttachment = [ & ]( const auto att ) {
-    //     getRenderDevice()->transitionImageLayout(
-    //         commandBuffer,
-    //         att->images[ currentFrameIndex ]->getHandle(),
-    //         att->format,
-    //         getRenderDevice()->formatIsColor( att->format )
-    //             ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    //             : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-    //         getRenderDevice()->formatIsColor( att->format )
-    //             ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    //             : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-    //         att->mipLevels,
-    //         att->layerCount
-    //     );
-    // };
-
-    // auto scene = Simulation::getInstance()->getScene();
-
-    // m_scenePass.render( scene, m_editorCamera.get() );
-
-    // for ( auto &pass : m_debugPasses ) {
-    //     pass->render( scene, m_editorCamera.get() );
-    // }
-
-    // m_sceneDebugPass.render( scene, m_editorCamera.get() );
-    // transitionAttachment( m_sceneDebugPass.getColorAttachment() );
-
-    // m_sceneDebugOverlayPass.render();
-    // transitionAttachment( m_sceneDebugOverlayPass.getColorAttachment() );
-
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 renderSize = ImGui::GetContentRegionAvail();
     bool isMinimized = renderSize.x < 1 || renderSize.y < 1;
@@ -367,13 +222,13 @@ void Scene::onRender( void ) noexcept
                 windowPos.x,
                 windowPos.y,
                 m_extent.width,
-                m_extent.height
+                m_extent.height,
+                !m_editorCameraEnabled
             );
         }
     }
 
-    // Update editor camera aspect ratio based on current window's size
-    m_editorCamera->setAspectRatio( m_extent.width / m_extent.height );
+    updateCamera();
 
     std::vector< std::shared_ptr< vulkan::Semaphore > > signals;
     for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
@@ -422,4 +277,62 @@ void Scene::onRender( void ) noexcept
             }
         );
     }
+}
+
+void Scene::updateCamera( void ) noexcept
+{
+    // Update editor camera aspect ratio based on current window's size
+    m_editorCamera->setAspectRatio( m_extent.width / m_extent.height );
+
+    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+    ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
+    ImVec2 mousePositionRelative = ImVec2( mousePositionAbsolute.x - screenPositionAbsolute.x, mousePositionAbsolute.y - screenPositionAbsolute.y );
+    auto mousePos = Vector2 { mousePositionRelative.x, mousePositionRelative.y };
+    auto delta = mousePos - m_lastMousePos;
+
+    if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) {
+        if ( ImGui::IsWindowFocused() && ImGui::IsWindowHovered() ) {
+            Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
+            m_editorCameraEnabled = true;
+        }
+    } else {
+        Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
+        m_editorCameraEnabled = false;
+    }
+
+    if ( m_editorCameraEnabled ) {
+        if ( !isZero( delta[ 1 ] ) ) {
+            const auto R = right( m_cameraRotation );
+            m_cameraRotation = rotation( R, -0.005 * delta[ 1 ] ) * m_cameraRotation;
+        }
+
+        if ( !isZero( delta[ 0 ] ) ) {
+            // This leads to gimbal lock when looking straight up/down, but I'm ok with it for now
+            const auto U = Vector3 { 0, 1, 0 };
+            m_cameraRotation = rotation( U, -0.005 * delta[ 0 ] ) * m_cameraRotation;
+        }
+
+        const auto F = forward( m_cameraRotation );
+        const auto R = right( m_cameraRotation );
+        if ( ImGui::IsKeyDown( ImGuiKey_W ) ) {
+            m_cameraTranslation = translation( F ) * m_cameraTranslation;
+            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+        }
+        if ( ImGui::IsKeyDown( ImGuiKey_S ) ) {
+            m_cameraTranslation = translation( -F ) * m_cameraTranslation;
+            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+        }
+        if ( ImGui::IsKeyDown( ImGuiKey_A ) ) {
+            m_cameraTranslation = translation( -R ) * m_cameraTranslation;
+            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+        }
+        if ( ImGui::IsKeyDown( ImGuiKey_D ) ) {
+            m_cameraTranslation = translation( R ) * m_cameraTranslation;
+            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+        }
+    }
+
+    m_lastMousePos = mousePos;
+    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+    m_editorCamera->setWorldIsCurrent( true );
 }

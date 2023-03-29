@@ -58,6 +58,9 @@ namespace crimild::editor::panels {
         virtual void onRender( void ) noexcept override;
 
     private:
+        void updateCamera( void ) noexcept;
+
+    private:
         Extent2D m_extent = Extent2D { .width = 1280.0, .height = 1280.0 };
         Event m_lastResizeEvent = Event {};
 
@@ -69,7 +72,7 @@ namespace crimild::editor::panels {
 
         std::unique_ptr< Camera > m_editorCamera;
         bool m_editorCameraEnabled = false;
-        Vector2i m_lastMousePos = Vector2i { 0, 0 };
+        Vector2 m_lastMousePos = Vector2 { 0, 0 };
         Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
         Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
     };
