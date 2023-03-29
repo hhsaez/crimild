@@ -118,6 +118,7 @@ namespace crimild::vulkan {
         void transitionImageLayout( vulkan::Image *image, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
 
         void copy( const vulkan::Image *src, const vulkan::Image *dst, uint32_t dstBaseArrayLayer = 0 ) noexcept;
+        void copy( std::shared_ptr< vulkan::Buffer > const &src, std::shared_ptr< vulkan::ImageView > const &dst ) noexcept;
 
         void dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ ) noexcept;
 

@@ -57,6 +57,22 @@ static void materialComponentDetails( MaterialComponent *materials )
             auto albedo = bsdf->getAlbedo();
             ImGui::ColorEdit3( "Albedo", get_ptr( albedo ) );
             bsdf->setAlbedo( albedo );
+
+            auto metallic = bsdf->getMetallic();
+            ImGui::DragFloat( "Metallic", &metallic, 0.01f, 0.0f, 1.0f );
+            bsdf->setMetallic( metallic );
+
+            auto roughness = bsdf->getRoughness();
+            ImGui::DragFloat( "Roughness", &roughness, 0.01f, 0.0f, 1.0f );
+            bsdf->setRoughness( roughness );
+
+            auto emissive = bsdf->getEmissive();
+            ImGui::ColorEdit3( "Emissive", get_ptr( emissive ), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float );
+            bsdf->setEmissive( emissive );
+
+            auto transmission = bsdf->getTransmission();
+            ImGui::DragFloat( "Transmission", &transmission, 0.01f, 0.0f, 1.0f );
+            bsdf->setTransmission( transmission );
         } else if ( auto unlit = dynamic_cast< UnlitMaterial * >( material ) ) {
             auto color = rgb( unlit->getColor() );
             ImGui::ColorEdit3( "Color", get_ptr( color ) );

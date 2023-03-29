@@ -468,6 +468,38 @@ void CommandBuffer::copy( const vulkan::Image *src, const vulkan::Image *dst, ui
     );
 }
 
+void CommandBuffer::copy(
+    std::shared_ptr< vulkan::Buffer > const &src,
+    std::shared_ptr< vulkan::ImageView > const &dst
+) noexcept
+{
+    const auto region = VkBufferImageCopy {
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = {
+            .aspectMask = dst->getSubresourceRange().aspectMask,
+            .mipLevel = dst->getSubresourceRange().baseMipLevel,
+            .baseArrayLayer = dst->getSubresourceRange().baseArrayLayer,
+            .layerCount = dst->getSubresourceRange().layerCount,
+        },
+        .imageOffset = { 0, 0 },
+        .imageExtent = dst->getImage()->getExtent(),
+    };
+
+    vkCmdCopyBufferToImage(
+        getHandle(),
+        src->getHandle(),
+        dst->getImage()->getHandle(),
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &region
+    );
+
+    m_boundObjects.insert( src );
+    m_boundObjects.insert( dst );
+}
+
 void CommandBuffer::dispatch( uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ ) noexcept
 {
     vkCmdDispatch( getHandle(), groupCountX, groupCountY, groupCountZ );

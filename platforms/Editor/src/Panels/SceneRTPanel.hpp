@@ -25,19 +25,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_VECTOR_3_IS_ZERO_
-#define CRIMILD_MATHEMATICS_VECTOR_3_IS_ZERO_
+#ifndef CRIMILD_EDITOR_PANELS_SCENE_RT
+#define CRIMILD_EDITOR_PANELS_SCENE_RT
 
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/isZero.hpp"
+#include "Foundation/VulkanUtils.hpp"
+#include "Panels/Panel.hpp"
 
-namespace crimild {
+namespace crimild::vulkan::framegraph {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isZero( const Vector3Impl< T > &t ) noexcept
-    {
-        return isZero( t.x ) && isZero( t.y ) && isZero( t.z );
-    }
+    class RenderSceneRT;
+
+}
+
+namespace crimild::editor::panels {
+
+    class SceneRT
+        : public Panel,
+          public vulkan::WithRenderDevice,
+          public DynamicSingleton< SceneRT > {
+    public:
+        SceneRT( vulkan::RenderDevice *renderDevice ) noexcept;
+        virtual ~SceneRT( void ) = default;
+
+        virtual Event handle( const Event &e ) noexcept;
+
+        virtual const char *getTitle( void ) const noexcept override { return "Scene RT"; }
+
+    protected:
+        virtual void onRender( void ) noexcept override;
+
+    private:
+        std::shared_ptr< vulkan::framegraph::RenderSceneRT > m_framegraph;
+        std::shared_ptr< ImGuiVulkanTexture > m_outputTexture;
+    };
 
 }
 

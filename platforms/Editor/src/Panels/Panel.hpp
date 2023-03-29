@@ -100,9 +100,10 @@ namespace crimild::editor::panels {
                 ImGui::SetNextWindowSize( ImVec2( 300, 300 ) );
                 m_reopened = false;
             }
-
+            
             auto visible = ImGui::Begin( getTitle(), &m_open, flags );
-            if ( m_open && visible ) {
+            bool itemVisible = ImGui::IsItemVisible();
+            if ( m_open && visible && itemVisible ) {
                 onRender();
             }
             ImGui::End();

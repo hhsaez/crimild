@@ -42,7 +42,9 @@
 #include "Mathematics/max.hpp"
 #include "Mathematics/min.hpp"
 #include "Mathematics/swizzle.hpp"
+#include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/Primitive.hpp"
+#include "Primitives/SpherePrimitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -51,6 +53,24 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 using namespace crimild;
+
+// Simple utility tool to check if a triangulated primitive is actually one of the unit ones
+// Because of how coding works, we cannot rely on pointer equality.
+static bool isSamePrimitive( const Primitive *A, const Primitive *B ) noexcept
+{
+    if ( A->getVertexData().size() != B->getVertexData().size() ) {
+        return false;
+    }
+
+    const auto dataA = A->getVertexData().first()->getBufferView();
+    const auto dataB = B->getVertexData().first()->getBufferView();
+
+    if ( dataA->getLength() != dataB->getLength() ) {
+        return false;
+    }
+
+    return memcmp( dataA->getData(), dataB->getData(), dataA->getLength() ) == 0;
+}
 
 static void splitPrimitives(
     const std::vector< Int32 > &offsets,
@@ -242,6 +262,12 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                 return RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
             }
             case Primitive::Type::TRIANGLES: {
+                if ( isSamePrimitive( primitive, SpherePrimitive::UNIT_SPHERE.get() ) ) {
+                    return RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
+                } else if ( isSamePrimitive( primitive, BoxPrimitive::UNIT_BOX.get() ) ) {
+                    return RTAcceleratedNode::Type::PRIMITIVE_BOX;
+                }
+
                 // For the moment, I'm defining as "valid" primitives only those
                 // containing both vertices and indices.
                 auto isValid = !primitive->getVertexData().empty();
