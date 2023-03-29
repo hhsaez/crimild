@@ -82,9 +82,6 @@ void MainMenuBar::renderFileMenu( void ) noexcept
         }
     };
 
-    // const auto baseDirectory = project->getScenesDirectory().string();
-    const auto baseDirectory = std::filesystem::current_path().string();
-
     if ( ImGui::BeginMenu( "File" ) ) {
         if ( ImGui::MenuItem( "New Project..." ) ) {
             openDialog(
@@ -107,7 +104,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                             Editor::getInstance()->createNewScene( path );
                         },
                         ".crimild",
-                        baseDirectory
+                        project->getScenesDirectory().string()
                     );
                 }
             }
@@ -136,7 +133,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                             Editor::getInstance()->loadScene( path );
                         },
                         ".crimild",
-                        baseDirectory
+                        project->getScenesDirectory().string()
                     );
                 }
             }
@@ -170,7 +167,7 @@ void MainMenuBar::renderFileMenu( void ) noexcept
                             Editor::getInstance()->saveSceneAs( path );
                         },
                         ".crimild",
-                        baseDirectory
+                        project->getScenesDirectory().string()
                     );
                 }
             }

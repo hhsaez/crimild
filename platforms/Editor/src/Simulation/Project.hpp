@@ -51,8 +51,8 @@ namespace crimild {
             inline const std::filesystem::path &getFilePath( void ) const noexcept { return m_filePath; }
 
             inline std::filesystem::path getRootDirectory( void ) const noexcept { return m_filePath.parent_path(); }
-            inline std::filesystem::path getAssetsDirectory( void ) const noexcept { return getRootDirectory() / "Assets"; }
-            inline std::filesystem::path getScenesDirectory( void ) const noexcept { return getAssetsDirectory() / "Scenes"; }
+            inline std::filesystem::path getAssetsDirectory( void ) const noexcept { return getRootDirectory() / "Assets/"; }
+            inline std::filesystem::path getScenesDirectory( void ) const noexcept { return getAssetsDirectory() / "Scenes/"; }
 
             inline void setCurrentSceneName( std::string_view sceneName ) noexcept { m_currentSceneName = sceneName; }
             inline const std::string &getCurrentSceneName( void ) const noexcept { return m_currentSceneName; }
