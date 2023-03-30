@@ -187,12 +187,12 @@ static void optimizePrimitive(
     std::vector< Int32 > offsets( triCount );
     std::vector< Bounds3 > primBounds( triCount );
     for ( auto i = Size( 0 ); i < triCount; ++i ) {
-        const Int32 idx = baseIndexOffset + i * 3;
+        const Int32 idx = i * 3;
         offsets[ i ] = idx;
 
         auto B = Bounds3 {};
         for ( auto pi = 0; pi < 3; ++pi ) {
-            const auto P = triangles[ indices[ idx + pi ] ].position;
+            const auto P = triangles[ indices[ baseIndexOffset + idx + pi ] ].position;
             B = combine( B, point3( P ) );
         }
 

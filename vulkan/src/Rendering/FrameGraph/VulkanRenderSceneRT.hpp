@@ -78,6 +78,9 @@ namespace crimild {
                 inline size_t getSampleCount( void ) const noexcept { return m_sampleCount; }
                 inline float getProgress( void ) const noexcept { return m_progress; }
 
+                inline void setBackgroundColor( const ColorRGB &color ) noexcept { m_backgroundColor = color; }
+                inline const ColorRGB &getBackgroundColor( void ) const noexcept { return m_backgroundColor; }
+
             protected:
                 virtual void onResize( void ) noexcept override;
 
@@ -115,6 +118,8 @@ namespace crimild {
                 SharedPointer< crimild::Node > m_scene;
                 SharedPointer< Camera > m_camera;
                 RTAcceleration::Result m_acceleratedScene;
+
+                ColorRGB m_backgroundColor = { 0.5, 0.5, 0.5 };
 
                 uint32_t m_sampleCount = 0;
                 float m_progress = 0;
