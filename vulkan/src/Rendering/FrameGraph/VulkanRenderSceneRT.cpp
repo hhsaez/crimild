@@ -601,7 +601,7 @@ crimild::ColorRGB RenderSceneRT::getRayColor( const Ray3 &R, const ColorRGB &bac
 
 void RenderSceneRT::updateImage( void ) noexcept
 {
-    const ColorRGB backgroundColor = { 0.5, 0.5, 0.5 };
+    const ColorRGB backgroundColor = getBackgroundColor();
     const int MAX_DEPTH = 10;
     const float H = getExtent().height;
     const float W = getExtent().width;

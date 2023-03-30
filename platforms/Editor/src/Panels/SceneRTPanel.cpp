@@ -79,6 +79,9 @@ void SceneRT::onRender( void ) noexcept
     if ( ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) ) ) {
         ImGui::Text( "Sample Count: %d", ( int ) m_framegraph->getSampleCount() );
         ImGui::Text( "Sample Progress: %.2f%%", m_framegraph->getProgress() );
+        auto backgroundColor = m_framegraph->getBackgroundColor();
+        ImGui::ColorEdit3( "Background", get_ptr( backgroundColor ) );
+        m_framegraph->setBackgroundColor( backgroundColor );
         if ( m_framegraph->getState() == vulkan::framegraph::RenderSceneRT::State::RUNNING ) {
             if ( ImGui::Button( "Pause" ) ) {
                 m_framegraph->setState( vulkan::framegraph::RenderSceneRT::State::PAUSED );
