@@ -29,13 +29,20 @@
 #define CRIMILD_EDITOR_PANELS_SCENE
 
 #include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Transformation_constants.hpp"
 #include "Panels/Panel.hpp"
 
 #include <unordered_map>
 
-namespace crimild::vulkan::framegraph {
+namespace crimild {
 
     class Node;
+
+    namespace vulkan::framegraph {
+
+        class Node;
+
+    }
 
 }
 

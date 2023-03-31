@@ -23,6 +23,7 @@ target_sources(
     Panels/InspectorPanel.hpp
     Panels/MainMenuBar.cpp
     Panels/MainMenuBar.hpp
+    Panels/Panel.cpp
     Panels/Panel.hpp
     Panels/PlaybackControlsPanel.cpp
     Panels/PlaybackControlsPanel.hpp

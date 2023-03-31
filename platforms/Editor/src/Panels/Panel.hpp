@@ -29,8 +29,7 @@
 #define CRIMILD_EDITOR_PANELS_PANEL
 
 #include "Foundation/ImGuiUtils.hpp"
-
-#include <Crimild.hpp>
+#include "Simulation/Event.hpp"
 
 namespace crimild::editor::panels {
 
@@ -43,23 +42,14 @@ namespace crimild::editor::panels {
         }
 
     protected:
-        Panel( void )
-        {
-            getAllPanels().push_back( this );
-        }
+        Panel( void ) noexcept;
 
     public:
-        virtual ~Panel( void ) noexcept
-        {
-            getAllPanels().remove( this );
-        }
+        virtual ~Panel( void ) noexcept;
 
         virtual const char *getTitle( void ) const noexcept = 0;
 
-        virtual Event handle( const Event &e ) noexcept
-        {
-            return e;
-        }
+        virtual Event handle( const Event &e ) noexcept;
 
         inline bool isOpen( void ) noexcept { return m_open; }
         inline void setOpen( bool open ) noexcept
@@ -70,50 +60,7 @@ namespace crimild::editor::panels {
             }
         }
 
-        void render( void ) noexcept
-        {
-            if ( !m_loaded ) {
-                // When the panel is first loaded, check ImGui settings to see if it is
-                // actually opened. If not, Keep the panel closed.
-                auto &context = *GImGui;
-                for ( auto *settings = context.SettingsWindows.begin(); settings != nullptr; settings = context.SettingsWindows.next_chunk( settings ) ) {
-                    if ( strcmp( getTitle(), settings->GetName() ) == 0 ) {
-                        m_open = true;
-                    }
-                }
-                m_loaded = true;
-            }
-
-            // Keep track if the panel open state changes (see notes below)
-            bool wasOpened = isOpen();
-
-            int32_t flags = 0;
-            if ( !isOpen() ) {
-                // We still need to render the panel even if it is closed. So,
-                // move it outside of the view and do not save it to ImGUI settings
-                flags = ImGuiTableFlags_NoSavedSettings;
-                ImGui::SetNextWindowPos( ImVec2( 999999, 999999 ) );
-            } else if ( m_reopened ) {
-                // Makes sure the panel is visible when re-opened
-                auto pos = ImGui::GetMainViewport()->Pos;
-                ImGui::SetNextWindowPos( pos + ImVec2( 100, 100 ) );
-                ImGui::SetNextWindowSize( ImVec2( 300, 300 ) );
-                m_reopened = false;
-            }
-            
-            auto visible = ImGui::Begin( getTitle(), &m_open, flags );
-            bool itemVisible = ImGui::IsItemVisible();
-            if ( m_open && visible && itemVisible ) {
-                onRender();
-            }
-            ImGui::End();
-
-            if ( isOpen() != wasOpened ) {
-                // Marks ImGui settings as dirty whenever the panel's open state changes
-                // This forces ImGui settings to be saved to disk as soon as possible.
-                ImGui::MarkIniSettingsDirty();
-            }
-        }
+        void render( void ) noexcept;
 
     protected:
         virtual void onRender( void ) noexcept = 0;
