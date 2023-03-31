@@ -30,10 +30,14 @@
 #include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp"
+#include "Rendering/FrameGraph/VulkanComputeImageMix.hpp"
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
+#include "Rendering/FrameGraph/VulkanRenderSceneDebug.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
+#include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
 #include "Simulation/Editor.hpp"
 
@@ -111,21 +115,24 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
 {
     const auto N = getRenderDevice()->getInFlightFrameCount();
     m_framegraphs.resize( N );
+    m_debugFramegraphs.resize( N );
+    m_mixes.resize( N );
     m_debugTargets.resize( N );
     m_outputTextures.resize( N );
+    const auto extent = VkExtent2D {
+        // Render using a squared aspect ratio, so we don't need to
+        // resize images when windows does. The end result might be
+        // a bit pixelated, but it's faster. And we can always render to
+        // a bigger buffer
+        .width = 1280,
+        .height = 1280,
+    };
     for ( int i = 0; i < N; ++i ) {
         auto prefix = StringUtils::toString( i );
         auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
             device,
             prefix + "/RenderScene",
-            VkExtent2D {
-                // Render using a squared aspect ratio, so we don't need to
-                // resize images when windows does. The end result might be
-                // a bit pixelated, but it's faster. And we can always render to
-                // a bigger buffer
-                .width = 1280,
-                .height = 1280,
-            }
+            extent
         );
         m_framegraphs[ i ] = framegraph;
         m_outputTextures[ i ].push_back(
@@ -133,6 +140,56 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
                 "Scene",
                 framegraph->getOutput()->getImageView(),
                 framegraph->getOutput()->getSampler()
+            )
+        );
+
+        m_debugFramegraphs[ i ] = crimild::alloc< vulkan::framegraph::RenderSceneDebug >(
+            device,
+            prefix + "/RenderSceneDebug",
+            extent
+        );
+        m_outputTextures[ i ].push_back(
+            crimild::alloc< ImGuiVulkanTexture >(
+                "SceneGizmos",
+                m_debugFramegraphs[ i ]->getOutput()->getImageView(),
+                m_debugFramegraphs[ i ]->getOutput()->getSampler()
+            )
+        );
+
+        auto mixName = prefix + "/Mix";
+        auto mixOutput = crimild::alloc< vulkan::ImageView >(
+            device,
+            mixName + "/ImageView",
+            [ & ] {
+                auto image = crimild::alloc< vulkan::Image >(
+                    device,
+                    extent,
+                    VK_FORMAT_R32G32B32A32_SFLOAT,
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
+                    mixName + "/Image"
+                );
+                image->allocateMemory();
+                return image;
+            }()
+        );
+        m_mixes[ i ] = crimild::alloc< vulkan::framegraph::ComputeImageMix >(
+            device,
+            mixName,
+            m_framegraphs[ i ]->getOutput()->getImageView(),
+            m_debugFramegraphs[ i ]->getOutput()->getImageView(),
+            mixOutput
+        );
+        m_outputTextures[ i ].push_back(
+            crimild::alloc< ImGuiVulkanTexture >(
+                "Mix",
+                mixOutput,
+                crimild::alloc< vulkan::Sampler >(
+                    device,
+                    mixName + "/Sampler",
+                    VK_FILTER_LINEAR,
+                    VK_SAMPLER_MIPMAP_MODE_LINEAR,
+                    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+                )
             )
         );
 
@@ -241,6 +298,16 @@ void Scene::onRender( void ) noexcept
             .signal = signals,
         }
     );
+
+    m_debugFramegraphs[ currentFrameIdx ]->render(
+        crimild::Simulation::getInstance()->getScene(),
+        m_editorCamera.get(),
+        {
+            // .signal = signals,
+        }
+    );
+
+    m_mixes[ currentFrameIdx ]->execute( {} );
 
     for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
         debugTarget->execute(

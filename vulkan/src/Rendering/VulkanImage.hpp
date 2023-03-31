@@ -90,7 +90,7 @@ namespace crimild {
 
             inline VkImage getHandle( void ) const noexcept { return m_handle; }
 
-            inline VkExtent3D getExtent( void ) const noexcept { return m_extent; }
+            inline const VkExtent3D &getExtent( void ) const noexcept { return m_extent; }
             inline VkFormat getFormat( void ) const noexcept { return m_format; }
 
             inline uint32_t getMipLevels( void ) const noexcept { return m_mipLevels; }

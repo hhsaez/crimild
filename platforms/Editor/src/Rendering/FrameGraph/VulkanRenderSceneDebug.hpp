@@ -25,56 +25,62 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
+#ifndef CRIMILD_EDITOR_RENDERING_FRAME_GRAPH_RENDER_SCENE_DEBUG
+#define CRIMILD_EDITOR_RENDERING_FRAME_GRAPH_RENDER_SCENE_DEBUG
 
-#include "Rendering/FrameGraph/VulkanComputeBase.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
 
-namespace crimild::vulkan {
+namespace crimild {
 
-    class ComputePipeline;
-    class DescriptorSet;
-    class RenderTarget;
+    class Camera;
+    class Node;
+    class UniformBuffer;
 
-    namespace framegraph {
+    namespace vulkan {
 
-        /**
-         * \todo Rename to ComputeImageSwizzle
-         */
-        class ComputeImageFromChannels
-            : public ComputeBase,
-              public WithCommandBuffer {
-        public:
-            ComputeImageFromChannels(
-                RenderDevice *device,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels
-            ) noexcept;
-
-            ComputeImageFromChannels(
-                RenderDevice *device,
-                std::string name,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels
-            ) noexcept;
-
-            virtual ~ComputeImageFromChannels( void ) = default;
-
-            void execute( SyncOptions const &options ) noexcept;
-
-            inline std::shared_ptr< RenderTarget > &getInput( void ) noexcept { return m_input; }
-            inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
-
-        private:
-            std::shared_ptr< RenderTarget > m_input;
-            std::shared_ptr< RenderTarget > m_output;
-
-            std::shared_ptr< ComputePipeline > m_pipeline;
-            std::shared_ptr< DescriptorSet > m_descriptorSet;
-        };
+        class DescriptorSet;
+        class Framebuffer;
+        class GraphicsPipeline;
+        class RenderPass;
+        class RenderTarget;
 
     }
+
+}
+
+namespace crimild::vulkan::framegraph {
+
+    class RenderSceneDebug
+        : public RenderBase,
+          public WithCommandBuffer {
+    public:
+        RenderSceneDebug( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept;
+        virtual ~RenderSceneDebug( void ) = default;
+
+        inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_outputTarget; }
+
+        virtual void render(
+            Node *scene,
+            Camera *camera,
+            SyncOptions const &options = {}
+        ) noexcept;
+
+    private:
+        std::shared_ptr< RenderTarget > m_outputTarget;
+
+        struct PushConstantsData {
+            Matrix4f mvp;
+            ColorRGB color;
+        };
+
+        struct Resources {
+            std::shared_ptr< RenderPass > renderPass;
+            std::shared_ptr< Framebuffer > framebuffer;
+            std::shared_ptr< GraphicsPipeline > pipeline;
+        } m_resources;
+    };
 
 }
 
