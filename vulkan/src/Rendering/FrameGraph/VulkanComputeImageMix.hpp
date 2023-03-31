@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_MIX
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_MIX
 
 #include "Rendering/FrameGraph/VulkanComputeBase.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
@@ -35,40 +35,30 @@ namespace crimild::vulkan {
 
     class ComputePipeline;
     class DescriptorSet;
-    class RenderTarget;
+    class ImageView;
 
     namespace framegraph {
 
-        /**
-         * \todo Rename to ComputeImageSwizzle
-         */
-        class ComputeImageFromChannels
+        class ComputeImageMix
             : public ComputeBase,
               public WithCommandBuffer {
         public:
-            ComputeImageFromChannels(
-                RenderDevice *device,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels
-            ) noexcept;
-
-            ComputeImageFromChannels(
+            ComputeImageMix(
                 RenderDevice *device,
                 std::string name,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels
+                std::shared_ptr< ImageView > const &source,
+                std::shared_ptr< ImageView > const &destination,
+                std::shared_ptr< ImageView > const &output
             ) noexcept;
 
-            virtual ~ComputeImageFromChannels( void ) = default;
+            virtual ~ComputeImageMix( void ) = default;
 
             void execute( SyncOptions const &options ) noexcept;
 
-            inline std::shared_ptr< RenderTarget > &getInput( void ) noexcept { return m_input; }
-            inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
-
         private:
-            std::shared_ptr< RenderTarget > m_input;
-            std::shared_ptr< RenderTarget > m_output;
+            std::shared_ptr< ImageView > m_source;
+            std::shared_ptr< ImageView > m_destination;
+            std::shared_ptr< ImageView > m_output;
 
             std::shared_ptr< ComputePipeline > m_pipeline;
             std::shared_ptr< DescriptorSet > m_descriptorSet;

@@ -20,6 +20,8 @@ target_sources(
     Rendering/FrameGraph/VulkanComputeBase.hpp
     Rendering/FrameGraph/VulkanComputeImageFromChannels.cpp
     Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp
+    Rendering/FrameGraph/VulkanComputeImageMix.cpp
+    Rendering/FrameGraph/VulkanComputeImageMix.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp

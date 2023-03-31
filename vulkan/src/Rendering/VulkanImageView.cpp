@@ -89,3 +89,8 @@ vulkan::ImageView::~ImageView( void ) noexcept
     );
     setHandle( VK_NULL_HANDLE );
 }
+
+const VkExtent3D &vulkan::ImageView::getExtent( void ) const noexcept
+{
+    return m_image->getExtent();
+}

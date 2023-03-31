@@ -36,7 +36,9 @@
 namespace crimild::vulkan::framegraph {
 
     class ComputeImageFromChannels;
+    class ComputeImageMix;
     class RenderScene;
+    class RenderSceneDebug;
 
 }
 
@@ -65,6 +67,8 @@ namespace crimild::editor::panels {
         Event m_lastResizeEvent = Event {};
 
         std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_framegraphs;
+        std::vector< std::shared_ptr< vulkan::framegraph::RenderSceneDebug > > m_debugFramegraphs;
+        std::vector< std::shared_ptr< vulkan::framegraph::ComputeImageMix > > m_mixes;
         std::vector< std::vector< std::shared_ptr< vulkan::framegraph::ComputeImageFromChannels > > > m_debugTargets;
 
         std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;

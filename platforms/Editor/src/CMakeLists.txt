@@ -41,6 +41,9 @@ target_sources(
     
     Rendering/STBImageManager.cpp
     Rendering/STBImageManager.hpp
+
+    Rendering/FrameGraph/VulkanRenderSceneDebug.cpp
+    Rendering/FrameGraph/VulkanRenderSceneDebug.hpp
     
     SceneGraph/PrefabNode.cpp
     SceneGraph/PrefabNode.hpp
