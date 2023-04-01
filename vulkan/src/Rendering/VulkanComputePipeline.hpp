@@ -51,7 +51,8 @@ namespace crimild {
                 RenderDevice *renderDevice,
                 std::string name,
                 std::shared_ptr< ShaderProgram > const &program,
-                const std::vector< std::shared_ptr< DescriptorSetLayout > > &descriptorSetLayouts
+                const std::vector< std::shared_ptr< DescriptorSetLayout > > &descriptorSetLayouts,
+                const std::vector< VkPushConstantRange > &pushConstantRanges = {}
             ) noexcept;
             ~ComputePipeline( void ) noexcept;
 

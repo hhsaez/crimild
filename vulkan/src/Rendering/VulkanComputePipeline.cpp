@@ -38,7 +38,8 @@ ComputePipeline::ComputePipeline(
     RenderDevice *device,
     std::string name,
     std::shared_ptr< ShaderProgram > const &program,
-    const std::vector< std::shared_ptr< DescriptorSetLayout > > &inDescriptorSetLayouts
+    const std::vector< std::shared_ptr< DescriptorSetLayout > > &inDescriptorSetLayouts,
+    const std::vector< VkPushConstantRange > &pushConstantRanges
 ) noexcept
     : WithRenderDevice( device ),
       Named( name ),
@@ -62,6 +63,8 @@ ComputePipeline::ComputePipeline(
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = uint32_t( descriptorSetLayouts.size() ),
         .pSetLayouts = descriptorSetLayouts.data(),
+        .pushConstantRangeCount = uint32_t( pushConstantRanges.size() ),
+        .pPushConstantRanges = pushConstantRanges.data(),
     };
     CRIMILD_VULKAN_CHECK(
         vkCreatePipelineLayout(

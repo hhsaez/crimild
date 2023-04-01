@@ -29,8 +29,8 @@
 
 #include "Concurrency/debounce.hpp"
 #include "Foundation/ImGuiUtils.hpp"
-#include "Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageMix.hpp"
+#include "Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp"
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneDebug.hpp"
 #include "Rendering/VulkanImage.hpp"
@@ -207,26 +207,25 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
             crimild::alloc< ImGuiVulkanTexture >( "Scene Only", renderSceneOutput ),
         };
 
-        auto debugTargets = std::vector< std::shared_ptr< ComputeImageFromChannels > > {
-            // crimild::alloc< vulkan::framegraph::ComputeImageFromChannels >(
-            //     device,
-            //     "Scene/Depth",
-            //     m_framegraphs[ i ]->getRenderTarget( "Scene/Depth" ),
-            //     "depth"
-            // )
-            crimild::alloc< ComputeImageFromChannels >( device, "Albedo", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Albedo" ), "rgb" ),
-            crimild::alloc< ComputeImageFromChannels >( device, "Position", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Position" ), "rgb" ),
-            crimild::alloc< ComputeImageFromChannels >( device, "Normal", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Normal" ), "rgb" ),
-        };
-        for ( auto &debugTarget : debugTargets ) {
-            m_framegraph[ i ].push_back( debugTarget );
+        auto computeDebugImage = [ & ]( std::string name, std::shared_ptr< vulkan::ImageView > const &imageView, ComputeImageSwizzle::Selector selector ) {
+            auto output = createColorImageView( name + "/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
+            auto swizzle = crimild::alloc< ComputeImageSwizzle >( device, name, imageView, selector, output );
+            m_framegraph[ i ].push_back( swizzle );
             m_outputTextures[ i ].push_back(
                 crimild::alloc< ImGuiVulkanTexture >(
-                    debugTarget->getName(),
-                    debugTarget->getOutput()->getImageView()
+                    name,
+                    output
                 )
             );
-        }
+        };
+
+        // computeDebugImage( "Depth", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Depth" )->getImageView(), ComputeImageSwizzle::Selector::RGB );
+        computeDebugImage( "Albedo", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Albedo" )->getImageView(), ComputeImageSwizzle::Selector::RGB );
+        computeDebugImage( "Position", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Position" )->getImageView(), ComputeImageSwizzle::Selector::RGB );
+        computeDebugImage( "Normal", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Normal" )->getImageView(), ComputeImageSwizzle::Selector::NORMAL );
+        computeDebugImage( "Metallic", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Material" )->getImageView(), ComputeImageSwizzle::Selector::RRR );
+        computeDebugImage( "Roughness", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Material" )->getImageView(), ComputeImageSwizzle::Selector::GGG );
+        computeDebugImage( "Ambient Occlusion", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Material" )->getImageView(), ComputeImageSwizzle::Selector::BBB );
     }
 }
 
@@ -254,7 +253,7 @@ void Scene::onRender( void ) noexcept
         ImGui::Image( tex_id, renderSize, uv_min, uv_max, tint_col, border_col );
 
         ImGui::SetCursorPos( ImVec2( 20, 40 ) );
-        ImGui::BeginChild( "Settings", ImVec2( 200, 200 ) );
+        ImGui::BeginChild( "Settings", ImVec2( 200, 400 ) );
         static ImGuiComboFlags flags = 0;
         if ( ImGui::BeginCombo( "##scenePanelOutput", textures[ m_selectedTexture ]->getName().c_str(), flags ) ) {
             for ( size_t i = 0; i < textures.size(); ++i ) {

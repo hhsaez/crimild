@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_FROM_CHANNELS
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_SWIZZLE
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_SWIZZLE
 
 #include "Rendering/FrameGraph/VulkanComputeBase.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
@@ -35,43 +35,46 @@ namespace crimild::vulkan {
 
     class ComputePipeline;
     class DescriptorSet;
-    class RenderTarget;
+    class ImageView;
 
     namespace framegraph {
 
-        /**
-         * \todo Rename to ComputeImageSwizzle
-         */
-        class ComputeImageFromChannels
+        class ComputeImageSwizzle
             : public ComputeBase,
               public WithCommandBuffer {
         public:
-            ComputeImageFromChannels(
-                RenderDevice *device,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels,
-                SyncOptions const &options = {}
-            ) noexcept;
+            enum class Selector {
+                RGBA = 0,
+                RGB = 1,
+                RRR = 2,
+                GGG = 3,
+                BBB = 4,
+                NORMAL = 6,
+            };
 
-            ComputeImageFromChannels(
+        public:
+            ComputeImageSwizzle(
                 RenderDevice *device,
                 std::string name,
-                std::shared_ptr< RenderTarget > const &input,
-                std::string channels,
+                std::shared_ptr< vulkan::ImageView > const &input,
+                Selector selector,
+                std::shared_ptr< vulkan::ImageView > const &output,
                 SyncOptions const &options = {}
             ) noexcept;
 
-            virtual ~ComputeImageFromChannels( void ) = default;
+            virtual ~ComputeImageSwizzle( void ) = default;
 
             virtual void execute( void ) noexcept override;
 
-            inline std::shared_ptr< RenderTarget > &getInput( void ) noexcept { return m_input; }
-            inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
-
         private:
-            std::shared_ptr< RenderTarget > m_input;
-            std::shared_ptr< RenderTarget > m_output;
+            std::shared_ptr< ImageView > m_input;
+            Selector m_selector;
+            std::shared_ptr< ImageView > m_output;
             SyncOptions m_syncOptions;
+
+            struct PushConstantsData {
+                alignas( 4 ) uint32_t selector;
+            };
 
             std::shared_ptr< ComputePipeline > m_pipeline;
             std::shared_ptr< DescriptorSet > m_descriptorSet;
