@@ -18,10 +18,10 @@ target_sources(
     Foundation/VulkanUtils.hpp
 
     Rendering/FrameGraph/VulkanComputeBase.hpp
-    Rendering/FrameGraph/VulkanComputeImageFromChannels.cpp
-    Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp
     Rendering/FrameGraph/VulkanComputeImageMix.cpp
     Rendering/FrameGraph/VulkanComputeImageMix.hpp
+    Rendering/FrameGraph/VulkanComputeImageSwizzle.cpp
+    Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp
     Rendering/FrameGraph/VulkanFramegraphNode.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Rendering/FrameGraph/VulkanComputeImageFromChannels.hpp"
+#include "Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp"
 
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
@@ -35,33 +35,17 @@
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanImage.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
-#include "Rendering/VulkanRenderTarget.hpp"
 
 using namespace crimild::vulkan::framegraph;
 
-ComputeImageFromChannels::ComputeImageFromChannels(
-    RenderDevice *device,
-    std::shared_ptr< RenderTarget > const &input,
-    std::string channels,
-    SyncOptions const &options
-) noexcept
-    : ComputeImageFromChannels(
-        device,
-        input->getName(),
-        input,
-        channels,
-        options
-    )
-{
-    // no-op
-}
-
-ComputeImageFromChannels::ComputeImageFromChannels(
+ComputeImageSwizzle::ComputeImageSwizzle(
     RenderDevice *device,
     std::string name,
-    std::shared_ptr< RenderTarget > const &input,
-    std::string channels,
+    std::shared_ptr< vulkan::ImageView > const &input,
+    Selector selector,
+    std::shared_ptr< vulkan::ImageView > const &output,
     SyncOptions const &options
 ) noexcept
     : ComputeBase( device, name ),
@@ -73,39 +57,24 @@ ComputeImageFromChannels::ComputeImageFromChannels(
           )
       ),
       m_input( input ),
-      m_output(
-          crimild::alloc< RenderTarget >(
-              device,
-              name,
-              input->getImage()->getFormat(),
-              [ & ] {
-                  auto imageExtent = input->getImage()->getExtent();
-                  return VkExtent2D {
-                      .width = imageExtent.width,
-                      .height = imageExtent.height,
-                  };
-              }()
-          )
-      ),
+      m_output( output ),
+      m_selector( selector ),
       m_syncOptions( options )
 {
-    std::vector< Descriptor > descriptors;
-    descriptors.push_back(
+    std::vector< Descriptor > descriptors = {
         Descriptor {
             .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .imageView = m_output->getImageView(),
-            .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-        }
-    );
-    descriptors.push_back(
-        Descriptor {
-            .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .imageView = input->getImageView(),
+            .imageView = m_input,
             .stage = VK_SHADER_STAGE_COMPUTE_BIT,
             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        }
-    );
+        },
+        Descriptor {
+            .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .imageView = m_output,
+            .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+        },
+    };
 
     auto descriptorSetLayout = crimild::alloc< DescriptorSetLayout >(
         getRenderDevice(),
@@ -122,18 +91,29 @@ ComputeImageFromChannels::ComputeImageFromChannels(
                     R"(
                         layout( local_size_x = 32, local_size_y = 32 ) in;
 
-                        layout ( binding = 0, rgba32f ) uniform writeonly image2D outputImage;
-
-                        layout ( binding = 1, rgba32f ) uniform readonly image2D gBufferImage0;
-                        layout ( binding = 2, rgba32f ) uniform readonly image2D gBufferImage1;
-                        layout ( binding = 3, rgba32f ) uniform readonly image2D gBufferImage2;
-                        layout ( binding = 4, rgba32f ) uniform readonly image2D gBufferImage3;
+                        layout ( binding = 0, rgba32f ) uniform readonly image2D inputImage;
+                        layout ( binding = 1, rgba32f ) uniform writeonly image2D outputImage;
                     
+                        layout( push_constant ) uniform Constants {
+                            int selector;
+                        };
+
                         void main()
                         {
                             ivec2 uv = ivec2( gl_GlobalInvocationID.xy );
-                            vec3 pixel = imageLoad( gBufferImage0, uv ).rgb;
-                            imageStore( outputImage, uv, vec4( pixel, 1 ) );
+                            vec4 pixel = imageLoad( inputImage, uv );
+                            if ( selector == 1 ) {
+                                pixel = vec4( pixel.rgb, 1 );
+                            } else if ( selector == 2 ) {
+                                pixel = vec4( vec3( pixel.r ), 1 );
+                            } else if ( selector == 3 ) {
+                                pixel = vec4( vec3( pixel.g ), 1 );
+                            } else if ( selector == 4 ) {
+                                pixel = vec4( vec3( pixel.b ), 1 );
+                            } else if ( selector == 6 ) {
+                                pixel = vec4( normalize( pixel.rgb ), 1 );
+                            }
+                            imageStore( outputImage, uv, pixel );
                         }
                     )"
                 ),
@@ -146,6 +126,13 @@ ComputeImageFromChannels::ComputeImageFromChannels(
             program,
             std::vector< std::shared_ptr< DescriptorSetLayout > > {
                 descriptorSetLayout,
+            },
+            std::vector< VkPushConstantRange > {
+                {
+                    .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+                    .offset = 0,
+                    .size = sizeof( PushConstantsData ),
+                },
             }
         );
     }();
@@ -159,7 +146,7 @@ ComputeImageFromChannels::ComputeImageFromChannels(
     );
 }
 
-void ComputeImageFromChannels::execute( void ) noexcept
+void ComputeImageSwizzle::execute( void ) noexcept
 {
     auto &cmds = getCommandBuffer();
     cmds->reset();
@@ -173,12 +160,21 @@ void ComputeImageFromChannels::execute( void ) noexcept
             .dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
             .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = m_output->getImageView(),
+            .imageView = m_output,
         }
     );
 
     cmds->bindPipeline( m_pipeline );
     cmds->bindDescriptorSet( 0, m_descriptorSet );
+
+    cmds->pushConstants(
+        VK_SHADER_STAGE_COMPUTE_BIT,
+        0,
+        PushConstantsData {
+            .selector = static_cast< uint32_t >( m_selector ),
+        }
+    );
+
     cmds->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
 
     cmds->pipelineBarrier(
@@ -189,11 +185,15 @@ void ComputeImageFromChannels::execute( void ) noexcept
             .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
             .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
             .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .imageView = m_output->getImageView(),
+            .imageView = m_output,
         }
     );
 
     cmds->end();
 
-    getRenderDevice()->submitComputeCommands( getCommandBuffer(), m_syncOptions.wait, m_syncOptions.signal );
+    getRenderDevice()->submitComputeCommands(
+        getCommandBuffer(),
+        m_syncOptions.wait,
+        m_syncOptions.signal
+    );
 }
