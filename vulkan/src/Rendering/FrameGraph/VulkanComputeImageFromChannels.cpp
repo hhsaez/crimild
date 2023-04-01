@@ -43,13 +43,15 @@ using namespace crimild::vulkan::framegraph;
 ComputeImageFromChannels::ComputeImageFromChannels(
     RenderDevice *device,
     std::shared_ptr< RenderTarget > const &input,
-    std::string channels
+    std::string channels,
+    SyncOptions const &options
 ) noexcept
     : ComputeImageFromChannels(
         device,
         input->getName(),
         input,
-        channels
+        channels,
+        options
     )
 {
     // no-op
@@ -59,7 +61,8 @@ ComputeImageFromChannels::ComputeImageFromChannels(
     RenderDevice *device,
     std::string name,
     std::shared_ptr< RenderTarget > const &input,
-    std::string channels
+    std::string channels,
+    SyncOptions const &options
 ) noexcept
     : ComputeBase( device, name ),
       WithCommandBuffer(
@@ -83,7 +86,8 @@ ComputeImageFromChannels::ComputeImageFromChannels(
                   };
               }()
           )
-      )
+      ),
+      m_syncOptions( options )
 {
     std::vector< Descriptor > descriptors;
     descriptors.push_back(
@@ -155,15 +159,41 @@ ComputeImageFromChannels::ComputeImageFromChannels(
     );
 }
 
-void ComputeImageFromChannels::execute( SyncOptions const &options ) noexcept
+void ComputeImageFromChannels::execute( void ) noexcept
 {
     auto &cmds = getCommandBuffer();
     cmds->reset();
-    cmds->begin( options );
+    cmds->begin();
+
+    cmds->pipelineBarrier(
+        vulkan::ImageMemoryBarrier {
+            .srcStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
+            .dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+            .imageView = m_output->getImageView(),
+        }
+    );
+
     cmds->bindPipeline( m_pipeline );
     cmds->bindDescriptorSet( 0, m_descriptorSet );
     cmds->dispatch( m_output->getExtent().width / 32, m_output->getExtent().height / 32, 1 );
-    cmds->end( options );
 
-    getRenderDevice()->submitComputeCommands( getCommandBuffer(), options.wait, options.signal );
+    cmds->pipelineBarrier(
+        vulkan::ImageMemoryBarrier {
+            .srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            .dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .imageView = m_output->getImageView(),
+        }
+    );
+
+    cmds->end();
+
+    getRenderDevice()->submitComputeCommands( getCommandBuffer(), m_syncOptions.wait, m_syncOptions.signal );
 }

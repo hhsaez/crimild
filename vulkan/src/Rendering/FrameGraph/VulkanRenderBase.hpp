@@ -28,19 +28,28 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_BASE
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/VulkanUtils.hpp"
+#include "Rendering/FrameGraph/VulkanFrameGraphNode.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
+
+namespace crimild::vulkan {
+
+    class ImageView;
+
+}
 
 namespace crimild::vulkan::framegraph {
 
     class RenderBase
-        : public SharedObject,
-          public Named,
+        : public Node,
           public WithRenderDevice,
           public WithSemaphore {
     protected:
+        RenderBase(
+            RenderDevice *device,
+            std::string name,
+            std::shared_ptr< vulkan::ImageView > const &output
+        ) noexcept;
+
         RenderBase(
             RenderDevice *device,
             std::string name,
@@ -49,6 +58,13 @@ namespace crimild::vulkan::framegraph {
 
     public:
         virtual ~RenderBase( void ) = default;
+
+        inline std::shared_ptr< vulkan::ImageView > &getOutputImage( void ) noexcept { return m_outputImage; }
+
+        virtual void execute( void ) noexcept
+        {
+            // TODO: do not implement this function here
+        }
 
         inline VkExtent2D getExtent( void ) const noexcept { return m_extent; }
         inline void setExtent( const VkExtent2D &extent ) noexcept
@@ -64,6 +80,8 @@ namespace crimild::vulkan::framegraph {
         virtual void onResize( void ) noexcept { }
 
     private:
+        std::shared_ptr< vulkan::ImageView > m_outputImage;
+
         VkExtent2D m_extent = { .width = 1, .height = 1 };
     };
 }

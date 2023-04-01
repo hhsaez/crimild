@@ -49,19 +49,21 @@ namespace crimild::vulkan {
             ComputeImageFromChannels(
                 RenderDevice *device,
                 std::shared_ptr< RenderTarget > const &input,
-                std::string channels
+                std::string channels,
+                SyncOptions const &options = {}
             ) noexcept;
 
             ComputeImageFromChannels(
                 RenderDevice *device,
                 std::string name,
                 std::shared_ptr< RenderTarget > const &input,
-                std::string channels
+                std::string channels,
+                SyncOptions const &options = {}
             ) noexcept;
 
             virtual ~ComputeImageFromChannels( void ) = default;
 
-            void execute( SyncOptions const &options ) noexcept;
+            virtual void execute( void ) noexcept override;
 
             inline std::shared_ptr< RenderTarget > &getInput( void ) noexcept { return m_input; }
             inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_output; }
@@ -69,6 +71,7 @@ namespace crimild::vulkan {
         private:
             std::shared_ptr< RenderTarget > m_input;
             std::shared_ptr< RenderTarget > m_output;
+            SyncOptions m_syncOptions;
 
             std::shared_ptr< ComputePipeline > m_pipeline;
             std::shared_ptr< DescriptorSet > m_descriptorSet;

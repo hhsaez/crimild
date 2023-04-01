@@ -35,10 +35,7 @@
 
 namespace crimild::vulkan::framegraph {
 
-    class ComputeImageFromChannels;
-    class ComputeImageMix;
-    class RenderScene;
-    class RenderSceneDebug;
+    class Node;
 
 }
 
@@ -66,15 +63,11 @@ namespace crimild::editor::panels {
         Extent2D m_extent = Extent2D { .width = 1280.0, .height = 1280.0 };
         Event m_lastResizeEvent = Event {};
 
-        std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_framegraphs;
-        std::vector< std::shared_ptr< vulkan::framegraph::RenderSceneDebug > > m_debugFramegraphs;
-        std::vector< std::shared_ptr< vulkan::framegraph::ComputeImageMix > > m_mixes;
-        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::ComputeImageFromChannels > > > m_debugTargets;
-
+        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::Node > > > m_framegraph;
         std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
         size_t m_selectedTexture = 0;
 
-        std::unique_ptr< Camera > m_editorCamera;
+        std::shared_ptr< Camera > m_editorCamera;
         bool m_editorCameraEnabled = false;
         Vector2 m_lastMousePos = Vector2 { 0, 0 };
         Transformation m_cameraRotation = Transformation::Constants::IDENTITY;

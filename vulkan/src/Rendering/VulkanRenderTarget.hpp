@@ -47,9 +47,16 @@ namespace crimild::vulkan {
         RenderTarget(
             RenderDevice *device,
             std::string name,
+            std::shared_ptr< vulkan::ImageView > const &imageView
+        ) noexcept;
+
+        RenderTarget(
+            RenderDevice *device,
+            std::string name,
             VkFormat format,
             const VkExtent2D &extent
         ) noexcept;
+
         virtual ~RenderTarget( void ) noexcept;
 
         inline const VkExtent2D &getExtent( void ) const noexcept { return m_extent; }

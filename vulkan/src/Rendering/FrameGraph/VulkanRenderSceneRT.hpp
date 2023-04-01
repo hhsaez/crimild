@@ -63,7 +63,7 @@ namespace crimild {
                 RenderSceneRT( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept;
                 virtual ~RenderSceneRT( void ) noexcept;
 
-                void render( Node *scene, Camera *camera ) noexcept;
+                void render( crimild::Node *scene, Camera *camera ) noexcept;
 
                 inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
                 {
@@ -96,7 +96,7 @@ namespace crimild {
                     }
                 };
 
-                void setup( Node *scene, Camera *camera ) noexcept;
+                void setup( crimild::Node *scene, Camera *camera ) noexcept;
 
                 Ray3 getRay( Vector2f uv ) noexcept;
                 ColorRGB getRayColor( const Ray3 &R, const ColorRGB &backgroundColor, int depth ) noexcept;
@@ -112,7 +112,7 @@ namespace crimild {
                 std::shared_ptr< BufferAccessor > m_imageAccessor;
                 std::shared_ptr< vulkan::Buffer > m_stagingBuffer;
 
-                SharedPointer< Node > m_scene;
+                SharedPointer< crimild::Node > m_scene;
                 SharedPointer< Camera > m_camera;
                 RTAcceleration::Result m_acceleratedScene;
 

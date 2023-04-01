@@ -28,29 +28,32 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_BASE
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_BASE
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
+#include "Rendering/FrameGraph/VulkanFramegraphNode.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 
 namespace crimild::vulkan::framegraph {
 
     class ComputeBase
-        : public SharedObject,
+        : public Node,
           public WithRenderDevice,
-          public Named,
           public WithSemaphore {
     protected:
         ComputeBase( RenderDevice *device, std::string name ) noexcept
-            : WithRenderDevice( device ),
-              Named( name ),
-              WithSemaphore( device, name + "/Semaphore" )
+            : Node( name ),
+              WithRenderDevice( device ),
+              WithSemaphore( device, name + "/Semaphore", VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT )
         {
             // no-op
         }
 
     public:
         virtual ~ComputeBase( void ) = default;
+
+        virtual void execute( void ) noexcept
+        {
+            // TODO: do not implement this function here
+        }
     };
 
 }

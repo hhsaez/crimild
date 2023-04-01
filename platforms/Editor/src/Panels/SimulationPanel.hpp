@@ -35,7 +35,7 @@
 
 namespace crimild::vulkan::framegraph {
 
-    class RenderScene;
+    class Node;
 
 }
 
@@ -60,8 +60,8 @@ namespace crimild::editor::panels {
         Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
         Extent2D m_simulationExtent = Extent2D { .width = 1280, .height = 720 };
 
-        std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_framegraphs;
-        std::vector< std::shared_ptr< ImGuiVulkanTexture > > m_outputTextures;
+        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::Node > > > m_framegraph;
+        std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
     };
 
 }

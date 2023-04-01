@@ -119,7 +119,7 @@ void RenderSceneRT::reset( void ) noexcept
     m_state = State::RUNNING;
 }
 
-void RenderSceneRT::setup( Node *scene, Camera *camera ) noexcept
+void RenderSceneRT::setup( crimild::Node *scene, Camera *camera ) noexcept
 {
     auto settings = Settings::getInstance();
 
@@ -626,7 +626,7 @@ void RenderSceneRT::updateImage( void ) noexcept
     ++m_sampleCount;
 }
 
-void RenderSceneRT::render( Node *scene, Camera *camera ) noexcept
+void RenderSceneRT::render( crimild::Node *scene, Camera *camera ) noexcept
 {
     if ( m_scene == nullptr ) {
         setup( scene, camera );

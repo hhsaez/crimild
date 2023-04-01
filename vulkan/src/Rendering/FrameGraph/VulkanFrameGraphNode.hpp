@@ -25,48 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_MIX
-#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_IMAGE_MIX
+#ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
+#define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
 
-#include "Rendering/FrameGraph/VulkanComputeBase.hpp"
-#include "Rendering/VulkanSynchronization.hpp"
+#include "Foundation/Named.hpp"
+#include "Foundation/SharedObject.hpp"
 
-namespace crimild::vulkan {
+namespace crimild::vulkan::framegraph {
 
-    class ComputePipeline;
-    class DescriptorSet;
-    class ImageView;
+    class Node
+        : public SharedObject,
+          public Named {
+    protected:
+        Node( std::string name )
+            : Named( name )
+        {
+            // no-op
+        }
 
-    namespace framegraph {
+    public:
+        virtual ~Node( void ) = default;
 
-        class ComputeImageMix
-            : public ComputeBase,
-              public WithCommandBuffer {
-        public:
-            ComputeImageMix(
-                RenderDevice *device,
-                std::string name,
-                std::shared_ptr< ImageView > const &source,
-                std::shared_ptr< ImageView > const &destination,
-                std::shared_ptr< ImageView > const &output,
-                SyncOptions const &options = {}
-            ) noexcept;
-
-            virtual ~ComputeImageMix( void ) = default;
-
-            virtual void execute( void ) noexcept override;
-
-        private:
-            std::shared_ptr< ImageView > m_source;
-            std::shared_ptr< ImageView > m_destination;
-            std::shared_ptr< ImageView > m_output;
-            SyncOptions m_syncOptions;
-
-            std::shared_ptr< ComputePipeline > m_pipeline;
-            std::shared_ptr< DescriptorSet > m_descriptorSet;
-        };
-
-    }
+        virtual void execute( void ) noexcept = 0;
+    };
 
 }
 
