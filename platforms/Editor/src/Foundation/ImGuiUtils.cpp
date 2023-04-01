@@ -34,6 +34,29 @@ using namespace crimild;
 
 ImGuiVulkanTexture::ImGuiVulkanTexture(
     std::string name,
+    std::shared_ptr< vulkan::ImageView > const &imageView
+) noexcept
+    : Named( name ),
+      m_imageView( imageView ),
+      m_sampler(
+          crimild::alloc< vulkan::Sampler >(
+              imageView->getRenderDevice(),
+              getName() + "/Sampler",
+              VK_FILTER_LINEAR,
+              VK_SAMPLER_MIPMAP_MODE_LINEAR,
+              VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+          )
+      )
+{
+    m_descriptorSet = ImGui_ImplVulkan_AddTexture(
+        m_sampler->getHandle(),
+        m_imageView->getHandle(),
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    );
+}
+
+ImGuiVulkanTexture::ImGuiVulkanTexture(
+    std::string name,
     std::shared_ptr< vulkan::ImageView > const &imageView,
     std::shared_ptr< vulkan::Sampler > const &sampler
 ) noexcept

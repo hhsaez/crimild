@@ -65,6 +65,11 @@ namespace crimild {
     public:
         ImGuiVulkanTexture(
             std::string name,
+            std::shared_ptr< vulkan::ImageView > const &imageView
+        ) noexcept;
+
+        ImGuiVulkanTexture(
+            std::string name,
             std::shared_ptr< vulkan::ImageView > const &imageView,
             std::shared_ptr< vulkan::Sampler > const &sampelr
         ) noexcept;
