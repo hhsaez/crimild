@@ -29,6 +29,7 @@
 
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/FrameGraph/VulkanRenderScene.hpp"
+#include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
@@ -39,26 +40,62 @@ using namespace crimild::editor::panels;
 Simulation::Simulation( crimild::vulkan::RenderDevice *device ) noexcept
     : WithRenderDevice( device )
 {
+    auto createImageView = [ & ]( std::string name, const VkExtent2D &extent, VkFormat format, VkImageUsageFlags usage ) {
+        return crimild::alloc< vulkan::ImageView >(
+            device,
+            name + "/ImageView",
+            [ & ] {
+                auto image = crimild::alloc< vulkan::Image >(
+                    device,
+                    extent,
+                    format,
+                    usage,
+                    name + "/Image"
+                );
+                image->allocateMemory();
+                return image;
+            }()
+        );
+    };
+
+    auto createColorImageView = [ & ]( std::string name, const VkExtent2D &extent, VkFormat format ) {
+        return createImageView(
+            name,
+            extent,
+            format,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT
+        );
+    };
+
+    const auto extent = VkExtent2D {
+        // Render using a squared aspect ratio, so we don't need to
+        // resize images when windows does. The end result might be
+        // a bit pixelated, but it's faster. And we can always render to
+        // a bigger buffer
+        .width = 1280,
+        .height = 720,
+    };
+
     // Simulation renders at the fixed size. This might change in the future
     const auto N = getRenderDevice()->getInFlightFrameCount();
-    m_framegraphs.resize( N );
+    m_framegraph.resize( N );
     m_outputTextures.resize( N );
     for ( int i = 0; i < N; ++i ) {
-        auto prefix = StringUtils::toString( i );
-        auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
+        auto renderSceneOutput = createColorImageView( "Scene/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
+        auto renderScene = crimild::alloc< vulkan::framegraph::RenderScene >(
             device,
-            prefix + "/RenderSimulation",
-            VkExtent2D {
-                .width = uint32_t( m_simulationExtent.width ),
-                .height = uint32_t( m_simulationExtent.height ),
-            }
+            "Scene",
+            nullptr,
+            renderSceneOutput
         );
-        m_framegraphs[ i ] = framegraph;
-        m_outputTextures[ i ] = crimild::alloc< ImGuiVulkanTexture >(
-            prefix + "/RenderSimulationOutput",
-            framegraph->getOutput()->getImageView(),
-            framegraph->getOutput()->getSampler()
-        );
+
+        m_framegraph[ i ] = {
+            renderScene,
+        };
+
+        m_outputTextures[ i ] = {
+            crimild::alloc< ImGuiVulkanTexture >( "Scene", renderSceneOutput ),
+        };
     }
 }
 
@@ -81,7 +118,7 @@ void Simulation::onRender( void ) noexcept
 
     auto currentFrameIdx = getRenderDevice()->getCurrentFrameIndex();
     if ( !m_outputTextures.empty() ) {
-        auto tex_id = m_outputTextures[ currentFrameIdx ]->getDescriptorSet();
+        auto tex_id = m_outputTextures[ currentFrameIdx ].front()->getDescriptorSet();
         ImVec2 uv_min = ImVec2( 0.0f, 0.0f );                 // Top-left
         ImVec2 uv_max = ImVec2( 1.0f, 1.0f );                 // Lower-right
         ImVec4 tint_col = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );   // No tint
@@ -109,8 +146,8 @@ void Simulation::onRender( void ) noexcept
     if ( camera != nullptr ) {
         camera->setAspectRatio( m_extent.width / m_extent.height );
     }
-    m_framegraphs[ currentFrameIdx ]->render(
-        crimild::Simulation::getInstance()->getScene(),
-        camera
-    );
+
+    for ( auto &node : m_framegraph[ currentFrameIdx ] ) {
+        node->execute();
+    }
 }

@@ -51,10 +51,17 @@ namespace crimild {
 
             class RenderScene : public RenderBase {
             public:
-                RenderScene( RenderDevice *device, std::string name, const VkExtent2D &extent );
+                RenderScene(
+                    RenderDevice *device,
+                    std::string name,
+                    std::shared_ptr< Camera > const &camera,
+                    std::shared_ptr< ImageView > const &output,
+                    SyncOptions const &options = {}
+                ) noexcept;
+
                 virtual ~RenderScene( void ) = default;
 
-                void render( Node *scene, Camera *camera, SyncOptions const &options = {} ) noexcept;
+                virtual void execute( void ) noexcept override;
 
                 inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
                 {
@@ -80,6 +87,10 @@ namespace crimild {
                 virtual void onResize( void ) noexcept override;
 
             private:
+                std::shared_ptr< Camera > m_camera;
+                std::shared_ptr< vulkan::ImageView > m_output;
+                SyncOptions m_syncOptions;
+
                 std::unordered_map< std::string, std::shared_ptr< RenderTarget > > m_renderTargets;
 
                 std::shared_ptr< RenderShadowMaps > m_shadows;

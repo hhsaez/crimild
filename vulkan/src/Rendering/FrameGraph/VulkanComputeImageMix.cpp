@@ -46,7 +46,8 @@ ComputeImageMix::ComputeImageMix(
     std::string name,
     std::shared_ptr< ImageView > const &source,
     std::shared_ptr< ImageView > const &destination,
-    std::shared_ptr< ImageView > const &output
+    std::shared_ptr< ImageView > const &output,
+    SyncOptions const &options
 ) noexcept
     : ComputeBase( device, name ),
       WithCommandBuffer(
@@ -58,7 +59,8 @@ ComputeImageMix::ComputeImageMix(
       ),
       m_source( source ),
       m_destination( destination ),
-      m_output( output )
+      m_output( output ),
+      m_syncOptions( options )
 {
     std::vector< Descriptor > descriptors {
         Descriptor {
@@ -132,11 +134,11 @@ ComputeImageMix::ComputeImageMix(
     );
 }
 
-void ComputeImageMix::execute( SyncOptions const &options ) noexcept
+void ComputeImageMix::execute( void ) noexcept
 {
     auto &cmds = getCommandBuffer();
     cmds->reset();
-    cmds->begin( options );
+    cmds->begin( m_syncOptions );
 
     cmds->pipelineBarrier(
         vulkan::ImageMemoryBarrier {
@@ -166,7 +168,7 @@ void ComputeImageMix::execute( SyncOptions const &options ) noexcept
         }
     );
 
-    cmds->end( options );
+    cmds->end( m_syncOptions );
 
-    getRenderDevice()->submitComputeCommands( cmds, options.wait, options.signal );
+    getRenderDevice()->submitComputeCommands( cmds, m_syncOptions.wait, m_syncOptions.signal );
 }

@@ -56,18 +56,25 @@ namespace crimild::vulkan::framegraph {
         : public RenderBase,
           public WithCommandBuffer {
     public:
-        RenderSceneDebug( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept;
-        virtual ~RenderSceneDebug( void ) = default;
-
-        inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_outputTarget; }
-
-        virtual void render(
-            Node *scene,
-            Camera *camera,
+        RenderSceneDebug(
+            RenderDevice *device,
+            std::string name,
+            std::shared_ptr< Camera > const &camera,
+            std::shared_ptr< ImageView > const &output,
             SyncOptions const &options = {}
         ) noexcept;
 
+        virtual ~RenderSceneDebug( void ) = default;
+
+        virtual void execute( void ) noexcept override;
+
+        inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept { return m_outputTarget; }
+
     private:
+        std::shared_ptr< Camera > m_camera;
+        std::shared_ptr< vulkan::ImageView > m_output;
+        SyncOptions m_syncOptions;
+
         std::shared_ptr< RenderTarget > m_outputTarget;
 
         struct PushConstantsData {

@@ -31,27 +31,44 @@
 #include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
 #include "Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp"
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/VulkanFetchSceneRenderState.hpp"
 
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;
 
-RenderScene::RenderScene( RenderDevice *device, std::string name, const VkExtent2D &extent )
-    : RenderBase( device, name, extent )
+RenderScene::RenderScene(
+    RenderDevice *device,
+    std::string name,
+    std::shared_ptr< Camera > const &camera,
+    std::shared_ptr< ImageView > const &output,
+    SyncOptions const &options
+) noexcept
+    : RenderBase( device, name, output ),
+      m_camera( camera ),
+      m_output( output ),
+      m_syncOptions( options )
 {
+    const auto extent = VkExtent2D {
+        m_output->getExtent().width,
+        m_output->getExtent().height,
+    };
+
+    m_renderTargets[ getName() + "/Targets/Color" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Color", output );
+
+    // Set scene color to opaque
+    m_renderTargets[ getName() + "/Targets/Color" ]->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
+
     m_renderTargets[ getName() + "/Targets/Depth" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Depth", VK_FORMAT_D32_SFLOAT, extent );
-    m_renderTargets[ getName() + "/Targets/Color" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
     m_renderTargets[ getName() + "/Targets/Albedo" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Albedo", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
     m_renderTargets[ getName() + "/Targets/Position" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Position", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
     m_renderTargets[ getName() + "/Targets/Normal" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Normal", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
     m_renderTargets[ getName() + "/Targets/Material" ] = crimild::alloc< RenderTarget >( device, getName() + "/Targets/Material", VK_FORMAT_R32G32B32A32_SFLOAT, extent );
-
-    // Set scene color to opaque
-    m_renderTargets[ getName() + "/Targets/Color" ]->setClearValue( VkClearValue { .color = { .float32 = { 0, 0, 0, 1 } } } );
 
     m_shadows = crimild::alloc< RenderShadowMaps >( device );
 
@@ -99,25 +116,32 @@ void RenderScene::onResize( void ) noexcept
     // TODO
 }
 
-void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &options ) noexcept
+void RenderScene::execute( void ) noexcept
 {
+    auto scene = Simulation::getInstance()->getScene();
     const auto renderState =
         scene != nullptr
             ? scene->perform< FetchSceneRenderState >()
             : FetchSceneRenderState::Result {};
 
-    if ( camera != nullptr ) {
+    if ( m_camera == nullptr ) {
+        m_camera = retain( Simulation::getInstance()->getMainCamera() );
+    }
+
+    if ( m_camera != nullptr ) {
         // Set correct aspect ratio for camera before rendering
-        camera->setAspectRatio( float( getExtent().width ) / float( getExtent().height ) );
+        m_camera->setAspectRatio(
+            float( getOutputImage()->getExtent().width ) / float( getOutputImage()->getExtent().height )
+        );
     }
 
     // Execute shadow pass. No need to add sync objects since render pass will
     // leave all attachments in the correct layout
-    m_shadows->render( renderState, camera );
+    m_shadows->render( renderState, m_camera.get() );
 
     m_gBuffer->render(
         renderState.litRenderables,
-        camera,
+        m_camera.get(),
         {
             .pre = {
                 // No need to add barriers here since render pass dependencies will deal with
@@ -132,7 +156,7 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
 
     m_lighting->render(
         renderState,
-        camera,
+        m_camera.get(),
         SyncOptions {
             .pre = {
                 // Make sure all G-Buffer targets are in the correct layout
@@ -181,12 +205,12 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
 
     m_unlit->render(
         renderState.unlitRenderables,
-        camera
+        m_camera.get()
     );
 
     m_environment->render(
         renderState.envRenderables,
-        camera,
+        m_camera.get(),
         {
             .post = {
                 .imageMemoryBarriers = {
@@ -205,7 +229,7 @@ void RenderScene::render( Node *scene, Camera *camera, SyncOptions const &option
             },
 
             // This is the last pass, so signal semaphores if needed.
-            .signal = options.signal,
+            .signal = m_syncOptions.signal,
         }
     );
 }

@@ -46,7 +46,7 @@ using namespace crimild::vulkan::framegraph;
 using namespace crimild::editor::panels;
 
 void drawGizmo(
-    Node *selectedNode,
+    crimild::Node *selectedNode,
     Camera *camera,
     float x,
     float y,
@@ -113,12 +113,13 @@ void drawGizmo(
 Scene::Scene( vulkan::RenderDevice *device ) noexcept
     : WithRenderDevice( device )
 {
+    m_editorCamera = crimild::alloc< Camera >();
+    m_cameraTranslation = translation( 10, 10, 10 );
+    m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
+    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+
     const auto N = getRenderDevice()->getInFlightFrameCount();
-    m_framegraphs.resize( N );
-    m_debugFramegraphs.resize( N );
-    m_mixes.resize( N );
-    m_debugTargets.resize( N );
-    m_outputTextures.resize( N );
+
     const auto extent = VkExtent2D {
         // Render using a squared aspect ratio, so we don't need to
         // resize images when windows does. The end result might be
@@ -127,99 +128,106 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
         .width = 1280,
         .height = 1280,
     };
-    for ( int i = 0; i < N; ++i ) {
-        auto prefix = StringUtils::toString( i );
-        auto framegraph = crimild::alloc< vulkan::framegraph::RenderScene >(
-            device,
-            prefix + "/RenderScene",
-            extent
-        );
-        m_framegraphs[ i ] = framegraph;
-        m_outputTextures[ i ].push_back(
-            crimild::alloc< ImGuiVulkanTexture >(
-                "Scene",
-                framegraph->getOutput()->getImageView(),
-                framegraph->getOutput()->getSampler()
-            )
-        );
 
-        m_debugFramegraphs[ i ] = crimild::alloc< vulkan::framegraph::RenderSceneDebug >(
+    auto createImageView = [ & ]( std::string name, const VkExtent2D &extent, VkFormat format, VkImageUsageFlags usage ) {
+        return crimild::alloc< vulkan::ImageView >(
             device,
-            prefix + "/RenderSceneDebug",
-            extent
-        );
-        m_outputTextures[ i ].push_back(
-            crimild::alloc< ImGuiVulkanTexture >(
-                "SceneGizmos",
-                m_debugFramegraphs[ i ]->getOutput()->getImageView(),
-                m_debugFramegraphs[ i ]->getOutput()->getSampler()
-            )
-        );
-
-        auto mixName = prefix + "/Mix";
-        auto mixOutput = crimild::alloc< vulkan::ImageView >(
-            device,
-            mixName + "/ImageView",
+            name + "/ImageView",
             [ & ] {
                 auto image = crimild::alloc< vulkan::Image >(
                     device,
                     extent,
-                    VK_FORMAT_R32G32B32A32_SFLOAT,
-                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
-                    mixName + "/Image"
+                    format,
+                    usage,
+                    name + "/Image"
                 );
                 image->allocateMemory();
                 return image;
             }()
         );
-        m_mixes[ i ] = crimild::alloc< vulkan::framegraph::ComputeImageMix >(
-            device,
-            mixName,
-            m_framegraphs[ i ]->getOutput()->getImageView(),
-            m_debugFramegraphs[ i ]->getOutput()->getImageView(),
-            mixOutput
+    };
+
+    auto createColorImageView = [ & ]( std::string name, const VkExtent2D &extent, VkFormat format ) {
+        return createImageView(
+            name,
+            extent,
+            format,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT
         );
-        m_outputTextures[ i ].push_back(
-            crimild::alloc< ImGuiVulkanTexture >(
-                "Mix",
-                mixOutput,
-                crimild::alloc< vulkan::Sampler >(
-                    device,
-                    mixName + "/Sampler",
-                    VK_FILTER_LINEAR,
-                    VK_SAMPLER_MIPMAP_MODE_LINEAR,
-                    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
-                )
-            )
+    };
+
+    m_framegraph.resize( N );
+    m_outputTextures.resize( N );
+    for ( int i = 0; i < N; ++i ) {
+        auto renderSceneOutput = createColorImageView( "Scene/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
+        auto renderSceneSemaphore = crimild::alloc< vulkan::Semaphore >( device, "Scene/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT );
+        auto renderScene = crimild::alloc< RenderScene >(
+            device,
+            "Scene",
+            m_editorCamera,
+            renderSceneOutput,
+            vulkan::SyncOptions {
+                // .signal = { renderSceneSemaphore },
+            }
         );
 
-        m_debugTargets[ i ] = {
+        auto renderGizmosOutput = createColorImageView( "Gizmos/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
+        auto renderGizmosSemaphore = crimild::alloc< vulkan::Semaphore >( device, "Gizmos/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT );
+        auto renderGizmos = crimild::alloc< RenderSceneDebug >(
+            device,
+            "Gizmos",
+            m_editorCamera,
+            renderGizmosOutput,
+            vulkan::SyncOptions {
+                // .signal = { renderGizmosSemaphore },
+            }
+        );
+
+        auto mixSceneAndGizmosOutput = createColorImageView( "MixSceneAndGizmos/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
+        auto mixSceneAndGizmos = crimild::alloc< ComputeImageMix >(
+            device,
+            "MixSceneAndGizmos",
+            renderGizmosOutput,
+            renderSceneOutput,
+            mixSceneAndGizmosOutput,
+            vulkan::SyncOptions {
+                // .wait = { renderSceneSemaphore, renderGizmosSemaphore },
+            }
+        );
+
+        m_framegraph[ i ] = {
+            renderScene,
+            renderGizmos,
+            mixSceneAndGizmos,
+        };
+
+        m_outputTextures[ i ] = {
+            crimild::alloc< ImGuiVulkanTexture >( "Default", mixSceneAndGizmosOutput ),
+            crimild::alloc< ImGuiVulkanTexture >( "Gizmos Only", renderGizmosOutput ),
+            crimild::alloc< ImGuiVulkanTexture >( "Scene Only", renderSceneOutput ),
+        };
+
+        auto debugTargets = std::vector< std::shared_ptr< ComputeImageFromChannels > > {
             // crimild::alloc< vulkan::framegraph::ComputeImageFromChannels >(
             //     device,
             //     "Scene/Depth",
             //     m_framegraphs[ i ]->getRenderTarget( "Scene/Depth" ),
             //     "depth"
             // )
-            crimild::alloc< ComputeImageFromChannels >( device, "Albedo", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Albedo" ), "rgb" ),
-            crimild::alloc< ComputeImageFromChannels >( device, "Position", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Position" ), "rgb" ),
-            crimild::alloc< ComputeImageFromChannels >( device, "Normal", m_framegraphs[ i ]->getRenderTarget( m_framegraphs[ i ]->getName() + "/Targets/Normal" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Albedo", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Albedo" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Position", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Position" ), "rgb" ),
+            crimild::alloc< ComputeImageFromChannels >( device, "Normal", renderScene->getRenderTarget( renderScene->getName() + "/Targets/Normal" ), "rgb" ),
         };
-
-        for ( auto &debugTarget : m_debugTargets[ i ] ) {
+        for ( auto &debugTarget : debugTargets ) {
+            m_framegraph[ i ].push_back( debugTarget );
             m_outputTextures[ i ].push_back(
                 crimild::alloc< ImGuiVulkanTexture >(
                     debugTarget->getName(),
-                    debugTarget->getOutput()->getImageView(),
-                    debugTarget->getOutput()->getSampler()
+                    debugTarget->getOutput()->getImageView()
                 )
             );
         }
     }
-
-    m_editorCamera = std::make_unique< Camera >();
-    m_cameraTranslation = translation( 10, 10, 10 );
-    m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
-    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
 }
 
 Event Scene::handle( const Event &e ) noexcept
@@ -287,62 +295,8 @@ void Scene::onRender( void ) noexcept
 
     updateCamera();
 
-    std::vector< std::shared_ptr< vulkan::Semaphore > > signals;
-    for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
-        signals.push_back( debugTarget->getSemaphore() );
-    }
-    m_framegraphs[ currentFrameIdx ]->render(
-        crimild::Simulation::getInstance()->getScene(),
-        m_editorCamera.get(),
-        {
-            .signal = signals,
-        }
-    );
-
-    m_debugFramegraphs[ currentFrameIdx ]->render(
-        crimild::Simulation::getInstance()->getScene(),
-        m_editorCamera.get(),
-        {
-            // .signal = signals,
-        }
-    );
-
-    m_mixes[ currentFrameIdx ]->execute( {} );
-
-    for ( auto &debugTarget : m_debugTargets[ currentFrameIdx ] ) {
-        debugTarget->execute(
-            {
-                .pre = {
-                    // Transition target image to general layout so it can be written
-                    .imageMemoryBarriers = {
-                        vulkan::ImageMemoryBarrier {
-                            .srcStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                            .dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                            .srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
-                            .dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-                            .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-                            .imageView = debugTarget->getOutput()->getImageView(),
-                        },
-                    },
-                },
-                .post = {
-                    // Transition target image to shader read
-                    .imageMemoryBarriers = {
-                        vulkan::ImageMemoryBarrier {
-                            .srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                            .dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                            .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT,
-                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-                            .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-                            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                            .imageView = debugTarget->getOutput()->getImageView(),
-                        },
-                    },
-                },
-                .wait = { debugTarget->getSemaphore() },
-            }
-        );
+    for ( auto &node : m_framegraph[ currentFrameIdx ] ) {
+        node->execute();
     }
 }
 

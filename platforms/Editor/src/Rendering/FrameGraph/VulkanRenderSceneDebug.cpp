@@ -35,12 +35,14 @@
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
+#include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Light.hpp"
+#include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 using namespace crimild;
@@ -57,7 +59,7 @@ public:
 
     ~DebugVisitor( void ) = default;
 
-    virtual void visitNode( Node *node ) override
+    virtual void visitNode( crimild::Node *node ) override
     {
         node->forEachComponent(
             [ & ]( auto cmp ) {
@@ -163,8 +165,14 @@ private:
     Camera *m_camera = nullptr;
 };
 
-RenderSceneDebug::RenderSceneDebug( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept
-    : RenderBase( device, name, extent ),
+RenderSceneDebug::RenderSceneDebug(
+    RenderDevice *device,
+    std::string name,
+    std::shared_ptr< Camera > const &camera,
+    std::shared_ptr< ImageView > const &output,
+    SyncOptions const &options
+) noexcept
+    : RenderBase( device, name, output ),
       WithCommandBuffer(
           crimild::alloc< CommandBuffer >(
               getRenderDevice(),
@@ -172,8 +180,16 @@ RenderSceneDebug::RenderSceneDebug( RenderDevice *device, std::string name, cons
               VK_COMMAND_BUFFER_LEVEL_PRIMARY
           )
       ),
-      m_outputTarget( crimild::alloc< RenderTarget >( device, getName() + "/Targets/Color", VK_FORMAT_R32G32B32A32_SFLOAT, extent ) )
+      m_output( output ),
+      m_camera( camera ),
+      m_syncOptions( options ),
+      m_outputTarget( crimild::alloc< RenderTarget >( device, getName() + "/Targets/Color", output ) )
 {
+    const auto extent = VkExtent2D {
+        m_output->getExtent().width,
+        m_output->getExtent().height,
+    };
+
     auto renderTargets = std::vector< std::shared_ptr< RenderTarget > > { m_outputTarget };
 
     m_resources.renderPass = crimild::alloc< RenderPass >(
@@ -186,7 +202,7 @@ RenderSceneDebug::RenderSceneDebug( RenderDevice *device, std::string name, cons
     m_resources.framebuffer = crimild::alloc< Framebuffer >(
         getRenderDevice(),
         getName() + "/Framebuffer",
-        getExtent(),
+        extent,
         m_resources.renderPass,
         renderTargets
     );
@@ -231,7 +247,7 @@ RenderSceneDebug::RenderSceneDebug( RenderDevice *device, std::string name, cons
             }
         );
 
-        const auto viewport = ViewportDimensions::fromExtent( getExtent().width, getExtent().height );
+        const auto viewport = ViewportDimensions::fromExtent( extent.width, extent.height );
 
         const auto pipelineDescriptor = GraphicsPipeline::Descriptor {
             .primitiveType = Primitive::Type::LINES,
@@ -258,23 +274,20 @@ RenderSceneDebug::RenderSceneDebug( RenderDevice *device, std::string name, cons
     }();
 }
 
-void RenderSceneDebug::render(
-    Node *scene,
-    Camera *camera,
-    SyncOptions const &options
-) noexcept
+void RenderSceneDebug::execute( void ) noexcept
 {
     auto &cmds = getCommandBuffer();
 
     cmds->reset();
-    cmds->begin( options );
+    cmds->begin( m_syncOptions );
     cmds->beginRenderPass( m_resources.renderPass, m_resources.framebuffer );
 
-    if ( scene != nullptr && camera != nullptr ) {
-        const auto view = camera->getViewMatrix();
-        const auto proj = camera->getProjectionMatrix();
+    auto scene = Simulation::getInstance()->getScene();
+    if ( scene != nullptr && m_camera != nullptr ) {
+        const auto view = m_camera->getViewMatrix();
+        const auto proj = m_camera->getProjectionMatrix();
 
-        scene->perform( DebugVisitor( camera ) );
+        scene->perform( DebugVisitor( m_camera.get() ) );
         DebugDrawManager::eachRenderable(
             [ & ]( auto renderable ) {
                 cmds->bindPipeline( m_resources.pipeline );
@@ -309,6 +322,6 @@ void RenderSceneDebug::render(
         }
     );
 
-    cmds->end( options );
-    getRenderDevice()->submitGraphicsCommands( cmds, options.wait, options.signal );
+    cmds->end( m_syncOptions );
+    getRenderDevice()->submitGraphicsCommands( cmds, m_syncOptions.wait, m_syncOptions.signal );
 }

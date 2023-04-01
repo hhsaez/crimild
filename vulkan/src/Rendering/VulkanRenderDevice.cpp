@@ -2372,8 +2372,10 @@ void RenderDevice::submitCommands(
     std::vector< VkCommandBuffer > commandBufferHandlers = { commandBuffer->getHandle() };
 
     std::vector< VkSemaphore > waitSemaphores;
+    std::vector< VkPipelineStageFlags > waitStageMasks;
     for ( auto &semaphore : wait ) {
         waitSemaphores.push_back( semaphore->getHandle() );
+        waitStageMasks.push_back( semaphore->getWaitStageMask() );
     }
 
     std::vector< VkSemaphore > signalSemaphores;
@@ -2381,14 +2383,11 @@ void RenderDevice::submitCommands(
         signalSemaphores.push_back( semaphore->getHandle() );
     }
 
-    // TODO: check if this is the correct flag
-    VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
     auto submitInfo = VkSubmitInfo {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = uint32_t( waitSemaphores.size() ),
         .pWaitSemaphores = waitSemaphores.data(),
-        .pWaitDstStageMask = &waitStageMask,
+        .pWaitDstStageMask = waitStageMasks.data(),
         .commandBufferCount = uint32_t( commandBufferHandlers.size() ),
         .pCommandBuffers = commandBufferHandlers.data(),
         .signalSemaphoreCount = uint32_t( signalSemaphores.size() ),

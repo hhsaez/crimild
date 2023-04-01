@@ -39,6 +39,63 @@ using namespace crimild::vulkan;
 RenderTarget::RenderTarget(
     RenderDevice *device,
     std::string name,
+    std::shared_ptr< vulkan::ImageView > const &imageView
+) noexcept
+    : WithRenderDevice( device ),
+      Named( name ),
+      m_extent(
+          VkExtent2D {
+              imageView->getExtent().width,
+              imageView->getExtent().height,
+          }
+      ),
+      m_image( imageView->getImage() ),
+      m_imageView( imageView ),
+      m_format( imageView->getImage()->getFormat() ),
+      m_formatIsColor( device->formatIsColor( m_format ) ),
+      m_formatIsDepthStencil( device->formatIsDepthStencil( m_format ) )
+{
+    if ( !isColor() && !isDepthStencil() ) {
+        CRIMILD_LOG_ERROR( "Invalid render target format: ", m_format );
+        return;
+    }
+
+    m_sampler = crimild::alloc< Sampler >(
+        device,
+        getName() + "/Sampler",
+        VK_FILTER_LINEAR,
+        VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+    );
+
+    m_descriptorSet = crimild::alloc< DescriptorSet >(
+        device,
+        getName() + "/DescriptorSet",
+        std::vector< Descriptor > {
+            {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .imageView = m_imageView,
+                .sampler = m_sampler,
+            },
+        }
+    );
+
+    if ( isColor() ) {
+        m_clearValue = VkClearValue {
+            .color = {
+                .float32 { 0, 0, 0, 0 },
+            },
+        };
+    } else if ( isDepthStencil() ) {
+        m_clearValue = VkClearValue {
+            .depthStencil = { 1, 0 },
+        };
+    }
+}
+
+RenderTarget::RenderTarget(
+    RenderDevice *device,
+    std::string name,
     VkFormat format,
     const VkExtent2D &extent
 ) noexcept

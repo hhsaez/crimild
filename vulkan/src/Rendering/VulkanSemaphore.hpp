@@ -39,14 +39,19 @@ namespace crimild::vulkan {
           public Named,
           public WithHandle< VkSemaphore > {
     public:
-        Semaphore( RenderDevice *device, std::string name ) noexcept;
+        Semaphore( RenderDevice *device, std::string name, VkPipelineStageFlags waitStageMask ) noexcept;
         virtual ~Semaphore( void ) noexcept;
+
+        inline VkPipelineStageFlags getWaitStageMask( void ) const noexcept { return m_waitStageMask; }
+
+    private:
+        VkPipelineStageFlags m_waitStageMask = VK_PIPELINE_STAGE_NONE;
     };
 
     class WithSemaphore {
     protected:
-        WithSemaphore( RenderDevice *device, std::string name ) noexcept
-            : m_semaphore( crimild::alloc< Semaphore >( device, name ) )
+        WithSemaphore( RenderDevice *device, std::string name, VkPipelineStageFlags waitStageMask ) noexcept
+            : m_semaphore( crimild::alloc< Semaphore >( device, name, waitStageMask ) )
         {
             // no-op
         }

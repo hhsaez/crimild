@@ -32,9 +32,10 @@
 
 using namespace crimild::vulkan;
 
-Semaphore::Semaphore( RenderDevice *device, std::string name ) noexcept
+Semaphore::Semaphore( RenderDevice *device, std::string name, VkPipelineStageFlags waitStageMask ) noexcept
     : WithRenderDevice( device ),
-      Named( name )
+      Named( name ),
+      m_waitStageMask( waitStageMask )
 {
     const auto createInfo = VkSemaphoreCreateInfo {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,

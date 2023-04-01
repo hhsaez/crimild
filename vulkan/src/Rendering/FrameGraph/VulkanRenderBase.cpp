@@ -30,10 +30,19 @@
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;
 
-RenderBase::RenderBase( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept
-    : Named( name ),
+RenderBase::RenderBase( RenderDevice *device, std::string name, std::shared_ptr< vulkan::ImageView > const &output ) noexcept
+    : Node( name ),
       WithRenderDevice( device ),
-      WithSemaphore( device, name + "/Semaphore" ),
+      WithSemaphore( device, name + "/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT ),
+      m_outputImage( output )
+{
+    // no-op
+}
+
+RenderBase::RenderBase( RenderDevice *device, std::string name, const VkExtent2D &extent ) noexcept
+    : Node( name ),
+      WithRenderDevice( device ),
+      WithSemaphore( device, name + "/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT ),
       m_extent( extent )
 {
     // no-op
