@@ -37,6 +37,7 @@
 namespace crimild {
 
     class Node;
+    class Camera;
 
     namespace vulkan::framegraph {
 
