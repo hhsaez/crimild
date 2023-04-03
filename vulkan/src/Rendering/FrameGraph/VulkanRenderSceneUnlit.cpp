@@ -120,7 +120,11 @@ void RenderSceneUnlit::bindMaterial( const UnlitMaterial *material ) noexcept
 
     auto renderCache = getRenderDevice()->getCache();
 
-    m_resources.materials[ material ].uniforms = crimild::alloc< UniformBuffer >( material->getColor() );
+    m_resources.materials[ material ].uniforms = [ & ] {
+        auto uniforms = crimild::alloc< UniformBuffer >( material->getColor() );
+        uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+        return uniforms;
+    }();
 
     m_resources.materials[ material ].descriptorSet = crimild::alloc< DescriptorSet >(
         getRenderDevice(),
