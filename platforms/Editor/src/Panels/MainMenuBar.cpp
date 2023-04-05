@@ -30,6 +30,7 @@
 #include "Foundation/ImGuiUtils.hpp"
 #include "Importers/GLTFImporter.hpp"
 #include "Panels/BehaviorsPanel.hpp"
+#include "Panels/ConsolePanel.hpp"
 #include "Panels/InspectorPanel.hpp"
 #include "Panels/MainMenuBar.hpp"
 #include "Panels/PlaybackControlsPanel.hpp"
@@ -427,6 +428,7 @@ void MainMenuBar::renderWorkspaceMenu( void ) noexcept
 
         renderWorkspaceMenuItem< panels::Behaviors >();
         renderWorkspaceMenuItem< panels::Timeline >();
+        renderWorkspaceMenuItem< panels::Console >();
 
         ImGui::Separator();
 
