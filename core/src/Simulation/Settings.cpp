@@ -25,9 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Settings.hpp"
+#include "Simulation/Settings.hpp"
 
-#include "FileSystem.hpp"
+#include "Foundation/Macros.hpp"
+#include "Simulation/FileSystem.hpp"
 
 using namespace crimild;
 

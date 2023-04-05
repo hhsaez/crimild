@@ -25,10 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Version.hpp"
+#include "Foundation/Version.hpp"
 
-#include "Log.hpp"
-#include "StringUtils.hpp"
+#include "Foundation/Log.hpp"
+#include "Foundation/Macros.hpp"
+#include "Foundation/StringUtils.hpp"
 
 using namespace crimild;
 

@@ -30,7 +30,8 @@
 
 #include "Foundation/Containers/Map.hpp"
 #include "Foundation/Log.hpp"
-#include "System.hpp"
+#include "Foundation/Macros.hpp"
+#include "Simulation/Systems/System.hpp"
 
 namespace crimild {
 
@@ -48,8 +49,8 @@ namespace crimild {
             Group *parentNode;
 
             /**
-			   \remarks Called before starting components
-			 */
+                           \remarks Called before starting components
+                         */
             std::function< void( Node * ) > onLoadSceneCallback;
         };
 
