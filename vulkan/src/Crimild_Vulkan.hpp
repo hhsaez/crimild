@@ -36,6 +36,7 @@
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
+#include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
 #include "Rendering/VulkanSurface.hpp"

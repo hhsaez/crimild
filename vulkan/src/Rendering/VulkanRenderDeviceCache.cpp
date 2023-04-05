@@ -56,10 +56,19 @@ RenderDeviceCache::~RenderDeviceCache( void ) noexcept
 
 void RenderDeviceCache::onBeforeFrame( void ) noexcept
 {
+    m_boundObjectsToDelete = m_boundObjects;
 }
 
 void RenderDeviceCache::onAfterFrame( void ) noexcept
 {
+    for ( auto &obj : m_boundObjectsToDelete ) {
+        m_buffers.erase( obj );
+        m_images.erase( obj );
+        m_imageViews.erase( obj );
+        m_samplers.erase( obj );
+        m_shadowMaps.erase( obj );
+    }
+    m_boundObjectsToDelete.clear();
 }
 
 std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( IndexBuffer *indexBuffer ) noexcept
@@ -72,6 +81,7 @@ std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( IndexBuffer *indexBu
         );
         m_boundObjects.insert( indexBuffer );
     }
+    m_boundObjectsToDelete.erase( indexBuffer );
     return m_buffers.at( indexBuffer );
 }
 
@@ -85,6 +95,7 @@ std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( VertexBuffer *vertex
         );
         m_boundObjects.insert( vertexBuffer );
     }
+    m_boundObjectsToDelete.erase( vertexBuffer );
     return m_buffers.at( vertexBuffer );
 }
 
@@ -98,6 +109,7 @@ std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( UniformBuffer *unifo
         );
         m_boundObjects.insert( uniformBuffer );
     }
+    m_boundObjectsToDelete.erase( uniformBuffer );
     return m_buffers.at( uniformBuffer );
 }
 
@@ -107,6 +119,7 @@ std::shared_ptr< vulkan::Image > &RenderDeviceCache::bind( crimild::Image *sourc
         m_images[ source ] = crimild::alloc< vulkan::Image >( getRenderDevice(), source );
         m_boundObjects.insert( source );
     }
+    m_boundObjectsToDelete.erase( source );
     return m_images.at( source );
 }
 
@@ -156,6 +169,7 @@ std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( crimild::ImageVie
         m_boundObjects.insert( source );
     }
 
+    m_boundObjectsToDelete.erase( source );
     return m_imageViews.at( source );
 }
 
@@ -189,12 +203,14 @@ std::shared_ptr< vulkan::Sampler > &RenderDeviceCache::bind( crimild::Sampler *s
         m_samplers[ source ] = crimild::alloc< vulkan::Sampler >( getRenderDevice(), source->getClassName(), info );
         m_boundObjects.insert( source );
     }
+    m_boundObjectsToDelete.erase( source );
     return m_samplers.at( source );
 }
 
 void RenderDeviceCache::setShadowMap( const Light *light, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept
 {
     m_boundObjects.insert( light );
+    m_boundObjectsToDelete.erase( light );
     m_shadowMaps[ light ] = shadowMap;
 }
 
@@ -205,5 +221,6 @@ std::shared_ptr< vulkan::ShadowMap > &RenderDeviceCache::getShadowMap( const Lig
         m_shadowMaps[ light ] = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
         m_boundObjects.insert( light );
     }
+    m_boundObjectsToDelete.erase( light );
     return m_shadowMaps.at( light );
 }

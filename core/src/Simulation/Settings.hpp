@@ -35,6 +35,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <functional>
 
 namespace crimild {
 

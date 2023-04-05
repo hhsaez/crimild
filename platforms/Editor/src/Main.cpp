@@ -734,7 +734,9 @@ int main( int argc, char **argv )
         ImGui::NewFrame();
 
         vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
+        vulkanObjects.renderDevice->getCache()->onBeforeFrame();
         panels->render();
+        vulkanObjects.renderDevice->getCache()->onAfterFrame();
 
         // Rendering
         ImGui::Render();
