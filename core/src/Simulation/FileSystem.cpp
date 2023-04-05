@@ -31,6 +31,8 @@
 #include "Foundation/Log.hpp"
 #include "Mathematics/Numeric.hpp"
 
+#include <fstream>
+
 using namespace crimild;
 
 FileSystem &FileSystem::getInstance( void )

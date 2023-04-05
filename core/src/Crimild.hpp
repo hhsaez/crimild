@@ -135,6 +135,7 @@
 #include "Foundation/Containers/Stack.hpp"
 #include "Foundation/FilePath.hpp"
 #include "Foundation/Log.hpp"
+#include "Foundation/LogOutputHandler.hpp"
 #include "Foundation/Macros.hpp"
 #include "Foundation/Memory.hpp"
 #include "Foundation/Named.hpp"

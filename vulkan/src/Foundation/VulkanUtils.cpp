@@ -543,7 +543,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL crimild_vulkan_debug_callback(
     void *pUserData
 )
 {
-    CRIMILD_LOG_DEBUG( "Vulkan validation layer: ", pCallbackData->pMessage );
+    CRIMILD_LOG_WARNING( "Vulkan validation layer: ", pCallbackData->pMessage );
     return VK_FALSE;
 }
 

@@ -28,21 +28,62 @@
 #ifndef CRIMILD_FOUNDATION_LOG_
 #define CRIMILD_FOUNDATION_LOG_
 
-#include "NamedObject.hpp"
-#include "SharedObject.hpp"
-#include "StringUtils.hpp"
+#include "Foundation/Macros.hpp"
+#include "Foundation/StringUtils.hpp"
 
-#include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
 
 namespace crimild {
 
     class Log {
+    public:
+        class OutputHandler {
+        protected:
+            OutputHandler( int level ) noexcept
+                : m_level( level )
+            {
+                // no-op
+            }
+
+        public:
+            virtual ~OutputHandler( void ) = default;
+
+            inline int getLevel( void ) const noexcept { return m_level; }
+
+            template< typename... Args >
+            void print( int level, const std::string &prefix, const std::string &tag, Args &&...args ) noexcept
+            {
+                if ( level <= getLevel() ) {
+                    const auto tp = std::chrono::system_clock::now();
+                    const auto s = std::chrono::duration_cast< std::chrono::microseconds >( tp.time_since_epoch() );
+                    const auto t = ( time_t ) ( s.count() );
+                    const auto line = StringUtils::toString(
+                        t,
+                        " ",
+                        std::this_thread::get_id(), // requires including <thread>
+                        " ",
+                        prefix,
+                        "/",
+                        tag,
+                        " - ",
+                        std::forward< Args >( args )...
+                    );
+                    print( level, line );
+                }
+            }
+
+        protected:
+            virtual void print( int level, const std::string &line ) noexcept = 0;
+
+        private:
+            int m_level = Log::LOG_LEVEL_DEBUG;
+        };
+
     private:
-        Log( void ) { }
-        ~Log( void ) { }
+        Log( void ) = default;
+        ~Log( void ) = default;
 
     public:
         enum Level {
@@ -56,131 +97,59 @@ namespace crimild {
             LOG_LEVEL_ALL = 9999
         };
 
-        static void setLevel( int level ) { _level = level; };
-        static int getLevel( void ) { return _level; }
-
-    private:
-        static int _level;
+    public:
+        static void setOutputHandlers( const std::vector< std::shared_ptr< OutputHandler > > &outputHandlers ) noexcept
+        {
+            m_outputHandlers = outputHandlers;
+        }
 
     public:
         template< typename... Args >
-        static void fatal( std::string const &TAG, Args &&... args )
+        static void fatal( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_FATAL, "F", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void error( std::string const &TAG, Args &&... args )
+        static void error( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_ERROR, "E", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void warning( std::string const &TAG, Args &&... args )
+        static void warning( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_WARNING, "W", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void info( std::string const &TAG, Args &&... args )
+        static void info( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_INFO, "I", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void debug( std::string const &TAG, Args &&... args )
+        static void debug( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_DEBUG, "D", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void trace( std::string const &TAG, Args &&... args )
+        static void trace( std::string const &TAG, Args &&...args )
         {
             print( Level::LOG_LEVEL_TRACE, "T", TAG, std::forward< Args >( args )... );
         }
 
         template< typename... Args >
-        static void print( int level, std::string const &levelStr, std::string const &TAG, Args &&... args )
+        static void print( int level, std::string const &levelStr, std::string const &TAG, Args &&...args )
         {
-            if ( getLevel() >= level && _outputHandler != nullptr ) {
-                auto tp = std::chrono::system_clock::now();
-                auto s = std::chrono::duration_cast< std::chrono::microseconds >( tp.time_since_epoch() );
-                auto t = ( time_t )( s.count() );
-
-                auto str = StringUtils::toString( t, " ", std::this_thread::get_id(), " ", levelStr, "/", TAG, " - ", std::forward< Args >( args )... );
-
-                _outputHandler->printLine( str );
+            for ( auto &handler : m_outputHandlers ) {
+                handler->print( level, levelStr, TAG, std::forward< Args >( args )... );
             }
-        }
-
-    public:
-        class OutputHandler {
-        public:
-            virtual ~OutputHandler( void ) { }
-
-            virtual void printLine( std::string const &line ) = 0;
-        };
-
-        class NullOutputHandler : public OutputHandler {
-        public:
-            NullOutputHandler( void ) { }
-            virtual ~NullOutputHandler( void ) { }
-
-            virtual void printLine( std::string const &line ) override
-            {
-                // do nothing
-            }
-        };
-
-        class ConsoleOutputHandler : public OutputHandler {
-        public:
-            ConsoleOutputHandler( void )
-            {
-            }
-
-            virtual ~ConsoleOutputHandler( void )
-            {
-                // force a flush when destroying
-                std::cout << std::endl;
-            }
-
-            virtual void printLine( std::string const &line ) override
-            {
-                std::lock_guard< std::mutex > lock( _mutex );
-
-                std::cout << line << "\n";
-            }
-
-        private:
-            std::mutex _mutex;
-        };
-
-        class FileOutputHandler : public OutputHandler {
-        public:
-            FileOutputHandler( std::string const &path )
-                : _out( path, std::ios::out ) { }
-            virtual ~FileOutputHandler( void ) { }
-
-            virtual void printLine( std::string const &line ) override
-            {
-                std::lock_guard< std::mutex > locK( _mutex );
-
-                _out << line << "\n";
-            }
-
-        private:
-            std::ofstream _out;
-            std::mutex _mutex;
-        };
-
-        template< class T, typename... Args >
-        static void setOutputHandler( Args &&... args )
-        {
-            _outputHandler = std::move( std::unique_ptr< T >( new T( std::forward< Args >( args )... ) ) );
         }
 
     private:
-        static std::unique_ptr< OutputHandler > _outputHandler;
+        static std::vector< std::shared_ptr< OutputHandler > > m_outputHandlers;
     };
 
 }

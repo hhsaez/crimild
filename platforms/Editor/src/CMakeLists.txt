@@ -19,6 +19,8 @@ target_sources(
     
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
+    Panels/ConsolePanel.cpp
+    Panels/ConsolePanel.hpp
     Panels/InspectorPanel.cpp
     Panels/InspectorPanel.hpp
     Panels/MainMenuBar.cpp
