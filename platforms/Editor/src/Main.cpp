@@ -12,6 +12,7 @@
 #include "Foundation/GLFWUtils.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Panels/BehaviorsPanel.hpp"
+#include "Panels/ConsolePanel.hpp"
 #include "Panels/InspectorPanel.hpp"
 #include "Panels/MainMenuBar.hpp"
 #include "Panels/PlaybackControlsPanel.hpp"
@@ -498,6 +499,13 @@ int main( int argc, char **argv )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Project );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::PrefabNode );
 
+    crimild::Log::setOutputHandlers(
+        {
+            std::make_shared< crimild::ConsoleOutputHandler >( crimild::Log::LOG_LEVEL_ERROR ),
+            std::make_shared< crimild::editor::panels::Console::OutputHandler >( crimild::Log::LOG_LEVEL_DEBUG ),
+        }
+    );
+
     crimild::Settings settings;
     settings.parseCommandLine( argc, argv );
 
@@ -660,6 +668,7 @@ int main( int argc, char **argv )
         crimild::editor::panels::Inspector inspector;
         crimild::editor::panels::Project project;
         crimild::editor::panels::SceneRT sceneRT;
+        crimild::editor::panels::Console console;
 
         void render( void ) noexcept
         {
@@ -676,6 +685,7 @@ int main( int argc, char **argv )
             inspector.render();
             project.render();
             sceneRT.render();
+            console.render();
         }
     };
     auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
