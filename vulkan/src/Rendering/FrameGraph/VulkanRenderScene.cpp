@@ -77,6 +77,7 @@ RenderScene::RenderScene(
         extent,
         std::vector< std::shared_ptr< RenderTarget > > {
             m_renderTargets[ getName() + "/Targets/Depth" ],
+            // m_renderTargets[ getName() + "/Targets/Color" ],
             m_renderTargets[ getName() + "/Targets/Albedo" ],
             m_renderTargets[ getName() + "/Targets/Position" ],
             m_renderTargets[ getName() + "/Targets/Normal" ],
@@ -137,7 +138,13 @@ void RenderScene::execute( void ) noexcept
 
     // Execute shadow pass. No need to add sync objects since render pass will
     // leave all attachments in the correct layout
-    m_shadows->render( renderState, m_camera.get() );
+    m_shadows->render( 
+        renderState, 
+        m_camera.get(),
+        { 
+            .signal = { m_shadows->getSemaphore() },
+        }
+    );
 
     m_gBuffer->render(
         renderState.litRenderables,
@@ -146,6 +153,56 @@ void RenderScene::execute( void ) noexcept
             .pre = {
                 // No need to add barriers here since render pass dependencies will deal with
                 // any layout transition.
+                .imageMemoryBarriers = {
+                    // Since this is the last pass, make sure the color target is
+                    // in the correct layout and can be read later on.
+                    ImageMemoryBarrier {
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .dstAccessMask = 0,
+                        .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .imageView = m_renderTargets[ getName() + "/Targets/Color" ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .dstAccessMask = 0,
+                        .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .imageView = m_renderTargets[ getName() + "/Targets/Albedo" ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .dstAccessMask = 0,
+                        .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .imageView = m_renderTargets[ getName() + "/Targets/Position" ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .dstAccessMask = 0,
+                        .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .imageView = m_renderTargets[ getName() + "/Targets/Normal" ]->getImageView(),
+                    },
+                    ImageMemoryBarrier {
+                        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        .dstAccessMask = 0,
+                        .oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .imageView = m_renderTargets[ getName() + "/Targets/Material" ]->getImageView(),
+                    },
+                },
+
             },
             .post = {
                 // Barriers for layout transitions will be added later (see below) in order to
@@ -200,6 +257,7 @@ void RenderScene::execute( void ) noexcept
                     },
                 },
             },
+            .wait = { m_shadows->getSemaphore() },
         }
     );
 

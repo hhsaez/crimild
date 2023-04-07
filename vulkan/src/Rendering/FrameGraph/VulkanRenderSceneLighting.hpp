@@ -67,9 +67,9 @@ namespace crimild::vulkan::framegraph {
         virtual void render( const SceneRenderState &renderState, const Camera *camera, SyncOptions const &options = {} ) noexcept override;
 
     private:
-        std::shared_ptr< DescriptorSet > getDirectionalLightDescriptors( const Light *light ) noexcept;
-        std::shared_ptr< DescriptorSet > getPointLightDescriptors( const Light *light ) noexcept;
-        std::shared_ptr< DescriptorSet > getSpotLightDescriptors( const Light *light ) noexcept;
+        std::shared_ptr< DescriptorSet > getDirectionalLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept;
+        std::shared_ptr< DescriptorSet > getPointLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept;
+        std::shared_ptr< DescriptorSet > getSpotLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept;
 
     private:
         std::vector< std::shared_ptr< RenderTarget > > m_inputs;
@@ -103,9 +103,6 @@ namespace crimild::vulkan::framegraph {
                         alignas( 16 ) Matrix4f lightSpaceMatrices[ 4 ];
                         alignas( 16 ) Vector4f splits;
                     };
-
-                    std::unordered_map< const Light *, std::shared_ptr< UniformBuffer > > uniforms;
-                    std::unordered_map< const Light *, std::shared_ptr< DescriptorSet > > descriptorSets;
                 } directional;
 
                 struct Point {
@@ -118,9 +115,6 @@ namespace crimild::vulkan::framegraph {
                         alignas( 16 ) ColorRGBf color;
                         alignas( 4 ) float castShadows;
                     };
-
-                    std::unordered_map< const Light *, std::shared_ptr< UniformBuffer > > uniforms;
-                    std::unordered_map< const Light *, std::shared_ptr< DescriptorSet > > descriptorSets;
                 } point;
 
                 struct Spot {
@@ -137,9 +131,6 @@ namespace crimild::vulkan::framegraph {
                         alignas( 4 ) Real32 outerCutoff;
                         alignas( 16 ) Matrix4f lightSpaceProjection;
                     };
-
-                    std::unordered_map< const Light *, std::shared_ptr< UniformBuffer > > uniforms;
-                    std::unordered_map< const Light *, std::shared_ptr< DescriptorSet > > descriptorSets;
                 } spot;
             } lights;
         } m_resources;

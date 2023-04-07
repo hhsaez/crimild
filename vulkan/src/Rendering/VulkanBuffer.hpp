@@ -43,7 +43,7 @@ namespace crimild::vulkan {
           public WithRenderDevice,
           public WithHandle< VkBuffer > {
     public:
-        Buffer( RenderDevice *device, std::string name, BufferView *bufferView ) noexcept;
+        Buffer( RenderDevice *device, std::string name, const BufferView *bufferView ) noexcept;
         virtual ~Buffer( void ) noexcept;
 
         void update( bool force = false ) noexcept;
@@ -52,7 +52,7 @@ namespace crimild::vulkan {
 
     private:
         VkDeviceMemory m_memory = VK_NULL_HANDLE;
-        std::shared_ptr< BufferView > m_bufferView;
+        std::shared_ptr< const BufferView > m_bufferView;
     };
 
 }

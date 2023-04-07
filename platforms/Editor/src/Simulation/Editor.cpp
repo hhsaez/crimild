@@ -466,33 +466,41 @@ void Editor::setSimulationState( SimulationState newState ) noexcept
     }
 
     if ( m_simulationState == SimulationState::STOPPED && newState == SimulationState::PLAYING ) {
-        m_edittableScene = crimild::retain( getScene() );
-        m_previousState = m_state;
+        crimild::concurrency::sync_frame(
+            [ this ] {
+                m_edittableScene = crimild::retain( getScene() );
+                m_previousState = m_state;
 
-        // Using encoders to clone the scene is overkill since it copies buffers
-        // and textures, which should not change during playback. And this is a
-        // slow operation. But it also guarrantees that the scene is a full clone,
-        // as well as providing a visual representation of what is actually saved
-        // in the file system.
-        // TODO: consider using a shallow copy (or implement shallow encoder).
-        auto encoder = crimild::alloc< coding::MemoryEncoder >();
-        encoder->encode( m_edittableScene );
-        encoder->encode( m_state );
+                // Using encoders to clone the scene is overkill since it copies buffers
+                // and textures, which should not change during playback. And this is a
+                // slow operation. But it also guarrantees that the scene is a full clone,
+                // as well as providing a visual representation of what is actually saved
+                // in the file system.
+                // TODO: consider using a shallow copy (or implement shallow encoder).
+                auto encoder = crimild::alloc< coding::MemoryEncoder >();
+                encoder->encode( m_edittableScene );
+                encoder->encode( m_state );
 
-        auto bytes = encoder->getBytes();
-        auto decoder = crimild::alloc< coding::MemoryDecoder >();
-        decoder->fromBytes( bytes );
+                auto bytes = encoder->getBytes();
+                auto decoder = crimild::alloc< coding::MemoryDecoder >();
+                decoder->fromBytes( bytes );
 
-        auto simScene = decoder->getObjectAt< Node >( 0 );
-        m_state = decoder->getObjectAt< Editor::State >( 1 );
+                auto simScene = decoder->getObjectAt< Node >( 0 );
+                m_state = decoder->getObjectAt< Editor::State >( 1 );
 
-        setScene( simScene );
-        handle( Event { .type = Event::Type::SCENE_CHANGED } );
+                setScene( simScene );
+                handle( Event { .type = Event::Type::SCENE_CHANGED } );
+            }
+        );
     } else if ( newState == SimulationState::STOPPED ) {
-        setScene( m_edittableScene );
-        m_state = m_previousState;
-        m_previousState = nullptr;
-        handle( Event { .type = Event::Type::SCENE_CHANGED } );
+        crimild::concurrency::sync_frame(
+            [ this ] {
+                setScene( m_edittableScene );
+                m_state = m_previousState;
+                m_previousState = nullptr;
+                handle( Event { .type = Event::Type::SCENE_CHANGED } );
+            }
+        );
     }
 
     m_simulationState = newState;

@@ -377,7 +377,7 @@ namespace crimild::editor::panels {
             m_inFLightShadowMaps.resize( N );
 
             for ( uint32_t frameIndex = 0; frameIndex < N; ++frameIndex ) {
-                auto &shadowMap = getRenderDevice()->getCache( frameIndex )->getShadowMap( light );
+                auto &shadowMap = getRenderDevice()->getCache( frameIndex )->getShadowMap( retain( light ) );
                 const uint32_t layerCount = shadowMap->getLayerCount();
                 m_inFLightShadowMaps[ frameIndex ].resize( layerCount );
                 for ( uint32_t layerIndex = 0; layerIndex < layerCount; ++layerIndex ) {
