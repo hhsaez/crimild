@@ -54,84 +54,117 @@ RenderDeviceCache::~RenderDeviceCache( void ) noexcept
     // no-op
 }
 
+size_t RenderDeviceCache::getNewObjectIndex( void ) noexcept
+{
+    auto ret = 0;
+    while ( ret < m_boundObjects.size() && !m_boundObjects[ ret ].expired() ) {
+        ++ret;
+    }
+    if ( ret >= m_boundObjects.size() ) {
+        m_boundObjects.resize( m_boundObjects.size() + 1 );
+    }
+    return ret;
+}
+
 void RenderDeviceCache::onBeforeFrame( void ) noexcept
 {
-    m_boundObjectsToDelete = m_boundObjects;
+    // no-op?
 }
 
 void RenderDeviceCache::onAfterFrame( void ) noexcept
 {
-    for ( auto &obj : m_boundObjectsToDelete ) {
-        m_buffers.erase( obj );
-        m_images.erase( obj );
-        m_imageViews.erase( obj );
-        m_samplers.erase( obj );
-        m_shadowMaps.erase( obj );
+    // This seems slow...
+    for ( size_t i = 0; i < m_boundObjects.size(); ++i ) {
+        if ( m_boundObjects[ i ].expired() ) {
+            if ( m_reverseIndex.contains( i ) ) {
+                m_index.erase( m_reverseIndex.at( i ) );
+            }
+            m_reverseIndex.erase( i );
+            m_buffers.erase( i );
+            m_images.erase( i );
+            m_imageViews.erase( i );
+            m_samplers.erase( i );
+            m_shadowMaps.erase( i );
+            m_uniforms.erase( i );
+            m_descriptorSets.erase( i );
+        }
     }
-    m_boundObjectsToDelete.clear();
 }
 
-std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( IndexBuffer *indexBuffer ) noexcept
+size_t RenderDeviceCache::addBoundObject( const std::shared_ptr< const SharedObject > &obj ) noexcept
 {
-    if ( !m_boundObjects.contains( indexBuffer ) ) {
-        m_buffers[ indexBuffer ] = crimild::alloc< vulkan::Buffer >(
+    const size_t id = reinterpret_cast< size_t >( obj.get() );
+    auto index = getNewObjectIndex();
+    m_index[ id ] = index;
+    m_reverseIndex[ index ] = id;
+    m_boundObjects[ index ] = obj;
+    return index;
+}
+
+std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( const std::shared_ptr< const IndexBuffer > &indexBuffer ) noexcept
+{
+    const auto id = indexBuffer->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( indexBuffer );
+        m_buffers[ index ] = crimild::alloc< vulkan::Buffer >(
             getRenderDevice(),
             indexBuffer->getClassName(),
             indexBuffer->getBufferView()
         );
-        m_boundObjects.insert( indexBuffer );
     }
-    m_boundObjectsToDelete.erase( indexBuffer );
-    return m_buffers.at( indexBuffer );
+    return m_buffers.at( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( VertexBuffer *vertexBuffer ) noexcept
+std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( const std::shared_ptr< const VertexBuffer > &vertexBuffer ) noexcept
 {
-    if ( !m_boundObjects.contains( vertexBuffer ) ) {
-        m_buffers[ vertexBuffer ] = crimild::alloc< vulkan::Buffer >(
+    const auto id = vertexBuffer->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( vertexBuffer );
+        m_buffers[ index ] = crimild::alloc< vulkan::Buffer >(
             getRenderDevice(),
             vertexBuffer->getClassName(),
             vertexBuffer->getBufferView()
         );
-        m_boundObjects.insert( vertexBuffer );
     }
-    m_boundObjectsToDelete.erase( vertexBuffer );
-    return m_buffers.at( vertexBuffer );
+    return m_buffers.at( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( UniformBuffer *uniformBuffer ) noexcept
+std::shared_ptr< vulkan::Buffer > &RenderDeviceCache::bind( const std::shared_ptr< const UniformBuffer > &uniformBuffer ) noexcept
 {
-    if ( !m_boundObjects.contains( uniformBuffer ) ) {
-        m_buffers[ uniformBuffer ] = crimild::alloc< vulkan::Buffer >(
+    const auto id = uniformBuffer->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( uniformBuffer );
+        m_buffers[ index ] = crimild::alloc< vulkan::Buffer >(
             getRenderDevice(),
             uniformBuffer->getClassName(),
             uniformBuffer->getBufferView()
         );
-        m_boundObjects.insert( uniformBuffer );
     }
-    m_boundObjectsToDelete.erase( uniformBuffer );
-    return m_buffers.at( uniformBuffer );
+    return m_buffers.at( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::Image > &RenderDeviceCache::bind( crimild::Image *source ) noexcept
+std::shared_ptr< vulkan::Image > &RenderDeviceCache::bind( const std::shared_ptr< const crimild::Image > &source ) noexcept
 {
-    if ( !m_boundObjects.contains( source ) ) {
-        m_images[ source ] = crimild::alloc< vulkan::Image >( getRenderDevice(), source );
-        m_boundObjects.insert( source );
+    const auto id = source->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( source );
+        m_images[ index ] = crimild::alloc< vulkan::Image >( getRenderDevice(), source.get() );
     }
-    m_boundObjectsToDelete.erase( source );
-    return m_images.at( source );
+    return m_images.at( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( crimild::ImageView *source ) noexcept
+std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( const std::shared_ptr< const crimild::ImageView > &source ) noexcept
 {
-    if ( !m_boundObjects.contains( source ) ) {
+    const auto id = source->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( source );
+
         auto mipLevels = source->mipLevels;
         if ( mipLevels == 0 ) {
             mipLevels = Numerici::max( 1, source->image->getMipLevels() );
         }
 
-        auto image = bind( source->image.get() );
+        auto image = bind( source->image );
 
         auto layerCount = source->layerCount;
         if ( layerCount == 0 ) {
@@ -142,7 +175,7 @@ std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( crimild::ImageVie
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .flags = 0,
             .image = image->getHandle(),
-            .viewType = utils::getImageViewType( source ),
+            .viewType = utils::getImageViewType( source.get() ),
             .format = [ & ] {
                 auto format = source->format;
                 if ( format == Format::UNDEFINED ) {
@@ -157,7 +190,7 @@ std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( crimild::ImageVie
                 .a = VK_COMPONENT_SWIZZLE_IDENTITY,
             },
             .subresourceRange = {
-                .aspectMask = utils::getImageViewAspectFlags( source ),
+                .aspectMask = utils::getImageViewAspectFlags( source.get() ),
                 .baseMipLevel = 0,
                 .levelCount = mipLevels,
                 .baseArrayLayer = 0,
@@ -165,17 +198,17 @@ std::shared_ptr< vulkan::ImageView > &RenderDeviceCache::bind( crimild::ImageVie
             },
         };
 
-        m_imageViews[ source ] = crimild::alloc< vulkan::ImageView >( getRenderDevice(), source->getName(), image, info );
-        m_boundObjects.insert( source );
+        m_imageViews[ index ] = crimild::alloc< vulkan::ImageView >( getRenderDevice(), source->getName(), image, info );
     }
-
-    m_boundObjectsToDelete.erase( source );
-    return m_imageViews.at( source );
+    return m_imageViews.at( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::Sampler > &RenderDeviceCache::bind( crimild::Sampler *source ) noexcept
+std::shared_ptr< vulkan::Sampler > &RenderDeviceCache::bind( const std::shared_ptr< const crimild::Sampler > &source ) noexcept
 {
-    if ( !m_boundObjects.contains( source ) ) {
+    const auto id = source->getUniqueID();
+    if ( !m_index.contains( id ) ) {
+        auto index = addBoundObject( source );
+
         auto addressMode = utils::getSamplerAddressMode( source->getWrapMode() );
         auto compareOp = utils::getCompareOp( source->getCompareOp() );
         auto borderColor = utils::getBorderColor( source->getBorderColor() );
@@ -200,27 +233,85 @@ std::shared_ptr< vulkan::Sampler > &RenderDeviceCache::bind( crimild::Sampler *s
             .borderColor = borderColor,
             .unnormalizedCoordinates = VK_FALSE,
         };
-        m_samplers[ source ] = crimild::alloc< vulkan::Sampler >( getRenderDevice(), source->getClassName(), info );
-        m_boundObjects.insert( source );
+        m_samplers[ index ] = crimild::alloc< vulkan::Sampler >( getRenderDevice(), source->getClassName(), info );
     }
-    m_boundObjectsToDelete.erase( source );
-    return m_samplers.at( source );
+    return m_samplers.at( m_index[ id ] );
 }
 
-void RenderDeviceCache::setShadowMap( const Light *light, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept
+bool RenderDeviceCache::hasShadowMap( const std::shared_ptr< const SharedObject > &obj ) const noexcept
 {
-    m_boundObjects.insert( light );
-    m_boundObjectsToDelete.erase( light );
-    m_shadowMaps[ light ] = shadowMap;
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        // no bounded
+        return false;
+    }
+
+    return m_shadowMaps.contains( m_index.at( id ) );
 }
 
-std::shared_ptr< vulkan::ShadowMap > &RenderDeviceCache::getShadowMap( const Light *light ) noexcept
+void RenderDeviceCache::setShadowMap( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept
 {
-    if ( !m_boundObjects.contains( light ) ) {
-        std::string name = !light->getName().empty() ? light->getName() + "/ShadowMap" : "ShadowMap";
-        m_shadowMaps[ light ] = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
-        m_boundObjects.insert( light );
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        addBoundObject( obj );
     }
-    m_boundObjectsToDelete.erase( light );
-    return m_shadowMaps.at( light );
+    m_shadowMaps[ m_index.at( id ) ] = shadowMap;
+}
+
+std::shared_ptr< vulkan::ShadowMap > &RenderDeviceCache::getShadowMap( const std::shared_ptr< const SharedObject > &obj ) noexcept
+{
+    const auto id = getObjectId( obj );
+    return m_shadowMaps.at( m_index.at( id ) );
+}
+
+bool RenderDeviceCache::hasUniforms( const std::shared_ptr< const SharedObject > &obj ) const noexcept
+{
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        // no bounded
+        return false;
+    }
+
+    return m_uniforms.contains( m_index.at( id ) );
+}
+
+void RenderDeviceCache::setUniforms( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< UniformBuffer > const &uniforms ) noexcept
+{
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        addBoundObject( obj );
+    }
+    m_uniforms[ m_index.at( id ) ] = uniforms;
+}
+
+std::shared_ptr< UniformBuffer > &RenderDeviceCache::getUniforms( const std::shared_ptr< const SharedObject > &obj ) noexcept
+{
+    const auto id = getObjectId( obj );
+    return m_uniforms.at( m_index.at( id ) );
+}
+
+bool RenderDeviceCache::hasDescriptorSet( const std::shared_ptr< const SharedObject > &obj ) const noexcept
+{
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        // no bounded
+        return false;
+    }
+
+    return m_descriptorSets.contains( m_index.at( id ) );
+}
+
+void RenderDeviceCache::setDescriptorSet( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< vulkan::DescriptorSet > const &descriptorSet ) noexcept
+{
+    const auto id = getObjectId( obj );
+    if ( !m_index.contains( id ) ) {
+        addBoundObject( obj );
+    }
+    m_descriptorSets[ m_index.at( id ) ] = descriptorSet;
+}
+
+std::shared_ptr< vulkan::DescriptorSet > &RenderDeviceCache::getDescriptorSet( const std::shared_ptr< const SharedObject > &obj ) noexcept
+{
+    const auto id = getObjectId( obj );
+    return m_descriptorSets.at( m_index.at( id ) );
 }

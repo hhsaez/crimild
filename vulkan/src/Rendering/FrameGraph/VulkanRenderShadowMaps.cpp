@@ -183,11 +183,18 @@ namespace crimild::vulkan::framegraph {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
 
+            auto cache = getRenderDevice()->getCache();
             const auto &lights = renderState.lights.at( Light::Type::DIRECTIONAL );
             const auto &shadowCasters = renderState.shadowCasters;
             for ( const auto &light : lights ) {
                 if ( light->castShadows() ) {
-                    if ( auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light.get() ) ) {
+                    if ( !cache->hasShadowMap( light ) ) {
+                        std::string name = !light->getName().empty() ? light->getName() + "/ShadowMap" : "ShadowMap";
+                        auto shadowMap = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
+                        cache->setShadowMap( light, shadowMap );
+                    }
+
+                    if ( auto shadowMap = cache->getShadowMap( light ) ) {
                         auto &shadowMapImage = shadowMap->getImage();
 
                         // Transition to transfer so we can write into the image after render.
@@ -207,10 +214,10 @@ namespace crimild::vulkan::framegraph {
                         // Transition back to read after render.
                         m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
                     }
-                } else {
+                } else if ( !cache->hasShadowMap( light ) ) {
                     // Set default shadow map for this light
                     // This makes things easier when computing lighting later
-                    getRenderDevice()->getCache()->setShadowMap( light.get(), m_fallbackShadowMap );
+                    getRenderDevice()->getCache()->setShadowMap( light, m_fallbackShadowMap );
                 }
             }
 
@@ -558,11 +565,18 @@ namespace crimild::vulkan::framegraph {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
 
+            auto cache = getRenderDevice()->getCache();
             const auto &lights = renderState.lights.at( Light::Type::POINT );
             const auto &shadowCasters = renderState.shadowCasters;
             for ( const auto &light : lights ) {
                 if ( light->castShadows() ) {
-                    if ( auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light.get() ) ) {
+                    if ( !cache->hasShadowMap( light ) ) {
+                        std::string name = !light->getName().empty() ? light->getName() + "/ShadowMap" : "ShadowMap";
+                        auto shadowMap = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
+                        cache->setShadowMap( light, shadowMap );
+                    }
+
+                    if ( auto shadowMap = cache->getShadowMap( light ) ) {
                         auto &shadowMapImage = shadowMap->getImage();
 
                         // Transition to transfer so we can write into the image after render.
@@ -585,10 +599,10 @@ namespace crimild::vulkan::framegraph {
                         // Transition back to read after render.
                         m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
                     }
-                } else {
+                } else if ( !cache->hasShadowMap( light ) ) {
                     // Set default shadow map for this light
                     // This makes things easier when computing lighting later
-                    getRenderDevice()->getCache()->setShadowMap( light.get(), m_fallbackShadowMap );
+                    getRenderDevice()->getCache()->setShadowMap( light, m_fallbackShadowMap );
                 }
             }
 
@@ -659,16 +673,16 @@ namespace crimild::vulkan::framegraph {
 
             for ( uint32_t layerIndex = 0; layerIndex < 6; ++layerIndex ) {
                 m_resources.lights[ light ][ layerIndex ].uniforms = [ & ] {
-                    auto ubo = std::make_unique< UniformBuffer >( Resources::LightData::UniformData {} );
+                    auto ubo = crimild::alloc< UniformBuffer >( Resources::LightData::UniformData {} );
                     ubo->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-                    getRenderDevice()->getCache()->bind( ubo.get() );
+                    getRenderDevice()->getCache()->bind( ubo );
                     return ubo;
                 }();
 
                 auto descriptors = std::vector< Descriptor > {
                     Descriptor {
                         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                        .buffer = getRenderDevice()->getCache()->bind( m_resources.lights[ light ][ layerIndex ].uniforms.get() ),
+                        .buffer = getRenderDevice()->getCache()->bind( m_resources.lights[ light ][ layerIndex ].uniforms ),
                         .stage = VK_SHADER_STAGE_VERTEX_BIT,
                     },
                 };
@@ -903,11 +917,18 @@ namespace crimild::vulkan::framegraph {
             m_commandBuffer->reset();
             m_commandBuffer->begin();
 
+            auto cache = getRenderDevice()->getCache();
             const auto &lights = renderState.lights.at( Light::Type::SPOT );
             const auto &shadowCasters = renderState.shadowCasters;
             for ( const auto &light : lights ) {
                 if ( light->castShadows() ) {
-                    if ( auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light.get() ) ) {
+                    if ( !cache->hasShadowMap( light ) ) {
+                        std::string name = !light->getName().empty() ? light->getName() + "/ShadowMap" : "ShadowMap";
+                        auto shadowMap = crimild::alloc< vulkan::ShadowMap >( getRenderDevice(), name, light->getType() );
+                        cache->setShadowMap( light, shadowMap );
+                    }
+
+                    if ( auto shadowMap = cache->getShadowMap( light ) ) {
                         auto &shadowMapImage = shadowMap->getImage();
 
                         // Transition to transfer so we can write into the image after render.
@@ -926,10 +947,10 @@ namespace crimild::vulkan::framegraph {
                         // Transition back to read after render.
                         m_commandBuffer->transitionImageLayout( shadowMap->getImage().get(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
                     }
-                } else {
+                } else if ( !cache->hasShadowMap( light ) ) {
                     // Set default shadow map for this light
                     // This makes things easier when computing lighting later
-                    getRenderDevice()->getCache()->setShadowMap( light.get(), m_fallbackShadowMap );
+                    getRenderDevice()->getCache()->setShadowMap( light, m_fallbackShadowMap );
                 }
             }
 
@@ -1043,7 +1064,39 @@ void RenderShadowMaps::render(
     SyncOptions const &options
 ) noexcept
 {
-    for ( auto &renderer : m_renderers ) {
-        renderer->render( renderState, camera, options );
-    }
+    // Call individually so we can control sync options easier
+    // This will make this passes to execute synchronously, which
+    // might slow things down. Otherwise, we'll end up with visual artifacts
+    // since lighting might be computed before copying shadow maps to
+    // their corresponding images.
+    // TODO: Improve synchronization so these passes run concurrently.
+
+    m_renderers[ 0 ]->render( 
+        renderState, 
+        camera, 
+        { 
+            .pre = options.pre, 
+            .wait = options.wait,
+            .signal = { m_renderers[ 0 ]->getSemaphore() },
+        } 
+    );
+
+    m_renderers[ 1 ]->render( 
+        renderState, 
+        camera,
+        {
+            .wait = { m_renderers[ 0 ]->getSemaphore() },
+            .signal = { m_renderers[ 1 ]->getSemaphore() },
+        }
+    );
+
+    m_renderers[ 0 ]->render(
+        renderState,
+        camera,
+        { 
+            .post = options.post,
+            .wait = { m_renderers[ 1 ]->getSemaphore() },
+            .signal = options.signal,
+        }
+    );
 }

@@ -501,7 +501,7 @@ int main( int argc, char **argv )
 
     crimild::Log::setOutputHandlers(
         {
-            std::make_shared< crimild::ConsoleOutputHandler >( crimild::Log::LOG_LEVEL_ERROR ),
+            std::make_shared< crimild::ConsoleOutputHandler >( crimild::Log::LOG_LEVEL_DEBUG ),
             std::make_shared< crimild::editor::panels::Console::OutputHandler >( crimild::Log::LOG_LEVEL_DEBUG ),
         }
     );

@@ -49,6 +49,7 @@ namespace crimild::vulkan {
     class ImageView;
     class Sampler;
     class ShadowMap;
+    class DescriptorSet;
 
     /**
      * \todo Each instance of RenderDeviceCache keeps a copy of everything bound to it. This is
@@ -66,26 +67,52 @@ namespace crimild::vulkan {
         void onBeforeFrame( void ) noexcept;
         void onAfterFrame( void ) noexcept;
 
-        std::shared_ptr< Buffer > &bind( IndexBuffer *uniformBuffer ) noexcept;
-        std::shared_ptr< Buffer > &bind( VertexBuffer *uniformBuffer ) noexcept;
-        std::shared_ptr< Buffer > &bind( UniformBuffer *uniformBuffer ) noexcept;
+        std::shared_ptr< Buffer > &bind( const std::shared_ptr< const crimild::IndexBuffer > &indices ) noexcept;
+        std::shared_ptr< Buffer > &bind( const std::shared_ptr< const crimild::VertexBuffer > &vertices ) noexcept;
+        std::shared_ptr< Buffer > &bind( const std::shared_ptr< const crimild::UniformBuffer > &uniforms ) noexcept;
 
-        std::shared_ptr< Image > &bind( crimild::Image *image ) noexcept;
-        std::shared_ptr< ImageView > &bind( crimild::ImageView *imageView ) noexcept;
-        std::shared_ptr< Sampler > &bind( crimild::Sampler *sampler ) noexcept;
+        std::shared_ptr< Image > &bind( const std::shared_ptr< const crimild::Image > &image ) noexcept;
+        std::shared_ptr< ImageView > &bind( const std::shared_ptr< const crimild::ImageView > &imageView ) noexcept;
+        std::shared_ptr< Sampler > &bind( const std::shared_ptr< const crimild::Sampler > &sampler ) noexcept;
 
-        void setShadowMap( const Light *light, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept;
-        std::shared_ptr< ShadowMap > &getShadowMap( const Light *light ) noexcept;
+        bool hasShadowMap( const std::shared_ptr< const SharedObject > &obj ) const noexcept;
+        void setShadowMap( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< ShadowMap > const &shadowMap ) noexcept;
+        std::shared_ptr< ShadowMap > &getShadowMap( const std::shared_ptr< const SharedObject > &obj ) noexcept;
+
+        bool hasUniforms( const std::shared_ptr< const SharedObject > &obj ) const noexcept;
+        void setUniforms( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< UniformBuffer > const &uniforms ) noexcept;
+        std::shared_ptr< UniformBuffer > &getUniforms( const std::shared_ptr< const SharedObject > &obj ) noexcept;
+
+        bool hasDescriptorSet( const std::shared_ptr< const SharedObject > &obj ) const noexcept;
+        void setDescriptorSet( const std::shared_ptr< const SharedObject > &obj, std::shared_ptr< vulkan::DescriptorSet > const &descriptorSet ) noexcept;
+        std::shared_ptr< vulkan::DescriptorSet > &getDescriptorSet( const std::shared_ptr< const SharedObject > &obj ) noexcept;
 
     private:
-        std::unordered_set< const SharedObject * > m_boundObjects;
-        std::unordered_map< const SharedObject *, std::shared_ptr< Buffer > > m_buffers;
-        std::unordered_map< const SharedObject *, std::shared_ptr< Image > > m_images;
-        std::unordered_map< const SharedObject *, std::shared_ptr< ImageView > > m_imageViews;
-        std::unordered_map< const SharedObject *, std::shared_ptr< Sampler > > m_samplers;
-        std::unordered_map< const SharedObject *, std::shared_ptr< ShadowMap > > m_shadowMaps;
+        size_t getObjectId( const std::shared_ptr< const SharedObject > &obj ) const noexcept
+        {
+            return reinterpret_cast< size_t >( obj.get() );
+        }
 
-        std::unordered_set< const SharedObject * > m_boundObjectsToDelete;
+        size_t getNewObjectIndex( void ) noexcept;
+
+        size_t addBoundObject( const std::shared_ptr< const SharedObject > &obj ) noexcept;
+
+    private:
+        // Small optimization: keep an index of positions into bound objects
+        // to use when checking if a given object is already bound. This avoid
+        // doing a linear search.
+        std::unordered_map< size_t, size_t > m_index;
+        std::unordered_map< size_t, size_t > m_reverseIndex;
+
+        std::vector< std::weak_ptr< const SharedObject > > m_boundObjects;
+
+        std::unordered_map< size_t, std::shared_ptr< vulkan::Buffer > > m_buffers;
+        std::unordered_map< size_t, std::shared_ptr< vulkan::Image > > m_images;
+        std::unordered_map< size_t, std::shared_ptr< vulkan::ImageView > > m_imageViews;
+        std::unordered_map< size_t, std::shared_ptr< vulkan::Sampler > > m_samplers;
+        std::unordered_map< size_t, std::shared_ptr< vulkan::ShadowMap > > m_shadowMaps;
+        std::unordered_map< size_t, std::shared_ptr< UniformBuffer > > m_uniforms;
+        std::unordered_map< size_t, std::shared_ptr< vulkan::DescriptorSet > > m_descriptorSets;
     };
 
 }

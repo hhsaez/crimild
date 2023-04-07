@@ -88,7 +88,7 @@ RenderSceneUnlit::RenderSceneUnlit(
     m_resources.common.uniforms = [ & ] {
         auto uniforms = crimild::alloc< UniformBuffer >( Resources::Common::UniformData {} );
         uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        device->getCache()->bind( uniforms.get() );
+        device->getCache()->bind( uniforms );
         return uniforms;
     }();
 
@@ -98,7 +98,7 @@ RenderSceneUnlit::RenderSceneUnlit(
         std::vector< Descriptor > {
             Descriptor {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = device->getCache()->bind( m_resources.common.uniforms.get() ),
+                .buffer = device->getCache()->bind( m_resources.common.uniforms ),
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
         }
@@ -132,13 +132,13 @@ void RenderSceneUnlit::bindMaterial( const UnlitMaterial *material ) noexcept
         std::vector< Descriptor > {
             {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = renderCache->bind( m_resources.materials[ material ].uniforms.get() ),
+                .buffer = renderCache->bind( m_resources.materials[ material ].uniforms ),
                 .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
             },
             {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .imageView = renderCache->bind( material->getTexture()->imageView.get() ),
-                .sampler = renderCache->bind( material->getTexture()->sampler.get() ),
+                .imageView = renderCache->bind( material->getTexture()->imageView ),
+                .sampler = renderCache->bind( material->getTexture()->sampler ),
             },
         }
     );

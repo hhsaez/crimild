@@ -252,7 +252,7 @@ void CommandBuffer::drawPrimitive( const std::shared_ptr< Primitive > &primitive
     primitive->getVertexData().each(
         [ &, i = 0 ]( auto &vertices ) mutable {
             if ( vertices != nullptr ) {
-                auto buffer = cache->bind( vertices.get() );
+                auto buffer = cache->bind( vertices );
                 m_boundObjects.insert( buffer );
                 VkBuffer buffers[] = { buffer->getHandle() };
                 VkDeviceSize offsets[] = { 0 };
@@ -263,7 +263,7 @@ void CommandBuffer::drawPrimitive( const std::shared_ptr< Primitive > &primitive
 
     auto indices = primitive->getIndices();
     if ( indices != nullptr ) {
-        auto buffer = cache->bind( indices );
+        auto buffer = cache->bind( retain( indices ) );
         m_boundObjects.insert( buffer );
         vkCmdBindIndexBuffer( getHandle(), buffer->getHandle(), 0, utils::getIndexType( indices ) );
         vkCmdDrawIndexed( getHandle(), indices->getIndexCount(), 1, 0, 0, 0 );

@@ -547,7 +547,7 @@ RenderSceneLighting::RenderSceneLighting(
     m_resources.common.uniforms = [ & ] {
         auto uniforms = crimild::alloc< UniformBuffer >( Resources::Common::UniformData {} );
         uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        device->getCache()->bind( uniforms.get() );
+        device->getCache()->bind( uniforms );
         return uniforms;
     }();
 
@@ -558,7 +558,7 @@ RenderSceneLighting::RenderSceneLighting(
             auto descriptors = std::vector< Descriptor > {
                 Descriptor {
                     .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .buffer = device->getCache()->bind( m_resources.common.uniforms.get() ),
+                    .buffer = device->getCache()->bind( m_resources.common.uniforms ),
                     .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 },
             };
@@ -648,9 +648,10 @@ RenderSceneLighting::RenderSceneLighting(
     );
 }
 
-std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getDirectionalLightDescriptors( const Light *light ) noexcept
+std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getDirectionalLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept
 {
-    const auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light );
+    auto cache = getRenderDevice()->getCache();
+    const auto shadowMap = cache->getShadowMap( light );
 
     Resources::Lights::Directional::UniformData props;
     props.castShadows = light->castShadows() ? 1.0f : 0.0f;
@@ -661,20 +662,20 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getDirectionalLigh
         props.splits[ layerId ] = shadowMap->getSplit( layerId );
     }
 
-    if ( !m_resources.lights.directional.uniforms.contains( light ) ) {
+    if ( !cache->hasUniforms( light ) ) {
         auto uniforms = crimild::alloc< UniformBuffer >( props );
         uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        getRenderDevice()->getCache()->bind( uniforms.get() );
-        m_resources.lights.directional.uniforms[ light ] = uniforms;
+        getRenderDevice()->getCache()->bind( uniforms );
+        cache->setUniforms( light, uniforms );
     } else {
-        m_resources.lights.directional.uniforms[ light ]->setValue( props );
+        cache->getUniforms( light )->setValue( props );
     }
 
-    if ( !m_resources.lights.directional.descriptorSets.contains( light ) ) {
+    if ( !cache->hasDescriptorSet( light ) ) {
         auto descriptors = std::vector< Descriptor > {
             Descriptor {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = getRenderDevice()->getCache()->bind( m_resources.lights.directional.uniforms[ light ].get() ),
+                .buffer = getRenderDevice()->getCache()->bind( cache->getUniforms( light ) ),
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
             Descriptor {
@@ -684,24 +685,28 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getDirectionalLigh
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
         };
-        m_resources.lights.directional.descriptorSets[ light ] = crimild::alloc< DescriptorSet >(
-            getRenderDevice(),
-            getName() + "/Lights/" + light->getName() + "/DescriptorSet",
-            crimild::alloc< vulkan::DescriptorPool >(
+        cache->setDescriptorSet(
+            light,
+            crimild::alloc< DescriptorSet >(
                 getRenderDevice(),
-                getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                getName() + "/Lights/" + light->getName() + "/DescriptorSet",
+                crimild::alloc< vulkan::DescriptorPool >(
+                    getRenderDevice(),
+                    getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                    descriptors
+                ),
+                m_resources.lights.descriptorSetLayout,
                 descriptors
-            ),
-            m_resources.lights.descriptorSetLayout,
-            descriptors
+            )
         );
     }
-    return m_resources.lights.directional.descriptorSets[ light ];
+    return cache->getDescriptorSet( light );
 }
 
-std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getPointLightDescriptors( const Light *light ) noexcept
+std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getPointLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept
 {
-    const auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light );
+    auto cache = getRenderDevice()->getCache();
+    const auto shadowMap = cache->getShadowMap( light );
 
     Resources::Lights::Point::UniformData props;
     props.position = light->getPosition();
@@ -709,20 +714,20 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getPointLightDescr
     props.color = light->getColor();
     props.castShadows = light->castShadows() ? 1.0f : 0.0f;
 
-    if ( !m_resources.lights.point.uniforms.contains( light ) ) {
+    if ( !cache->hasUniforms( light ) ) {
         auto uniforms = crimild::alloc< UniformBuffer >( props );
         uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        getRenderDevice()->getCache()->bind( uniforms.get() );
-        m_resources.lights.point.uniforms[ light ] = uniforms;
+        getRenderDevice()->getCache()->bind( uniforms );
+        cache->setUniforms( light, uniforms );
     } else {
-        m_resources.lights.point.uniforms[ light ]->setValue( props );
+        cache->getUniforms( light )->setValue( props );
     }
 
-    if ( !m_resources.lights.point.descriptorSets.contains( light ) ) {
+    if ( !cache->hasDescriptorSet( light ) ) {
         auto descriptors = std::vector< Descriptor > {
             Descriptor {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = getRenderDevice()->getCache()->bind( m_resources.lights.point.uniforms[ light ].get() ),
+                .buffer = getRenderDevice()->getCache()->bind( cache->getUniforms( light ) ),
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
             Descriptor {
@@ -732,24 +737,28 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getPointLightDescr
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
         };
-        m_resources.lights.point.descriptorSets[ light ] = crimild::alloc< DescriptorSet >(
-            getRenderDevice(),
-            getName() + "/Lights/" + light->getName() + "/DescriptorSet",
-            crimild::alloc< vulkan::DescriptorPool >(
+        cache->setDescriptorSet(
+            light,
+            crimild::alloc< DescriptorSet >(
                 getRenderDevice(),
-                getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                getName() + "/Lights/" + light->getName() + "/DescriptorSet",
+                crimild::alloc< vulkan::DescriptorPool >(
+                    getRenderDevice(),
+                    getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                    descriptors
+                ),
+                m_resources.lights.descriptorSetLayout,
                 descriptors
-            ),
-            m_resources.lights.descriptorSetLayout,
-            descriptors
+            )
         );
     }
-    return m_resources.lights.point.descriptorSets[ light ];
+    return cache->getDescriptorSet( light );
 }
 
-std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getSpotLightDescriptors( const Light *light ) noexcept
+std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getSpotLightDescriptors( const std::shared_ptr< const Light > &light ) noexcept
 {
-    const auto shadowMap = getRenderDevice()->getCache()->getShadowMap( light );
+    auto cache = getRenderDevice()->getCache();
+    const auto shadowMap = cache->getShadowMap( light );
 
     Resources::Lights::Spot::UniformData props;
     props.castShadows = light->castShadows() ? 1.0f : 0.0f;
@@ -761,20 +770,20 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getSpotLightDescri
     props.outerCutoff = Numericf::cos( light->getOuterCutoff() );
     props.lightSpaceProjection = shadowMap->getLightSpaceMatrix( 0 );
 
-    if ( !m_resources.lights.spot.uniforms.contains( light ) ) {
+    if ( !cache->hasUniforms( light ) ) {
         auto uniforms = crimild::alloc< UniformBuffer >( props );
         uniforms->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-        getRenderDevice()->getCache()->bind( uniforms.get() );
-        m_resources.lights.spot.uniforms[ light ] = uniforms;
+        getRenderDevice()->getCache()->bind( uniforms );
+        cache->setUniforms( light, uniforms );
     } else {
-        m_resources.lights.spot.uniforms[ light ]->setValue( props );
+        cache->getUniforms( light )->setValue( props );
     }
 
-    if ( !m_resources.lights.spot.descriptorSets.contains( light ) ) {
+    if ( !cache->hasDescriptorSet( light ) ) {
         auto descriptors = std::vector< Descriptor > {
             Descriptor {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = getRenderDevice()->getCache()->bind( m_resources.lights.spot.uniforms[ light ].get() ),
+                .buffer = getRenderDevice()->getCache()->bind( cache->getUniforms( light ) ),
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
             Descriptor {
@@ -784,19 +793,22 @@ std::shared_ptr< vulkan::DescriptorSet > RenderSceneLighting::getSpotLightDescri
                 .stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             },
         };
-        m_resources.lights.spot.descriptorSets[ light ] = crimild::alloc< DescriptorSet >(
-            getRenderDevice(),
-            getName() + "/Lights/" + light->getName() + "/DescriptorSet",
-            crimild::alloc< vulkan::DescriptorPool >(
+        cache->setDescriptorSet(
+            light,
+            crimild::alloc< DescriptorSet >(
                 getRenderDevice(),
-                getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                getName() + "/Lights/" + light->getName() + "/DescriptorSet",
+                crimild::alloc< vulkan::DescriptorPool >(
+                    getRenderDevice(),
+                    getName() + "/Lights/" + light->getName() + "/DescriptorPool",
+                    descriptors
+                ),
+                m_resources.lights.descriptorSetLayout,
                 descriptors
-            ),
-            m_resources.lights.descriptorSetLayout,
-            descriptors
+            )
         );
     }
-    return m_resources.lights.spot.descriptorSets[ light ];
+    return cache->getDescriptorSet( light );
 }
 
 void RenderSceneLighting::render(
@@ -829,7 +841,7 @@ void RenderSceneLighting::render(
     cmds->bindPipeline( m_resources.lights.directional.pipeline );
     cmds->bindDescriptorSet( 0, m_resources.common.descriptorSet );
     for ( const auto &light : renderState.lights.at( Light::Type::DIRECTIONAL ) ) {
-        auto lightDescriptors = getDirectionalLightDescriptors( light.get() );
+        auto lightDescriptors = getDirectionalLightDescriptors( light );
         cmds->bindDescriptorSet( 1, lightDescriptors );
         cmds->draw( 6 );
     }
@@ -839,7 +851,7 @@ void RenderSceneLighting::render(
     cmds->bindPipeline( m_resources.lights.point.pipeline );
     cmds->bindDescriptorSet( 0, m_resources.common.descriptorSet );
     for ( const auto &light : renderState.lights.at( Light::Type::POINT ) ) {
-        auto lightDescriptors = getPointLightDescriptors( light.get() );
+        auto lightDescriptors = getPointLightDescriptors( light );
         cmds->bindDescriptorSet( 1, lightDescriptors );
         cmds->drawPrimitive( m_resources.lights.point.volume );
     }
@@ -849,7 +861,7 @@ void RenderSceneLighting::render(
     cmds->bindPipeline( m_resources.lights.spot.pipeline );
     cmds->bindDescriptorSet( 0, m_resources.common.descriptorSet );
     for ( const auto &light : renderState.lights.at( Light::Type::SPOT ) ) {
-        auto lightDescriptors = getSpotLightDescriptors( light.get() );
+        auto lightDescriptors = getSpotLightDescriptors( light );
         cmds->bindDescriptorSet( 1, lightDescriptors );
         cmds->drawPrimitive( m_resources.lights.spot.volume );
     }

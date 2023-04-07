@@ -35,21 +35,27 @@ using namespace crimild::vulkan;
 
 // TODO: For Static buffers, we should use a staging buffer to transfer data to GPU. For dynamic buffers,
 // we might use a transfer queue...
-vulkan::Buffer::Buffer( RenderDevice *device, std::string name, BufferView *bufferView ) noexcept
+vulkan::Buffer::Buffer( RenderDevice *device, std::string name, const BufferView *bufferView ) noexcept
     : Named( name ),
       WithRenderDevice( device ),
       m_bufferView( retain( bufferView ) )
 {
     auto size = bufferView->getLength();
 
-    VkBufferUsageFlags usage = [ & ] {
+    VkBufferUsageFlags usage = [ & ]() -> VkBufferUsageFlags {
         switch ( bufferView->getTarget() ) {
-            case BufferView::Target::UNIFORM:
-                return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
             case BufferView::Target::VERTEX:
                 return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
             case BufferView::Target::INDEX:
                 return VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            case BufferView::Target::UNIFORM:
+                return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            case BufferView::Target::STAGING:
+                return VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+            case BufferView::Target::STORAGE:
+                return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+            case BufferView::Target::IMAGE:
+                return VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT;
             default:
                 CRIMILD_LOG_ERROR( "Unsupported buffer target " );
                 return VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
@@ -112,6 +118,8 @@ vulkan::Buffer::Buffer( RenderDevice *device, std::string name, BufferView *buff
         // Force copy data to GPU since this is the first initialization
         update( true );
     }
+
+    getRenderDevice()->setObjectName( ( uint64_t ) getHandle(), VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, name );
 }
 
 vulkan::Buffer::~Buffer( void ) noexcept

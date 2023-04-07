@@ -101,7 +101,7 @@ void RenderSceneGBuffer::createRenderPassResources( void ) noexcept
             Descriptor {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .buffer = getRenderDevice()->getCache()->bind(
-                    m_resources.renderPass.uniforms.get()
+                    m_resources.renderPass.uniforms
                 ),
                 .stage = VK_SHADER_STAGE_VERTEX_BIT,
             },
@@ -146,13 +146,13 @@ void RenderSceneGBuffer::bindMaterial( const materials::PrincipledBSDF *material
         std::vector< Descriptor > {
             {
                 .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .buffer = renderCache->bind( m_resources.materials[ material ].uniforms.get() ),
+                .buffer = renderCache->bind( m_resources.materials[ material ].uniforms ),
                 .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
             },
             {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .imageView = renderCache->bind( material->getAlbedoMap()->imageView.get() ),
-                .sampler = renderCache->bind( material->getAlbedoMap()->sampler.get() ),
+                .imageView = renderCache->bind( material->getAlbedoMap()->imageView ),
+                .sampler = renderCache->bind( material->getAlbedoMap()->sampler ),
             },
         }
     );
