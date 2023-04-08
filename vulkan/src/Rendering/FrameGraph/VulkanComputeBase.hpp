@@ -29,7 +29,7 @@
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_COMPUTE_BASE
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/FrameGraph/VulkanFramegraphNode.hpp"
+#include "Rendering/FrameGraph/VulkanFrameGraphNode.hpp"
 #include "Rendering/VulkanSemaphore.hpp"
 
 namespace crimild::vulkan::framegraph {

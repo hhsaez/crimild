@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_IMPORT=OFF -DCRIMILD_BUILD_STB=ON -DCRIMILD_BUILD_OPENAL=OFF -DCRIMILD_BUILD_GLFW=OFF -DCRIMILD_BUILD_VULKAN=OFF -DCRIMILD_BUILD_IMGUI=OFF -DCRIMILD_BUILD_TOOLS=OFF -DCRIMILD_BUILD_EXAMPLES=OFF
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_OPENAL=OFF -DCRIMILD_BUILD_GLFW=OFF -DCRIMILD_BUILD_IMGUI=OFF -DCRIMILD_BUILD_TOOLS=OFF -DCRIMILD_BUILD_EXAMPLES=OFF
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 2
 
       - name: Test
