@@ -222,7 +222,7 @@ namespace crimild::vulkan::framegraph {
             }
 
             m_commandBuffer->end();
-            getRenderDevice()->submitGraphicsCommands( m_commandBuffer );
+            getRenderDevice()->submitGraphicsCommands( m_commandBuffer, options.wait, options.signal );
         }
 
     private:
@@ -607,7 +607,7 @@ namespace crimild::vulkan::framegraph {
             }
 
             m_commandBuffer->end();
-            getRenderDevice()->submitGraphicsCommands( m_commandBuffer );
+            getRenderDevice()->submitGraphicsCommands( m_commandBuffer, options.wait, options.signal );
         }
 
     private:
@@ -955,7 +955,7 @@ namespace crimild::vulkan::framegraph {
             }
 
             m_commandBuffer->end();
-            getRenderDevice()->submitGraphicsCommands( m_commandBuffer );
+            getRenderDevice()->submitGraphicsCommands( m_commandBuffer, options.wait, options.signal );
         }
 
     private:
@@ -1090,7 +1090,7 @@ void RenderShadowMaps::render(
         }
     );
 
-    m_renderers[ 0 ]->render(
+    m_renderers[ 2 ]->render(
         renderState,
         camera,
         { 
