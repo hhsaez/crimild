@@ -31,6 +31,7 @@
 #include "Foundation/Macros.hpp"
 #include "Foundation/StringUtils.hpp"
 
+#include <memory>
 #include <sstream>
 #include <string>
 #include <thread>

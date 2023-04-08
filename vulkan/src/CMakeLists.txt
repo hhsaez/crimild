@@ -1,6 +1,35 @@
 crimild_trace()
 
-find_package( Vulkan REQUIRED )
+find_package( Vulkan )
+
+if ( NOT Vulkan_FOUND )
+    if ( WIN32 )
+        find_library( Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${PROJECT_SOURCE_DIR}/third-party/vulkan/lib )
+        if ( Vulkan_LIBRARY )
+            message( "Using bundled Vulkan libraries" )
+            set( Vulkan_FOUND ON )
+            set( Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include )
+        endif ()
+    elseif ( LINUX )
+        find_library( Vulkan_LIBRARY NAMES vulkan HINTS "$ENV{VULKAN_SDK}/lib" "${PROJECT_SOURCE_DIR}/third-party/vulkan/lib" )
+        if ( Vulkan_LIBRARY )
+            message( "Using bundled Vulkan libraries" )
+            set( Vulkan_FOUND ON )
+            set( Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include )
+        endif ()
+    elseif ( APPLE )
+        message( "Using bundled Vulkan libraries" )
+        set( Vulkan_FOUND ON )
+        set( Vulkan_LIBRARY ${PROJECT_SOURCE_DIR}/third-party/vulkan/lib/libvulkan.dylib )
+        set( Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include )
+    endif ()
+endif ()
+
+if ( NOT Vulkan_FOUND )
+    message( FATAL_ERROR "Could not find Vulkan libraries" )
+else ()
+    message( STATUS ${Vulkan_LIBRARY} )
+endif ()
 
 add_library( crimild_vulkan OBJECT )
 
@@ -22,7 +51,7 @@ target_sources(
     Rendering/FrameGraph/VulkanComputeImageMix.hpp
     Rendering/FrameGraph/VulkanComputeImageSwizzle.cpp
     Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp
-    Rendering/FrameGraph/VulkanFramegraphNode.hpp
+    Rendering/FrameGraph/VulkanFrameGraphNode.hpp
     Rendering/FrameGraph/VulkanRenderBase.cpp
     Rendering/FrameGraph/VulkanRenderBase.hpp
     Rendering/FrameGraph/VulkanRenderScene.cpp
@@ -135,16 +164,19 @@ target_include_directories(
     # Make sure to include GLSLang headers before Vulkan's so there is no conflict and
     # the app will run correctly. Otherwise, you may seem errors when compiling shaders
     # due to invalid resource settings (like when using gl_VertexIdentifier in arrays)
-    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glslang
-	PRIVATE ${Vulkan_INCLUDE_DIRS} 
+    PUBLIC ${PROJECT_SOURCE_DIR}/third-party/glslang
+	PUBLIC ${Vulkan_INCLUDE_DIRS} 
 )
 
 target_link_libraries( 
 	crimild_vulkan
 	PRIVATE Crimild::Core
-	PRIVATE ${Vulkan_LIBRARIES}
-    PRIVATE glslang
-    PRIVATE SPIRV 
+
+    # Vulkan libraries are made public so they can be used in other projects, like 
+    # the editor or players
+	PUBLIC ${Vulkan_LIBRARY}
+    PUBLIC glslang
+    PUBLIC SPIRV 
 )
 
 add_library( Crimild::Vulkan ALIAS crimild_vulkan )

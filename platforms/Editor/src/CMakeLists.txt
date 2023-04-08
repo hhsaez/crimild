@@ -1,7 +1,5 @@
 crimild_trace()
 
-find_package( Vulkan REQUIRED )
-
 add_executable( crimild_editor )
 
 target_sources(
@@ -77,8 +75,6 @@ target_include_directories(
 	crimild_editor
 	PRIVATE . 
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
-    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glslang
-	PRIVATE ${Vulkan_INCLUDE_DIRS} 
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/examples
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/backends
@@ -93,7 +89,6 @@ target_link_libraries(
 	crimild_editor 
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
-	PRIVATE ${Vulkan_LIBRARIES}
     PRIVATE glfw
 )
 

@@ -425,7 +425,7 @@ namespace crimild {
             };
         }
 
-        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const const vulkan::GraphicsPipeline::Descriptor &descriptor ) noexcept
+        VkPipelineLayout createPipelineLayout( RenderDevice *renderDevice, const vulkan::GraphicsPipeline::Descriptor &descriptor ) noexcept
         {
             CRIMILD_LOG_TRACE();
 
