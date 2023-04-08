@@ -47,6 +47,7 @@ ComputeImageMix::ComputeImageMix(
     std::shared_ptr< ImageView > const &source,
     std::shared_ptr< ImageView > const &destination,
     std::shared_ptr< ImageView > const &output,
+    Mode mode,
     SyncOptions const &options
 ) noexcept
     : ComputeBase( device, name ),
@@ -104,11 +105,24 @@ ComputeImageMix::ComputeImageMix(
                     
                         void main()
                         {
+                            int mode = 17;
+
                             ivec2 uv = ivec2( gl_GlobalInvocationID.xy );
                             vec4 src = imageLoad( srcImage, uv );
                             vec4 dst = imageLoad( dstImage, uv );
-                            vec4 color = vec4( src.rgb + dst.rgb, 1.0 );
-                            imageStore( outputImage, uv, color );
+                            vec3 color = vec3( 0.0 );
+                            float opacity = src.a;
+
+                            if ( mode == 1 ) { 
+                                // add
+                                color = opacity * min( src.rgb + dst.rgb, 1.0 ) + ( 1.0 - opacity ) * dst.rgb;
+                            }
+                            else if ( mode == 17 ) { 
+                                // normal
+                                color = opacity * src.rgb + ( 1.0 - opacity ) * dst.rgb;
+                            }
+
+                            imageStore( outputImage, uv, vec4( color, 1.0 ) );
                         }
                     )"
                 ),

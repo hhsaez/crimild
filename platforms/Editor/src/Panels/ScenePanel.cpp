@@ -190,6 +190,7 @@ Scene::Scene( vulkan::RenderDevice *device ) noexcept
             renderGizmosOutput,
             renderSceneOutput,
             mixSceneAndGizmosOutput,
+            ComputeImageMix::Mode::NORMAL,
             vulkan::SyncOptions {
                 // .wait = { renderSceneSemaphore, renderGizmosSemaphore },
             }

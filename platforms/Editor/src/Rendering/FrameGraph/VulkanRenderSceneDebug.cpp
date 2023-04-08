@@ -42,6 +42,7 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Light.hpp"
+#include "Simulation/Editor.hpp"
 #include "Simulation/Simulation.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
@@ -282,12 +283,53 @@ void RenderSceneDebug::execute( void ) noexcept
     cmds->begin( m_syncOptions );
     cmds->beginRenderPass( m_resources.renderPass, m_resources.framebuffer );
 
+    // Render grid
+    // Maybe I should move this to a primitive?
+    // for ( float z = -100.0f; z <= 100.0f; z += 1.0f ) {
+    //     DebugDrawManager::addLine( { -100.0f, 0, z }, { 100.0f, 0, z }, { 1, 1, 1 } );
+    // }
+    // for ( float x = -100.0f; x < 100.0f; x += 1.0f ) {
+    //     DebugDrawManager::addLine( { x, 0, -100.0f }, { x, 0, 100.0f }, { 1, 1, 1 } );
+    // }
+
+    // Render selected node bounds as a box
+    if ( auto editor = editor::Editor::getInstance() ) {
+        if ( auto selectedNode = editor->getSelectedObject< crimild::Node >() ) {
+            auto bounds = selectedNode->getWorldBound();
+            const auto min = bounds->getMin();
+            const auto max = bounds->getMax();
+
+            // TODO: Create an "addBox" for debug utils
+            DebugDrawManager::addLine( { min.x, min.y, min.z }, { max.x, min.y, min.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { min.x, max.y, min.z }, { max.x, max.y, min.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { min.x, min.y, min.z }, { min.x, max.y, min.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { max.x, min.y, min.z }, { max.x, max.y, min.z }, { 1, 1, 0 } );
+
+            DebugDrawManager::addLine( { min.x, min.y, max.z }, { max.x, min.y, max.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { min.x, max.y, max.z }, { max.x, max.y, max.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { min.x, min.y, max.z }, { min.x, max.y, max.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { max.x, min.y, max.z }, { max.x, max.y, max.z }, { 1, 1, 0 } );
+
+            DebugDrawManager::addLine( { min.x, min.y, min.z }, { min.x, min.y, max.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { min.x, max.y, min.z }, { min.x, max.y, max.z }, { 1, 1, 0 } );
+
+            DebugDrawManager::addLine( { max.x, min.y, min.z }, { max.x, min.y, max.z }, { 1, 1, 0 } );
+            DebugDrawManager::addLine( { max.x, max.y, min.z }, { max.x, max.y, max.z }, { 1, 1, 0 } );
+        }
+    }
+
+    // Render axis
+    DebugDrawManager::addLine( { 0, 0, 0 }, { 100, 0, 0 }, { 1, 0, 0 } );
+    DebugDrawManager::addLine( { 0, 0, 0 }, { 0, 100, 0 }, { 0, 1, 0 } );
+    DebugDrawManager::addLine( { 0, 0, 0 }, { 0, 0, 100 }, { 0, 0, 1 } );
+
     auto scene = Simulation::getInstance()->getScene();
     if ( scene != nullptr && m_camera != nullptr ) {
         const auto view = m_camera->getViewMatrix();
         const auto proj = m_camera->getProjectionMatrix();
 
         scene->perform( DebugVisitor( m_camera.get() ) );
+
         DebugDrawManager::eachRenderable(
             [ & ]( auto renderable ) {
                 cmds->bindPipeline( m_resources.pipeline );
