@@ -138,10 +138,10 @@ void RenderScene::execute( void ) noexcept
 
     // Execute shadow pass. No need to add sync objects since render pass will
     // leave all attachments in the correct layout
-    m_shadows->render( 
-        renderState, 
+    m_shadows->render(
+        renderState,
         m_camera.get(),
-        { 
+        {
             .signal = { m_shadows->getSemaphore() },
         }
     );

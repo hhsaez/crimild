@@ -40,12 +40,12 @@ VulkanInstance::VulkanInstance( void ) noexcept
 {
     createInstance();
     createDebugMessenger();
-    // createReportCallback();
+    createReportCallback();
 }
 
 VulkanInstance::~VulkanInstance( void ) noexcept
 {
-    // destroyReportCallback();
+    destroyReportCallback();
     destroyDebugMessenger();
     destroyInstance();
 }
