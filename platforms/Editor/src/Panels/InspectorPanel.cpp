@@ -339,10 +339,11 @@ namespace crimild::editor::panels {
                 light->setCastShadows( castShadows );
 
                 if ( castShadows ) {
-                    if ( m_inFLightShadowMaps.empty() ) {
-                        configureShadowMapLayers( light );
-                    }
-                    renderShadowMap();
+                    ImGui::Text( "TODO: Fix shadow map debug rendering" );
+//                    if ( m_inFLightShadowMaps.empty() ) {
+//                        configureShadowMapLayers( light );
+//                    }
+//                    renderShadowMap();
                 }
             }
         }
