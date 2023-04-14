@@ -33,6 +33,7 @@
 #include "Mathematics/Cylinder_normal.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Random.hpp"
+#include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Vector2Ops.hpp"
