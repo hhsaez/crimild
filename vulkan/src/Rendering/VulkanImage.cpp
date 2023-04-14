@@ -246,6 +246,29 @@ vulkan::Image::Image( const vulkan::RenderDevice *device, const crimild::Image *
     }
 }
 
+vulkan::Image::Image(
+    const RenderDevice *device,
+    VkImage handle,
+    const VkExtent2D &extent,
+    VkFormat format,
+    VkImageUsageFlags usage,
+    std::string name
+) noexcept
+    : WithConstRenderDevice( device ),
+      Named( name ),
+      m_handle( handle ),
+      m_format( format ),
+      m_extent( { extent.width, extent.height, 1 } ),
+      m_layout( VK_IMAGE_LAYOUT_UNDEFINED ),
+      m_arrayLayers( 1 ),
+      m_mipLevels( 1 ),
+      m_aspectFlags( VK_IMAGE_ASPECT_COLOR_BIT ),
+      m_readonly( true )
+{
+
+    device->setObjectName( getHandle(), name );
+}
+
 vulkan::Image::Image( const vulkan::RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name ) noexcept
     : WithConstRenderDevice( rd ),
       Named( name )

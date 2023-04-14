@@ -78,13 +78,29 @@ namespace crimild {
             ) noexcept;
 
             /**
+             * \brief Constructs an image from an existing handle
+             *
+             * Special case for images created by the device, like swapchain images
+             * \remarks Sets m_readonly to true
+             * \remarks Internal use only
+             */
+            Image(
+                const RenderDevice *device,
+                VkImage handle,
+                const VkExtent2D &extent,
+                VkFormat format,
+                VkImageUsageFlags usage,
+                std::string name = "Image"
+            ) noexcept;
+
+            /**
                 \brief Constructs an image from an already allocated resource
 
                 \remarks Sets m_readonly to true
 
                 \remarks Internal use only
             */
-            Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name = "Image" ) noexcept;
+            [[deprecated]] Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name = "Image" ) noexcept;
 
             virtual ~Image( void ) noexcept;
 

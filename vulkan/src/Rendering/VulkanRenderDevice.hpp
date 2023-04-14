@@ -68,7 +68,8 @@ namespace crimild {
 
             [[nodiscard]] inline const PhysicalDevice *getPhysicalDevice( void ) const noexcept { return m_physicalDevice; }
 
-            inline void setInFlightFrameCount( uint32_t count ) noexcept { m_inFlightFrameCount = count; }
+            void configure( uint32_t inFlightFrameCount ) noexcept;
+
             /**
              * \brief Get the total number of frames active at any given point in time
              */

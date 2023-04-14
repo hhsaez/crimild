@@ -210,6 +210,16 @@ RenderDevice::~RenderDevice( void ) noexcept
     m_presentQueueHandle = VK_NULL_HANDLE;
 }
 
+void RenderDevice::configure( uint32_t inFlightFrameCount ) noexcept
+{
+    m_inFlightFrameCount = inFlightFrameCount;
+
+    m_caches.clear();
+    for ( int i = 0; i < m_inFlightFrameCount; ++i ) {
+        m_caches.push_back( crimild::alloc< RenderDeviceCache >( this ) );
+    }
+}
+
 void RenderDevice::handle( const Event &e ) noexcept
 {
     switch ( e.type ) {
@@ -2403,3 +2413,4 @@ void RenderDevice::submitCommands(
         )
     );
 }
+
