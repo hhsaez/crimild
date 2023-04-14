@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build:
     name: Build ${{ matrix.name }}
@@ -17,15 +14,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: "Windows"
+          - name: "Windows (Release)"
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'
-          - name: "Ubuntu"
+            build_type: Release
+          - name: "Windows (Debug)"
+            os: windows-latest
+            cmake_args: '-G "Visual Studio 17 2022" -A x64'
+            build_type: Debug
+          - name: "Ubuntu (Release)"
             os: ubuntu-latest
             cmake_args: ''
-          - name: "Mac OSX"
+            build_type: Release
+          - name: "Ubuntu (Debug)"
+            os: ubuntu-latest
+            cmake_args: ''
+            build_type: Release
+          - name: "Mac OSX (Release)"
             os: macos-latest
             cmake_args: ''
+            build_type: Release
+          - name: "Mac OSX (Debug)"
+            os: macos-latest
+            cmake_args: ''
+            build_type: Debug
 
     steps:
       - uses: actions/checkout@v2
@@ -34,9 +46,9 @@ jobs:
 
       - name: Build
         run: |
-          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 2
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON
+          cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 2
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}} --stop-on-failure  -V --parallel 2
+        run: ctest -C ${{matrix.build_type}} --stop-on-failure  -V --parallel 2
