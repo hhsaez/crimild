@@ -44,6 +44,12 @@ jobs:
         with:
           submodules: recursive
 
+      - if: matrix.os == 'ubuntu-latest'
+        name: Setup
+        run: |
+          sudo apt update
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+
       - name: Build
         run: |
           cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON
