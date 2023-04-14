@@ -28,7 +28,9 @@
 #ifndef CRIMILD_GLFW_UTILS_
 #define CRIMILD_GLFW_UTILS_
 
+#define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
 
 #endif
