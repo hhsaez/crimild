@@ -33,6 +33,7 @@
 #include "Rendering/Extent.hpp"
 #include "Simulation/Event.hpp"
 
+#include <memory>
 #include <string>
 
 namespace crimild {
