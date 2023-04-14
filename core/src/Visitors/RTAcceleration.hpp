@@ -47,7 +47,7 @@ namespace crimild {
 
        \todo Support more than one primitive per geometry
        \todo Support more than one material per geometry
-       
+
        \todo Optimize for better cache usage while traversing. Consider
        moving materialIndex to a different structure.
      */
@@ -61,12 +61,12 @@ namespace crimild {
             GROUP,
 
             /**
-             * \brief A geometry is a container of primitives. 
-             * 
+             * \brief A geometry is a container of primitives.
+             *
              * In this case, bounds will be used as a first intersection test.
-             * 
+             *
              * The primitive associated with this geometry will be stored in the node
-             * right after the current one. Therefore, there's no need to store a 
+             * right after the current one. Therefore, there's no need to store a
              * separated primitive index.
              */
             GEOMETRY,
@@ -80,7 +80,7 @@ namespace crimild {
             PRIMITIVE_CYLINDER,
             /**
              * \brief A triangulated primitive
-             * 
+             *
              * In this case, RTAcceleratedNode::primitiveIndex will point to an optimized
              * triangulated mesh, represented by the RTPrimAccelNode class.
              */
@@ -93,15 +93,15 @@ namespace crimild {
 
             /**
              * \brief Offset to the second child
-             * 
+             *
              * The first child in a group is stored immediatelly after the current node. The
-             * second child can be store much later, though. 
-             * 
+             * second child can be store much later, though.
+             *
              * We don't need to keep track of the number of children since a node has either one
              * or two child nodes. Empty nodes are not allowed.
-             * 
+             *
              * \remarks This is only valid on nodes that can have children
-            */
+             */
             Int32 secondChildIndex = -1;
 
             /**
@@ -111,9 +111,9 @@ namespace crimild {
             Int32 primitiveIndex;
         };
 
-        /** 
+        /**
          * \brief Index to a  array
-         * 
+         *
          * \todo Find a way to pack this field with others in a union.
          * \remarks Only valid for primitives
          */
@@ -126,10 +126,10 @@ namespace crimild {
         //     Transformation bounds;
 
         /**
-             * \brief World transformation
-             * 
-             * \remarks Only valid for leaf nodes (primitives)
-             */
+         * \brief World transformation
+         *
+         * \remarks Only valid for leaf nodes (primitives)
+         */
         Transformation world;
         // };
     };
@@ -145,7 +145,7 @@ namespace crimild {
 
         /**
          * \brief Volume density
-         * 
+         *
          * A non-negative value is used to indicate that this is a volumetric
          * material
          */
@@ -154,20 +154,20 @@ namespace crimild {
 
     /**
      * \brief Primitive acceleration representation
-     * 
+     *
      * Interior nodes provide access to three pieces of information:
      * - Split axis: which of the x, y or z axes was split at this node.
      * - Split position: the position of the splitting plane along the axis.
      * - Children: information about to how to reach the two child nodes beneth it.
-     * 
+     *
      * Leaf nodes need to record only which primitives overlap it.
-     * 
+     *
      * Additional care was taken to ensure that nodes use only 8 bytes of memory
      * (assuming a 32bits Float and Int representation). This maximizes the number
      * of nodes that can live in the same cache line at any given point in time
      * (up to 8 in a 64-byte cache line), improving performance when traversing
      * later on.
-     * 
+     *
      * \todo (hernan) I don't like the name. Maybe replaced "primitive" by "triangle"
      * since that's what we're optimizing here.
      */
@@ -182,20 +182,20 @@ namespace crimild {
              * If the leaf node is overlapped by zero or one triangle, this variable is
              * used to directly get the index of the first point of that triangle, without
              * any need to push offsets dynamically.
-             * 
-             * \todo This seems to be overkill. Maybe I just need to use the offset below. 
-             * 
+             *
+             * \todo This seems to be overkill. Maybe I just need to use the offset below.
+             *
              * \remarks Valid only for leaf nodes
              */
             Int onePrimitive;
 
             /**
              * Stores the offset for the first primitive index
-             * 
+             *
              * \todo Since triangles are represented by indexed vertex buffers,
              * this actually is a double indirection offset. This offset
-             * is used to get index for the first point in a triangle. 
-             * 
+             * is used to get index for the first point in a triangle.
+             *
              * \remarks Valid only for leaf nodes
              */
             Int primitiveIndicesOffset;
@@ -207,18 +207,18 @@ namespace crimild {
              * this is an interior node (with x, y, and z splits, represented
              * by the values 0, 1 and 2 respectively) and leaf nodes (represented
              * by the value 3).
-             * 
+             *
              * \remarks Valid for interior and leaf nodes
              */
             Int flags;
 
             /**
              * Stores the number of primitives that overlap this node.
-             * 
+             *
              * Since this variable shares the same space as the flags variable above,
              * only 30 bits are actually available for use. Also, keep in mind that
              * the low-order bits are reserved for flags.
-             * 
+             *
              * \remarks Valid only for leaf nodes
              */
             Int primCount;
@@ -264,6 +264,9 @@ namespace crimild {
             RTPrimAccel primitives;
         };
 
+        explicit RTAcceleration( bool preferUnitPrimitives = true ) noexcept;
+        virtual ~RTAcceleration( void ) = default;
+
         virtual void traverse( Node *node ) noexcept override;
 
         virtual void visitGroup( Group *group ) noexcept override;
@@ -276,6 +279,7 @@ namespace crimild {
         void printStats( void ) noexcept;
 
     private:
+        bool m_preferUnitPrimitives = true;
         Result m_result;
         Map< Material *, Int32 > m_materialIDs;
         Map< Primitive *, Int32 > m_primitiveIDs;

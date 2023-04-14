@@ -204,6 +204,12 @@ static void optimizePrimitive(
     splitPrimitives( offsets, rootBounds, primBounds, indexOffsets, primTree, 10 );
 }
 
+RTAcceleration::RTAcceleration( bool preferUnitPrimitives ) noexcept
+    : m_preferUnitPrimitives( preferUnitPrimitives )
+{
+    // no-op
+}
+
 void RTAcceleration::traverse( Node *node ) noexcept
 {
     m_stats.reset();
@@ -262,10 +268,12 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
                 return RTAcceleratedNode::Type::PRIMITIVE_CYLINDER;
             }
             case Primitive::Type::TRIANGLES: {
-                if ( isSamePrimitive( primitive, SpherePrimitive::UNIT_SPHERE.get() ) ) {
-                    return RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
-                } else if ( isSamePrimitive( primitive, BoxPrimitive::UNIT_BOX.get() ) ) {
-                    return RTAcceleratedNode::Type::PRIMITIVE_BOX;
+                if ( m_preferUnitPrimitives ) {
+                    if ( isSamePrimitive( primitive, SpherePrimitive::UNIT_SPHERE.get() ) ) {
+                        return RTAcceleratedNode::Type::PRIMITIVE_SPHERE;
+                    } else if ( isSamePrimitive( primitive, BoxPrimitive::UNIT_BOX.get() ) ) {
+                        return RTAcceleratedNode::Type::PRIMITIVE_BOX;
+                    }
                 }
 
                 // For the moment, I'm defining as "valid" primitives only those
