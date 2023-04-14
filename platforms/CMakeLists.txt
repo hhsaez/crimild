@@ -1,4 +1,9 @@
 crimild_trace()
 
-add_subdirectory( Editor )
-add_subdirectory( Player )
+if( CRIMILD_BUILD_EDITOR )
+    add_subdirectory( Editor )
+endif()
+
+if( CRIMILD_BUILD_PLAYER )
+    add_subdirectory( Player )
+endif()

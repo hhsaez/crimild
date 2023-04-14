@@ -23,10 +23,9 @@ else()
 endif()
 
 # Define build options here
-option( CRIMILD_BUILD_TESTS "Build tests" ${CRIMILD_IS_MAIN_PROJECT} )
-option( CRIMILD_BUILD_VULKAN "Build the crimild-vulkan extension?" ${CRIMILD_IS_MAIN_PROJECT} )
-option( CRIMILD_BUILD_GLFW "Build the crimild-glfw extension?" ${CRIMILD_IS_MAIN_PROJECT} )
-option( CRIMILD_BUILD_IMGUI "Build the crimild-imgui extension?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_TESTS "Build tests?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_EDITOR "Build crimild editor?" ${CRIMILD_IS_MAIN_PROJECT} )
+option( CRIMILD_BUILD_PLAYER "Build crimild player?" ${CRIMILD_IS_MAIN_PROJECT} )
 option( CRIMILD_BUILD_EXAMPLES "Build examples?" ${CRIMILD_IS_MAIN_PROJECT} )
 
 # Global tests setup
@@ -38,38 +37,32 @@ endif ()
 # Add subdirectories
 add_subdirectory( core )
 
-if( CRIMILD_BUILD_VULKAN )
+# Configure Vulkan
+if( CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER )
 	add_definitions( -DCRIMILD_ENABLE_VULKAN=1 )
-	
 	set( SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip installation" )
 	set( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
 	set( BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External" )
 	set( ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper" )
 	set( ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap" )
 	add_subdirectory( ${Crimild_SOURCE_DIR}/third-party/glslang )
-	
 	add_subdirectory(vulkan)
 endif()
 
-if( CRIMILD_BUILD_IMGUI )
-	add_definitions( -DCRIMILD_ENABLE_IMGUI=1 )
-	add_subdirectory( imgui )
-endif()
-
-if( CRIMILD_BUILD_GLFW )
-	add_definitions( -DCRIMILD_ENABLE_GLFW=1 )
-
+# Configure GLFW
+if( CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER )
 	set( GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" )
 	set( GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" )
 	set( GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" )
 	set( ENABLE_CTEST OFF CACHE BOOL "Enables testing" )
 	add_subdirectory( ${Crimild_SOURCE_DIR}/third-party/glfw )
+endif()
 
+# Configure TinyGLTF
+if( CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER )
 	set( TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE )
 	set( TINYGLTF_INSTALL OFF CACHE INTERNAL "" FORCE )
 	add_subdirectory( ${PROJECT_SOURCE_DIR}/third-party/tinygltf )
-
-	add_subdirectory( glfw )
 endif()
 
 if( CRIMILD_BUILD_EXAMPLES )
