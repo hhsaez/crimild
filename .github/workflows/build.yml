@@ -18,26 +18,32 @@ jobs:
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'
             build_type: Release
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
           - name: "Windows (Debug)"
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'
             build_type: Debug
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
           - name: "Ubuntu (Release)"
             os: ubuntu-latest
             cmake_args: ''
             build_type: Release
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
           - name: "Ubuntu (Debug)"
             os: ubuntu-latest
             cmake_args: ''
             build_type: Release
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
           - name: "Mac OSX (Release)"
             os: macos-latest
             cmake_args: ''
             build_type: Release
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
           - name: "Mac OSX (Debug)"
             os: macos-latest
             cmake_args: ''
             build_type: Debug
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
 
     steps:
       - uses: actions/checkout@v2
@@ -52,7 +58,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON
+          cmake ${{ matrix.cmake_args }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} ${{matrix.crimild_build_flags}}
           cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 2
 
       - name: Test
