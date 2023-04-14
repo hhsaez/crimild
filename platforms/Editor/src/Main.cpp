@@ -563,7 +563,7 @@ int main( int argc, char **argv )
     SetupVulkanWindow( wd, surface, w, h );
 
     // Set number of in-flight frames. This will result in one framegraph per frame
-    vulkanObjects.renderDevice->setInFlightFrameCount( wd->ImageCount );
+    vulkanObjects.renderDevice->configure( wd->ImageCount );
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

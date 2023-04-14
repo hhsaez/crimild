@@ -36,126 +36,126 @@ add_library( crimild_vulkan OBJECT )
 target_sources( 
     crimild_vulkan
 
-    PUBLIC
-    Crimild_Vulkan.hpp
+    PUBLIC Crimild_Vulkan.hpp
 
-    PRIVATE
-    Crimild_Vulkan.cpp
+    PRIVATE Crimild_Vulkan.cpp
     
-    Foundation/VulkanInitializers.hpp
-    Foundation/VulkanUtils.cpp
-    Foundation/VulkanUtils.hpp
+    PRIVATE Foundation/VulkanInitializers.hpp
+    PRIVATE Foundation/VulkanUtils.cpp
+    PRIVATE Foundation/VulkanUtils.hpp
 
-    Rendering/FrameGraph/VulkanComputeBase.hpp
-    Rendering/FrameGraph/VulkanComputeImageMix.cpp
-    Rendering/FrameGraph/VulkanComputeImageMix.hpp
-    Rendering/FrameGraph/VulkanComputeImageSwizzle.cpp
-    Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp
-    Rendering/FrameGraph/VulkanFrameGraphNode.hpp
-    Rendering/FrameGraph/VulkanRenderBase.cpp
-    Rendering/FrameGraph/VulkanRenderBase.hpp
-    Rendering/FrameGraph/VulkanRenderScene.cpp
-    Rendering/FrameGraph/VulkanRenderScene.hpp
-    Rendering/FrameGraph/VulkanRenderSceneGBuffer.cpp
-    Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp
-    Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
-    Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
-    Rendering/FrameGraph/VulkanRenderSceneRT.cpp
-    Rendering/FrameGraph/VulkanRenderSceneRT.hpp
-    Rendering/FrameGraph/VulkanRenderSceneUnlit.cpp
-    Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp
-    Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
-    Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
+    PRIVATE Rendering/FrameGraph/VulkanComputeBase.hpp
+    PRIVATE Rendering/FrameGraph/VulkanComputeImageMix.cpp
+    PRIVATE Rendering/FrameGraph/VulkanComputeImageMix.hpp
+    PRIVATE Rendering/FrameGraph/VulkanComputeImageSwizzle.cpp
+    PRIVATE Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp
+    PRIVATE Rendering/FrameGraph/VulkanFrameGraphNode.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderBase.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderBase.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderScene.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderScene.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneGBuffer.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneLighting.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneLighting.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneRT.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneRT.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneUnlit.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneUnlit.hpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
 
-    Rendering/RenderPasses/VulkanBlitPass.cpp
-    Rendering/RenderPasses/VulkanBlitPass.hpp
-    Rendering/RenderPasses/VulkanClearPass.cpp
-    Rendering/RenderPasses/VulkanClearPass.hpp
-    Rendering/RenderPasses/VulkanDebugAttachmentPass.cpp
-    Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp
-    Rendering/RenderPasses/VulkanGBufferPass.cpp
-    Rendering/RenderPasses/VulkanGBufferPass.hpp
-    Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.cpp
-    Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp
-    Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.cpp
-    Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp
-    Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.cpp 
-    Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp
-    Rendering/RenderPasses/VulkanLocalLightingPass.cpp
-    Rendering/RenderPasses/VulkanLocalLightingPass.hpp
-    Rendering/RenderPasses/VulkanOverlayPass.cpp
-    Rendering/RenderPasses/VulkanOverlayPass.hpp
-    Rendering/RenderPasses/VulkanPresentPass.cpp
-    Rendering/RenderPasses/VulkanPresentPass.hpp
-    Rendering/RenderPasses/VulkanRenderPassBase.cpp
-    Rendering/RenderPasses/VulkanRenderPassBase.hpp
-    Rendering/RenderPasses/VulkanSceneDebugPass.cpp
-    Rendering/RenderPasses/VulkanSceneDebugPass.hpp
-    Rendering/RenderPasses/VulkanScenePass.cpp
-    Rendering/RenderPasses/VulkanScenePass.hpp
-    Rendering/RenderPasses/VulkanSelectionOutlinePass.cpp
-    Rendering/RenderPasses/VulkanSelectionOutlinePass.hpp
-    Rendering/RenderPasses/VulkanShaderPass.cpp
-    Rendering/RenderPasses/VulkanShaderPass.hpp
-    Rendering/RenderPasses/VulkanShadowPass.cpp
-    Rendering/RenderPasses/VulkanShadowPass.hpp
-    Rendering/RenderPasses/VulkanSoftRTPass.cpp
-    Rendering/RenderPasses/VulkanSoftRTPass.hpp
-    Rendering/RenderPasses/VulkanUnlitPass.cpp
-    Rendering/RenderPasses/VulkanUnlitPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanBlitPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanBlitPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanClearPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanClearPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanDebugAttachmentPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanGBufferPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanGBufferPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.cpp 
+    PRIVATE Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanLocalLightingPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanLocalLightingPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanOverlayPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanOverlayPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanPresentPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanPresentPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanRenderPassBase.cpp
+    PRIVATE Rendering/RenderPasses/VulkanRenderPassBase.hpp
+    PRIVATE Rendering/RenderPasses/VulkanSceneDebugPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanSceneDebugPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanScenePass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanScenePass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanSelectionOutlinePass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanSelectionOutlinePass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanShaderPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanShaderPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanShadowPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanShadowPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanSoftRTPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanSoftRTPass.hpp
+    PRIVATE Rendering/RenderPasses/VulkanUnlitPass.cpp
+    PRIVATE Rendering/RenderPasses/VulkanUnlitPass.hpp
 
-    Rendering/VulkanBuffer.cpp
-    Rendering/VulkanBuffer.hpp
-    Rendering/VulkanCommandBuffer.cpp
-    Rendering/VulkanCommandBuffer.hpp
-    Rendering/VulkanComputePipeline.cpp
-    Rendering/VulkanComputePipeline.hpp
-    Rendering/VulkanDescriptor.hpp
-    Rendering/VulkanDescriptorPool.cpp
-    Rendering/VulkanDescriptorPool.hpp
-    Rendering/VulkanDescriptorSet.cpp
-    Rendering/VulkanDescriptorSet.hpp
-    Rendering/VulkanDescriptorSetLayout.cpp
-    Rendering/VulkanDescriptorSetLayout.hpp
-    Rendering/VulkanFence.cpp
-    Rendering/VulkanFence.hpp
-    Rendering/VulkanFramebuffer.cpp
-    Rendering/VulkanFramebuffer.hpp
-    Rendering/VulkanFramebufferAttachment.hpp
-    Rendering/VulkanGraphicsPipeline.cpp
-    Rendering/VulkanGraphicsPipeline.hpp
-    Rendering/VulkanImage.cpp
-    Rendering/VulkanImage.hpp
-    Rendering/VulkanImageView.cpp
-    Rendering/VulkanImageView.hpp
-    Rendering/VulkanInstance.cpp 
-    Rendering/VulkanInstance.hpp
-    Rendering/VulkanPhysicalDevice.cpp
-    Rendering/VulkanPhysicalDevice.hpp
-    Rendering/VulkanRenderDevice.cpp
-    Rendering/VulkanRenderDevice.hpp
-    Rendering/VulkanRenderDeviceCache.cpp
-    Rendering/VulkanRenderDeviceCache.hpp
-    Rendering/VulkanRenderPass.cpp
-    Rendering/VulkanRenderPass.hpp
-    Rendering/VulkanRenderTarget.cpp
-    Rendering/VulkanRenderTarget.hpp
-    Rendering/VulkanSampler.cpp
-    Rendering/VulkanSampler.hpp
-    Rendering/VulkanSceneRenderState.hpp
-    Rendering/VulkanSemaphore.cpp
-    Rendering/VulkanSemaphore.hpp
-    Rendering/VulkanShaderCompiler.cpp
-    Rendering/VulkanShaderCompiler.hpp
-    Rendering/VulkanShaderModule.cpp
-    Rendering/VulkanShaderModule.hpp
-    Rendering/VulkanShadowMap.cpp
-    Rendering/VulkanShadowMap.hpp
-    Rendering/VulkanSurface.cpp
-    Rendering/VulkanSurface.hpp
-    Rendering/VulkanSynchronization.hpp
-    Visitors/VulkanFetchSceneRenderState.cpp
-    Visitors/VulkanFetchSceneRenderState.hpp
+    PRIVATE Rendering/VulkanBuffer.cpp
+    PRIVATE Rendering/VulkanBuffer.hpp
+    PRIVATE Rendering/VulkanCommandBuffer.cpp
+    PRIVATE Rendering/VulkanCommandBuffer.hpp
+    PRIVATE Rendering/VulkanComputePipeline.cpp
+    PRIVATE Rendering/VulkanComputePipeline.hpp
+    PRIVATE Rendering/VulkanDescriptor.hpp
+    PRIVATE Rendering/VulkanDescriptorPool.cpp
+    PRIVATE Rendering/VulkanDescriptorPool.hpp
+    PRIVATE Rendering/VulkanDescriptorSet.cpp
+    PRIVATE Rendering/VulkanDescriptorSet.hpp
+    PRIVATE Rendering/VulkanDescriptorSetLayout.cpp
+    PRIVATE Rendering/VulkanDescriptorSetLayout.hpp
+    PRIVATE Rendering/VulkanFence.cpp
+    PRIVATE Rendering/VulkanFence.hpp
+    PRIVATE Rendering/VulkanFramebuffer.cpp
+    PRIVATE Rendering/VulkanFramebuffer.hpp
+    PRIVATE Rendering/VulkanFramebufferAttachment.hpp
+    PRIVATE Rendering/VulkanGraphicsPipeline.cpp
+    PRIVATE Rendering/VulkanGraphicsPipeline.hpp
+    PRIVATE Rendering/VulkanImage.cpp
+    PRIVATE Rendering/VulkanImage.hpp
+    PRIVATE Rendering/VulkanImageView.cpp
+    PRIVATE Rendering/VulkanImageView.hpp
+    PRIVATE Rendering/VulkanInstance.cpp 
+    PRIVATE Rendering/VulkanInstance.hpp
+    PRIVATE Rendering/VulkanPhysicalDevice.cpp
+    PRIVATE Rendering/VulkanPhysicalDevice.hpp
+    PRIVATE Rendering/VulkanRenderDevice.cpp
+    PRIVATE Rendering/VulkanRenderDevice.hpp
+    PRIVATE Rendering/VulkanRenderDeviceCache.cpp
+    PRIVATE Rendering/VulkanRenderDeviceCache.hpp
+    PRIVATE Rendering/VulkanRenderPass.cpp
+    PRIVATE Rendering/VulkanRenderPass.hpp
+    PRIVATE Rendering/VulkanRenderTarget.cpp
+    PRIVATE Rendering/VulkanRenderTarget.hpp
+    PRIVATE Rendering/VulkanSampler.cpp
+    PRIVATE Rendering/VulkanSampler.hpp
+    PRIVATE Rendering/VulkanSceneRenderState.hpp
+    PRIVATE Rendering/VulkanSemaphore.cpp
+    PRIVATE Rendering/VulkanSemaphore.hpp
+    PRIVATE Rendering/VulkanShaderCompiler.cpp
+    PRIVATE Rendering/VulkanShaderCompiler.hpp
+    PRIVATE Rendering/VulkanShaderModule.cpp
+    PRIVATE Rendering/VulkanShaderModule.hpp
+    PRIVATE Rendering/VulkanShadowMap.cpp
+    PRIVATE Rendering/VulkanShadowMap.hpp
+    PRIVATE Rendering/VulkanSurface.cpp
+    PRIVATE Rendering/VulkanSurface.hpp
+    PRIVATE Rendering/VulkanSwapchain.cpp
+    PRIVATE Rendering/VulkanSwapchain.hpp
+    PRIVATE Rendering/VulkanSynchronization.hpp
+    PRIVATE Visitors/VulkanFetchSceneRenderState.cpp
+    PRIVATE Visitors/VulkanFetchSceneRenderState.hpp
 )
 
 target_include_directories( 
