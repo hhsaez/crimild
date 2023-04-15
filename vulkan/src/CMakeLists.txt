@@ -65,43 +65,6 @@ target_sources(
     PRIVATE Rendering/FrameGraph/VulkanRenderShadowMaps.cpp
     PRIVATE Rendering/FrameGraph/VulkanRenderShadowMaps.hpp
 
-    PRIVATE Rendering/RenderPasses/VulkanBlitPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanBlitPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanClearPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanClearPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanDebugAttachmentPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanDebugAttachmentPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanGBufferPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanGBufferPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanGenerateDirectionalLightsShadowMapsPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanGeneratePointLightsShadowMapsPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.cpp 
-    PRIVATE Rendering/RenderPasses/VulkanGenerateSpotLightsShadowMapsPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanLocalLightingPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanLocalLightingPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanOverlayPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanOverlayPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanPresentPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanPresentPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanRenderPassBase.cpp
-    PRIVATE Rendering/RenderPasses/VulkanRenderPassBase.hpp
-    PRIVATE Rendering/RenderPasses/VulkanSceneDebugPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanSceneDebugPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanScenePass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanScenePass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanSelectionOutlinePass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanSelectionOutlinePass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanShaderPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanShaderPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanShadowPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanShadowPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanSoftRTPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanSoftRTPass.hpp
-    PRIVATE Rendering/RenderPasses/VulkanUnlitPass.cpp
-    PRIVATE Rendering/RenderPasses/VulkanUnlitPass.hpp
-
     PRIVATE Rendering/VulkanBuffer.cpp
     PRIVATE Rendering/VulkanBuffer.hpp
     PRIVATE Rendering/VulkanCommandBuffer.cpp
