@@ -119,6 +119,10 @@ namespace crimild {
 
             NODE_SELECTED,
 
+            NODE_3D_LOCAL_TRANSFORMATION_CHANGED,
+            NODE_3D_WORLD_TRANSFORMATION_CHANGED,
+            NODE_3D_PARENT_TRANSFORMATION_CHANGED,
+
             SCENE_CHANGED,
 
             SIMULATION_START,
@@ -200,6 +204,9 @@ namespace crimild {
                 break;
             case Event::Type::SIMULATION_STOP:
                 out << "SIMULATION_STOP";
+                break;
+            default:
+                out << "UNKNOWN EVENT TYPE " << int( e.type );
                 break;
         }
 

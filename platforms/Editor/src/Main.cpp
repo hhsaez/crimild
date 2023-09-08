@@ -32,7 +32,7 @@
 
 namespace crimild::vulkan {
 
-    class GLFWVulkanSurface : public vulkan::VulkanSurface {
+  class GLFWVulkanSurface : public vulkan::VulkanSurface {
     public:
         GLFWVulkanSurface( VulkanInstance *instance, GLFWwindow *window ) noexcept
             : vulkan::VulkanSurface(

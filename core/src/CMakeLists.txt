@@ -2,16 +2,16 @@ crimild_trace()
 
 add_library( crimild_core OBJECT )
 
-target_sources( 
+target_sources(
     crimild_core
-    
+
     PUBLIC
     Animation/Accumulator.hpp
     Animation/Animation.hpp
     Animation/Channel.hpp
     Animation/ChannelImpl.hpp
     Animation/Clip.hpp
-    Animation/Skeleton.hpp   
+    Animation/Skeleton.hpp
     Audio/AudioListener.hpp
     Audio/AudioSource.hpp
     Behaviors/Actions/AnimateContextValue.hpp
@@ -431,6 +431,8 @@ target_sources(
     SceneGraph/Group.hpp
     SceneGraph/Light.hpp
     SceneGraph/Node.hpp
+    SceneGraph/Node3D.hpp
+    SceneGraph/NodeBase.hpp
     SceneGraph/Node_io.hpp
     SceneGraph/Node_withTransformation.hpp
     SceneGraph/NullNode.hpp
@@ -721,6 +723,8 @@ target_sources(
     SceneGraph/Group.cpp
     SceneGraph/Light.cpp
     SceneGraph/Node.cpp
+    SceneGraph/Node3D.cpp
+    SceneGraph/NodeBase.cpp
     SceneGraph/Skybox.cpp
     SceneGraph/Switch.cpp
     SceneGraph/Text.cpp

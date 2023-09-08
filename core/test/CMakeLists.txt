@@ -2,7 +2,7 @@ crimild_trace()
 
 add_executable( crimild_core_test )
 
-target_sources( 
+target_sources(
     crimild_core_test
 
     PRIVATE
@@ -88,6 +88,8 @@ target_sources(
     SceneGraph/GroupTest.cpp
     SceneGraph/LightTest.cpp
     SceneGraph/NodeTest.cpp
+    SceneGraph/NewNodeTest.cpp
+    SceneGraph/Node3DTest.cpp
     Simulation/InputTest.cpp
     Simulation/SimulationTest.cpp
     TestRunner.cpp
@@ -104,13 +106,13 @@ target_sources(
 
 target_include_directories( crimild_core_test PRIVATE . )
 
-target_link_libraries( 
+target_link_libraries(
     crimild_core_test
-    PRIVATE crimild_core 
+    PRIVATE crimild_core
     PRIVATE gtest gmock
 )
 
-gtest_discover_tests( 
+gtest_discover_tests(
     crimild_core_test
     WORKING_DIRECTORY ${PROJECT_DIR}
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
