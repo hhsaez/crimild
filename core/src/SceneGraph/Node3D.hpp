@@ -35,35 +35,31 @@
 // #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/NodeBase.hpp"
 
-namespace crimild {
+namespace crimild::ex {
 
-    namespace scenegraph {
+    class Node3D : public Node {
+    public:
+        explicit Node3D( std::string_view name = "" ) noexcept;
+        virtual ~Node3D( void ) noexcept = default;
 
-        class Node3D : public NodeBase {
-        public:
-            explicit Node3D( std::string_view name = "" ) noexcept;
-            virtual ~Node3D( void ) noexcept = default;
+        virtual Event handle( const Event &e ) noexcept override;
 
-            virtual Event handle( const Event &e ) noexcept override;
+        std::shared_ptr< Node3D > getParentNode3D( void ) const noexcept;
 
-            std::shared_ptr< Node3D > getParentNode3D( void ) const noexcept;
+        inline bool localNeedsUpdate( void ) const noexcept { return m_localNeedsUpdate; }
+        void setLocal( const Transformation &local ) noexcept;
+        Transformation &getLocal( void ) noexcept;
 
-            inline bool localNeedsUpdate( void ) const noexcept { return m_localNeedsUpdate; }
-            void setLocal( const Transformation &local ) noexcept;
-            Transformation &getLocal( void ) noexcept;
+        inline bool worldNeedsUpdate( void ) const noexcept { return m_worldNeedsUpdate; }
+        void setWorld( const Transformation &world ) noexcept;
+        Transformation &getWorld( void ) noexcept;
 
-            inline bool worldNeedsUpdate( void ) const noexcept { return m_worldNeedsUpdate; }
-            void setWorld( const Transformation &world ) noexcept;
-            Transformation &getWorld( void ) noexcept;
-
-        private:
-            Transformation m_local = Transformation::Constants::IDENTITY;
-            Transformation m_world = Transformation::Constants::IDENTITY;
-            bool m_localNeedsUpdate = false;
-            bool m_worldNeedsUpdate = false;
-        };
-
-    }
+    private:
+        Transformation m_local = Transformation::Constants::IDENTITY;
+        Transformation m_world = Transformation::Constants::IDENTITY;
+        bool m_localNeedsUpdate = false;
+        bool m_worldNeedsUpdate = false;
+    };
 
 }
 

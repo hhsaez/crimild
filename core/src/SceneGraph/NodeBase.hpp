@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_SCENEGRAPH_NODE_BASE_
-#define CRIMILD_CORE_SCENEGRAPH_NODE_BASE_
+#ifndef CRIMILD_CORE_SCENEGRAPH_NODE_
+#define CRIMILD_CORE_SCENEGRAPH_NODE_
 
 #include "Foundation/Named.hpp"
 #include "Foundation/SmallObject.hpp"
@@ -57,92 +57,57 @@
    - Signal (or EventDispatcher)
 */
 
-namespace crimild {
+namespace crimild::ex {
 
-    namespace simulation {
+    class Simulation;
 
-        /*
-                class SimulationContext : public std::enable_shared_from_this< SimulationContext > {
-                public:
-                    void setScene( std::shared_ptr< scenegraph::NodeBase > const &scene ) noexcept
-                    {
-                        if ( m_scene != nullptr ) {
-                            m_scene->setSimulation( nullptr );
-                        }
+    class Node
+        : public SmallObject<>,
+          public std::enable_shared_from_this< Node >,
+          public Named {
+    public:
+        explicit Node( std::string_view name = "" ) noexcept;
+        virtual ~Node( void ) = default;
 
-                        m_scene = scene;
+        virtual Event handle( const Event &e ) noexcept;
 
-                        if ( m_scene != nullptr ) {
-                            m_scene->setSimulation( weak_from_this() );
-                        }
-                    }
+        inline bool hasParent( void ) const noexcept
+        {
+            return !m_parent.expired();
+        }
 
-                    virtual void step( void ) noexcept
-                    {
-                        m_scene.step();
+        inline std::shared_ptr< Node > getParent( void ) const noexcept
+        {
+            return m_parent.lock();
+        }
 
-                        pruneExpired();
-                    }
+        inline std::shared_ptr< Node > getParent( void ) noexcept
+        {
+            return m_parent.lock();
+        }
 
-                    void pruneExpired( void ) noexcept
-                    {
-                        std::erase_if(
-                            m_geometries,
-                            []( const auto &ptr ) {
-                                return ptr.expired();
-                            }
-                        );
-                    }
+        void attach( std::shared_ptr< Node > const &child ) noexcept;
 
-                private:
-                    std::shared_ptr< scenegraph::NodeBase > m_scene;
-                    std::set< std::weak_ptr< scenegraph::Geometry >, std::owner_less<> > m_geometries;
-                };
-        */
+        template< typename NodeType = Node >
+        std::shared_ptr< NodeType > getChildAt( size_t index ) noexcept
+        {
+            return std::static_pointer_cast< NodeType >( m_children[ index ] );
+        }
 
-    }
+        virtual void setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept;
+        inline bool hasSimulation( void ) const noexcept { return !m_simulation.expired(); }
+        inline std::shared_ptr< Simulation > getSimulation( void ) const noexcept { return m_simulation.lock(); }
 
-    namespace scenegraph {
+        void addToGroup( std::string_view groupName ) noexcept;
+        void removeFromGroup( std::string_view groupName ) noexcept;
+        inline const std::set< std::string > &getGroups( void ) const noexcept { return m_groups; }
 
-        class NodeBase
-            : public SmallObject<>,
-              public std::enable_shared_from_this< NodeBase >,
-              public Named {
-        public:
-            explicit NodeBase( std::string_view name = "" ) noexcept;
-            virtual ~NodeBase( void ) = default;
-
-            virtual Event handle( const Event &e ) noexcept;
-
-            inline bool hasParent( void ) const noexcept
-            {
-                return !m_parent.expired();
-            }
-
-            inline std::shared_ptr< NodeBase > getParent( void ) const noexcept
-            {
-                return m_parent.lock();
-            }
-
-            inline std::shared_ptr< NodeBase > getParent( void ) noexcept
-            {
-                return m_parent.lock();
-            }
-
-            void attach( std::shared_ptr< NodeBase > const &child ) noexcept;
-
-            template< typename NodeBaseType = NodeBase >
-            std::shared_ptr< NodeBaseType > getChildAt( size_t index ) noexcept
-            {
-                return std::static_pointer_cast< NodeBaseType >( m_children[ index ] );
-            }
-
-        private:
-            std::vector< std::shared_ptr< NodeBase > > m_children;
-            std::weak_ptr< NodeBase > m_parent;
-        };
-
-    }
+    private:
+        std::vector< std::shared_ptr< Node > > m_children;
+        std::weak_ptr< Node > m_parent;
+        std::weak_ptr< Simulation > m_simulation;
+        std::set< std::string > m_groups;
+    };
 
 }
 

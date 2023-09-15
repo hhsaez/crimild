@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-present, H. Hernan Saez
+ * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,63 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/NodeBase.hpp"
+#include "SceneGraph/Geometry3D.hpp"
 
+#include "Foundation/Memory.hpp"
 #include "Simulation/SimulationNew.hpp"
 
-using namespace crimild::ex;
+#include "gtest/gtest.h"
 
-using Event = crimild::Event;
-
-Node::Node( std::string_view name ) noexcept
-    : Named( name )
+TEST( Geometry3D, it_registers_in_simulation )
 {
-    // no-op
-}
+    auto g = crimild::alloc< crimild::ex::Geometry3D >();
+    auto s = crimild::alloc< crimild::ex::Simulation >();
 
-Event Node::handle( const Event &e ) noexcept
-{
-    for ( auto &child : m_children ) {
-        child->handle( e );
-    }
-    return e;
-}
-
-void Node::attach( std::shared_ptr< Node > const &child ) noexcept
-{
-    m_children.push_back( child );
-    child->m_parent = weak_from_this();
-}
-
-void Node::setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept
-{
-    // TODO: Remove things from old simulation?
-
-    m_simulation = simulation;
-
-    if ( hasSimulation() ) {
-        for ( const auto &groupName : m_groups ) {
-            getSimulation()->addNodeToGroup( weak_from_this(), groupName );
-        }
-    }
-
-    for ( auto &child : m_children ) {
-        child->setSimulation( simulation );
-    }
-}
-
-void Node::addToGroup( std::string_view groupName ) noexcept
-{
-    if ( hasSimulation() ) {
-        getSimulation()->addNodeToGroup( weak_from_this(), groupName );
-    }
-    m_groups.insert( std::string( groupName ) );
-}
-
-void Node::removeFromGroup( std::string_view groupName ) noexcept
-{
-    if ( hasSimulation() ) {
-        getSimulation()->removeNodeFromGroup( weak_from_this(), groupName );
-    }
-    m_groups.erase( std::string( groupName ) );
+    g->setSimulation( s );
 }

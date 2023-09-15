@@ -85,6 +85,7 @@ target_sources(
     Rendering/VertexLayoutTest.cpp
     Rendering/VertexTest.cpp
     SceneGraph/GeometryTest.cpp
+    SceneGraph/Geometry3DTest.cpp
     SceneGraph/GroupTest.cpp
     SceneGraph/LightTest.cpp
     SceneGraph/NodeTest.cpp

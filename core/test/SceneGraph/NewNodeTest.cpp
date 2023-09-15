@@ -25,13 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Foundation/Memory.hpp"
 #include "SceneGraph/NodeBase.hpp"
+#include "Simulation/SimulationNew.hpp"
 
 #include "gtest/gtest.h"
 
 TEST( Node, construction )
 {
-    auto node = crimild::alloc< crimild::scenegraph::NodeBase >( "a Node" );
+    auto node = crimild::alloc< crimild::ex::Node >( "a Node" );
 
     EXPECT_EQ( node->getName(), "a Node" );
     EXPECT_FALSE( node->hasParent() );
@@ -40,24 +42,24 @@ TEST( Node, construction )
 
 TEST( Node, get_child )
 {
-    auto root = crimild::alloc< crimild::scenegraph::NodeBase >( "Root" );
-    root->attach( crimild::alloc< crimild::scenegraph::NodeBase >( "Child" ) );
+    auto root = crimild::alloc< crimild::ex::Node >( "Root" );
+    root->attach( crimild::alloc< crimild::ex::Node >( "Child" ) );
 
     EXPECT_EQ( "Child", root->getChildAt( 0 )->getName() );
 }
 
 TEST( Node, get_child_with_node_type )
 {
-    auto root = crimild::alloc< crimild::scenegraph::NodeBase >( "Root" );
-    root->attach( crimild::alloc< crimild::scenegraph::NodeBase >( "Child" ) );
+    auto root = crimild::alloc< crimild::ex::Node >( "Root" );
+    root->attach( crimild::alloc< crimild::ex::Node >( "Child" ) );
 
-    EXPECT_EQ( "Child", root->getChildAt< crimild::scenegraph::NodeBase >( 0 )->getName() );
+    EXPECT_EQ( "Child", root->getChildAt< crimild::ex::Node >( 0 )->getName() );
 }
 
 TEST( Node, get_parent )
 {
-    auto root = crimild::alloc< crimild::scenegraph::NodeBase >( "Parent" );
-    auto child = crimild::alloc< crimild::scenegraph::NodeBase >( "Child" );
+    auto root = crimild::alloc< crimild::ex::Node >( "Parent" );
+    auto child = crimild::alloc< crimild::ex::Node >( "Child" );
 
     EXPECT_FALSE( child->hasParent() );
     EXPECT_EQ( nullptr, child->getParent() );
@@ -70,10 +72,10 @@ TEST( Node, get_parent )
 
 TEST( Node, invalidate_parent )
 {
-    auto child = crimild::alloc< crimild::scenegraph::NodeBase >();
+    auto child = crimild::alloc< crimild::ex::Node >();
 
     {
-        auto parent = crimild::alloc< crimild::scenegraph::NodeBase >();
+        auto parent = crimild::alloc< crimild::ex::Node >();
         parent->attach( child );
         EXPECT_TRUE( child->hasParent() );
     }
@@ -83,16 +85,99 @@ TEST( Node, invalidate_parent )
 
 TEST( Node, invalidate_children )
 {
-    std::weak_ptr< crimild::scenegraph::NodeBase > child;
+    std::weak_ptr< crimild::ex::Node > child;
 
     {
-        auto parent = crimild::alloc< crimild::scenegraph::NodeBase >();
-        parent->attach( crimild::alloc< crimild::scenegraph::NodeBase >() );
+        auto parent = crimild::alloc< crimild::ex::Node >();
+        parent->attach( crimild::alloc< crimild::ex::Node >() );
         child = parent->getChildAt( 0 );
         EXPECT_FALSE( child.expired() );
     }
 
     EXPECT_TRUE( child.expired() );
+}
+
+TEST( Node, reparent )
+{
+    // TODO
+}
+
+TEST( Node, switch_simulation )
+{
+    // TODO
+}
+
+TEST( Node, add_to_group )
+{
+    auto node = crimild::alloc< crimild::ex::Node >( "a node" );
+    auto sim = crimild::alloc< crimild::ex::Simulation >();
+
+    node->setSimulation( sim );
+
+    node->addToGroup( "SOME_GROUP" );
+
+    EXPECT_EQ( std::set< std::string > { "SOME_GROUP" }, node->getGroups() );
+
+    EXPECT_TRUE( sim->hasGroup( "SOME_GROUP" ) );
+    const auto &ns = sim->getNodesInGroup( "SOME_GROUP" );
+    EXPECT_EQ( 1, ns.size() );
+    EXPECT_EQ( node, ns.begin()->lock() );
+}
+
+TEST( Node, remove_from_group )
+{
+    auto node = crimild::alloc< crimild::ex::Node >( "a node" );
+    auto sim = crimild::alloc< crimild::ex::Simulation >();
+
+    node->setSimulation( sim );
+
+    node->addToGroup( "SOME_GROUP" );
+
+    EXPECT_EQ( std::set< std::string > { "SOME_GROUP" }, node->getGroups() );
+
+    {
+        const auto &ns = sim->getNodesInGroup( "SOME_GROUP" );
+        EXPECT_EQ( 1, ns.size() );
+        EXPECT_EQ( node, ns.begin()->lock() );
+    }
+    node->removeFromGroup( "SOME_GROUP" );
+
+    {
+        EXPECT_TRUE( sim->hasGroup( "SOME_GROUP" ) );
+        const auto &ns = sim->getNodesInGroup( "SOME_GROUP" );
+        EXPECT_EQ( 0, ns.size() );
+    }
+}
+
+TEST( Node, add_to_group_before_simulation )
+{
+    auto node = crimild::alloc< crimild::ex::Node >( "a node" );
+    node->addToGroup( "SOME_GROUP" );
+    EXPECT_EQ( std::set< std::string > { "SOME_GROUP" }, node->getGroups() );
+
+    auto sim = crimild::alloc< crimild::ex::Simulation >();
+    node->setSimulation( sim );
+
+    EXPECT_TRUE( sim->hasGroup( "SOME_GROUP" ) );
+    const auto &ns = sim->getNodesInGroup( "SOME_GROUP" );
+    EXPECT_EQ( 1, ns.size() );
+    EXPECT_EQ( node, ns.begin()->lock() );
+}
+
+TEST( Node, remove_from_group_before_simulation )
+{
+    auto node = crimild::alloc< crimild::ex::Node >( "a node" );
+
+    node->addToGroup( "SOME_GROUP" );
+    EXPECT_EQ( std::set< std::string > { "SOME_GROUP" }, node->getGroups() );
+
+    node->removeFromGroup( "SOME_GROUP" );
+    EXPECT_EQ( std::set< std::string > {}, node->getGroups() );
+
+    auto sim = crimild::alloc< crimild::ex::Simulation >();
+    node->setSimulation( sim );
+
+    EXPECT_FALSE( sim->hasGroup( "SOME_GROUP" ) );
 }
 
 // TEST( NodeTest, destruction )

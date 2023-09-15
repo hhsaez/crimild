@@ -25,63 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/NodeBase.hpp"
+#include "SceneGraph/Geometry3D.hpp"
 
 #include "Simulation/SimulationNew.hpp"
 
+using namespace crimild;
 using namespace crimild::ex;
 
-using Event = crimild::Event;
-
-Node::Node( std::string_view name ) noexcept
-    : Named( name )
+Geometry3D::Geometry3D( std::string_view name ) noexcept
+    : Node3D( name )
 {
-    // no-op
 }
 
-Event Node::handle( const Event &e ) noexcept
-{
-    for ( auto &child : m_children ) {
-        child->handle( e );
-    }
-    return e;
-}
-
-void Node::attach( std::shared_ptr< Node > const &child ) noexcept
-{
-    m_children.push_back( child );
-    child->m_parent = weak_from_this();
-}
-
-void Node::setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept
-{
-    // TODO: Remove things from old simulation?
-
-    m_simulation = simulation;
-
-    if ( hasSimulation() ) {
-        for ( const auto &groupName : m_groups ) {
-            getSimulation()->addNodeToGroup( weak_from_this(), groupName );
-        }
-    }
-
-    for ( auto &child : m_children ) {
-        child->setSimulation( simulation );
-    }
-}
-
-void Node::addToGroup( std::string_view groupName ) noexcept
+void Geometry3D::setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept
 {
     if ( hasSimulation() ) {
-        getSimulation()->addNodeToGroup( weak_from_this(), groupName );
+        getSimulation()->detach( std::static_pointer_cast< Geometry3D >( shared_from_this() ) );
     }
-    m_groups.insert( std::string( groupName ) );
-}
 
-void Node::removeFromGroup( std::string_view groupName ) noexcept
-{
+    Node3D::setSimulation( simulation );
+
     if ( hasSimulation() ) {
-        getSimulation()->removeNodeFromGroup( weak_from_this(), groupName );
+        getSimulation()->attach( std::static_pointer_cast< Geometry3D >( shared_from_this() ) );
     }
-    m_groups.erase( std::string( groupName ) );
 }

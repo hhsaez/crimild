@@ -30,10 +30,10 @@
 #include "Mathematics/Transformation_apply.hpp"
 
 using namespace crimild;
-using namespace crimild::scenegraph;
+using namespace crimild::ex;
 
 Node3D::Node3D( std::string_view name ) noexcept
-    : NodeBase( name )
+    : Node( name )
 {
 }
 
@@ -45,16 +45,16 @@ Event Node3D::handle( const Event &e ) noexcept
             break;
         case Event::Type::NODE_3D_LOCAL_TRANSFORMATION_CHANGED:
             m_worldNeedsUpdate = true;
-            return NodeBase::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
+            return Node::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
             break;
         case Event::Type::NODE_3D_WORLD_TRANSFORMATION_CHANGED:
             m_localNeedsUpdate = true;
-            return NodeBase::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
+            return Node::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
             break;
         default:
             break;
     }
-    return NodeBase::handle( e );
+    return Node::handle( e );
 }
 
 std::shared_ptr< Node3D > Node3D::getParentNode3D( void ) const noexcept
@@ -88,7 +88,7 @@ Transformation &Node3D::getLocal( void ) noexcept
 void Node3D::setWorld( const Transformation &world ) noexcept
 {
     m_world = world;
-    handle( { Event::Type::NODE_3D_LOCAL_TRANSFORMATION_CHANGED } );
+    handle( { Event::Type::NODE_3D_WORLD_TRANSFORMATION_CHANGED } );
 }
 
 Transformation &Node3D::getWorld( void ) noexcept

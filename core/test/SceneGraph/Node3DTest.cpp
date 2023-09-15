@@ -28,14 +28,17 @@
 #include "SceneGraph/Node3D.hpp"
 
 #include "Foundation/Memory.hpp"
-#include "Mathematics/Transformation_identity.hpp"
+#include "Mathematics/Point_equality.hpp"
+#include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Transformation_isIdentity.hpp"
+#include "Mathematics/Transformation_translation.hpp"
 
 #include "gtest/gtest.h"
 
 TEST( Node3D, get_parent_node_3d )
 {
-    auto root = crimild::alloc< crimild::scenegraph::NodeBase >( "Parent" );
-    auto child = crimild::alloc< crimild::scenegraph::NodeBase >( "Child" );
+    auto root = crimild::alloc< crimild::ex::Node >( "Parent" );
+    auto child = crimild::alloc< crimild::ex::Node >( "Child" );
 
     EXPECT_FALSE( child->hasParent() );
     EXPECT_EQ( nullptr, child->getParent() );
@@ -48,9 +51,9 @@ TEST( Node3D, get_parent_node_3d )
 
 TEST( Node3D, get_parent_node_3d_indirect )
 {
-    auto root = crimild::alloc< crimild::scenegraph::Node3D >( "Parent" );
-    auto middle = crimild::alloc< crimild::scenegraph::NodeBase >( "Some node" );
-    auto child = crimild::alloc< crimild::scenegraph::Node3D >( "Child" );
+    auto root = crimild::alloc< crimild::ex::Node3D >( "Parent" );
+    auto middle = crimild::alloc< crimild::ex::Node >( "Some node" );
+    auto child = crimild::alloc< crimild::ex::Node3D >( "Child" );
 
     root->attach( middle );
     middle->attach( child );
@@ -62,7 +65,7 @@ TEST( Node3D, get_parent_node_3d_indirect )
 
 TEST( Node3D, default_transforms )
 {
-    auto node = crimild::alloc< crimild::scenegraph::Node3D >();
+    auto node = crimild::alloc< crimild::ex::Node3D >();
 
     EXPECT_FALSE( node->localNeedsUpdate() );
     EXPECT_TRUE( isIdentity( node->getLocal() ) );
@@ -72,7 +75,7 @@ TEST( Node3D, default_transforms )
 
 TEST( Node3D, transforms_local )
 {
-    auto node = crimild::alloc< crimild::scenegraph::Node3D >();
+    auto node = crimild::alloc< crimild::ex::Node3D >();
 
     EXPECT_FALSE( node->localNeedsUpdate() );
     node->setLocal( crimild::translation( 1, 0, 0 ) );
@@ -87,7 +90,7 @@ TEST( Node3D, transforms_local )
 
 TEST( Node3D, transforms_world )
 {
-    auto node = crimild::alloc< crimild::scenegraph::Node3D >();
+    auto node = crimild::alloc< crimild::ex::Node3D >();
 
     EXPECT_FALSE( node->worldNeedsUpdate() );
     node->setWorld( crimild::translation( 1, 0, 0 ) );
@@ -103,7 +106,7 @@ TEST( Node3D, transforms_world )
 TEST( Node3D, transforms_local_const )
 {
     const auto node = [] {
-        auto ret = crimild::alloc< crimild::scenegraph::Node3D >();
+        auto ret = crimild::alloc< crimild::ex::Node3D >();
         ret->setLocal( crimild::translation( 1, 0, 0 ) );
         return ret;
     }();
@@ -130,29 +133,29 @@ TEST( Node3D, transform_child_nodes )
     // Indirect child updates local
     // Indirect child updates world
 
-    auto root = crimild::alloc< crimild::scenegraph::Node3D >( "Root" );
-    root->attach( crimild::alloc< crimild::scenegraph::Node3D >( "Child" ) );
+    auto root = crimild::alloc< crimild::ex::Node3D >( "Root" );
+    root->attach( crimild::alloc< crimild::ex::Node3D >( "Child" ) );
 
     root->setLocal( crimild::translation( 1, 0, 0 ) );
 
-    root->getChildAt< crimild::scenegraph::Node3D >( 0 )->setLocal( crimild::translation( 0, 1, 0 ) );
+    root->getChildAt< crimild::ex::Node3D >( 0 )->setLocal( crimild::translation( 0, 1, 0 ) );
 
     EXPECT_EQ(
         ( crimild::Point3 { 1, 1, 0 } ),
-        crimild::location( root->getChildAt< crimild::scenegraph::Node3D >( 0 )->getWorld() )
+        crimild::location( root->getChildAt< crimild::ex::Node3D >( 0 )->getWorld() )
     );
 }
 
 TEST( Node3D, transform_child_nodes_indirect )
 {
-    auto root = crimild::alloc< crimild::scenegraph::Node3D >( "Root" );
-    root->attach( crimild::alloc< crimild::scenegraph::NodeBase >( "Middle node" ) );
-    root->getChildAt( 0 )->attach( crimild::alloc< crimild::scenegraph::Node3D >( "Child" ) );
+    auto root = crimild::alloc< crimild::ex::Node3D >( "Root" );
+    root->attach( crimild::alloc< crimild::ex::Node >( "Middle node" ) );
+    root->getChildAt( 0 )->attach( crimild::alloc< crimild::ex::Node3D >( "Child" ) );
 
     root->setLocal( crimild::translation( 1, 0, 0 ) );
 
     EXPECT_EQ(
         ( crimild::Point3 { 1, 0, 0 } ),
-        crimild::location( root->getChildAt( 0 )->getChildAt< crimild::scenegraph::Node3D >( 0 )->getWorld() )
+        crimild::location( root->getChildAt( 0 )->getChildAt< crimild::ex::Node3D >( 0 )->getWorld() )
     );
 }

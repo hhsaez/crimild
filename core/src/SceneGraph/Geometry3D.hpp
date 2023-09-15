@@ -25,63 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "SceneGraph/NodeBase.hpp"
+#ifndef CRIMILD_CORE_SCENEGRAPH_GEOMETRY_3D_
+#define CRIMILD_CORE_SCENEGRAPH_GEOMETRY_3D_
 
-#include "Simulation/SimulationNew.hpp"
+#include "SceneGraph/Node3D.hpp"
 
-using namespace crimild::ex;
+namespace crimild {
 
-using Event = crimild::Event;
+    class Primitive;
+    class Material;
 
-Node::Node( std::string_view name ) noexcept
-    : Named( name )
-{
-    // no-op
-}
+    namespace ex {
 
-Event Node::handle( const Event &e ) noexcept
-{
-    for ( auto &child : m_children ) {
-        child->handle( e );
-    }
-    return e;
-}
+        class Geometry3D : public Node3D {
+        public:
+            explicit Geometry3D( std::string_view name = "" ) noexcept;
+            virtual ~Geometry3D( void ) noexcept = default;
 
-void Node::attach( std::shared_ptr< Node > const &child ) noexcept
-{
-    m_children.push_back( child );
-    child->m_parent = weak_from_this();
-}
+            virtual void setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept override;
 
-void Node::setSimulation( std::weak_ptr< Simulation > const &simulation ) noexcept
-{
-    // TODO: Remove things from old simulation?
+        private:
+            std::shared_ptr< Primitive > m_primitive;
+            std::shared_ptr< Material > m_material;
+        };
 
-    m_simulation = simulation;
-
-    if ( hasSimulation() ) {
-        for ( const auto &groupName : m_groups ) {
-            getSimulation()->addNodeToGroup( weak_from_this(), groupName );
-        }
     }
 
-    for ( auto &child : m_children ) {
-        child->setSimulation( simulation );
-    }
 }
 
-void Node::addToGroup( std::string_view groupName ) noexcept
-{
-    if ( hasSimulation() ) {
-        getSimulation()->addNodeToGroup( weak_from_this(), groupName );
-    }
-    m_groups.insert( std::string( groupName ) );
-}
-
-void Node::removeFromGroup( std::string_view groupName ) noexcept
-{
-    if ( hasSimulation() ) {
-        getSimulation()->removeNodeFromGroup( weak_from_this(), groupName );
-    }
-    m_groups.erase( std::string( groupName ) );
-}
+#endif

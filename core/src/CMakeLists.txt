@@ -428,6 +428,7 @@ target_sources(
     SceneGraph/Camera.hpp
     SceneGraph/CSGNode.hpp
     SceneGraph/Geometry.hpp
+    SceneGraph/Geometry3D.hpp
     SceneGraph/Group.hpp
     SceneGraph/Light.hpp
     SceneGraph/Node.hpp
@@ -449,6 +450,7 @@ target_sources(
     Simulation/Input.hpp
     Simulation/Settings.hpp
     Simulation/Simulation.hpp
+    Simulation/SimulationNew.hpp
     Simulation/Systems/AudioSystem.hpp
     Simulation/Systems/CaptureSystem.hpp
     Simulation/Systems/ConsoleSystem.hpp
@@ -720,6 +722,7 @@ target_sources(
     SceneGraph/Camera.cpp
     SceneGraph/CSGNode.cpp
     SceneGraph/Geometry.cpp
+    SceneGraph/Geometry3D.cpp
     SceneGraph/Group.cpp
     SceneGraph/Light.cpp
     SceneGraph/Node.cpp
@@ -736,6 +739,7 @@ target_sources(
     Simulation/Input.cpp
     Simulation/Settings.cpp
     Simulation/Simulation.cpp
+    Simulation/SimulationNew.cpp
     Simulation/Systems/CaptureSystem.cpp
     Simulation/Systems/ConsoleSystem.cpp
     Simulation/Systems/DebugSystem.cpp
