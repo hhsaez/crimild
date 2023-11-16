@@ -46,11 +46,9 @@ Event Node3D::handle( const Event &e ) noexcept
         case Event::Type::NODE_3D_LOCAL_TRANSFORMATION_CHANGED:
             m_worldNeedsUpdate = true;
             return Node::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
-            break;
         case Event::Type::NODE_3D_WORLD_TRANSFORMATION_CHANGED:
             m_localNeedsUpdate = true;
             return Node::handle( { Event::Type::NODE_3D_PARENT_TRANSFORMATION_CHANGED } );
-            break;
         default:
             break;
     }
@@ -59,6 +57,11 @@ Event Node3D::handle( const Event &e ) noexcept
 
 std::shared_ptr< Node3D > Node3D::getParentNode3D( void ) const noexcept
 {
+    // This is quite expensive. I need to figure out a way to cache
+    // this result. Maybe, we can traverse the scene tree upwards
+    // when this node is added to another one, looking for the first
+    // Node3D avaiable. That will be the "3D parent"
+
     std::weak_ptr< Node3D > ret;
     auto parent = getParent();
     while ( parent != nullptr ) {

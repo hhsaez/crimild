@@ -37,6 +37,9 @@
 
 namespace crimild::ex {
 
+    /// \brief A node
+    ///
+    /// This is a 3d node, with transfromations
     class Node3D : public Node {
     public:
         explicit Node3D( std::string_view name = "" ) noexcept;
