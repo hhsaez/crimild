@@ -70,4 +70,3 @@ if( CRIMILD_BUILD_EXAMPLES )
 endif()
 
 add_subdirectory( platforms )
-

@@ -2,16 +2,16 @@ crimild_trace()
 
 add_library( crimild_core OBJECT )
 
-target_sources( 
+target_sources(
     crimild_core
-    
+
     PUBLIC
     Animation/Accumulator.hpp
     Animation/Animation.hpp
     Animation/Channel.hpp
     Animation/ChannelImpl.hpp
     Animation/Clip.hpp
-    Animation/Skeleton.hpp   
+    Animation/Skeleton.hpp
     Audio/AudioListener.hpp
     Audio/AudioSource.hpp
     Behaviors/Actions/AnimateContextValue.hpp
@@ -428,9 +428,12 @@ target_sources(
     SceneGraph/Camera.hpp
     SceneGraph/CSGNode.hpp
     SceneGraph/Geometry.hpp
+    SceneGraph/Geometry3D.hpp
     SceneGraph/Group.hpp
     SceneGraph/Light.hpp
     SceneGraph/Node.hpp
+    SceneGraph/Node3D.hpp
+    SceneGraph/NodeBase.hpp
     SceneGraph/Node_io.hpp
     SceneGraph/Node_withTransformation.hpp
     SceneGraph/NullNode.hpp
@@ -447,6 +450,7 @@ target_sources(
     Simulation/Input.hpp
     Simulation/Settings.hpp
     Simulation/Simulation.hpp
+    Simulation/SimulationNew.hpp
     Simulation/Systems/AudioSystem.hpp
     Simulation/Systems/CaptureSystem.hpp
     Simulation/Systems/ConsoleSystem.hpp
@@ -718,9 +722,12 @@ target_sources(
     SceneGraph/Camera.cpp
     SceneGraph/CSGNode.cpp
     SceneGraph/Geometry.cpp
+    SceneGraph/Geometry3D.cpp
     SceneGraph/Group.cpp
     SceneGraph/Light.cpp
     SceneGraph/Node.cpp
+    SceneGraph/Node3D.cpp
+    SceneGraph/NodeBase.cpp
     SceneGraph/Skybox.cpp
     SceneGraph/Switch.cpp
     SceneGraph/Text.cpp
@@ -732,6 +739,7 @@ target_sources(
     Simulation/Input.cpp
     Simulation/Settings.cpp
     Simulation/Simulation.cpp
+    Simulation/SimulationNew.cpp
     Simulation/Systems/CaptureSystem.cpp
     Simulation/Systems/ConsoleSystem.cpp
     Simulation/Systems/DebugSystem.cpp
