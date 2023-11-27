@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_REFLECT_
 
 #include "Mathematics/Normal3.hpp"
-#include "Mathematics/Normal3Ops.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/dot.hpp"

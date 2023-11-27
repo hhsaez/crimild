@@ -33,11 +33,8 @@
 #include "Mathematics/Matrix3_equality.hpp"
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Matrix4_constants.hpp"
-#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 
@@ -203,7 +200,8 @@ TEST( BufferAccessor, setMultipleValues )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -235,7 +233,8 @@ TEST( BufferAccessor, setInterleavedMultipleValues )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     texCoords->set(
         Array< crimild::Real32 > {
@@ -245,7 +244,8 @@ TEST( BufferAccessor, setInterleavedMultipleValues )
             1.0,
             1.0,
             1.0,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -283,7 +283,8 @@ TEST( BufferAccessor, eachPosition )
         [ & ]( const Vector3f &p, crimild::Size index ) {
             ASSERT_EQ( positionData[ index ], p );
             callCount++;
-        } );
+        }
+    );
     ASSERT_EQ( 3, callCount );
 
     auto texCoordData = Array< Vector2f > {
@@ -299,6 +300,7 @@ TEST( BufferAccessor, eachPosition )
         [ & ]( const Vector2f &uv, crimild::Size index ) {
             ASSERT_EQ( texCoordData[ index ], uv );
             callCount++;
-        } );
+        }
+    );
     ASSERT_EQ( 3, callCount );
 }

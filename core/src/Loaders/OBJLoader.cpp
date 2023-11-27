@@ -29,9 +29,8 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Foundation/Log.hpp"
-#include "Mathematics/Vector2_constants.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
@@ -240,16 +239,20 @@ void OBJLoader::generateGeometry( void )
                 [ & ] {
                     auto primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
                     primitive->setVertexData(
-                        { crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), vertices ) } );
+                        { crimild::alloc< VertexBuffer >( VertexP3N3TC2::getLayout(), vertices ) }
+                    );
                     primitive->setIndices(
-                        crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, indices ) );
+                        crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, indices )
+                    );
                     return primitive;
-                }() );
+                }()
+            );
             if ( _currentMaterial != nullptr ) {
                 geometry->attachComponent< MaterialComponent >()->attachMaterial( _currentMaterial );
             }
             return geometry;
-        }() );
+        }()
+    );
 
     _faces.clear();
 }
@@ -442,7 +445,8 @@ SharedPointer< Texture > OBJLoader::loadTexture( std::string textureFileName )
         { .filePath = {
               .path = FileSystem::getInstance().extractDirectory( _fileName ) + "/" + textureFileName,
               .pathType = FilePath::PathType::ABSOLUTE,
-          } } );
+          } }
+    );
 
     if ( image == nullptr ) {
         CRIMILD_LOG_WARNING( "Failed to load image ", textureFileName );

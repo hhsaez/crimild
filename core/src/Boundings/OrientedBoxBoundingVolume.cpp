@@ -30,7 +30,6 @@
 #include "Debug/DebugRenderHelper.hpp"
 #include "Mathematics/Intersection.hpp"
 #include "Mathematics/Point3.hpp"
-#include "Mathematics/Point3_constants.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 
 using namespace crimild;
@@ -81,7 +80,7 @@ SharedPointer< BoundingVolume > OrientedBoxBoundingVolume::clone( void ) const
 
 void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-    //computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+    // computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
 void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
@@ -102,211 +101,211 @@ void OrientedBoxBoundingVolume::computeFrom( const BoundingVolume *volume, const
     */
 
     /*
-	Vector3f p0, p1;
-	transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
-	transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
+        Vector3f p0, p1;
+        transformation.applyToPoint( volume->getCenter() + volume->getMin(), p0 );
+        transformation.applyToPoint( volume->getCenter() + volume->getMax(), p1 );
 
-	Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
-	Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
+        Vector3f min( Numericf::min( p0[ 0 ], p1[ 0 ] ), Numericf::min( p0[ 1 ], p1[ 1 ] ), Numericf::min( p0[ 2 ], p1[ 2 ] ) );
+        Vector3f max( Numericf::max( p0[ 0 ], p1[ 0 ] ), Numericf::max( p0[ 1 ], p1[ 1 ] ), Numericf::max( p0[ 2 ], p1[ 2 ] ) );
 
-	computeFrom( min, max );
-	*/
+        computeFrom( min, max );
+        */
 }
 
 void OrientedBoxBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
 {
     /*
-	if ( positionCount == 0 || positions == NULL ) {
-		return;
-	}
+        if ( positionCount == 0 || positions == NULL ) {
+                return;
+        }
 
-	Vector3f max = positions[ 0 ];
-	Vector3f min = positions[ 0 ];
+        Vector3f max = positions[ 0 ];
+        Vector3f min = positions[ 0 ];
 
-	for ( unsigned int i = 1; i < positionCount; i++ ) {
-		const Vector3f &pos = positions[ i ];
+        for ( unsigned int i = 1; i < positionCount; i++ ) {
+                const Vector3f &pos = positions[ i ];
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	computeFrom( min, max );
-	*/
+        computeFrom( min, max );
+        */
 }
 
 void OrientedBoxBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
     /*
-	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		return;
-	}
+        if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
+                return;
+        }
 
-	Vector3f max = vbo->getPositionAt( 0 );
-	Vector3f min = vbo->getPositionAt( 0 );
-	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
+        Vector3f max = vbo->getPositionAt( 0 );
+        Vector3f min = vbo->getPositionAt( 0 );
+        for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
+                Vector3f pos = vbo->getPositionAt( i );
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	computeFrom( min, max );
-	*/
+        computeFrom( min, max );
+        */
 }
 
 void OrientedBoxBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
 {
     /*
-	_sphere.setCenter( 0.5f * ( max + min ) );
-	_sphere.setRadius( Numericf::max( 0.01f, ( max - _sphere.getCenter() ).getMagnitude() ) );
+        _sphere.setCenter( 0.5f * ( max + min ) );
+        _sphere.setRadius( Numericf::max( 0.01f, ( max - _sphere.getCenter() ).getMagnitude() ) );
 
-	setMin( min - getCenter() );
-	setMax( max - getCenter() );
-	*/
+        setMin( min - getCenter() );
+        setMax( max - getCenter() );
+        */
 }
 
 void OrientedBoxBoundingVolume::expandToContain( const Point3 &p )
 {
     /*
-	auto min = getCenter() + getMin();
-	auto max = getCenter() + getMax();
+        auto min = getCenter() + getMin();
+        auto max = getCenter() + getMax();
 
-	min = Vector3f( Numericf::min( p[ 0 ], min[ 0 ] ), Numericf::min( p[ 1 ], min[ 1 ] ), Numericf::min( p[ 2 ], min[ 2 ] ) );
-	max = Vector3f( Numericf::max( p[ 0 ], max[ 0 ] ), Numericf::max( p[ 1 ], max[ 1 ] ), Numericf::max( p[ 2 ], max[ 2 ] ) );
+        min = Vector3f( Numericf::min( p[ 0 ], min[ 0 ] ), Numericf::min( p[ 1 ], min[ 1 ] ), Numericf::min( p[ 2 ], min[ 2 ] ) );
+        max = Vector3f( Numericf::max( p[ 0 ], max[ 0 ] ), Numericf::max( p[ 1 ], max[ 1 ] ), Numericf::max( p[ 2 ], max[ 2 ] ) );
 
-	computeFrom( min, max );
-	*/
+        computeFrom( min, max );
+        */
 }
 
 void OrientedBoxBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
 {
     /*
-	if ( positionCount == 0 || positions == NULL ) {
-		return;
-	}
+        if ( positionCount == 0 || positions == NULL ) {
+                return;
+        }
 
-	Vector3f max = positions[ 0 ];
-	Vector3f min = positions[ 0 ];
+        Vector3f max = positions[ 0 ];
+        Vector3f min = positions[ 0 ];
 
-	for ( unsigned int i = 1; i < positionCount; i++ ) {
-		const Vector3f &pos = positions[ i ];
+        for ( unsigned int i = 1; i < positionCount; i++ ) {
+                const Vector3f &pos = positions[ i ];
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	expandToContain( max );
-	expandToContain( min );
-	*/
+        expandToContain( max );
+        expandToContain( min );
+        */
 }
 
 void OrientedBoxBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
     /*
-	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		return;
-	}
+        if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
+                return;
+        }
 
-	Vector3f max = vbo->getPositionAt( 0 );
-	Vector3f min = vbo->getPositionAt( 0 );
+        Vector3f max = vbo->getPositionAt( 0 );
+        Vector3f min = vbo->getPositionAt( 0 );
 
-	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
+        for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
+                Vector3f pos = vbo->getPositionAt( i );
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	expandToContain( max );
-	expandToContain( min );
-	*/
+        expandToContain( max );
+        expandToContain( min );
+        */
 }
 
 void OrientedBoxBoundingVolume::expandToContain( const BoundingVolume *input )
 {
     /*
-	expandToContain( input->getCenter() + input->getMin() );
-	expandToContain( input->getCenter() + input->getMax() );
-	*/
+        expandToContain( input->getCenter() + input->getMin() );
+        expandToContain( input->getCenter() + input->getMax() );
+        */
 }
 
 int OrientedBoxBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-    //return _sphere.whichSide( plane );
+    // return _sphere.whichSide( plane );
     return 0;
 }
 
 bool OrientedBoxBoundingVolume::contains( const Point3 &point ) const
 {
     /*
-	float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
-	float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
-	return ( centerDiffSqr < radiusSqr );
-	*/
+        float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
+        float radiusSqr = _sphere.getRadius() * _sphere.getRadius();
+        return ( centerDiffSqr < radiusSqr );
+        */
     return false;
 }
 
 bool OrientedBoxBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
     /*
-	if ( !Intersection::test( _sphere, ray ) ) {
-		return false;
-	}
+        if ( !Intersection::test( _sphere, ray ) ) {
+                return false;
+        }
 
-	return Intersection::test( getCenter() + getMin(), getCenter() + getMax(), ray );
-	*/
+        return Intersection::test( getCenter() + getMin(), getCenter() + getMax(), ray );
+        */
 
     return false;
 }
 
 bool OrientedBoxBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-    return false; //other->testIntersection( _sphere );
+    return false; // other->testIntersection( _sphere );
 }
 
 bool OrientedBoxBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    return false; //Intersection::test( _sphere, sphere );
+    return false; // Intersection::test( _sphere, sphere );
 }
 
 bool OrientedBoxBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-    return false; //whichSide( plane ) == 0;
+    return false; // whichSide( plane ) == 0;
 }
 
 void OrientedBoxBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-    //other->resolveIntersection( _sphere, result );
+    // other->resolveIntersection( _sphere, result );
 }
 
 void OrientedBoxBoundingVolume::resolveIntersection( const Sphere &other, Transformation &result ) const
 {
     /*
-	Vector3f direction = other.getCenter() - _sphere.getCenter();
-	float d = direction.getMagnitude();
-	float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
-	result.setTranslate( direction.normalize() * diff );
-	*/
+        Vector3f direction = other.getCenter() - _sphere.getCenter();
+        float d = direction.getMagnitude();
+        float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
+        result.setTranslate( direction.normalize() * diff );
+        */
 }
 
 void OrientedBoxBoundingVolume::resolveIntersection( const Plane3 &plane, Transformation &result ) const

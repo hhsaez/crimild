@@ -29,19 +29,18 @@
 #define CRIMILD_CORE_MATHEMATICS_PLANE_
 
 #include "Normal3.hpp"
-#include "Normal_equality.hpp"
 #include "Point3.hpp"
 #include "Point_equality.hpp"
 
 namespace crimild {
 
     /**
-		\brief Defines a plane in three-dimensional space
+        \brief Defines a plane in three-dimensional space
 
-		A plane is represented by a normal vector and a constant
+        A plane is represented by a normal vector and a constant
 
         The default plane is the XZ-plane
-	 */
+    */
     struct Plane3 {
         Normal3 n = Normal3 { 0, 1, 0 };
         Real d = 0;
@@ -57,8 +56,14 @@ namespace crimild {
         }
     };
 
-    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept { return p.n; }
-    [[nodiscard]] inline constexpr Real distance( const Plane3 &p ) noexcept { return p.d; }
+    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
+    {
+        return p.n;
+    }
+    [[nodiscard]] inline constexpr Real distance( const Plane3 &p ) noexcept
+    {
+        return p.d;
+    }
 
 }
 

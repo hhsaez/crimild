@@ -28,16 +28,51 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_3_
 #define CRIMILD_MATHEMATICS_VECTOR_3_
 
+#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple3.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     struct Vector3Impl : public Tuple3Impl< T > {
-        struct Constants;
+        struct Constants {
+            static constexpr auto ZERO = Vector3Impl< T > { 0, 0, 0 };
+            static constexpr auto ONE = Vector3Impl< T > { 1, 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Vector3Impl< T > {
+                std::numeric_limits< T >::infinity(),
+                std::numeric_limits< T >::infinity(),
+                std::numeric_limits< T >::infinity(),
+            };
+            static constexpr auto NEGATIVE_INFINITY = Vector3Impl< T > {
+                -std::numeric_limits< T >::infinity(),
+                -std::numeric_limits< T >::infinity(),
+                -std::numeric_limits< T >::infinity(),
+            };
+            static constexpr auto UNIT_X = Vector3Impl< T > { 1, 0, 0 };
+            static constexpr auto UNIT_Y = Vector3Impl< T > { 0, 1, 0 };
+            static constexpr auto UNIT_Z = Vector3Impl< T > { 0, 0, 1 };
+            static constexpr auto RIGHT = Vector3Impl< T > { 1, 0, 0 };
+            static constexpr auto UP = Vector3Impl< T > { 0, 1, 0 };
+            static constexpr auto FORWARD = Vector3Impl< T > { 0, 0, -1 };
+        };
 
-        [[nodiscard]] inline constexpr Bool operator==( const Vector3Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Vector3Impl &other ) const noexcept;
+        using Tuple3Impl< T >::x;
+        using Tuple3Impl< T >::y;
+        using Tuple3Impl< T >::z;
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator==( const Vector3Impl< U > &other ) const noexcept
+        {
+            return x == other.x && y == other.y && z == other.z;
+        }
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator!=( const Vector3Impl &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
 
     using Vector3 = Vector3Impl< Real >;

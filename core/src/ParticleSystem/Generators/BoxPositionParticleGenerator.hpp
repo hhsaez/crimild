@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PARTICLE_GENERATOR_POSITION_BOX_
 #define CRIMILD_PARTICLE_GENERATOR_POSITION_BOX_
 
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "ParticleSystem/ParticleSystemComponent.hpp"
 
 namespace crimild {
@@ -70,8 +70,8 @@ namespace crimild {
         ParticleAttribArray *_positions = nullptr;
 
         /**
-		 	\name Coding support
-		*/
+                        \name Coding support
+                */
         //@{
 
     public:

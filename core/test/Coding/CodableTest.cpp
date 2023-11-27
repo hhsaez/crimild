@@ -32,7 +32,6 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Foundation/ObjectFactory.hpp"
-#include "Mathematics/Transformation_equality.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"

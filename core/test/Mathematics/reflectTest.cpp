@@ -28,7 +28,7 @@
 #include "Mathematics/reflect.hpp"
 
 #include "Mathematics/Numbers.hpp"
-#include "Mathematics/Vector_equality.hpp"
+#include "Mathematics/isEqual.hpp"
 
 #include "gtest/gtest.h"
 
@@ -47,5 +47,5 @@ TEST( reflect, reflect2 )
     const auto V = Vector3 { 0, -1, 0 };
     const auto N = Normal3 { numbers::SQRT_2_DIV_2, numbers::SQRT_2_DIV_2, 0 };
 
-    EXPECT_EQ( reflect( V, N ), ( Vector3 { 1, 0, 0 } ) );
+    EXPECT_TRUE( isEqual( reflect( V, N ), Vector3 { 1, 0, 0 } ) );
 }

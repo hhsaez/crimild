@@ -28,16 +28,45 @@
 #ifndef CRIMILD_MATHEMATICS_POINT_3_
 #define CRIMILD_MATHEMATICS_POINT_3_
 
+#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple3.hpp"
+
+#include <limits>
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     struct Point3Impl : public Tuple3Impl< T > {
-        struct Constants;
+        struct Constants {
+            static constexpr auto ZERO = Point3Impl< T > { 0, 0, 0 };
+            static constexpr auto ONE = Point3Impl< T > { 1, 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Point3Impl< T > {
+                std::numeric_limits< T >::infinity(),
+                std::numeric_limits< T >::infinity(),
+                std::numeric_limits< T >::infinity(),
+            };
+            static constexpr auto NEGATIVE_INFINITY = Point3Impl< T > {
+                -std::numeric_limits< T >::infinity(),
+                -std::numeric_limits< T >::infinity(),
+                -std::numeric_limits< T >::infinity(),
+            };
+        };
 
-        [[nodiscard]] inline constexpr Bool operator==( const Point3Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Point3Impl &other ) const noexcept;
+        using Tuple3Impl< T >::x;
+        using Tuple3Impl< T >::y;
+        using Tuple3Impl< T >::z;
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator==( const Point3Impl< U > &other ) const noexcept
+        {
+            return x == other.x && y == other.y && z == other.z;
+        }
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator!=( const Point3Impl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
 
     using Point3 = Point3Impl< Real >;
@@ -45,7 +74,6 @@ namespace crimild {
     using Point3d = Point3Impl< Real64 >;
     using Point3i = Point3Impl< Int32 >;
     using Point3ui = Point3Impl< UInt32 >;
-
 }
 
 #endif

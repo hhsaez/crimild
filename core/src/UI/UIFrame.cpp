@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Vector4_constants.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "UIFrameConstraint.hpp"
@@ -76,15 +76,15 @@ void UIFrame::update( const Clock & )
 
     if ( parentFrame != nullptr ) {
         /*
-		const auto &frame = getExtensions();
-		auto w = frame.getWidth();
-		auto h = frame.getHeight();
-		auto pExtensions = parentFrame->getExtensions();
-		auto pW = pExtensions.getWidth();
-		auto pH = pExtensions.getHeight();
-		auto x = frame.getX() + 0.5f * ( -pW + w );
-		auto y = -frame.getY() + 0.5f * ( pH - h );
-		getNode()->local().setTranslate( Vector3f( x, y, 0.01f + _zIndex ) );
+                const auto &frame = getExtensions();
+                auto w = frame.getWidth();
+                auto h = frame.getHeight();
+                auto pExtensions = parentFrame->getExtensions();
+                auto pW = pExtensions.getWidth();
+                auto pH = pExtensions.getHeight();
+                auto x = frame.getX() + 0.5f * ( -pW + w );
+                auto y = -frame.getY() + 0.5f * ( pH - h );
+                getNode()->local().setTranslate( Vector3f( x, y, 0.01f + _zIndex ) );
         */
     }
 }

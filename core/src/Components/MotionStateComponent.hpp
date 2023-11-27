@@ -29,8 +29,8 @@
 #define CRIMILD_CORE_COMPONENTS_MOTION_STATE_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Point3_constants.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/Vector3.hpp"
 
 namespace crimild {
 

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_NORMALIZE_
 #define CRIMILD_MATHEMATICS_NORMALIZE_
 
-#include "Mathematics/Normal3Ops.hpp"
+#include "Mathematics/Normal3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/Vector4Ops.hpp"
 #include "Mathematics/length.hpp"
