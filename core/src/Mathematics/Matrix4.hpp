@@ -71,8 +71,17 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline constexpr Bool operator==( const Matrix4Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Matrix4Impl &other ) const noexcept;
+        template< typename U >
+        [[nodiscard]] inline constexpr Bool operator==( const Matrix4Impl< U > &other ) const noexcept
+        {
+            return c0 == other.c0 && c1 == other.c1 && c2 == other.c2 && c3 == other.c3;
+        }
+
+        template< typename U >
+        [[nodiscard]] inline constexpr Bool operator!=( const Matrix4Impl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
 
     using Matrix4 = Matrix4Impl< Real >;

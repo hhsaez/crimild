@@ -28,16 +28,42 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_2_
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
+#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple2.hpp"
 
 namespace crimild {
 
     template< typename T >
     struct Vector2Impl : public Tuple2Impl< T > {
-        struct Constants;
+        struct Constants {
+            static constexpr auto ZERO = Vector2Impl< T > { 0, 0 };
+            static constexpr auto ONE = Vector2Impl< T > { 1, 1 };
+            static constexpr auto POSITIVE_INFINITY = Vector2Impl< T > {
+                std::numeric_limits< T >::infinity(),
+                std::numeric_limits< T >::infinity(),
+            };
+            static constexpr auto NEGATIVE_INFINITY = Vector2Impl< T > {
+                -std::numeric_limits< T >::infinity(),
+                -std::numeric_limits< T >::infinity(),
+            };
+            static constexpr auto UNIT_X = Vector2Impl< T > { 1, 0 };
+            static constexpr auto UNIT_Y = Vector2Impl< T > { 0, 1 };
+        };
 
-        [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl &other ) const noexcept;
+        using Tuple2Impl< T >::x;
+        using Tuple2Impl< T >::y;
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl< U > &other ) const noexcept
+        {
+            return x == other.x && y == other.y;
+        }
+
+        template< concepts::Arithmetic U >
+        [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
 
     using Vector2 = Vector2Impl< Real >;

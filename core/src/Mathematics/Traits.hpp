@@ -43,13 +43,34 @@ namespace crimild {
         }
 
         template< typename T >
-        inline constexpr Bool isHighPrecision( void ) noexcept { return false; }
+        inline constexpr bool isArithmetic( void ) noexcept
+        {
+            return std::is_arithmetic_v< T >;
+        }
+
+        template< typename T >
+        inline constexpr Bool isHighPrecision( void ) noexcept
+        {
+            return false;
+        }
+
         template<>
-        inline constexpr Bool isHighPrecision< Int64 >( void ) noexcept { return true; }
+        inline constexpr Bool isHighPrecision< Int64 >( void ) noexcept
+        {
+            return true;
+        }
+
         template<>
-        inline constexpr Bool isHighPrecision< UInt64 >( void ) noexcept { return true; }
+        inline constexpr Bool isHighPrecision< UInt64 >( void ) noexcept
+        {
+            return true;
+        }
+
         template<>
-        inline constexpr Bool isHighPrecision< Real64 >( void ) noexcept { return true; }
+        inline constexpr Bool isHighPrecision< Real64 >( void ) noexcept
+        {
+            return true;
+        }
 
     }
 

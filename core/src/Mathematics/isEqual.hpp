@@ -28,11 +28,22 @@
 #ifndef CRIMILD_MATHEMATICS_IS_EQUAL_
 #define CRIMILD_MATHEMATICS_IS_EQUAL_
 
+#include "Mathematics/ColorRGB.hpp"
+#include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Concepts.hpp"
+#include "Mathematics/Matrix4.hpp"
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/Ray3.hpp"
+#include "Mathematics/Transformation.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "Mathematics/isZero.hpp"
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     inline constexpr Bool isEqual( const T &x, const T &y ) noexcept
     {
         if constexpr ( traits::isReal< T >() ) {
@@ -40,6 +51,66 @@ namespace crimild {
         } else {
             return x == y;
         }
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const ColorRGBImpl< T > &a, const ColorRGBImpl< U > &b ) noexcept
+    {
+        return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< U > &b ) noexcept
+    {
+        return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b ) && isEqual( a.a, b.a );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Matrix4Impl< T > &a, const Matrix4Impl< U > &b ) noexcept
+    {
+        return isEqual( a.c0, b.c0 ) && isEqual( a.c1, b.c1 ) && isEqual( a.c2, b.c2 ) && isEqual( a.c3, b.c3 );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Normal3Impl< T > &a, const Normal3Impl< U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Point3Impl< T > &a, const Point3Impl< U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Vector2Impl< T > &a, const Vector2Impl< U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Vector3Impl< T > &a, const Vector3Impl< U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z );
+    }
+
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Vector4Impl< T > &a, const Vector4Impl< U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z ) && isEqual( a.w, b.w );
+    }
+
+    [[nodiscard]] inline constexpr Bool isEqual( const Transformation &a, const Transformation &b ) noexcept
+    {
+        // Check for contents first, since it should be faster
+        // TODO: checking for `invMat` should not be necessary
+        return isEqual( a.contents, b.contents ) && isEqual( a.mat, b.mat ) && isEqual( a.invMat, b.invMat );
+    }
+
+    [[nodiscard]] inline constexpr Bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
+    {
+        return isEqual( a.o, b.o ) && isEqual( a.d, b.d );
     }
 
 }

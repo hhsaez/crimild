@@ -29,7 +29,6 @@
 
 #include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Ray_equality.hpp"
 #include "Mathematics/io.hpp"
 
 #include "gtest/gtest.h"

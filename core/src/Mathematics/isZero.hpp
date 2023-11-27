@@ -28,13 +28,15 @@
 #ifndef CRIMILD_MATHEMATICS_IS_ZERO_
 #define CRIMILD_MATHEMATICS_IS_ZERO_
 
+#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/Traits.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/abs.hpp"
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     inline constexpr Bool isZero( const T &x ) noexcept
     {
         if constexpr ( traits::isReal< T >() ) {
@@ -42,6 +44,12 @@ namespace crimild {
         } else {
             return x == 0;
         }
+    }
+
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isZero( const Vector3Impl< T > &t ) noexcept
+    {
+        return isZero( t.x ) && isZero( t.y ) && isZero( t.z );
     }
 
 }

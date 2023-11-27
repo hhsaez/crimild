@@ -29,14 +29,11 @@
 
 #include "Mathematics/Matrix4_constants.hpp"
 #include "Mathematics/Matrix4_determinant.hpp"
-#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Matrix4_transpose.hpp"
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/Vector4Ops.hpp"
-#include "Mathematics/Vector4_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/isEqual.hpp"
 #include "Mathematics/isZero.hpp"
@@ -100,7 +97,8 @@ TEST( Matrix4, IDENTITY )
             { 0, 1, 0, 0 },
             { 0, 0, 1, 0 },
             { 0, 0, 0, 1 },
-        } );
+        }
+    );
 
     EXPECT_TRUE( true );
 }
@@ -113,7 +111,8 @@ TEST( Matrix4, ZERO )
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 },
-        } );
+        }
+    );
 
     EXPECT_TRUE( true );
 }
@@ -126,7 +125,8 @@ TEST( Matrix4, ONE )
             { 1, 1, 1, 1 },
             { 1, 1, 1, 1 },
             { 1, 1, 1, 1 },
-        } );
+        }
+    );
 
     EXPECT_TRUE( true );
 }
@@ -259,13 +259,13 @@ TEST( Matrix4, inverse )
         { -0.04511, 0.52068, 0.19737, 0.30639 },
     };
 
-    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, A * B );
-    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, B * A );
+    EXPECT_TRUE( isEqual( crimild::Matrix4::Constants::IDENTITY, A * B ) );
+    EXPECT_TRUE( isEqual( crimild::Matrix4::Constants::IDENTITY, B * A ) );
 
-    EXPECT_EQ( B, crimild::inverse( A ) );
+    EXPECT_TRUE( isEqual( B, crimild::inverse( A ) ) );
 
-    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, A * crimild::inverse( A ) );
-    EXPECT_EQ( crimild::Matrix4::Constants::IDENTITY, crimild::inverse( A ) * A );
+    EXPECT_TRUE( isEqual( crimild::Matrix4::Constants::IDENTITY, A * crimild::inverse( A ) ) );
+    EXPECT_TRUE( isEqual( crimild::Matrix4::Constants::IDENTITY, crimild::inverse( A ) * A ) );
 }
 
 TEST( Matrix4, inverseProduct )
@@ -286,7 +286,7 @@ TEST( Matrix4, inverseProduct )
 
     constexpr auto C = A * B;
 
-    EXPECT_EQ( A, C * crimild::inverse( B ) );
+    EXPECT_TRUE( isEqual( A, C * crimild::inverse( B ) ) );
 }
 
 TEST( Matrix4, io )

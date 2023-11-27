@@ -31,7 +31,7 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Vector2_constants.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphOperation.hpp"

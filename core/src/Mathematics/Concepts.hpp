@@ -25,36 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_VECTOR_3_CONSTANTS_
-#define CRIMILD_MATHEMATICS_VECTOR_3_CONSTANTS_
+#ifndef CRIMILD_MATHEMATICS_CONCEPTS_
+#define CRIMILD_MATHEMATICS_CONCEPTS_
 
-#include "Mathematics/Vector3.hpp"
-
-#include <limits>
+#include "Mathematics/Traits.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Vector3Impl< T >::Constants {
-        static constexpr auto ZERO = Vector3Impl< T > { 0, 0, 0 };
-        static constexpr auto ONE = Vector3Impl< T > { 1, 1, 1 };
-        static constexpr auto POSITIVE_INFINITY = Vector3Impl< T > {
-            std::numeric_limits< T >::infinity(),
-            std::numeric_limits< T >::infinity(),
-            std::numeric_limits< T >::infinity(),
-        };
-        static constexpr auto NEGATIVE_INFINITY = Vector3Impl< T > {
-            -std::numeric_limits< T >::infinity(),
-            -std::numeric_limits< T >::infinity(),
-            -std::numeric_limits< T >::infinity(),
-        };
-        static constexpr auto UNIT_X = Vector3Impl< T > { 1, 0, 0 };
-        static constexpr auto UNIT_Y = Vector3Impl< T > { 0, 1, 0 };
-        static constexpr auto UNIT_Z = Vector3Impl< T > { 0, 0, 1 };
-        static constexpr auto RIGHT = Vector3Impl< T > { 1, 0, 0 };
-        static constexpr auto UP = Vector3Impl< T > { 0, 1, 0 };
-        static constexpr auto FORWARD = Vector3Impl< T > { 0, 0, -1 };
-    };
+    namespace concepts {
+
+        template< typename T >
+        concept Arithmetic = traits::isArithmetic< T >();
+
+    }
 
 }
 

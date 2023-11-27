@@ -29,7 +29,6 @@
 
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/Point_equality.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
 

@@ -29,7 +29,6 @@
 #define CRIMILD_PRIMITIVES_BOX_
 
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3_constants.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 

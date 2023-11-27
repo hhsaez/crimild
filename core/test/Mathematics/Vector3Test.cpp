@@ -28,7 +28,6 @@
 #include "Mathematics/Vector3.hpp"
 
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"

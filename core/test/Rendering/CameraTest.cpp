@@ -29,14 +29,11 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/io.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
@@ -75,7 +72,7 @@ TEST( Camera, view_matrix )
     const auto view = camera->getViewMatrix();
 
     // always compare with inverse matrix
-    EXPECT_EQ( M, view );
+    EXPECT_TRUE( isEqual( M, view ) );
 }
 
 TEST( Camera, get_ray_through_the_center_of_the_canvas )
@@ -114,8 +111,8 @@ TEST( Camera, get_ray_through_the_corner_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( 0, 0, ray ) );
 
-    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
-    EXPECT_EQ( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
+    EXPECT_TRUE( isEqual( Point3::Constants::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) ) );
 }
 
 TEST( Camera, get_ray_for_translated_camera )
@@ -160,8 +157,8 @@ TEST( Camera, get_ray_for_rotated_camera )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
-    EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
+    EXPECT_TRUE( isEqual( Point3::Constants::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( Vector3::Constants::RIGHT, direction( ray ) ) );
 }
 
 TEST( Camera, get_ray_for_transformed_camera )

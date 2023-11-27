@@ -39,12 +39,25 @@ namespace crimild {
 
         [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept;
 
-        [[nodiscard]] inline constexpr Bool operator==( const Ray3 &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Ray3 &other ) const noexcept;
+        [[nodiscard]] inline constexpr Bool operator==( const Ray3 &other ) const noexcept
+        {
+            return o == other.o && d == other.d;
+        }
+
+        [[nodiscard]] inline constexpr Bool operator!=( const Ray3 &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
 
-    [[nodiscard]] inline constexpr const Point3 &origin( const Ray3 &r ) noexcept { return r.o; }
-    [[nodiscard]] inline constexpr const Vector3 &direction( const Ray3 &r ) noexcept { return r.d; }
+    [[nodiscard]] inline constexpr const Point3 &origin( const Ray3 &r ) noexcept
+    {
+        return r.o;
+    }
+    [[nodiscard]] inline constexpr const Vector3 &direction( const Ray3 &r ) noexcept
+    {
+        return r.d;
+    }
 
 }
 
