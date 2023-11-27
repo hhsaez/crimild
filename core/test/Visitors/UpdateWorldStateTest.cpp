@@ -30,7 +30,6 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -87,9 +86,11 @@ TEST( UpdateWorldStateTest, geometry )
                                     .position = Vector3f { 1.0f, 1.5f, 0.0f },
                                     .normal = Vector3f { 0, 0, 1 },
                                 },
-                            } );
+                            }
+                        );
                     }(),
-                } );
+                }
+            );
             primitive->setIndices(
                 crimild::alloc< IndexBuffer >(
                     Format::INDEX_32_UINT,
@@ -97,9 +98,12 @@ TEST( UpdateWorldStateTest, geometry )
                         0,
                         1,
                         2,
-                    } ) );
+                    }
+                )
+            );
             return primitive;
-        }() );
+        }()
+    );
 
     geometry->perform( UpdateWorldState() );
 

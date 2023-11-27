@@ -29,7 +29,6 @@
 
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4Ops.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/io.hpp"

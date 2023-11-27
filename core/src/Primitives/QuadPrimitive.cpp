@@ -28,7 +28,7 @@
 #include "QuadPrimitive.hpp"
 
 #include "Mathematics/Vector2Ops.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 
@@ -57,7 +57,8 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
             Vector3f { -w, -h, 0.0f },
             Vector3f { w, -h, 0.0f },
             Vector3f { w, h, 0.0f },
-        } );
+        }
+    );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
@@ -67,7 +68,8 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
                 Vector3f::Constants::UNIT_Z,
                 Vector3f::Constants::UNIT_Z,
                 Vector3f::Constants::UNIT_Z,
-            } );
+            }
+        );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
@@ -78,7 +80,8 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
                 texCoordOffset + ( Vector2 { 0.0f, 1.0f } * texCoordScale ),
                 texCoordOffset + ( Vector2 { 1.0f, 1.0f } * texCoordScale ),
                 texCoordOffset + ( Vector2 { 1.0f, 0.0f } * texCoordScale ),
-            } );
+            }
+        );
     }
 
     setVertexData( { vertices } );
@@ -96,7 +99,9 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
                     3,
                     3,
                     0,
-                } ) );
+                }
+            )
+        );
     } else if ( getType() == Primitive::Type::TRIANGLE_STRIP ) {
         // make sure indices are in the right order
         setIndices(
@@ -107,7 +112,9 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
                     2,
                     0,
                     3,
-                } ) );
+                }
+            )
+        );
     } else {
         setIndices(
             crimild::alloc< IndexBuffer >(
@@ -119,6 +126,8 @@ QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
                     0,
                     2,
                     3,
-                } ) );
+                }
+            )
+        );
     }
 }

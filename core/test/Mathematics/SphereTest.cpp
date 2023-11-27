@@ -31,6 +31,7 @@
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_scale.hpp"
+#include "Mathematics/isEqual.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
@@ -60,12 +61,16 @@ TEST( Sphere, normal )
     static_assert( normal( S, Point3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) == Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } );
     static_assert( length( normal( S, Point3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == Real( 1 ) );
 
-    EXPECT_EQ(
-        ( Normal3 { 0, 0.97014, -0.24254 } ),
-        normal(
-            S,
-            scale( 1, 0.5, 1 ) * rotationZ( numbers::PI / 5 ),
-            Point3 { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ) );
+    EXPECT_TRUE(
+        isEqual(
+            Normal3 { 0, 0.97014, -0.24254 },
+            normal(
+                S,
+                scale( 1, 0.5, 1 ) * rotationZ( numbers::PI / 5 ),
+                Point3 { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
+            )
+        )
+    );
 
     EXPECT_TRUE( true );
 }

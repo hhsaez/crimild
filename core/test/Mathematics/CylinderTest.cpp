@@ -26,8 +26,8 @@
  */
 
 #include "Mathematics/Cylinder.hpp"
+
 #include "Mathematics/Cylinder_normal.hpp"
-#include "Mathematics/Normal_equality.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>

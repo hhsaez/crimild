@@ -214,10 +214,7 @@ target_sources(
     Mathematics/max.hpp
     Mathematics/min.hpp
     Mathematics/Normal3.hpp
-    Mathematics/Normal3Ops.hpp
-    Mathematics/Normal3_constants.hpp
     Mathematics/normalize.hpp
-    Mathematics/Normal_equality.hpp
     Mathematics/Numbers.hpp
     Mathematics/Numeric.hpp
     Mathematics/ortho.hpp

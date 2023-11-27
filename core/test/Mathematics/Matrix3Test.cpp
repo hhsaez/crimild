@@ -30,7 +30,6 @@
 #include "Mathematics/Matrix3_constants.hpp"
 #include "Mathematics/Matrix3_equality.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector_equality.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
@@ -57,7 +56,8 @@ TEST( Matrix3, IDENTITY )
             { 1, 0, 0 },
             { 0, 1, 0 },
             { 0, 0, 1 },
-        } );
+        }
+    );
 
     EXPECT_TRUE( true );
 }
@@ -69,7 +69,8 @@ TEST( Matrix3, ZERO )
             { 0, 0, 0 },
             { 0, 0, 0 },
             { 0, 0, 0 },
-        } );
+        }
+    );
 
     EXPECT_TRUE( true );
 }

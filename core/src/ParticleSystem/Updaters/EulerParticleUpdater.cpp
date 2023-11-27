@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 
@@ -52,40 +52,40 @@ void EulerParticleUpdater::configure( Node *node, ParticleData *particles )
 void EulerParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
     /*
-	const auto count = particles->getAliveCount();
+        const auto count = particles->getAliveCount();
 
-	const auto g = dt * _globalAcceleration;
+        const auto g = dt * _globalAcceleration;
 
-	auto as = _accelerations->getData< Vector3f >();
-	auto vs = _velocities->getData< Vector3f >();
-	auto ps = _positions->getData< Vector3f >();
+        auto as = _accelerations->getData< Vector3f >();
+        auto vs = _velocities->getData< Vector3f >();
+        auto ps = _positions->getData< Vector3f >();
 
     crimild::Size itemsPerCacheLine = 64 / sizeof( crimild::Real32 );
 
-	// TODO: all the accelerations are the same value
-	// I think this could be optimized, but other
-	// updaters may need separated values
-	// Also, accelerations are handled in the same way
-	// regardless of the computation space (world or local)
+        // TODO: all the accelerations are the same value
+        // I think this could be optimized, but other
+        // updaters may need separated values
+        // Also, accelerations are handled in the same way
+        // regardless of the computation space (world or local)
     for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
         for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
             as[ j ] += g;
         }
-	}
+        }
 
-	// Velocities are handled in the same way
-	// regardless of the computation space (world or local)
+        // Velocities are handled in the same way
+        // regardless of the computation space (world or local)
     for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
         for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
             vs[ j ] += dt * as[ j ];
         }
-	}
+        }
 
     for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
         for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
             ps[ j ] += dt * vs[ j ];
         }
-	}
+        }
     */
 }
 

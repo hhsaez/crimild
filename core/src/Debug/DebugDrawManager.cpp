@@ -32,11 +32,10 @@
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/distance.hpp"
+#include "Mathematics/isNaN.hpp"
 #include "Mathematics/orthonormalization.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
-#include "Mathematics/isNaN.hpp"
-#include "Mathematics/Vector_equality.hpp"
 
 using namespace crimild;
 

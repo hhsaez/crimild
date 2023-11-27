@@ -30,6 +30,7 @@
 
 #include "Mathematics/Cylinder.hpp"
 #include "Mathematics/Normal3.hpp"
+#include "Mathematics/Numbers.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_apply.hpp"

@@ -29,7 +29,8 @@
 #define CRIMILD_CORE_VISITORS_INTERSECT_WORLD_
 
 #include "Foundation/Containers/Array.hpp"
-#include "Mathematics/Normal3Ops.hpp"
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Numbers.hpp"
 #include "Mathematics/Point3.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Vector3.hpp"
@@ -43,7 +44,7 @@ namespace crimild {
 
     /**
      * Collects geometries that intersect with a given ray
-     * 
+     *
      * \todo Test intersection with groups to speed things up
      */
     class IntersectWorld : public NodeVisitor {

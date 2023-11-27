@@ -29,16 +29,15 @@
 #define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_
 
 #include "Mathematics/Point3.hpp"
-#include "Mathematics/Point3_constants.hpp"
 
 namespace crimild {
 
     /**
      * \brief An axis aligned 3D bounding box
-     * 
+     *
      * By default, a Bounds3 instance is created with an invalid value,
      * violating the invariant that min <= max. This represents an empty
-     * box, ensuring that any operations on it (i.e. union) yield the 
+     * box, ensuring that any operations on it (i.e. union) yield the
      * correct result.
      */
     struct Bounds3 {

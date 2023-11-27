@@ -29,8 +29,8 @@
 
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_apply.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/distance.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/length.hpp"
@@ -116,7 +116,8 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
                 max = crimild::max( max, pos );
                 min = crimild::min( min, pos );
             }
-        } );
+        }
+    );
 
     computeFrom( min, max );
 }
@@ -187,7 +188,8 @@ void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
                 max = crimild::max( max, P );
                 min = crimild::min( min, P );
             }
-        } );
+        }
+    );
 
     expandToContain( max );
     expandToContain( min );
@@ -232,7 +234,7 @@ bool AABBBoundingVolume::testIntersection( const BoundingVolume *other ) const
 
 bool AABBBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    //return Intersection::test( _sphere, sphere );
+    // return Intersection::test( _sphere, sphere );
     assert( false );
     return false;
 }

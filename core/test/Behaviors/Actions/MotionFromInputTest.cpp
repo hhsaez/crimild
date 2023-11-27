@@ -38,7 +38,6 @@
 #include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Input.hpp"

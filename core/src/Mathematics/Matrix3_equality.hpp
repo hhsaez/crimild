@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_MATRIX_3_EQUALITY_
 
 #include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Vector_equality.hpp"
 
 namespace crimild {
 

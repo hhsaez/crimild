@@ -29,9 +29,9 @@
 
 #include "Debug/DebugRenderHelper.hpp"
 #include "Mathematics/Intersection.hpp"
-#include "Mathematics/Point3_constants.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector3_constants.hpp"
 #include "Mathematics/max.hpp"
 
 using namespace crimild;
@@ -68,7 +68,7 @@ SharedPointer< BoundingVolume > Box2DBoundingVolume::clone( void ) const
 
 void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-    //computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+    // computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
 void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
@@ -137,7 +137,7 @@ void Box2DBoundingVolume::expandToContain( const BoundingVolume *input )
 int Box2DBoundingVolume::whichSide( const Plane3 &plane ) const
 {
     // TODO
-    //return _sphere.whichSide( plane );
+    // return _sphere.whichSide( plane );
     return 0;
 }
 
@@ -229,7 +229,7 @@ bool Box2DBoundingVolume::testIntersection( const BoundingVolume *other ) const
 
 bool Box2DBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    //return Intersection::test( _sphere, sphere );
+    // return Intersection::test( _sphere, sphere );
     return false;
 }
 

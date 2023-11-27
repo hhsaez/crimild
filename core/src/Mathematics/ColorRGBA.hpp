@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_COLOR_RGBA_
 
 #include "Foundation/Types.hpp"
-#include "Mathematics/isEqual.hpp"
 
 #include <cmath>
 
@@ -76,12 +75,12 @@ namespace crimild {
 
         [[nodiscard]] inline constexpr Bool operator==( const ColorRGBAImpl &other ) const noexcept
         {
-            return isEqual( this->r, other.r ) && isEqual( this->g, other.g ) && isEqual( this->b, other.b ) && isEqual( this->a, other.a );
+            return r == other.r && g == other.g && b == other.b && a == other.a;
         }
 
         [[nodiscard]] inline constexpr Bool operator!=( const ColorRGBAImpl &other ) const noexcept
         {
-            return !isEqual( this->r, other.r ) || !isEqual( this->g, other.g ) || !isEqual( this->b, other.b ) || !isEqual( this->a, other.a );
+            return !( *this == other );
         }
     };
 

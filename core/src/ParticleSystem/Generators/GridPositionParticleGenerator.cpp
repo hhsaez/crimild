@@ -30,7 +30,7 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Mathematics/Random.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -54,7 +54,7 @@ void GridPositionParticleGenerator::configure( Node *node, ParticleData *particl
 void GridPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
     /*
-	auto ps = _positions->getData< Vector3f >();
+        auto ps = _positions->getData< Vector3f >();
 
     const auto posMin = _origin - _size;
     const auto posMax = _origin + _size;
@@ -64,20 +64,20 @@ void GridPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, Pa
     auto i = startId;
     const auto pCount = endId - startId;
     if ( pCount == 0 ) {
-    	return;
+        return;
     }
 
     for ( auto z = -halfSize.z(); z <= halfSize.z(); z += 1.0f ) {
-    	for ( auto x = -halfSize.x(); x <= halfSize.x(); x += 1.0f ) {
-			auto p = Vector3f( 2 * x, 0.0f, 2 * z );
-    		if ( particles->shouldComputeInWorldSpace() ) {
-    			node->getWorld().applyToPoint( p, p );
-    		}
-    		ps[ i ] = p;
-    		if ( ++i >= pCount ) {
-    			return;
-    		}
-    	}
+        for ( auto x = -halfSize.x(); x <= halfSize.x(); x += 1.0f ) {
+                        auto p = Vector3f( 2 * x, 0.0f, 2 * z );
+                if ( particles->shouldComputeInWorldSpace() ) {
+                        node->getWorld().applyToPoint( p, p );
+                }
+                ps[ i ] = p;
+                if ( ++i >= pCount ) {
+                        return;
+                }
+        }
     }
     */
 }

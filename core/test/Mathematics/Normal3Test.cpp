@@ -27,11 +27,8 @@
 
 #include "Mathematics/Normal3.hpp"
 
-#include "Mathematics/Normal3Ops.hpp"
-#include "Mathematics/Normal_equality.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/isEqual.hpp"

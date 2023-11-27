@@ -29,6 +29,7 @@
 #define CRIMILD_MATHEMATICS_ORTHONORMALIZATION_
 
 #include "Mathematics/Vector3.hpp"
+#include "Mathematics/abs.hpp"
 #include "Mathematics/normalize.hpp"
 
 namespace crimild {

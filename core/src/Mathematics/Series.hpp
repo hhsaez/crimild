@@ -31,7 +31,6 @@
 #include "Foundation/Containers/Array.hpp"
 #include "Foundation/Types.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3_constants.hpp"
 
 namespace crimild {
 
@@ -51,7 +50,8 @@ namespace crimild {
                     a = b;
                     b = c;
                     return ret;
-                } );
+                }
+            );
         }
 
         static Array< std::pair< Vector3f, Real32 > > fibonacciSquares( Size N ) noexcept
@@ -82,7 +82,8 @@ namespace crimild {
                     c0 = c1;
                     c1 = c;
                     return std::make_pair( c, s );
-                } );
+                }
+            );
         }
 
     }

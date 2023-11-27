@@ -29,11 +29,11 @@
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 
 #include "Mathematics/Matrix4_transpose.hpp"
-#include "Mathematics/Point3_constants.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/Transformation_isIdentity.hpp"
 #include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Mathematics/swizzle.hpp"
 
@@ -41,7 +41,7 @@ namespace crimild {
 
     /**
      *  \brief Checks if a given Transformation swaps the coordinate system handedness.
-     * 
+     *
      *  Certain transformations change the handedness of the coordinate system. For example, using negative
      *  scale values. Some operations need to know this in order to compute the right values for normals, for example.
      */

@@ -46,18 +46,6 @@ namespace crimild {
         return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y );
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool Point3Impl< T >::operator==( const Point3Impl< T > &other ) const noexcept
-    {
-        return isEqual( this->x, other.x ) && isEqual( this->y, other.y ) && isEqual( this->z, other.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool Point3Impl< T >::operator!=( const Point3Impl< T > &other ) const noexcept
-    {
-        return !isEqual( this->x, other.x ) || !isEqual( this->y, other.y ) || !isEqual( this->z, other.z );
-    }
-
 }
 
 #endif

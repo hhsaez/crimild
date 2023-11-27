@@ -45,7 +45,6 @@
 #include "Mathematics/Bounds3_volume.hpp"
 #include "Mathematics/Point3_isInfinity.hpp"
 #include "Mathematics/Point_equality.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/io.hpp"
 
@@ -112,28 +111,36 @@ TEST( Bounds3, isNaN )
             Bounds3 {
                 Point3 { 1, 2, 3 },
                 Point3 { 4, 5, 6 },
-            } ) );
+            }
+        )
+    );
 
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
                 Point3 { 1, NAN, 3 },
                 Point3 { 4, 5, 6 },
-            } ) );
+            }
+        )
+    );
 
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
                 Point3 { 1, 2, 3 },
                 Point3 { NAN, 5, 6 },
-            } ) );
+            }
+        )
+    );
 
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
                 Point3 { 1, NAN, 3 },
                 Point3 { NAN, 5, 6 },
-            } ) );
+            }
+        )
+    );
 }
 
 TEST( Bounds3, min )
@@ -179,14 +186,16 @@ TEST( Bounds3, minDimension )
         minDimension( Bounds3 {
             Point3 { 1, 2, 3 },
             Point3 { 6, 5, 3.5 },
-        } ) );
+        } )
+    );
 
     EXPECT_EQ(
         2,
         minDimension( Bounds3 {
             Point3 { -1, 2, 3 },
             Point3 { -6, 5, 4 },
-        } ) );
+        } )
+    );
 }
 
 TEST( Bounds3, maxDimension )
@@ -196,21 +205,24 @@ TEST( Bounds3, maxDimension )
         maxDimension( Bounds3 {
             Point3 { 1, 2, 3 },
             Point3 { 4, 5, 6 },
-        } ) );
+        } )
+    );
 
     EXPECT_EQ(
         1,
         maxDimension( Bounds3 {
             Point3 { 1, 2, 3 },
             Point3 { 4, 10, 6 },
-        } ) );
+        } )
+    );
 
     EXPECT_EQ(
         0,
         maxDimension( Bounds3 {
             Point3 { -1, 2, 3 },
             Point3 { -10, 5, 4 },
-        } ) );
+        } )
+    );
 }
 
 TEST( Bounds3, ostream )
@@ -244,7 +256,9 @@ TEST( Bounds3, centroid )
             Bounds3 {
                 Point3 { -1, -2, -3 },
                 Point3 { 1, 2, 3 },
-            } ) );
+            }
+        )
+    );
 
     EXPECT_EQ(
         ( Point3 { 2.5, 3.5, 4.5 } ),
@@ -252,7 +266,9 @@ TEST( Bounds3, centroid )
             Bounds3 {
                 Point3 { 1, 2, 3 },
                 Point3 { 4, 5, 6 },
-            } ) );
+            }
+        )
+    );
 }
 
 TEST( Bounds3, combine )
@@ -350,80 +366,110 @@ TEST( Bounds3, overlaps_cube )
         testOverlap(
             Bounds3 { { -1, -1, -1 }, { 1, 1, 1 } },
             { front, back, left, right, top, bottom },
-            {} ) );
+            {}
+        )
+    );
 
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, -1, -1 }, { 0, 1, 1 } },
             { front, back, left, top, bottom },
-            { right } ) );
+            { right }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, -1, -1 }, { 1, 1, 1 } },
             { front, back, right, top, bottom },
-            { left } ) );
+            { left }
+        )
+    );
 
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, -1, -1 }, { 0, 0, 1 } },
             { front, back, left, bottom },
-            { right, top } ) );
+            { right, top }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, -1, -1 }, { 1, 0, 1 } },
             { front, back, right, bottom },
-            { left, top } ) );
+            { left, top }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, 0, -1 }, { 0, 1, 1 } },
             { front, back, left, top },
-            { right, bottom } ) );
+            { right, bottom }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, 0, -1 }, { 1, 1, 1 } },
             { front, back, right, top },
-            { left, bottom } ) );
+            { left, bottom }
+        )
+    );
 
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, -1, -1 }, { 0, 0, 0 } },
             { back, left, bottom },
-            { right, top, front } ) );
+            { right, top, front }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, -1, -1 }, { 1, 0, 0 } },
             { back, right, bottom },
-            { left, top, front } ) );
+            { left, top, front }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, 0, -1 }, { 0, 1, 0 } },
             { back, left, top },
-            { right, bottom, front } ) );
+            { right, bottom, front }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, 0, -1 }, { 1, 1, 0 } },
             { back, right, top },
-            { left, bottom, front } ) );
+            { left, bottom, front }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, -1, 0 }, { 0, 0, 1 } },
             { front, left, bottom },
-            { right, top, back } ) );
+            { right, top, back }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, -1, 0 }, { 1, 0, 1 } },
             { front, right, bottom },
-            { left, top, back } ) );
+            { left, top, back }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { -1, 0, 0 }, { 0, 1, 1 } },
             { front, left, top },
-            { right, bottom, back } ) );
+            { right, bottom, back }
+        )
+    );
     EXPECT_TRUE(
         testOverlap(
             Bounds3 { { 0, 0, 0 }, { 1, 1, 1 } },
             { front, right, top },
-            { left, bottom, back } ) );
+            { left, bottom, back }
+        )
+    );
 }
 
 TEST( Bounds3, inside )
