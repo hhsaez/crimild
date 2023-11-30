@@ -31,7 +31,6 @@
 #include "Mathematics/Traits.hpp"
 #include "Mathematics/Tuple2.hpp"
 #include "Mathematics/tupleBuilder.hpp"
-#include "Mathematics/tupleComponents.hpp"
 
 namespace crimild {
 
@@ -47,7 +46,7 @@ namespace crimild {
     }
 
     template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr auto abs2( const Tuple2< Derived, T > &t ) noexcept
+    [[nodiscard]] inline constexpr auto abs( const Tuple2< Derived, T > &t ) noexcept
     {
         return Derived< T > {
             abs( t.x ),
@@ -55,31 +54,54 @@ namespace crimild {
         };
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto abs( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto abs( const Point2Impl< T > &t ) noexcept
     {
-        constexpr auto N = traits::tupleComponents< TupleImpl >();
-        if constexpr ( N == 2 ) {
-            return tuple2Builder< TupleImpl, T >(
-                abs( t.x ),
-                abs( t.y )
-            );
-        } else if constexpr ( N == 3 ) {
-            return tuple3Builder< TupleImpl, T >(
-                abs( t.x ),
-                abs( t.y ),
-                abs( t.z )
-            );
-        } else if constexpr ( N == 4 ) {
-            return tuple4Builder< TupleImpl, T >(
-                abs( t.x ),
-                abs( t.y ),
-                abs( t.z ),
-                abs( t.w )
-            );
-        } else {
-            return t;
-        }
+        return Point2Impl< T > {
+            abs( t.x ),
+            abs( t.y ),
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto abs( const Vector3Impl< T > &t ) noexcept
+    {
+        return Vector3Impl< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto abs( const Normal3Impl< T > &t ) noexcept
+    {
+        return Normal3Impl< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto abs( const Point3Impl< T > &t ) noexcept
+    {
+        return Point3Impl< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto abs( const Vector4Impl< T > &t ) noexcept
+    {
+        return Vector4Impl< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z ),
+            abs( t.w )
+        };
     }
 
 }
