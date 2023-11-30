@@ -36,14 +36,14 @@
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Vector2Impl< T > &u ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Real lengthSquared( const Vector2< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y;
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Vector2Impl< T > &u ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Real length( const Vector2< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }

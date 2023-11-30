@@ -28,49 +28,66 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_2_
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
-#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple2.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Vector2Impl : public Tuple2Impl< T > {
-        struct Constants {
-            static constexpr auto ZERO = Vector2Impl< T > { 0, 0 };
-            static constexpr auto ONE = Vector2Impl< T > { 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector2Impl< T > {
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto NEGATIVE_INFINITY = Vector2Impl< T > {
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto UNIT_X = Vector2Impl< T > { 1, 0 };
-            static constexpr auto UNIT_Y = Vector2Impl< T > { 0, 1 };
-        };
+    template< concepts::Arithmetic T = Real >
+    class Vector2 : public Tuple2< Vector2, T > {
+    public:
+        static const Vector2 ZERO;
+        static const Vector2 ONE;
+        static const Vector2 POSITIVE_INFINITY;
+        static const Vector2 NEGATIVE_INFINITY;
+        static const Vector2 UNIT_X;
+        static const Vector2 UNIT_Y;
 
-        using Tuple2Impl< T >::x;
-        using Tuple2Impl< T >::y;
+    public:
+        using Tuple2< Vector2, T >::x;
+        using Tuple2< Vector2, T >::y;
 
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator==( const Vector2Impl< U > &other ) const noexcept
+        constexpr Vector2( void ) noexcept = default;
+
+        constexpr Vector2( T x, T y ) noexcept
+            : Tuple2< Vector2, T >( x, y )
         {
-            return x == other.x && y == other.y;
         }
 
         template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator!=( const Vector2Impl< U > &other ) const noexcept
-        {
-            return !( *this == other );
-        }
+        constexpr explicit Vector2( U value ) noexcept
+            : Tuple2< Vector2, T >( value ) { }
+
+        ~Vector2( void ) noexcept = default;
     };
 
-    using Vector2 = Vector2Impl< Real >;
-    using Vector2f = Vector2Impl< Real32 >;
-    using Vector2d = Vector2Impl< Real64 >;
-    using Vector2i = Vector2Impl< Int32 >;
-    using Vector2ui = Vector2Impl< UInt32 >;
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::ZERO( 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::ONE( 1 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::POSITIVE_INFINITY(
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::NEGATIVE_INFINITY(
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::UNIT_X( 1, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector2< T > Vector2< T >::UNIT_Y( 0, 1 );
+
+    using Vector2f = Vector2< Real32 >;
+    using Vector2d = Vector2< Real64 >;
+    using Vector2i = Vector2< Int32 >;
+    using Vector2ui = Vector2< UInt32 >;
 
 }
 
