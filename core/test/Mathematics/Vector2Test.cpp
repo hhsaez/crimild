@@ -68,9 +68,9 @@ TEST( Vector2, equality )
 
 TEST( Vector2, addition )
 {
-    constexpr auto u = Vector2 { 10, 20 };
-    constexpr auto v = Vector2 { 30, 40 };
-    constexpr auto res = Vector2 { 40, 60 };
+    constexpr auto u = Vector2i { 10, 20 };
+    constexpr auto v = Vector2i { 30, 40 };
+    constexpr auto res = Vector2i { 40, 60 };
 
     static_assert( crimild::isEqual( res, u + v ) );
 
@@ -199,7 +199,7 @@ TEST( Vector2, abs )
     constexpr auto u = Vector2f { -10, -20 };
     constexpr auto res = Vector2f { 10, 20 };
 
-    static_assert( isEqual( res, crimild::abs2( u ) ) );
+    static_assert( isEqual( res, crimild::abs( u ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -218,7 +218,7 @@ TEST( Vector2, swizzle )
 {
     constexpr auto u = Vector2i( 2, 3 );
 
-    static_assert( xx( u ) == Vector2i( 2, 2 ) );
+    static_assert( crimild::xx( u ) == Vector2i( 2, 2 ) );
     static_assert( xy( u ) == Vector2i( 2, 3 ) );
     static_assert( yx( u ) == Vector2i( 3, 2 ) );
     static_assert( yy( u ) == Vector2i( 3, 3 ) );

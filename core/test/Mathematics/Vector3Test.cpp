@@ -165,9 +165,9 @@ TEST( Vector3, isNaN )
 TEST( Vector3, abs )
 {
     constexpr auto u = crimild::Vector3 { -10, -20, -30 };
-    constexpr auto res = crimild::Vector3 { 10, 20, 30 };
-
-    static_assert( crimild::isEqual( res, crimild::abs( u ) ) );
+    constexpr auto expected = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto res = crimild::abs( u );
+    static_assert( crimild::isEqual( res, expected ) );
 
     EXPECT_TRUE( true );
 }
