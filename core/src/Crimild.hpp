@@ -180,7 +180,6 @@
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/Vector4.hpp"

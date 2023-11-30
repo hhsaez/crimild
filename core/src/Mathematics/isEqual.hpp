@@ -71,6 +71,12 @@ namespace crimild {
         return isEqual( a.c0, b.c0 ) && isEqual( a.c1, b.c1 ) && isEqual( a.c2, b.c2 ) && isEqual( a.c3, b.c3 );
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const Tuple2< Derived, T > &a, const Tuple2< Derived, U > &b ) noexcept
+    {
+        return isEqual( a.x, b.x ) && isEqual( a.y, b.y );
+    }
+
     template< concepts::Arithmetic T, concepts::Arithmetic U >
     inline constexpr Bool isEqual( const Normal3Impl< T > &a, const Normal3Impl< U > &b ) noexcept
     {
@@ -81,12 +87,6 @@ namespace crimild {
     inline constexpr Bool isEqual( const Point3Impl< T > &a, const Point3Impl< U > &b ) noexcept
     {
         return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z );
-    }
-
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const Vector2Impl< T > &a, const Vector2Impl< U > &b ) noexcept
-    {
-        return isEqual( a.x, b.x ) && isEqual( a.y, b.y );
     }
 
     template< concepts::Arithmetic T, concepts::Arithmetic U >

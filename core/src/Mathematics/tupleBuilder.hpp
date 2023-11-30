@@ -40,51 +40,75 @@ namespace crimild {
     namespace traits {
 
         template< template< typename > class PointImpl >
-        [[nodiscard]] constexpr Bool isPoint( void ) noexcept { return false; }
+        [[nodiscard]] constexpr Bool isPoint( void ) noexcept
+        {
+            return false;
+        }
 
         template<>
-        [[nodiscard]] constexpr Bool isPoint< Point2Impl >( void ) noexcept { return true; }
+        [[nodiscard]] constexpr Bool isPoint< Point2Impl >( void ) noexcept
+        {
+            return true;
+        }
 
         template<>
-        [[nodiscard]] constexpr Bool isPoint< Point3Impl >( void ) noexcept { return true; }
+        [[nodiscard]] constexpr Bool isPoint< Point3Impl >( void ) noexcept
+        {
+            return true;
+        }
 
     }
 
     namespace traits {
 
         template< template< typename > class VectorImpl >
-        [[nodiscard]] inline constexpr Bool isVector( void ) noexcept { return false; }
+        [[nodiscard]] inline constexpr Bool isVector( void ) noexcept
+        {
+            return false;
+        }
+
+        // template<>
+        // [[nodiscard]] inline constexpr Bool isVector< Vector2Impl >( void ) noexcept { return true; }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isVector< Vector2Impl >( void ) noexcept { return true; }
+        [[nodiscard]] inline constexpr Bool isVector< Vector3Impl >( void ) noexcept
+        {
+            return true;
+        }
 
         template<>
-        [[nodiscard]] inline constexpr Bool isVector< Vector3Impl >( void ) noexcept { return true; }
-
-        template<>
-        [[nodiscard]] inline constexpr Bool isVector< Vector4Impl >( void ) noexcept { return true; }
-    }
-
-    namespace traits {
-
-        template< template< typename > class VectorImpl >
-        [[nodiscard]] inline constexpr Bool isNormal( void ) noexcept { return false; }
-
-        template<>
-        [[nodiscard]] inline constexpr Bool isNormal< Normal3Impl >( void ) noexcept { return true; }
-    }
-
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto tuple2Builder( T x, T y ) noexcept
-    {
-        if constexpr ( traits::isPoint< TupleImpl >() ) {
-            return Point2Impl< T > { x, y };
-        } else if constexpr ( traits::isVector< TupleImpl >() ) {
-            return Vector2Impl< T > { x, y };
-        } else {
-            return Tuple2Impl< T > { x, y };
+        [[nodiscard]] inline constexpr Bool isVector< Vector4Impl >( void ) noexcept
+        {
+            return true;
         }
     }
+
+    namespace traits {
+
+        template< template< typename > class VectorImpl >
+        [[nodiscard]] inline constexpr Bool isNormal( void ) noexcept
+        {
+            return false;
+        }
+
+        template<>
+        [[nodiscard]] inline constexpr Bool isNormal< Normal3Impl >( void ) noexcept
+        {
+            return true;
+        }
+    }
+
+    // template< template< typename > class TupleImpl, typename T >
+    // [[nodiscard]] inline constexpr auto tuple2Builder( T x, T y ) noexcept
+    // {
+    //     if constexpr ( traits::isPoint< TupleImpl >() ) {
+    //         return Point2Impl< T > { x, y };
+    //         // } else if constexpr ( traits::isVector< TupleImpl >() ) {
+    //         //     return Vector2Impl< T > { x, y };
+    //     } else {
+    //         return Tuple2Impl< T > { x, y };
+    //     }
+    // }
 
     template< template< typename > class TupleImpl, typename T >
     [[nodiscard]] inline constexpr auto tuple3Builder( T x, T y, T z ) noexcept

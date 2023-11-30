@@ -52,7 +52,7 @@ namespace crimild {
         inline Int32 getMouseLookButton( void ) const noexcept { return m_mouseLookButton; }
 
     private:
-        Vector2 _lastMousePos;
+        Vector2f _lastMousePos;
         crimild::Bool _initialized = false;
         Real32 _speed = 1.0f;
 

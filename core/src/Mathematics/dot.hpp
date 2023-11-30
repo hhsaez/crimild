@@ -37,8 +37,8 @@
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr T dot( const Vector2Impl< T > &u, const Vector2Impl< T > &v ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr T dot( const Vector2< T > &u, const Vector2< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y;
     }

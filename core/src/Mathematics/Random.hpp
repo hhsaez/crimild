@@ -176,7 +176,7 @@ namespace crimild {
             return dist( defaultGenerator() );
         }
 
-        [[nodiscard]] inline Vector2 nextVector2( void ) noexcept
+        [[nodiscard]] inline auto nextVector2( void ) noexcept
         {
             return Vector2 {
                 next(),
@@ -184,7 +184,7 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector2 nextVector2( Real lo, Real hi ) noexcept
+        [[nodiscard]] inline auto nextVector2( Real lo, Real hi ) noexcept
         {
             return Vector2 {
                 next( lo, hi ),
@@ -228,7 +228,7 @@ namespace crimild {
             return sign( dot( v, N ) ) * v;
         }
 
-        [[nodiscard]] inline Vector2 nextInUnitDisk( void ) noexcept
+        [[nodiscard]] inline auto nextInUnitDisk( void ) noexcept
         {
             while ( true ) {
                 const auto v = nextVector2( -1, 1 );

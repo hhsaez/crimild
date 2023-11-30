@@ -43,34 +43,61 @@ namespace crimild {
     namespace traits {
 
         template< template< typename > class TupleImpl >
-        [[nodiscard]] constexpr Size tupleComponents( void ) noexcept { return 0; }
+        [[nodiscard]] constexpr Size tupleComponents( void ) noexcept
+        {
+            return 0;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple2Impl >( void ) noexcept { return 2; }
+        [[nodiscard]] constexpr Size tupleComponents< Tuple2Impl >( void ) noexcept
+        {
+            return 2;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple3Impl >( void ) noexcept { return 3; }
+        [[nodiscard]] constexpr Size tupleComponents< Tuple3Impl >( void ) noexcept
+        {
+            return 3;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Tuple4Impl >( void ) noexcept { return 4; }
+        [[nodiscard]] constexpr Size tupleComponents< Tuple4Impl >( void ) noexcept
+        {
+            return 4;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Point2Impl >( void ) noexcept { return 2; }
+        [[nodiscard]] constexpr Size tupleComponents< Point2Impl >( void ) noexcept
+        {
+            return 2;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Point3Impl >( void ) noexcept { return 3; }
+        [[nodiscard]] constexpr Size tupleComponents< Point3Impl >( void ) noexcept
+        {
+            return 3;
+        }
+
+        // template<>
+        // [[nodiscard]] constexpr Size tupleComponents< Vector2Impl >( void ) noexcept { return 2; }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector2Impl >( void ) noexcept { return 2; }
+        [[nodiscard]] constexpr Size tupleComponents< Vector3Impl >( void ) noexcept
+        {
+            return 3;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector3Impl >( void ) noexcept { return 3; }
+        [[nodiscard]] constexpr Size tupleComponents< Vector4Impl >( void ) noexcept
+        {
+            return 4;
+        }
 
         template<>
-        [[nodiscard]] constexpr Size tupleComponents< Vector4Impl >( void ) noexcept { return 4; }
-
-        template<>
-        [[nodiscard]] constexpr Size tupleComponents< Normal3Impl >( void ) noexcept { return 3; }
+        [[nodiscard]] constexpr Size tupleComponents< Normal3Impl >( void ) noexcept
+        {
+            return 3;
+        }
 
     }
 

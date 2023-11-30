@@ -29,12 +29,13 @@
 #define CRIMILD_MATHEMATICS_ABS_
 
 #include "Mathematics/Traits.hpp"
+#include "Mathematics/Tuple2.hpp"
 #include "Mathematics/tupleBuilder.hpp"
 #include "Mathematics/tupleComponents.hpp"
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     inline constexpr T abs( const T &x ) noexcept
     {
         if constexpr ( traits::isReal< T >() ) {
@@ -45,6 +46,15 @@ namespace crimild {
         }
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto abs2( const Tuple2< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            abs( t.x ),
+            abs( t.y ),
+        };
+    }
+
     template< template< typename > class TupleImpl, typename T >
     [[nodiscard]] inline constexpr auto abs( const TupleImpl< T > &t ) noexcept
     {
@@ -52,18 +62,23 @@ namespace crimild {
         if constexpr ( N == 2 ) {
             return tuple2Builder< TupleImpl, T >(
                 abs( t.x ),
-                abs( t.y ) );
+                abs( t.y )
+            );
         } else if constexpr ( N == 3 ) {
             return tuple3Builder< TupleImpl, T >(
                 abs( t.x ),
                 abs( t.y ),
-                abs( t.z ) );
-        } else {
+                abs( t.z )
+            );
+        } else if constexpr ( N == 4 ) {
             return tuple4Builder< TupleImpl, T >(
                 abs( t.x ),
                 abs( t.y ),
                 abs( t.z ),
-                abs( t.w ) );
+                abs( t.w )
+            );
+        } else {
+            return t;
         }
     }
 

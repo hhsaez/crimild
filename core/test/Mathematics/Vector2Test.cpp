@@ -27,7 +27,6 @@
 
 #include "Mathematics/Vector2.hpp"
 
-#include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/isEqual.hpp"
@@ -75,6 +74,13 @@ TEST( Vector2, addition )
 
     static_assert( crimild::isEqual( res, u + v ) );
 
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret += Vector2f { 20, 30 };
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( 30, 60 ) ) );
+
     EXPECT_TRUE( true );
 }
 
@@ -86,17 +92,31 @@ TEST( Vector2, subtraction )
 
     static_assert( crimild::isEqual( res, u - v ) );
 
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret -= Vector2f { 20, 30 };
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( -10, 0 ) ) );
+
     EXPECT_TRUE( true );
 }
 
 TEST( Vector2, multiplication )
 {
-    constexpr auto u = Vector2 { 10, 20 };
+    constexpr auto u = Vector2f { 10, 20 };
     constexpr auto s = Real( 5 );
-    constexpr auto res = Vector2 { 50, 100 };
+    constexpr auto res = Vector2f { 50, 100 };
 
     static_assert( crimild::isEqual( res, u * s ) );
     static_assert( crimild::isEqual( res, s * u ) );
+
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret *= 2;
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( 20, 60 ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -109,16 +129,48 @@ TEST( Vector2, vectorMultiplication )
 
     static_assert( crimild::isEqual( res, u * v ) );
 
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret *= Vector2f { 2, 3 };
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( 20, 90 ) ) );
+
     EXPECT_TRUE( true );
 }
 
 TEST( Vector2, division )
 {
-    constexpr auto u = Vector2 { 10, 20 };
+    constexpr auto u = Vector2f { 10, 20 };
     constexpr auto s = Real( 2 );
-    constexpr auto res = Vector2 { 5, 10 };
+    constexpr auto res = Vector2f { 5, 10 };
 
     static_assert( crimild::isEqual( res, u / s ) );
+
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret /= 2;
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( 5, 15 ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, vectorDivision )
+{
+    constexpr auto u = Vector2f { 10, 20 };
+    constexpr auto v = Vector2f { 2, 5 };
+    constexpr auto res = Vector2f { 5, 4 };
+
+    static_assert( crimild::isEqual( res, u / v ) );
+
+    constexpr auto w = [] {
+        auto ret = Vector2f { 10, 30 };
+        ret /= Vector2f { 2, 5 };
+        return ret;
+    }();
+    static_assert( isEqual( w, Vector2f( 5, 6 ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -144,10 +196,10 @@ TEST( Vector2, isNaN )
 
 TEST( Vector2, abs )
 {
-    constexpr auto u = Vector2 { -10, -20 };
-    constexpr auto res = Vector2 { 10, 20 };
+    constexpr auto u = Vector2f { -10, -20 };
+    constexpr auto res = Vector2f { 10, 20 };
 
-    static_assert( isEqual( res, crimild::abs( u ) ) );
+    static_assert( isEqual( res, crimild::abs2( u ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -158,6 +210,18 @@ TEST( Vector2, dot )
     constexpr auto v = Vector2 { 8, 10 };
 
     static_assert( 46 == dot( u, v ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, swizzle )
+{
+    constexpr auto u = Vector2i( 2, 3 );
+
+    static_assert( xx( u ) == Vector2i( 2, 2 ) );
+    static_assert( xy( u ) == Vector2i( 2, 3 ) );
+    static_assert( yx( u ) == Vector2i( 3, 2 ) );
+    static_assert( yy( u ) == Vector2i( 3, 3 ) );
 
     EXPECT_TRUE( true );
 }

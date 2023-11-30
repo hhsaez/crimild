@@ -952,7 +952,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
                     alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
                     alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
-                    alignas( 16 ) Vector2 uv = Vector2 { 0, 0 };
+                    alignas( 16 ) Vector2f uv = Vector2f { 0, 0 };
                     alignas( 4 ) Int32 bounces = 0;
                     alignas( 4 ) Int32 samples = 0;
                 };

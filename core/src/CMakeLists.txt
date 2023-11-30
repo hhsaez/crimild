@@ -207,7 +207,6 @@ target_sources(
     Mathematics/Matrix4.hpp
     Mathematics/Matrix4_constants.hpp
     Mathematics/Matrix4_determinant.hpp
-    Mathematics/Matrix4_equality.hpp
     Mathematics/Matrix4_inverse.hpp
     Mathematics/Matrix4_operators.hpp
     Mathematics/Matrix4_transpose.hpp
@@ -226,7 +225,6 @@ target_sources(
     Mathematics/Point2_constants.hpp
     Mathematics/Point3.hpp
     Mathematics/Point3Ops.hpp
-    Mathematics/Point3_constants.hpp
     Mathematics/Point3_isInfinity.hpp
     Mathematics/Point_equality.hpp
     Mathematics/pow.hpp
@@ -236,7 +234,6 @@ target_sources(
     Mathematics/Ray3.hpp
     Mathematics/Ray3_operators.hpp
     Mathematics/Ray_apply.hpp
-    Mathematics/Ray_equality.hpp
     Mathematics/README.md
     Mathematics/Rect.hpp
     Mathematics/reflect.hpp
@@ -256,7 +253,6 @@ target_sources(
     Mathematics/Transformation_apply.hpp
     Mathematics/Transformation_constants.hpp
     Mathematics/Transformation_easing.hpp
-    Mathematics/Transformation_equality.hpp
     Mathematics/Transformation_euler.hpp
     Mathematics/Transformation_inverse.hpp
     Mathematics/Transformation_isIdentity.hpp
@@ -276,15 +272,10 @@ target_sources(
     Mathematics/tupleComponents.hpp
     Mathematics/Vector2.hpp
     Mathematics/Vector2Ops.hpp
-    Mathematics/Vector2_constants.hpp
     Mathematics/Vector3.hpp
     Mathematics/Vector3Ops.hpp
-    Mathematics/Vector3_constants.hpp
-    Mathematics/Vector3_isZero.hpp
     Mathematics/Vector4.hpp
     Mathematics/Vector4Ops.hpp
-    Mathematics/Vector4_constants.hpp
-    Mathematics/Vector_equality.hpp
     Mathematics/whichSide.hpp
     Messaging/MessageQueue.hpp
     Navigation/NavigationCell.hpp

@@ -46,11 +46,11 @@ namespace crimild {
         return Point3Impl< T > { t.x, t.y, t.z };
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Vector2Impl< T > vector2( const Tuple2Impl< T > &t ) noexcept
-    {
-        return Vector2Impl< T > { t.x, t.y };
-    }
+    // template< typename T >
+    // [[nodiscard]] inline constexpr Vector2Impl< T > vector2( const Tuple2Impl< T > &t ) noexcept
+    // {
+    //     return Vector2Impl< T > { t.x, t.y };
+    // }
 
     template< typename T >
     [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple3Impl< T > &t ) noexcept

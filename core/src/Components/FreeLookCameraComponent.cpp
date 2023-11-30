@@ -37,7 +37,6 @@
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector2Ops.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Simulation/Input.hpp"
@@ -47,7 +46,7 @@ using namespace crimild;
 
 void FreeLookCameraComponent::start( void )
 {
-    _lastMousePos = Vector2::Constants::ZERO;
+    _lastMousePos = Vector2f::ZERO;
 
     m_position = location( getNode()->getLocal() );
 
@@ -76,7 +75,7 @@ void FreeLookCameraComponent::update( const Clock &c )
     auto root = getNode();
 
     const auto mousePos = Input::getInstance()->getMousePosition();
-    const auto mouseDelta = _initialized ? mousePos - _lastMousePos : Vector2::Constants::ZERO;
+    const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::ZERO;
     _initialized = true;
     _lastMousePos = mousePos;
 

@@ -39,7 +39,7 @@
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
-#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/easing.hpp"
 #include "Mathematics/intersect.hpp"
@@ -577,7 +577,7 @@ namespace crimild {
             Ray3 ray;
             ColorRGB sampleColor;
             ColorRGB accumColor;
-            Vector2 uv;
+            Vector2<> uv;
             Int32 bounces;
             Int32 samples;
         };

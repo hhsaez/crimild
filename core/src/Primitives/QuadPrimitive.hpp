@@ -83,10 +83,10 @@ namespace crimild {
     public:
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
-            Vector2f size = Vector2f::Constants::ONE;
+            Vector2f size = Vector2f::ONE;
             VertexLayout layout = VertexP3N3TC2::getLayout();
-            Vector2f texCoordOffset = Vector2f::Constants::ZERO;
-            Vector2f texCoordScale = Vector2f::Constants::ONE;
+            Vector2f texCoordOffset = Vector2f::ZERO;
+            Vector2f texCoordScale = Vector2f::ONE;
         };
 
     public:
