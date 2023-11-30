@@ -129,7 +129,7 @@ namespace crimild {
 
         struct ClearValue {
             ColorRGBA color = ColorRGBA::Constants::CLEAR;
-            Vector2f depthStencil = Vector2f::Constants::UNIT_X;
+            Vector2f depthStencil = Vector2f::UNIT_X;
         };
         ClearValue clearValue;
 

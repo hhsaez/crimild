@@ -28,7 +28,7 @@
 #include "ParametricPrimitive.hpp"
 
 #include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/normalize.hpp"
@@ -47,7 +47,7 @@ void ParametricPrimitive::setInterval( const ParametricInterval &interval )
 {
     _upperBound = interval.upperBound;
     _divisions = interval.divisions;
-    _slices = _divisions - Vector2i { 1, 1 };
+    _slices = _divisions - Vector2i::ONE;
     _textureCount = interval.textureCount;
 }
 

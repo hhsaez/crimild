@@ -219,7 +219,7 @@ void OBJLoader::generateGeometry( void )
             auto v = VertexP3N3TC2 {
                 .position = _positions[ faceIndices[ 0 ] - 1 ],
                 .normal = !_normals.empty() ? _normals[ faceIndices[ 2 ] - 1 ] : Vector3f::Constants::ZERO,
-                .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::Constants::ZERO,
+                .texCoord = !_textureCoords.empty() ? _textureCoords[ faceIndices[ 1 ] - 1 ] : Vector2f::ZERO,
             };
 
             if ( !uniqueVertices.contains( v ) ) {

@@ -27,7 +27,7 @@
 
 #include "TrefoilKnotPrimitive.hpp"
 
-#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/normalize.hpp"

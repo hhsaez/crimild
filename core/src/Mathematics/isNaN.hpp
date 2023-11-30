@@ -40,7 +40,7 @@
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     inline constexpr Bool isNaN( const T &value ) noexcept
     {
         // std::isnan cannot be used in constexpr
@@ -48,8 +48,8 @@ namespace crimild {
         return value != value;
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Vector2Impl< T > &t ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isNaN( const Vector2< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y );
     }

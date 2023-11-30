@@ -70,10 +70,10 @@ namespace crimild {
         };
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Vector2Impl< T > permute( const Vector2Impl< T > &u, Int x, Int y ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Vector2< T > permute( const Vector2< T > &u, size_t x, size_t y ) noexcept
     {
-        return Vector2Impl< T > {
+        return Vector2< T > {
             u[ x ],
             u[ y ],
         };
