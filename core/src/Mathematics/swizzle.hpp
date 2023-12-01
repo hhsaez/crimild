@@ -30,9 +30,51 @@
 
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/ColorRGBA.hpp"
+#include "Mathematics/Tuple2.hpp"
 #include "Mathematics/tupleBuilder.hpp"
 
 namespace crimild {
+
+    ///@{
+    /**
+     * @brief Swizzle function for Tuple2 derived classes
+     */
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto xx( const Tuple2< Derived, T > &u ) noexcept
+    {
+        return Derived< T > {
+            u.x,
+            u.x,
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto xy( const Tuple2< Derived, T > &u ) noexcept
+    {
+        return Derived< T > {
+            u.x,
+            u.y,
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto yx( const Tuple2< Derived, T > &u ) noexcept
+    {
+        return Derived< T > {
+            u.y,
+            u.x,
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto yy( const Tuple2< Derived, T > &u ) noexcept
+    {
+        return Derived< T > {
+            u.y,
+            u.y,
+        };
+    }
+    ///@}
 
     template< typename T >
     [[nodiscard]] inline constexpr Point2Impl< T > point2( const Tuple2Impl< T > &t ) noexcept
@@ -45,12 +87,6 @@ namespace crimild {
     {
         return Point3Impl< T > { t.x, t.y, t.z };
     }
-
-    // template< typename T >
-    // [[nodiscard]] inline constexpr Vector2Impl< T > vector2( const Tuple2Impl< T > &t ) noexcept
-    // {
-    //     return Vector2Impl< T > { t.x, t.y };
-    // }
 
     template< typename T >
     [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple3Impl< T > &t ) noexcept

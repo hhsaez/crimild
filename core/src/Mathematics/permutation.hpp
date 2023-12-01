@@ -40,40 +40,10 @@
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Tuple2Impl< T > permute( const Tuple2Impl< T > &u, Int x, Int y ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto permute( const Tuple2< Derived, T > &u, size_t x, size_t y ) noexcept
     {
-        return Tuple2Impl< T > {
-            u[ x ],
-            u[ y ],
-        };
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Tuple3Impl< T > permute( const Tuple3Impl< T > &u, Int x, Int y, Int z ) noexcept
-    {
-        return Tuple3Impl< T > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
-        };
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Tuple4Impl< T > permute( const Tuple4Impl< T > &u, Int x, Int y, Int z, Int w ) noexcept
-    {
-        return Tuple4Impl< T > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
-            u[ w ],
-        };
-    }
-
-    template< concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Vector2< T > permute( const Vector2< T > &u, size_t x, size_t y ) noexcept
-    {
-        return Vector2< T > {
+        return Derived< T > {
             u[ x ],
             u[ y ],
         };

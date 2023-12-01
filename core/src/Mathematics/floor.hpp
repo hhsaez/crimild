@@ -34,31 +34,77 @@
 
 namespace crimild {
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     [[nodiscard]] inline constexpr T floor( T x ) noexcept
     {
-        return std::floor( x );
+        if constexpr ( traits::isHighPrecision< T >() ) {
+            // High precision floating-point should use the standard implementation
+            // which is not constexpr.
+            return std::floor( x );
+        } else {
+            // Use int64 to avoid precision errors when casting float values
+            const int64_t i = static_cast< int64_t >( x );
+            return static_cast< T >( x < i ? i - 1 : i );
+        }
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto floor( const TupleImpl< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto floor( const Tuple2< Derived, T > &t ) noexcept
     {
-        if constexpr ( traits::tupleComponents< TupleImpl >() == 2 ) {
-            return tuple2Builder< TupleImpl, T >(
-                floor( t.x ),
-                floor( t.y ) );
-        } else if constexpr ( traits::tupleComponents< TupleImpl >() == 3 ) {
-            return tuple3Builder< TupleImpl, T >(
-                floor( t.x ),
-                floor( t.y ),
-                floor( t.z ) );
-        } else {
-            return tuple4Builder< TupleImpl, T >(
-                floor( t.x ),
-                floor( t.y ),
-                floor( t.z ),
-                floor( t.w ) );
-        }
+        return Derived< T > {
+            floor( t.x ),
+            floor( t.y ),
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto floor( const Point2Impl< T > &t ) noexcept
+    {
+        return Point2Impl< T > {
+            floor( t.x ),
+            floor( t.y ),
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto floor( const Vector3Impl< T > &t ) noexcept
+    {
+        return Vector3Impl< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto floor( const Normal3Impl< T > &t ) noexcept
+    {
+        return Normal3Impl< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto floor( const Point3Impl< T > &t ) noexcept
+    {
+        return Point3Impl< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z )
+        };
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr auto floor( const Vector4Impl< T > &t ) noexcept
+    {
+        return Vector4Impl< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z ),
+            floor( t.w )
+        };
     }
 
 }
