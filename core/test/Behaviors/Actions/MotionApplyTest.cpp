@@ -32,7 +32,6 @@
 #include "Behaviors/Composites/Sequence.hpp"
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Node.hpp"

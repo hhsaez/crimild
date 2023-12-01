@@ -77,12 +77,6 @@ namespace crimild {
     ///@}
 
     template< typename T >
-    [[nodiscard]] inline constexpr Point2Impl< T > point2( const Tuple2Impl< T > &t ) noexcept
-    {
-        return Point2Impl< T > { t.x, t.y };
-    }
-
-    template< typename T >
     [[nodiscard]] inline constexpr Point3Impl< T > point3( const Tuple3Impl< T > &t ) noexcept
     {
         return Point3Impl< T > { t.x, t.y, t.z };

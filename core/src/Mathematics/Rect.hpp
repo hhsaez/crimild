@@ -28,14 +28,14 @@
 #ifndef CRIMILD_MATHEMATICS_RECT_
 #define CRIMILD_MATHEMATICS_RECT_
 
-#include "Point2.hpp"
-#include "Size2D.hpp"
+#include "Mathematics/Point2.hpp"
+#include "Mathematics/Size2D.hpp"
 
 namespace crimild {
 
     template< typename T >
     struct RectImpl {
-        Point2Impl< T > origin;
+        Point2< T > origin;
         Size2DImpl< T > size;
 
         [[nodiscard]] inline constexpr Bool operator==( const RectImpl &other ) const noexcept
@@ -50,9 +50,9 @@ namespace crimild {
     };
 
     template< typename T >
-    [[nodiscard]] inline constexpr Point2Impl< T > center( const RectImpl< T > &rect ) noexcept
+    [[nodiscard]] inline constexpr Point2< T > center( const RectImpl< T > &rect ) noexcept
     {
-        return Point2Impl< T > {
+        return Point2< T > {
             rect.origin.x + rect.size.width / T( 2 ),
             rect.origin.y + rect.size.height / T( 2 ),
         };

@@ -126,7 +126,10 @@ void UIFrame::decode( coding::Decoder &decoder )
 
     auto frame = Vector4f::Constants::ZERO;
     decoder.decode( "extensions", frame );
-    _extensions = Rectf { frame.x, frame.y, frame.z, frame.w };
+    _extensions = Rectf {
+        .origin = { frame.x, frame.y },
+        .size = { frame.z, frame.w },
+    };
 
     decoder.decode( "constraints", _constraints );
 }

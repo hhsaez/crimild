@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_IS_EQUAL_
 
 #include "Mathematics/Bounds3.hpp"
-#include "Mathematics/Point_equality.hpp"
 
 namespace crimild {
 

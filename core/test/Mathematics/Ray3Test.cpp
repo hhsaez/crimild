@@ -27,7 +27,6 @@
 
 #include "Mathematics/Ray3.hpp"
 
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/io.hpp"
 

@@ -28,7 +28,6 @@
 #include "Mathematics/Box.hpp"
 
 #include "Mathematics/Box_normal.hpp"
-#include "Mathematics/Point_equality.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>

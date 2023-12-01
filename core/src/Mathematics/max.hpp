@@ -67,12 +67,6 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr T max( const Tuple2Impl< T > &t ) noexcept
-    {
-        return max( t[ 0 ], t[ 1 ] );
-    }
-
-    template< typename T >
     [[nodiscard, deprecated]] inline constexpr T max( const Tuple3Impl< T > &t ) noexcept
     {
         return max( t[ 0 ], max( t[ 1 ], t[ 2 ] ) );
@@ -82,15 +76,6 @@ namespace crimild {
     [[nodiscard, deprecated]] inline constexpr T max( const Tuple4Impl< T > &t ) noexcept
     {
         return max( t[ 0 ], max( t[ 1 ], max( t[ 2 ], t[ 3 ] ) ) );
-    }
-
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto max( const Point2Impl< T > &lhs, const Point2Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = max( lhs.x, rhs.x );
-        ret.y = max( lhs.y, rhs.y );
-        return ret;
     }
 
     template< typename T, typename U >
@@ -131,14 +116,6 @@ namespace crimild {
         ret.y = max( lhs.y, rhs.y );
         ret.z = max( lhs.z, rhs.z );
         ret.w = max( lhs.w, rhs.w );
-        return ret;
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr size_t maxDimension( const Tuple2Impl< T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] > t[ ret ] ? 1 : ret;
         return ret;
     }
 

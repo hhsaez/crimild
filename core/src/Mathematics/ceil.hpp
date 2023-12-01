@@ -58,15 +58,6 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto ceil( const Point2Impl< T > &t ) noexcept
-    {
-        return Point2Impl< T > {
-            ceil( t.x ),
-            ceil( t.y ),
-        };
-    }
-
-    template< typename T >
     [[nodiscard, deprecated]] inline constexpr auto ceil( const Vector3Impl< T > &t ) noexcept
     {
         return Vector3Impl< T > {

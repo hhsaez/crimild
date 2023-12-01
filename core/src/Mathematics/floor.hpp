@@ -58,15 +58,6 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto floor( const Point2Impl< T > &t ) noexcept
-    {
-        return Point2Impl< T > {
-            floor( t.x ),
-            floor( t.y ),
-        };
-    }
-
-    template< typename T >
     [[nodiscard, deprecated]] inline constexpr auto floor( const Vector3Impl< T > &t ) noexcept
     {
         return Vector3Impl< T > {

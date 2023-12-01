@@ -4,6 +4,7 @@
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/isZero.hpp"
 #include "Mathematics/length.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Navigation/NavigationController.hpp"

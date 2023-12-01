@@ -28,9 +28,9 @@
 #ifndef CRIMILD_CORE_MATHEMATICS_PLANE_
 #define CRIMILD_CORE_MATHEMATICS_PLANE_
 
-#include "Normal3.hpp"
-#include "Point3.hpp"
-#include "Point_equality.hpp"
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/isEqual.hpp"
 
 namespace crimild {
 

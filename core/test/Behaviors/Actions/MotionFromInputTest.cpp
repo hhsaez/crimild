@@ -35,7 +35,6 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Node.hpp"
