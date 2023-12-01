@@ -44,7 +44,6 @@
 #include "Mathematics/Bounds3_surfaceArea.hpp"
 #include "Mathematics/Bounds3_volume.hpp"
 #include "Mathematics/Point3_isInfinity.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/io.hpp"
 

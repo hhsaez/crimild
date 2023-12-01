@@ -28,7 +28,6 @@
 #include "SceneGraph/Light.hpp"
 
 #include "Mathematics/ColorRGB.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
 

@@ -29,7 +29,6 @@
 
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "SceneGraph/Node.hpp"
 

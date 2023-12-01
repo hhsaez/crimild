@@ -43,8 +43,8 @@
 
 namespace crimild {
 
-    template< typename T >
-    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple2Impl< T > &u ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple2< Derived, T > &u ) noexcept
     {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
             << std::setprecision( 6 );

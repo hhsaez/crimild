@@ -66,12 +66,6 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr T min( const Tuple2Impl< T > &t ) noexcept
-    {
-        return min( t[ 0 ], t[ 1 ] );
-    }
-
-    template< typename T >
     [[nodiscard, deprecated]] inline constexpr T min( const Tuple3Impl< T > &t ) noexcept
     {
         return min( t[ 0 ], min( t[ 1 ], t[ 2 ] ) );
@@ -81,15 +75,6 @@ namespace crimild {
     [[nodiscard, deprecated]] inline constexpr T min( const Tuple4Impl< T > &t ) noexcept
     {
         return min( t[ 0 ], min( t[ 1 ], min( t[ 2 ], t[ 3 ] ) ) );
-    }
-
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto min( const Point2Impl< T > &lhs, const Point2Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = min( lhs.x, rhs.x );
-        ret.y = min( lhs.y, rhs.y );
-        return ret;
     }
 
     template< typename T, typename U >
@@ -130,14 +115,6 @@ namespace crimild {
         ret.y = min( lhs.y, rhs.y );
         ret.z = min( lhs.z, rhs.z );
         ret.w = min( lhs.w, rhs.w );
-        return ret;
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple2Impl< T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
         return ret;
     }
 
