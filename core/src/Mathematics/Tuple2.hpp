@@ -339,35 +339,6 @@ namespace crimild {
         ///@}
     };
 
-    template< typename T >
-    struct [[deprecated]] Tuple2Impl {
-        T x;
-        T y;
-
-        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
-        {
-            switch ( index ) {
-                case 0:
-                    return x;
-                case 1:
-                    return y;
-                default:
-                    return NAN;
-            }
-        }
-
-        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
-        {
-            switch ( index ) {
-                case 0:
-                    return x;
-                case 1:
-                default:
-                    return y;
-            }
-        }
-    };
-
 }
 
 #endif

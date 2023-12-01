@@ -32,19 +32,54 @@
 
 namespace crimild {
 
-    template< typename T >
-    struct Point2Impl : public Tuple2Impl< T > {
-        struct Constants;
+    template< concepts::Arithmetic T = Real >
+    class Point2 : public Tuple2< Point2, T > {
+    public:
+        static const Point2 ZERO;
+        static const Point2 ONE;
+        static const Point2 POSITIVE_INFINITY;
+        static const Point2 NEGATIVE_INFINITY;
 
-        [[nodiscard]] inline constexpr Bool operator==( const Point2Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Point2Impl &other ) const noexcept;
+    public:
+        using Tuple2< Point2, T >::x;
+        using Tuple2< Point2, T >::y;
+
+        constexpr Point2( void ) noexcept = default;
+
+        constexpr Point2( T x, T y ) noexcept
+            : Tuple2< Point2, T >( x, y )
+        {
+        }
+
+        template< concepts::Arithmetic U >
+        constexpr explicit Point2( U value ) noexcept
+            : Tuple2< Point2, T >( value ) { }
+
+        ~Point2( void ) noexcept = default;
     };
 
-    using Point2 = Point2Impl< Real >;
-    using Point2f = Point2Impl< Real32 >;
-    using Point2d = Point2Impl< Real64 >;
-    using Point2i = Point2Impl< Int32 >;
-    using Point2ui = Point2Impl< UInt32 >;
+    template< concepts::Arithmetic T >
+    constexpr const Point2< T > Point2< T >::ZERO( 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Point2< T > Point2< T >::ONE( 1 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Point2< T > Point2< T >::POSITIVE_INFINITY(
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Point2< T > Point2< T >::NEGATIVE_INFINITY(
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity()
+    );
+
+    using Point2f = Point2< Real32 >;
+    using Point2d = Point2< Real64 >;
+    using Point2i = Point2< Int32 >;
+    using Point2ui = Point2< UInt32 >;
 
 }
 

@@ -38,16 +38,16 @@
 
 namespace crimild {
 
-    template< typename T >
-    inline constexpr const T *get_ptr( const Tuple2Impl< T > &u )
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    inline constexpr const T *get_ptr( const Tuple2< Derived, T > &u )
     {
-        return static_cast< const T * >( &u.x );
+        return static_cast< const Derived< T > * >( &u.x );
     }
 
-    template< typename T >
-    inline constexpr T *get_ptr( Tuple2Impl< T > &u )
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    inline constexpr T *get_ptr( Tuple2< Derived, T > &u )
     {
-        return static_cast< T * >( &u.x );
+        return static_cast< Derived< T > * >( &u.x );
     }
 
     template< typename T >

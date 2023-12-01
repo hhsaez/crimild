@@ -48,10 +48,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
         return ViewportDimensions {
             .scalingMode = viewport.scalingMode,
             .dimensions = Rectf {
-                viewport.dimensions.origin.x + padding,
-                viewport.dimensions.origin.y + padding,
-                viewport.dimensions.size.width - 2.0f * padding,
-                viewport.dimensions.size.height - 2.0f * padding,
+                .origin = viewport.dimensions.origin + Point2f( padding ),
+                .size = {
+                    .width = viewport.dimensions.size.width - 2.0f * padding,
+                    .height = viewport.dimensions.size.height - 2.0f * padding,
+                },
             },
         };
     };
@@ -130,7 +131,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
                                     gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
                                     outTexCoord = texCoords[ gl_VertexIndex ];
                                 }
-                            )" ),
+                            )"
+                        ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
@@ -145,8 +147,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
                                     vec4 color = texture( uColorMap, inTexCoord );
                                     outColor = vec4( color.rgb, 1.0 );
                                 }
-                            )" ),
-                    } );
+                            )"
+                        ),
+                    }
+                );
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -160,7 +164,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
                     }(),
                 };
                 return program;
-            }() );
+            }()
+        );
         pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->depthStencilState.depthTestEnable = false;
@@ -177,7 +182,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
                 },
             };
             return descriptorSet;
-        } );
+        }
+    );
 
     renderPass->reads( resources );
     renderPass->writes( { color } );
@@ -199,6 +205,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::debug( Array< SharedPo
                     commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
                     commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptorSet ) );
                     commandBuffer->draw( 6 );
-                } );
-        } );
+                }
+            );
+        }
+    );
 }
