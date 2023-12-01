@@ -28,9 +28,16 @@
 #include "Mathematics/Vector2.hpp"
 
 #include "Mathematics/abs.hpp"
+#include "Mathematics/ceil.hpp"
 #include "Mathematics/dot.hpp"
+#include "Mathematics/easing.hpp"
+#include "Mathematics/floor.hpp"
 #include "Mathematics/isEqual.hpp"
 #include "Mathematics/isNaN.hpp"
+#include "Mathematics/max.hpp"
+#include "Mathematics/min.hpp"
+#include "Mathematics/permutation.hpp"
+#include "Mathematics/swizzle.hpp"
 
 #include "gtest/gtest.h"
 
@@ -56,9 +63,12 @@ TEST( Vector2, index )
 
 TEST( Vector2, equality )
 {
-    constexpr auto u = Vector2 { 10, 20 };
-    constexpr auto v = Vector2 { 30, 40 };
-    constexpr auto w = Vector2 { 10, 20 };
+    constexpr auto u = Vector2i { 10, 20 };
+    constexpr auto v = Vector2i { 30, 40 };
+    constexpr auto w = Vector2i { 10, 20 };
+
+    static_assert( u != v );
+    static_assert( u == w );
 
     static_assert( isEqual( u, w ), "equality" );
     static_assert( !isEqual( u, v ), "inequality" );
@@ -201,6 +211,75 @@ TEST( Vector2, abs )
 
     static_assert( isEqual( res, crimild::abs( u ) ) );
 
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, ceil )
+{
+    constexpr auto u = Vector2f { 25.6, -3.2 };
+    static_assert( isEqual( ceil( u ), Vector2f { 26, -3 } ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, floor )
+{
+    constexpr auto u = Vector2f { 25.6, -3.2 };
+    static_assert( isEqual( floor( u ), Vector2f { 25, -4 } ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, lerp )
+{
+    constexpr auto u = Vector2f { 10, 20 };
+    constexpr auto v = Vector2f { 20, 30 };
+    static_assert( isEqual( lerp( u, v, 0.5f ), Vector2f { 15, 25 } ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, min )
+{
+    constexpr auto u = crimild::Vector2 { 2, 3 };
+    constexpr auto v = crimild::Vector2 { 1, 5 };
+    constexpr auto m = crimild::Vector2 { 1, 3 };
+
+    static_assert( 2 == crimild::min( u ) );
+    static_assert( crimild::isEqual( m, crimild::min( u, v ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, max )
+{
+    constexpr auto u = crimild::Vector2 { 2, 3 };
+    constexpr auto v = crimild::Vector2 { 1, 5 };
+    constexpr auto m = crimild::Vector2 { 2, 5 };
+
+    static_assert( 3 == crimild::max( u ) );
+    static_assert( crimild::isEqual( m, crimild::max( u, v ) ) );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector2, minDimension )
+{
+    constexpr auto u = crimild::Vector2 { 2, 3 };
+
+    EXPECT_EQ( 0, crimild::minDimension( u ) );
+}
+
+TEST( Vector2, maxDimension )
+{
+    constexpr auto u = crimild::Vector2 { 2, 3 };
+
+    EXPECT_EQ( 1, crimild::maxDimension( u ) );
+}
+
+TEST( Vector2, permutation )
+{
+    static_assert( permute( Vector2i { 2, 3 }, 1, 0 ) == Vector2i { 3, 2 } );
     EXPECT_TRUE( true );
 }
 

@@ -170,6 +170,10 @@ namespace crimild {
         /**
          * @brief Comparison operators
          *
+         * In order to prevent ambiguities, these overloads use Tuple2 as param. It is still
+         * not possible to compare objects of different Derived types, though, so comparing
+         * Vector2 and Point2 instances is not allowed.
+         *
          * @remarks
          * These operators perform strict equality for tuple components. In some scenarios,
          * you might want to use isEqual() instead for comparing floating-point values.
@@ -177,13 +181,13 @@ namespace crimild {
          * @see isEqual
          */
         template< concepts::Arithmetic U >
-        inline constexpr bool operator==( const Derived< U > &other ) const noexcept
+        inline constexpr bool operator==( const Tuple2< Derived, U > &other ) const noexcept
         {
             return x == other.x && y == other.y;
         }
 
         template< concepts::Arithmetic U >
-        inline constexpr bool operator!=( const Derived< U > &other ) const noexcept
+        inline constexpr bool operator!=( const Tuple2< Derived, U > &other ) const noexcept
         {
             return !( *this == other );
         }
@@ -334,47 +338,6 @@ namespace crimild {
         }
         ///@}
     };
-
-    /**
-     * @name Swizzle functions for Tuple2
-     */
-    //@{
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr auto xx( const Tuple2< Derived, T > &u ) noexcept
-    {
-        return Derived< T > {
-            u.x,
-            u.x,
-        };
-    }
-
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr auto xy( const Tuple2< Derived, T > &u ) noexcept
-    {
-        return Derived< T > {
-            u.x,
-            u.y,
-        };
-    }
-
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr auto yx( const Tuple2< Derived, T > &u ) noexcept
-    {
-        return Derived< T > {
-            u.y,
-            u.x,
-        };
-    }
-
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr auto yy( const Tuple2< Derived, T > &u ) noexcept
-    {
-        return Derived< T > {
-            u.y,
-            u.y,
-        };
-    }
-    //@}
 
     template< typename T >
     struct [[deprecated]] Tuple2Impl {
