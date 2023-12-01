@@ -36,55 +36,127 @@
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr T min( T x, T y ) noexcept
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr auto min( T x, U y ) noexcept
     {
         return x < y ? x : y;
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr T min( const TupleImpl< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &v ) noexcept
     {
-        auto ret = t[ 0 ];
-        constexpr auto N = traits::tupleComponents< TupleImpl >();
-        for ( auto i = 1l; i < N; ++i ) {
-            ret = min( ret, t[ i ] );
-        }
+        return min( v.x, v.y );
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
+    {
+        return Derived< decltype( min( T {}, U {} ) ) > {
+            min( u.x, v.x ),
+            min( u.y, v.y ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto minDimension( const Tuple2< Derived, T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
         return ret;
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto min( const TupleImpl< T > &t, const TupleImpl< T > &u ) noexcept
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr T min( const Tuple2Impl< T > &t ) noexcept
     {
-        constexpr auto N = traits::tupleComponents< TupleImpl >();
-        if constexpr ( N == 2 ) {
-            return tuple2Builder< TupleImpl, T >(
-                min( t.x, u.x ),
-                min( t.y, u.y ) );
-        } else if constexpr ( N == 3 ) {
-            return tuple3Builder< TupleImpl, T >(
-                min( t.x, u.x ),
-                min( t.y, u.y ),
-                min( t.z, u.z ) );
-        } else {
-            return tuple4Builder< TupleImpl, T >(
-                min( t.x, u.x ),
-                min( t.y, u.y ),
-                min( t.z, u.z ),
-                min( t.w, u.w ) );
-        }
+        return min( t[ 0 ], t[ 1 ] );
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr Size minDimension( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr T min( const Tuple3Impl< T > &t ) noexcept
     {
-        auto ret = Size( 0 );
-        constexpr auto N = traits::tupleComponents< TupleImpl >();
-        for ( auto i = 1l; i < N; ++i ) {
-            if ( t[ i ] < t[ ret ] ) {
-                ret = i;
-            }
-        }
+        return min( t[ 0 ], min( t[ 1 ], t[ 2 ] ) );
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr T min( const Tuple4Impl< T > &t ) noexcept
+    {
+        return min( t[ 0 ], min( t[ 1 ], min( t[ 2 ], t[ 3 ] ) ) );
+    }
+
+    template< typename T, typename U >
+    [[nodiscard, deprecated]] inline constexpr auto min( const Point2Impl< T > &lhs, const Point2Impl< U > &rhs ) noexcept
+    {
+        auto ret = lhs;
+        ret.x = min( lhs.x, rhs.x );
+        ret.y = min( lhs.y, rhs.y );
+        return ret;
+    }
+
+    template< typename T, typename U >
+    [[nodiscard, deprecated]] inline constexpr auto min( const Vector3Impl< T > &lhs, const Vector3Impl< U > &rhs ) noexcept
+    {
+        auto ret = lhs;
+        ret.x = min( lhs.x, rhs.x );
+        ret.y = min( lhs.y, rhs.y );
+        ret.z = min( lhs.z, rhs.z );
+        return ret;
+    }
+
+    template< typename T, typename U >
+    [[nodiscard, deprecated]] inline constexpr auto min( const Point3Impl< T > &lhs, const Point3Impl< U > &rhs ) noexcept
+    {
+        auto ret = lhs;
+        ret.x = min( lhs.x, rhs.x );
+        ret.y = min( lhs.y, rhs.y );
+        ret.z = min( lhs.z, rhs.z );
+        return ret;
+    }
+
+    template< typename T, typename U >
+    [[nodiscard, deprecated]] inline constexpr auto min( const Normal3Impl< T > &lhs, const Normal3Impl< U > &rhs ) noexcept
+    {
+        auto ret = lhs;
+        ret.x = min( lhs.x, rhs.x );
+        ret.y = min( lhs.y, rhs.y );
+        ret.z = min( lhs.z, rhs.z );
+        return ret;
+    }
+
+    template< typename T, typename U >
+    [[nodiscard, deprecated]] inline constexpr auto min( const Vector4Impl< T > &lhs, const Vector4Impl< U > &rhs ) noexcept
+    {
+        auto ret = lhs;
+        ret.x = min( lhs.x, rhs.x );
+        ret.y = min( lhs.y, rhs.y );
+        ret.z = min( lhs.z, rhs.z );
+        ret.w = min( lhs.w, rhs.w );
+        return ret;
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple2Impl< T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+        return ret;
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple3Impl< T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
+        return ret;
+    }
+
+    template< typename T >
+    [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple4Impl< T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
+        ret = t[ 3 ] < t[ ret ] ? 3 : ret;
         return ret;
     }
 
