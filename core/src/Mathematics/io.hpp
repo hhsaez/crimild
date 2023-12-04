@@ -52,21 +52,21 @@ namespace crimild {
         return out;
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple4< Derived, T > &u ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 6 );
+        out << "(" << u.x << ", " << u.y << ", " << u.z << ", " << u.w << ")";
+        return out;
+    }
+
     template< typename T >
     [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple3Impl< T > &u ) noexcept
     {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
             << std::setprecision( 6 );
         out << "(" << u.x << ", " << u.y << ", " << u.z << ")";
-        return out;
-    }
-
-    template< typename T >
-    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple4Impl< T > &u ) noexcept
-    {
-        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
-            << std::setprecision( 6 );
-        out << "(" << u.x << ", " << u.y << ", " << u.z << ", " << u.w << ")";
         return out;
     }
 

@@ -55,12 +55,6 @@ namespace crimild {
         }
 
         template<>
-        [[nodiscard, deprecated]] constexpr Size tupleComponents< Tuple4Impl >( void ) noexcept
-        {
-            return 4;
-        }
-
-        template<>
         [[nodiscard, deprecated]] constexpr Size tupleComponents< Point3Impl >( void ) noexcept
         {
             return 3;
@@ -73,12 +67,6 @@ namespace crimild {
         [[nodiscard, deprecated]] constexpr Size tupleComponents< Vector3Impl >( void ) noexcept
         {
             return 3;
-        }
-
-        template<>
-        [[nodiscard, deprecated]] constexpr Size tupleComponents< Vector4Impl >( void ) noexcept
-        {
-            return 4;
         }
 
         template<>

@@ -38,6 +38,7 @@
 #include "Mathematics/io.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Mathematics/perspective.hpp"
+#include "Mathematics/swizzle.hpp"
 #include "Mathematics/trigonometry.hpp"
 #include "Simulation/Settings.hpp"
 

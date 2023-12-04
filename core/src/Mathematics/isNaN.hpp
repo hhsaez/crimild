@@ -55,16 +55,16 @@ namespace crimild {
         return isNaN( t.x ) || isNaN( t.y );
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isNaN( const Tuple4< Derived, T > &t ) noexcept
+    {
+        return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z ) || isNaN( t.w );
+    }
+
     template< typename T >
     [[nodiscard]] inline constexpr Bool isNaN( const Vector3Impl< T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z );
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Vector4Impl< T > &t ) noexcept
-    {
-        return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z ) || isNaN( t.w );
     }
 
     template< typename T >

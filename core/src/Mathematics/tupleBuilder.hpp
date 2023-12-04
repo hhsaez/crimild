@@ -61,17 +61,8 @@ namespace crimild {
             return false;
         }
 
-        // template<>
-        // [[nodiscard]] inline constexpr Bool isVector< Vector2Impl >( void ) noexcept { return true; }
-
         template<>
         [[nodiscard, deprecated]] inline constexpr Bool isVector< Vector3Impl >( void ) noexcept
-        {
-            return true;
-        }
-
-        template<>
-        [[nodiscard, deprecated]] inline constexpr Bool isVector< Vector4Impl >( void ) noexcept
         {
             return true;
         }
@@ -115,16 +106,6 @@ namespace crimild {
             return Normal3Impl< T > { x, y, z };
         } else {
             return Tuple3Impl< T > { x, y, z };
-        }
-    }
-
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard, deprecated]] inline constexpr auto tuple4Builder( T x, T y, T z, T w ) noexcept
-    {
-        if constexpr ( traits::isVector< TupleImpl >() ) {
-            return Vector4Impl< T > { x, y, z, w };
-        } else {
-            return Tuple4Impl< T > { x, y, z, w };
         }
     }
 

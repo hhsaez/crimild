@@ -36,17 +36,17 @@ namespace crimild {
     {
         // clang-format off
         const auto m = Matrix4 {
-            scale.x, 0, 0, 0,
-            0, scale.y, 0, 0,
-            0, 0, scale.z, 0,
-            0, 0, 0, 1,
+            { scale.x, 0, 0, 0 },
+            { 0, scale.y, 0, 0 },
+            { 0, 0, scale.z, 0 },
+            { 0, 0, 0, 1 },
         };
 
         const auto inv = Matrix4 {
-            Real( 1 ) / scale.x , 0, 0, 0,
-            0, Real( 1 ) / scale.y, 0, 0,
-            0, 0, Real( 1 ) / scale.z, 0,
-            0, 0, 0, 1,
+            { Real( 1 ) / scale.x , 0, 0, 0 },
+            { 0, Real( 1 ) / scale.y, 0, 0 },
+            { 0, 0, Real( 1 ) / scale.z, 0 },
+            { 0, 0, 0, 1 },
         };
         // clang-format on
 

@@ -54,6 +54,17 @@ namespace crimild {
         };
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto abs( const Tuple4< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z ),
+            abs( t.w ),
+        };
+    }
+
     template< typename T >
     [[nodiscard, deprecated]] inline constexpr auto abs( const Vector3Impl< T > &t ) noexcept
     {
@@ -81,17 +92,6 @@ namespace crimild {
             abs( t.x ),
             abs( t.y ),
             abs( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto abs( const Vector4Impl< T > &t ) noexcept
-    {
-        return Vector4Impl< T > {
-            abs( t.x ),
-            abs( t.y ),
-            abs( t.z ),
-            abs( t.w )
         };
     }
 

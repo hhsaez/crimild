@@ -108,7 +108,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     outEyePosition = inverse( view )[ 3 ].xyz;
                                     outTexCoord = inTexCoord;
                                 }
-                            )" ),
+                            )"
+                        ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
@@ -192,15 +193,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     outNormal = vec4( N, 1.0 );
                                     outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                                 }
-                            )" ),
-                    } );
+                            )"
+                        ),
+                    }
+                );
                 program->vertexLayouts = { VertexP3N3TC2::getLayout() };
                 program->instanceLayouts = {
                     VertexLayout {
-                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4 >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
                     },
                 };
                 program->descriptorSetLayouts = {
@@ -267,7 +270,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                     }(),
                 };
                 return program;
-            }() );
+            }()
+        );
         return pipeline;
     }();
 
@@ -293,7 +297,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
         void push( Geometry *geometry ) noexcept
         {
             if ( geometries.size() <= instanceCount ) {
-                const auto N = 1 + geometries.size(); //Size( 1.5 * crimild::max( Size( 1 ), Size( geometries.size() ) ) );
+                const auto N = 1 + geometries.size(); // Size( 1.5 * crimild::max( Size( 1 ), Size( geometries.size() ) ) );
                 geometries.resize( N );
             }
 
@@ -305,12 +309,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
             if ( this->data == nullptr || this->data->getVertexCount() < instanceCount ) {
                 this->data = crimild::alloc< VertexBuffer >(
                     VertexLayout {
-                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4 >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4 >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
                     },
-                    instanceCount );
+                    instanceCount
+                );
                 this->data->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
             }
 
@@ -358,7 +363,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                             instances[ material ][ primitive ].push( geometry );
                         }
                     }
-                } );
+                }
+            );
 
             for ( auto &perMaterial : instances ) {
                 auto material = perMaterial.first;
@@ -416,5 +422,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
             //     commandBuffer->bindDescriptorSet( instance.material->getDescriptors() );
             //     commandBuffer->drawPrimitive( instance.primitive, instance.data );
             // }
-        } );
+        }
+    );
 }
