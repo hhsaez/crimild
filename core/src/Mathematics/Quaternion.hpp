@@ -32,7 +32,6 @@
 #include "Mathematics/Matrix4.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
-#include "Mathematics/Vector4Ops.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/swizzle.hpp"
@@ -46,34 +45,34 @@ namespace crimild {
     namespace impl {
 
         /**
-		 \brief Template-based implementation for Quaternions
+                 \brief Template-based implementation for Quaternions
 
-		 A Quaternion, as invented by Sir William Rowan Hamilton, is an
-		 extension to complex numbers.
+                 A Quaternion, as invented by Sir William Rowan Hamilton, is an
+                 extension to complex numbers.
 
-		 In mathematics, a quaternion q can be defined in the following ways, all equivalent:
+                 In mathematics, a quaternion q can be defined in the following ways, all equivalent:
 
-		 \code
-		 q = (qv, qw) = iqx + jqy + kqz + qw = qv + qw,
-		 qv = iqx + jqy + kqz = (qx, qy, qz),
-		 i2 = j2 = k2 = -1, jk = -kj = i, ki = -ik = j, ij = -ji = k
-		 \endcode
+                 \code
+                 q = (qv, qw) = iqx + jqy + kqz + qw = qv + qw,
+                 qv = iqx + jqy + kqz = (qx, qy, qz),
+                 i2 = j2 = k2 = -1, jk = -kj = i, ki = -ik = j, ij = -ji = k
+                 \endcode
 
-		 The variable qw is called the real part of a quaternion. The imaginary part
-		 is qv, and i, j and k are called imaginary units
+                 The variable qw is called the real part of a quaternion. The imaginary part
+                 is qv, and i, j and k are called imaginary units
 
-		 \section REFERENCES References
+                 \section REFERENCES References
 
-		 - "Real-Time Rendering", 3rd Edition
-		 - "Mathematics for 3D Game Programming and Computer Graphics", 2nd Edition
-		 - Wikipedia (http://en.wikipedia.org/wiki/Quaternion)
-	 */
+                 - "Real-Time Rendering", 3rd Edition
+                 - "Mathematics for 3D Game Programming and Computer Graphics", 2nd Edition
+                 - Wikipedia (http://en.wikipedia.org/wiki/Quaternion)
+         */
         template< typename PRECISION >
         class [[deprecated]] Quaternion {
         public:
             /**
-		 	\brief Creates a new quaternion representing a rotation
-		 */
+                        \brief Creates a new quaternion representing a rotation
+                 */
             static Quaternion createFromAxisAngle( const Vector3Impl< PRECISION > &axis, PRECISION angle )
             {
                 Quaternion q;
@@ -122,64 +121,64 @@ namespace crimild {
 
         public:
             /**
-			\brief Default constructor
+                        \brief Default constructor
 
-			The default constructor does not nothing. The user is responsible for
-			setting valid values for all quaternion components
-		 */
+                        The default constructor does not nothing. The user is responsible for
+                        setting valid values for all quaternion components
+                 */
             Quaternion( void )
                 : _data { 0, 0, 0, 1 }
             {
             }
 
             /**
-			\brief Explicit constructor
+                        \brief Explicit constructor
 
-			Constructs a quaternion by specifying both the real
-			and the imaginary parts of it as a scalar and a vector
-			respectively.
-		 */
+                        Constructs a quaternion by specifying both the real
+                        and the imaginary parts of it as a scalar and a vector
+                        respectively.
+                 */
             Quaternion( PRECISION r, const Vector3Impl< PRECISION > &i )
                 : _data( i[ 0 ], i[ 1 ], i[ 2 ], r )
             {
             }
 
             /**
-			\brief Explicit constructor
-		 */
+                        \brief Explicit constructor
+                 */
             Quaternion( PRECISION x, PRECISION y, PRECISION z, PRECISION w )
                 : _data { x, y, z, w }
             {
             }
 
-            explicit Quaternion( const Vector4Impl< PRECISION > &data )
+            explicit Quaternion( const Vector4< PRECISION > &data )
                 : _data( data )
             {
             }
 
             /**
-			\brief Copy constructor
-		 */
+                        \brief Copy constructor
+                 */
             Quaternion( const Quaternion &q )
                 : _data( q._data )
             {
             }
 
             /**
-			\brief Destructor
-		 */
+                        \brief Destructor
+                 */
             ~Quaternion( void )
             {
             }
 
-            const Vector4Impl< PRECISION > &getRawData( void ) const
+            const Vector4< PRECISION > &getRawData( void ) const
             {
                 return _data;
             }
 
             /**
-			\brief Assignment operator
-		 */
+                        \brief Assignment operator
+                 */
             Quaternion operator=( const Quaternion &q )
             {
                 _data = q._data;
@@ -198,7 +197,8 @@ namespace crimild {
 
             Vector3Impl< PRECISION > getImaginary( void ) const
             {
-                return xyz( _data );
+                // return xyz( _data );
+                return { _data.x, _data.y, _data.z };
             }
 
             void setImaginary( const Vector3Impl< PRECISION > &value )
@@ -264,21 +264,21 @@ namespace crimild {
             friend std::ostream &operator<<( std::ostream &output, const Quaternion &input );
 
             /**
-			\breif Calculates the conjugate for this quaternion
+                        \breif Calculates the conjugate for this quaternion
 
-			The conjugate is calculated as:
-			\code
-			q* = (qv, qw)* = (-qv, qw)
-			\endcode
-		 */
+                        The conjugate is calculated as:
+                        \code
+                        q* = (qv, qw)* = (-qv, qw)
+                        \endcode
+                 */
             Quaternion getConjugate( void ) const
             {
-                return *this; //Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
+                return *this; // Quaternion( -_data[ 0 ], -_data[ 1 ], -_data[ 2 ], _data[ 3 ] );
             }
 
             Quaternion &makeIdentity( void )
             {
-                _data = Vector4Impl< PRECISION > { 0, 0, 0, 1 };
+                _data = Vector4< PRECISION > { 0, 0, 0, 1 };
                 return *this;
             }
 
@@ -387,8 +387,8 @@ namespace crimild {
             }
 
             /**
-		 	\brief Computes the rotation from the compositions of two quaternions
-		 */
+                        \brief Computes the rotation from the compositions of two quaternions
+                 */
             Quaternion rotate( Quaternion q1 ) const
             {
                 PRECISION w0 = getReal();
@@ -401,10 +401,7 @@ namespace crimild {
                 PRECISION y1 = q1.getImaginary()[ 1 ];
                 PRECISION z1 = q1.getImaginary()[ 2 ];
 
-                Quaternion q( w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1,
-                              w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1,
-                              w0 * y1 + y0 * w1 + z0 * x1 - x0 * z1,
-                              w0 * z1 + z0 * w1 + x0 * y1 - y0 * x1 );
+                Quaternion q( w0 * w1 - x0 * x1 - y0 * y1 - z0 * z1, w0 * x1 + x0 * w1 + y0 * z1 - z0 * y1, w0 * y1 + y0 * w1 + z0 * x1 - x0 * z1, w0 * z1 + z0 * w1 + x0 * y1 - y0 * x1 );
                 return q.normalize();
             }
 
@@ -515,19 +512,19 @@ namespace crimild {
             }
 
         private:
-            Vector4Impl< PRECISION > _data;
+            Vector4< PRECISION > _data;
         };
 
         template< typename U >
         Quaternion< U > operator-( const Quaternion< U > &q )
         {
-            return q; //Quaternion< U >( -q._data );
+            return q; // Quaternion< U >( -q._data );
         }
 
         template< typename U >
         Quaternion< U > operator+( const Quaternion< U > &q, const Quaternion< U > &r )
         {
-            return q; //Quaternion< U >( q._data + r._data );
+            return q; // Quaternion< U >( q._data + r._data );
         }
 
         template< typename U >
@@ -585,7 +582,7 @@ namespace crimild {
         template< typename U, typename V >
         Quaternion< U > operator*( const Quaternion< U > &q, V s )
         {
-            return q; //Quaternion< U >( q._data * s );
+            return q; // Quaternion< U >( q._data * s );
         }
 
         template< typename U, typename V >

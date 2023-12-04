@@ -31,6 +31,7 @@
 #include "Mathematics/ColorRGB.hpp"
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Tuple2.hpp"
+#include "Mathematics/Tuple4.hpp"
 #include "Mathematics/tupleBuilder.hpp"
 
 namespace crimild {
@@ -76,6 +77,21 @@ namespace crimild {
     }
     ///@}
 
+    ///@{
+    /**
+     * @brief Swizzle function for Tuple4 derived classes
+     */
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto xyz( const Tuple4< Derived, T > &u ) noexcept
+    {
+        return Vector3Impl< T > {
+            u.x,
+            u.y,
+            u.z,
+        };
+    }
+    ///@}
+
     template< typename T >
     [[nodiscard]] inline constexpr Point3Impl< T > point3( const Tuple3Impl< T > &t ) noexcept
     {
@@ -88,16 +104,16 @@ namespace crimild {
         return Vector3Impl< T > { t.x, t.y, t.z };
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple4Impl< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Vector3Impl< T > vector3( const Tuple4< Derived, T > &t ) noexcept
     {
         return Vector3Impl< T > { t.x, t.y, t.z };
     }
 
     template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector4Impl< T > vector4( const Tuple3Impl< T > &t, U w ) noexcept
+    [[nodiscard, deprecated]] inline constexpr auto vector4( const Tuple3Impl< T > &t, U w ) noexcept
     {
-        return Vector4Impl< T > { t.x, t.y, t.z, T( w ) };
+        return Vector4< decltype( T {} + U {} ) >( t.x, t.y, t.z, w );
     }
 
     template< typename T >
@@ -106,34 +122,34 @@ namespace crimild {
         return Normal3Impl< T > { t.x, t.y, t.z };
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto xyz( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto xyz( const Tuple3Impl< T > &t ) noexcept
     {
-        return tuple3Builder< TupleImpl, T >( t.x, t.y, t.z );
+        return tuple3Builder< Tuple3Impl, T >( t.x, t.y, t.z );
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto xxx( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto xxx( const Tuple3Impl< T > &t ) noexcept
     {
-        return tuple3Builder< TupleImpl, T >( t.x, t.x, t.x );
+        return tuple3Builder< Tuple3Impl, T >( t.x, t.x, t.x );
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto yyy( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto yyy( const Tuple3Impl< T > &t ) noexcept
     {
-        return tuple3Builder< TupleImpl, T >( t.y, t.y, t.y );
+        return tuple3Builder< Tuple3Impl, T >( t.y, t.y, t.y );
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto xyz0( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto xyz0( const Tuple3Impl< T > &t ) noexcept
     {
-        return tuple4Builder< TupleImpl, T >( t.x, t.y, t.z, 0 );
+        return tuple4Builder< Tuple3Impl, T >( t.x, t.y, t.z, 0 );
     }
 
-    template< template< typename > class TupleImpl, typename T >
-    [[nodiscard]] inline constexpr auto xyz1( const TupleImpl< T > &t ) noexcept
+    template< typename T >
+    [[nodiscard]] inline constexpr auto xyz1( const Tuple3Impl< T > &t ) noexcept
     {
-        return tuple4Builder< TupleImpl, T >( t.x, t.y, t.z, 1 );
+        return tuple4Builder< Tuple3Impl, T >( t.x, t.y, t.z, 1 );
     }
 
     [[nodiscard]] inline constexpr auto rgb( const ColorRGBA &c ) noexcept
@@ -152,8 +168,8 @@ namespace crimild {
         return ColorRGBA { c.r, c.g, c.b, 1.0 };
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr auto rgba( const Tuple4Impl< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto rgba( const Tuple4< Derived, T > &t ) noexcept
     {
         return ColorRGB { t.x, t.y, t.z, t.w };
     }

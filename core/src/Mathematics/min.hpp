@@ -65,16 +65,39 @@ namespace crimild {
         return ret;
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &v ) noexcept
+    {
+        return min( v.x, min( v.y, min( v.z, v.w ) ) );
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &u, const Tuple4< Derived, U > &v ) noexcept
+    {
+        return Derived< decltype( min( T {}, U {} ) ) > {
+            min( u.x, v.x ),
+            min( u.y, v.y ),
+            min( u.z, v.z ),
+            min( u.w, v.w ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto minDimension( const Tuple4< Derived, T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
+        ret = t[ 3 ] < t[ ret ] ? 3 : ret;
+        return ret;
+    }
+
+    // DEPRECATED FROM HERE
+
     template< typename T >
     [[nodiscard, deprecated]] inline constexpr T min( const Tuple3Impl< T > &t ) noexcept
     {
         return min( t[ 0 ], min( t[ 1 ], t[ 2 ] ) );
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr T min( const Tuple4Impl< T > &t ) noexcept
-    {
-        return min( t[ 0 ], min( t[ 1 ], min( t[ 2 ], t[ 3 ] ) ) );
     }
 
     template< typename T, typename U >
@@ -107,33 +130,12 @@ namespace crimild {
         return ret;
     }
 
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto min( const Vector4Impl< T > &lhs, const Vector4Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = min( lhs.x, rhs.x );
-        ret.y = min( lhs.y, rhs.y );
-        ret.z = min( lhs.z, rhs.z );
-        ret.w = min( lhs.w, rhs.w );
-        return ret;
-    }
-
     template< typename T >
     [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple3Impl< T > &t ) noexcept
     {
         size_t ret = 0;
         ret = t[ 1 ] < t[ ret ] ? 1 : ret;
         ret = t[ 2 ] < t[ ret ] ? 2 : ret;
-        return ret;
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr size_t minDimension( const Tuple4Impl< T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
-        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
-        ret = t[ 3 ] < t[ ret ] ? 3 : ret;
         return ret;
     }
 

@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_MATRIX_4_OPERATORS_
 
 #include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Vector4Ops.hpp"
 
 #include <cassert>
 
@@ -117,10 +116,10 @@ namespace crimild {
         };
     }
 
-    template< typename T >
-    [[nodiscard]] static constexpr Vector4Impl< T > operator*( const Matrix4Impl< T > &A, const Vector4Impl< T > &B ) noexcept
+    template< typename T, typename U >
+    [[nodiscard]] static constexpr auto operator*( const Matrix4Impl< T > &A, const Vector4< U > &B ) noexcept
     {
-        return Vector4Impl< T > {
+        return Vector4< decltype( T {} * U {} ) > {
             A[ 0 ][ 0 ] * B[ 0 ] + A[ 1 ][ 0 ] * B[ 1 ] + A[ 2 ][ 0 ] * B[ 2 ] + A[ 3 ][ 0 ] * B[ 3 ],
             A[ 0 ][ 1 ] * B[ 0 ] + A[ 1 ][ 1 ] * B[ 1 ] + A[ 2 ][ 1 ] * B[ 2 ] + A[ 3 ][ 1 ] * B[ 3 ],
             A[ 0 ][ 2 ] * B[ 0 ] + A[ 1 ][ 2 ] * B[ 1 ] + A[ 2 ][ 2 ] * B[ 2 ] + A[ 3 ][ 2 ] * B[ 3 ],

@@ -49,12 +49,6 @@ namespace crimild {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr T dot( const Vector4Impl< T > &u, const Vector4Impl< T > &v ) noexcept
-    {
-        return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
-    }
-
     template< typename T, typename U >
     [[nodiscard]] inline constexpr T dot( const Normal3Impl< T > &u, const Normal3Impl< U > &v ) noexcept
     {
@@ -71,6 +65,12 @@ namespace crimild {
     [[nodiscard]] inline constexpr T dot( const Vector3Impl< T > &u, const Normal3Impl< T > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr T dot( const Vector4< T > &u, const Vector4< T > &v ) noexcept
+    {
+        return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
     }
 
     template< typename T >
