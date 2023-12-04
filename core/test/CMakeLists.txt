@@ -42,6 +42,7 @@ target_sources(
     Mathematics/min.cpp
     Mathematics/Normal3Test.cpp
     Mathematics/Plane3Test.cpp
+    Mathematics/Point2Test.cpp
     Mathematics/Point3Test.cpp
     Mathematics/QuaternionTest.cpp
     Mathematics/Ray3Test.cpp

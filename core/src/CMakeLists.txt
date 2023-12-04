@@ -222,11 +222,9 @@ target_sources(
     Mathematics/perspective.hpp
     Mathematics/Plane3.hpp
     Mathematics/Point2.hpp
-    Mathematics/Point2_constants.hpp
     Mathematics/Point3.hpp
     Mathematics/Point3Ops.hpp
     Mathematics/Point3_isInfinity.hpp
-    Mathematics/Point_equality.hpp
     Mathematics/pow.hpp
     Mathematics/project.hpp
     Mathematics/Quaternion.hpp
@@ -271,7 +269,6 @@ target_sources(
     Mathematics/tupleBuilder.hpp
     Mathematics/tupleComponents.hpp
     Mathematics/Vector2.hpp
-    Mathematics/Vector2Ops.hpp
     Mathematics/Vector3.hpp
     Mathematics/Vector3Ops.hpp
     Mathematics/Vector4.hpp
