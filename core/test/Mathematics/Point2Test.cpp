@@ -58,6 +58,11 @@ TEST( Point2, index )
 
     EXPECT_EQ( 10, u[ 0 ] );
     EXPECT_EQ( 20, u[ 1 ] );
+
+    auto v = Point2f { 10, 20 };
+    v[ 0 ] = 20;
+    v[ 1 ] = 21;
+    EXPECT_TRUE( isEqual( v, Point2f { 20, 21 } ) );
 }
 
 TEST( Point2, equality )

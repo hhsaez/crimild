@@ -57,6 +57,17 @@ namespace crimild {
         };
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto floor( const Tuple4< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z ),
+            floor( t.w ),
+        };
+    }
+
     template< typename T >
     [[nodiscard, deprecated]] inline constexpr auto floor( const Vector3Impl< T > &t ) noexcept
     {
@@ -84,17 +95,6 @@ namespace crimild {
             floor( t.x ),
             floor( t.y ),
             floor( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto floor( const Vector4Impl< T > &t ) noexcept
-    {
-        return Vector4Impl< T > {
-            floor( t.x ),
-            floor( t.y ),
-            floor( t.z ),
-            floor( t.w )
         };
     }
 

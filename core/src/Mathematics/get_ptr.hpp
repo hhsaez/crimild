@@ -50,6 +50,18 @@ namespace crimild {
         return static_cast< Derived< T > * >( &u.x );
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    inline constexpr const T *get_ptr( const Tuple4< Derived, T > &u )
+    {
+        return static_cast< const Derived< T > * >( &u.x );
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    inline constexpr T *get_ptr( Tuple4< Derived, T > &u )
+    {
+        return static_cast< Derived< T > * >( &u.x );
+    }
+
     template< typename T >
     inline constexpr const T *get_ptr( const Tuple3Impl< T > &u )
     {
@@ -58,18 +70,6 @@ namespace crimild {
 
     template< typename T >
     inline constexpr T *get_ptr( Tuple3Impl< T > &u )
-    {
-        return static_cast< T * >( &u.x );
-    }
-
-    template< typename T >
-    inline constexpr const T *get_ptr( const Tuple4Impl< T > &u )
-    {
-        return static_cast< const T * >( &u.x );
-    }
-
-    template< typename T >
-    inline constexpr T *get_ptr( Tuple4Impl< T > &u )
     {
         return static_cast< T * >( &u.x );
     }

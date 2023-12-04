@@ -272,7 +272,6 @@ target_sources(
     Mathematics/Vector3.hpp
     Mathematics/Vector3Ops.hpp
     Mathematics/Vector4.hpp
-    Mathematics/Vector4Ops.hpp
     Mathematics/whichSide.hpp
     Messaging/MessageQueue.hpp
     Navigation/NavigationCell.hpp

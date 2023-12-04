@@ -30,7 +30,7 @@
 
 #include "Mathematics/Normal3.hpp"
 #include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector4Ops.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "Mathematics/length.hpp"
 
 namespace crimild {
@@ -42,7 +42,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Vector4Impl< T > normalize( const Vector4Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Vector4< T > normalize( const Vector4< T > &u ) noexcept
     {
         return u / length( u );
     }

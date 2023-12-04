@@ -49,8 +49,19 @@ namespace crimild {
         };
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto permute( const Tuple4< Derived, T > &u, size_t x, size_t y, size_t z, size_t w ) noexcept
+    {
+        return Derived< T > {
+            u[ x ],
+            u[ y ],
+            u[ z ],
+            u[ w ],
+        };
+    }
+
     template< typename T >
-    [[nodiscard]] inline constexpr Vector3Impl< T > permute( const Vector3Impl< T > &u, Int x, Int y, Int z ) noexcept
+    [[nodiscard, deprecated]] inline constexpr Vector3Impl< T > permute( const Vector3Impl< T > &u, Int x, Int y, Int z ) noexcept
     {
         return Vector3Impl< T > {
             u[ x ],
@@ -60,18 +71,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Vector4Impl< T > permute( const Vector4Impl< T > &u, Int x, Int y, Int z, Int w ) noexcept
-    {
-        return Vector4Impl< T > {
-            u[ x ],
-            u[ y ],
-            u[ z ],
-            u[ w ]
-        };
-    }
-
-    template< typename T >
-    [[nodiscard]] inline constexpr Point3Impl< T > permute( const Point3Impl< T > &u, Int x, Int y, Int z ) noexcept
+    [[nodiscard, deprecated]] inline constexpr Point3Impl< T > permute( const Point3Impl< T > &u, Int x, Int y, Int z ) noexcept
     {
         return Point3Impl< T > {
             u[ x ],
@@ -81,7 +81,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBImpl< T > permute( const ColorRGBImpl< T > &c, Int r, Int g, Int b ) noexcept
+    [[nodiscard, deprecated]] inline constexpr ColorRGBImpl< T > permute( const ColorRGBImpl< T > &c, Int r, Int g, Int b ) noexcept
     {
         return ColorRGBImpl< T > {
             c[ r ],
@@ -91,7 +91,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBAImpl< T > permute( const ColorRGBAImpl< T > &c, Int r, Int g, Int b, Int a ) noexcept
+    [[nodiscard, deprecated]] inline constexpr ColorRGBAImpl< T > permute( const ColorRGBAImpl< T > &c, Int r, Int g, Int b, Int a ) noexcept
     {
         return ColorRGBAImpl< T > {
             c[ r ],

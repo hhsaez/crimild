@@ -28,7 +28,7 @@
 #include "Mathematics/Vector4.hpp"
 
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector4Ops.hpp"
+#include "Mathematics/Vector4.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/io.hpp"
@@ -102,9 +102,9 @@ TEST( Vector4, subtraction )
 
 TEST( Vector4, multiplication )
 {
-    constexpr auto u = crimild::Vector4 { 10, 20, 30, 40 };
+    constexpr auto u = crimild::Vector4f { 10, 20, 30, 40 };
     constexpr auto s = crimild::Real( 5 );
-    constexpr auto res = crimild::Vector4 { 50, 100, 150, 200 };
+    constexpr auto res = crimild::Vector4f { 50, 100, 150, 200 };
 
     static_assert( crimild::isEqual( res, u * s ) );
     static_assert( crimild::isEqual( res, s * u ) );
@@ -125,9 +125,9 @@ TEST( Vector4, vectorMultiplication )
 
 TEST( Vector4, division )
 {
-    constexpr auto u = crimild::Vector4 { 10, 20, 30, 40 };
+    constexpr auto u = crimild::Vector4f { 10, 20, 30, 40 };
     constexpr auto s = crimild::Real( 2 );
-    constexpr auto res = crimild::Vector4 { 5, 10, 15, 20 };
+    constexpr auto res = crimild::Vector4f { 5, 10, 15, 20 };
 
     static_assert( crimild::isEqual( res, u / s ) );
 
@@ -146,9 +146,9 @@ TEST( Vector4, negation )
 
 TEST( Vector4, isNaN )
 {
-    constexpr auto u = crimild::Vector4 { 10, 20, 30, 40 };
-    constexpr auto v = crimild::Vector4 { NAN, NAN, NAN, NAN };
-    constexpr auto w = crimild::Vector4 { NAN, NAN, 0, NAN };
+    constexpr auto u = crimild::Vector4f { 10, 20, 30, 40 };
+    constexpr auto v = crimild::Vector4f { NAN, NAN, NAN, NAN };
+    constexpr auto w = crimild::Vector4f { NAN, NAN, 0, NAN };
 
     EXPECT_TRUE( crimild::isNaN( v ) );
     EXPECT_FALSE( crimild::isNaN( u ) );
@@ -157,8 +157,8 @@ TEST( Vector4, isNaN )
 
 TEST( Vector4, abs )
 {
-    constexpr auto u = crimild::Vector4 { -10, -20, -30, -40 };
-    constexpr auto res = crimild::Vector4 { 10, 20, 30, 40 };
+    constexpr auto u = crimild::Vector4f { -10, -20, -30, -40 };
+    constexpr auto res = crimild::Vector4f { 10, 20, 30, 40 };
 
     static_assert( crimild::isEqual( res, crimild::abs( u ) ) );
 
@@ -183,8 +183,8 @@ TEST( Vector4, length )
 
 TEST( Vector4, normalize )
 {
-    constexpr auto u = crimild::Vector4 { 2, 3, 4, 5 };
-    constexpr auto v = crimild::Vector4 { 0.272165527, 0.4082482905, 0.544331054, 0.6804138174 };
+    constexpr auto u = crimild::Vector4f { 2, 3, 4, 5 };
+    constexpr auto v = crimild::Vector4f { 0.272165527, 0.4082482905, 0.544331054, 0.6804138174 };
 
     static_assert( crimild::isEqual( v, crimild::normalize( u ) ) );
 
@@ -238,7 +238,7 @@ TEST( Vector4, maxDimension )
 TEST( Vector4, ostream )
 {
     {
-        constexpr auto u = crimild::Vector4 { 2, 3, 4, 1 };
+        constexpr auto u = crimild::Vector4f { 2, 3, 4, 1 };
 
         std::stringstream ss;
         ss << u;
@@ -258,7 +258,7 @@ TEST( Vector4, ostream )
 
 TEST( Vector4, permute )
 {
-    static_assert( crimild::isEqual( crimild::Vector4 { 6, 4, 1, 5 }, crimild::permute( crimild::Vector4 { 4, 5, 6, 1 }, 2, 0, 3, 1 ) ) );
+    static_assert( crimild::isEqual( crimild::Vector4 { 6, 4, 1, 5 }, crimild::permute( crimild::Vector4f { 4, 5, 6, 1 }, 2, 0, 3, 1 ) ) );
     EXPECT_TRUE( true );
 }
 

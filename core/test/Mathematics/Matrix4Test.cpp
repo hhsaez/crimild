@@ -33,7 +33,6 @@
 #include "Mathematics/Matrix4_operators.hpp"
 #include "Mathematics/Matrix4_transpose.hpp"
 #include "Mathematics/Vector4.hpp"
-#include "Mathematics/Vector4Ops.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/isEqual.hpp"
 #include "Mathematics/isZero.hpp"
@@ -186,27 +185,25 @@ TEST( Matrix4, matrixProduct )
 
 TEST( Matrix4, vectorProduct )
 {
-    constexpr auto A = crimild::Matrix4 {
+    constexpr auto A = crimild::Matrix4f {
         { 1, 2, 8, 0 },
         { 2, 4, 6, 0 },
         { 3, 4, 4, 0 },
         { 4, 2, 1, 1 },
     };
 
-    constexpr auto V = crimild::Vector4 {
+    constexpr auto V = crimild::Vector4f {
         1,
         2,
         3,
         1,
     };
 
-    static_assert( A * V == crimild::Vector4 { 18, 24, 33, 1 } );
+    static_assert( A * V == crimild::Vector4f { 18, 24, 33, 1 } );
 
     static_assert( ( crimild::Matrix4::Constants::IDENTITY * V ) == V );
 
-    static_assert( ( A * crimild::Vector4::Constants::ZERO ) == crimild::Vector4::Constants::ZERO );
-
-    EXPECT_TRUE( true );
+    EXPECT_TRUE( isEqual( A * crimild::Vector4f::ZERO, crimild::Vector4f::ZERO ) );
 }
 
 TEST( Matrix4, determinant )

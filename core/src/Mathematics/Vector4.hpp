@@ -28,58 +28,82 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_4_
 #define CRIMILD_MATHEMATICS_VECTOR_4_
 
-#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple4.hpp"
 
 #include <limits>
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    struct Vector4Impl : public Tuple4Impl< T > {
-        struct Constants {
-            static constexpr auto ZERO = Vector4Impl< T > { 0, 0, 0, 0 };
-            static constexpr auto ONE = Vector4Impl< T > { 1, 1, 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector4Impl< T > {
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto NEGATIVE_INFINITY = Vector4Impl< T > {
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto UNIT_X = Vector4Impl< T > { 1, 0, 0, 0 };
-            static constexpr auto UNIT_Y = Vector4Impl< T > { 0, 1, 0, 0 };
-            static constexpr auto UNIT_Z = Vector4Impl< T > { 0, 0, 1, 0 };
-            static constexpr auto UNIT_W = Vector4Impl< T > { 0, 0, 0, 1 };
-        };
+    template< concepts::Arithmetic T = Real >
+    class Vector4 : public Tuple4< Vector4, T > {
+    public:
+        static const Vector4 ZERO;
+        static const Vector4 ONE;
+        static const Vector4 POSITIVE_INFINITY;
+        static const Vector4 NEGATIVE_INFINITY;
+        static const Vector4 UNIT_X;
+        static const Vector4 UNIT_Y;
+        static const Vector4 UNIT_Z;
+        static const Vector4 UNIT_W;
 
-        using Tuple4Impl< T >::x;
-        using Tuple4Impl< T >::y;
-        using Tuple4Impl< T >::z;
-        using Tuple4Impl< T >::w;
+    public:
+        using Tuple4< Vector4, T >::x;
+        using Tuple4< Vector4, T >::y;
+        using Tuple4< Vector4, T >::z;
+        using Tuple4< Vector4, T >::w;
+
+        constexpr Vector4( void ) noexcept = default;
+
+        constexpr Vector4( T x, T y, T z, T w ) noexcept
+            : Tuple4< Vector4, T >( x, y, z, w )
+        {
+        }
 
         template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator==( const Vector4Impl< U > &other ) const noexcept
-        {
-            return x == other.x && y == other.y && z == other.z && w == other.w;
-        }
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator!=( const Vector4Impl< U > &other ) const noexcept
-        {
-            return !( *this == other );
-        }
+        constexpr explicit Vector4( U value ) noexcept
+            : Tuple4< Vector4, T >( value ) { }
+
+        ~Vector4( void ) noexcept = default;
     };
 
-    using Vector4 = Vector4Impl< Real >;
-    using Vector4f = Vector4Impl< Real32 >;
-    using Vector4d = Vector4Impl< Real64 >;
-    using Vector4i = Vector4Impl< Int32 >;
-    using Vector4ui = Vector4Impl< UInt32 >;
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::ZERO( 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::ONE( 1 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::POSITIVE_INFINITY(
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::NEGATIVE_INFINITY(
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::UNIT_X( 1, 0, 0, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::UNIT_Y( 0, 1, 0, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::UNIT_Z( 0, 0, 1, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector4< T > Vector4< T >::UNIT_W( 0, 0, 0, 1 );
+
+    using Vector4f = Vector4< Real32 >;
+    using Vector4d = Vector4< Real64 >;
+    using Vector4i = Vector4< Int32 >;
+    using Vector4ui = Vector4< UInt32 >;
 
 }
 

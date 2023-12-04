@@ -124,7 +124,7 @@ void UIFrame::decode( coding::Decoder &decoder )
 {
     NodeComponent::decode( decoder );
 
-    auto frame = Vector4f::Constants::ZERO;
+    auto frame = Vector4f::ZERO;
     decoder.decode( "extensions", frame );
     _extensions = Rectf {
         .origin = { frame.x, frame.y },
