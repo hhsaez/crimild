@@ -32,9 +32,10 @@
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Normal3.hpp"
 #include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Tuple2.hpp"
 #include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
+#include "Mathematics/isNaN.hpp"
 
 #include <cmath>
 
@@ -48,8 +49,8 @@ namespace crimild {
         return value != value;
     }
 
-    template< concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Vector2< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isNaN( const Tuple2< Derived, T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y );
     }

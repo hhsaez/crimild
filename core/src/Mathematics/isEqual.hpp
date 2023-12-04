@@ -43,8 +43,8 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    inline constexpr Bool isEqual( const T &x, const T &y ) noexcept
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    inline constexpr Bool isEqual( const T &x, const U &y ) noexcept
     {
         if constexpr ( traits::isReal< T >() ) {
             return isZero( x - y );

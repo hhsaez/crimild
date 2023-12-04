@@ -32,11 +32,18 @@
 #include "Mathematics/Point3.hpp"
 #include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
+#include "Mathematics/Tuple2.hpp"
 #include "Mathematics/abs.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/length.hpp"
 
 namespace crimild {
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr Real distanceSquared( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
+    {
+        return lengthSquared( u - v );
+    }
 
     template< typename T >
     [[nodiscard]] inline constexpr Real distanceSquared( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
