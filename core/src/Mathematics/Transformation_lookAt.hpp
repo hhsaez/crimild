@@ -29,7 +29,7 @@
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_LOOK_AT_
 
 #include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation.hpp"
 #include "Mathematics/cross.hpp"
 #include "Mathematics/dot.hpp"
@@ -45,7 +45,7 @@ namespace crimild {
        \remarks Crimild uses a right-handed coordinate system, but the forward vector is always pointing
        in the -Z direction.
      */
-    [[nodiscard]] static constexpr Transformation lookAt( const Point3 &eye, const Point3 &target, const Vector3 &up ) noexcept
+    [[nodiscard]] static constexpr Transformation lookAt( const Point3f &eye, const Point3f &target, const Vector3f &up ) noexcept
     {
         // Compute the view vector. Keep in mind that Forward always point towards the -Z axis.
         const auto zAxis = normalize( eye - target );
@@ -58,8 +58,8 @@ namespace crimild {
                     return ret;
                 } else {
                     // Pik a different up vector
-                    Vector3 right, up;
-                    orthonormalBasis( vector3( zAxis ), right, up );
+                    Vector3f right, up;
+                    orthonormalBasis( zAxis, right, up );
                     return up;
                 }
             }()

@@ -35,9 +35,12 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3 max( const Bounds3 &B ) noexcept { return B.max; }
+    [[nodiscard]] inline constexpr Point3f max( const Bounds3 &B ) noexcept
+    {
+        return B.max;
+    }
 
-    [[nodiscard]] inline constexpr Point3 max( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
+    [[nodiscard]] inline constexpr Point3f max( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
     {
         return max( max( B0 ), max( B1 ) );
     }

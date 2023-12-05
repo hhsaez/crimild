@@ -27,10 +27,9 @@
 
 #include "AABBBoundingVolume.hpp"
 
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/distance.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/length.hpp"
@@ -46,7 +45,7 @@ AABBBoundingVolume::AABBBoundingVolume( void ) noexcept
     : m_box( Box {} ),
       m_sphere( Sphere { { 0, 0, 0 }, numbers::SQRT_3 } )
 {
-    computeFrom( -point3( size( m_box ) ), point3( size( m_box ) ) );
+    computeFrom( -Point3f( size( m_box ) ), Point3f( size( m_box ) ) );
 }
 
 SharedPointer< BoundingVolume > AABBBoundingVolume::clone( void ) const
@@ -75,17 +74,17 @@ void AABBBoundingVolume::computeFrom( const BoundingVolume *volume, const Transf
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
+void AABBBoundingVolume::computeFrom( const Point3f *positions, unsigned int positionCount )
 {
     if ( positionCount == 0 || positions == NULL ) {
         return;
     }
 
-    Point3 max = positions[ 0 ];
-    Point3 min = positions[ 0 ];
+    Point3f max = positions[ 0 ];
+    Point3f min = positions[ 0 ];
 
     for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Point3 &pos = point3( positions[ i ] );
+        const Point3f &pos = Point3f( positions[ i ] );
         min = crimild::min( min, pos );
         max = crimild::max( max, pos );
     }
@@ -104,10 +103,10 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
         return;
     }
 
-    Point3 max;
-    Point3 min;
+    Point3f max;
+    Point3f min;
 
-    positions->each< Point3 >(
+    positions->each< Point3f >(
         [ & ]( auto &pos, auto i ) {
             if ( i == 0 ) {
                 max = pos;
@@ -122,7 +121,7 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
+void AABBBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
     const auto center = 0.5 * ( max + min );
     const auto size = max - center;
@@ -136,7 +135,7 @@ void AABBBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
     setMax( max );
 }
 
-void AABBBoundingVolume::expandToContain( const Point3 &p )
+void AABBBoundingVolume::expandToContain( const Point3f &p )
 {
     const auto min = crimild::min( getMin(), p );
     const auto max = crimild::max( getMax(), p );
@@ -144,17 +143,17 @@ void AABBBoundingVolume::expandToContain( const Point3 &p )
     computeFrom( min, max );
 }
 
-void AABBBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
+void AABBBoundingVolume::expandToContain( const Point3f *positions, unsigned int positionCount )
 {
     if ( positionCount == 0 || positions == NULL ) {
         return;
     }
 
-    Point3 max = positions[ 0 ];
-    Point3 min = positions[ 0 ];
+    Point3f max = positions[ 0 ];
+    Point3f min = positions[ 0 ];
 
     for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Point3 &pos = positions[ i ];
+        const Point3f &pos = positions[ i ];
 
         max = crimild::max( max, pos );
         min = crimild::min( min, pos );
@@ -175,12 +174,12 @@ void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
         return;
     }
 
-    Point3 max;
-    Point3 min;
+    Point3f max;
+    Point3f min;
 
     positions->each< Vector3f >(
         [ & ]( auto &pos, auto i ) {
-            const auto P = point3( pos );
+            const auto P = Point3f( pos );
             if ( i == 0 ) {
                 max = P;
                 min = P;
@@ -206,7 +205,7 @@ int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
     return crimild::whichSide( plane, m_sphere );
 }
 
-bool AABBBoundingVolume::contains( const Point3 &point ) const
+bool AABBBoundingVolume::contains( const Point3f &point ) const
 {
     const auto centerDiffSqr = distanceSquared( getCenter(), point );
     float radiusSqr = radius( m_sphere ) * radius( m_sphere );

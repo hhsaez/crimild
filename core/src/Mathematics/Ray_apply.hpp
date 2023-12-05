@@ -34,7 +34,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3 Ray3::operator()( Real t ) const noexcept
+    [[nodiscard]] inline constexpr Point3f Ray3::operator()( Real t ) const noexcept
     {
         return o + t * d;
     }

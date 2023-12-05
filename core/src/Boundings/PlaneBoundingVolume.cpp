@@ -55,7 +55,7 @@ void PlaneBoundingVolume::computeFrom( const BoundingVolume *volume, const Trans
 {
 }
 
-void PlaneBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
+void PlaneBoundingVolume::computeFrom( const Point3f *positions, unsigned int positionCount )
 {
 }
 
@@ -63,15 +63,15 @@ void PlaneBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
 }
 
-void PlaneBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
+void PlaneBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
 }
 
-void PlaneBoundingVolume::expandToContain( const Point3 &point )
+void PlaneBoundingVolume::expandToContain( const Point3f &point )
 {
 }
 
-void PlaneBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
+void PlaneBoundingVolume::expandToContain( const Point3f *positions, unsigned int positionCount )
 {
 }
 
@@ -88,14 +88,14 @@ int PlaneBoundingVolume::whichSide( const Plane3 &plane ) const
     return 0;
 }
 
-bool PlaneBoundingVolume::contains( const Point3 &point ) const
+bool PlaneBoundingVolume::contains( const Point3f &point ) const
 {
     return false;
 }
 
 bool PlaneBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-    //return Intersection::test( _plane, ray );
+    // return Intersection::test( _plane, ray );
     return false;
 }
 
@@ -106,7 +106,7 @@ bool PlaneBoundingVolume::testIntersection( const BoundingVolume *other ) const
 
 bool PlaneBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    //return sphere.whichSide( _plane ) == 0;
+    // return sphere.whichSide( _plane ) == 0;
     return false;
 }
 

@@ -298,7 +298,8 @@ public:
                     //                    camera->local().lookAt( 5.0f * Vector3f::UNIT_Y );
                     camera->attachComponent< FreeLookCameraComponent >();
                     return camera;
-                }() );
+                }()
+            );
 
             scene->attachNode(
                 [ & ] {
@@ -351,7 +352,8 @@ public:
                     pivot->attachNode( model );
                     //         			return behaviors::withBehavior( pivot, behaviors::actions::rotate( Vector3 { 0, 1, 0 }, 0.1 ) );
                     return pivot;
-                }() );
+                }()
+            );
 
             scene->attachNode(
                 [ & ] {
@@ -370,7 +372,8 @@ public:
                                             .pathType = FilePath::PathType::ABSOLUTE,
                                         },
                                         .hdr = true,
-                                    } );
+                                    }
+                                );
                                 return imageView;
                             }();
                             texture->sampler = [ & ] {
@@ -382,8 +385,10 @@ public:
                                 return sampler;
                             }();
                             return texture;
-                        }() );
-                }() );
+                        }()
+                    );
+                }()
+            );
 
             scene->attachNode(
                 [] {
@@ -392,12 +397,15 @@ public:
                     light->setEnergy( 10.0f );
                     light->setLocal(
                         lookAt(
-                            Point3 { 1, 1, 1 },
-                            Point3 { 0, 0, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 1, 1, 1 },
+                            Point3f { 0, 0, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     //                    light->setCastShadows( true );
                     return light;
-                }() );
+                }()
+            );
 
             if ( settings->get< Bool >( "show.plane", true ) ) {
                 scene->attachNode(
@@ -405,23 +413,28 @@ public:
                         auto geometry = crimild::alloc< Geometry >();
                         geometry->attachPrimitive(
                             crimild::alloc< QuadPrimitive >(
-                                QuadPrimitive::Params {} ) );
+                                QuadPrimitive::Params {}
+                            )
+                        );
                         geometry->setLocal(
                             [] {
                                 Transformation t;
                                 //                                t.rotate().fromAxisAngle( Vector3f::UNIT_X, -Numericf::HALF_PI );
                                 //                                t.setScale( 100.0f );
                                 return t;
-                            }() );
+                            }()
+                        );
                         geometry->attachComponent< MaterialComponent >()->attachMaterial(
                             [] {
                                 auto material = crimild::alloc< materials::PrincipledBSDF >();
                                 material->setMetallic( 0.0f );
                                 material->setRoughness( 1.0f );
                                 return material;
-                            }() );
+                            }()
+                        );
                         return geometry;
-                    }() );
+                    }()
+                );
             }
 
             scene->perform( StartComponents() );

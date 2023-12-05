@@ -28,101 +28,47 @@
 #ifndef CRIMILD_MATHEMATICS_NORMAL_3_
 #define CRIMILD_MATHEMATICS_NORMAL_3_
 
-#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple3.hpp"
 
 namespace crimild {
 
     template< concepts::Arithmetic T >
-    struct Normal3Impl : public Tuple3Impl< T > {
-        struct Constants {
-            static constexpr auto UNIT_X = Normal3Impl< T > { 1, 0, 0 };
-            static constexpr auto UNIT_Y = Normal3Impl< T > { 0, 1, 0 };
-            static constexpr auto UNIT_Z = Normal3Impl< T > { 0, 0, 1 };
-        };
+    class Normal3 : public Tuple3< Normal3, T > {
+    public:
+        static const Normal3 UNIT_X;
+        static const Normal3 UNIT_Y;
+        static const Normal3 UNIT_Z;
 
-        using Tuple3Impl< T >::x;
-        using Tuple3Impl< T >::y;
-        using Tuple3Impl< T >::z;
+    public:
+        using Tuple3< Normal3, T >::x;
+        using Tuple3< Normal3, T >::y;
+        using Tuple3< Normal3, T >::z;
 
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator==( const Normal3Impl< U > &other ) const noexcept
+        constexpr Normal3( void ) noexcept = default;
+
+        constexpr Normal3( T x, T y, T z ) noexcept
+            : Tuple3< Normal3, T >( x, y, z )
         {
-            return x == other.x && y == other.y && z == other.z;
         }
 
         template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator!=( const Normal3Impl< U > &other ) const noexcept
-        {
-            return !( *this == other );
-        }
+        constexpr explicit Normal3( U value ) noexcept
+            : Tuple3< Normal3, T >( value ) { }
 
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Normal3Impl operator+( const Normal3Impl< U > &v ) const noexcept
-        {
-            return Normal3Impl {
-                x + v.x,
-                y + v.y,
-                z + v.z,
-            };
-        }
-
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Normal3Impl operator-( const Normal3Impl< U > &v ) const noexcept
-        {
-            return Normal3Impl {
-                x - v.x,
-                y - v.y,
-                z - v.z,
-            };
-        }
-
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Normal3Impl operator*( U s ) const noexcept
-        {
-            return Normal3Impl {
-                x * s,
-                y * s,
-                z * s,
-            };
-        }
-
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Normal3Impl operator*( const Normal3Impl< U > &v ) const noexcept
-        {
-            return Normal3Impl {
-                x * v.x,
-                y * v.y,
-                z * v.z,
-            };
-        }
-
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Normal3Impl operator/( U s ) const noexcept
-        {
-            const auto invS = crimild::Real( 1 ) / s;
-            return *this * invS;
-        }
-
-        [[nodiscard]] inline constexpr Normal3Impl operator-( void ) const noexcept
-        {
-            return Normal3Impl {
-                -x,
-                -y,
-                -z,
-            };
-        }
+        ~Normal3( void ) noexcept = default;
     };
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    [[nodiscard]] inline constexpr auto operator*( U s, const Normal3Impl< T > &u ) noexcept
-    {
-        return u * s;
-    }
+    template< concepts::Arithmetic T >
+    constexpr const Normal3< T > Normal3< T >::UNIT_X( 1, 0, 0 );
 
-    using Normal3 = Normal3Impl< Real >;
-    using Normal3f = Normal3Impl< Real32 >;
-    using Normal3d = Normal3Impl< Real64 >;
+    template< concepts::Arithmetic T >
+    constexpr const Normal3< T > Normal3< T >::UNIT_Y( 0, 1, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Normal3< T > Normal3< T >::UNIT_Z( 0, 0, 1 );
+
+    using Normal3f = Normal3< Real32 >;
+    using Normal3d = Normal3< Real64 >;
 
 }
 

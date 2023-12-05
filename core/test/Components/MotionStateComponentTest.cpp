@@ -47,7 +47,7 @@ TEST( MotionState, default_values )
     auto motion = crimild::alloc< MotionState >();
 
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), motion->position );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
 }
 
@@ -59,7 +59,7 @@ TEST( MotionState, coding )
     {
         auto motion = crimild::alloc< MotionState >();
         motion->velocity = Vector3 { 1, 2, 3 };
-        motion->position = Point3 { 4, 5, 6 };
+        motion->position = Point3f { 4, 5, 6 };
         motion->steering = Vector3 { 7, 8, 9 };
 
         encoder->encode( motion );
@@ -72,7 +72,7 @@ TEST( MotionState, coding )
         auto motion = decoder->getObjectAt< MotionState >( 0 );
         ASSERT_NE( nullptr, motion );
         EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 4, 5, 6 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
     }
 }

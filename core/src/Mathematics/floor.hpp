@@ -28,9 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_FLOOR_
 #define CRIMILD_MATHEMATICS_FLOOR_
 
-#include "Mathematics/Traits.hpp"
-#include "Mathematics/tupleBuilder.hpp"
-#include "Mathematics/tupleComponents.hpp"
+#include "Mathematics/Tuple2.hpp"
+#include "Mathematics/Tuple3.hpp"
+#include "Mathematics/Tuple4.hpp"
 
 namespace crimild {
 
@@ -58,6 +58,16 @@ namespace crimild {
     }
 
     template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto floor( const Tuple3< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            floor( t.x ),
+            floor( t.y ),
+            floor( t.z ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
     [[nodiscard]] inline constexpr auto floor( const Tuple4< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -65,36 +75,6 @@ namespace crimild {
             floor( t.y ),
             floor( t.z ),
             floor( t.w ),
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto floor( const Vector3Impl< T > &t ) noexcept
-    {
-        return Vector3Impl< T > {
-            floor( t.x ),
-            floor( t.y ),
-            floor( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto floor( const Normal3Impl< T > &t ) noexcept
-    {
-        return Normal3Impl< T > {
-            floor( t.x ),
-            floor( t.y ),
-            floor( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto floor( const Point3Impl< T > &t ) noexcept
-    {
-        return Point3Impl< T > {
-            floor( t.x ),
-            floor( t.y ),
-            floor( t.z )
         };
     }
 

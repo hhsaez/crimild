@@ -28,13 +28,16 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_4_
 #define CRIMILD_MATHEMATICS_VECTOR_4_
 
+#include "Mathematics/Normal3.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Tuple4.hpp"
+#include "Mathematics/Vector3.hpp"
 
 #include <limits>
 
 namespace crimild {
 
-    template< concepts::Arithmetic T = Real >
+    template< concepts::Arithmetic T >
     class Vector4 : public Tuple4< Vector4, T > {
     public:
         static const Vector4 ZERO;
@@ -62,6 +65,18 @@ namespace crimild {
         template< concepts::Arithmetic U >
         constexpr explicit Vector4( U value ) noexcept
             : Tuple4< Vector4, T >( value ) { }
+
+        template< concepts::Arithmetic U >
+        constexpr explicit Vector4( const Point3< U > &p ) noexcept
+            : Tuple4< Vector4, T >( p.x, p.y, p.z, 1 ) { }
+
+        template< concepts::Arithmetic U >
+        constexpr explicit Vector4( const Vector3< U > &v ) noexcept
+            : Tuple4< Vector4, T >( v.x, v.y, v.z, 0 ) { }
+
+        template< concepts::Arithmetic U >
+        constexpr explicit Vector4( const Normal3< U > &n ) noexcept
+            : Tuple4< Vector4, T >( n.x, n.y, n.z, 1 ) { }
 
         ~Vector4( void ) noexcept = default;
     };

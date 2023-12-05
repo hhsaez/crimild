@@ -41,23 +41,23 @@ namespace crimild {
      * correct result.
      */
     struct Bounds3 {
-        Point3 min = Point3::Constants::POSITIVE_INFINITY;
-        Point3 max = Point3::Constants::NEGATIVE_INFINITY;
+        Point3f min = Point3f::POSITIVE_INFINITY;
+        Point3f max = Point3f::NEGATIVE_INFINITY;
 
-        [[nodiscard]] inline constexpr const Point3 &operator[]( Index i ) const noexcept
+        [[nodiscard]] inline constexpr const Point3f &operator[]( Index i ) const noexcept
         {
             return i == 0 ? min : max;
         }
 
-        [[nodiscard]] inline Point3 &operator[]( Index i ) noexcept
+        [[nodiscard]] inline Point3f &operator[]( Index i ) noexcept
         {
             return i == 0 ? min : max;
         }
     };
 
-    [[nodiscard]] inline constexpr Point3 corner( const Bounds3 &B, Index i ) noexcept
+    [[nodiscard]] inline constexpr Point3f corner( const Bounds3 &B, Index i ) noexcept
     {
-        return Point3 {
+        return Point3f {
             B[ i & 1 ].x,
             B[ ( i & 2 ) ? 1 : 0 ].y,
             B[ ( i & 4 ) ? 1 : 0 ].z,

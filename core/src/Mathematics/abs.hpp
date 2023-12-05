@@ -30,7 +30,8 @@
 
 #include "Mathematics/Traits.hpp"
 #include "Mathematics/Tuple2.hpp"
-#include "Mathematics/tupleBuilder.hpp"
+#include "Mathematics/Tuple3.hpp"
+#include "Mathematics/Tuple4.hpp"
 
 namespace crimild {
 
@@ -55,6 +56,16 @@ namespace crimild {
     }
 
     template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto abs( const Tuple3< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            abs( t.x ),
+            abs( t.y ),
+            abs( t.z ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
     [[nodiscard]] inline constexpr auto abs( const Tuple4< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -62,36 +73,6 @@ namespace crimild {
             abs( t.y ),
             abs( t.z ),
             abs( t.w ),
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto abs( const Vector3Impl< T > &t ) noexcept
-    {
-        return Vector3Impl< T > {
-            abs( t.x ),
-            abs( t.y ),
-            abs( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto abs( const Normal3Impl< T > &t ) noexcept
-    {
-        return Normal3Impl< T > {
-            abs( t.x ),
-            abs( t.y ),
-            abs( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto abs( const Point3Impl< T > &t ) noexcept
-    {
-        return Point3Impl< T > {
-            abs( t.x ),
-            abs( t.y ),
-            abs( t.z )
         };
     }
 

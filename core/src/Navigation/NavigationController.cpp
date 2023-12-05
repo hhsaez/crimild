@@ -100,7 +100,7 @@ Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
     return r.getPointAt( t );
     */
     assert( true );
-    return Vector3 {};
+    return Vector3f {};
 }
 
 bool NavigationController::snap( void )
@@ -116,7 +116,7 @@ bool NavigationController::teleport( const Vector3f &target )
 
     setCurrentCell( cell );
     assert( false );
-    //getNode()->local().setTranslate( target );
+    // getNode()->local().setTranslate( target );
 
     return cell != nullptr;
 }
@@ -205,9 +205,9 @@ bool NavigationController::move( const Vector3f &target )
 bool NavigationController::findCurrentCell( void )
 {
     assert( false );
-    //auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
-    //if ( cell != nullptr ) {
-        //setCurrentCell( cell );
+    // auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
+    // if ( cell != nullptr ) {
+    // setCurrentCell( cell );
     //}
 
     return getCurrentCell();

@@ -82,10 +82,10 @@ TEST( RTAcceleration, it_optimizes_scene_with_one_geometry )
     auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 2, optimized.nodes.size() );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 0 ].type );
 
-    ASSERT_EQ( ( Point3 { -1, -2, -3 } ), location( inverse( optimized.nodes[ 1 ].world ) ) );
+    ASSERT_EQ( ( Point3f { -1, -2, -3 } ), location( inverse( optimized.nodes[ 1 ].world ) ) );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 1 ].materialIndex );
 
@@ -285,7 +285,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_union )
     ASSERT_EQ( 3, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_UNION, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 
@@ -316,7 +316,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_intersection )
 
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_INTERSECTION, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 
@@ -347,7 +347,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_difference )
 
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_DIFFERENCE, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 

@@ -29,26 +29,26 @@
 #define CRIMILD_MATHEMATICS_NORMALIZE_
 
 #include "Mathematics/Normal3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/Vector4.hpp"
 #include "Mathematics/length.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Vector3Impl< T > normalize( const Vector3Impl< T > &u ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Vector3< T > normalize( const Vector3< T > &u ) noexcept
     {
         return u / length( u );
     }
 
-    template< typename T >
+    template< concepts::Arithmetic T >
     [[nodiscard]] inline constexpr Vector4< T > normalize( const Vector4< T > &u ) noexcept
     {
         return u / length( u );
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr Normal3Impl< T > normalize( const Normal3Impl< T > &u ) noexcept
+    template< concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Normal3< T > normalize( const Normal3< T > &u ) noexcept
     {
         return u / length( u );
     }

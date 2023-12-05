@@ -33,11 +33,16 @@
 
 namespace crimild {
 
+    /**
+     * @brief A ray in 3D space
+     *
+     * Uses default precision for members
+     */
     struct Ray3 {
-        Point3 o;
-        Vector3 d;
+        Point3f o;
+        Vector3f d;
 
-        [[nodiscard]] inline constexpr Point3 operator()( Real t ) const noexcept;
+        [[nodiscard]] inline constexpr Point3f operator()( Real t ) const noexcept;
 
         [[nodiscard]] inline constexpr Bool operator==( const Ray3 &other ) const noexcept
         {
@@ -50,11 +55,11 @@ namespace crimild {
         }
     };
 
-    [[nodiscard]] inline constexpr const Point3 &origin( const Ray3 &r ) noexcept
+    [[nodiscard]] inline constexpr const Point3f &origin( const Ray3 &r ) noexcept
     {
         return r.o;
     }
-    [[nodiscard]] inline constexpr const Vector3 &direction( const Ray3 &r ) noexcept
+    [[nodiscard]] inline constexpr const Vector3f &direction( const Ray3 &r ) noexcept
     {
         return r.d;
     }

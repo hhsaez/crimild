@@ -36,12 +36,12 @@ using namespace crimild;
 TEST( intersect, raySphereTwoRoots )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 0, -5 },
+        Point3f { 0, 0, -5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -54,12 +54,12 @@ TEST( intersect, raySphereTwoRoots )
 TEST( intersect, raySphereOneRoot )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 1, -5 },
+        Point3f { 0, 1, -5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -72,12 +72,12 @@ TEST( intersect, raySphereOneRoot )
 TEST( intersect, raySphereNoIntersection )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 2, -5 },
+        Point3f { 0, 2, -5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -88,12 +88,12 @@ TEST( intersect, raySphereNoIntersection )
 TEST( intersect, raySphereOriginInside )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 0, 0 },
+        Point3f { 0, 0, 0 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -106,12 +106,12 @@ TEST( intersect, raySphereOriginInside )
 TEST( intersect, sphereBehindRay )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 0, 5 },
+        Point3f { 0, 0, 5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -124,12 +124,12 @@ TEST( intersect, sphereBehindRay )
 TEST( intersect, rayAndTransformedSphere )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 0, -5 },
+        Point3f { 0, 0, -5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -145,12 +145,12 @@ TEST( intersect, rayAndTransformedSphere )
 TEST( intersect, it_intersects_a_scaled_sphere )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
     constexpr auto R = Ray3 {
-        Point3 { 0, 0, -5 },
+        Point3f { 0, 0, -5 },
         Vector3 { 0, 0, 1 },
     };
 
@@ -355,15 +355,15 @@ TEST( intersect, ray_misses_cylinder )
         EXPECT_FALSE( intersect( R, C, t0, t1 ) );
     };
 
-    test( Ray3 { Point3 { 1, 0, 0 }, Vector3 { 0, 1, 0 } } );
-    test( Ray3 { Point3 { 0, 0, 0 }, Vector3 { 0, 1, 0 } } );
-    test( Ray3 { Point3 { 0, 0, -5 }, Vector3 { 1, 1, 1 } } );
+    test( Ray3 { Point3f { 1, 0, 0 }, Vector3 { 0, 1, 0 } } );
+    test( Ray3 { Point3f { 0, 0, 0 }, Vector3 { 0, 1, 0 } } );
+    test( Ray3 { Point3f { 0, 0, -5 }, Vector3 { 1, 1, 1 } } );
 }
 
 TEST( intersect, ray_hits_cylinder )
 {
     {
-        const auto R = Ray3 { Point3 { 1, 0, -5 }, Vector3 { 0, 0, 1 } };
+        const auto R = Ray3 { Point3f { 1, 0, -5 }, Vector3 { 0, 0, 1 } };
         const Real x0 = 5;
         const Real x1 = 5;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -374,7 +374,7 @@ TEST( intersect, ray_hits_cylinder )
     };
 
     {
-        const auto R = Ray3 { Point3 { 1, 10, -5 }, Vector3 { 0, 0, 1 } };
+        const auto R = Ray3 { Point3f { 1, 10, -5 }, Vector3 { 0, 0, 1 } };
         const Real x0 = 5;
         const Real x1 = 5;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -385,7 +385,7 @@ TEST( intersect, ray_hits_cylinder )
     };
 
     {
-        const auto R = Ray3 { Point3 { 1, -100, -5 }, Vector3 { 0, 0, 1 } };
+        const auto R = Ray3 { Point3f { 1, -100, -5 }, Vector3 { 0, 0, 1 } };
         const Real x0 = 5;
         const Real x1 = 5;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -396,7 +396,7 @@ TEST( intersect, ray_hits_cylinder )
     };
 
     {
-        const auto R = Ray3 { Point3 { 1, 1000, -5 }, Vector3 { 0, 0, 1 } };
+        const auto R = Ray3 { Point3f { 1, 1000, -5 }, Vector3 { 0, 0, 1 } };
         const Real x0 = 5;
         const Real x1 = 5;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -407,7 +407,7 @@ TEST( intersect, ray_hits_cylinder )
     };
 
     {
-        const auto R = Ray3 { Point3 { 0, 0, -5 }, Vector3 { 0, 0, 1 } };
+        const auto R = Ray3 { Point3f { 0, 0, -5 }, Vector3 { 0, 0, 1 } };
         const Real x0 = 4;
         const Real x1 = 6;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -418,7 +418,7 @@ TEST( intersect, ray_hits_cylinder )
     };
 
     {
-        const auto R = Ray3 { Point3 { 0.5, 0, -5 }, normalize( Vector3 { 0.1, 1, 1 } ) };
+        const auto R = Ray3 { Point3f { 0.5, 0, -5 }, normalize( Vector3 { 0.1, 1, 1 } ) };
         const Real x0 = 680;
         const Real x1 = 708;
         const auto C = Cylinder { .height = numbers::POSITIVE_INFINITY, .closed = false };
@@ -443,12 +443,12 @@ TEST( intersect, ray_hits_cylinder_with_different_height )
         EXPECT_FALSE( intersect( R, C, t0, t1 ) );
     };
 
-    fail( Ray3 { Point3 { 0, 0.15, 0 }, normalize( Vector3 { 0.1, 1, 0 } ) } );
-    fail( Ray3 { Point3 { 0, 3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    fail( Ray3 { Point3 { 0, -3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    fail( Ray3 { Point3 { 0, 2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    fail( Ray3 { Point3 { 0, -2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
-    pass( Ray3 { Point3 { 0, 1.5, -2 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3f { 0, 0.15, 0 }, normalize( Vector3 { 0.1, 1, 0 } ) } );
+    fail( Ray3 { Point3f { 0, 3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3f { 0, -3, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3f { 0, 2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    fail( Ray3 { Point3f { 0, -2, -5 }, normalize( Vector3 { 0, 0, 1 } ) } );
+    pass( Ray3 { Point3f { 0, 1.5, -2 }, normalize( Vector3 { 0, 0, 1 } ) } );
 }
 
 TEST( intersect, ray_hits_cylinder_end_caps )
@@ -461,12 +461,12 @@ TEST( intersect, ray_hits_cylinder_end_caps )
         EXPECT_EQ( floor( x1 * 1000 ), floor( t1 * 1000 ) );
     };
 
-    test( Ray3 { Point3 { 0, 3, 0 }, normalize( Vector3 { 0, -1, 0 } ) }, 1, 5 );
-    test( Ray3 { Point3 { 0, -3, 0 }, normalize( Vector3 { 0, 1, 0 } ) }, 1, 5 );
-    test( Ray3 { Point3 { 0, 3, -2 }, normalize( Vector3 { 0, -1, 2 } ) }, 2.23607, 3.3541 );
-    test( Ray3 { Point3 { 0, 4, -2 }, normalize( Vector3 { 0, -1, 1 } ) }, 2.828, 4.242 );
-    test( Ray3 { Point3 { 0, 0, -2 }, normalize( Vector3 { 0, 1, 2 } ) }, 1.118, 3.354 );
-    test( Ray3 { Point3 { 0, -2, -2 }, normalize( Vector3 { 0, 1, 1 } ) }, 1.414, 4.242 );
+    test( Ray3 { Point3f { 0, 3, 0 }, normalize( Vector3 { 0, -1, 0 } ) }, 1, 5 );
+    test( Ray3 { Point3f { 0, -3, 0 }, normalize( Vector3 { 0, 1, 0 } ) }, 1, 5 );
+    test( Ray3 { Point3f { 0, 3, -2 }, normalize( Vector3 { 0, -1, 2 } ) }, 2.23607, 3.3541 );
+    test( Ray3 { Point3f { 0, 4, -2 }, normalize( Vector3 { 0, -1, 1 } ) }, 2.828, 4.242 );
+    test( Ray3 { Point3f { 0, 0, -2 }, normalize( Vector3 { 0, 1, 2 } ) }, 1.118, 3.354 );
+    test( Ray3 { Point3f { 0, -2, -2 }, normalize( Vector3 { 0, 1, 1 } ) }, 1.414, 4.242 );
 }
 
 TEST( intersect, it_fails_if_ray_is_parallel_to_triangle )

@@ -95,7 +95,7 @@ namespace crimild {
     }
 
     // TODO: make this function constexpr
-    [[nodiscard]] static Transformation rotation( const Vector3 &axis, Radians angle ) noexcept
+    [[nodiscard]] static Transformation rotation( const Vector3f &axis, Radians angle ) noexcept
     {
         const auto x = axis.x;
         const auto y = axis.y;

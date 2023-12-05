@@ -34,7 +34,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Bounds3 combine( const Bounds3 &B, const Point3 &P ) noexcept
+    [[nodiscard]] inline constexpr Bounds3 combine( const Bounds3 &B, const Point3f &P ) noexcept
     {
         return Bounds3 {
             min( min( B ), P ),

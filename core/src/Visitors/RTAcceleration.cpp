@@ -193,7 +193,7 @@ static void optimizePrimitive(
         auto B = Bounds3 {};
         for ( auto pi = 0; pi < 3; ++pi ) {
             const auto P = triangles[ indices[ baseIndexOffset + idx + pi ] ].position;
-            B = combine( B, point3( P ) );
+            B = combine( B, Point3f( P ) );
         }
 
         primBounds[ i ] = B;
@@ -226,7 +226,7 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
 
     // Compute a transformation for representing bounding volumes
     const auto size = Real( 0.5 ) * ( group->getWorldBound()->getMax() - group->getWorldBound()->getMin() );
-    auto boundingTransform = translation( vector3( group->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
+    auto boundingTransform = translation( Vector3f( group->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
 
     const auto groupIndex = m_result.nodes.size();
 
@@ -399,7 +399,7 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
             .world = [ & ] {
                 // Compute a transformation for representing bounding volumes
                 const auto size = Real( 0.5 ) * ( geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin() );
-                return translation( vector3( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
+                return translation( Vector3f( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
             }(),
         }
     );
@@ -432,7 +432,7 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
     }
 
     // Compute a transformation for representing bounding volumes
-    auto boundingTransform = translation( vector3( csg->getWorldBound()->getCenter() ) ) * scale( csg->getWorldBound()->getRadius() );
+    auto boundingTransform = translation( Vector3f( csg->getWorldBound()->getCenter() ) ) * scale( csg->getWorldBound()->getRadius() );
 
     const auto csgIndex = m_result.nodes.size();
 

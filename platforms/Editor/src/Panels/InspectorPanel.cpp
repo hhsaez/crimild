@@ -197,7 +197,7 @@ namespace crimild::editor::panels {
     public:
         virtual void render( crimild::Node *node ) noexcept override
         {
-            Point3 nodeTranslation;
+            Point3f nodeTranslation;
             Vector3 nodeRotation;
             Vector3 nodeScale;
             ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
@@ -340,10 +340,10 @@ namespace crimild::editor::panels {
 
                 if ( castShadows ) {
                     ImGui::Text( "TODO: Fix shadow map debug rendering" );
-//                    if ( m_inFLightShadowMaps.empty() ) {
-//                        configureShadowMapLayers( light );
-//                    }
-//                    renderShadowMap();
+                    //                    if ( m_inFLightShadowMaps.empty() ) {
+                    //                        configureShadowMapLayers( light );
+                    //                    }
+                    //                    renderShadowMap();
                 }
             }
         }

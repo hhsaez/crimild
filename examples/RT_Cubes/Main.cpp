@@ -82,7 +82,7 @@ public:
                 auto box = [ primitive = crimild::alloc< Primitive >( Primitive::Type::BOX ) ]( const auto &center, const auto &size, auto material ) -> SharedPointer< Node > {
                     auto geometry = crimild::alloc< Geometry >();
                     geometry->attachPrimitive( primitive );
-                    geometry->setLocal( translation( vector3( center ) ) * scale( size.x, size.y, size.z ) );
+                    geometry->setLocal( translation( Vector3f( center ) ) * scale( size.x, size.y, size.z ) );
                     geometry->attachComponent< MaterialComponent >( material );
                     return geometry;
                 };
@@ -105,9 +105,11 @@ public:
                             };
                             scene->attachNode(
                                 box(
-                                    Point3 { x, y, z } + offset,
+                                    Point3f { x, y, z } + offset,
                                     size,
-                                    materials[ Int32( rnd.generate( 0, materials.size() ) ) ] ) );
+                                    materials[ Int32( rnd.generate( 0, materials.size() ) ) ]
+                                )
+                            );
                         }
                     }
                 }
@@ -122,9 +124,11 @@ public:
                     auto camera = crimild::alloc< Camera >( 20.0f, 4.0f / 3.0f, 0.1f, 1024.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 250, 250, 250 }, //70, 70, 70 },
-                            Point3 { 0, 0, 0 },       //10, 50, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 250, 250, 250 }, // 70, 70, 70 },
+                            Point3f { 0, 0, 0 },       // 10, 50, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->attachComponent< FreeLookCameraComponent >();
                     return camera;
                 }() );
@@ -132,7 +136,8 @@ public:
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
 
         if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {
             RenderSystem::getInstance()->useRTSoftRenderPath();

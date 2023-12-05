@@ -56,7 +56,7 @@ namespace crimild {
         crimild::Bool _initialized = false;
         Real32 _speed = 1.0f;
 
-        Point3 m_position = Point3 { 0, 0, 0 };
+        Point3f m_position = Point3f { 0, 0, 0 };
         Real m_pitch = 0;
         Real m_yaw = 0;
         Real m_roll = 0;

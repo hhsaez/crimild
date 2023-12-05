@@ -42,7 +42,7 @@ namespace crimild {
         The default plane is the XZ-plane
     */
     struct Plane3 {
-        Normal3 n = Normal3 { 0, 1, 0 };
+        Normal3f n = Normal3f { 0, 1, 0 };
         Real d = 0;
 
         [[nodiscard]] inline constexpr Bool operator==( const Plane3 &other ) const noexcept
@@ -56,7 +56,7 @@ namespace crimild {
         }
     };
 
-    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
+    [[nodiscard]] inline constexpr const Normal3f &normal( const Plane3 &p ) noexcept
     {
         return p.n;
     }

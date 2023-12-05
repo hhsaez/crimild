@@ -66,7 +66,7 @@ Behavior::State MotionReset::step( BehaviorContext *context )
     }
 
     m_motion->position = location( agent->getLocal() );
-    m_motion->steering = Vector3::Constants::ZERO;
+    m_motion->steering = Vector3f::ZERO;
 
     // if ( context->hasTargets() ) {
     //     auto target = context->getTargetAt( 0 );

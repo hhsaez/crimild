@@ -52,7 +52,7 @@ namespace crimild {
          *
          * This value is updated by crimild::behaviors::actions::MotionApply
          */
-        Vector3 velocity = Vector3::Constants::ZERO;
+        Vector3f velocity = Vector3f::ZERO;
 
         /**
          * \brief Current position
@@ -63,7 +63,7 @@ namespace crimild {
          * It is updated by crimild::behaviors::actions::MotionApply based on
          * current velocity and steering force
          */
-        Point3 position = Point3::Constants::ZERO;
+        Point3f position = Point3f::ZERO;
 
         /**
          * \brief Steering force
@@ -71,7 +71,7 @@ namespace crimild {
          * This value is reset by crimild::behaviors::actions::MotionReset on
          * every step.
          */
-        Vector3 steering = Vector3::Constants::ZERO;
+        Vector3f steering = Vector3f::ZERO;
 
         float maxVelocity = 1.0f;
         float maxForce = 1.0f;

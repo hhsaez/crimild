@@ -31,24 +31,23 @@
 #include "Mathematics/Intersection.hpp"
 #include "Mathematics/Point3.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/max.hpp"
 
 using namespace crimild;
 
 Box2DBoundingVolume::Box2DBoundingVolume( void )
-    : _sphere { Point3::Constants::ZERO, 1.0f }
+    : _sphere { Point3f::ZERO, 1.0f }
 {
 }
 
 Box2DBoundingVolume::Box2DBoundingVolume( crimild::Real32 halfWidth, crimild::Real32 halfHeight )
 {
-    setRAxis( halfWidth * Vector3::Constants::UNIT_X );
-    setSAxis( halfHeight * Vector3::Constants::UNIT_Y );
-    setTAxis( Vector3::Constants::UNIT_Z );
+    setRAxis( halfWidth * Vector3f::UNIT_X );
+    setSAxis( halfHeight * Vector3f::UNIT_Y );
+    setTAxis( Vector3f::UNIT_Z );
 
     _sphere = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         crimild::max( halfWidth, halfHeight ),
     };
 }
@@ -99,7 +98,7 @@ void Box2DBoundingVolume::computeFrom( const BoundingVolume *volume, const Trans
     */
 }
 
-void Box2DBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
+void Box2DBoundingVolume::computeFrom( const Point3f *positions, unsigned int positionCount )
 {
     // TODO
 }
@@ -109,17 +108,17 @@ void Box2DBoundingVolume::computeFrom( const VertexBuffer *vbo )
     // TODO
 }
 
-void Box2DBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
+void Box2DBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
     // TODO
 }
 
-void Box2DBoundingVolume::expandToContain( const Point3 &p )
+void Box2DBoundingVolume::expandToContain( const Point3f &p )
 {
     // TODO
 }
 
-void Box2DBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
+void Box2DBoundingVolume::expandToContain( const Point3f *positions, unsigned int positionCount )
 {
     // TODO
 }
@@ -141,7 +140,7 @@ int Box2DBoundingVolume::whichSide( const Plane3 &plane ) const
     return 0;
 }
 
-bool Box2DBoundingVolume::contains( const Point3 &point ) const
+bool Box2DBoundingVolume::contains( const Point3f &point ) const
 {
     /*
     float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();

@@ -54,6 +54,14 @@ TEST( Vector3, construction )
     EXPECT_EQ( 30, u.z );
 }
 
+TEST( Vector3, fromPoint3f )
+{
+    constexpr auto p3 = Point3i( 1, 2, 3 );
+    constexpr auto v3 = Vector3i( p3 );
+    static_assert( v3 == Vector3( 1, 2, 3 ) );
+    EXPECT_TRUE( true );
+}
+
 TEST( Vector3, size )
 {
     constexpr auto u = crimild::Vector3 { 10, 20, 30 };

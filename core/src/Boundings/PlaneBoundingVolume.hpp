@@ -38,29 +38,29 @@ namespace crimild {
         explicit PlaneBoundingVolume( const Plane3 &plane );
         virtual ~PlaneBoundingVolume( void );
 
-        virtual const Point3 &getCenter( void ) const override { return _center; }
+        virtual const Point3f &getCenter( void ) const override { return _center; }
         virtual float getRadius( void ) const override { return 0.0f; }
 
     private:
-        Point3 _center;
+        Point3f _center;
         Plane3 _plane;
 
     public:
         virtual void computeFrom( const BoundingVolume *volume ) override;
         virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) override;
-        virtual void computeFrom( const Point3 *positions, unsigned int positionCount ) override;
+        virtual void computeFrom( const Point3f *positions, unsigned int positionCount ) override;
         virtual void computeFrom( const VertexBuffer *vbo ) override;
-        virtual void computeFrom( const Point3 &min, const Point3 &max ) override;
+        virtual void computeFrom( const Point3f &min, const Point3f &max ) override;
 
     public:
-        virtual void expandToContain( const Point3 &point ) override;
-        virtual void expandToContain( const Point3 *positions, unsigned int positionCount ) override;
+        virtual void expandToContain( const Point3f &point ) override;
+        virtual void expandToContain( const Point3f *positions, unsigned int positionCount ) override;
         virtual void expandToContain( const VertexBuffer *vbo ) override;
         virtual void expandToContain( const BoundingVolume *input ) override;
 
     public:
         virtual int whichSide( const Plane3 &plane ) const override;
-        virtual bool contains( const Point3 &point ) const override;
+        virtual bool contains( const Point3f &point ) const override;
 
     public:
         virtual bool testIntersection( const Ray3 &ray ) const override;

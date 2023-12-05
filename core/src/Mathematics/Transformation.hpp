@@ -78,9 +78,9 @@ namespace crimild {
             return !( *this == other );
         }
 
-        [[nodiscard]] constexpr Point3 operator()( const Point3 &p ) const noexcept;
-        [[nodiscard]] constexpr Vector3 operator()( const Vector3 &v ) const noexcept;
-        [[nodiscard]] constexpr Normal3 operator()( const Normal3 &N ) const noexcept;
+        [[nodiscard]] constexpr Point3f operator()( const Point3f &p ) const noexcept;
+        [[nodiscard]] constexpr Vector3f operator()( const Vector3f &v ) const noexcept;
+        [[nodiscard]] constexpr Normal3f operator()( const Normal3f &N ) const noexcept;
         [[nodiscard]] constexpr Ray3 operator()( const Ray3 &R ) const noexcept;
     };
 

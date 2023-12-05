@@ -73,7 +73,7 @@ namespace crimild {
             /**
                         \brief Creates a new quaternion representing a rotation
                  */
-            static Quaternion createFromAxisAngle( const Vector3Impl< PRECISION > &axis, PRECISION angle )
+            static Quaternion createFromAxisAngle( const Vector3< PRECISION > &axis, PRECISION angle )
             {
                 Quaternion q;
                 q.fromAxisAngle( axis, angle );
@@ -87,27 +87,27 @@ namespace crimild {
             in "Game Programming Gems". It calculates a quaternion that
             rotates from a to b, avoiding numerical instability.
          */
-            static Quaternion createFromVectors( const Vector3Impl< PRECISION > &v0, const Vector3Impl< PRECISION > &v1 )
+            static Quaternion createFromVectors( const Vector3< PRECISION > &v0, const Vector3< PRECISION > &v1 )
             {
                 if ( v0 == -v1 ) {
-                    return Quaternion::createFromAxisAngle( Vector3Impl< PRECISION > { 1, 0, 0 }, Numeric< PRECISION >::PI );
+                    return Quaternion::createFromAxisAngle( Vector3< PRECISION > { 1, 0, 0 }, Numeric< PRECISION >::PI );
                 }
 
-                Vector3Impl c = v0 ^ v1;
+                Vector3 c = v0 ^ v1;
                 PRECISION d = v0 * v1;
                 PRECISION s = std::sqrt( ( 1.0 + d ) * 2.0 );
 
                 return Quaternion( s / 2.0, c[ 0 ] / s, c[ 1 ] / s, c[ 2 ] / s );
             }
 
-            static Quaternion createFromDirection( const Vector3Impl< PRECISION > &direction, const Vector3Impl< PRECISION > &up = Vector3Impl< PRECISION > { 0, 1, 0 } )
+            static Quaternion createFromDirection( const Vector3< PRECISION > &direction, const Vector3< PRECISION > &up = Vector3< PRECISION > { 0, 1, 0 } )
             {
                 Quaternion q;
                 q.lookAt( direction, up );
                 return q;
             }
 
-            static Quaternion createFromEulerAngles( const Vector3Impl< PRECISION > &angles )
+            static Quaternion createFromEulerAngles( const Vector3< PRECISION > &angles )
             {
                 return createFromEulerAngles( angles[ 0 ], angles[ 1 ], angles[ 2 ] );
             }
@@ -138,7 +138,7 @@ namespace crimild {
                         and the imaginary parts of it as a scalar and a vector
                         respectively.
                  */
-            Quaternion( PRECISION r, const Vector3Impl< PRECISION > &i )
+            Quaternion( PRECISION r, const Vector3< PRECISION > &i )
                 : _data( i[ 0 ], i[ 1 ], i[ 2 ], r )
             {
             }
@@ -195,13 +195,13 @@ namespace crimild {
                 return false; //( _data != q._data );
             }
 
-            Vector3Impl< PRECISION > getImaginary( void ) const
+            Vector3< PRECISION > getImaginary( void ) const
             {
                 // return xyz( _data );
                 return { _data.x, _data.y, _data.z };
             }
 
-            void setImaginary( const Vector3Impl< PRECISION > &value )
+            void setImaginary( const Vector3< PRECISION > &value )
             {
                 _data[ 0 ] = value[ 0 ];
                 _data[ 1 ] = value[ 1 ];
@@ -231,10 +231,10 @@ namespace crimild {
             friend Quaternion< U > operator*( const Quaternion< U > &q, const Quaternion< U > &r );
 
             template< typename U >
-            friend Vector3Impl< U > operator*( const Quaternion< U > &q, const Vector3Impl< U > &v );
+            friend Vector3< U > operator*( const Quaternion< U > &q, const Vector3< U > &v );
 
             template< typename U >
-            friend Vector3Impl< U > operator*( const Vector3Impl< U > &v, const Quaternion< U > &q );
+            friend Vector3< U > operator*( const Vector3< U > &v, const Quaternion< U > &q );
 
             template< typename U, typename V >
             friend Quaternion< U > operator*( const Quaternion< U > &q, V s );
@@ -314,7 +314,7 @@ namespace crimild {
                 return *this;
             }
 
-            Quaternion &fromAxisAngle( const Vector3Impl< PRECISION > &axis, PRECISION angle )
+            Quaternion &fromAxisAngle( const Vector3< PRECISION > &axis, PRECISION angle )
             {
                 /*
                 double sinTheta = std::sin( 0.5 * angle );
@@ -356,7 +356,7 @@ namespace crimild {
                 return *this;
             }
 
-            Vector3Impl< PRECISION > toEulerAngles( void ) const
+            Vector3< PRECISION > toEulerAngles( void ) const
             {
                 // from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
@@ -383,7 +383,7 @@ namespace crimild {
                 double t4 = +1.0f - 2.0f * ( ysqr + z * z );
                 double yaw = std::atan2( t3, t4 );
 
-                return Vector3Impl( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
+                return Vector3( ( PRECISION ) pitch, ( PRECISION ) yaw, ( PRECISION ) roll );
             }
 
             /**
@@ -482,20 +482,20 @@ namespace crimild {
                 return *this;
             }
 
-            Quaternion &lookAt( const Vector3Impl< PRECISION > &direction, const Vector3Impl< PRECISION > &up = Vector3Impl< PRECISION > { 0, 1, 0 } )
+            Quaternion &lookAt( const Vector3< PRECISION > &direction, const Vector3< PRECISION > &up = Vector3< PRECISION > { 0, 1, 0 } )
             {
-                Vector3Impl< PRECISION > forward( 0, 0, -1 );
-                Vector3Impl< PRECISION > right( 1, 0, 0 );
+                Vector3< PRECISION > forward( 0, 0, -1 );
+                Vector3< PRECISION > right( 1, 0, 0 );
 
-                Vector3Impl< PRECISION > axis = up;
+                Vector3< PRECISION > axis = up;
 
-                Vector3Impl< PRECISION > u = forward ^ direction;
+                Vector3< PRECISION > u = forward ^ direction;
                 if ( Numeric< PRECISION >::isZero( u.getSquaredMagnitude() ) ) {
                     u = right ^ direction;
                 }
                 u.normalize();
 
-                Vector3Impl< PRECISION > v = u ^ up;
+                Vector3< PRECISION > v = u ^ up;
                 if ( Numeric< PRECISION >::isZero( v.getSquaredMagnitude() ) ) {
                     axis = u;
                 } else {
@@ -503,7 +503,7 @@ namespace crimild {
                     u = v ^ u;
 
                     // Oh, Dark Lork, I summon thee!!!
-                    axis = Vector3Impl< PRECISION > { -u[ 1 ], u[ 0 ], u[ 2 ] };
+                    axis = Vector3< PRECISION > { -u[ 1 ], u[ 0 ], u[ 2 ] };
                 }
 
                 float angle = std::acos( forward * direction );
@@ -538,9 +538,9 @@ namespace crimild {
         {
             return q;
             /*
-            impl::Vector3Impl< U > qImaginary = q.getImaginary();
+            impl::Vector3< U > qImaginary = q.getImaginary();
             U qReal = q.getReal();
-            impl::Vector3Impl< U > rImaginary = r.getImaginary();
+            impl::Vector3< U > rImaginary = r.getImaginary();
             U rReal = r.getReal();
 
             // TODO: this should be replaced by a faster method
@@ -550,7 +550,7 @@ namespace crimild {
         }
 
         template< typename U >
-        Vector3Impl< U > operator*( const Quaternion< U > &q, const Vector3Impl< U > &v )
+        Vector3< U > operator*( const Quaternion< U > &q, const Vector3< U > &v )
         {
             U x = v[ 0 ];
             U y = v[ 1 ];
@@ -565,7 +565,7 @@ namespace crimild {
             U iz = qw * z + qx * y - qy * x;
             U iw = -qx * x - qy * y - qz * z;
 
-            Vector3Impl< U > result = {
+            Vector3< U > result = {
                 ix * qw + iw * -qx + iy * -qz - iz * -qy,
                 iy * qw + iw * -qy + iz * -qx - ix * -qz,
                 iz * qw + iw * -qz + ix * -qy - iy * -qx,
@@ -574,7 +574,7 @@ namespace crimild {
         }
 
         template< typename U >
-        Vector3Impl< U > operator*( const Vector3Impl< U > &v, const Quaternion< U > &q )
+        Vector3< U > operator*( const Vector3< U > &v, const Quaternion< U > &q )
         {
             return q * v;
         }

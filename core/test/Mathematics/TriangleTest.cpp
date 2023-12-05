@@ -42,9 +42,9 @@ TEST( Triangle, construction )
         { 1, 0, 0 },
     };
 
-    EXPECT_EQ( ( Point3 { 0, 1, 0 } ), T.p0 );
-    EXPECT_EQ( ( Point3 { -1, 0, 0 } ), T.p1 );
-    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), T.p2 );
+    EXPECT_EQ( ( Point3f { 0, 1, 0 } ), T.p0 );
+    EXPECT_EQ( ( Point3f { -1, 0, 0 } ), T.p1 );
+    EXPECT_EQ( ( Point3f { 1, 0, 0 } ), T.p2 );
 }
 
 TEST( Triangle, edges )
@@ -68,7 +68,7 @@ TEST( Triangle, normal )
         { 0, 1, 0 },
     };
 
-    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3 { 0, 0.5, 0 } ) );
-    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3 { -0.5, 0.75, 0 } ) );
-    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3 { 0.5, 0.25, 0 } ) );
+    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3f { 0, 0.5, 0 } ) );
+    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3f { -0.5, 0.75, 0 } ) );
+    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( T, Point3f { 0.5, 0.25, 0 } ) );
 }

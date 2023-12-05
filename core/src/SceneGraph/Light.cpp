@@ -37,7 +37,7 @@
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/ceil.hpp"
 #include "Mathematics/io.hpp"
 #include "Mathematics/length.hpp"
@@ -70,7 +70,7 @@ Light::~Light( void )
     unload();
 }
 
-[[nodiscard]] Point3 Light::getPosition( void ) const noexcept
+[[nodiscard]] Point3f Light::getPosition( void ) const noexcept
 {
     return location( getWorld() );
 }
@@ -205,7 +205,7 @@ auto updateCascade = []( auto cascadeId, auto light ) {
 
     for ( auto i = 0l; i < 8; ++i ) {
         const auto inversePoint = invViewProj * vector4( frustumCorners[ i ], 1 );
-        frustumCorners[ i ] = vector3( inversePoint / inversePoint.w );
+        frustumCorners[ i ] = Vector3f( inversePoint / inversePoint.w );
     }
 
     for ( auto i = 0l; i < 4; ++i ) {
@@ -237,8 +237,8 @@ auto updateCascade = []( auto cascadeId, auto light ) {
 
     const auto lightDirection = light->getDirection();
     const auto lightViewMatrix = lookAt(
-                                     Point3 { frustumCenter + lightDirection * minExtents.z },
-                                     point3( frustumCenter ),
+                                     Point3f { frustumCenter + lightDirection * minExtents.z },
+                                     Point3f( frustumCenter ),
                                      Vector3f::Constants::UP
     )
                                      .invMat;

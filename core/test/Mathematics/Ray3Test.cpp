@@ -36,11 +36,11 @@
 TEST( Ray3, construction )
 {
     constexpr auto r = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
+        crimild::Point3f { 10, 20, 30 },
         crimild::Vector3 { 0, 0, -1 },
     };
 
-    constexpr auto o = crimild::Point3 { 10, 20, 30 };
+    constexpr auto o = crimild::Point3f { 10, 20, 30 };
     constexpr auto d = crimild::Vector3 { 0, 0, -1 };
 
     static_assert( crimild::isEqual( o, crimild::origin( r ) ) );
@@ -52,13 +52,13 @@ TEST( Ray3, construction )
 TEST( Ray3, apply )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 2, 3, 4 },
+        crimild::Point3f { 2, 3, 4 },
         crimild::Vector3 { 1, 0, 0 },
     };
 
-    static_assert( R( 0 ) == crimild::Point3 { 2, 3, 4 } );
-    static_assert( R( 1 ) == crimild::Point3 { 3, 3, 4 } );
-    static_assert( R( -1 ) == crimild::Point3 { 1, 3, 4 } );
+    static_assert( R( 0 ) == crimild::Point3f { 2, 3, 4 } );
+    static_assert( R( 1 ) == crimild::Point3f { 3, 3, 4 } );
+    static_assert( R( -1 ) == crimild::Point3f { 1, 3, 4 } );
 
     EXPECT_TRUE( true );
 }
@@ -66,7 +66,7 @@ TEST( Ray3, apply )
 TEST( Ray3, ostream )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 10, 20, 30 },
+        crimild::Point3f { 10, 20, 30 },
         crimild::Vector3 { 0, 0, -1 },
     };
 

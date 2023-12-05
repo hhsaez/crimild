@@ -28,7 +28,6 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_3_
 #define CRIMILD_MATHEMATICS_VECTOR_3_
 
-#include "Mathematics/Concepts.hpp"
 #include "Mathematics/Tuple3.hpp"
 
 #include <limits>
@@ -36,50 +35,84 @@
 namespace crimild {
 
     template< concepts::Arithmetic T >
-    struct Vector3Impl : public Tuple3Impl< T > {
-        struct Constants {
-            static constexpr auto ZERO = Vector3Impl< T > { 0, 0, 0 };
-            static constexpr auto ONE = Vector3Impl< T > { 1, 1, 1 };
-            static constexpr auto POSITIVE_INFINITY = Vector3Impl< T > {
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto NEGATIVE_INFINITY = Vector3Impl< T > {
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-            };
-            static constexpr auto UNIT_X = Vector3Impl< T > { 1, 0, 0 };
-            static constexpr auto UNIT_Y = Vector3Impl< T > { 0, 1, 0 };
-            static constexpr auto UNIT_Z = Vector3Impl< T > { 0, 0, 1 };
-            static constexpr auto RIGHT = Vector3Impl< T > { 1, 0, 0 };
-            static constexpr auto UP = Vector3Impl< T > { 0, 1, 0 };
-            static constexpr auto FORWARD = Vector3Impl< T > { 0, 0, -1 };
-        };
+    class Vector3 : public Tuple3< Vector3, T > {
+    public:
+        static const Vector3 ZERO;
+        static const Vector3 ONE;
+        static const Vector3 POSITIVE_INFINITY;
+        static const Vector3 NEGATIVE_INFINITY;
+        static const Vector3 UNIT_X;
+        static const Vector3 UNIT_Y;
+        static const Vector3 UNIT_Z;
+        static const Vector3 FORWARD;
+        static const Vector3 UP;
+        static const Vector3 RIGHT;
 
-        using Tuple3Impl< T >::x;
-        using Tuple3Impl< T >::y;
-        using Tuple3Impl< T >::z;
+    public:
+        using Tuple3< Vector3, T >::x;
+        using Tuple3< Vector3, T >::y;
+        using Tuple3< Vector3, T >::z;
 
-        template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator==( const Vector3Impl< U > &other ) const noexcept
+        constexpr Vector3( void ) noexcept = default;
+
+        constexpr Vector3( T x, T y, T z ) noexcept
+            : Tuple3< Vector3, T >( x, y, z )
         {
-            return x == other.x && y == other.y && z == other.z;
         }
 
         template< concepts::Arithmetic U >
-        [[nodiscard]] inline constexpr Bool operator!=( const Vector3Impl &other ) const noexcept
-        {
-            return !( *this == other );
-        }
+        constexpr explicit Vector3( U value ) noexcept
+            : Tuple3< Vector3, T >( value ) { }
+
+        template< template< concepts::Arithmetic > class OtherTuple, concepts::Arithmetic U >
+        constexpr explicit Vector3( const OtherTuple< U > &other ) noexcept
+            : Tuple3< Vector3, T >( other.x, other.y, other.z ) { }
+
+        ~Vector3( void ) noexcept = default;
     };
 
-    using Vector3 = Vector3Impl< Real >;
-    using Vector3f = Vector3Impl< Real32 >;
-    using Vector3d = Vector3Impl< Real64 >;
-    using Vector3i = Vector3Impl< Int32 >;
-    using Vector3ui = Vector3Impl< UInt32 >;
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::ZERO( 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::ONE( 1 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::POSITIVE_INFINITY(
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity(),
+        std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::NEGATIVE_INFINITY(
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity(),
+        -std::numeric_limits< T >::infinity()
+    );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::UNIT_X( 1, 0, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::UNIT_Y( 0, 1, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::UNIT_Z( 0, 0, 1 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::RIGHT( 1, 0, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::UP( 0, 1, 0 );
+
+    template< concepts::Arithmetic T >
+    constexpr const Vector3< T > Vector3< T >::FORWARD( 0, 0, 1 );
+
+    using Vector3f = Vector3< Real32 >;
+    using Vector3d = Vector3< Real64 >;
+    using Vector3i = Vector3< Int32 >;
+    using Vector3ui = Vector3< UInt32 >;
 
 }
 

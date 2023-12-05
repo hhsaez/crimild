@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T = Real >
+    template< concepts::Arithmetic T >
     class Point2 : public Tuple2< Point2, T > {
     public:
         static const Point2 ZERO;

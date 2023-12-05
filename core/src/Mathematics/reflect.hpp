@@ -30,15 +30,14 @@
 
 #include "Mathematics/Normal3.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/swizzle.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3 reflect( const Vector3 &in, const Normal3 &N ) noexcept
+    [[nodiscard]] inline constexpr Vector3f reflect( const Vector3f &in, const Normal3f &N ) noexcept
     {
-        return in - vector3( N * Real( 2 ) * dot( in, N ) );
+        return in - Vector3f( N * Real( 2 ) * dot( in, N ) );
     }
 
 }

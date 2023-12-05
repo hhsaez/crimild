@@ -28,16 +28,16 @@
 #include "SphereBoundingVolume.hpp"
 
 #include "Mathematics/Intersection.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 
 SphereBoundingVolume::SphereBoundingVolume( void )
-    : _sphere { Point3 { 0.0f, 0.0f, 0.0f }, 1.0f }
+    : _sphere { Point3f { 0.0f, 0.0f, 0.0f }, 1.0f }
 {
 }
 
-SphereBoundingVolume::SphereBoundingVolume( const Point3 &center, float radius )
+SphereBoundingVolume::SphereBoundingVolume( const Point3f &center, float radius )
     : _sphere { center, radius }
 {
 }
@@ -53,7 +53,7 @@ SphereBoundingVolume::~SphereBoundingVolume( void )
 
 void SphereBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-    //computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
+    // computeFrom( volume->getCenter() + volume->getMin(), volume->getCenter() + volume->getMax() );
 }
 
 void SphereBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
@@ -69,7 +69,7 @@ void SphereBoundingVolume::computeFrom( const BoundingVolume *volume, const Tran
     */
 }
 
-void SphereBoundingVolume::computeFrom( const Point3 *positions, unsigned int positionCount )
+void SphereBoundingVolume::computeFrom( const Point3f *positions, unsigned int positionCount )
 {
     /*
     if ( positionCount == 0 || positions == NULL ) {
@@ -111,59 +111,59 @@ void SphereBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
     assert( false );
     /*
-	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 0.5f );
-		return;
-	}
+        if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
+                _sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
+                _sphere.setRadius( 0.5f );
+                return;
+        }
 
-	Vector3f max = vbo->getPositionAt( 0 );
-	Vector3f min = vbo->getPositionAt( 0 );
-	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
+        Vector3f max = vbo->getPositionAt( 0 );
+        Vector3f min = vbo->getPositionAt( 0 );
+        for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
+                Vector3f pos = vbo->getPositionAt( i );
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	Vector3f center = 0.5f * ( max + min );
+        Vector3f center = 0.5f * ( max + min );
 
-	float radius = 0.0f;
-	for ( unsigned int i = 0; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
-		float mag2 = ( pos - center ).getSquaredMagnitude();
-		if ( mag2 > radius * radius ) {
-			radius = sqrt( mag2 );
-		}
-	}
+        float radius = 0.0f;
+        for ( unsigned int i = 0; i < vbo->getVertexCount(); i++ ) {
+                Vector3f pos = vbo->getPositionAt( i );
+                float mag2 = ( pos - center ).getSquaredMagnitude();
+                if ( mag2 > radius * radius ) {
+                        radius = sqrt( mag2 );
+                }
+        }
 
-	_sphere.setCenter( center );
-	_sphere.setRadius( radius );
+        _sphere.setCenter( center );
+        _sphere.setRadius( radius );
 
-	setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
-	setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+        setMin( -getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
+        setMax( +getRadius() * Vector3f( 1.0f, 1.0f, 1.0f ) );
     */
 }
 
-void SphereBoundingVolume::computeFrom( const Point3 &min, const Point3 &max )
+void SphereBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
     // TODO
 }
 
-void SphereBoundingVolume::expandToContain( const Point3 &point )
+void SphereBoundingVolume::expandToContain( const Point3f &point )
 {
     //    _sphere.expandToContain( Sphere( point, 0.0f ) );
 
-    setMin( -getRadius() * Point3 { 1.0f, 1.0f, 1.0f } );
-    setMax( +getRadius() * Point3 { 1.0f, 1.0f, 1.0f } );
+    setMin( -getRadius() * Point3f { 1.0f, 1.0f, 1.0f } );
+    setMax( +getRadius() * Point3f { 1.0f, 1.0f, 1.0f } );
 }
 
-void SphereBoundingVolume::expandToContain( const Point3 *positions, unsigned int positionCount )
+void SphereBoundingVolume::expandToContain( const Point3f *positions, unsigned int positionCount )
 {
     /*
     if ( positionCount == 0 || positions == NULL ) {
@@ -202,29 +202,29 @@ void SphereBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
     assert( false );
     /*
-	if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
-		_sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
-		_sphere.setRadius( 1.0f );
-		return;
-	}
+        if ( vbo->getVertexCount() == 0 || !vbo->getVertexFormat().hasPositions() ) {
+                _sphere.setCenter( Vector3f( 0.0f, 0.0f, 0.0f ) );
+                _sphere.setRadius( 1.0f );
+                return;
+        }
 
-	Vector3f max = vbo->getPositionAt( 0 );
-	Vector3f min = vbo->getPositionAt( 0 );
+        Vector3f max = vbo->getPositionAt( 0 );
+        Vector3f min = vbo->getPositionAt( 0 );
 
-	for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
-		Vector3f pos = vbo->getPositionAt( i );
+        for ( unsigned int i = 1; i < vbo->getVertexCount(); i++ ) {
+                Vector3f pos = vbo->getPositionAt( i );
 
-		if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
+                if ( pos[ 0 ] > max[ 0 ] ) max[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] > max[ 1 ] ) max[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] > max[ 2 ] ) max[ 2 ] = pos[ 2 ];
 
-		if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
-		if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
-		if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
-	}
+                if ( pos[ 0 ] < min[ 0 ] ) min[ 0 ] = pos[ 0 ];
+                if ( pos[ 1 ] < min[ 1 ] ) min[ 1 ] = pos[ 1 ];
+                if ( pos[ 2 ] < min[ 2 ] ) min[ 2 ] = pos[ 2 ];
+        }
 
-	expandToContain( max );
-	expandToContain( min );
+        expandToContain( max );
+        expandToContain( min );
     */
 }
 
@@ -240,11 +240,11 @@ void SphereBoundingVolume::expandToContain( const BoundingVolume *input )
 
 int SphereBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-    //return _sphere.whichSide( plane );
+    // return _sphere.whichSide( plane );
     return false;
 }
 
-bool SphereBoundingVolume::contains( const Point3 &point ) const
+bool SphereBoundingVolume::contains( const Point3f &point ) const
 {
     /*
     float centerDiffSqr = ( _sphere.getCenter() - point ).getSquaredMagnitude();
@@ -256,7 +256,7 @@ bool SphereBoundingVolume::contains( const Point3 &point ) const
 
 bool SphereBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-    //return Intersection::test( _sphere, ray );
+    // return Intersection::test( _sphere, ray );
     return false;
 }
 
@@ -267,13 +267,13 @@ bool SphereBoundingVolume::testIntersection( const BoundingVolume *other ) const
 
 bool SphereBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    //return Intersection::test( _sphere, sphere );
+    // return Intersection::test( _sphere, sphere );
     return false;
 }
 
 bool SphereBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-    //return whichSide( plane ) == 0;
+    // return whichSide( plane ) == 0;
     return false;
 }
 

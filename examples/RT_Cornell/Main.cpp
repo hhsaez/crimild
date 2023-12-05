@@ -80,7 +80,8 @@ public:
                         group->attachNode( withTranslation( withScale( withMaterial( box(), emissive( ColorRGB { 10, 10, 10 } ) ), w / 4, d, w / 4 ), 0, h - d, 0 ) );
 
                         return withScale( withTranslation( group, 0, h, 0 ), 3 );
-                    }() );
+                    }()
+                );
 
                 scene->attachNode( withTranslation( withRotationY( withScale( withMaterial( box(), lambertian( ColorRGB { 1, 1, 1 } ) ), 1.1 ), 2.5 ), 1.25, 1.1, 1.25 ) );
                 scene->attachNode( withTranslation( withRotationY( withScale( withMaterial( box(), lambertian( ColorRGB { 1, 1, 1 } ) ), 1, 2.5, 1 ), 0.25 ), -1.5, 2.5, -1.5 ) );
@@ -89,9 +90,11 @@ public:
                     auto camera = crimild::alloc< Camera >();
                     camera->setLocal(
                         lookAt(
-                            Point3 { 0, 3.5, 15 },
-                            Point3 { 0, 3.5, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 0, 3.5, 15 },
+                            Point3f { 0, 3.5, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->setFocusDistance( 10 );
                     camera->setAperture( 0.0f );
                     camera->attachComponent< FreeLookCameraComponent >();
@@ -109,7 +112,8 @@ public:
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
     }
 };
 

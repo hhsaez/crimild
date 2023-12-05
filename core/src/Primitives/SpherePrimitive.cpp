@@ -28,7 +28,7 @@
 #include "SpherePrimitive.hpp"
 
 #include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 
 #include <vector>
 
@@ -95,7 +95,8 @@ SpherePrimitive::SpherePrimitive( const Params &params ) noexcept
     if ( getType() == Primitive::Type::POINTS ) {
         auto indices = crimild::alloc< IndexBuffer >(
             Format::INDEX_32_UINT,
-            Array< Int32 >( divisions[ 1 ] * divisions[ 0 ] ).fill( []( auto i ) { return i; } ) );
+            Array< Int32 >( divisions[ 1 ] * divisions[ 0 ] ).fill( []( auto i ) { return i; } )
+        );
         setIndices( indices );
     } else {
         auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, 6 * divisions[ 1 ] * divisions[ 0 ] );

@@ -48,8 +48,8 @@ TEST( Cylinder, normal )
 {
     constexpr auto C = Cylinder {};
 
-    EXPECT_EQ( ( Normal3 { 1, 0, 0 } ), normal( C, Point3 { 1, 0, 0 } ) );
-    EXPECT_EQ( ( Normal3 { 0, 0, -1 } ), normal( C, Point3 { 0, 5, -1 } ) );
-    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( C, Point3 { 0, -2, 1 } ) );
-    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( C, Point3 { -1, 1, 0 } ) );
+    EXPECT_EQ( ( Normal3 { 1, 0, 0 } ), normal( C, Point3f { 1, 0, 0 } ) );
+    EXPECT_EQ( ( Normal3 { 0, 0, -1 } ), normal( C, Point3f { 0, 5, -1 } ) );
+    EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), normal( C, Point3f { 0, -2, 1 } ) );
+    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( C, Point3f { -1, 1, 0 } ) );
 }

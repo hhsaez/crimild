@@ -93,10 +93,10 @@ TEST( Transformation, translation )
 
 TEST( Transformation, translatePoint )
 {
-    constexpr auto P = crimild::Point3 { 10, 20, 30 };
+    constexpr auto P = crimild::Point3f { 10, 20, 30 };
     constexpr auto T = crimild::translation( 5, 12, 134 );
 
-    static_assert( crimild::isEqual( crimild::Point3 { 15, 32, 164 }, T( P ) ) );
+    static_assert( crimild::isEqual( crimild::Point3f { 15, 32, 164 }, T( P ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -124,14 +124,14 @@ TEST( Transformation, translateNormal )
 TEST( Transformation, translateRay3 )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 1, 2, 3 },
+        crimild::Point3f { 1, 2, 3 },
         crimild::Vector3 { 0, 1, 0 },
     };
 
     constexpr auto T = crimild::translation( 3, 4, 5 );
 
     constexpr auto R1 = crimild::Ray3 {
-        crimild::Point3 { 4, 6, 8 },
+        crimild::Point3f { 4, 6, 8 },
         crimild::Vector3 { 0, 1, 0 },
     };
 
@@ -161,20 +161,20 @@ TEST( Transformation, scaleProperties )
 
 TEST( Transformation, scalePoint )
 {
-    constexpr auto P = crimild::Point3 { 10, 20, 30 };
+    constexpr auto P = crimild::Point3f { 10, 20, 30 };
     constexpr auto S = crimild::scale( 5, 10, 2 );
 
-    static_assert( crimild::isEqual( crimild::Point3 { 50, 200, 60 }, S( P ) ) );
+    static_assert( crimild::isEqual( crimild::Point3f { 50, 200, 60 }, S( P ) ) );
 
     EXPECT_TRUE( true );
 }
 
 TEST( Transformation, uniformScalePoint )
 {
-    constexpr auto P = crimild::Point3 { 10, 20, 30 };
+    constexpr auto P = crimild::Point3f { 10, 20, 30 };
     constexpr auto S = crimild::scale( 5 );
 
-    static_assert( crimild::isEqual( crimild::Point3 { 50, 100, 150 }, S( P ) ) );
+    static_assert( crimild::isEqual( crimild::Point3f { 50, 100, 150 }, S( P ) ) );
 
     EXPECT_TRUE( true );
 }
@@ -225,13 +225,13 @@ TEST( Transformation, swaps_handedness )
 TEST( Transformation, scaleRay3 )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3 { 1, 2, 3 },
+        crimild::Point3f { 1, 2, 3 },
         crimild::Vector3 { 0, 1, 0 },
     };
 
     constexpr auto S = crimild::scale( 2, 3, 4 );
 
-    static_assert( S( R ) == crimild::Ray3 { crimild::Point3 { 2, 6, 12 }, crimild::Vector3 { 0, 3, 0 } } );
+    static_assert( S( R ) == crimild::Ray3 { crimild::Point3f { 2, 6, 12 }, crimild::Vector3 { 0, 3, 0 } } );
 
     EXPECT_TRUE( true );
 }
@@ -319,7 +319,7 @@ TEST( Transformation, product )
         static_assert( crimild::hasTranslation( T ) );
         static_assert( !crimild::hasRotation( T ) );
         static_assert( !crimild::hasScale( T ) );
-        static_assert( crimild::location( T ) == crimild::Point3 { 4, 4, 2 } );
+        static_assert( crimild::location( T ) == crimild::Point3f { 4, 4, 2 } );
     }
 
     {
@@ -328,7 +328,7 @@ TEST( Transformation, product )
         static_assert( crimild::hasTranslation( T ) );
         static_assert( !crimild::hasRotation( T ) );
         static_assert( !crimild::hasScale( T ) );
-        static_assert( crimild::location( T ) == crimild::Point3 { 2, 2, 1 } );
+        static_assert( crimild::location( T ) == crimild::Point3f { 2, 2, 1 } );
     }
 
     {
@@ -337,7 +337,7 @@ TEST( Transformation, product )
         static_assert( crimild::hasTranslation( T ) );
         static_assert( !crimild::hasRotation( T ) );
         static_assert( !crimild::hasScale( T ) );
-        static_assert( crimild::location( T ) == crimild::Point3 { 2, 2, 1 } );
+        static_assert( crimild::location( T ) == crimild::Point3f { 2, 2, 1 } );
     }
 
     EXPECT_TRUE( true );
@@ -346,8 +346,8 @@ TEST( Transformation, product )
 TEST( Transformation, lookAt_default_orientation )
 {
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 0, 0 },
-        crimild::Point3 { 0, 0, -1 },
+        crimild::Point3f { 0, 0, 0 },
+        crimild::Point3f { 0, 0, -1 },
         crimild::Vector3 { 0, 1, 0 }
     );
 
@@ -361,8 +361,8 @@ TEST( Transformation, lookAt_default_orientation )
 TEST( Transformation, lookAt_positive_z_direction )
 {
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 0, 0 },
-        crimild::Point3 { 0, 0, 1 },
+        crimild::Point3f { 0, 0, 0 },
+        crimild::Point3f { 0, 0, 1 },
         crimild::Vector3 { 0, 1, 0 }
     );
 
@@ -373,26 +373,26 @@ TEST( Transformation, lookAt_positive_z_direction )
 TEST( Transformation, lookAt_moves_the_world )
 {
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 0, 8 },
-        crimild::Point3 { 0, 0, 0 },
+        crimild::Point3f { 0, 0, 8 },
+        crimild::Point3f { 0, 0, 0 },
         crimild::Vector3 { 0, 1, 0 }
     );
 
     EXPECT_EQ( crimild::translation( 0, 0, 8 ).mat, T.mat );
     EXPECT_EQ( crimild::translation( 0, 0, 8 ).invMat, T.invMat );
 
-    EXPECT_EQ( ( crimild::Point3 { 0, 0, -8 } ), crimild::inverse( T )( crimild::Point3 { 0, 0, 0 } ) );
+    EXPECT_EQ( ( crimild::Point3f { 0, 0, -8 } ), crimild::inverse( T )( crimild::Point3f { 0, 0, 0 } ) );
 }
 
 TEST( Transformation, lookAt_arbitrary )
 {
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 5, 5, 5 },
-        crimild::Point3 { 0, 1, 0 },
+        crimild::Point3f { 5, 5, 5 },
+        crimild::Point3f { 0, 1, 0 },
         crimild::Vector3 { 0, 1, 0 }
     );
 
-    EXPECT_TRUE( isEqual( crimild::location( T ), ( crimild::Point3 { 5, 5, 5 } ) ) );
+    EXPECT_TRUE( isEqual( crimild::location( T ), ( crimild::Point3f { 5, 5, 5 } ) ) );
     EXPECT_TRUE( isEqual( crimild::forward( T ), crimild::normalize( crimild::Vector3 { 0, 1, 0 } - crimild::Vector3 { 5, 5, 5 } ) ) );
 
     EXPECT_TRUE( crimild::hasTranslation( T ) );
@@ -406,8 +406,8 @@ TEST( Transformation, lookAt_handles_invalid_up )
 {
     // Looking down
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 0, 0 },
-        crimild::Point3 { 0, -1, 0 },
+        crimild::Point3f { 0, 0, 0 },
+        crimild::Point3f { 0, -1, 0 },
         crimild::Vector3 { 0, 1, 0 }
     );
 
@@ -418,34 +418,34 @@ TEST( Transformation, lookAt_looking_down )
 {
     // Looking down
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 0, 0 },
-        crimild::Point3 { 0, -1, 0 },
+        crimild::Point3f { 0, 0, 0 },
+        crimild::Point3f { 0, -1, 0 },
         crimild::Vector3 { 0, 0, -1 }
     );
 
     EXPECT_EQ( ( crimild::Vector3 { 0, -1, 0 } ), forward( T ) );
     EXPECT_EQ( ( crimild::Vector3 { 0, 0, -1 } ), up( T ) );
     EXPECT_EQ( ( crimild::Vector3 { 1, 0, 0 } ), right( T ) );
-    EXPECT_EQ( ( crimild::Point3 { 0, 0, 0 } ), location( T ) );
+    EXPECT_EQ( ( crimild::Point3f { 0, 0, 0 } ), location( T ) );
 }
 
 TEST( Transformation, transforms_after_lookAt )
 {
     // Looking down
     constexpr auto T = crimild::lookAt(
-        crimild::Point3 { 0, 2, 0 },
-        crimild::Point3 { 0, 0.6, 0 },
+        crimild::Point3f { 0, 2, 0 },
+        crimild::Point3f { 0, 0.6, 0 },
         crimild::Vector3 { 0, 0, -1 }
     );
 
     EXPECT_EQ( ( crimild::Vector3 { 0, -1, 0 } ), forward( T ) );
     EXPECT_EQ( ( crimild::Vector3 { 0, 0, -1 } ), up( T ) );
     EXPECT_EQ( ( crimild::Vector3 { 1, 0, 0 } ), right( T ) );
-    EXPECT_EQ( ( crimild::Point3 { 0, 2, 0 } ), location( T ) );
+    EXPECT_EQ( ( crimild::Point3f { 0, 2, 0 } ), location( T ) );
 
-    EXPECT_EQ( ( crimild::Point3 { 0, 1, -2 } ), T( crimild::Point3 { 0, 2, -1 } ) );
-    EXPECT_EQ( ( crimild::Point3 { 1, 2, -2 } ), T( crimild::Point3 { 1, 2, 0 } ) );
-    EXPECT_EQ( ( crimild::Point3 { 0, 2, -1 } ), T( crimild::Point3 { 0, 1, 0 } ) );
+    EXPECT_EQ( ( crimild::Point3f { 0, 1, -2 } ), T( crimild::Point3f { 0, 2, -1 } ) );
+    EXPECT_EQ( ( crimild::Point3f { 1, 2, -2 } ), T( crimild::Point3f { 1, 2, 0 } ) );
+    EXPECT_EQ( ( crimild::Point3f { 0, 2, -1 } ), T( crimild::Point3f { 0, 1, 0 } ) );
 
     // Vectors are not affected by position
     EXPECT_EQ( ( crimild::Vector3 { 0, -1, -2 } ), T( crimild::Vector3 { 0, 2, -1 } ) );
@@ -456,10 +456,10 @@ TEST( Transformation, transforms_after_lookAt )
 TEST( Transfromation, location )
 {
     constexpr auto I = crimild::Transformation::Constants::IDENTITY;
-    static_assert( crimild::location( I ) == crimild::Point3::Constants::ZERO );
+    static_assert( crimild::location( I ) == crimild::Point3f::ZERO );
 
     constexpr auto T = crimild::translation( 5, 12, 134 );
-    static_assert( crimild::Point3 { 5, 12, 134 } == crimild::location( T ) );
+    static_assert( crimild::Point3f { 5, 12, 134 } == crimild::location( T ) );
 
     EXPECT_TRUE( true );
 }

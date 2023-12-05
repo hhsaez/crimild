@@ -40,7 +40,7 @@ public:
                 auto sphere = [ &, primitive = crimild::alloc< Primitive >( Primitive::Type::SPHERE ) ]( const auto &center, Real radius, auto material ) -> SharedPointer< Node > {
                     auto geometry = crimild::alloc< Geometry >();
                     geometry->attachPrimitive( primitive );
-                    geometry->setLocal( translation( vector3( center ) ) * scale( radius ) );
+                    geometry->setLocal( translation( Vector3f( center ) ) * scale( radius ) );
                     geometry->attachComponent< MaterialComponent >( material );
                     return geometry;
                 };
@@ -61,22 +61,26 @@ public:
                 // Ground
                 scene->attachNode(
                     sphere(
-                        Point3 { 0, -1000, 0 },
+                        Point3f { 0, -1000, 0 },
                         1000,
-                        lambertian( ColorRGB { 0.5, 0.5, 0.5 } ) ) );
+                        lambertian( ColorRGB { 0.5, 0.5, 0.5 } )
+                    )
+                );
 
-                scene->attachNode( sphere( Point3 { 4, 1, 0 }, 1.0f, dielectric( 1.5f ) ) );
-                scene->attachNode( sphere( Point3 { 0, 1, 0 }, 1.0, dielectric( 1.5f ) ) );
-                scene->attachNode( sphere( Point3 { 0, 1, 0 }, -0.99, dielectric( 1.5f ) ) );
-                scene->attachNode( sphere( Point3 { -4, 1, 0 }, 1.0, lambertian( ColorRGB { 0.4, 0.2, 0.1 } ) ) );
+                scene->attachNode( sphere( Point3f { 4, 1, 0 }, 1.0f, dielectric( 1.5f ) ) );
+                scene->attachNode( sphere( Point3f { 0, 1, 0 }, 1.0, dielectric( 1.5f ) ) );
+                scene->attachNode( sphere( Point3f { 0, 1, 0 }, -0.99, dielectric( 1.5f ) ) );
+                scene->attachNode( sphere( Point3f { -4, 1, 0 }, 1.0, lambertian( ColorRGB { 0.4, 0.2, 0.1 } ) ) );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 13, 2, 3 },
-                            Point3 { 0, 1, -0.5 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 13, 2, 3 },
+                            Point3f { 0, 1, -0.5 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->setFocusDistance( 10 );
                     camera->setAperture( 0.1f );
                     camera->attachComponent< FreeLookCameraComponent >();
@@ -93,7 +97,8 @@ public:
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
 
         if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {
             RenderSystem::getInstance()->useRTSoftRenderPath();

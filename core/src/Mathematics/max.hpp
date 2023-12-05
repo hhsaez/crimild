@@ -32,8 +32,6 @@
 #include "Mathematics/ColorRGBA.hpp"
 #include "Mathematics/Traits.hpp"
 #include "Mathematics/Tuple2.hpp"
-#include "Mathematics/tupleBuilder.hpp"
-#include "Mathematics/tupleComponents.hpp"
 
 namespace crimild {
 
@@ -67,6 +65,31 @@ namespace crimild {
     }
 
     template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto max( const Tuple3< Derived, T > &v ) noexcept
+    {
+        return max( v.x, max( v.y, v.z ) );
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr auto max( const Tuple3< Derived, T > &u, const Tuple3< Derived, U > &v ) noexcept
+    {
+        return Derived< decltype( max( T {}, U {} ) ) > {
+            max( u.x, v.x ),
+            max( u.y, v.y ),
+            max( u.z, v.z ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto maxDimension( const Tuple3< Derived, T > &t ) noexcept
+    {
+        size_t ret = 0;
+        ret = t[ 1 ] > t[ ret ] ? 1 : ret;
+        ret = t[ 2 ] > t[ ret ] ? 2 : ret;
+        return ret;
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
     [[nodiscard]] inline constexpr auto max( const Tuple4< Derived, T > &v ) noexcept
     {
         return max( v.x, max( v.y, max( v.z, v.w ) ) );
@@ -90,53 +113,6 @@ namespace crimild {
         ret = t[ 1 ] > t[ ret ] ? 1 : ret;
         ret = t[ 2 ] > t[ ret ] ? 2 : ret;
         ret = t[ 3 ] > t[ ret ] ? 3 : ret;
-        return ret;
-    }
-
-    // DEPRECATED FROM HERE
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr T max( const Tuple3Impl< T > &t ) noexcept
-    {
-        return max( t[ 0 ], max( t[ 1 ], t[ 2 ] ) );
-    }
-
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto max( const Vector3Impl< T > &lhs, const Vector3Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = max( lhs.x, rhs.x );
-        ret.y = max( lhs.y, rhs.y );
-        ret.z = max( lhs.z, rhs.z );
-        return ret;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto max( const Point3Impl< T > &lhs, const Point3Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = max( lhs.x, rhs.x );
-        ret.y = max( lhs.y, rhs.y );
-        ret.z = max( lhs.z, rhs.z );
-        return ret;
-    }
-
-    template< typename T, typename U >
-    [[nodiscard, deprecated]] inline constexpr auto max( const Normal3Impl< T > &lhs, const Normal3Impl< U > &rhs ) noexcept
-    {
-        auto ret = lhs;
-        ret.x = max( lhs.x, rhs.x );
-        ret.y = max( lhs.y, rhs.y );
-        ret.z = max( lhs.z, rhs.z );
-        return ret;
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr size_t maxDimension( const Tuple3Impl< T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] > t[ ret ] ? 1 : ret;
-        ret = t[ 2 ] > t[ ret ] ? 2 : ret;
         return ret;
     }
 

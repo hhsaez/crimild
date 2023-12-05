@@ -65,7 +65,8 @@ TEST( BinTreeScene, it_discards_all_empty_groups )
             [] {
                 auto group = crimild::alloc< Group >();
                 return group;
-            }() );
+            }()
+        );
         return group;
     }();
 
@@ -93,11 +94,14 @@ TEST( BinTreeScene, it_discards_all_groups_with_one_child )
                                 auto group = crimild::alloc< Group >();
                                 group->attachNode( crimild::alloc< Geometry >() );
                                 return group;
-                            }() );
+                            }()
+                        );
                         return group;
-                    }() );
+                    }()
+                );
                 return group;
-            }() );
+            }()
+        );
         return group;
     }();
 
@@ -125,11 +129,14 @@ TEST( BinTreeScene, it_keeps_only_geometries )
                                 auto group = crimild::alloc< Group >();
                                 group->attachNode( crimild::alloc< Geometry >() );
                                 return group;
-                            }() );
+                            }()
+                        );
                         return group;
-                    }() );
+                    }()
+                );
                 return group;
-            }() );
+            }()
+        );
         group->attachNode( crimild::alloc< Geometry >() );
         return group;
     }();
@@ -167,7 +174,7 @@ TEST( BinTreeScene, it_handles_a_single_geometry )
     EXPECT_NE( nullptr, cast_ptr< Geometry >( res )->anyPrimitive() );
     EXPECT_NE( nullptr, res->getComponent< MaterialComponent >() );
     EXPECT_NE( nullptr, res->getComponent< MaterialComponent >()->first() );
-    EXPECT_EQ( ( Point3 { 1, 2, 3 } ), location( res->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), location( res->getLocal() ) );
 }
 
 TEST( BinTreeScene, it_handles_a_group_with_a_single_child )
@@ -227,7 +234,8 @@ TEST( BinTreeScene, it_handles_a_csg_node_with_one_child )
                 geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
                 geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
                 return geometry;
-            }() );
+            }()
+        );
         return csg;
     }();
 
@@ -250,14 +258,16 @@ TEST( BinTreeScene, it_handles_a_csg_node_with_two_children )
                 geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
                 geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
                 return geometry;
-            }() );
+            }()
+        );
         csg->setRight(
             [] {
                 auto geometry = crimild::alloc< Geometry >();
                 geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
                 geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
                 return geometry;
-            }() );
+            }()
+        );
         return csg;
     }();
 
@@ -275,8 +285,8 @@ TEST( BinTreeScene, it_handles_a_parent_with_many_children )
 {
     /**
      * Original scene:
-     *       A 
-     *   ____|____ 
+     *       A
+     *   ____|____
      *  /| | | | |\
      * B C D E F G H
      */
@@ -293,8 +303,8 @@ TEST( BinTreeScene, it_handles_a_parent_with_many_children )
     /**
      * Optimized scene:
      *        A
-     *    Z       W 
-     *  Y   X   V   U 
+     *    Z       W
+     *  Y   X   V   U
      * B C D E F G H I
      */
     auto res = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE );

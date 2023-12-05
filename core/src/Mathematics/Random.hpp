@@ -32,7 +32,6 @@
 #include "Foundation/Types.hpp"
 #include "Mathematics/ColorRGBAOps.hpp"
 #include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
 #include "Mathematics/dot.hpp"
 #include "Mathematics/length.hpp"
 #include "Mathematics/sign.hpp"
@@ -90,9 +89,9 @@ namespace crimild {
 
     private:
         template< typename T >
-        inline static void generateImpl( Vector3Impl< T > &result, const Vector3Impl< T > &min, const Vector3Impl< T > &max ) noexcept
+        inline static void generateImpl( Vector3< T > &result, const Vector3< T > &min, const Vector3< T > &max ) noexcept
         {
-            result = Vector3Impl< T > {
+            result = Vector3< T > {
                 Random::generate< T >( min[ 0 ], max[ 0 ] ),
                 Random::generate< T >( min[ 1 ], max[ 1 ] ),
                 Random::generate< T >( min[ 2 ], max[ 2 ] ),
@@ -186,31 +185,31 @@ namespace crimild {
 
         [[nodiscard]] inline auto nextVector2( Real lo, Real hi ) noexcept
         {
-            return Vector2 {
+            return Vector2f {
                 next( lo, hi ),
                 next( lo, hi ),
             };
         }
 
-        [[nodiscard]] inline Vector3 nextVector3( void ) noexcept
+        [[nodiscard]] inline Vector3f nextVector3( void ) noexcept
         {
-            return Vector3 {
+            return Vector3f {
                 next(),
                 next(),
                 next(),
             };
         }
 
-        [[nodiscard]] inline Vector3 nextVector3( Real lo, Real hi ) noexcept
+        [[nodiscard]] inline Vector3f nextVector3( Real lo, Real hi ) noexcept
         {
-            return Vector3 {
+            return Vector3f {
                 next( lo, hi ),
                 next( lo, hi ),
                 next( lo, hi ),
             };
         }
 
-        [[nodiscard]] inline Vector3 nextInUnitSphere( void ) noexcept
+        [[nodiscard]] inline Vector3f nextInUnitSphere( void ) noexcept
         {
             while ( true ) {
                 const auto v = nextVector3( -1, 1 );
@@ -222,7 +221,7 @@ namespace crimild {
             }
         }
 
-        [[nodiscard]] inline Vector3 nextInHemisphere( const Normal3 &N ) noexcept
+        [[nodiscard]] inline Vector3f nextInHemisphere( const Normal3f &N ) noexcept
         {
             const auto v = nextInUnitSphere();
             return sign( dot( v, N ) ) * v;

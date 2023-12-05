@@ -56,34 +56,40 @@ public:
                         auto c = cylinder( lambertian( ColorRGB { 1, 1, 0 } ) );
                         c->setLocal( scale( 1, 0.25, 1 ) );
                         return c;
-                    }() );
+                    }()
+                );
 
                 scene->attachNode(
                     [ & ] {
                         auto c = cylinder( lambertian( ColorRGB { 1, 0, 0 } ) );
                         c->setLocal( scale( 0.5, 0.5, 0.5 ) );
                         return c;
-                    }() );
+                    }()
+                );
                 scene->attachNode(
                     [ & ] {
                         auto c = cylinder( lambertian( ColorRGB { 0, 1, 1 } ) );
                         c->setLocal( scale( 0.25, 0.75, 0.25 ) );
                         return c;
-                    }() );
+                    }()
+                );
                 scene->attachNode(
                     [ & ] {
                         auto c = cylinder( lambertian( ColorRGB { 0, 0, 1 } ) );
                         c->setLocal( scale( 0.125, 1, 0.125 ) );
                         return c;
-                    }() );
+                    }()
+                );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 0, 3, 8 },
-                            Point3 { 0, 0, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 0, 3, 8 },
+                            Point3f { 0, 0, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->setFocusDistance( 10 );
                     camera->setAperture( 0.0f );
                     camera->attachComponent< FreeLookCameraComponent >();
@@ -107,7 +113,8 @@ public:
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
 
         // Use soft RT by default
         if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {
