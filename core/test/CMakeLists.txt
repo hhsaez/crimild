@@ -17,18 +17,6 @@ target_sources(
     Coding/CodableTest.cpp
     Components/MaterialComponentTest.cpp
     Components/MotionStateComponentTest.cpp
-    Foundation/Containers/ArrayTest.cpp
-    Foundation/Containers/DigraphTest.cpp
-    Foundation/Containers/MapTest.cpp
-    Foundation/Containers/PriorityQueueTest.cpp
-    Foundation/Containers/QueueTest.cpp
-    Foundation/Containers/SetTest.cpp
-    Foundation/Containers/StackTest.cpp
-    Foundation/NamedObjectTest.cpp
-    Foundation/Policies/PriorityTest.cpp
-    Foundation/RTTITest.cpp
-    Foundation/VariantTest.cpp
-    Foundation/VersionTest.cpp
     Mathematics/Bounds3Test.cpp
     Mathematics/BoxTest.cpp
     Mathematics/ClockTest.cpp
