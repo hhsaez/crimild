@@ -2,7 +2,7 @@ function( CRIMILD_READ_VERSION CRIMILD_VERSION_NAME_ARG )
 	set( VERSION_REGEX "#define ${CRIMILD_VERSION_NAME_ARG}[ \t]+(.+)" )
 	file( 
 		STRINGS 
-		"${CMAKE_CURRENT_SOURCE_DIR}/core/src/Foundation/Version.hpp" 
+		"${CMAKE_CURRENT_SOURCE_DIR}/foundation/src/Common/Version.hpp" 
 		VERSION_STRING 
 		REGEX 
 		${VERSION_REGEX} 
