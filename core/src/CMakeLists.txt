@@ -114,39 +114,6 @@ target_sources(
     Exceptions/HasParentException.hpp
     Exceptions/InvalidFileFormatException.hpp
     Exceptions/RuntimeException.hpp
-    Foundation/Chunk.hpp
-    Foundation/Containers
-    Foundation/Containers/Array.hpp
-    Foundation/Containers/Digraph.hpp
-    Foundation/Containers/List.hpp
-    Foundation/Containers/Map.hpp
-    Foundation/Containers/PriorityQueue.hpp
-    Foundation/Containers/Queue.hpp
-    Foundation/Containers/Set.hpp
-    Foundation/Containers/Stack.hpp
-    Foundation/FilePath.hpp
-    Foundation/FixedAllocator.hpp
-    Foundation/KeyValuePair.hpp
-    Foundation/Log.hpp
-    Foundation/Macros.hpp
-    Foundation/Memory.hpp
-    Foundation/NamedObject.hpp
-    Foundation/NonCopyable.hpp
-    Foundation/ObjectFactory.hpp
-    Foundation/Observable.hpp
-    Foundation/Policies
-    Foundation/Policies/CachePolicy.hpp
-    Foundation/Policies/ThreadingPolicy.hpp
-    Foundation/Profiler.hpp
-    Foundation/RTTI.hpp
-    Foundation/SharedObject.hpp
-    Foundation/Singleton.hpp
-    Foundation/SmallObject.hpp
-    Foundation/SmallObjectAllocator.hpp
-    Foundation/StringUtils.hpp
-    Foundation/Types.hpp
-    Foundation/Variant.hpp
-    Foundation/Version.hpp
     Loaders/OBJLoader.hpp
     Mathematics/abs.hpp
     Mathematics/Bounds3.hpp
@@ -553,16 +520,6 @@ target_sources(
     Debug/DebugRenderComponent.cpp
     Debug/DebugRenderHelper.cpp
     Debug/SceneDebugDump.cpp
-    Foundation/Chunk.cpp
-    Foundation/FilePath.cpp
-    Foundation/FixedAllocator.cpp
-    Foundation/Log.cpp
-    Foundation/NamedObject.cpp
-    Foundation/ObjectFactory.cpp
-    Foundation/Profiler.cpp
-    Foundation/SmallObjectAllocator.cpp
-    Foundation/Variant.cpp
-    Foundation/Version.cpp
     Loaders/OBJLoader.cpp
     Mathematics/Clock.cpp
     Mathematics/Random.cpp
