@@ -802,9 +802,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
     // Triangles are always in world space
     struct TriangleDesc {
-        alignas( 16 ) Point3 p0;
-        alignas( 16 ) Point3 p1;
-        alignas( 16 ) Point3 p2;
+        alignas( 16 ) Point3f p0;
+        alignas( 16 ) Point3f p1;
+        alignas( 16 ) Point3f p2;
         alignas( 16 ) Vector3 e0;
         alignas( 16 ) Vector3 e1;
         alignas( 16 ) Normal3 n;
@@ -918,9 +918,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     const auto N = indices->getIndexCount();
                                     for ( auto i = 0; i < N; i += 3 ) {
                                         const auto T = Triangle {
-                                            .p0 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 0 ) ) ),
-                                            .p1 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 1 ) ) ),
-                                            .p2 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 2 ) ) ),
+                                            .p0 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 0 ) ) ),
+                                            .p1 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 1 ) ) ),
+                                            .p2 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 2 ) ) ),
                                         };
 
                                         triangles.add( {
@@ -948,7 +948,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             .descriptorType = DescriptorType::STORAGE_BUFFER,
             .obj = [ & ] {
                 struct BufferData {
-                    alignas( 16 ) Point3 origin = Point3 { 0, 0, 0 };
+                    alignas( 16 ) Point3f origin = Point3f { 0, 0, 0 };
                     alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
                     alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
                     alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
@@ -976,7 +976,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 4 ) UInt32 seed;
                     alignas( 16 ) Matrix4 cameraInvProj;
                     alignas( 16 ) Matrix4 cameraWorld;
-                    alignas( 16 ) Point3 cameraOrigin;
+                    alignas( 16 ) Point3f cameraOrigin;
                     alignas( 16 ) Vector3 cameraRight;
                     alignas( 16 ) Vector3 cameraUp;
                     alignas( 4 ) Real32 cameraLensRadius;
@@ -1007,7 +1007,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         static auto cameraInvProj = Matrix4::Constants::IDENTITY;
                         static auto cameraWorld = Matrix4::Constants::IDENTITY;
 
-                        auto cameraOrigin = Point3::Constants::ZERO;
+                        auto cameraOrigin = Point3f::ZERO;
                         auto cameraRight = Vector3::Constants::RIGHT;
                         auto cameraUp = Vector3::Constants::UP;
 

@@ -345,7 +345,7 @@ namespace crimild::vulkan::framegraph {
 
             for ( auto i = 0l; i < 8; ++i ) {
                 const auto inversePoint = invViewProj * vector4( frustumCorners[ i ], 1 );
-                frustumCorners[ i ] = vector3( inversePoint / inversePoint.w );
+                frustumCorners[ i ] = Vector3f( inversePoint / inversePoint.w );
             }
 
             for ( auto i = 0l; i < 4; ++i ) {
@@ -376,7 +376,7 @@ namespace crimild::vulkan::framegraph {
             const auto minExtents = -maxExtents;
 
             const auto lightDirection = light->getDirection();
-            const auto lightViewMatrix = lookAt( Point3 { frustumCenter + lightDirection * minExtents.z }, point3( frustumCenter ), Vector3f::Constants::UP ).invMat;
+            const auto lightViewMatrix = lookAt( Point3f { frustumCenter + lightDirection * minExtents.z }, Point3f( frustumCenter ), Vector3f::Constants::UP ).invMat;
 
             // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
             const auto lightProjectionMatrix = ortho( minExtents.x, maxExtents.x, maxExtents.y, minExtents.y, 0.0f, maxExtents.z - minExtents.z );
@@ -1071,18 +1071,18 @@ void RenderShadowMaps::render(
     // their corresponding images.
     // TODO: Improve synchronization so these passes run concurrently.
 
-    m_renderers[ 0 ]->render( 
-        renderState, 
-        camera, 
-        { 
-            .pre = options.pre, 
+    m_renderers[ 0 ]->render(
+        renderState,
+        camera,
+        {
+            .pre = options.pre,
             .wait = options.wait,
             .signal = { m_renderers[ 0 ]->getSemaphore() },
-        } 
+        }
     );
 
-    m_renderers[ 1 ]->render( 
-        renderState, 
+    m_renderers[ 1 ]->render(
+        renderState,
         camera,
         {
             .wait = { m_renderers[ 0 ]->getSemaphore() },
@@ -1093,7 +1093,7 @@ void RenderShadowMaps::render(
     m_renderers[ 2 ]->render(
         renderState,
         camera,
-        { 
+        {
             .post = options.post,
             .wait = { m_renderers[ 1 ]->getSemaphore() },
             .signal = options.signal,

@@ -73,7 +73,7 @@ public:
                                         auto node,
                                         const auto &clock
                                     ) {
-                                        node->setLocal( translation( vector3( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
+                                        node->setLocal( translation( Vector3f( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
                                     }
                                 );
 
@@ -118,8 +118,8 @@ public:
                     auto camera = crimild::alloc< Camera >();
                     camera->setLocal(
                         lookAt(
-                            Point3 { 15, 20, 50 },
-                            Point3 { 0, 0, 0 },
+                            Point3f { 15, 20, 50 },
+                            Point3f { 0, 0, 0 },
                             Vector3::Constants::UP
                         )
                     );
@@ -133,8 +133,8 @@ public:
                         light->setCastShadows( true );
                         light->setLocal(
                             lookAt(
-                                Point3 { -20.0f, 20.0f, 20.0f },
-                                Point3 { 0, 0, 0 },
+                                Point3f { -20.0f, 20.0f, 20.0f },
+                                Point3f { 0, 0, 0 },
                                 Vector3::Constants::UP
                             )
                         );
@@ -149,8 +149,8 @@ public:
                         light->setCastShadows( true );
                         light->setLocal(
                             lookAt(
-                                Point3 { 20.0f, 20.0f, 0.0f },
-                                Point3 { 0, 0, 0 },
+                                Point3f { 20.0f, 20.0f, 0.0f },
+                                Point3f { 0, 0, 0 },
                                 Vector3::Constants::UP
                             )
                         );

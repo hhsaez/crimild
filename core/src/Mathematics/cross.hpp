@@ -32,10 +32,10 @@
 
 namespace crimild {
 
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr Vector3Impl< T > cross( const Vector3Impl< T > &u, const Vector3Impl< U > &v ) noexcept
+    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    [[nodiscard]] inline constexpr auto cross( const Vector3< T > &u, const Vector3< U > &v ) noexcept
     {
-        return Vector3Impl< T > {
+        return Vector3< decltype( T {} + U {} ) > {
             u.y * v.z - u.z * v.y,
             u.z * v.x - u.x * v.z,
             u.x * v.y - u.y * v.x,

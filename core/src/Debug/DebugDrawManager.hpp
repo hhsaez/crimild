@@ -46,8 +46,8 @@ namespace crimild {
          * @brief Adds a line segment to the debug drawing queue.
          */
         static void addLine(
-            const Point3 &from,
-            const Point3 &to,
+            const Point3f &from,
+            const Point3f &to,
             const ColorRGB &color,
             float width = 1.0f,
             float duration = 0.0f,
@@ -55,7 +55,7 @@ namespace crimild {
         ) noexcept;
 
         static void addCross(
-            const Point3 &position,
+            const Point3f &position,
             const ColorRGB &color,
             float size,
             float duration = 0.0f,
@@ -63,7 +63,7 @@ namespace crimild {
         ) noexcept;
 
         static void addSphere(
-            const Point3 &center,
+            const Point3f &center,
             float radius,
             const ColorRGB &color,
             float duration = 0.0f,
@@ -71,8 +71,8 @@ namespace crimild {
         ) noexcept;
 
         static void addCircle(
-            const Point3 &center,
-            const Vector3 &normal,
+            const Point3f &center,
+            const Vector3f &normal,
             float radius,
             const ColorRGB &color,
             float duration = 0.0f,
@@ -86,7 +86,7 @@ namespace crimild {
         ) noexcept;
 
         static void addText(
-            const Point3 &position,
+            const Point3f &position,
             std::string_view text,
             const ColorRGB &color,
             float duration = 0.0f,

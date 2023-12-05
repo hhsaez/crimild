@@ -49,21 +49,21 @@ namespace crimild {
     public:
         virtual ~BoundingVolume( void );
 
-        virtual const Point3 &getCenter( void ) const = 0;
+        virtual const Point3f &getCenter( void ) const = 0;
         virtual Real getRadius( void ) const = 0;
 
         virtual SharedPointer< BoundingVolume > clone( void ) const { return nullptr; }
 
-        const Point3 &getMin( void ) const { return _min; }
-        const Point3 &getMax( void ) const { return _max; }
+        const Point3f &getMin( void ) const { return _min; }
+        const Point3f &getMax( void ) const { return _max; }
 
     protected:
-        void setMin( const Point3 &min ) { _min = min; }
-        void setMax( const Point3 &max ) { _max = max; }
+        void setMin( const Point3f &min ) { _min = min; }
+        void setMax( const Point3f &max ) { _max = max; }
 
     private:
-        Point3 _min;
-        Point3 _max;
+        Point3f _min;
+        Point3f _max;
 
     public:
         void setRAxis( const Vector3f &r ) { _r = r; }
@@ -83,19 +83,19 @@ namespace crimild {
     public:
         virtual void computeFrom( const BoundingVolume *volume ) = 0;
         virtual void computeFrom( const BoundingVolume *volume, const Transformation &transform ) = 0;
-        virtual void computeFrom( const Point3 *positions, unsigned int positionCount ) = 0;
+        virtual void computeFrom( const Point3f *positions, unsigned int positionCount ) = 0;
         virtual void computeFrom( const VertexBuffer *vbo ) = 0;
-        virtual void computeFrom( const Point3 &min, const Point3 &max ) = 0;
+        virtual void computeFrom( const Point3f &min, const Point3f &max ) = 0;
 
     public:
-        virtual void expandToContain( const Point3 &point ) = 0;
-        virtual void expandToContain( const Point3 *positions, unsigned int positionCount ) = 0;
+        virtual void expandToContain( const Point3f &point ) = 0;
+        virtual void expandToContain( const Point3f *positions, unsigned int positionCount ) = 0;
         virtual void expandToContain( const VertexBuffer *vbo ) = 0;
         virtual void expandToContain( const BoundingVolume *other ) = 0;
 
     public:
         virtual int whichSide( const Plane3 &plane ) const = 0;
-        virtual bool contains( const Point3 &point ) const = 0;
+        virtual bool contains( const Point3f &point ) const = 0;
 
     public:
         virtual bool testIntersection( const Ray3 &ray ) const = 0;
@@ -108,8 +108,8 @@ namespace crimild {
         virtual void resolveIntersection( const Plane3 &plane, Transformation &result ) const = 0;
 
         /*
-		  \name Debug
-		 */
+                  \name Debug
+                 */
         //@{
 
     public:

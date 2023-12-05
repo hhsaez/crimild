@@ -37,7 +37,7 @@ using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
-Rotate::Rotate( const Vector3 &axis, Radians angle ) noexcept
+Rotate::Rotate( const Vector3f &axis, Radians angle ) noexcept
     : m_axis( axis ),
       m_angle( angle )
 {

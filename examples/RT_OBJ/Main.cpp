@@ -63,12 +63,15 @@ public:
                     auto camera = crimild::alloc< Camera >( 60.0f, 4.0f / 3.0f, 0.1f, 5000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 3, 3, 3 },
-                            Point3 { 0, 0, 0 },
-                            Vector3 { 0, 1, 0 } ) );
+                            Point3f { 3, 3, 3 },
+                            Point3f { 0, 0, 0 },
+                            Vector3 { 0, 1, 0 }
+                        )
+                    );
                     camera->attachComponent< FreeLookCameraComponent >();
                     return camera;
-                }() );
+                }()
+            );
 
             scene->perform( StartComponents() );
 

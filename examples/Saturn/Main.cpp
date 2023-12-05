@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -176,7 +176,8 @@ SharedPointer< Group > buildScene( int options )
                                 { .path = "assets/textures/back.tga" },
                                 { .path = "assets/textures/front.tga" },
                             },
-                        } );
+                        }
+                    );
                     return imageView;
                 }();
                 texture->sampler = [ & ] {
@@ -188,7 +189,9 @@ SharedPointer< Group > buildScene( int options )
                     return sampler;
                 }();
                 return texture;
-            }() ) );
+            }()
+        )
+    );
 
     scene->attachNode( [] {
         auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
@@ -196,9 +199,11 @@ SharedPointer< Group > buildScene( int options )
         // light->setLocal( rotation( -0.25f, -Numericf::HALF_PI, 0.0f ) );
         light->setLocal(
             lookAt(
-                Point3 { 1, 1, 1 },
-                Point3 { 0, 0, 0 },
-                Vector3 { 0, 1, 0 } ) );
+                Point3f { 1, 1, 1 },
+                Point3f { 0, 0, 0 },
+                Vector3 { 0, 1, 0 }
+            )
+        );
         light->setCastShadows( true );
         return light;
     }() );
@@ -207,47 +212,49 @@ SharedPointer< Group > buildScene( int options )
         auto camera = crimild::alloc< Camera >();
         camera->setLocal(
             lookAt(
-                Point3 { 0, 30, 100 },
-                Point3 { 0, 0, 0 },
-                Vector3 { 0, 1, 0 } ) );
+                Point3f { 0, 30, 100 },
+                Point3f { 0, 0, 0 },
+                Vector3 { 0, 1, 0 }
+            )
+        );
         camera->attachComponent< FreeLookCameraComponent >();
 
         /*
-		auto graph = crimild::alloc< RenderGraph >();
+                auto graph = crimild::alloc< RenderGraph >();
         auto depthPass = graph->createPass< DepthPass >();
-		auto scenePass = graph->createPass< passes::ForwardLightingPass >();
+                auto scenePass = graph->createPass< passes::ForwardLightingPass >();
         auto shadowPass = graph->createPass< passes::ShadowPass >();
-		auto skyboxPass = graph->createPass< SkyboxPass >();
+                auto skyboxPass = graph->createPass< SkyboxPass >();
 
         scenePass->setDepthInput( depthPass->getDepthOutput() );
-		scenePass->setShadowInput( shadowPass->getShadowOutput() );
-		skyboxPass->setDepthInput( depthPass->getDepthOutput() );
-		
-		auto blend = graph->createPass< BlendPass >();
-		blend->addInput( skyboxPass->getColorOutput() );
-		blend->addInput( scenePass->getColorOutput() );
-		
-		graph->setOutput( blend->getOutput() );
+                scenePass->setShadowInput( shadowPass->getShadowOutput() );
+                skyboxPass->setDepthInput( depthPass->getDepthOutput() );
 
-		auto debugMode = false;
-		if ( debugMode ) {
-			auto linearizeDepthPass = graph->createPass< LinearizeDepthPass >();
-			linearizeDepthPass->setInput( depthPass->getDepthOutput() );
-			
-			auto shadowMap = graph->createPass< TextureColorPass >( TextureColorPass::Mode::RED );
-			shadowMap->setInput( shadowPass->getShadowOutput() );
-			
-			auto debugPass = graph->createPass< FrameDebugPass >();
-			debugPass->addInput( graph->getOutput() );
-			debugPass->addInput( shadowMap->getOutput() );
-			debugPass->addInput( scenePass->getColorOutput() );
-			debugPass->addInput( linearizeDepthPass->getOutput() );
-			debugPass->addInput( skyboxPass->getColorOutput() );
-			graph->setOutput( debugPass->getOutput() );
-		}
-		
-		camera->setRenderGraph( graph );
-		*/
+                auto blend = graph->createPass< BlendPass >();
+                blend->addInput( skyboxPass->getColorOutput() );
+                blend->addInput( scenePass->getColorOutput() );
+
+                graph->setOutput( blend->getOutput() );
+
+                auto debugMode = false;
+                if ( debugMode ) {
+                        auto linearizeDepthPass = graph->createPass< LinearizeDepthPass >();
+                        linearizeDepthPass->setInput( depthPass->getDepthOutput() );
+
+                        auto shadowMap = graph->createPass< TextureColorPass >( TextureColorPass::Mode::RED );
+                        shadowMap->setInput( shadowPass->getShadowOutput() );
+
+                        auto debugPass = graph->createPass< FrameDebugPass >();
+                        debugPass->addInput( graph->getOutput() );
+                        debugPass->addInput( shadowMap->getOutput() );
+                        debugPass->addInput( scenePass->getColorOutput() );
+                        debugPass->addInput( linearizeDepthPass->getOutput() );
+                        debugPass->addInput( skyboxPass->getColorOutput() );
+                        graph->setOutput( debugPass->getOutput() );
+                }
+
+                camera->setRenderGraph( graph );
+                */
 
         return camera;
     }() );

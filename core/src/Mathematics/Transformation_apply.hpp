@@ -56,23 +56,23 @@ namespace crimild {
         return det < 0;
     }
 
-    [[nodiscard]] constexpr Point3 Transformation::operator()( const Point3 &p ) const noexcept
+    [[nodiscard]] constexpr Point3f Transformation::operator()( const Point3f &p ) const noexcept
     {
         if ( isIdentity( *this ) ) {
             return p;
         }
 
-        const auto V = mat * vector4( p, Real( 1 ) );
-        return point3( xyz( V ) );
+        const auto V = mat * Vector4f( p );
+        return Point3f( V );
     }
 
-    [[nodiscard]] constexpr Vector3 Transformation::operator()( const Vector3 &v ) const noexcept
+    [[nodiscard]] constexpr Vector3f Transformation::operator()( const Vector3f &v ) const noexcept
     {
         if ( isIdentity( *this ) ) {
             return v;
         }
 
-        const auto v0 = vector4( v, Real( 0 ) );
+        const auto v0 = Vector4f( v );
         const auto v1 = mat * v0;
         return Vector3 {
             v1.x,
@@ -81,13 +81,13 @@ namespace crimild {
         };
     }
 
-    [[nodiscard]] constexpr Normal3 Transformation::operator()( const Normal3 &N ) const noexcept
+    [[nodiscard]] constexpr Normal3f Transformation::operator()( const Normal3f &N ) const noexcept
     {
         if ( isIdentity( *this ) ) {
             return N;
         }
 
-        const auto V = vector4( N, Real( 0 ) );
+        const auto V = Vector4f( N );
         const auto R = transpose( invMat ) * V;
         const auto ret = Normal3 {
             R.x,
@@ -111,24 +111,24 @@ namespace crimild {
         };
     }
 
-    [[nodiscard]] inline constexpr Point3 location( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Point3f location( const Transformation &t ) noexcept
     {
-        return t( Point3::Constants::ZERO );
+        return t( Point3f::ZERO );
     }
 
-    [[nodiscard]] inline constexpr Vector3 right( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3f right( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3::Constants::RIGHT ) );
+        return normalize( t( Vector3f::RIGHT ) );
     }
 
-    [[nodiscard]] inline constexpr Vector3 up( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3f up( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3::Constants::UP ) );
+        return normalize( t( Vector3f::UP ) );
     }
 
-    [[nodiscard]] inline constexpr Vector3 forward( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3f forward( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3::Constants::FORWARD ) );
+        return normalize( t( Vector3f::FORWARD ) );
     }
 
 }

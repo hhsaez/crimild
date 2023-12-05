@@ -37,10 +37,10 @@ TEST( AABBBoundingVolume, construction )
 {
     auto bb = crimild::alloc< AABBBoundingVolume >();
 
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), bb->getCenter() );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
     EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3 { -1, -1, -1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3 { 1, 1, 1 } ), bb->getMax() );
+    EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
+    EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, compute_from_simple_volume )
@@ -50,10 +50,10 @@ TEST( AABBBoundingVolume, compute_from_simple_volume )
 
     bb->computeFrom( crimild::get_ptr( other ) );
 
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), bb->getCenter() );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
     EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3 { -1, -1, -1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3 { 1, 1, 1 } ), bb->getMax() );
+    EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
+    EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, compute_from_transformed_volume )
@@ -63,10 +63,10 @@ TEST( AABBBoundingVolume, compute_from_transformed_volume )
 
     bb->computeFrom( crimild::get_ptr( other ), translation( -1, 2, 3 ) );
 
-    EXPECT_EQ( ( Point3 { -1, 2, 3 } ), bb->getCenter() );
+    EXPECT_EQ( ( Point3f { -1, 2, 3 } ), bb->getCenter() );
     EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3 { -1 - 1, 2 - 1, 3 - 1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3 { -1 + 1, 2 + 1, 3 + 1 } ), bb->getMax() );
+    EXPECT_EQ( ( Point3f { -1 - 1, 2 - 1, 3 - 1 } ), bb->getMin() );
+    EXPECT_EQ( ( Point3f { -1 + 1, 2 + 1, 3 + 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, ray_intersection_hit )

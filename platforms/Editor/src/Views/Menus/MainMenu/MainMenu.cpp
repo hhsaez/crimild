@@ -151,8 +151,8 @@ void MainMenu::renderSceneMenu( void ) noexcept
                 light->setCastShadows( true );
                 light->setLocal(
                     lookAt(
-                        Point3 { -5, 5, 10 },
-                        Point3 { 0, 0, 0 },
+                        Point3f { -5, 5, 10 },
+                        Point3f { 0, 0, 0 },
                         Vector3::Constants::UP
                     )
                 );
@@ -181,8 +181,8 @@ void MainMenu::renderSceneMenu( void ) noexcept
                 light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
                 light->setLocal(
                     lookAt(
-                        Point3 { 10, 10, 0 },
-                        Point3 { 0, 0, 0 },
+                        Point3f { 10, 10, 0 },
+                        Point3f { 0, 0, 0 },
                         Vector3::Constants::UP
                     )
                 );

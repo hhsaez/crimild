@@ -35,9 +35,12 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3 min( const Bounds3 &B ) noexcept { return B.min; }
+    [[nodiscard]] inline constexpr Point3f min( const Bounds3 &B ) noexcept
+    {
+        return B.min;
+    }
 
-    [[nodiscard]] inline constexpr Point3 min( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
+    [[nodiscard]] inline constexpr Point3f min( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
     {
         return min( min( B0 ), min( B1 ) );
     }

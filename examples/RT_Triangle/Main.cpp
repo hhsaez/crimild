@@ -71,9 +71,11 @@ public:
                                                         .normal = Normal3 { 0, 0, 1 },
 
                                                     },
-                                                } );
+                                                }
+                                            );
                                         }(),
-                                    } );
+                                    }
+                                );
                                 primitive->setIndices(
                                     crimild::alloc< IndexBuffer >(
                                         Format::INDEX_32_UINT,
@@ -84,9 +86,12 @@ public:
                                             0,
                                             2,
                                             3,
-                                        } ) );
+                                        }
+                                    )
+                                );
                                 return primitive;
-                            }() );
+                            }()
+                        );
 #else
                         geometry->attachPrimitive( crimild::alloc< SpherePrimitive >() );
 #endif
@@ -96,17 +101,21 @@ public:
                                 auto material = crimild::alloc< materials::PrincipledBSDF >();
                                 material->setAlbedo( ColorRGB { 1, 0, 0 } );
                                 return material;
-                            }() );
+                            }()
+                        );
                         return geometry;
-                    }() );
+                    }()
+                );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 0, 0, 10 },
-                            Point3 { 0, 0, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 0, 0, 10 },
+                            Point3f { 0, 0, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->setFocusDistance( 10 );
                     camera->setAperture( 0.0f );
                     camera->attachComponent< FreeLookCameraComponent >();
@@ -123,7 +132,8 @@ public:
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
 
         // Use soft RT by default
         if ( Simulation::getInstance()->getSettings()->get< std::string >( "video.render_path", "default" ) == "default" ) {

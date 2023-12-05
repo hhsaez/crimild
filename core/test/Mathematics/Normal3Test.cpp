@@ -246,7 +246,7 @@ TEST( Normal3, ostream )
 TEST( Normal3, conversion )
 {
     constexpr auto N = crimild::Normal3 { 1, 2, 3 };
-    [[maybe_unused]] constexpr auto V = crimild::vector3( N );
+    [[maybe_unused]] constexpr auto V = crimild::Vector3f( N );
     constexpr auto V4 = crimild::vector4( N, crimild::Real( 0 ) );
 
     static_assert( crimild::isEqual( V4, crimild::Vector4 { 1, 2, 3, 0 } ) );

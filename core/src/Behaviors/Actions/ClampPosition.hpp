@@ -51,8 +51,8 @@ namespace crimild {
 
             private:
                 Bounds3 m_limits = {
-                    .min = Point3 { -1, -1, -1 },
-                    .max = Point3 { 1, 1, 1 },
+                    .min = Point3f { -1, -1, -1 },
+                    .max = Point3f { 1, 1, 1 },
                 };
 
                 /**

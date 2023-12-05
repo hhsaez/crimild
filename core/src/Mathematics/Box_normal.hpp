@@ -41,7 +41,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Point3 &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Point3f &P ) noexcept
     {
         const auto absP = abs( P );
         const auto i = maxDimension( absP );
@@ -50,7 +50,7 @@ namespace crimild {
         return N;
     }
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Transformation &T, const Point3 &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Transformation &T, const Point3f &P ) noexcept
     {
         const auto N = normal( B, inverse( T )( P ) );
         return normalize( T( N ) );

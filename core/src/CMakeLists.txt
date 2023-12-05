@@ -223,8 +223,6 @@ target_sources(
     Mathematics/Plane3.hpp
     Mathematics/Point2.hpp
     Mathematics/Point3.hpp
-    Mathematics/Point3Ops.hpp
-    Mathematics/Point3_isInfinity.hpp
     Mathematics/pow.hpp
     Mathematics/project.hpp
     Mathematics/Quaternion.hpp
@@ -266,11 +264,8 @@ target_sources(
     Mathematics/Tuple2.hpp
     Mathematics/Tuple3.hpp
     Mathematics/Tuple4.hpp
-    Mathematics/tupleBuilder.hpp
-    Mathematics/tupleComponents.hpp
     Mathematics/Vector2.hpp
     Mathematics/Vector3.hpp
-    Mathematics/Vector3Ops.hpp
     Mathematics/Vector4.hpp
     Mathematics/whichSide.hpp
     Messaging/MessageQueue.hpp

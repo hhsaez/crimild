@@ -36,7 +36,7 @@
 
 using namespace crimild;
 
-RotationComponent::RotationComponent( const Vector3 &axis, float speed )
+RotationComponent::RotationComponent( const Vector3f &axis, float speed )
     : _axis( normalize( axis ) ),
       _speed( speed ),
       _time( 0 )

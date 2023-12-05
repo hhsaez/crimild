@@ -73,10 +73,10 @@ namespace crimild {
     {
         assert( false && "TODO" );
         return impl::LineSegment< T, N > {};
-        //return LineSegment( project( l.getOrigin() ), project( l.getDestination() ) );
+        // return LineSegment( project( l.getOrigin() ), project( l.getDestination() ) );
     }
 
-    [[nodiscard]] constexpr Point3 project( const Plane3 &A, const Point3 &P ) noexcept
+    [[nodiscard]] constexpr Point3f project( const Plane3 &A, const Point3f &P ) noexcept
     {
         const auto d = distanceSigned( A, P );
         const auto V = Vector3( d * A.getNormal() );

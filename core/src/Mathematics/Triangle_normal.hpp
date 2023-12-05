@@ -37,14 +37,14 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Point3 & ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Point3f & ) noexcept
     {
         const auto E0 = edge0( T );
         const auto E1 = edge1( T );
         return normalize( normal3( cross( E0, E1 ) ) );
     }
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Transformation &X, const Point3 &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Transformation &X, const Point3f &P ) noexcept
     {
         const auto N = normal( T, P );
         return normalize( X( N ) );

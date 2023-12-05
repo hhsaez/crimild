@@ -88,7 +88,7 @@ namespace crimild {
                 struct IntersectionResult {
                     Int32 materialId = -1;
                     Real t = numbers::POSITIVE_INFINITY;
-                    Point3 point;
+                    Point3f point;
                     Normal3 normal;
                     Bool frontFace;
 

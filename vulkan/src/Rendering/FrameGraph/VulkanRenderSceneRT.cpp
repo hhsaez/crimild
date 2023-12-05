@@ -562,10 +562,10 @@ bool RenderSceneRT::scatter( const Ray3 &R, const IntersectionResult &result, Ra
         return true;
     }
 
-    auto scatteredDirection = vector3( result.normal ) + normalize( random::nextInUnitSphere() );
+    auto scatteredDirection = Vector3f( result.normal ) + normalize( random::nextInUnitSphere() );
     // Catch degenerate scatter direction
     if ( isZero( scatteredDirection ) ) {
-        scatteredDirection = vector3( result.normal );
+        scatteredDirection = Vector3f( result.normal );
     }
     scattered = Ray3 { result.point, scatteredDirection };
     attenuation = material.albedo;

@@ -30,7 +30,6 @@
 
 #include "Mathematics/Plane3.hpp"
 #include "Mathematics/Point3.hpp"
-#include "Mathematics/Point3Ops.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Tuple2.hpp"
 #include "Mathematics/abs.hpp"
@@ -46,35 +45,35 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distanceSquared( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
+    [[nodiscard]] inline constexpr Real distanceSquared( const Point3< T > &u, const Point3< T > &v ) noexcept
     {
         return lengthSquared( v - u );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distance( const Point3Impl< T > &u, const Point3Impl< T > &v ) noexcept
+    [[nodiscard]] inline constexpr Real distance( const Point3< T > &u, const Point3< T > &v ) noexcept
     {
         return sqrt( lengthSquared( v - u ) );
     }
 
-    [[nodiscard]] constexpr Real distanceSquared( const Ray3 &R, const Point3 &P ) noexcept
+    [[nodiscard]] constexpr Real distanceSquared( const Ray3 &R, const Point3f &P ) noexcept
     {
         const auto V = P - origin( R );
         const auto d = dot( V, direction( R ) );
         return ( dot( V, V ) - d * d ) / lengthSquared( direction( R ) );
     }
 
-    [[nodiscard]] constexpr Real distance( const Ray3 &R, const Point3 &P ) noexcept
+    [[nodiscard]] constexpr Real distance( const Ray3 &R, const Point3f &P ) noexcept
     {
         return sqrt( distanceSquared( R, P ) );
     }
 
-    [[nodiscard]] constexpr Real distanceSigned( const Plane3 &A, const Point3 &P ) noexcept
+    [[nodiscard]] constexpr Real distanceSigned( const Plane3 &A, const Point3f &P ) noexcept
     {
         return dot( normal( A ), Vector3 { P.x, P.y, P.z } ) + distance( A );
     }
 
-    [[nodiscard]] constexpr Real distance( const Plane3 &A, const Point3 &P ) noexcept
+    [[nodiscard]] constexpr Real distance( const Plane3 &A, const Point3f &P ) noexcept
     {
         return abs( distanceSigned( A, P ) );
     }

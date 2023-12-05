@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_INTERPOLATION_
 #define CRIMILD_MATHEMATICS_INTERPOLATION_
 
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/dot.hpp"
 #include "Numeric.hpp"
 #include "Quaternion.hpp"
@@ -36,25 +36,25 @@
 namespace crimild {
 
     /**
-		\brief Implements different interpolation calculations
-
-		This class is used to group different interpolation calculations using
-		templates which make it useful for several types of objects.
-
-		Check the following URL out to see a visual example of each of the
-		easing functions:
-		http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm
-	 */
+     * \brief Implements different interpolation calculations
+     *
+     * This class is used to group different interpolation calculations using
+     * templates which make it useful for several types of objects.
+     *
+     * Check the following URL out to see a visual example of each of the
+     * easing functions:
+     * http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm
+     */
     class [[deprecated]] Interpolation {
     public:
         /**
-		 	\brief assign the to value to the result
+                        \brief assign the to value to the result
 
-		 	This method is useful for debugging purposes
+                        This method is useful for debugging purposes
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void none( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -62,11 +62,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'linear' interpolation between two values
+                        \brief Implements 'linear' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void linear( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -74,11 +74,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuadratic in' interpolation between two values
+                        \brief Implements 'cuadratic in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuadraticIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -87,11 +87,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic in' interpolation between two values
+                        \brief Implements 'cubic in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -100,11 +100,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic out' interpolation between two values
+                        \brief Implements 'cubic out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -114,11 +114,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic in-out' interpolation between two values
+                        \brief Implements 'cubic in-out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicInOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -128,11 +128,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic out-in' interpolation between two values
+                        \brief Implements 'cubic out-in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicOutIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -142,11 +142,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic back-in' interpolation between two values
+                        \brief Implements 'cubic back-in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicBackIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -156,11 +156,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cubic back-out' interpolation between two values
+                        \brief Implements 'cubic back-out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cubicBackOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -170,11 +170,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuartic in' interpolation between two values
+                        \brief Implements 'cuartic in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuarticIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -183,11 +183,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuartic out' interpolation between two values
+                        \brief Implements 'cuartic out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuarticOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -197,11 +197,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuartic out-in' interpolation between two values
+                        \brief Implements 'cuartic out-in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuarticOutIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -211,11 +211,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuartic back-in' interpolation between two values
+                        \brief Implements 'cuartic back-in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuarticBackIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -225,11 +225,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'cuartic back-out' interpolation between two values
+                        \brief Implements 'cuartic back-out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void cuarticBackOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -239,11 +239,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'quintic in' interpolation between two values
+                        \brief Implements 'quintic in' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void quinticIn( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -253,11 +253,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'quintic out' interpolation between two values
+                        \brief Implements 'quintic out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void quinticOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -267,11 +267,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'quintic in-out' interpolation between two values
+                        \brief Implements 'quintic in-out' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void quinticInOut( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -281,11 +281,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'elastic in (small)' interpolation between two values
+                        \brief Implements 'elastic in (small)' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void elasticInSmall( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -295,11 +295,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'elastic in (big)' interpolation between two values
+                        \brief Implements 'elastic in (big)' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void elasticInBig( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -309,11 +309,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'elastic out (small)' interpolation between two values
+                        \brief Implements 'elastic out (small)' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void elasticOutSmall( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -323,11 +323,11 @@ namespace crimild {
         }
 
         /**
-		 	\brief Implements 'elastic out (big)' interpolation between two values
+                        \brief Implements 'elastic out (big)' interpolation between two values
 
-		 	\remarks Input can be any object type implementing addition and
-		 	scalar multiplication, like scalars or vectors.
-		 */
+                        \remarks Input can be any object type implementing addition and
+                        scalar multiplication, like scalars or vectors.
+                 */
         template< typename T, typename PRECISION >
         static void elasticOutBig( const T &from, const T &to, PRECISION t, T &result )
         {
@@ -371,13 +371,13 @@ namespace crimild {
         }
 
         /**
-			\brief Calculate spherical liner interpolation for two quaternions
+                        \brief Calculate spherical liner interpolation for two quaternions
 
-			\param q0 Original quaternion. Must be unit length
-			\param q1 Destination quaternion. Must be unit length
+                        \param q0 Original quaternion. Must be unit length
+                        \param q1 Destination quaternion. Must be unit length
 
-			\remarks This interpolation requires the use of quaternions only
-		 */
+                        \remarks This interpolation requires the use of quaternions only
+                 */
         template< typename PRECISION >
         static impl::Quaternion< PRECISION > slerp( const impl::Quaternion< PRECISION > &a, const impl::Quaternion< PRECISION > b, double t )
         {
@@ -394,8 +394,8 @@ namespace crimild {
             PRECISION sinTheta = Numeric< PRECISION >::sin( theta );
 
             if ( sinTheta > 0.0001 ) {
-                w1 = ( PRECISION )( Numeric< PRECISION >::sin( ( 1.0 - t ) * theta ) / sinTheta );
-                w2 = ( PRECISION )( Numeric< PRECISION >::sin( t * theta ) / sinTheta );
+                w1 = ( PRECISION ) ( Numeric< PRECISION >::sin( ( 1.0 - t ) * theta ) / sinTheta );
+                w2 = ( PRECISION ) ( Numeric< PRECISION >::sin( t * theta ) / sinTheta );
             } else {
                 w1 = 1.0 - t;
                 w2 = t;

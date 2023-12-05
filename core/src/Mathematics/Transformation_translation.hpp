@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Transformation translation( const Vector3 &delta ) noexcept
+    [[nodiscard]] static constexpr Transformation translation( const Vector3f &delta ) noexcept
     {
         const auto m = Matrix4 {
             { 1, 0, 0, 0 },
@@ -53,7 +53,7 @@ namespace crimild {
 
     [[nodiscard]] inline constexpr Transformation translation( Real x, Real y, Real z ) noexcept
     {
-        return translation( Vector3 { x, y, z } );
+        return translation( Vector3f { x, y, z } );
     }
 
     [[nodiscard]] inline constexpr Bool hasTranslation( const Transformation &t ) noexcept

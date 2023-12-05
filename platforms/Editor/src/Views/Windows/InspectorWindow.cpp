@@ -198,7 +198,7 @@ namespace crimild::editor {
     public:
         virtual void render( crimild::Node *node ) noexcept override
         {
-            Point3 nodeTranslation;
+            Point3f nodeTranslation;
             Vector3 nodeRotation;
             Vector3 nodeScale;
             ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
