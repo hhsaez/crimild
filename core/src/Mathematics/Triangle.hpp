@@ -33,9 +33,9 @@
 namespace crimild {
 
     struct Triangle {
-        Point3 p0;
-        Point3 p1;
-        Point3 p2;
+        Point3f p0;
+        Point3f p1;
+        Point3f p2;
     };
 
 }

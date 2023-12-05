@@ -56,6 +56,30 @@ TEST( Vector4, construction )
     EXPECT_EQ( 40, u.w );
 }
 
+TEST( Vector4, fromPoint3 )
+{
+    constexpr auto p3 = Point3i( 1, 2, 3 );
+    constexpr auto v4 = Vector4i( p3 );
+    static_assert( v4 == Vector4i( 1, 2, 3, 1 ) );
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector4, fromVector3 )
+{
+    constexpr auto v3 = Vector3i( 1, 2, 3 );
+    constexpr auto v4 = Vector4i( v3 );
+    static_assert( v4 == Vector4i( 1, 2, 3, 0 ) );
+    EXPECT_TRUE( true );
+}
+
+TEST( Vector4, fromNormal3 )
+{
+    constexpr auto n3 = Vector3i( 1, 2, 3 );
+    constexpr auto v4 = Vector4i( n3 );
+    static_assert( v4 == Vector4i( 1, 2, 3, 0 ) );
+    EXPECT_TRUE( true );
+}
+
 TEST( Vector4, index )
 {
     constexpr auto u = crimild::Vector4 { 10, 20, 30, 40 };

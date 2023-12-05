@@ -47,14 +47,16 @@ TEST( IntersectWorld, intersect_world_with_a_ray )
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
-        }() );
+        }()
+    );
     world->attachNode(
         [] {
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             geometry->setLocal( scale( 0.5 ) );
             return geometry;
-        }() );
+        }()
+    );
     world->perform( UpdateWorldState() );
 
     const auto R = Ray3 { { 0, 0, -5 }, { 0, 0, 1 } };
@@ -77,7 +79,8 @@ TEST( IntersectWorld, precompute_intersection_results )
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
-        }() );
+        }()
+    );
     world->perform( UpdateWorldState() );
 
     const auto R = Ray3 { { 0, 0, -5 }, { 0, 0, 1 } };
@@ -88,7 +91,7 @@ TEST( IntersectWorld, precompute_intersection_results )
     EXPECT_EQ( 2, results.size() );
     EXPECT_EQ( 4, results[ 0 ].t );
     EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
-    EXPECT_EQ( ( Point3 { 0, 0, -1 } ), results[ 0 ].point );
+    EXPECT_EQ( ( Point3f { 0, 0, -1 } ), results[ 0 ].point );
     EXPECT_EQ( ( Normal3 { 0, 0, -1 } ), results[ 0 ].normal );
 }
 
@@ -100,7 +103,8 @@ TEST( IntersectWorld, intersection_occurs_on_the_outside )
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
-        }() );
+        }()
+    );
     world->perform( UpdateWorldState() );
 
     const auto R = Ray3 { { 0, 0, -5 }, { 0, 0, 1 } };
@@ -111,7 +115,7 @@ TEST( IntersectWorld, intersection_occurs_on_the_outside )
     EXPECT_EQ( 2, results.size() );
     EXPECT_EQ( 4, results[ 0 ].t );
     EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
-    EXPECT_EQ( ( Point3 { 0, 0, -1 } ), results[ 0 ].point );
+    EXPECT_EQ( ( Point3f { 0, 0, -1 } ), results[ 0 ].point );
     EXPECT_EQ( ( Normal3 { 0, 0, -1 } ), results[ 0 ].normal );
     EXPECT_EQ( true, results[ 0 ].frontFace );
 }
@@ -124,7 +128,8 @@ TEST( IntersectWorld, intersection_occurs_on_the_inside )
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
-        }() );
+        }()
+    );
     world->perform( UpdateWorldState() );
 
     const auto R = Ray3 { { 0, 0, 0 }, { 0, 0, 1 } };
@@ -135,7 +140,7 @@ TEST( IntersectWorld, intersection_occurs_on_the_inside )
     EXPECT_EQ( 1, results.size() );
     EXPECT_EQ( 1, results[ 0 ].t );
     EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
-    EXPECT_EQ( ( Point3 { 0, 0, 1 } ), results[ 0 ].point );
+    EXPECT_EQ( ( Point3f { 0, 0, 1 } ), results[ 0 ].point );
     EXPECT_EQ( ( Normal3 { 0, 0, -1 } ), results[ 0 ].normal );
     EXPECT_EQ( false, results[ 0 ].frontFace );
 }
@@ -148,7 +153,8 @@ TEST( IntersectWorld, no_intersection )
             auto geometry = crimild::alloc< Geometry >();
             geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
             return geometry;
-        }() );
+        }()
+    );
     world->perform( UpdateWorldState() );
 
     const auto R = Ray3 { { 0, 0, -5 }, { 0, 0, -1 } };
@@ -186,9 +192,11 @@ TEST( IntersectWorld, ray_triangle_intersection )
                                             .position = Vector3f { 0.0f, 0.5f, 0.0f },
                                             .normal = Vector3f { 0, 0, 1 },
                                         },
-                                    } );
+                                    }
+                                );
                             }(),
-                        } );
+                        }
+                    );
                     primitive->setIndices(
                         crimild::alloc< IndexBuffer >(
                             Format::INDEX_32_UINT,
@@ -196,11 +204,15 @@ TEST( IntersectWorld, ray_triangle_intersection )
                                 0,
                                 1,
                                 2,
-                            } ) );
+                            }
+                        )
+                    );
                     return primitive;
-                }() );
+                }()
+            );
             return geometry;
-        }() );
+        }()
+    );
 
     world->perform( UpdateWorldState() );
 
@@ -213,7 +225,7 @@ TEST( IntersectWorld, ray_triangle_intersection )
         EXPECT_EQ( 1, results.size() );
         EXPECT_EQ( 5, results[ 0 ].t );
         EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
-        EXPECT_EQ( ( Point3 { 0, 0, 0 } ), results[ 0 ].point );
+        EXPECT_EQ( ( Point3f { 0, 0, 0 } ), results[ 0 ].point );
         EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), results[ 0 ].normal );
         EXPECT_EQ( true, results[ 0 ].frontFace );
     }
@@ -227,7 +239,7 @@ TEST( IntersectWorld, ray_triangle_intersection )
         EXPECT_EQ( 1, results.size() );
         EXPECT_EQ( 5, results[ 0 ].t );
         EXPECT_EQ( world->getNodeAt( 0 ), results[ 0 ].geometry );
-        EXPECT_EQ( ( Point3 { 0.5, -0.5, 0 } ), results[ 0 ].point );
+        EXPECT_EQ( ( Point3f { 0.5, -0.5, 0 } ), results[ 0 ].point );
         EXPECT_EQ( ( Normal3 { 0, 0, 1 } ), results[ 0 ].normal );
         EXPECT_EQ( true, results[ 0 ].frontFace );
     }

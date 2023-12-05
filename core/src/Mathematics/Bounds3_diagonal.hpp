@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_DIAGONAL_
 
 #include "Mathematics/Bounds3.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 
 namespace crimild {
 

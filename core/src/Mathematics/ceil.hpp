@@ -28,9 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_CEIL_
 #define CRIMILD_MATHEMATICS_CEIL_
 
-#include "Mathematics/Traits.hpp"
-#include "Mathematics/tupleBuilder.hpp"
-#include "Mathematics/tupleComponents.hpp"
+#include "Mathematics/Tuple2.hpp"
+#include "Mathematics/Tuple3.hpp"
+#include "Mathematics/Tuple4.hpp"
 
 namespace crimild {
 
@@ -58,6 +58,16 @@ namespace crimild {
     }
 
     template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr auto ceil( const Tuple3< Derived, T > &t ) noexcept
+    {
+        return Derived< T > {
+            ceil( t.x ),
+            ceil( t.y ),
+            ceil( t.z ),
+        };
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
     [[nodiscard]] inline constexpr auto ceil( const Tuple4< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -65,36 +75,6 @@ namespace crimild {
             ceil( t.y ),
             ceil( t.z ),
             ceil( t.w ),
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto ceil( const Vector3Impl< T > &t ) noexcept
-    {
-        return Vector3Impl< T > {
-            ceil( t.x ),
-            ceil( t.y ),
-            ceil( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto ceil( const Normal3Impl< T > &t ) noexcept
-    {
-        return Normal3Impl< T > {
-            ceil( t.x ),
-            ceil( t.y ),
-            ceil( t.z )
-        };
-    }
-
-    template< typename T >
-    [[nodiscard, deprecated]] inline constexpr auto ceil( const Point3Impl< T > &t ) noexcept
-    {
-        return Point3Impl< T > {
-            ceil( t.x ),
-            ceil( t.y ),
-            ceil( t.z )
         };
     }
 

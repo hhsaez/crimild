@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3 centroid( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr Point3f centroid( const Bounds3 &B ) noexcept
     {
         return 0.5 * ( B.max + B.min );
     }

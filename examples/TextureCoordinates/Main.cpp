@@ -70,8 +70,8 @@ public:
                         auto camera = crimild::alloc< Camera >();
                         camera->setLocal(
                             lookAt(
-                                Point3 { 0, 0, 3 },
-                                Point3 { 0, 0, 0 },
+                                Point3f { 0, 0, 3 },
+                                Point3f { 0, 0, 0 },
                                 Vector3::Constants::UP
                             )
                         );

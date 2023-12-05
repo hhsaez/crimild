@@ -32,14 +32,14 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Bool inside( const Point3 &P, const Bounds3 &B ) noexcept
+    [[nodiscard]] static constexpr Bool inside( const Point3f &P, const Bounds3 &B ) noexcept
     {
         return B.min.x <= P.x && P.x <= B.max.x
                && B.min.y <= P.y && P.y <= B.max.y
                && B.min.z <= P.z && P.z <= B.max.z;
     }
 
-    [[nodiscard]] static constexpr Bool insideExclusive( const Point3 &P, const Bounds3 &B ) noexcept
+    [[nodiscard]] static constexpr Bool insideExclusive( const Point3f &P, const Bounds3 &B ) noexcept
     {
         return B.min.x < P.x && P.x < B.max.x
                && B.min.y < P.y && P.y < B.max.y

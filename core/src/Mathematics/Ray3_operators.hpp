@@ -37,8 +37,8 @@ namespace crimild {
     [[nodiscard]] static constexpr Ray3 operator*( const Matrix4 &M, const Ray3 &R ) noexcept
     {
         return Ray3 {
-            point3( vector3( M * vector4( origin( R ), 1 ) ) ),
-            vector3( M * vector4( direction( R ), 0 ) ),
+            Point3f( M * Vector4f( origin( R ) ) ),
+            Vector3f( M * Vector4f( direction( R ) ) ),
         };
     }
 

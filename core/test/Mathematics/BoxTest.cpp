@@ -38,7 +38,7 @@ TEST( Box, construction )
 {
     constexpr auto B = Box {};
 
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), center( B ) );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), center( B ) );
     EXPECT_EQ( ( Vector3 { 1, 1, 1 } ), size( B ) );
 }
 
@@ -46,14 +46,14 @@ TEST( Box, normal )
 {
     constexpr auto B = Box {};
 
-    static_assert( normal( B, Point3 { 1, 0.5, -0.8 } ) == Normal3 { 1, 0, 0 } );
-    static_assert( normal( B, Point3 { -1, -0.2, 0.9 } ) == Normal3 { -1, 0, 0 } );
-    static_assert( normal( B, Point3 { -0.4, 1, -0.1 } ) == Normal3 { 0, 1, 0 } );
-    static_assert( normal( B, Point3 { 0.3, -1, -0.7 } ) == Normal3 { 0, -1, 0 } );
-    static_assert( normal( B, Point3 { -0.6, 0.3, 1 } ) == Normal3 { 0, 0, 1 } );
-    static_assert( normal( B, Point3 { 0.4, 0.4, -1 } ) == Normal3 { 0, 0, -1 } );
-    static_assert( normal( B, Point3 { 1, 1, 1 } ) == Normal3 { 1, 0, 0 } );
-    static_assert( normal( B, Point3 { -1, -1, -1 } ) == Normal3 { -1, 0, 0 } );
+    static_assert( normal( B, Point3f { 1, 0.5, -0.8 } ) == Normal3 { 1, 0, 0 } );
+    static_assert( normal( B, Point3f { -1, -0.2, 0.9 } ) == Normal3 { -1, 0, 0 } );
+    static_assert( normal( B, Point3f { -0.4, 1, -0.1 } ) == Normal3 { 0, 1, 0 } );
+    static_assert( normal( B, Point3f { 0.3, -1, -0.7 } ) == Normal3 { 0, -1, 0 } );
+    static_assert( normal( B, Point3f { -0.6, 0.3, 1 } ) == Normal3 { 0, 0, 1 } );
+    static_assert( normal( B, Point3f { 0.4, 0.4, -1 } ) == Normal3 { 0, 0, -1 } );
+    static_assert( normal( B, Point3f { 1, 1, 1 } ) == Normal3 { 1, 0, 0 } );
+    static_assert( normal( B, Point3f { -1, -1, -1 } ) == Normal3 { -1, 0, 0 } );
 
     EXPECT_TRUE( true );
 }

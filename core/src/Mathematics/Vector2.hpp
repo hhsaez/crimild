@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T = Real >
+    template< concepts::Arithmetic T >
     class Vector2 : public Tuple2< Vector2, T > {
     public:
         static const Vector2 ZERO;

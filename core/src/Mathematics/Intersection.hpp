@@ -31,7 +31,7 @@
 #include "Mathematics/LineSegment3.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/Plane3.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/distance.hpp"
 #include "Mathematics/pow.hpp"
 #include "Numeric.hpp"

@@ -1,9 +1,9 @@
 #include "MotionApply.hpp"
 
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/isZero.hpp"
 #include "Mathematics/length.hpp"
 #include "Mathematics/swizzle.hpp"
@@ -15,7 +15,7 @@ using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 using namespace crimild::navigation;
 
-Vector3 clamp( Vector3 v, Real lo, Real hi ) noexcept
+Vector3f clamp( Vector3f v, Real lo, Real hi ) noexcept
 {
     const auto L = length( v );
     if ( isZero( L ) ) {
@@ -78,7 +78,7 @@ Behavior::State MotionApply::step( BehaviorContext *context )
 
     position = position + dt * velocity;
 
-    agent->setLocal( translation( vector3( position ) ) );
+    agent->setLocal( translation( Vector3f( position ) ) );
 #if 0
 	auto velocity = context->getValue< Vector3f >( "motion.velocity" );
 	auto steering = context->getValue< Vector3f >( "motion.steering" );

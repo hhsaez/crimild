@@ -71,8 +71,8 @@ namespace crimild {
 
         const Type &getType( void ) const noexcept { return _type; }
 
-        [[nodiscard]] Point3 getPosition( void ) const noexcept;
-        [[nodiscard]] Vector3 getDirection( void ) const noexcept;
+        [[nodiscard]] Point3f getPosition( void ) const noexcept;
+        [[nodiscard]] Vector3f getDirection( void ) const noexcept;
 
         void setAttenuation( const Vector3f &attenuation ) { _attenuation = attenuation; }
         const Vector3f &getAttenuation( void ) const { return _attenuation; }

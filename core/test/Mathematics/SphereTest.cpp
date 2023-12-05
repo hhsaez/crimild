@@ -41,11 +41,11 @@ using namespace crimild;
 TEST( Sphere, construction )
 {
     constexpr auto S = Sphere {
-        Point3::Constants::ZERO,
+        Point3f::ZERO,
         Real( 1 ),
     };
 
-    static_assert( center( S ) == Point3::Constants::ZERO );
+    static_assert( center( S ) == Point3f::ZERO );
     static_assert( radius( S ) == Real( 1 ) );
 
     EXPECT_TRUE( true );
@@ -55,11 +55,11 @@ TEST( Sphere, normal )
 {
     constexpr auto S = Sphere {};
 
-    static_assert( normal( S, Point3 { 1, 0, 0 } ) == Normal3 { 1, 0, 0 } );
-    static_assert( normal( S, Point3 { 0, 1, 0 } ) == Normal3 { 0, 1, 0 } );
-    static_assert( normal( S, Point3 { 0, 0, 1 } ) == Normal3 { 0, 0, 1 } );
-    static_assert( normal( S, Point3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) == Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } );
-    static_assert( length( normal( S, Point3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == Real( 1 ) );
+    static_assert( normal( S, Point3f { 1, 0, 0 } ) == Normal3 { 1, 0, 0 } );
+    static_assert( normal( S, Point3f { 0, 1, 0 } ) == Normal3 { 0, 1, 0 } );
+    static_assert( normal( S, Point3f { 0, 0, 1 } ) == Normal3 { 0, 0, 1 } );
+    static_assert( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) == Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } );
+    static_assert( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == Real( 1 ) );
 
     EXPECT_TRUE(
         isEqual(
@@ -67,7 +67,7 @@ TEST( Sphere, normal )
             normal(
                 S,
                 scale( 1, 0.5, 1 ) * rotationZ( numbers::PI / 5 ),
-                Point3 { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
+                Point3f { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
             )
         )
     );
@@ -79,5 +79,5 @@ TEST( Sphere, negate_normal )
 {
     constexpr auto S = Sphere {};
 
-    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( S, scale( -1 ), Point3 { 1, 0, 0 } ) );
+    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( S, scale( -1 ), Point3f { 1, 0, 0 } ) );
 }

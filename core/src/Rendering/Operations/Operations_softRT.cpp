@@ -77,7 +77,7 @@ using namespace crimild;
 struct IntersectionResult {
     Int32 materialId = -1;
     Real t = numbers::POSITIVE_INFINITY;
-    Point3 point;
+    Point3f point;
     Normal3 normal;
     Bool frontFace;
 
@@ -472,9 +472,9 @@ struct IntersectionResult {
             } else {
                 // Lambertian model
                 // TODO(hernan): use randomInHemisphere instead?
-                auto scatterDirection = vector3( res.normal ) + randomUnitVector();
+                auto scatterDirection = Vector3f( res.normal ) + randomUnitVector();
                 if ( isZero( scatterDirection ) ) {
-                    scatterDirection = vector3( res.normal );
+                    scatterDirection = Vector3f( res.normal );
                 }
                 scattered = Ray3 { res.point, scatterDirection };
                 attenuation = albedo;
@@ -710,9 +710,9 @@ namespace crimild {
                 return true;
             }
 
-            auto scatteredDirection = vector3( result.normal ) + normalize( random::nextInUnitSphere() );
+            auto scatteredDirection = Vector3f( result.normal ) + normalize( random::nextInUnitSphere() );
             if ( isZero( scatteredDirection ) ) {
-                scatteredDirection = vector3( result.normal );
+                scatteredDirection = Vector3f( result.normal );
             }
             scattered = Ray3 { result.point, scatteredDirection };
             attenuation = material.albedo;

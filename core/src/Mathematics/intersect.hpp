@@ -31,7 +31,7 @@
 #include "Mathematics/Box.hpp"
 #include "Mathematics/Cylinder.hpp"
 #include "Mathematics/Plane3.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Ray3.hpp"
 #include "Mathematics/Ray3_operators.hpp"
 #include "Mathematics/Sphere.hpp"
@@ -91,7 +91,7 @@ namespace crimild {
             return false;
         }
 
-        t = ( dot( -normal( P ), vector3( origin( R ) ) ) + distance( P ) ) / nv;
+        t = ( dot( -normal( P ), Vector3f( origin( R ) ) ) + distance( P ) ) / nv;
         return true;
     }
 

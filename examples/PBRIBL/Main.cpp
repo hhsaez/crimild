@@ -41,7 +41,8 @@ public:
                     SpherePrimitive::Params {
                         .type = Primitive::Type::TRIANGLES,
                         .layout = VertexP3N3TC2::getLayout(),
-                    } );
+                    }
+                );
 
                 for ( auto y = 0; y < 7; ++y ) {
                     for ( auto x = 0; x < 7; ++x ) {
@@ -54,7 +55,8 @@ public:
                                 material->setMetallic( 1.0f - float( y ) / 6.0f );
                                 material->setRoughness( Real( x ) / 6.0f );
                                 return material;
-                            }() );
+                            }()
+                        );
                         scene->attachNode( geometry );
                     }
                 }
@@ -72,7 +74,8 @@ public:
                                             .path = settings->get< std::string >( "skybox", "assets/textures/Newport_Loft_Ref.hdr" ),
                                         },
                                         .hdr = true,
-                                    } );
+                                    }
+                                );
                                 return imageView;
                             }();
                             texture->sampler = [ & ] {
@@ -84,7 +87,9 @@ public:
                                 return sampler;
                             }();
                             return texture;
-                        }() ) );
+                        }()
+                    )
+                );
 
                 auto createLight = []( const auto &position ) {
                     auto light = crimild::alloc< Light >( Light::Type::POINT );
@@ -107,15 +112,17 @@ public:
                 scene->attachNode(
                     [ & ] {
                         auto camera = crimild::alloc< Camera >();
-                        camera->setLocal( lookAt( Point3 { 15, 5, 20 }, Point3 { 0, 0, 0 }, Vector3 { 0, 1, 0 } ) );
+                        camera->setLocal( lookAt( Point3f { 15, 5, 20 }, Point3f { 0, 0, 0 }, Vector3 { 0, 1, 0 } ) );
                         camera->attachComponent< FreeLookCameraComponent >();
                         return camera;
-                    }() );
+                    }()
+                );
 
                 scene->perform( StartComponents() );
 
                 return scene;
-            }() );
+            }()
+        );
     }
 };
 

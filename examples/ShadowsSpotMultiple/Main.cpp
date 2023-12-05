@@ -73,7 +73,7 @@ public:
                                 geometry->attachComponent< LambdaComponent >(
                                     [ origin = location( geometry->getLocal() ),
                                       speed = ( rnd.generate( -1.0f, 1.0f ) < 0 ? -1.0f : 1.0f ) * rnd.generate( 1.0f, 6.0f ) ]( auto node, const auto &clock ) {
-                                        node->setLocal( translation( vector3( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
+                                        node->setLocal( translation( Vector3f( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
                                     }
                                 );
 
@@ -116,8 +116,8 @@ public:
                     auto camera = crimild::alloc< Camera >();
                     camera->setLocal(
                         lookAt(
-                            Point3 { 15, 20, 50 },
-                            Point3 { 0, 1, 0 },
+                            Point3f { 15, 20, 50 },
+                            Point3f { 0, 1, 0 },
                             Vector3::Constants::UP
                         )
                     );
@@ -134,8 +134,8 @@ public:
                         light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
                         light->setLocal(
                             lookAt(
-                                Point3 { 20, 20, 0 },
-                                Point3 { 0, 0, 0 },
+                                Point3f { 20, 20, 0 },
+                                Point3f { 0, 0, 0 },
                                 Vector3::Constants::UP
                             )
                         );
@@ -153,8 +153,8 @@ public:
                         light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
                         light->setLocal(
                             lookAt(
-                                Point3 { 0, 20, 20 },
-                                Point3 { 0, 1, 0 },
+                                Point3f { 0, 20, 20 },
+                                Point3f { 0, 1, 0 },
                                 Vector3::Constants::UP
                             )
                         );
@@ -172,8 +172,8 @@ public:
                         light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
                         light->setLocal(
                             lookAt(
-                                Point3 { -20, 20, 0 },
-                                Point3 { 0, 0, 0 },
+                                Point3f { -20, 20, 0 },
+                                Point3f { 0, 0, 0 },
                                 Vector3::Constants::UP
                             )
                         );

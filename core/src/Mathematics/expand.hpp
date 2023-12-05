@@ -44,7 +44,7 @@ namespace crimild {
         const auto radiusDiff = R1 - R0;
         const auto radiusDiffSqr = radiusDiff * radiusDiff;
 
-        Point3 C;
+        Point3f C;
         auto R = Real( 0 );
         if ( radiusDiffSqr >= lengthSqr ) {
             if ( radiusDiff >= 0 ) {

@@ -64,39 +64,39 @@ TEST( Bounds3, indexing )
 {
     constexpr auto B = Bounds3 { { 1, 2, 3 }, { 4, 5, 6 } };
 
-    EXPECT_EQ( ( Point3 { 1, 2, 3 } ), B[ 0 ] );
-    EXPECT_EQ( ( Point3 { 4, 5, 6 } ), B[ 1 ] );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), B[ 0 ] );
+    EXPECT_EQ( ( Point3f { 4, 5, 6 } ), B[ 1 ] );
 }
 
 TEST( Bounds3, corner )
 {
     constexpr auto B = Bounds3 { { 1, 2, 3 }, { 4, 5, 6 } };
 
-    EXPECT_EQ( ( Point3 { 1, 2, 3 } ), corner( B, 0 ) );
-    EXPECT_EQ( ( Point3 { 4, 2, 3 } ), corner( B, 1 ) );
-    EXPECT_EQ( ( Point3 { 1, 5, 3 } ), corner( B, 2 ) );
-    EXPECT_EQ( ( Point3 { 4, 5, 3 } ), corner( B, 3 ) );
-    EXPECT_EQ( ( Point3 { 1, 2, 6 } ), corner( B, 4 ) );
-    EXPECT_EQ( ( Point3 { 4, 2, 6 } ), corner( B, 5 ) );
-    EXPECT_EQ( ( Point3 { 1, 5, 6 } ), corner( B, 6 ) );
-    EXPECT_EQ( ( Point3 { 4, 5, 6 } ), corner( B, 7 ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), corner( B, 0 ) );
+    EXPECT_EQ( ( Point3f { 4, 2, 3 } ), corner( B, 1 ) );
+    EXPECT_EQ( ( Point3f { 1, 5, 3 } ), corner( B, 2 ) );
+    EXPECT_EQ( ( Point3f { 4, 5, 3 } ), corner( B, 3 ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 6 } ), corner( B, 4 ) );
+    EXPECT_EQ( ( Point3f { 4, 2, 6 } ), corner( B, 5 ) );
+    EXPECT_EQ( ( Point3f { 1, 5, 6 } ), corner( B, 6 ) );
+    EXPECT_EQ( ( Point3f { 4, 5, 6 } ), corner( B, 7 ) );
 }
 
 TEST( Bounds3, equality )
 {
     constexpr auto B0 = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 4, 5, 6 },
+        Point3f { 1, 2, 3 },
+        Point3f { 4, 5, 6 },
     };
 
     constexpr auto B1 = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 4, 5, 6 },
+        Point3f { 1, 2, 3 },
+        Point3f { 4, 5, 6 },
     };
 
     constexpr auto B2 = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 8, 9, 10 },
+        Point3f { 1, 2, 3 },
+        Point3f { 8, 9, 10 },
     };
 
     EXPECT_EQ( B0, B1 );
@@ -108,8 +108,8 @@ TEST( Bounds3, isNaN )
     EXPECT_FALSE(
         crimild::isNaN(
             Bounds3 {
-                Point3 { 1, 2, 3 },
-                Point3 { 4, 5, 6 },
+                Point3f { 1, 2, 3 },
+                Point3f { 4, 5, 6 },
             }
         )
     );
@@ -117,8 +117,8 @@ TEST( Bounds3, isNaN )
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
-                Point3 { 1, NAN, 3 },
-                Point3 { 4, 5, 6 },
+                Point3f { 1, NAN, 3 },
+                Point3f { 4, 5, 6 },
             }
         )
     );
@@ -126,8 +126,8 @@ TEST( Bounds3, isNaN )
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
-                Point3 { 1, 2, 3 },
-                Point3 { NAN, 5, 6 },
+                Point3f { 1, 2, 3 },
+                Point3f { NAN, 5, 6 },
             }
         )
     );
@@ -135,8 +135,8 @@ TEST( Bounds3, isNaN )
     EXPECT_TRUE(
         crimild::isNaN(
             Bounds3 {
-                Point3 { 1, NAN, 3 },
-                Point3 { NAN, 5, 6 },
+                Point3f { 1, NAN, 3 },
+                Point3f { NAN, 5, 6 },
             }
         )
     );
@@ -145,17 +145,17 @@ TEST( Bounds3, isNaN )
 TEST( Bounds3, min )
 {
     constexpr auto B0 = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 4, 5, 6 },
+        Point3f { 1, 2, 3 },
+        Point3f { 4, 5, 6 },
     };
 
     constexpr auto B1 = Bounds3 {
-        Point3 { 7, 8, 9 },
-        Point3 { 10, 11, 12 },
+        Point3f { 7, 8, 9 },
+        Point3f { 10, 11, 12 },
     };
 
-    static_assert( Point3 { 1, 2, 3 } == crimild::min( B0 ) );
-    static_assert( Point3 { 1, 2, 3 } == crimild::min( B0, B1 ) );
+    static_assert( Point3f { 1, 2, 3 } == crimild::min( B0 ) );
+    static_assert( Point3f { 1, 2, 3 } == crimild::min( B0, B1 ) );
 
     EXPECT_TRUE( isInfinity( min( Bounds3 {} ) ) );
 }
@@ -163,17 +163,17 @@ TEST( Bounds3, min )
 TEST( Bounds3, max )
 {
     constexpr auto B0 = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 4, 5, 6 },
+        Point3f { 1, 2, 3 },
+        Point3f { 4, 5, 6 },
     };
 
     constexpr auto B1 = Bounds3 {
-        Point3 { 7, 8, 9 },
-        Point3 { 10, 11, 12 },
+        Point3f { 7, 8, 9 },
+        Point3f { 10, 11, 12 },
     };
 
-    static_assert( Point3 { 4, 5, 6 } == max( B0 ) );
-    static_assert( Point3 { 10, 11, 12 } == max( B0, B1 ) );
+    static_assert( Point3f { 4, 5, 6 } == max( B0 ) );
+    static_assert( Point3f { 10, 11, 12 } == max( B0, B1 ) );
 
     EXPECT_TRUE( isInfinity( max( Bounds3 {} ) ) );
 }
@@ -183,16 +183,16 @@ TEST( Bounds3, minDimension )
     EXPECT_EQ(
         2,
         minDimension( Bounds3 {
-            Point3 { 1, 2, 3 },
-            Point3 { 6, 5, 3.5 },
+            Point3f { 1, 2, 3 },
+            Point3f { 6, 5, 3.5 },
         } )
     );
 
     EXPECT_EQ(
         2,
         minDimension( Bounds3 {
-            Point3 { -1, 2, 3 },
-            Point3 { -6, 5, 4 },
+            Point3f { -1, 2, 3 },
+            Point3f { -6, 5, 4 },
         } )
     );
 }
@@ -202,24 +202,24 @@ TEST( Bounds3, maxDimension )
     EXPECT_EQ(
         0,
         maxDimension( Bounds3 {
-            Point3 { 1, 2, 3 },
-            Point3 { 4, 5, 6 },
+            Point3f { 1, 2, 3 },
+            Point3f { 4, 5, 6 },
         } )
     );
 
     EXPECT_EQ(
         1,
         maxDimension( Bounds3 {
-            Point3 { 1, 2, 3 },
-            Point3 { 4, 10, 6 },
+            Point3f { 1, 2, 3 },
+            Point3f { 4, 10, 6 },
         } )
     );
 
     EXPECT_EQ(
         0,
         maxDimension( Bounds3 {
-            Point3 { -1, 2, 3 },
-            Point3 { -10, 5, 4 },
+            Point3f { -1, 2, 3 },
+            Point3f { -10, 5, 4 },
         } )
     );
 }
@@ -227,8 +227,8 @@ TEST( Bounds3, maxDimension )
 TEST( Bounds3, ostream )
 {
     const auto B = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 6, 5, 4 },
+        Point3f { 1, 2, 3 },
+        Point3f { 6, 5, 4 },
     };
 
     std::stringstream ss;
@@ -240,8 +240,8 @@ TEST( Bounds3, ostream )
 TEST( Bounds3, diagonal )
 {
     const auto B = Bounds3 {
-        Point3 { 1, 2, 3 },
-        Point3 { 6, 5, 4 },
+        Point3f { 1, 2, 3 },
+        Point3f { 6, 5, 4 },
     };
 
     EXPECT_EQ( ( Vector3 { 5, 3, 1 } ), diagonal( B ) );
@@ -250,21 +250,21 @@ TEST( Bounds3, diagonal )
 TEST( Bounds3, centroid )
 {
     EXPECT_EQ(
-        ( Point3 { 0, 0, 0 } ),
+        ( Point3f { 0, 0, 0 } ),
         centroid(
             Bounds3 {
-                Point3 { -1, -2, -3 },
-                Point3 { 1, 2, 3 },
+                Point3f { -1, -2, -3 },
+                Point3f { 1, 2, 3 },
             }
         )
     );
 
     EXPECT_EQ(
-        ( Point3 { 2.5, 3.5, 4.5 } ),
+        ( Point3f { 2.5, 3.5, 4.5 } ),
         centroid(
             Bounds3 {
-                Point3 { 1, 2, 3 },
-                Point3 { 4, 5, 6 },
+                Point3f { 1, 2, 3 },
+                Point3f { 4, 5, 6 },
             }
         )
     );
@@ -273,9 +273,9 @@ TEST( Bounds3, centroid )
 TEST( Bounds3, combine )
 {
     constexpr auto B = Bounds3 {};
-    constexpr auto P = Point3 { 1, 2, 3 };
-    constexpr auto Q = Point3 { 4, 5, 6 };
-    constexpr auto R = Point3 { 2, 3, 4 };
+    constexpr auto P = Point3f { 1, 2, 3 };
+    constexpr auto Q = Point3f { 4, 5, 6 };
+    constexpr auto R = Point3f { 2, 3, 4 };
 
     static_assert( Bounds3 { P, P } == combine( B, P ) );
     static_assert( Bounds3 { P, P } == combine( combine( B, P ), P ) );
@@ -295,13 +295,13 @@ TEST( Bounds3, combine )
     static_assert( B4 == combine( combine( combine( B, B0 ), B2 ), B3 ) );
 
     {
-        constexpr auto B0 = combine( Bounds3 {}, Point3 { 1, -1, -1 } );
+        constexpr auto B0 = combine( Bounds3 {}, Point3f { 1, -1, -1 } );
         EXPECT_EQ( B0, ( Bounds3 { { 1, -1, -1 }, { 1, -1, -1 } } ) );
 
-        constexpr auto B1 = combine( B0, Point3 { 1, -1, 1 } );
+        constexpr auto B1 = combine( B0, Point3f { 1, -1, 1 } );
         EXPECT_EQ( B1, ( Bounds3 { { 1, -1, -1 }, { 1, -1, 1 } } ) );
 
-        constexpr auto B2 = combine( B1, Point3 { -1, -1, 1 } );
+        constexpr auto B2 = combine( B1, Point3f { -1, -1, 1 } );
         EXPECT_EQ( B2, ( Bounds3 { { -1, -1, -1 }, { 1, -1, 1 } } ) );
     }
 
@@ -474,9 +474,9 @@ TEST( Bounds3, overlaps_cube )
 TEST( Bounds3, inside )
 {
     constexpr auto B = Bounds3 { { 1, 2, 3 }, { 4, 5, 6 } };
-    constexpr auto P0 = Point3 { 1, 2, 3 };
-    constexpr auto P1 = Point3 { 2, 3, 4 };
-    constexpr auto P2 = Point3 { 0, 2, 3 };
+    constexpr auto P0 = Point3f { 1, 2, 3 };
+    constexpr auto P1 = Point3f { 2, 3, 4 };
+    constexpr auto P2 = Point3f { 0, 2, 3 };
 
     static_assert( inside( P0, B ) );
     static_assert( inside( P1, B ) );
@@ -515,7 +515,7 @@ TEST( Bounds3, easing )
 {
     constexpr auto B = Bounds3 { { 1, 2, 3 }, { 4, 5, 6 } };
 
-    static_assert( lerp( B, Vector3 { 0.5, 0.5, 0.5 } ) == Point3 { 2.5, 3.5, 4.5 } );
+    static_assert( lerp( B, Vector3 { 0.5, 0.5, 0.5 } ) == Point3f { 2.5, 3.5, 4.5 } );
 
     EXPECT_TRUE( true );
 }

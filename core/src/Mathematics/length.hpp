@@ -61,25 +61,25 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Vector3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const Vector3< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Vector3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const Vector3< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Normal3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real lengthSquared( const Normal3< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Normal3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr Real length( const Normal3< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }

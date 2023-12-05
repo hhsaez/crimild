@@ -196,8 +196,8 @@ public:
                                 light->setOuterCutoff( Numericf::DEG_TO_RAD * 20.0f );
                                 light->setLocal(
                                     lookAt(
-                                        Point3 { 0, 1, 0 },
-                                        Point3 { 0, 0, -5 },
+                                        Point3f { 0, 1, 0 },
+                                        Point3f { 0, 0, -5 },
                                         Vector3::Constants::UP
                                     )
                                 );

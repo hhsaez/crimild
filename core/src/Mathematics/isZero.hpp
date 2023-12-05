@@ -31,7 +31,9 @@
 #include "Mathematics/Concepts.hpp"
 #include "Mathematics/Numbers.hpp"
 #include "Mathematics/Traits.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Mathematics/Tuple2.hpp"
+#include "Mathematics/Tuple3.hpp"
+#include "Mathematics/Tuple4.hpp"
 #include "Mathematics/abs.hpp"
 
 namespace crimild {
@@ -46,12 +48,23 @@ namespace crimild {
         }
     }
 
-    template< concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isZero( const Vector3Impl< T > &t ) noexcept
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isZero( const Tuple2< Derived, T > &t ) noexcept
+    {
+        return isZero( t.x ) && isZero( t.y );
+    }
+
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isZero( const Tuple3< Derived, T > &t ) noexcept
     {
         return isZero( t.x ) && isZero( t.y ) && isZero( t.z );
     }
 
+    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    [[nodiscard]] inline constexpr Bool isZero( const Tuple4< Derived, T > &t ) noexcept
+    {
+        return isZero( t.x ) && isZero( t.y ) && isZero( t.z ) && isZero( t.w );
+    }
 }
 
 #endif
