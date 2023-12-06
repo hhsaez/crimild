@@ -115,126 +115,6 @@ target_sources(
     Exceptions/InvalidFileFormatException.hpp
     Exceptions/RuntimeException.hpp
     Loaders/OBJLoader.hpp
-    Mathematics/abs.hpp
-    Mathematics/Bounds3.hpp
-    Mathematics/Bounds3_bisect.hpp
-    Mathematics/Bounds3_centroid.hpp
-    Mathematics/Bounds3_combine.hpp
-    Mathematics/Bounds3_diagonal.hpp
-    Mathematics/Bounds3_easing.hpp
-    Mathematics/Bounds3_equality.hpp
-    Mathematics/Bounds3_expand.hpp
-    Mathematics/Bounds3_inside.hpp
-    Mathematics/Bounds3_intersect.hpp
-    Mathematics/Bounds3_io.hpp
-    Mathematics/Bounds3_isNaN.hpp
-    Mathematics/Bounds3_max.hpp
-    Mathematics/Bounds3_min.hpp
-    Mathematics/Bounds3_overlaps.hpp
-    Mathematics/Bounds3_surfaceArea.hpp
-    Mathematics/Bounds3_volume.hpp
-    Mathematics/Box.hpp
-    Mathematics/Box_normal.hpp
-    Mathematics/ceil.hpp
-    Mathematics/clamp.hpp
-    Mathematics/Clock.hpp
-    Mathematics/ColorRGB.hpp
-    Mathematics/ColorRGBA.hpp
-    Mathematics/ColorRGBAOps.hpp
-    Mathematics/ColorRGBOps.hpp
-    Mathematics/ColorRGB_isZero.hpp
-    Mathematics/cross.hpp
-    Mathematics/Cylinder.hpp
-    Mathematics/Cylinder_normal.hpp
-    Mathematics/distance.hpp
-    Mathematics/dot.hpp
-    Mathematics/easing.hpp
-    Mathematics/expand.hpp
-    Mathematics/factorial.hpp
-    Mathematics/floor.hpp
-    Mathematics/Frustum.hpp
-    Mathematics/get_ptr.hpp
-    Mathematics/Interpolation.hpp
-    Mathematics/intersect.hpp
-    Mathematics/Intersection.hpp
-    Mathematics/io.hpp
-    Mathematics/isEqual.hpp
-    Mathematics/isInfinity.hpp
-    Mathematics/isNaN.hpp
-    Mathematics/isZero.hpp
-    Mathematics/length.hpp
-    Mathematics/LineSegment3.hpp
-    Mathematics/Matrix3.hpp
-    Mathematics/Matrix3_constants.hpp
-    Mathematics/Matrix3_determinant.hpp
-    Mathematics/Matrix3_equality.hpp
-    Mathematics/Matrix3_inverse.hpp
-    Mathematics/Matrix3_operators.hpp
-    Mathematics/Matrix3_transpose.hpp
-    Mathematics/Matrix4.hpp
-    Mathematics/Matrix4_constants.hpp
-    Mathematics/Matrix4_determinant.hpp
-    Mathematics/Matrix4_inverse.hpp
-    Mathematics/Matrix4_operators.hpp
-    Mathematics/Matrix4_transpose.hpp
-    Mathematics/max.hpp
-    Mathematics/min.hpp
-    Mathematics/Normal3.hpp
-    Mathematics/normalize.hpp
-    Mathematics/Numbers.hpp
-    Mathematics/Numeric.hpp
-    Mathematics/ortho.hpp
-    Mathematics/orthonormalization.hpp
-    Mathematics/permutation.hpp
-    Mathematics/perspective.hpp
-    Mathematics/Plane3.hpp
-    Mathematics/Point2.hpp
-    Mathematics/Point3.hpp
-    Mathematics/pow.hpp
-    Mathematics/project.hpp
-    Mathematics/Quaternion.hpp
-    Mathematics/Random.hpp
-    Mathematics/Ray3.hpp
-    Mathematics/Ray3_operators.hpp
-    Mathematics/Ray_apply.hpp
-    Mathematics/README.md
-    Mathematics/Rect.hpp
-    Mathematics/reflect.hpp
-    Mathematics/refract.hpp
-    Mathematics/Root.hpp
-    Mathematics/round.hpp
-    Mathematics/Series.hpp
-    Mathematics/sign.hpp
-    Mathematics/Size2D.hpp
-    Mathematics/Size3D.hpp
-    Mathematics/Sphere.hpp
-    Mathematics/Sphere_normal.hpp
-    Mathematics/sqrt.hpp
-    Mathematics/swizzle.hpp
-    Mathematics/Traits.hpp
-    Mathematics/Transformation.hpp
-    Mathematics/Transformation_apply.hpp
-    Mathematics/Transformation_constants.hpp
-    Mathematics/Transformation_easing.hpp
-    Mathematics/Transformation_euler.hpp
-    Mathematics/Transformation_inverse.hpp
-    Mathematics/Transformation_isIdentity.hpp
-    Mathematics/Transformation_lookAt.hpp
-    Mathematics/Transformation_operators.hpp
-    Mathematics/Transformation_rotation.hpp
-    Mathematics/Transformation_scale.hpp
-    Mathematics/Transformation_translation.hpp
-    Mathematics/Triangle.hpp
-    Mathematics/Triangle_edges.hpp
-    Mathematics/Triangle_normal.hpp
-    Mathematics/trigonometry.hpp
-    Mathematics/Tuple2.hpp
-    Mathematics/Tuple3.hpp
-    Mathematics/Tuple4.hpp
-    Mathematics/Vector2.hpp
-    Mathematics/Vector3.hpp
-    Mathematics/Vector4.hpp
-    Mathematics/whichSide.hpp
     Messaging/MessageQueue.hpp
     Navigation/NavigationCell.hpp
     Navigation/NavigationCellEdge.hpp
@@ -521,8 +401,6 @@ target_sources(
     Debug/DebugRenderHelper.cpp
     Debug/SceneDebugDump.cpp
     Loaders/OBJLoader.cpp
-    Mathematics/Clock.cpp
-    Mathematics/Random.cpp
     Messaging/MessageQueue.cpp
     Navigation/NavigationCell.cpp
     Navigation/NavigationCellEdge.cpp

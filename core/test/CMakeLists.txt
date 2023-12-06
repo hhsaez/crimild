@@ -17,34 +17,6 @@ target_sources(
     Coding/CodableTest.cpp
     Components/MaterialComponentTest.cpp
     Components/MotionStateComponentTest.cpp
-    Mathematics/Bounds3Test.cpp
-    Mathematics/BoxTest.cpp
-    Mathematics/ClockTest.cpp
-    Mathematics/ColorRGBATest.cpp
-    Mathematics/ColorRGBTest.cpp
-    Mathematics/CylinderTest.cpp
-    Mathematics/intersectTest.cpp
-    Mathematics/Matrix3Test.cpp
-    Mathematics/Matrix4Test.cpp
-    Mathematics/max.cpp
-    Mathematics/min.cpp
-    Mathematics/Normal3Test.cpp
-    Mathematics/Plane3Test.cpp
-    Mathematics/Point2Test.cpp
-    Mathematics/Point3Test.cpp
-    Mathematics/QuaternionTest.cpp
-    Mathematics/Ray3Test.cpp
-    Mathematics/RectTest.cpp
-    Mathematics/reflectTest.cpp
-    Mathematics/roundTest.cpp
-    Mathematics/SphereTest.cpp
-    Mathematics/TraitsTest.cpp
-    Mathematics/TransformationTest.cpp
-    Mathematics/TriangleTest.cpp
-    Mathematics/UtilsTest.cpp
-    Mathematics/Vector2Test.cpp
-    Mathematics/Vector3Test.cpp
-    Mathematics/Vector4Test.cpp
     Messaging/MessageQueueTest.cpp
     Primitives/PrimitiveTest.cpp
     Primitives/QuadPrimitiveTest.cpp

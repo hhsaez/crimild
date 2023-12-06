@@ -1,0 +1,150 @@
+crimild_trace()
+
+add_library( crimild_mathematics OBJECT )
+
+target_sources( 
+    crimild_mathematics
+    
+    PUBLIC
+    Crimild_Mathematics.hpp
+
+    PRIVATE
+    abs.hpp
+    Bounds3.hpp
+    Bounds3_bisect.hpp
+    Bounds3_centroid.hpp
+    Bounds3_combine.hpp
+    Bounds3_diagonal.hpp
+    Bounds3_easing.hpp
+    Bounds3_equality.hpp
+    Bounds3_expand.hpp
+    Bounds3_inside.hpp
+    Bounds3_intersect.hpp
+    Bounds3_io.hpp
+    Bounds3_isNaN.hpp
+    Bounds3_max.hpp
+    Bounds3_min.hpp
+    Bounds3_overlaps.hpp
+    Bounds3_surfaceArea.hpp
+    Bounds3_volume.hpp
+    Box.hpp
+    Box_normal.hpp
+    ceil.hpp
+    clamp.hpp
+    Clock.hpp
+    ColorRGB.hpp
+    ColorRGBA.hpp
+    ColorRGBAOps.hpp
+    ColorRGBOps.hpp
+    ColorRGB_isZero.hpp
+    cross.hpp
+    Cylinder.hpp
+    Cylinder_normal.hpp
+    distance.hpp
+    dot.hpp
+    easing.hpp
+    expand.hpp
+    factorial.hpp
+    floor.hpp
+    Frustum.hpp
+    get_ptr.hpp
+    Interpolation.hpp
+    intersect.hpp
+    Intersection.hpp
+    io.hpp
+    isEqual.hpp
+    isInfinity.hpp
+    isNaN.hpp
+    isZero.hpp
+    length.hpp
+    LineSegment3.hpp
+    Matrix3.hpp
+    Matrix3_constants.hpp
+    Matrix3_determinant.hpp
+    Matrix3_equality.hpp
+    Matrix3_inverse.hpp
+    Matrix3_operators.hpp
+    Matrix3_transpose.hpp
+    Matrix4.hpp
+    Matrix4_constants.hpp
+    Matrix4_determinant.hpp
+    Matrix4_inverse.hpp
+    Matrix4_operators.hpp
+    Matrix4_transpose.hpp
+    max.hpp
+    min.hpp
+    Normal3.hpp
+    normalize.hpp
+    Numbers.hpp
+    Numeric.hpp
+    ortho.hpp
+    orthonormalization.hpp
+    permutation.hpp
+    perspective.hpp
+    Plane3.hpp
+    Point2.hpp
+    Point3.hpp
+    pow.hpp
+    project.hpp
+    Quaternion.hpp
+    Random.hpp
+    Ray3.hpp
+    Ray3_operators.hpp
+    Ray_apply.hpp
+    README.md
+    Rect.hpp
+    reflect.hpp
+    refract.hpp
+    Root.hpp
+    round.hpp
+    Series.hpp
+    sign.hpp
+    Size2D.hpp
+    Size3D.hpp
+    Sphere.hpp
+    Sphere_normal.hpp
+    sqrt.hpp
+    swizzle.hpp
+    Traits.hpp
+    Transformation.hpp
+    Transformation_apply.hpp
+    Transformation_constants.hpp
+    Transformation_easing.hpp
+    Transformation_euler.hpp
+    Transformation_inverse.hpp
+    Transformation_isIdentity.hpp
+    Transformation_lookAt.hpp
+    Transformation_operators.hpp
+    Transformation_rotation.hpp
+    Transformation_scale.hpp
+    Transformation_translation.hpp
+    Triangle.hpp
+    Triangle_edges.hpp
+    Triangle_normal.hpp
+    trigonometry.hpp
+    Tuple2.hpp
+    Tuple3.hpp
+    Tuple4.hpp
+    Vector2.hpp
+    Vector3.hpp
+    Vector4.hpp
+    whichSide.hpp
+    
+    PRIVATE
+    Crimild_Mathematics.cpp
+    
+    PRIVATE
+    Clock.cpp
+    Random.cpp
+)
+
+target_include_directories( crimild_mathematics PUBLIC . )
+
+target_link_libraries( 
+    crimild_mathematics
+    PRIVATE Crimild::Foundation
+)
+
+target_compile_features( crimild_mathematics PUBLIC cxx_std_20 )
+add_library( Crimild::Mathematics ALIAS crimild_mathematics )
+
