@@ -36,6 +36,7 @@ endif ()
 
 # Add subdirectories
 add_subdirectory( foundation )
+add_subdirectory( mathematics )
 add_subdirectory( core )
 
 # Configure Vulkan
