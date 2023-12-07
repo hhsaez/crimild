@@ -40,7 +40,7 @@ namespace crimild {
     /**
      * @brief Swizzle function for Tuple2 derived classes
      */
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto xx( const Tuple2< Derived, T > &u ) noexcept
     {
         return Derived< T > {
@@ -49,7 +49,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto xy( const Tuple2< Derived, T > &u ) noexcept
     {
         return Derived< T > {
@@ -58,7 +58,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto yx( const Tuple2< Derived, T > &u ) noexcept
     {
         return Derived< T > {
@@ -67,7 +67,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto yy( const Tuple2< Derived, T > &u ) noexcept
     {
         return Derived< T > {
@@ -81,7 +81,7 @@ namespace crimild {
     /**
      * @brief Swizzle function for Tuple3 derived classes
      */
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto xyz( const Tuple3< Derived, T > &u ) noexcept
     {
         return Derived< T > {
@@ -96,7 +96,7 @@ namespace crimild {
     /**
      * @brief Swizzle function for Tuple4 derived classes
      */
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr auto xyz( const Vector4< T > &u ) noexcept
     {
         return Vector3< T > {
@@ -119,7 +119,7 @@ namespace crimild {
     //     return Vector3Impl< T > { t.x, t.y, t.z };
     // }
 
-    // template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    // template< template< ArithmeticType > class Derived, ArithmeticType T >
     // [[nodiscard]] inline constexpr Vector3Impl< T > Vector3f( const Tuple4< Derived, T > &t ) noexcept
     // {
     //     return Vector3Impl< T > { t.x, t.y, t.z };
@@ -183,14 +183,14 @@ namespace crimild {
     //     return ColorRGBA { c.r, c.g, c.b, 1.0 };
     // }
 
-    // template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    // template< template< ArithmeticType > class Derived, ArithmeticType T >
     // [[nodiscard]] inline constexpr auto rgba( const Tuple4< Derived, T > &t ) noexcept
     // {
     //     return ColorRGB { t.x, t.y, t.z, t.w };
     // }
 
     // template< typename T >
-    // [[nodiscard]] inline constexpr auto rgba( const Tuple3Impl< T > &t, Real a ) noexcept
+    // [[nodiscard]] inline constexpr auto rgba( const Tuple3Impl< T > &t, real_t a ) noexcept
     // {
     //     return ColorRGBA { t.x, t.y, t.z, a };
     // }

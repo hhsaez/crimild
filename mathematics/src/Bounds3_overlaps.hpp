@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Bool overlaps( const Bounds3 &A, const Bounds3 &B ) noexcept
+    [[nodiscard]] static constexpr bool overlaps( const Bounds3 &A, const Bounds3 &B ) noexcept
     {
         return A.max.x >= B.min.x && A.min.x <= B.max.x
                && A.max.y >= B.min.y && A.min.y <= B.max.y

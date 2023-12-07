@@ -45,7 +45,7 @@ namespace crimild {
         const auto radiusDiffSqr = radiusDiff * radiusDiff;
 
         Point3f C;
-        auto R = Real( 0 );
+        auto R = real_t( 0 );
         if ( radiusDiffSqr >= lengthSqr ) {
             if ( radiusDiff >= 0 ) {
                 C = C1;
@@ -58,7 +58,7 @@ namespace crimild {
                 C = C0 + coeff * centerDiff;
             }
 
-            R = Real( 0.5 ) * ( length + R0 + R1 );
+            R = real_t( 0.5 ) * ( length + R0 + R1 );
         }
 
         return Sphere( C, R );

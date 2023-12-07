@@ -127,7 +127,7 @@ TEST( Vector4, subtraction )
 TEST( Vector4, multiplication )
 {
     constexpr auto u = crimild::Vector4f { 10, 20, 30, 40 };
-    constexpr auto s = crimild::Real( 5 );
+    constexpr auto s = real_t( 5 );
     constexpr auto res = crimild::Vector4f { 50, 100, 150, 200 };
 
     static_assert( crimild::isEqual( res, u * s ) );
@@ -150,7 +150,7 @@ TEST( Vector4, vectorMultiplication )
 TEST( Vector4, division )
 {
     constexpr auto u = crimild::Vector4f { 10, 20, 30, 40 };
-    constexpr auto s = crimild::Real( 2 );
+    constexpr auto s = real_t( 2 );
     constexpr auto res = crimild::Vector4f { 5, 10, 15, 20 };
 
     static_assert( crimild::isEqual( res, u / s ) );
@@ -201,8 +201,8 @@ TEST( Vector4, length )
 {
     constexpr auto u = crimild::Vector4 { 2, 3, 4, 5 };
 
-    EXPECT_EQ( crimild::Real( 54 ), crimild::lengthSquared( u ) );
-    EXPECT_EQ( crimild::Real( 7.3484692283 ), crimild::length( u ) );
+    EXPECT_EQ( real_t( 54 ), crimild::lengthSquared( u ) );
+    EXPECT_EQ( real_t( 7.3484692283 ), crimild::length( u ) );
 }
 
 TEST( Vector4, normalize )
@@ -212,8 +212,8 @@ TEST( Vector4, normalize )
 
     static_assert( crimild::isEqual( v, crimild::normalize( u ) ) );
 
-    EXPECT_TRUE( crimild::isEqual( crimild::Real( 1 ), crimild::lengthSquared( crimild::normalize( u ) ) ) );
-    EXPECT_TRUE( crimild::isEqual( crimild::Real( 1 ), crimild::length( crimild::normalize( u ) ) ) );
+    EXPECT_TRUE( crimild::isEqual( real_t( 1 ), crimild::lengthSquared( crimild::normalize( u ) ) ) );
+    EXPECT_TRUE( crimild::isEqual( real_t( 1 ), crimild::length( crimild::normalize( u ) ) ) );
 }
 
 TEST( Vector4, normalizeNaN )

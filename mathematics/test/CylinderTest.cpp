@@ -38,8 +38,8 @@ TEST( Cylinder, construction )
 {
     constexpr auto C = Cylinder {};
 
-    static_assert( radius( C ) == Real( 1 ) );
-    static_assert( height( C ) == Real( 1 ) );
+    static_assert( radius( C ) == real_t( 1 ) );
+    static_assert( height( C ) == real_t( 1 ) );
 
     EXPECT_TRUE( true );
 }

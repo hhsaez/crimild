@@ -55,7 +55,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator*( const ColorRGBAImpl< T > &u, crimild::Real s ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator*( const ColorRGBAImpl< T > &u, real_t s ) noexcept
     {
         return ColorRGBAImpl< T > {
             u.r * s,
@@ -66,7 +66,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator*( crimild::Real s, const ColorRGBAImpl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator*( real_t s, const ColorRGBAImpl< T > &u ) noexcept
     {
         return ColorRGBAImpl< T > {
             u.r * s,
@@ -88,9 +88,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator/( const ColorRGBAImpl< T > &u, crimild::Real s ) noexcept
+    [[nodiscard]] inline constexpr ColorRGBAImpl< T > operator/( const ColorRGBAImpl< T > &u, real_t s ) noexcept
     {
-        const auto invS = crimild::Real( 1 ) / s;
+        const auto invS = real_t( 1 ) / s;
         return u * invS;
     }
 

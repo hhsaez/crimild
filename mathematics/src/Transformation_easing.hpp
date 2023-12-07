@@ -64,7 +64,7 @@ namespace crimild {
         // with its inverse transpose. This is a fairly complex process, but most of the time
         // convergence should only require a few loops.
         R = RS;
-        Real norm = 0;
+        real_t norm = 0;
         int count = 0;
         do {
             // Compute next matrix in the series
@@ -79,9 +79,9 @@ namespace crimild {
             // Compute norm of difference between R and next
             norm = 0;
             for ( int i = 0; i < 3; ++i ) {
-                Real n = abs( R[ i ][ 0 ] - next[ i ][ 0 ] )
-                         + abs( R[ i ][ 0 ] - next[ i ][ 0 ] )
-                         + abs( R[ i ][ 0 ] - next[ i ][ 0 ] );
+                real_t n = abs( R[ i ][ 0 ] - next[ i ][ 0 ] )
+                           + abs( R[ i ][ 0 ] - next[ i ][ 0 ] )
+                           + abs( R[ i ][ 0 ] - next[ i ][ 0 ] );
                 norm = max( norm, n );
             }
 
@@ -97,7 +97,7 @@ namespace crimild {
     // This is a very complex operation and should not be used frequently.
     // TODO: This is way I needed to represent transformations using separated components for
     // translation, rotation and scaling.
-    [[nodiscard]] constexpr Transformation lerp( const Transformation &start, const Transformation &end, Real t ) noexcept
+    [[nodiscard]] constexpr Transformation lerp( const Transformation &start, const Transformation &end, real_t t ) noexcept
     {
         if ( t <= 0 ) {
             return start;

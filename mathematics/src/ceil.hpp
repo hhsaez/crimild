@@ -34,10 +34,10 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr T ceil( T x ) noexcept
     {
-        if constexpr ( traits::isHighPrecision< T >() ) {
+        if constexpr ( std::is_same< T, double >::value ) {
             // High precision floating-point should use the standard implementation
             // which is not constexpr.
             return std::ceil( x );
@@ -48,7 +48,7 @@ namespace crimild {
         }
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto ceil( const Tuple2< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -57,7 +57,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto ceil( const Tuple3< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -67,7 +67,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto ceil( const Tuple4< Derived, T > &t ) noexcept
     {
         return Derived< T > {

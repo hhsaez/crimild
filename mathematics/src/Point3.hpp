@@ -30,13 +30,14 @@
 
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "Types.hpp"
 #include "Vector3.hpp"
 
 #include <limits>
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     class Point3 : public Tuple3< Point3, T > {
     public:
         struct Constants {
@@ -66,21 +67,21 @@ namespace crimild {
         {
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Point3( U value ) noexcept
             : Tuple3< Point3, T >( value ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Point3( const Tuple3< OtherDerived, U > &other ) noexcept
             : Tuple3< Point3, T >( other.x, other.y, other.z ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Point3( const Tuple4< OtherDerived, U > &other ) noexcept
             : Tuple3< Point3, T >( other.x, other.y, other.z ) { }
 
         ~Point3( void ) noexcept = default;
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Point3< T > &operator=( const Point3< U > &other ) noexcept
         {
             x = other.x;
@@ -89,13 +90,13 @@ namespace crimild {
             return *this;
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr auto operator+( const Point3< U > &v ) const noexcept
         {
             return Tuple3< Point3, T >::operator+( v );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr auto operator+( const Vector3< U > &v ) const noexcept
         {
             return Point3< decltype( T {} + U {} ) > {
@@ -105,7 +106,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr auto &operator+=( const Vector3< U > &other ) noexcept
         {
             x += other.x;
@@ -115,7 +116,7 @@ namespace crimild {
         }
 
         // Special case: Subtracting two points always results in a vector.
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr auto operator-( const Point3< U > &p ) const noexcept
         {
             return Vector3< decltype( T {} - U {} ) > {
@@ -125,7 +126,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr auto operator-( const Vector3< U > &v ) const noexcept
         {
             return Point3< decltype( T {} - U {} ) > {
@@ -135,7 +136,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr auto &operator-=( const Vector3< U > &other ) noexcept
         {
             x -= other.x;
@@ -145,10 +146,10 @@ namespace crimild {
         }
     };
 
-    using Point3f = Point3< Real32 >;
-    using Point3d = Point3< Real64 >;
-    using Point3i = Point3< Int32 >;
-    using Point3ui = Point3< UInt32 >;
+    using Point3f = Point3< float >;
+    using Point3d = Point3< double >;
+    using Point3i = Point3< int32_t >;
+    using Point3ui = Point3< uint32_t >;
 
 }
 

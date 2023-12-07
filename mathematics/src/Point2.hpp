@@ -29,10 +29,11 @@
 #define CRIMILD_MATHEMATICS_POINT_2_
 
 #include "Tuple2.hpp"
+#include "Types.hpp"
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     class Point2 : public Tuple2< Point2, T > {
     public:
         struct Constants {
@@ -59,17 +60,17 @@ namespace crimild {
         {
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Point2( U value ) noexcept
             : Tuple2< Point2, T >( value ) { }
 
         ~Point2( void ) noexcept = default;
     };
 
-    using Point2f = Point2< Real32 >;
-    using Point2d = Point2< Real64 >;
-    using Point2i = Point2< Int32 >;
-    using Point2ui = Point2< UInt32 >;
+    using Point2f = Point2< float >;
+    using Point2d = Point2< double >;
+    using Point2i = Point2< int32_t >;
+    using Point2ui = Point2< uint32_t >;
 
 }
 

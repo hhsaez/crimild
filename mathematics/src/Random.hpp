@@ -34,7 +34,6 @@
 #include "length.hpp"
 #include "sign.hpp"
 
-#include <Crimild_Foundation.hpp>
 #include <algorithm>
 #include <cfloat>
 #include <chrono>
@@ -53,12 +52,12 @@ namespace crimild {
         class Generator {
         public:
             Generator( void );
-            Generator( crimild::UInt32 seed );
+            Generator( uint32_t seed );
             ~Generator( void );
 
-            crimild::Real64 generate( void );
-            crimild::Real64 generate( crimild::Real64 max );
-            crimild::Real64 generate( crimild::Real64 min, crimild::Real64 max );
+            double generate( void );
+            double generate( double max );
+            double generate( double min, double max );
 
         private:
             std::mt19937_64 _generator;
@@ -103,7 +102,7 @@ namespace crimild {
             // TODO(hernan): This is not thread safe!!
             thread_local static Random::Generator defaultGenerator;
 
-            crimild::Real64 r = defaultGenerator.generate();
+            double r = defaultGenerator.generate();
             result = min + r * ( max - min );
         }
 
@@ -134,7 +133,7 @@ namespace crimild {
         {
             static thread_local auto gen = [] {
                 auto gen = [] {
-                    if constexpr ( traits::isHighPrecision< Real >() ) {
+                    if constexpr ( std::is_same< real_t, double >::value ) {
                         return std::mt19937_64 {};
                     } else {
                         return std::mt19937 {};
@@ -148,29 +147,29 @@ namespace crimild {
             return gen;
         }
 
-        inline void seed( UInt32 s ) noexcept
+        inline void seed( uint32_t s ) noexcept
         {
             defaultGenerator().seed( s );
         }
 
-        [[nodiscard]] inline Real next( void ) noexcept
+        [[nodiscard]] inline real_t next( void ) noexcept
         {
             // TODO(Hernan): Should this be static?
-            std::uniform_real_distribution< Real > dist;
+            std::uniform_real_distribution< real_t > dist;
             return dist( defaultGenerator() );
         }
 
-        [[nodiscard]] inline Real next( Real lo, Real hi ) noexcept
+        [[nodiscard]] inline real_t next( real_t lo, real_t hi ) noexcept
         {
             // TODO(Hernan): Should this be static?
-            std::uniform_real_distribution< Real > dist( lo, hi );
+            std::uniform_real_distribution< real_t > dist( lo, hi );
             return dist( defaultGenerator() );
         }
 
-        [[nodiscard]] inline Int nextInt( Int lo, Int hi ) noexcept
+        [[nodiscard]] inline int nextInt( int lo, int hi ) noexcept
         {
             // TODO(Hernan): Should this be static?
-            std::uniform_int_distribution< Int > dist( lo, hi );
+            std::uniform_int_distribution< int > dist( lo, hi );
             return dist( defaultGenerator() );
         }
 
@@ -182,9 +181,9 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline auto nextVector2( Real lo, Real hi ) noexcept
+        [[nodiscard]] inline auto nextVector2( real_t lo, real_t hi ) noexcept
         {
-            return Vector2f {
+            return Vector2 {
                 next( lo, hi ),
                 next( lo, hi ),
             };
@@ -199,7 +198,7 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector3f nextVector3( Real lo, Real hi ) noexcept
+        [[nodiscard]] inline Vector3f nextVector3( real_t lo, real_t hi ) noexcept
         {
             return Vector3f {
                 next( lo, hi ),

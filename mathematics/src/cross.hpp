@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto cross( const Vector3< T > &u, const Vector3< U > &v ) noexcept
     {
         return Vector3< decltype( T {} + U {} ) > {

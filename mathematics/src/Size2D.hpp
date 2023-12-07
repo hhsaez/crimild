@@ -28,8 +28,6 @@
 #ifndef CRIMILD_MATHEMATICS_SIZE_2D_
 #define CRIMILD_MATHEMATICS_SIZE_2D_
 
-#include <Crimild_Foundation.hpp>
-
 namespace crimild {
 
     template< typename T >

@@ -30,50 +30,48 @@
 
 #include "Vector3.hpp"
 
-#include <Crimild_Foundation.hpp>
-
 namespace crimild {
 
     namespace math {
 
-        template< typename Number >
-        static Array< Number > fibonacci( Size N ) noexcept
+        template< typename T >
+        static std::vector< T > fibonacci( size_t N ) noexcept
         {
-            return Array< Number >( N ).fill(
-                [ a = Number( 0 ),
-                  b = Number( 1 ) ]( auto i ) mutable {
-                    if ( i < 2 ) {
-                        return Number( i );
-                    }
-                    auto c = a + b;
-                    auto ret = c;
+            std::vector< T > ret( N );
+            T a = 0;
+            T b = 1;
+            for ( size_t i = 0; i < N; ++i ) {
+                if ( i < 2 ) {
+                    ret[ i ] = i;
+                } else {
+                    ret[ i ] = a + b;
                     a = b;
-                    b = c;
-                    return ret;
+                    b = ret[ i ];
                 }
-            );
+            }
+            return ret;
         }
 
-        static Array< std::pair< Vector3f, Real32 > > fibonacciSquares( Size N ) noexcept
+        static auto fibonacciSquares( size_t N ) noexcept
         {
-            return Array< std::pair< Vector3f, Real32 > >( N ).fill(
-                [ s0 = 1.0f,
-                  s1 = 1.0f,
-                  c0 = Vector3f::Constants::ZERO,
-                  c1 = -Vector3f::Constants::UNIT_X ]( auto i ) mutable -> std::pair< Vector3f, Real32 > {
-                    const auto OFFSET = Array< Vector3f > {
-                        -Vector3f::Constants::UNIT_Y,
-                        -Vector3f::Constants::UNIT_X,
-                        Vector3f::Constants::UNIT_Y,
-                        Vector3f::Constants::UNIT_X,
-                    };
+            auto ret = std::vector< std::pair< Vector3f, float > >( N );
+            real_t s0 = 1.0f;
+            real_t s1 = 1.0f;
+            Vector3f c0 = Vector3f::Constants::ZERO;
+            Vector3f c1 = -Vector3f::Constants::UNIT_X;
+            const auto OFFSET = std::array< Vector3f, 4 > {
+                -Vector3f::Constants::UNIT_Y,
+                -Vector3f::Constants::UNIT_X,
+                Vector3f::Constants::UNIT_Y,
+                Vector3f::Constants::UNIT_X,
+            };
+            for ( size_t i = 0; i < N; ++i ) {
 
-                    if ( i == 0 ) {
-                        return std::make_pair( c0, 1.0f );
-                    } else if ( i == 1 ) {
-                        return std::make_pair( c1, 1.0f );
-                    }
-
+                if ( i == 0 ) {
+                    ret[ i ] = std::make_pair( c0, 1.0f );
+                } else if ( i == 1 ) {
+                    ret[ i ] = std::make_pair( c1, 1.0f );
+                } else {
                     auto s = s0 + s1;
                     s0 = s1;
                     s1 = s;
@@ -81,9 +79,11 @@ namespace crimild {
                     auto c = c1 + 0.5f * ( s0 + s1 ) * OFFSET[ i % 4 ] + 0.5f * ( s1 - s0 ) * OFFSET[ ( i + 1 ) % 4 ];
                     c0 = c1;
                     c1 = c;
-                    return std::make_pair( c, s );
+                    ret[ i ] = std::make_pair( c, s );
                 }
-            );
+            }
+
+            return ret;
         }
 
     }

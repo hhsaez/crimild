@@ -140,8 +140,8 @@ TEST( Point3, distance )
     constexpr auto u = crimild::Point3f { 2, 3, 4 };
     constexpr auto v = crimild::Point3f { 5, 6, 7 };
 
-    EXPECT_EQ( crimild::Real( 27 ), crimild::distanceSquared( u, v ) );
-    EXPECT_TRUE( crimild::isEqual( crimild::Real( 5.1961524227 ), crimild::distance( u, v ) ) );
+    EXPECT_EQ( real_t( 27 ), crimild::distanceSquared( u, v ) );
+    EXPECT_TRUE( crimild::isEqual( real_t( 5.1961524227 ), crimild::distance( u, v ) ) );
 }
 
 TEST( Point3, lerp )

@@ -57,7 +57,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( const Matrix4Impl< T > &a, Real s ) noexcept
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( const Matrix4Impl< T > &a, real_t s ) noexcept
     {
         return Matrix4Impl< T > {
             a[ 0 ] * s,
@@ -68,7 +68,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( Real s, const Matrix4Impl< T > &a ) noexcept
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator*( real_t s, const Matrix4Impl< T > &a ) noexcept
     {
         return Matrix4Impl< T > {
             a[ 0 ] * s,
@@ -79,9 +79,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Matrix4Impl< T > operator/( const Matrix4Impl< T > &a, Real s ) noexcept
+    [[nodiscard]] inline constexpr Matrix4Impl< T > operator/( const Matrix4Impl< T > &a, real_t s ) noexcept
     {
-        const auto invS = Real( 1 ) / s;
+        const auto invS = real_t( 1 ) / s;
         return a * invS;
     }
 

@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Bool isNaN( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr bool isNaN( const Bounds3 &B ) noexcept
     {
         return isNaN( B.min ) || isNaN( B.max );
     }

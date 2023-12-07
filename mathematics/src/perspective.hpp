@@ -31,11 +31,9 @@
 #include "Matrix4.hpp"
 #include "trigonometry.hpp"
 
-#include <Crimild_Foundation.hpp>
-
 namespace crimild {
 
-    [[nodiscard]] constexpr Matrix4 perspective( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
+    [[nodiscard]] constexpr Matrix4 perspective( real_t l, real_t r, real_t b, real_t t, real_t n, real_t f ) noexcept
     {
 #if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
@@ -64,9 +62,9 @@ namespace crimild {
 
        \todo Make this function constexpr
      */
-    [[nodiscard]] static Matrix4 perspective( Degrees fov, Real aspect, Real near, Real far ) noexcept
+    [[nodiscard]] static Matrix4 perspective( degrees_t fov, real_t aspect, real_t near, real_t far ) noexcept
     {
-        const auto c = Real( 1 ) / tan( Real( 0.5 ) * radians( fov ) );
+        const auto c = real_t( 1 ) / tan( real_t( 0.5 ) * radians( fov ) );
         const auto a = aspect;
         const auto n = near;
         const auto f = far;
@@ -83,7 +81,7 @@ namespace crimild {
             { c / a, 0, 0, 0 },
             { 0, c, 0, 0 },
             { 0, 0, -( f + n ) / ( f - n ), -1 },
-            { 0, 0, Real( -2 ) * f * n / ( f - n ), 0 },
+            { 0, 0, real_t( -2 ) * f * n / ( f - n ), 0 },
         };
 #endif
     }
