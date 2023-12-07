@@ -37,49 +37,49 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    [[nodiscard]] inline constexpr auto dot( const Vector2< T > &u, const Vector2< U > &v ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr auto dot( const Vector2Impl< T > &u, const Vector2Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const Vector3< T > &u, const Vector3< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const Normal3< T > &u, const Normal3< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const Normal3< T > &u, const Vector3< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const Vector3< T > &u, const Normal3< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const Vector4< T > &u, const Vector4< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const ColorRGBImpl< T > &a, const ColorRGBImpl< U > &b ) noexcept
     {
         return a.r * b.r + a.g * b.g + a.b * b.b;
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto dot( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< U > &b ) noexcept
     {
         return a.r * b.r + a.g * b.g + a.b * b.b + a.a * b.a;

@@ -43,60 +43,60 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const T &x, const U &y ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const T &x, const U &y ) noexcept
     {
-        if constexpr ( traits::isReal< T >() ) {
+        if constexpr ( std::is_floating_point< T >::value ) {
             return isZero( x - y );
         } else {
             return x == y;
         }
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const Tuple2< Derived, T > &a, const Tuple2< Derived, U > &b ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const Tuple2< Derived, T > &a, const Tuple2< Derived, U > &b ) noexcept
     {
         return isEqual( a.x, b.x ) && isEqual( a.y, b.y );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const Tuple3< Derived, T > &a, const Tuple3< Derived, U > &b ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const Tuple3< Derived, T > &a, const Tuple3< Derived, U > &b ) noexcept
     {
         return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const Tuple4< Derived, T > &a, const Tuple4< Derived, U > &b ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const Tuple4< Derived, T > &a, const Tuple4< Derived, U > &b ) noexcept
     {
         return isEqual( a.x, b.x ) && isEqual( a.y, b.y ) && isEqual( a.z, b.z ) && isEqual( a.z, b.z );
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const ColorRGBImpl< T > &a, const ColorRGBImpl< U > &b ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const ColorRGBImpl< T > &a, const ColorRGBImpl< U > &b ) noexcept
     {
         return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b );
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< U > &b ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< U > &b ) noexcept
     {
         return isEqual( a.r, b.r ) && isEqual( a.g, b.g ) && isEqual( a.b, b.b ) && isEqual( a.a, b.a );
     }
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
-    inline constexpr Bool isEqual( const Matrix4Impl< T > &a, const Matrix4Impl< U > &b ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    inline constexpr bool isEqual( const Matrix4Impl< T > &a, const Matrix4Impl< U > &b ) noexcept
     {
         return isEqual( a.c0, b.c0 ) && isEqual( a.c1, b.c1 ) && isEqual( a.c2, b.c2 ) && isEqual( a.c3, b.c3 );
     }
 
-    [[nodiscard]] inline constexpr Bool isEqual( const Transformation &a, const Transformation &b ) noexcept
+    [[nodiscard]] inline constexpr bool isEqual( const Transformation &a, const Transformation &b ) noexcept
     {
         // Check for contents first, since it should be faster
         // TODO: checking for `invMat` should not be necessary
         return isEqual( a.contents, b.contents ) && isEqual( a.mat, b.mat ) && isEqual( a.invMat, b.invMat );
     }
 
-    [[nodiscard]] inline constexpr Bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
+    [[nodiscard]] inline constexpr bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
     {
         return isEqual( a.o, b.o ) && isEqual( a.d, b.d );
     }

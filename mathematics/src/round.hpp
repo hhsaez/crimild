@@ -28,15 +28,17 @@
 #ifndef CRIMILD_MATHEMATICS_ROUND_
 #define CRIMILD_MATHEMATICS_ROUND_
 
-#include "Traits.hpp"
+#include "Types.hpp"
+
+#include <type_traits>
 
 namespace crimild {
 
     template< typename T >
-    inline constexpr T round( const T &x, Real threshold = Real( 0.5 ) ) noexcept
+    inline constexpr T round( const T &x, real_t threshold = real_t( 0.5 ) ) noexcept
     {
-        if constexpr ( traits::isReal< T >() ) {
-            return T( Int( x >= 0 ? x + Real( 1 - threshold ) : x - Real( 1 - threshold ) ) );
+        if constexpr ( std::is_floating_point< T >::value ) {
+            return T( int( x >= 0 ? x + real_t( 1 - threshold ) : x - real_t( 1 - threshold ) ) );
         } else {
             return x;
         }

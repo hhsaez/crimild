@@ -28,7 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGB_
 #define CRIMILD_MATHEMATICS_COLOR_RGB_
 
-#include <Crimild_Foundation.hpp>
+#include "Types.hpp"
+
 #include <cmath>
 
 namespace crimild {
@@ -41,7 +42,7 @@ namespace crimild {
         T g;
         T b;
 
-        [[nodiscard]] inline constexpr T operator[]( Size index ) const noexcept
+        [[nodiscard]] inline constexpr T operator[]( size_t index ) const noexcept
         {
             switch ( index ) {
                 case 0:
@@ -54,7 +55,7 @@ namespace crimild {
             }
         }
 
-        [[nodiscard]] inline constexpr T &operator[]( Size index ) noexcept
+        [[nodiscard]] inline constexpr T &operator[]( size_t index ) noexcept
         {
             switch ( index ) {
                 case 0:
@@ -67,12 +68,12 @@ namespace crimild {
             }
         }
 
-        [[nodiscard]] inline constexpr Bool operator==( const ColorRGBImpl &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator==( const ColorRGBImpl &other ) const noexcept
         {
             return r == other.r && g == other.g && b == other.b;
         }
 
-        [[nodiscard]] inline constexpr Bool operator!=( const ColorRGBImpl &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator!=( const ColorRGBImpl &other ) const noexcept
         {
             return !( *this == other );
         }
@@ -87,9 +88,9 @@ namespace crimild {
         static constexpr auto BLUE = ColorRGBImpl< T > { 0, 0, 1 };
     };
 
-    using ColorRGB = ColorRGBImpl< Real >;
-    using ColorRGBf = ColorRGBImpl< Real32 >;
-    using ColorRGBd = ColorRGBImpl< Real64 >;
+    using ColorRGB = ColorRGBImpl< real_t >;
+    using ColorRGBf = ColorRGBImpl< float >;
+    using ColorRGBd = ColorRGBImpl< double >;
 
 }
 

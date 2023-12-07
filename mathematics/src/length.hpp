@@ -36,50 +36,50 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Vector2< T > &u ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector2Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y;
     }
 
-    template< concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Real length( const Vector2< T > &u ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr real_t length( const Vector2Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Vector4< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector4< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z + u.w * u.w;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Vector4< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t length( const Vector4< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector3< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Vector3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t length( const Vector3< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real lengthSquared( const Normal3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t lengthSquared( const Normal3< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real length( const Normal3< T > &u ) noexcept
+    [[nodiscard]] inline constexpr real_t length( const Normal3< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }

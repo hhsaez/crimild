@@ -30,7 +30,6 @@
 
 #include "Concepts.hpp"
 
-#include <Crimild_Foundation.hpp>
 #include <cassert>
 #include <cmath>
 
@@ -53,7 +52,7 @@ namespace crimild {
      * The use of CRTP makes Tuple2 a kind of an abstract class, although no actual
      * abstract virtual functions are used for performance reasons.
      */
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     class Tuple2 {
     protected:
         /**
@@ -101,7 +100,7 @@ namespace crimild {
         /**
          * \brief Copy constructor
          */
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr Tuple2( const Tuple2< Derived, U > &other ) noexcept
             : Tuple2( other.x, other.y )
         {
@@ -137,7 +136,7 @@ namespace crimild {
         T y = {};
         ///@}
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator=( const Tuple2< Derived, U > &other ) noexcept
         {
             x = other.x;
@@ -180,13 +179,13 @@ namespace crimild {
          *
          * @see isEqual
          */
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr bool operator==( const Tuple2< Derived, U > &other ) const noexcept
         {
             return x == other.x && y == other.y;
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr bool operator!=( const Tuple2< Derived, U > &other ) const noexcept
         {
             return !( *this == other );
@@ -218,7 +217,7 @@ namespace crimild {
          * to obtain a new Point2 (the inverse is not allowed, though). This operation is defined in Point2.
          */
         ///@{
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator+( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} + U {} ) > {
@@ -227,7 +226,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator+=( const Derived< U > &other ) noexcept
         {
             x += other.x;
@@ -235,7 +234,7 @@ namespace crimild {
             return static_cast< Derived< T > & >( *this );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator-( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} - U {} ) > {
@@ -244,7 +243,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator-=( const Derived< U > &other ) noexcept
         {
             x -= other.x;
@@ -252,7 +251,7 @@ namespace crimild {
             return static_cast< Derived< T > & >( *this );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator*( const U &scalar ) const noexcept
         {
             return Derived< decltype( T {} * U {} ) > {
@@ -264,7 +263,7 @@ namespace crimild {
         /**
          * @brief Multiplication overload for premultiplying with a scalar
          */
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] friend inline constexpr auto operator*( const U &scalar, const Derived< T > &u ) noexcept
         {
             return Derived< decltype( T {} * U {} ) > {
@@ -273,7 +272,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator*=( const U &s ) noexcept
         {
             x *= s;
@@ -281,7 +280,7 @@ namespace crimild {
             return static_cast< Derived< T > & >( *this );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator*( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} * U {} ) > {
@@ -290,7 +289,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator*=( const Derived< U > &other ) noexcept
         {
             x *= other.x;
@@ -298,7 +297,7 @@ namespace crimild {
             return static_cast< Derived< T > & >( *this );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator/( const U &scalar ) const noexcept
         {
             return Derived< decltype( T {} / U {} ) > {
@@ -307,7 +306,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator/=( const U &s ) noexcept
         {
             x /= s;
@@ -315,7 +314,7 @@ namespace crimild {
             return static_cast< Derived< T > & >( *this );
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         [[nodiscard]] inline constexpr Derived< T > operator/( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} / U {} ) > {
@@ -324,7 +323,7 @@ namespace crimild {
             };
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         inline constexpr Derived< T > &operator/=( const Derived< U > &other ) noexcept
         {
             x /= other.x;

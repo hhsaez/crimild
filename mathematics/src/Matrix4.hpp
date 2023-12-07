@@ -41,7 +41,7 @@ namespace crimild {
         Vector4< T > c2;
         Vector4< T > c3;
 
-        [[nodiscard]] inline constexpr const Vector4< T > &operator[]( Index index ) const noexcept
+        [[nodiscard]] inline constexpr const Vector4< T > &operator[]( size_t index ) const noexcept
         {
             switch ( index ) {
                 case 0:
@@ -56,7 +56,7 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector4< T > &operator[]( Index index ) noexcept
+        [[nodiscard]] inline Vector4< T > &operator[]( size_t index ) noexcept
         {
             switch ( index ) {
                 case 0:
@@ -72,23 +72,23 @@ namespace crimild {
         }
 
         template< typename U >
-        [[nodiscard]] inline constexpr Bool operator==( const Matrix4Impl< U > &other ) const noexcept
+        [[nodiscard]] inline constexpr size_t operator==( const Matrix4Impl< U > &other ) const noexcept
         {
             return c0 == other.c0 && c1 == other.c1 && c2 == other.c2 && c3 == other.c3;
         }
 
         template< typename U >
-        [[nodiscard]] inline constexpr Bool operator!=( const Matrix4Impl< U > &other ) const noexcept
+        [[nodiscard]] inline constexpr size_t operator!=( const Matrix4Impl< U > &other ) const noexcept
         {
             return !( *this == other );
         }
     };
 
-    using Matrix4 = Matrix4Impl< Real >;
-    using Matrix4f = Matrix4Impl< Real32 >;
-    using Matrix4d = Matrix4Impl< Real64 >;
-    using Matrix4i = Matrix4Impl< Int32 >;
-    using Matrix4ui = Matrix4Impl< UInt32 >;
+    using Matrix4 = Matrix4Impl< real_t >;
+    using Matrix4f = Matrix4Impl< float >;
+    using Matrix4d = Matrix4Impl< double >;
+    using Matrix4i = Matrix4Impl< int32_t >;
+    using Matrix4ui = Matrix4Impl< int32_t >;
 
 }
 

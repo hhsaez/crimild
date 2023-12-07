@@ -140,9 +140,9 @@ TEST( Utils, cos )
         //const auto deg = Real( 100 ) * crimild::degrees( rad );
         //   const auto deg0 = crimild::floor( Real( 100 ) * crimild::degrees( rad ) );
         //  const auto deg1 = crimild::ceil( Real( 100 ) * crimild::degrees( rad ) );
-        //  const auto c = crimild::lerp( cosTable[ UInt32( deg0 ) ], cosTable[ UInt32( deg1 ) ], crimild::min( Real( 1 ), deg - deg0 ) );
+        //  const auto c = crimild::lerp( cosTable[ Uint32_t( deg0 ) ], cosTable[ Uint32_t( deg1 ) ], crimild::min( Real( 1 ), deg - deg0 ) );
         //  return c;
-        Real ret = 0;
+        real_t ret = 0;
         for ( auto n = Int( 0 ); n < 20; ++n ) {
             ret += crimild::pow( -1, n ) * crimild::pow( rad, 2 * n ) / crimild::factorial( 2 * n );
         }

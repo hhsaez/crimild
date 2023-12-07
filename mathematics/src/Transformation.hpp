@@ -66,14 +66,14 @@ namespace crimild {
            \remarks It's set as Contents::USER_DEFINED by default, so you need to be careful
            when creating a custom transformation.
          */
-        UInt32 contents = Contents::USER_DEFINED;
+        uint32_t contents = Contents::USER_DEFINED;
 
-        [[nodiscard]] inline constexpr Bool operator==( const Transformation &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator==( const Transformation &other ) const noexcept
         {
             return contents == other.contents && mat == other.mat && invMat == other.invMat;
         }
 
-        [[nodiscard]] inline constexpr Bool operator!=( const Transformation &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator!=( const Transformation &other ) const noexcept
         {
             return !( *this == other );
         }

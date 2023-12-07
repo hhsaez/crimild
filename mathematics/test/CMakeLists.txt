@@ -27,7 +27,6 @@ target_sources(
     reflectTest.cpp
     roundTest.cpp
     SphereTest.cpp
-    TraitsTest.cpp
     TransformationTest.cpp
     TriangleTest.cpp
     UtilsTest.cpp

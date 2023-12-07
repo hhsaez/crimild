@@ -42,16 +42,16 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Real findIntersection( const Sphere &S, const Ray3 &R, Real lowerBound = numbers::EPSILON, Real upperBound = numbers::POSITIVE_INFINITY ) noexcept
+    [[nodiscard]] static constexpr real_t findIntersection( const Sphere &S, const Ray3 &R, real_t lowerBound = numbers::EPSILON, real_t upperBound = numbers::POSITIVE_INFINITY ) noexcept
     {
         const auto centerDiff = origin( R ) - center( S );
 
         const auto a = lengthSquared( direction( R ) );
-        const auto b = Real( 2 ) * dot( centerDiff, direction( R ) );
+        const auto b = real_t( 2 ) * dot( centerDiff, direction( R ) );
         const auto c = lengthSquared( centerDiff ) - pow( radius( S ), 2 );
 
-        Real t0 = 0;
-        Real t1 = 0;
+        real_t t0 = 0;
+        real_t t1 = 0;
         if ( findRoots( a, b, c, t0, t1 ) == 0 ) {
             return -1;
         }
@@ -67,7 +67,7 @@ namespace crimild {
         return -1;
     }
 
-    [[nodiscard]] static constexpr Bool checkIntersection( const Sphere &S, const Ray3 &R ) noexcept
+    [[nodiscard]] static constexpr bool checkIntersection( const Sphere &S, const Ray3 &R ) noexcept
     {
         return findIntersection( S, R ) >= 0;
     }

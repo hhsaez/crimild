@@ -55,9 +55,9 @@ namespace crimild {
         const T b10 = a21 * a33 - a23 * a31;
         const T b11 = a22 * a33 - a23 * a32;
 
-        const Real det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+        const real_t det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
         assert( det != 0 );
-        const Real invDet = Real( 1 ) / det;
+        const real_t invDet = real_t( 1 ) / det;
 
         return Matrix4Impl< T > {
             {

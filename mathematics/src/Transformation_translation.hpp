@@ -51,12 +51,12 @@ namespace crimild {
         return Transformation { m, inv, Transformation::Contents::TRANSLATION };
     }
 
-    [[nodiscard]] inline constexpr Transformation translation( Real x, Real y, Real z ) noexcept
+    [[nodiscard]] inline constexpr Transformation translation( real_t x, real_t y, real_t z ) noexcept
     {
         return translation( Vector3f { x, y, z } );
     }
 
-    [[nodiscard]] inline constexpr Bool hasTranslation( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr bool hasTranslation( const Transformation &t ) noexcept
     {
         return t.contents & Transformation::Contents::TRANSLATION;
     }

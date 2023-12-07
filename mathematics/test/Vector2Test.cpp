@@ -115,7 +115,7 @@ TEST( Vector2, subtraction )
 TEST( Vector2, multiplication )
 {
     constexpr auto u = Vector2f { 10, 20 };
-    constexpr auto s = Real( 5 );
+    constexpr auto s = real_t( 5 );
     constexpr auto res = Vector2f { 50, 100 };
 
     static_assert( crimild::isEqual( res, u * s ) );
@@ -152,7 +152,7 @@ TEST( Vector2, vectorMultiplication )
 TEST( Vector2, division )
 {
     constexpr auto u = Vector2f { 10, 20 };
-    constexpr auto s = Real( 2 );
+    constexpr auto s = real_t( 2 );
     constexpr auto res = Vector2f { 5, 10 };
 
     static_assert( crimild::isEqual( res, u / s ) );

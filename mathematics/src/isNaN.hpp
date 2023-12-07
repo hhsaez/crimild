@@ -41,40 +41,40 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    inline constexpr Bool isNaN( const T &value ) noexcept
+    template< ArithmeticType T >
+    inline constexpr bool isNaN( const T &value ) noexcept
     {
         // std::isnan cannot be used in constexpr
         // This might not be 100% correct in all platforms, but so far it's good
         return value != value;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Tuple2< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isNaN( const Tuple2< Derived, T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Tuple3< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isNaN( const Tuple3< Derived, T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isNaN( const Tuple4< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isNaN( const Tuple4< Derived, T > &t ) noexcept
     {
         return isNaN( t.x ) || isNaN( t.y ) || isNaN( t.z ) || isNaN( t.w );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const ColorRGBImpl< T > &c ) noexcept
+    [[nodiscard]] inline constexpr bool isNaN( const ColorRGBImpl< T > &c ) noexcept
     {
         return isNaN( c.r ) || isNaN( c.g ) || isNaN( c.b );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool isNaN( const ColorRGBAImpl< T > &c ) noexcept
+    [[nodiscard]] inline constexpr bool isNaN( const ColorRGBAImpl< T > &c ) noexcept
     {
         return isNaN( c.r ) || isNaN( c.g ) || isNaN( c.b ) || isNaN( c.a );
     }

@@ -43,9 +43,9 @@ namespace crimild {
         };
 
         const auto inv = Matrix4 {
-            { Real( 1 ) / scale.x , 0, 0, 0 },
-            { 0, Real( 1 ) / scale.y, 0, 0 },
-            { 0, 0, Real( 1 ) / scale.z, 0 },
+            { real_t( 1 ) / scale.x , 0, 0, 0 },
+            { 0, real_t( 1 ) / scale.y, 0, 0 },
+            { 0, 0, real_t( 1 ) / scale.z, 0 },
             { 0, 0, 0, 1 },
         };
         // clang-format on
@@ -53,17 +53,17 @@ namespace crimild {
         return Transformation { m, inv, Transformation::Contents::SCALING };
     }
 
-    [[nodiscard]] inline constexpr Transformation scale( Real x, Real y, Real z ) noexcept
+    [[nodiscard]] inline constexpr Transformation scale( real_t x, real_t y, real_t z ) noexcept
     {
         return scale( Vector3f { x, y, z } );
     }
 
-    [[nodiscard]] inline constexpr Transformation scale( Real x ) noexcept
+    [[nodiscard]] inline constexpr Transformation scale( real_t x ) noexcept
     {
         return scale( Vector3f { x, x, x } );
     }
 
-    [[nodiscard]] inline constexpr Bool hasScale( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr bool hasScale( const Transformation &t ) noexcept
     {
         return t.contents & Transformation::Contents::SCALING;
     }

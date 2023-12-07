@@ -94,7 +94,7 @@ TEST( ColorRGB, subtraction )
 TEST( ColorRGB, multiplication )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 5 );
+    constexpr auto s = real_t( 5 );
 
     static_assert( crimild::isEqual( crimild::ColorRGB { 50, 100, 150 }, ( u * s ) ), "multiplication" );
     static_assert( crimild::isEqual( crimild::ColorRGB { 50, 100, 150 }, ( s * u ) ), "multiplication" );
@@ -115,7 +115,7 @@ TEST( ColorRGB, vectorMultiplication )
 TEST( ColorRGB, division )
 {
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 2 );
+    constexpr auto s = real_t( 2 );
 
     static_assert( crimild::isEqual( crimild::ColorRGB { 5, 10, 15 }, ( u / s ) ), "division" );
 
@@ -202,7 +202,7 @@ TEST( ColorRGB, constexpr )
     constexpr auto u = crimild::ColorRGB { 10, 20, 30 };
     constexpr auto v = crimild::ColorRGB { 30, 40, 50 };
     constexpr auto w = crimild::ColorRGB { 10, 20, 30 };
-    constexpr auto s = crimild::Real( 5 );
+    constexpr auto s = real_t( 5 );
 
     static_assert( 10 == u[ 0 ], "index" );
     static_assert( 20 == u[ 1 ], "index" );

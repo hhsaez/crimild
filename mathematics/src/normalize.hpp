@@ -35,19 +35,19 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr Vector3< T > normalize( const Vector3< T > &u ) noexcept
     {
         return u / length( u );
     }
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr Vector4< T > normalize( const Vector4< T > &u ) noexcept
     {
         return u / length( u );
     }
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr Normal3< T > normalize( const Normal3< T > &u ) noexcept
     {
         return u / length( u );

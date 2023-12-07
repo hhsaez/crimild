@@ -28,9 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_SQRT_
 #define CRIMILD_MATHEMATICS_SQRT_
 
-#include "Traits.hpp"
-
 #include <cmath>
+#include <type_traits>
 
 namespace crimild {
 
@@ -56,7 +55,7 @@ namespace crimild {
     template< typename T >
     [[nodiscard]] inline constexpr T sqrt( T x ) noexcept
     {
-        if constexpr ( traits::isHighPrecision< Real >() ) {
+        if constexpr ( std::is_same< real_t, double >::value ) {
             return std::sqrt( x );
         } else {
             return impl::sqrt< T >( x, x, 0 );

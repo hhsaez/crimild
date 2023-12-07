@@ -40,7 +40,7 @@
 
 namespace crimild {
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto permute( const Tuple2< Derived, T > &u, size_t x, size_t y ) noexcept
     {
         return Derived< T > {
@@ -49,7 +49,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto permute( const Tuple3< Derived, T > &u, size_t x, size_t y, size_t z ) noexcept
     {
         return Derived< T > {
@@ -59,7 +59,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto permute( const Tuple4< Derived, T > &u, size_t x, size_t y, size_t z, size_t w ) noexcept
     {
         return Derived< T > {
@@ -71,7 +71,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr ColorRGBImpl< T > permute( const ColorRGBImpl< T > &c, Int r, Int g, Int b ) noexcept
+    [[nodiscard, deprecated]] inline constexpr ColorRGBImpl< T > permute( const ColorRGBImpl< T > &c, size_t r, size_t g, size_t b ) noexcept
     {
         return ColorRGBImpl< T > {
             c[ r ],
@@ -81,7 +81,7 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard, deprecated]] inline constexpr ColorRGBAImpl< T > permute( const ColorRGBAImpl< T > &c, Int r, Int g, Int b, Int a ) noexcept
+    [[nodiscard, deprecated]] inline constexpr ColorRGBAImpl< T > permute( const ColorRGBAImpl< T > &c, size_t r, size_t g, size_t b, size_t a ) noexcept
     {
         return ColorRGBAImpl< T > {
             c[ r ],

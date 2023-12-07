@@ -28,12 +28,10 @@
 #ifndef CRIMILD_MATHEMATICS_SIGN_
 #define CRIMILD_MATHEMATICS_SIGN_
 
-#include <Crimild_Foundation.hpp>
-
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr Char sign( const T &x ) noexcept
+    [[nodiscard]] inline constexpr uint8_t sign( const T &x ) noexcept
     {
         return x >= 0 ? +1 : -1;
     }

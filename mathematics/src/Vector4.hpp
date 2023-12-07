@@ -31,13 +31,14 @@
 #include "Normal3.hpp"
 #include "Point3.hpp"
 #include "Tuple4.hpp"
+#include "Types.hpp"
 #include "Vector3.hpp"
 
 #include <limits>
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     class Vector4 : public Tuple4< Vector4, T > {
     public:
         struct Constants {
@@ -74,29 +75,29 @@ namespace crimild {
         {
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Vector4( U value ) noexcept
             : Tuple4< Vector4, T >( value ) { }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Vector4( const Point3< U > &p ) noexcept
             : Tuple4< Vector4, T >( p.x, p.y, p.z, 1 ) { }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Vector4( const Vector3< U > &v ) noexcept
             : Tuple4< Vector4, T >( v.x, v.y, v.z, 0 ) { }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Vector4( const Normal3< U > &n ) noexcept
             : Tuple4< Vector4, T >( n.x, n.y, n.z, 1 ) { }
 
         ~Vector4( void ) noexcept = default;
     };
 
-    using Vector4f = Vector4< Real32 >;
-    using Vector4d = Vector4< Real64 >;
-    using Vector4i = Vector4< Int32 >;
-    using Vector4ui = Vector4< UInt32 >;
+    using Vector4f = Vector4< float >;
+    using Vector4d = Vector4< double >;
+    using Vector4i = Vector4< int32_t >;
+    using Vector4ui = Vector4< uint32_t >;
 
 }
 

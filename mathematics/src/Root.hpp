@@ -30,14 +30,14 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Bool findRoots( Real a, Real b, Real c, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool findRoots( real_t a, real_t b, real_t c, real_t &t0, real_t &t1 ) noexcept
     {
         const auto discriminant = b * b - 4 * a * c;
 
         if ( discriminant < 0 ) {
             return 0; // no real roots
         } else {
-            Real s = -b / 2 * a;
+            real_t s = -b / 2 * a;
 
             if ( discriminant == 0 ) {
                 t0 = t1 = s;
@@ -52,13 +52,13 @@ namespace crimild {
     }
 
     /**
-		\brief Find the roots for a polynomial
-	 */
+                \brief Find the roots for a polynomial
+         */
     class Root {
     public:
         /**
-			\brief Determine if the polynomial has real roots
-		 */
+                        \brief Determine if the polynomial has real roots
+                 */
         template< typename T >
         static bool hasRealRoots( T a, T b, T c )
         {
@@ -72,12 +72,12 @@ namespace crimild {
         }
 
         /**
-			\brief Calculate roots for a quadratic polynomial
-			\returns Number of roots found (0, 1 or 2)
+                        \brief Calculate roots for a quadratic polynomial
+                        \returns Number of roots found (0, 1 or 2)
 
-			If there is no real roots for this polynomial, the
-			calculate() function returns 0
-		 */
+                        If there is no real roots for this polynomial, the
+                        calculate() function returns 0
+                 */
         template< typename T >
         static int compute( T a, T b, T c, T &t0, T &t1 )
         {

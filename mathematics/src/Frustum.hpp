@@ -50,12 +50,12 @@ namespace crimild {
     public:
         constexpr Frustum( void ) noexcept = default;
 
-        constexpr Frustum( Real rMin, Real rMax, Real uMin, Real uMax, Real dMin, Real dMax ) noexcept
+        constexpr Frustum( real_t rMin, real_t rMax, real_t uMin, real_t uMax, real_t dMin, real_t dMax ) noexcept
             : m_extents( { rMin, rMax, uMin, uMax, dMin, dMax } )
         {
         }
 
-        Frustum( Real verticalFoV, Real aspect, Real dMin, Real dMax ) noexcept
+        Frustum( real_t verticalFoV, real_t aspect, real_t dMin, real_t dMax ) noexcept
         {
             const auto halfAngleRadians = radians( 0.5f * verticalFoV );
 
@@ -91,12 +91,12 @@ namespace crimild {
             return *this;
         }
 
-        [[nodiscard]] inline constexpr Real getRMin( void ) const noexcept { return m_extents[ 0 ]; }
-        [[nodiscard]] inline constexpr Real getRMax( void ) const noexcept { return m_extents[ 1 ]; }
-        [[nodiscard]] inline constexpr Real getUMin( void ) const noexcept { return m_extents[ 2 ]; }
-        [[nodiscard]] inline constexpr Real getUMax( void ) const noexcept { return m_extents[ 3 ]; }
-        [[nodiscard]] inline constexpr Real getDMin( void ) const noexcept { return m_extents[ 4 ]; }
-        [[nodiscard]] inline constexpr Real getDMax( void ) const noexcept { return m_extents[ 5 ]; }
+        [[nodiscard]] inline constexpr real_t getRMin( void ) const noexcept { return m_extents[ 0 ]; }
+        [[nodiscard]] inline constexpr real_t getRMax( void ) const noexcept { return m_extents[ 1 ]; }
+        [[nodiscard]] inline constexpr real_t getUMin( void ) const noexcept { return m_extents[ 2 ]; }
+        [[nodiscard]] inline constexpr real_t getUMax( void ) const noexcept { return m_extents[ 3 ]; }
+        [[nodiscard]] inline constexpr real_t getDMin( void ) const noexcept { return m_extents[ 4 ]; }
+        [[nodiscard]] inline constexpr real_t getDMax( void ) const noexcept { return m_extents[ 5 ]; }
 
         friend std::ostream &operator<<( std::ostream &out, const Frustum &f ) noexcept
         {
@@ -109,7 +109,7 @@ namespace crimild {
         }
 
     private:
-        std::array< Real, 6 > m_extents = { 0 };
+        std::array< real_t, 6 > m_extents = { 0 };
     };
 
 }

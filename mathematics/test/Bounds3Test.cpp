@@ -525,7 +525,7 @@ TEST( Bounds3, bisect )
     constexpr auto B = Bounds3 { { 1, 2, 3 }, { 4, 5, 6 } };
 
     Bounds3 B0, B1;
-    Real split;
+    real_t split;
 
     {
         bisect( B, 0, split, B0, B1 );

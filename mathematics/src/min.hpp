@@ -30,26 +30,25 @@
 
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
-#include "Traits.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
 
 namespace crimild {
 
-    template< concepts::Arithmetic T, concepts::Arithmetic U >
+    template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto min( T x, U y ) noexcept
     {
         return x < y ? x : y;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &v ) noexcept
     {
         return min( v.x, v.y );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
     {
         return Derived< decltype( min( T {}, U {} ) ) > {
@@ -58,7 +57,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto minDimension( const Tuple2< Derived, T > &t ) noexcept
     {
         size_t ret = 0;
@@ -66,13 +65,13 @@ namespace crimild {
         return ret;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &v ) noexcept
     {
         return min( v.x, min( v.y, v.z ) );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const Tuple3< Derived, U > &v ) noexcept
     {
         return Derived< decltype( min( T {}, U {} ) ) > {
@@ -82,7 +81,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto minDimension( const Tuple3< Derived, T > &t ) noexcept
     {
         size_t ret = 0;
@@ -91,13 +90,13 @@ namespace crimild {
         return ret;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &v ) noexcept
     {
         return min( v.x, min( v.y, min( v.z, v.w ) ) );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &u, const Tuple4< Derived, U > &v ) noexcept
     {
         return Derived< decltype( min( T {}, U {} ) ) > {
@@ -108,7 +107,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto minDimension( const Tuple4< Derived, T > &t ) noexcept
     {
         size_t ret = 0;
@@ -135,9 +134,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Size minDimension( const ColorRGBImpl< T > &c ) noexcept
+    [[nodiscard]] inline constexpr size_t minDimension( const ColorRGBImpl< T > &c ) noexcept
     {
-        auto ret = Size( 0 );
+        auto ret = size_t( 0 );
         for ( auto i = 1l; i < 3; ++i ) {
             if ( c[ i ] < c[ ret ] ) {
                 ret = i;
@@ -164,9 +163,9 @@ namespace crimild {
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Size minDimension( const ColorRGBAImpl< T > &c ) noexcept
+    [[nodiscard]] inline constexpr size_t minDimension( const ColorRGBAImpl< T > &c ) noexcept
     {
-        auto ret = Size( 0 );
+        auto ret = size_t( 0 );
         for ( auto i = 1l; i < 4; ++i ) {
             if ( c[ i ] < c[ ret ] ) {
                 ret = i;

@@ -97,7 +97,7 @@ TEST( ColorRGBA, subtraction )
 TEST( ColorRGBA, multiplication )
 {
     constexpr auto u = crimild::ColorRGBA { 10, 20, 30, 40 };
-    constexpr auto s = crimild::Real( 5 );
+    constexpr auto s = real_t( 5 );
     constexpr auto res = crimild::ColorRGBA { 50, 100, 150, 200 };
 
     EXPECT_TRUE( crimild::isEqual( res, u * s ) );
@@ -116,7 +116,7 @@ TEST( ColorRGBA, vectorMultiplication )
 TEST( ColorRGBA, division )
 {
     constexpr auto u = crimild::ColorRGBA { 10, 20, 30, 40 };
-    constexpr auto s = crimild::Real( 2 );
+    constexpr auto s = real_t( 2 );
     constexpr auto res = crimild::ColorRGBA { 5, 10, 15, 20 };
 
     EXPECT_TRUE( crimild::isEqual( res, u / s ) );
@@ -202,7 +202,7 @@ TEST( ColorRGBA, constexpr )
     constexpr auto u = crimild::ColorRGBA { 10, 20, 30, 40 };
     constexpr auto v = crimild::ColorRGBA { 30, 40, 50, 60 };
     constexpr auto w = crimild::ColorRGBA { 10, 20, 30, 40 };
-    constexpr auto s = crimild::Real( 5 );
+    constexpr auto s = real_t( 5 );
 
     static_assert( crimild::isEqual( u, w ), "equality" );
     static_assert( !crimild::isEqual( u, v ), "inequality" );

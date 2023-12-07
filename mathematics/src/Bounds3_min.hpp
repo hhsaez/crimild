@@ -45,7 +45,7 @@ namespace crimild {
         return min( min( B0 ), min( B1 ) );
     }
 
-    [[nodiscard]] inline constexpr Index minDimension( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr size_t minDimension( const Bounds3 &B ) noexcept
     {
         return minDimension( abs( diagonal( B ) ) );
     }

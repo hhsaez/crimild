@@ -28,14 +28,14 @@
 #ifndef CRIMILD_MATHEMATICS_EASING_
 #define CRIMILD_MATHEMATICS_EASING_
 
-#include <Crimild_Foundation.hpp>
+#include "Types.hpp"
 
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr T lerp( const T &start, const T &end, Real t ) noexcept
+    [[nodiscard]] inline constexpr T lerp( const T &start, const T &end, real_t t ) noexcept
     {
-        return ( Real( 1 ) - t ) * start + t * end;
+        return ( real_t( 1 ) - t ) * start + t * end;
     }
 
 }

@@ -28,16 +28,12 @@
 #ifndef CRIMILD_MATHEMATICS_CONCEPTS_
 #define CRIMILD_MATHEMATICS_CONCEPTS_
 
-#include "Traits.hpp"
+#include <type_traits>
 
 namespace crimild {
 
-    namespace concepts {
-
-        template< typename T >
-        concept Arithmetic = traits::isArithmetic< T >();
-
-    }
+    template< typename T >
+    concept ArithmeticType = std::is_arithmetic< T >::value;
 
 }
 

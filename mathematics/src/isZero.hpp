@@ -30,7 +30,6 @@
 
 #include "Concepts.hpp"
 #include "Numbers.hpp"
-#include "Traits.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
@@ -38,30 +37,30 @@
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    inline constexpr Bool isZero( const T &x ) noexcept
+    template< ArithmeticType T >
+    inline constexpr bool isZero( const T &x ) noexcept
     {
-        if constexpr ( traits::isReal< T >() ) {
+        if constexpr ( std::is_floating_point< T >::value ) {
             return abs( x ) < numbers::EPSILON;
         } else {
             return x == 0;
         }
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isZero( const Tuple2< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isZero( const Tuple2< Derived, T > &t ) noexcept
     {
         return isZero( t.x ) && isZero( t.y );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isZero( const Tuple3< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isZero( const Tuple3< Derived, T > &t ) noexcept
     {
         return isZero( t.x ) && isZero( t.y ) && isZero( t.z );
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
-    [[nodiscard]] inline constexpr Bool isZero( const Tuple4< Derived, T > &t ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isZero( const Tuple4< Derived, T > &t ) noexcept
     {
         return isZero( t.x ) && isZero( t.y ) && isZero( t.z ) && isZero( t.w );
     }

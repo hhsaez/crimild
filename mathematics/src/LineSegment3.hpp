@@ -40,12 +40,12 @@ namespace crimild {
         Point3< T > p0;
         Point3< T > p1;
 
-        [[nodiscard]] constexpr Bool operator==( const LineSegment3Impl &other ) const noexcept
+        [[nodiscard]] constexpr bool operator==( const LineSegment3Impl &other ) const noexcept
         {
             return p0 == other.p0 && p1 == other.p1;
         }
 
-        [[nodiscard]] constexpr Bool operator!=( const LineSegment3Impl &other ) const noexcept
+        [[nodiscard]] constexpr bool operator!=( const LineSegment3Impl &other ) const noexcept
         {
             return p0 != other.p1 || p0 != other.p1;
         }
@@ -63,7 +63,7 @@ namespace crimild {
         return l.p1;
     }
 
-    using LineSegment3 = LineSegment3Impl< Real >;
+    using LineSegment3 = LineSegment3Impl< real_t >;
 
 }
 

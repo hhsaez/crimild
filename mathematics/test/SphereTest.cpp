@@ -43,7 +43,7 @@ TEST( Sphere, construction )
     constexpr auto S = Sphere {};
 
     static_assert( center( S ) == crimild::Point3f::Constants::ZERO );
-    static_assert( radius( S ) == Real( 1 ) );
+    static_assert( radius( S ) == real_t( 1 ) );
 
     EXPECT_TRUE( true );
 }
@@ -56,7 +56,7 @@ TEST( Sphere, normal )
     static_assert( normal( S, Point3f { 0, 1, 0 } ) == Normal3 { 0, 1, 0 } );
     static_assert( normal( S, Point3f { 0, 0, 1 } ) == Normal3 { 0, 0, 1 } );
     static_assert( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) == Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } );
-    static_assert( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == Real( 1 ) );
+    static_assert( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == real_t( 1 ) );
 
     EXPECT_TRUE(
         isEqual(

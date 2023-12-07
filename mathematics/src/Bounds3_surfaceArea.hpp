@@ -32,10 +32,10 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Real surfaceArea( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr real_t surfaceArea( const Bounds3 &B ) noexcept
     {
         const auto D = diagonal( B );
-        return Real( 2 ) * ( D.x * D.y + D.x * D.z + D.y * D.z );
+        return real_t( 2 ) * ( D.x * D.y + D.x * D.z + D.y * D.z );
     }
 
 }

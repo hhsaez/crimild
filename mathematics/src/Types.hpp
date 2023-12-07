@@ -25,54 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRAITS_
-#define CRIMILD_MATHEMATICS_TRAITS_
+#ifndef CRIMILD_MATHEMATICS_TYPES_
+#define CRIMILD_MATHEMATICS_TYPES_
 
-#include <Crimild_Foundation.hpp>
-#include <type_traits>
+#include <cstdint>
 
-namespace crimild {
+/**
+ * @brief Alias for the default floating-point type
+ */
+using real_t = float;
 
-    namespace traits {
-
-        template< typename T >
-        inline constexpr Bool isReal( void ) noexcept
-        {
-            return std::is_floating_point< T >::value;
-        }
-
-        template< typename T >
-        inline constexpr bool isArithmetic( void ) noexcept
-        {
-            return std::is_arithmetic_v< T >;
-        }
-
-        template< typename T >
-        inline constexpr Bool isHighPrecision( void ) noexcept
-        {
-            return false;
-        }
-
-        template<>
-        inline constexpr Bool isHighPrecision< Int64 >( void ) noexcept
-        {
-            return true;
-        }
-
-        template<>
-        inline constexpr Bool isHighPrecision< UInt64 >( void ) noexcept
-        {
-            return true;
-        }
-
-        template<>
-        inline constexpr Bool isHighPrecision< Real64 >( void ) noexcept
-        {
-            return true;
-        }
-
-    }
-
-}
+using radians_t = real_t;
+using degrees_t = real_t;
 
 #endif

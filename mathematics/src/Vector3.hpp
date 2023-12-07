@@ -30,12 +30,13 @@
 
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "Types.hpp"
 
 #include <limits>
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     class Vector3 : public Tuple3< Vector3, T > {
     public:
         struct Constants {
@@ -56,6 +57,14 @@ namespace crimild {
             static constexpr Vector3 UNIT_Z = { 0, 0, 1 };
             static constexpr Vector3 RIGHT = { 1, 0, 0 };
             static constexpr Vector3 UP = { 0, 1, 0 };
+
+            /**
+             * @brief Forward vector
+             *
+             * @ref Readme.md
+             *
+             * [Readme](Readme.md)
+             */
             static constexpr Vector3 FORWARD = { 0, 0, 1 };
         };
 
@@ -71,25 +80,25 @@ namespace crimild {
         {
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Vector3( U value ) noexcept
             : Tuple3< Vector3, T >( value ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Vector3( const Tuple3< OtherDerived, U > &other ) noexcept
             : Tuple3< Vector3, T >( other.x, other.y, other.z ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Vector3( const Tuple4< OtherDerived, U > &other ) noexcept
             : Tuple3< Vector3, T >( other.x, other.y, other.z ) { }
 
         ~Vector3( void ) noexcept = default;
     };
 
-    using Vector3f = Vector3< Real32 >;
-    using Vector3d = Vector3< Real64 >;
-    using Vector3i = Vector3< Int32 >;
-    using Vector3ui = Vector3< UInt32 >;
+    using Vector3f = Vector3< float >;
+    using Vector3d = Vector3< double >;
+    using Vector3i = Vector3< int32_t >;
+    using Vector3ui = Vector3< uint32_t >;
 
 }
 

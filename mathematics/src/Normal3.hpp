@@ -30,10 +30,11 @@
 
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "Types.hpp"
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     class Normal3 : public Tuple3< Normal3, T > {
     public:
         struct Constants {
@@ -54,23 +55,23 @@ namespace crimild {
         {
         }
 
-        template< concepts::Arithmetic U >
+        template< ArithmeticType U >
         constexpr explicit Normal3( U value ) noexcept
             : Tuple3< Normal3, T >( value ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Normal3( const Tuple3< OtherDerived, U > &other ) noexcept
             : Tuple3< Normal3, T >( other.x, other.y, other.z ) { }
 
-        template< template< concepts::Arithmetic > class OtherDerived, concepts::Arithmetic U >
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr Normal3( const Tuple4< OtherDerived, U > &other ) noexcept
             : Tuple3< Normal3, T >( other.x, other.y, other.z ) { }
 
         ~Normal3( void ) noexcept = default;
     };
 
-    using Normal3f = Normal3< Real32 >;
-    using Normal3d = Normal3< Real64 >;
+    using Normal3f = Normal3< float >;
+    using Normal3d = Normal3< double >;
 
 }
 

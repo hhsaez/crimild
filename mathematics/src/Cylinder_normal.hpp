@@ -43,10 +43,10 @@ namespace crimild {
     // TODO(hernan): Take into account the cylinder's center
     [[nodiscard]] inline constexpr Normal3f normal( const Cylinder &C, const Point3f &P ) noexcept
     {
-        const Real dist = P.x * P.x + P.z * P.z;
-        const Real r = radius( C );
-        const Real r2 = r * r;
-        const Real h = height( C );
+        const real_t dist = P.x * P.x + P.z * P.z;
+        const real_t r = radius( C );
+        const real_t r2 = r * r;
+        const real_t h = height( C );
 
         if ( dist < r2 && P.y >= -h - numbers::EPSILON ) {
             return Normal3 { 0, 1, 0 };

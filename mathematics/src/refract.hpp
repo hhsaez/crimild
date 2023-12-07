@@ -38,7 +38,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3 refract( const Vector3 &in, const Normal3 &N, Real eta ) noexcept
+    [[nodiscard]] inline constexpr Vector3 refract( const Vector3 &in, const Normal3 &N, real_t eta ) noexcept
     {
         const auto cosTheta = min( dot( -in, N ), Real( 1 ) );
         const auto rOutPerp = eta * ( in + cosTheta * Vector3f( N ) );
