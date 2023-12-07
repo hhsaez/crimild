@@ -30,11 +30,9 @@
 
 #include "Matrix4.hpp"
 
-#include <Crimild_Foundation.hpp>
-
 namespace crimild {
 
-    [[nodiscard]] constexpr Matrix4 ortho( Real l, Real r, Real b, Real t, Real n, Real f ) noexcept
+    [[nodiscard]] constexpr Matrix4 ortho( real_t l, real_t r, real_t b, real_t t, real_t n, real_t f ) noexcept
     {
 #if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
         return Matrix4 {
@@ -45,9 +43,9 @@ namespace crimild {
         };
 #else
         return Matrix4 {
-            { Real( 2 ) / ( r - l ), 0, 0, 0 },
-            { 0, Real( 2 ) / ( t - b ), 0, 0 },
-            { 0, 0, -Real( 2 ) / ( f - n ), 0 },
+            { real_t( 2 ) / ( r - l ), 0, 0, 0 },
+            { 0, real_t( 2 ) / ( t - b ), 0, 0 },
+            { 0, 0, -real_t( 2 ) / ( f - n ), 0 },
             { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -( f + n ) / ( f - n ), 1 },
         };
 #endif

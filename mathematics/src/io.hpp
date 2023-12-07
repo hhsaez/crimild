@@ -43,7 +43,7 @@
 
 namespace crimild {
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple2< Derived, T > &u ) noexcept
     {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
@@ -52,7 +52,7 @@ namespace crimild {
         return out;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple3< Derived, T > &u ) noexcept
     {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
@@ -61,7 +61,7 @@ namespace crimild {
         return out;
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Tuple4< Derived, T > &u ) noexcept
     {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )

@@ -38,12 +38,12 @@ namespace crimild {
         Point2< T > origin;
         Size2DImpl< T > size;
 
-        [[nodiscard]] inline constexpr Bool operator==( const RectImpl &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator==( const RectImpl &other ) const noexcept
         {
             return isEqual( this->origin, other.origin ) && isEqual( this->size, other.size );
         }
 
-        [[nodiscard]] inline constexpr Bool operator!=( const RectImpl &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator!=( const RectImpl &other ) const noexcept
         {
             return !isEqual( this->origin, other.origin ) || !isEqual( this->size, other.size );
         }
@@ -58,10 +58,10 @@ namespace crimild {
         };
     }
 
-    using Rect = RectImpl< Real >;
-    using Rectf = RectImpl< Real32 >;
-    using Rectd = RectImpl< Real64 >;
-    using Recti = RectImpl< Int >;
+    using Rect = RectImpl< real_t >;
+    using Rectf = RectImpl< float >;
+    using Rectd = RectImpl< double >;
+    using Recti = RectImpl< int32_t >;
 
 }
 

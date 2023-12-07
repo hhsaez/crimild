@@ -30,7 +30,7 @@
 #include "gtest/gtest.h"
 #include <sstream>
 
-TEST( min, Real )
+TEST( min, real_t )
 {
     static_assert( 1 == crimild::min( 1, 10 ) );
     static_assert( 1 == crimild::min( 10, 1 ) );

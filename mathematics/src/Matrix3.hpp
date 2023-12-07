@@ -40,7 +40,7 @@ namespace crimild {
         Vector3< T > c1;
         Vector3< T > c2;
 
-        [[nodiscard]] inline constexpr const Vector3< T > &operator[]( Index index ) const noexcept
+        [[nodiscard]] inline constexpr const Vector3< T > &operator[]( size_t index ) const noexcept
         {
             switch ( index ) {
                 case 0:
@@ -53,7 +53,7 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector3< T > &operator[]( Index index ) noexcept
+        [[nodiscard]] inline Vector3< T > &operator[]( size_t index ) noexcept
         {
             switch ( index ) {
                 case 0:
@@ -66,15 +66,15 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline constexpr Bool operator==( const Matrix3Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr Bool operator!=( const Matrix3Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr bool operator==( const Matrix3Impl &other ) const noexcept;
+        [[nodiscard]] inline constexpr bool operator!=( const Matrix3Impl &other ) const noexcept;
     };
 
-    using Matrix3 = Matrix3Impl< Real >;
-    using Matrix3f = Matrix3Impl< Real32 >;
-    using Matrix3d = Matrix3Impl< Real64 >;
-    using Matrix3i = Matrix3Impl< Int32 >;
-    using Matrix3ui = Matrix3Impl< UInt32 >;
+    using Matrix3 = Matrix3Impl< real_t >;
+    using Matrix3f = Matrix3Impl< float >;
+    using Matrix3d = Matrix3Impl< double >;
+    using Matrix3i = Matrix3Impl< int32_t >;
+    using Matrix3ui = Matrix3Impl< uint32_t >;
 
 }
 

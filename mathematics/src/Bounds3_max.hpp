@@ -45,7 +45,7 @@ namespace crimild {
         return max( max( B0 ), max( B1 ) );
     }
 
-    [[nodiscard]] inline constexpr Index maxDimension( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr size_t maxDimension( const Bounds3 &B ) noexcept
     {
         return maxDimension( abs( diagonal( B ) ) );
     }

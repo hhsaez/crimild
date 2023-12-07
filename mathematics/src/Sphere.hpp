@@ -34,7 +34,7 @@ namespace crimild {
 
     struct Sphere {
         Point3f center = Point3f { 0, 0, 0 };
-        Real radius = Real( 1 );
+        real_t radius = real_t( 1 );
     };
 
     [[nodiscard]] inline constexpr const Point3f &center( const Sphere &s ) noexcept
@@ -42,7 +42,7 @@ namespace crimild {
         return s.center;
     }
 
-    [[nodiscard]] inline constexpr Real radius( const Sphere &s ) noexcept
+    [[nodiscard]] inline constexpr real_t radius( const Sphere &s ) noexcept
     {
         return s.radius;
     }

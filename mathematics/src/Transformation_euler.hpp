@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline Transformation euler( Radians yaw, Radians pitch, Radians roll ) noexcept
+    [[nodiscard]] inline Transformation euler( radians_t yaw, radians_t pitch, radians_t roll ) noexcept
     {
         const auto cy = cos( yaw );
         const auto sy = sin( yaw );
@@ -56,11 +56,11 @@ namespace crimild {
         };
     }
 
-    inline void extractYawPitchRoll( const Transformation &T, Real &yaw, Real &pitch, Real &roll ) noexcept
+    inline void extractYawPitchRoll( const Transformation &T, real_t &yaw, real_t &pitch, real_t &roll ) noexcept
     {
         const auto &M = T.mat;
         yaw = atan2( M[ 2 ][ 0 ], M[ 2 ][ 2 ] );
-        const auto cosYAngle = sqrt( pow( M[ 0 ][ 1 ], Real( 2 ) ) + pow( M[ 1 ][ 1 ], Real( 2 ) ) );
+        const auto cosYAngle = sqrt( pow( M[ 0 ][ 1 ], real_t( 2 ) ) + pow( M[ 1 ][ 1 ], real_t( 2 ) ) );
         pitch = atan2( -M[ 2 ][ 1 ], cosYAngle );
         const auto sinXAngle = sin( yaw );
         const auto cosXAngle = cos( yaw );

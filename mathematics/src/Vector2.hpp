@@ -29,49 +29,49 @@
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
 #include "Tuple2.hpp"
+#include "Types.hpp"
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
-    class Vector2 : public Tuple2< Vector2, T > {
+    template< ArithmeticType T >
+    class Vector2Impl : public Tuple2< Vector2Impl, T > {
     public:
         struct Constants {
-            static constexpr Vector2 ZERO = { 0, 0 };
-            static constexpr Vector2 ONE = { 1, 1 };
-            static constexpr Vector2 POSITIVE_INFINITY = {
+            static constexpr Vector2Impl ZERO = { 0, 0 };
+            static constexpr Vector2Impl ONE = { 1, 1 };
+            static constexpr Vector2Impl POSITIVE_INFINITY = {
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity(),
             };
-            static constexpr Vector2 NEGATIVE_INFINITY = {
+            static constexpr Vector2Impl NEGATIVE_INFINITY = {
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity(),
             };
-            static constexpr Vector2 UNIT_X = { 1, 0 };
-            static constexpr Vector2 UNIT_Y = { 0, 1 };
+            static constexpr Vector2Impl UNIT_X = { 1, 0 };
+            static constexpr Vector2Impl UNIT_Y = { 0, 1 };
         };
 
     public:
-        using Tuple2< Vector2, T >::x;
-        using Tuple2< Vector2, T >::y;
+        using Tuple2< Vector2Impl, T >::x;
+        using Tuple2< Vector2Impl, T >::y;
 
-        constexpr Vector2( void ) noexcept = default;
+        constexpr Vector2Impl( void ) noexcept = default;
 
-        constexpr Vector2( T x, T y ) noexcept
-            : Tuple2< Vector2, T >( x, y )
-        {
-        }
+        constexpr Vector2Impl( T x, T y ) noexcept
+            : Tuple2< Vector2Impl, T >( x, y ) { }
 
-        template< concepts::Arithmetic U >
-        constexpr explicit Vector2( U value ) noexcept
-            : Tuple2< Vector2, T >( value ) { }
+        template< ArithmeticType U >
+        constexpr explicit Vector2Impl( U value ) noexcept
+            : Tuple2< Vector2Impl, T >( value ) { }
 
-        ~Vector2( void ) noexcept = default;
+        ~Vector2Impl( void ) noexcept = default;
     };
 
-    using Vector2f = Vector2< Real32 >;
-    using Vector2d = Vector2< Real64 >;
-    using Vector2i = Vector2< Int32 >;
-    using Vector2ui = Vector2< UInt32 >;
+    using Vector2 = Vector2Impl< real_t >;
+    using Vector2f = Vector2Impl< float >;
+    using Vector2d = Vector2Impl< double >;
+    using Vector2i = Vector2Impl< int32_t >;
+    using Vector2ui = Vector2Impl< uint32_t >;
 
 }
 

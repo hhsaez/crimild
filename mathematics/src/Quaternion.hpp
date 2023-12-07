@@ -652,7 +652,7 @@ namespace crimild {
 
     }
 
-    using Quaternion = impl::Quaternion< Real >;
+    using Quaternion = impl::Quaternion< real_t >;
 
 }
 

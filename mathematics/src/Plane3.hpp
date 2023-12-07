@@ -43,14 +43,14 @@ namespace crimild {
     */
     struct Plane3 {
         Normal3f n = Normal3f { 0, 1, 0 };
-        Real d = 0;
+        real_t d = 0;
 
-        [[nodiscard]] inline constexpr Bool operator==( const Plane3 &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator==( const Plane3 &other ) const noexcept
         {
             return isEqual( this->n, other.n ) && isEqual( this->d, other.d );
         }
 
-        [[nodiscard]] inline constexpr Bool operator!=( const Plane3 &other ) const noexcept
+        [[nodiscard]] inline constexpr bool operator!=( const Plane3 &other ) const noexcept
         {
             return !isEqual( this->n, other.n ) || !isEqual( this->d, other.d );
         }
@@ -60,7 +60,7 @@ namespace crimild {
     {
         return p.n;
     }
-    [[nodiscard]] inline constexpr Real distance( const Plane3 &p ) noexcept
+    [[nodiscard]] inline constexpr real_t distance( const Plane3 &p ) noexcept
     {
         return p.d;
     }

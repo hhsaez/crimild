@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Bool isIdentity( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr bool isIdentity( const Transformation &t ) noexcept
     {
         return t.contents == Transformation::Contents::IDENTITY;
     }

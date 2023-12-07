@@ -32,30 +32,30 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Radians radians( Degrees deg ) noexcept
+    [[nodiscard]] inline constexpr radians_t radians( degrees_t deg ) noexcept
     {
         return deg * numbers::PI / 180.0;
     }
 
-    [[nodiscard]] inline constexpr Degrees degrees( Radians rad ) noexcept
+    [[nodiscard]] inline constexpr degrees_t degrees( radians_t rad ) noexcept
     {
         return rad * 180.0 / numbers::PI;
     }
 
     // TODO: Make this function constexpr
-    [[nodiscard]] inline Real cos( Radians rad ) noexcept
+    [[nodiscard]] inline real_t cos( radians_t rad ) noexcept
     {
         return std::cos( rad );
     }
 
     // TODO: Make this function constexpr
-    [[nodiscard]] inline Real sin( Radians rad ) noexcept
+    [[nodiscard]] inline real_t sin( radians_t rad ) noexcept
     {
         return std::sin( rad );
     }
 
     // TODO: Make this function constexpr
-    [[nodiscard]] inline Real tan( Radians rad ) noexcept
+    [[nodiscard]] inline real_t tan( radians_t rad ) noexcept
     {
         return std::tan( rad );
     }

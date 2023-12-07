@@ -44,18 +44,18 @@ namespace crimild {
         Point3f min = Point3f::Constants::POSITIVE_INFINITY;
         Point3f max = Point3f::Constants::NEGATIVE_INFINITY;
 
-        [[nodiscard]] inline constexpr const Point3f &operator[]( Index i ) const noexcept
+        [[nodiscard]] inline constexpr const Point3f &operator[]( size_t i ) const noexcept
         {
             return i == 0 ? min : max;
         }
 
-        [[nodiscard]] inline Point3f &operator[]( Index i ) noexcept
+        [[nodiscard]] inline Point3f &operator[]( size_t i ) noexcept
         {
             return i == 0 ? min : max;
         }
     };
 
-    [[nodiscard]] inline constexpr Point3f corner( const Bounds3 &B, Index i ) noexcept
+    [[nodiscard]] inline constexpr Point3f corner( const Bounds3 &B, size_t i ) noexcept
     {
         return Point3f {
             B[ i & 1 ].x,

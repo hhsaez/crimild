@@ -33,13 +33,13 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool Matrix3Impl< T >::operator==( const Matrix3Impl< T > &other ) const noexcept
+    [[nodiscard]] inline constexpr bool Matrix3Impl< T >::operator==( const Matrix3Impl< T > &other ) const noexcept
     {
         return c0 == other.c0 && c1 == other.c1 && c2 == other.c2;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Bool Matrix3Impl< T >::operator!=( const Matrix3Impl< T > &other ) const noexcept
+    [[nodiscard]] inline constexpr bool Matrix3Impl< T >::operator!=( const Matrix3Impl< T > &other ) const noexcept
     {
         return c0 != other.c0 || c1 != other.c1 || c2 != other.c2;
     }

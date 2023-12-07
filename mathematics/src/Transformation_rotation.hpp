@@ -35,7 +35,7 @@ namespace crimild {
     // \remarks All rotation matrices are calculated based on right-handed coordinate systems
 
     // TODO: make this function constexpr
-    [[nodiscard]] static Transformation rotationX( Radians angle ) noexcept
+    [[nodiscard]] static Transformation rotationX( radians_t angle ) noexcept
     {
         const auto m = Matrix4 {
             { 1, 0, 0, 0 },
@@ -55,7 +55,7 @@ namespace crimild {
     }
 
     // TODO: make this function constexpr
-    [[nodiscard]] static Transformation rotationY( Radians angle ) noexcept
+    [[nodiscard]] static Transformation rotationY( radians_t angle ) noexcept
     {
         const auto m = Matrix4 {
             { cos( angle ), 0, -sin( angle ), 0 },
@@ -75,7 +75,7 @@ namespace crimild {
     }
 
     // TODO: make this function constexpr
-    [[nodiscard]] static Transformation rotationZ( Radians angle ) noexcept
+    [[nodiscard]] static Transformation rotationZ( radians_t angle ) noexcept
     {
         const auto m = Matrix4 {
             { cos( angle ), sin( angle ), 0, 0 },
@@ -95,7 +95,7 @@ namespace crimild {
     }
 
     // TODO: make this function constexpr
-    [[nodiscard]] static Transformation rotation( const Vector3f &axis, Radians angle ) noexcept
+    [[nodiscard]] static Transformation rotation( const Vector3f &axis, radians_t angle ) noexcept
     {
         const auto x = axis.x;
         const auto y = axis.y;
@@ -108,8 +108,8 @@ namespace crimild {
         const auto zz = axis.z * axis.z;
         const auto cosTheta = cos( angle );
         const auto sinTheta = sin( angle );
-        const auto oneMinusCosTheta = Real( 1 ) - cosTheta;
-        const auto oneMinusSinTheta = Real( 1 ) - sinTheta;
+        const auto oneMinusCosTheta = real_t( 1 ) - cosTheta;
+        const auto oneMinusSinTheta = real_t( 1 ) - sinTheta;
 
         // TODO: I think I need to transpose this matrix in order to make it work with right-hand coordinate systems
         const auto m = Matrix4 {
@@ -171,7 +171,7 @@ namespace crimild {
         return Transformation { m, inv, Transformation::Contents::ROTATION };
     }
 
-    [[nodiscard]] inline constexpr Bool hasRotation( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr bool hasRotation( const Transformation &t ) noexcept
     {
         return t.contents & Transformation::Contents::ROTATION;
     }

@@ -52,14 +52,14 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Sphere &S, real_t &t0, real_t &t1 ) noexcept
     {
         const auto CO = origin( R ) - center( S );
         const auto a = dot( direction( R ), direction( R ) );
-        const auto b = Real( 2 ) * dot( direction( R ), CO );
+        const auto b = real_t( 2 ) * dot( direction( R ), CO );
         const auto c = dot( CO, CO ) - pow( radius( S ), 2 );
 
-        const auto d = b * b - Real( 4 ) * a * c;
+        const auto d = b * b - real_t( 4 ) * a * c;
 
         if ( d < 0 ) {
             return false;
@@ -73,18 +73,18 @@ namespace crimild {
         return true;
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, const Transformation &sphereWorld, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Sphere &S, const Transformation &sphereWorld, real_t &t0, real_t &t1 ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( sphereWorld )( R ), S, t0, t1 );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Sphere &S, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Sphere &S, const Matrix4 &invWorld, real_t &t0, real_t &t1 ) noexcept
     {
         return intersect( invWorld * R, S, t0, t1 );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Plane3 &P, real_t &t ) noexcept
     {
         const auto nv = dot( normal( P ), direction( R ) );
         if ( isZero( nv ) ) {
@@ -95,18 +95,18 @@ namespace crimild {
         return true;
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, const Transformation &planeWorld, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Plane3 &P, const Transformation &planeWorld, real_t &t ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( planeWorld )( R ), P, t );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Plane3 &P, const Matrix4 &invWorld, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Plane3 &P, const Matrix4 &invWorld, real_t &t ) noexcept
     {
         return intersect( invWorld * R, P, t );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, Real &tMin, Real &tMax ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, real_t &tMin, real_t &tMax ) noexcept
     {
         const auto BMax = center( B ) + size( B );
         const auto BMin = center( B ) - size( B );
@@ -123,7 +123,7 @@ namespace crimild {
                 }
             }
 
-            const auto invD = Real( 1 ) / direction( R )[ a ];
+            const auto invD = real_t( 1 ) / direction( R )[ a ];
             auto t0 = ( BMin[ a ] - origin( R )[ a ] ) * invD;
             auto t1 = ( BMax[ a ] - origin( R )[ a ] ) * invD;
             if ( t0 > t1 ) {
@@ -142,27 +142,27 @@ namespace crimild {
         return true;
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, const Transformation &world, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, const Transformation &world, real_t &t0, real_t &t1 ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), B, t0, t1 );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Box &B, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, const Matrix4 &invWorld, real_t &t0, real_t &t1 ) noexcept
     {
         return intersect( invWorld * R, B, t0, t1 );
     }
 
     namespace internal {
 
-        [[nodiscard]] static constexpr Bool checkCylinderCap( const Ray3 &R, Real t ) noexcept
+        [[nodiscard]] static constexpr bool checkCylinderCap( const Ray3 &R, real_t t ) noexcept
         {
             const auto x = R.o.x + t * R.d.x;
             const auto z = R.o.z + t * R.d.z;
             return ( x * x + z * z ) <= 1;
         };
 
-        [[nodiscard]] static constexpr Bool intersectCylinderCaps( const Ray3 &R, const Cylinder &C, Real &tMin, Real &tMax ) noexcept
+        [[nodiscard]] static constexpr bool intersectCylinderCaps( const Ray3 &R, const Cylinder &C, real_t &tMin, real_t &tMax ) noexcept
         {
             if ( !isClosed( C ) || isZero( R.d.y ) ) {
                 return false;
@@ -196,27 +196,27 @@ namespace crimild {
 
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, Real &tMin, Real &tMax ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Cylinder &C, real_t &tMin, real_t &tMax ) noexcept
     {
         tMin = numbers::POSITIVE_INFINITY;
         tMax = numbers::POSITIVE_INFINITY;
 
-        const Real a = ( R.d.x * R.d.x ) + ( R.d.z * R.d.z );
+        const real_t a = ( R.d.x * R.d.x ) + ( R.d.z * R.d.z );
         if ( isZero( a ) ) {
             return internal::intersectCylinderCaps( R, C, tMin, tMax );
         }
 
-        const Real b = ( Real( 2 ) * R.o.x * R.d.x ) + ( Real( 2 ) * R.o.z * R.d.z );
-        const Real c = ( R.o.x * R.o.x ) + ( R.o.z * R.o.z ) - Real( 1 );
+        const real_t b = ( real_t( 2 ) * R.o.x * R.d.x ) + ( real_t( 2 ) * R.o.z * R.d.z );
+        const real_t c = ( R.o.x * R.o.x ) + ( R.o.z * R.o.z ) - real_t( 1 );
 
-        const Real disc = b * b - Real( 4 ) * a * c;
+        const real_t disc = b * b - real_t( 4 ) * a * c;
         if ( disc < 0 ) {
             return false;
         }
-        const Real disc_root = sqrt( disc );
+        const real_t disc_root = sqrt( disc );
 
-        Real t0 = ( -b - disc_root ) / ( Real( 2 ) * a );
-        Real t1 = ( -b + disc_root ) / ( Real( 2 ) * a );
+        real_t t0 = ( -b - disc_root ) / ( real_t( 2 ) * a );
+        real_t t1 = ( -b + disc_root ) / ( real_t( 2 ) * a );
         if ( t0 < t1 ) {
             std::swap( t0, t1 );
         }
@@ -250,13 +250,13 @@ namespace crimild {
         return hasResult;
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, const Transformation &world, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Cylinder &C, const Transformation &world, real_t &t0, real_t &t1 ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), C, t0, t1 );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Cylinder &C, const Matrix4 &invWorld, Real &t0, Real &t1 ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Cylinder &C, const Matrix4 &invWorld, real_t &t0, real_t &t1 ) noexcept
     {
         return intersect( invWorld * R, C, t0, t1 );
     }
@@ -266,27 +266,27 @@ namespace crimild {
 
        Implements Möller-Trumbore intersection algorithm
      */
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Triangle &T, real_t &t ) noexcept
     {
         const auto E0 = edge0( T );
         const auto E1 = edge1( T );
 
         const auto dirCrossE1 = cross( direction( R ), E1 );
-        const Real det = dot( edge0( T ), dirCrossE1 );
+        const real_t det = dot( edge0( T ), dirCrossE1 );
         if ( isZero( det ) ) {
             return false;
         }
 
-        const Real f = 1 / det;
+        const real_t f = 1 / det;
 
         const auto p0ToOrigin = origin( R ) - T.p0;
-        const Real u = f * dot( p0ToOrigin, dirCrossE1 );
+        const real_t u = f * dot( p0ToOrigin, dirCrossE1 );
         if ( u < 0 || u > 1 ) {
             return false;
         }
 
         const auto originCrossE0 = cross( p0ToOrigin, E0 );
-        const Real v = f * dot( direction( R ), originCrossE0 );
+        const real_t v = f * dot( direction( R ), originCrossE0 );
         if ( v < 0 || ( u + v ) > 1 ) {
             return false;
         }
@@ -296,13 +296,13 @@ namespace crimild {
         return true;
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, const Transformation &world, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Triangle &T, const Transformation &world, real_t &t ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), T, t );
     }
 
-    [[nodiscard]] static constexpr Bool intersect( const Ray3 &R, const Triangle &T, const Matrix4 &invWorld, Real &t ) noexcept
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Triangle &T, const Matrix4 &invWorld, real_t &t ) noexcept
     {
         return intersect( invWorld * R, T, t );
     }

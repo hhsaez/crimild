@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Real volume( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr real_t volume( const Bounds3 &B ) noexcept
     {
         const auto D = diagonal( B );
         return D.x * D.y * D.z;

@@ -45,12 +45,12 @@ namespace crimild {
      *  Certain transformations change the handedness of the coordinate system. For example, using negative
      *  scale values. Some operations need to know this in order to compute the right values for normals, for example.
      */
-    [[nodiscard]] inline constexpr Bool swapsHandedness( const Transformation &T ) noexcept
+    [[nodiscard]] inline constexpr bool swapsHandedness( const Transformation &T ) noexcept
     {
         // Compute the determinant of the upper 3x3 matrix
-        Real det = T.mat[ 0 ][ 0 ] * ( T.mat[ 1 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 1 ][ 2 ] )
-                   - T.mat[ 1 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 0 ][ 2 ] )
-                   + T.mat[ 2 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 1 ][ 2 ] - T.mat[ 1 ][ 1 ] * T.mat[ 0 ][ 2 ] );
+        real_t det = T.mat[ 0 ][ 0 ] * ( T.mat[ 1 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 1 ][ 2 ] )
+                     - T.mat[ 1 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 2 ][ 2 ] - T.mat[ 2 ][ 1 ] * T.mat[ 0 ][ 2 ] )
+                     + T.mat[ 2 ][ 0 ] * ( T.mat[ 0 ][ 1 ] * T.mat[ 1 ][ 2 ] - T.mat[ 1 ][ 1 ] * T.mat[ 0 ][ 2 ] );
 
         // If the determinant is negative, then the transformation swaps handedness
         return det < 0;

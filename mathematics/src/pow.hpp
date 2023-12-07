@@ -28,21 +28,22 @@
 #ifndef CRIMILD_MATHEMATICS_POW_
 #define CRIMILD_MATHEMATICS_POW_
 
-#include <Crimild_Foundation.hpp>
+#include "Types.hpp"
+
 #include <cmath>
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Real pow( Real base, Int exp ) noexcept
+    [[nodiscard]] static constexpr real_t pow( real_t base, int exp ) noexcept
     {
-        auto ret = Real( 1 );
-        for ( auto i = Int( 0 ); i < exp; ++i ) {
+        auto ret = real_t( 1 );
+        for ( auto i = int( 0 ); i < exp; ++i ) {
             ret *= base;
         }
         return ret;
     }
 
-    [[nodiscard]] inline Real pow( Real base, Real exp ) noexcept
+    [[nodiscard]] inline real_t pow( real_t base, real_t exp ) noexcept
     {
         return std::pow( base, exp );
     }

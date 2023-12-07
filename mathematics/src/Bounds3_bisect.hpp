@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    static constexpr void bisect( const Bounds3 &B, Int axis, Real &split, Bounds3 &below, Bounds3 &above ) noexcept
+    static constexpr void bisect( const Bounds3 &B, int axis, real_t &split, Bounds3 &below, Bounds3 &above ) noexcept
     {
         split = 0.5 * ( B.max[ axis ] + B.min[ axis ] );
         below = Bounds3 {

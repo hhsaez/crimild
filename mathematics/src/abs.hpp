@@ -28,17 +28,16 @@
 #ifndef CRIMILD_MATHEMATICS_ABS_
 #define CRIMILD_MATHEMATICS_ABS_
 
-#include "Traits.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
 
 namespace crimild {
 
-    template< concepts::Arithmetic T >
+    template< ArithmeticType T >
     inline constexpr T abs( const T &x ) noexcept
     {
-        if constexpr ( traits::isReal< T >() ) {
+        if constexpr ( std::is_floating_point< T >::value ) {
             // std::fabs cannot be used in constexpr
             return x > 0 ? x : -x;
         } else {
@@ -46,7 +45,7 @@ namespace crimild {
         }
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto abs( const Tuple2< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -55,7 +54,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto abs( const Tuple3< Derived, T > &t ) noexcept
     {
         return Derived< T > {
@@ -65,7 +64,7 @@ namespace crimild {
         };
     }
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T >
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto abs( const Tuple4< Derived, T > &t ) noexcept
     {
         return Derived< T > {

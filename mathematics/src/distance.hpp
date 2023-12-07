@@ -38,42 +38,42 @@
 
 namespace crimild {
 
-    template< template< concepts::Arithmetic > class Derived, concepts::Arithmetic T, concepts::Arithmetic U >
-    [[nodiscard]] inline constexpr Real distanceSquared( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr real_t distanceSquared( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
     {
         return lengthSquared( u - v );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distanceSquared( const Point3< T > &u, const Point3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr real_t distanceSquared( const Point3< T > &u, const Point3< T > &v ) noexcept
     {
         return lengthSquared( v - u );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr Real distance( const Point3< T > &u, const Point3< T > &v ) noexcept
+    [[nodiscard]] inline constexpr real_t distance( const Point3< T > &u, const Point3< T > &v ) noexcept
     {
         return sqrt( lengthSquared( v - u ) );
     }
 
-    [[nodiscard]] constexpr Real distanceSquared( const Ray3 &R, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distanceSquared( const Ray3 &R, const Point3f &P ) noexcept
     {
         const auto V = P - origin( R );
         const auto d = dot( V, direction( R ) );
         return ( dot( V, V ) - d * d ) / lengthSquared( direction( R ) );
     }
 
-    [[nodiscard]] constexpr Real distance( const Ray3 &R, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distance( const Ray3 &R, const Point3f &P ) noexcept
     {
         return sqrt( distanceSquared( R, P ) );
     }
 
-    [[nodiscard]] constexpr Real distanceSigned( const Plane3 &A, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distanceSigned( const Plane3 &A, const Point3f &P ) noexcept
     {
         return dot( normal( A ), Vector3 { P.x, P.y, P.z } ) + distance( A );
     }
 
-    [[nodiscard]] constexpr Real distance( const Plane3 &A, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distance( const Plane3 &A, const Point3f &P ) noexcept
     {
         return abs( distanceSigned( A, P ) );
     }

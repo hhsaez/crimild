@@ -105,7 +105,6 @@ target_sources(
     Sphere_normal.hpp
     sqrt.hpp
     swizzle.hpp
-    Traits.hpp
     Transformation.hpp
     Transformation_apply.hpp
     Transformation_constants.hpp
@@ -140,10 +139,10 @@ target_sources(
 
 target_include_directories( crimild_mathematics PUBLIC . )
 
-target_link_libraries( 
-    crimild_mathematics
-    PRIVATE Crimild::Foundation
-)
+# target_link_libraries( 
+#     crimild_mathematics
+#     PRIVATE Crimild::Foundation
+# )
 
 target_compile_features( crimild_mathematics PUBLIC cxx_std_20 )
 add_library( Crimild::Mathematics ALIAS crimild_mathematics )

@@ -37,7 +37,7 @@ namespace crimild {
 
     [[nodiscard]] inline constexpr Vector3f reflect( const Vector3f &in, const Normal3f &N ) noexcept
     {
-        return in - Vector3f( N * Real( 2 ) * dot( in, N ) );
+        return in - Vector3f( N * real_t( 2 ) * dot( in, N ) );
     }
 
 }
