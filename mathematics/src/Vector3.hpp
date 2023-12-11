@@ -37,26 +37,26 @@
 namespace crimild {
 
     template< ArithmeticType T >
-    class Vector3 : public Tuple3< Vector3, T > {
+    class Vector3Impl : public Tuple3< Vector3Impl, T > {
     public:
         struct Constants {
-            static constexpr Vector3 ZERO = { 0, 0, 0 };
-            static constexpr Vector3 ONE = { 1, 1, 1 };
-            static constexpr Vector3 POSITIVE_INFINITY = {
+            static constexpr Vector3Impl ZERO = { 0, 0, 0 };
+            static constexpr Vector3Impl ONE = { 1, 1, 1 };
+            static constexpr Vector3Impl POSITIVE_INFINITY = {
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity(),
             };
-            static constexpr Vector3 NEGATIVE_INFINITY = {
+            static constexpr Vector3Impl NEGATIVE_INFINITY = {
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity(),
             };
-            static constexpr Vector3 UNIT_X = { 1, 0, 0 };
-            static constexpr Vector3 UNIT_Y = { 0, 1, 0 };
-            static constexpr Vector3 UNIT_Z = { 0, 0, 1 };
-            static constexpr Vector3 RIGHT = { 1, 0, 0 };
-            static constexpr Vector3 UP = { 0, 1, 0 };
+            static constexpr Vector3Impl UNIT_X = { 1, 0, 0 };
+            static constexpr Vector3Impl UNIT_Y = { 0, 1, 0 };
+            static constexpr Vector3Impl UNIT_Z = { 0, 0, 1 };
+            static constexpr Vector3Impl RIGHT = { 1, 0, 0 };
+            static constexpr Vector3Impl UP = { 0, 1, 0 };
 
             /**
              * @brief Forward vector
@@ -65,40 +65,41 @@ namespace crimild {
              *
              * [Readme](Readme.md)
              */
-            static constexpr Vector3 FORWARD = { 0, 0, 1 };
+            static constexpr Vector3Impl FORWARD = { 0, 0, -1 };
         };
 
     public:
-        using Tuple3< Vector3, T >::x;
-        using Tuple3< Vector3, T >::y;
-        using Tuple3< Vector3, T >::z;
+        using Tuple3< Vector3Impl, T >::x;
+        using Tuple3< Vector3Impl, T >::y;
+        using Tuple3< Vector3Impl, T >::z;
 
-        constexpr Vector3( void ) noexcept = default;
+        constexpr Vector3Impl( void ) noexcept = default;
 
-        constexpr Vector3( T x, T y, T z ) noexcept
-            : Tuple3< Vector3, T >( x, y, z )
+        constexpr Vector3Impl( T x, T y, T z ) noexcept
+            : Tuple3< Vector3Impl, T >( x, y, z )
         {
         }
 
         template< ArithmeticType U >
-        constexpr explicit Vector3( U value ) noexcept
-            : Tuple3< Vector3, T >( value ) { }
+        constexpr explicit Vector3Impl( U value ) noexcept
+            : Tuple3< Vector3Impl, T >( value ) { }
 
         template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
-        constexpr Vector3( const Tuple3< OtherDerived, U > &other ) noexcept
-            : Tuple3< Vector3, T >( other.x, other.y, other.z ) { }
+        constexpr explicit Vector3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
+            : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
         template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
-        constexpr Vector3( const Tuple4< OtherDerived, U > &other ) noexcept
-            : Tuple3< Vector3, T >( other.x, other.y, other.z ) { }
+        constexpr explicit Vector3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
+            : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
-        ~Vector3( void ) noexcept = default;
+        ~Vector3Impl( void ) noexcept = default;
     };
 
-    using Vector3f = Vector3< float >;
-    using Vector3d = Vector3< double >;
-    using Vector3i = Vector3< int32_t >;
-    using Vector3ui = Vector3< uint32_t >;
+    using Vector3 = Vector3Impl< real_t >;
+    using Vector3f = Vector3Impl< float >;
+    using Vector3d = Vector3Impl< double >;
+    using Vector3i = Vector3Impl< int32_t >;
+    using Vector3ui = Vector3Impl< uint32_t >;
 
 }
 

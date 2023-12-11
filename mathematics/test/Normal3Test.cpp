@@ -59,7 +59,7 @@ TEST( Normal3, construction )
 
 TEST( Normal3, index )
 {
-    constexpr auto u = crimild::Normal3f { 10, 20, 30 };
+    constexpr auto u = crimild::Normal3 { 10, 20, 30 };
 
     static_assert( crimild::isEqual( real_t( 10 ), u[ 0 ] ) );
     static_assert( crimild::isEqual( real_t( 20 ), u[ 1 ] ) );
@@ -138,9 +138,9 @@ TEST( Normal3, negation )
 
 TEST( Normal3, isNaN )
 {
-    constexpr auto u = crimild::Normal3f { 10, 20, 30 };
-    constexpr auto v = crimild::Normal3f { NAN, NAN, NAN };
-    constexpr auto w = crimild::Normal3f { NAN, NAN, 0 };
+    constexpr auto u = crimild::Normal3 { 10, 20, 30 };
+    constexpr auto v = crimild::Normal3 { NAN, NAN, NAN };
+    constexpr auto w = crimild::Normal3 { NAN, NAN, 0 };
 
     EXPECT_FALSE( crimild::isNaN( u ) );
     EXPECT_TRUE( crimild::isNaN( v ) );
@@ -151,8 +151,8 @@ TEST( Normal3, isNaN )
 
 TEST( Normal3, abs )
 {
-    constexpr auto u = crimild::Normal3f { -10, -20, -30 };
-    constexpr auto res = crimild::Normal3f { 10, 20, 30 };
+    constexpr auto u = crimild::Normal3 { -10, -20, -30 };
+    constexpr auto res = crimild::Normal3 { 10, 20, 30 };
 
     static_assert( crimild::isEqual( res, crimild::abs( u ) ) );
 
@@ -177,8 +177,8 @@ TEST( Normal3, length )
 
 TEST( Normal3, normalize )
 {
-    constexpr auto u = crimild::Normal3f { 2, 3, 4 };
-    constexpr auto v = crimild::Normal3f {
+    constexpr auto u = crimild::Normal3 { 2, 3, 4 };
+    constexpr auto v = crimild::Normal3 {
         0.3713906764,
         0.5570860145,
         0.7427813527,
@@ -192,7 +192,7 @@ TEST( Normal3, normalize )
 
 TEST( Normal3, normalizeNaN )
 {
-    EXPECT_TRUE( crimild::isNaN( crimild::normalize( crimild::Normal3f {} ) ) );
+    EXPECT_TRUE( crimild::isNaN( crimild::normalize( crimild::Normal3 {} ) ) );
 }
 
 TEST( Normal3, min )
@@ -235,7 +235,7 @@ TEST( Normal3, maxDimension )
 
 TEST( Normal3, ostream )
 {
-    constexpr auto u = crimild::Normal3f { 2, 3, 4 };
+    constexpr auto u = crimild::Normal3 { 2, 3, 4 };
 
     std::stringstream ss;
     ss << u;
@@ -245,13 +245,13 @@ TEST( Normal3, ostream )
 
 TEST( Normal3, conversion )
 {
-    constexpr auto N = crimild::Normal3f { 1, 2, 3 };
-    [[maybe_unused]] constexpr auto V = crimild::Vector3f( N );
+    constexpr auto N = crimild::Normal3 { 1, 2, 3 };
+    [[maybe_unused]] constexpr auto V = crimild::Vector3( N );
     constexpr auto V4 = crimild::Vector4f( N );
 
     static_assert( crimild::isEqual( V4, crimild::Vector4 { 1, 2, 3, 0 } ) );
 
-    constexpr auto N3 = crimild::normalize( crimild::Normal3f( V4 ) );
+    constexpr auto N3 = crimild::normalize( crimild::Normal3( V4 ) );
 
     EXPECT_TRUE( true );
 }

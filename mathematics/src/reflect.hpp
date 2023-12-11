@@ -35,9 +35,10 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3f reflect( const Vector3f &in, const Normal3f &N ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr auto reflect( const Vector3Impl< T > &in, const Normal3Impl< U > &N ) noexcept
     {
-        return in - Vector3f( N * real_t( 2 ) * dot( in, N ) );
+        return in - Vector3Impl< decltype( T {} + U {} ) >( N * real_t( 2 ) * dot( in, N ) );
     }
 
 }

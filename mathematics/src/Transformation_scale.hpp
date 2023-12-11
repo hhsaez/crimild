@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Transformation scale( const Vector3f &scale ) noexcept
+    [[nodiscard]] static constexpr Transformation scale( const Vector3 &scale ) noexcept
     {
         // clang-format off
         const auto m = Matrix4 {
@@ -55,12 +55,12 @@ namespace crimild {
 
     [[nodiscard]] inline constexpr Transformation scale( real_t x, real_t y, real_t z ) noexcept
     {
-        return scale( Vector3f { x, y, z } );
+        return scale( Vector3 { x, y, z } );
     }
 
     [[nodiscard]] inline constexpr Transformation scale( real_t x ) noexcept
     {
-        return scale( Vector3f { x, x, x } );
+        return scale( Vector3 { x, x, x } );
     }
 
     [[nodiscard]] inline constexpr bool hasScale( const Transformation &t ) noexcept

@@ -44,14 +44,14 @@ namespace crimild {
         return lengthSquared( u - v );
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr real_t distanceSquared( const Point3< T > &u, const Point3< T > &v ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr real_t distanceSquared( const Point3Impl< T > &u, const Point3Impl< U > &v ) noexcept
     {
         return lengthSquared( v - u );
     }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr real_t distance( const Point3< T > &u, const Point3< T > &v ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr real_t distance( const Point3Impl< T > &u, const Point3Impl< U > &v ) noexcept
     {
         return sqrt( lengthSquared( v - u ) );
     }

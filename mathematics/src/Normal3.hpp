@@ -35,43 +35,44 @@
 namespace crimild {
 
     template< ArithmeticType T >
-    class Normal3 : public Tuple3< Normal3, T > {
+    class Normal3Impl : public Tuple3< Normal3Impl, T > {
     public:
         struct Constants {
-            static constexpr Normal3 UNIT_X = { 1, 0, 0 };
-            static constexpr Normal3 UNIT_Y = { 0, 1, 0 };
-            static constexpr Normal3 UNIT_Z = { 0, 0, 1 };
+            static constexpr Normal3Impl UNIT_X = { 1, 0, 0 };
+            static constexpr Normal3Impl UNIT_Y = { 0, 1, 0 };
+            static constexpr Normal3Impl UNIT_Z = { 0, 0, 1 };
         };
 
     public:
-        using Tuple3< Normal3, T >::x;
-        using Tuple3< Normal3, T >::y;
-        using Tuple3< Normal3, T >::z;
+        using Tuple3< Normal3Impl, T >::x;
+        using Tuple3< Normal3Impl, T >::y;
+        using Tuple3< Normal3Impl, T >::z;
 
-        constexpr Normal3( void ) noexcept = default;
+        constexpr Normal3Impl( void ) noexcept = default;
 
-        constexpr Normal3( T x, T y, T z ) noexcept
-            : Tuple3< Normal3, T >( x, y, z )
+        constexpr Normal3Impl( T x, T y, T z ) noexcept
+            : Tuple3< Normal3Impl, T >( x, y, z )
         {
         }
 
         template< ArithmeticType U >
-        constexpr explicit Normal3( U value ) noexcept
-            : Tuple3< Normal3, T >( value ) { }
+        constexpr explicit Normal3Impl( U value ) noexcept
+            : Tuple3< Normal3Impl, T >( value ) { }
 
         template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
-        constexpr Normal3( const Tuple3< OtherDerived, U > &other ) noexcept
-            : Tuple3< Normal3, T >( other.x, other.y, other.z ) { }
+        constexpr explicit Normal3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
+            : Tuple3< Normal3Impl, T >( other.x, other.y, other.z ) { }
 
         template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
-        constexpr Normal3( const Tuple4< OtherDerived, U > &other ) noexcept
-            : Tuple3< Normal3, T >( other.x, other.y, other.z ) { }
+        constexpr explicit Normal3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
+            : Tuple3< Normal3Impl, T >( other.x, other.y, other.z ) { }
 
-        ~Normal3( void ) noexcept = default;
+        ~Normal3Impl( void ) noexcept = default;
     };
 
-    using Normal3f = Normal3< float >;
-    using Normal3d = Normal3< double >;
+    using Normal3 = Normal3Impl< real_t >;
+    using Normal3f = Normal3Impl< float >;
+    using Normal3d = Normal3Impl< double >;
 
 }
 

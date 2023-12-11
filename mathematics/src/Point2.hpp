@@ -34,43 +34,44 @@
 namespace crimild {
 
     template< ArithmeticType T >
-    class Point2 : public Tuple2< Point2, T > {
+    class Point2Impl : public Tuple2< Point2Impl, T > {
     public:
         struct Constants {
-            static constexpr Point2 ZERO = { 0, 0 };
-            static constexpr Point2 ONE = { 1, 1 };
-            static constexpr Point2 POSITIVE_INFINITY = {
+            static constexpr Point2Impl ZERO = { 0, 0 };
+            static constexpr Point2Impl ONE = { 1, 1 };
+            static constexpr Point2Impl POSITIVE_INFINITY = {
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity()
             };
-            static constexpr Point2 NEGATIVE_INFINITY = {
+            static constexpr Point2Impl NEGATIVE_INFINITY = {
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity()
             };
         };
 
     public:
-        using Tuple2< Point2, T >::x;
-        using Tuple2< Point2, T >::y;
+        using Tuple2< Point2Impl, T >::x;
+        using Tuple2< Point2Impl, T >::y;
 
-        constexpr Point2( void ) noexcept = default;
+        constexpr Point2Impl( void ) noexcept = default;
 
-        constexpr Point2( T x, T y ) noexcept
-            : Tuple2< Point2, T >( x, y )
+        constexpr Point2Impl( T x, T y ) noexcept
+            : Tuple2< Point2Impl, T >( x, y )
         {
         }
 
         template< ArithmeticType U >
-        constexpr explicit Point2( U value ) noexcept
-            : Tuple2< Point2, T >( value ) { }
+        constexpr explicit Point2Impl( U value ) noexcept
+            : Tuple2< Point2Impl, T >( value ) { }
 
-        ~Point2( void ) noexcept = default;
+        ~Point2Impl( void ) noexcept = default;
     };
 
-    using Point2f = Point2< float >;
-    using Point2d = Point2< double >;
-    using Point2i = Point2< int32_t >;
-    using Point2ui = Point2< uint32_t >;
+    using Point2 = Point2Impl< real_t >;
+    using Point2f = Point2Impl< float >;
+    using Point2d = Point2Impl< double >;
+    using Point2i = Point2Impl< int32_t >;
+    using Point2ui = Point2Impl< uint32_t >;
 
 }
 

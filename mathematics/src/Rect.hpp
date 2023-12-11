@@ -35,7 +35,7 @@ namespace crimild {
 
     template< typename T >
     struct RectImpl {
-        Point2< T > origin;
+        Point2Impl< T > origin;
         Size2DImpl< T > size;
 
         [[nodiscard]] inline constexpr bool operator==( const RectImpl &other ) const noexcept
@@ -50,9 +50,9 @@ namespace crimild {
     };
 
     template< typename T >
-    [[nodiscard]] inline constexpr Point2< T > center( const RectImpl< T > &rect ) noexcept
+    [[nodiscard]] inline constexpr Point2Impl< T > center( const RectImpl< T > &rect ) noexcept
     {
-        return Point2< T > {
+        return Point2Impl< T > {
             rect.origin.x + rect.size.width / T( 2 ),
             rect.origin.y + rect.size.height / T( 2 ),
         };

@@ -114,7 +114,7 @@ TEST( QuaternionTest, testInverse )
 TEST( QuaternionTest, testRotationMatrix )
 {
     #if 0
-    Vector3f axis( 0.0f, 1.0f, 0.0f );
+    Vector3 axis( 0.0f, 1.0f, 0.0f );
     float angle = Numericf::PI;
 
     Matrix3f rotMatrix( axis, angle );
