@@ -34,15 +34,15 @@
 namespace crimild {
 
     struct Box {
-        Point3f center = Point3f { 0, 0, 0 };
-        Vector3f size = Vector3f { 1, 1, 1 };
+        Point3 center = Point3 { 0, 0, 0 };
+        Vector3 size = Vector3 { 1, 1, 1 };
     };
 
     [[nodiscard]] inline constexpr const Point3f &center( const Box &b ) noexcept
     {
         return b.center;
     }
-    [[nodiscard]] inline constexpr const Vector3f &size( const Box &b ) noexcept
+    [[nodiscard]] inline constexpr const Vector3 &size( const Box &b ) noexcept
     {
         return b.size;
     }

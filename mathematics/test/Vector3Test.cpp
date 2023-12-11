@@ -71,7 +71,7 @@ TEST( Vector3, size )
 
 TEST( Vector3, index )
 {
-    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
 
     static_assert( 10 == u[ 0 ], "index" );
     static_assert( 20 == u[ 1 ], "index" );
@@ -116,9 +116,9 @@ TEST( Vector3, subtraction )
 
 TEST( Vector3, multiplication )
 {
-    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
     constexpr auto s = real_t( 5 );
-    constexpr auto res = crimild::Vector3f { 50, 100, 150 };
+    constexpr auto res = crimild::Vector3 { 50, 100, 150 };
 
     static_assert( crimild::isEqual( res, u * s ) );
     static_assert( crimild::isEqual( res, s * u ) );
@@ -139,9 +139,9 @@ TEST( Vector3, vectorMultiplication )
 
 TEST( Vector3, division )
 {
-    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
     constexpr auto s = real_t( 2 );
-    constexpr auto res = crimild::Vector3f { 5, 10, 15 };
+    constexpr auto res = crimild::Vector3 { 5, 10, 15 };
 
     static_assert( crimild::isEqual( res, u / s ) );
 
@@ -160,9 +160,9 @@ TEST( Vector3, negation )
 
 TEST( Vector3, isNaN )
 {
-    constexpr auto u = crimild::Vector3f { 10, 20, 30 };
-    constexpr auto v = crimild::Vector3f { NAN, NAN, NAN };
-    constexpr auto w = crimild::Vector3f { NAN, NAN, 0 };
+    constexpr auto u = crimild::Vector3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { NAN, NAN, NAN };
+    constexpr auto w = crimild::Vector3 { NAN, NAN, 0 };
 
     EXPECT_TRUE( crimild::isNaN( v ) );
     EXPECT_FALSE( crimild::isNaN( u ) );
@@ -171,8 +171,8 @@ TEST( Vector3, isNaN )
 
 TEST( Vector3, abs )
 {
-    constexpr auto u = crimild::Vector3f { -10, -20, -30 };
-    constexpr auto expected = crimild::Vector3f { 10, 20, 30 };
+    constexpr auto u = crimild::Vector3 { -10, -20, -30 };
+    constexpr auto expected = crimild::Vector3 { 10, 20, 30 };
     constexpr auto res = crimild::abs( u );
     static_assert( crimild::isEqual( res, expected ) );
 
@@ -210,8 +210,8 @@ TEST( Vector3, length )
 
 TEST( Vector3, normalize )
 {
-    constexpr auto u = crimild::Vector3f { 2, 3, 4 };
-    constexpr auto v = crimild::Vector3f {
+    constexpr auto u = crimild::Vector3 { 2, 3, 4 };
+    constexpr auto v = crimild::Vector3 {
         0.3713906764,
         0.5570860145,
         0.7427813527,
@@ -225,7 +225,7 @@ TEST( Vector3, normalize )
 
 TEST( Vector3, normalizeNaN )
 {
-    EXPECT_TRUE( crimild::isNaN( crimild::normalize( crimild::Vector3f {} ) ) );
+    EXPECT_TRUE( crimild::isNaN( crimild::normalize( crimild::Vector3 {} ) ) );
 }
 
 TEST( Vector3, min )
@@ -269,7 +269,7 @@ TEST( Vector3, maxDimension )
 TEST( Vector3, ostream )
 {
     {
-        constexpr auto u = crimild::Vector3f { 2, 3, 4 };
+        constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
         std::stringstream ss;
         ss << u;
@@ -289,8 +289,8 @@ TEST( Vector3, ostream )
 
 TEST( Vector3, orthonormalBasis )
 {
-    constexpr auto v1 = crimild::Vector3f { 4, 5, 6 };
-    crimild::Vector3f v2, v3;
+    constexpr auto v1 = crimild::Vector3 { 4, 5, 6 };
+    crimild::Vector3 v2, v3;
 
     crimild::orthonormalBasis( v1, v2, v3 );
 

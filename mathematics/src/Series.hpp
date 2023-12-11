@@ -54,16 +54,16 @@ namespace crimild {
 
         static auto fibonacciSquares( size_t N ) noexcept
         {
-            auto ret = std::vector< std::pair< Vector3f, float > >( N );
+            auto ret = std::vector< std::pair< Vector3, float > >( N );
             real_t s0 = 1.0f;
             real_t s1 = 1.0f;
-            Vector3f c0 = Vector3f::Constants::ZERO;
-            Vector3f c1 = -Vector3f::Constants::UNIT_X;
-            const auto OFFSET = std::array< Vector3f, 4 > {
-                -Vector3f::Constants::UNIT_Y,
-                -Vector3f::Constants::UNIT_X,
-                Vector3f::Constants::UNIT_Y,
-                Vector3f::Constants::UNIT_X,
+            Vector3 c0 = Vector3::Constants::ZERO;
+            Vector3 c1 = -Vector3::Constants::UNIT_X;
+            const auto OFFSET = std::array< Vector3, 4 > {
+                -Vector3::Constants::UNIT_Y,
+                -Vector3::Constants::UNIT_X,
+                Vector3::Constants::UNIT_Y,
+                Vector3::Constants::UNIT_X,
             };
             for ( size_t i = 0; i < N; ++i ) {
 

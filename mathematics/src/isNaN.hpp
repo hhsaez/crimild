@@ -35,7 +35,6 @@
 #include "Tuple2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
-#include "isNaN.hpp"
 
 #include <cmath>
 

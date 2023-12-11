@@ -87,9 +87,9 @@ namespace crimild {
 
     private:
         template< typename T >
-        inline static void generateImpl( Vector3< T > &result, const Vector3< T > &min, const Vector3< T > &max ) noexcept
+        inline static void generateImpl( Vector3Impl< T > &result, const Vector3Impl< T > &min, const Vector3Impl< T > &max ) noexcept
         {
-            result = Vector3< T > {
+            result = Vector3Impl< T > {
                 Random::generate< T >( min[ 0 ], max[ 0 ] ),
                 Random::generate< T >( min[ 1 ], max[ 1 ] ),
                 Random::generate< T >( min[ 2 ], max[ 2 ] ),
@@ -189,25 +189,25 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector3f nextVector3( void ) noexcept
+        [[nodiscard]] inline Vector3 nextVector3( void ) noexcept
         {
-            return Vector3f {
+            return Vector3 {
                 next(),
                 next(),
                 next(),
             };
         }
 
-        [[nodiscard]] inline Vector3f nextVector3( real_t lo, real_t hi ) noexcept
+        [[nodiscard]] inline Vector3 nextVector3( real_t lo, real_t hi ) noexcept
         {
-            return Vector3f {
+            return Vector3 {
                 next( lo, hi ),
                 next( lo, hi ),
                 next( lo, hi ),
             };
         }
 
-        [[nodiscard]] inline Vector3f nextInUnitSphere( void ) noexcept
+        [[nodiscard]] inline Vector3 nextInUnitSphere( void ) noexcept
         {
             while ( true ) {
                 const auto v = nextVector3( -1, 1 );
@@ -219,7 +219,7 @@ namespace crimild {
             }
         }
 
-        [[nodiscard]] inline Vector3f nextInHemisphere( const Normal3f &N ) noexcept
+        [[nodiscard]] inline Vector3 nextInHemisphere( const Normal3 &N ) noexcept
         {
             const auto v = nextInUnitSphere();
             return sign( dot( v, N ) ) * v;

@@ -39,65 +39,66 @@
 namespace crimild {
 
     template< ArithmeticType T >
-    class Vector4 : public Tuple4< Vector4, T > {
+    class Vector4Impl : public Tuple4< Vector4Impl, T > {
     public:
         struct Constants {
-            static constexpr Vector4 ZERO = { 0, 0, 0, 0 };
-            static constexpr Vector4 ONE = { 1, 1, 1, 1 };
-            static constexpr Vector4 POSITIVE_INFINITY = {
+            static constexpr Vector4Impl ZERO = { 0, 0, 0, 0 };
+            static constexpr Vector4Impl ONE = { 1, 1, 1, 1 };
+            static constexpr Vector4Impl POSITIVE_INFINITY = {
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity(),
                 std::numeric_limits< T >::infinity()
             };
-            static constexpr Vector4 NEGATIVE_INFINITY = {
+            static constexpr Vector4Impl NEGATIVE_INFINITY = {
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity(),
                 -std::numeric_limits< T >::infinity()
             };
-            static constexpr Vector4 UNIT_X = { 1, 0, 0, 0 };
-            static constexpr Vector4 UNIT_Y = { 0, 1, 0, 0 };
-            static constexpr Vector4 UNIT_Z = { 0, 0, 1, 0 };
-            static constexpr Vector4 UNIT_W = { 0, 0, 0, 1 };
+            static constexpr Vector4Impl UNIT_X = { 1, 0, 0, 0 };
+            static constexpr Vector4Impl UNIT_Y = { 0, 1, 0, 0 };
+            static constexpr Vector4Impl UNIT_Z = { 0, 0, 1, 0 };
+            static constexpr Vector4Impl UNIT_W = { 0, 0, 0, 1 };
         };
 
     public:
-        using Tuple4< Vector4, T >::x;
-        using Tuple4< Vector4, T >::y;
-        using Tuple4< Vector4, T >::z;
-        using Tuple4< Vector4, T >::w;
+        using Tuple4< Vector4Impl, T >::x;
+        using Tuple4< Vector4Impl, T >::y;
+        using Tuple4< Vector4Impl, T >::z;
+        using Tuple4< Vector4Impl, T >::w;
 
-        constexpr Vector4( void ) noexcept = default;
+        constexpr Vector4Impl( void ) noexcept = default;
 
-        constexpr Vector4( T x, T y, T z, T w ) noexcept
-            : Tuple4< Vector4, T >( x, y, z, w )
+        constexpr Vector4Impl( T x, T y, T z, T w ) noexcept
+            : Tuple4< Vector4Impl, T >( x, y, z, w )
         {
         }
 
         template< ArithmeticType U >
-        constexpr explicit Vector4( U value ) noexcept
-            : Tuple4< Vector4, T >( value ) { }
+        constexpr explicit Vector4Impl( U value ) noexcept
+            : Tuple4< Vector4Impl, T >( value ) { }
 
         template< ArithmeticType U >
-        constexpr explicit Vector4( const Point3< U > &p ) noexcept
-            : Tuple4< Vector4, T >( p.x, p.y, p.z, 1 ) { }
+        constexpr explicit Vector4Impl( const Point3Impl< U > &p ) noexcept
+            : Tuple4< Vector4Impl, T >( p.x, p.y, p.z, 1 ) { }
 
         template< ArithmeticType U >
-        constexpr explicit Vector4( const Vector3< U > &v ) noexcept
-            : Tuple4< Vector4, T >( v.x, v.y, v.z, 0 ) { }
+        constexpr explicit Vector4Impl( const Vector3Impl< U > &v ) noexcept
+            : Tuple4< Vector4Impl, T >( v.x, v.y, v.z, 0 ) { }
 
         template< ArithmeticType U >
-        constexpr explicit Vector4( const Normal3< U > &n ) noexcept
-            : Tuple4< Vector4, T >( n.x, n.y, n.z, 1 ) { }
+        constexpr explicit Vector4Impl( const Normal3Impl< U > &n ) noexcept
+            : Tuple4< Vector4Impl, T >( n.x, n.y, n.z, 0 ) { }
 
-        ~Vector4( void ) noexcept = default;
+        ~Vector4Impl( void ) noexcept = default;
     };
 
-    using Vector4f = Vector4< float >;
-    using Vector4d = Vector4< double >;
-    using Vector4i = Vector4< int32_t >;
-    using Vector4ui = Vector4< uint32_t >;
+    using Vector4 = Vector4Impl< real_t >;
+    using Vector4f = Vector4Impl< float >;
+    using Vector4d = Vector4Impl< double >;
+    using Vector4i = Vector4Impl< int32_t >;
+    using Vector4ui = Vector4Impl< uint32_t >;
 
 }
 

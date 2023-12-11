@@ -36,11 +36,11 @@ namespace crimild {
     struct Matrix3Impl {
         struct Constants;
 
-        Vector3< T > c0;
-        Vector3< T > c1;
-        Vector3< T > c2;
+        Vector3Impl< T > c0;
+        Vector3Impl< T > c1;
+        Vector3Impl< T > c2;
 
-        [[nodiscard]] inline constexpr const Vector3< T > &operator[]( size_t index ) const noexcept
+        [[nodiscard]] inline constexpr const Vector3Impl< T > &operator[]( size_t index ) const noexcept
         {
             switch ( index ) {
                 case 0:
@@ -53,7 +53,7 @@ namespace crimild {
             };
         }
 
-        [[nodiscard]] inline Vector3< T > &operator[]( size_t index ) noexcept
+        [[nodiscard]] inline Vector3Impl< T > &operator[]( size_t index ) noexcept
         {
             switch ( index ) {
                 case 0:

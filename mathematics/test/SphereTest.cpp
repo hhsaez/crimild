@@ -60,7 +60,7 @@ TEST( Sphere, normal )
 
     EXPECT_TRUE(
         isEqual(
-            Normal3f { 0, 0.97014, -0.24254 },
+            Normal3 { 0, 0.97014, -0.24254 },
             normal(
                 S,
                 scale( 1, 0.5, 1 ) * rotationZ( numbers::PI / 5 ),
@@ -76,5 +76,5 @@ TEST( Sphere, negate_normal )
 {
     constexpr auto S = Sphere {};
 
-    EXPECT_EQ( ( Normal3f { -1, 0, 0 } ), normal( S, scale( -1 ), Point3f { 1, 0, 0 } ) );
+    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( S, scale( -1 ), Point3f { 1, 0, 0 } ) );
 }
