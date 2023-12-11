@@ -34,17 +34,17 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3f edge0( const Triangle &T ) noexcept
+    [[nodiscard]] inline constexpr Vector3 edge0( const Triangle &T ) noexcept
     {
         return T.p1 - T.p0;
     }
 
-    [[nodiscard]] inline constexpr Vector3f edge1( const Triangle &T ) noexcept
+    [[nodiscard]] inline constexpr Vector3 edge1( const Triangle &T ) noexcept
     {
         return T.p2 - T.p0;
     }
 
-    [[nodiscard]] inline constexpr Vector3f edge2( const Triangle &T ) noexcept
+    [[nodiscard]] inline constexpr Vector3 edge2( const Triangle &T ) noexcept
     {
         return T.p2 - T.p1;
     }

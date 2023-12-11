@@ -91,7 +91,7 @@ namespace crimild {
             return false;
         }
 
-        t = ( dot( -normal( P ), Vector3f( origin( R ) ) ) + distance( P ) ) / nv;
+        t = ( dot( -normal( P ), Vector3( origin( R ) ) ) + distance( P ) ) / nv;
         return true;
     }
 

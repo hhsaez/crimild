@@ -54,15 +54,15 @@ TEST( Point2, construction )
 
 TEST( Point2, index )
 {
-    constexpr auto u = crimild::Point2f { 10, 20 };
+    constexpr auto u = crimild::Point2 { 10, 20 };
 
     EXPECT_EQ( 10, u[ 0 ] );
     EXPECT_EQ( 20, u[ 1 ] );
 
-    auto v = Point2f { 10, 20 };
+    auto v = Point2 { 10, 20 };
     v[ 0 ] = 20;
     v[ 1 ] = 21;
-    EXPECT_TRUE( isEqual( v, Point2f { 20, 21 } ) );
+    EXPECT_TRUE( isEqual( v, Point2 { 20, 21 } ) );
 }
 
 TEST( Point2, equality )
@@ -114,9 +114,9 @@ TEST( Point2, equality )
 
 TEST( Point2, isNaN )
 {
-    constexpr auto u = crimild::Point2f { 10, 20 };
-    constexpr auto v = crimild::Point2f { NAN, NAN };
-    constexpr auto w = crimild::Point2f { NAN, 0 };
+    constexpr auto u = crimild::Point2 { 10, 20 };
+    constexpr auto v = crimild::Point2 { NAN, NAN };
+    constexpr auto w = crimild::Point2 { NAN, 0 };
 
     EXPECT_TRUE( crimild::isNaN( v ) );
     EXPECT_FALSE( crimild::isNaN( u ) );
@@ -133,8 +133,8 @@ TEST( Point2, abs )
 
 // TEST( Point2, distance )
 // {
-//     constexpr auto u = crimild::Point2f { 2, 3 };
-//     constexpr auto v = crimild::Point2f { 5, 6 };
+//     constexpr auto u = crimild::Point2 { 2, 3 };
+//     constexpr auto v = crimild::Point2 { 5, 6 };
 
 //     EXPECT_EQ( crimild::Real( 27 ), crimild::distanceSquared( u, v ) );
 //     EXPECT_TRUE( crimild::isEqual( crimild::Real( 5.1961524227 ), crimild::distance( u, v ) ) );
@@ -142,9 +142,9 @@ TEST( Point2, abs )
 
 TEST( Point2, lerp )
 {
-    constexpr auto u = crimild::Point2f { 2, 3 };
-    constexpr auto v = crimild::Point2f { 5, 6 };
-    constexpr auto res = crimild::Point2f { 3.5, 4.5 };
+    constexpr auto u = crimild::Point2 { 2, 3 };
+    constexpr auto v = crimild::Point2 { 5, 6 };
+    constexpr auto res = crimild::Point2 { 3.5, 4.5 };
 
     EXPECT_TRUE( crimild::isEqual( res, crimild::lerp( u, v, 0.5 ) ) );
 }
@@ -160,23 +160,23 @@ TEST( Point2, min )
 
     {
         const auto A = crimild::Point2 { 1, -1 };
-        const auto B = crimild::min( A, crimild::Point2f::Constants::POSITIVE_INFINITY );
+        const auto B = crimild::min( A, crimild::Point2::Constants::POSITIVE_INFINITY );
         EXPECT_EQ( A, B );
     }
 }
 
 TEST( Point2, max )
 {
-    constexpr auto u = crimild::Point2f { 2, 3 };
-    constexpr auto v = crimild::Point2f { 1, 5 };
-    constexpr auto m = crimild::Point2f { 2, 5 };
+    constexpr auto u = crimild::Point2 { 2, 3 };
+    constexpr auto v = crimild::Point2 { 1, 5 };
+    constexpr auto m = crimild::Point2 { 2, 5 };
 
     EXPECT_EQ( 3, crimild::max( u ) );
     EXPECT_TRUE( crimild::isEqual( m, crimild::max( u, v ) ) );
 
     {
-        const auto A = crimild::Point2f { 1, -1 };
-        const auto B = crimild::max( A, crimild::Point2f::Constants::NEGATIVE_INFINITY );
+        const auto A = crimild::Point2 { 1, -1 };
+        const auto B = crimild::max( A, crimild::Point2::Constants::NEGATIVE_INFINITY );
         EXPECT_EQ( A, B );
     }
 }
@@ -197,8 +197,8 @@ TEST( Point2, maxDimension )
 
 TEST( Point2, floor )
 {
-    constexpr auto u = crimild::Point2f { 2.5, 3.8 };
-    constexpr auto v = crimild::Point2f { 2, 3 };
+    constexpr auto u = crimild::Point2 { 2.5, 3.8 };
+    constexpr auto v = crimild::Point2 { 2, 3 };
 
     EXPECT_TRUE( crimild::isEqual( v, crimild::floor( u ) ) );
 }
@@ -222,7 +222,7 @@ TEST( Point2, permute )
 TEST( Point2, ostream )
 {
     {
-        constexpr auto u = crimild::Point2f { 2, 3 };
+        constexpr auto u = crimild::Point2 { 2, 3 };
 
         std::stringstream ss;
         ss << u;

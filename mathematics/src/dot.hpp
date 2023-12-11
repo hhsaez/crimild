@@ -44,31 +44,31 @@ namespace crimild {
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto dot( const Vector3< T > &u, const Vector3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr auto dot( const Vector3Impl< T > &u, const Vector3Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto dot( const Normal3< T > &u, const Normal3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr auto dot( const Normal3Impl< T > &u, const Normal3Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto dot( const Normal3< T > &u, const Vector3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr auto dot( const Normal3Impl< T > &u, const Vector3Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto dot( const Vector3< T > &u, const Normal3< U > &v ) noexcept
+    [[nodiscard]] inline constexpr auto dot( const Vector3Impl< T > &u, const Normal3Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto dot( const Vector4< T > &u, const Vector4< U > &v ) noexcept
+    [[nodiscard]] inline constexpr auto dot( const Vector4Impl< T > &u, const Vector4Impl< U > &v ) noexcept
     {
         return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
     }

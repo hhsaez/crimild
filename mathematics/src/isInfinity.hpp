@@ -40,7 +40,7 @@ namespace crimild {
     }
 
     template< typename T >
-    inline Bool isInfinity( const Point3< T > &p ) noexcept
+    inline Bool isInfinity( const Point3Impl< T > &p ) noexcept
     {
         return isInfinity( p.x ) || isInfinity( p.y ) || isInfinity( p.z );
     }

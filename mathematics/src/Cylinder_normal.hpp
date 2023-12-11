@@ -41,7 +41,7 @@ namespace crimild {
 
     // Project the point in the XZ plane and normalize
     // TODO(hernan): Take into account the cylinder's center
-    [[nodiscard]] inline constexpr Normal3f normal( const Cylinder &C, const Point3f &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Point3f &P ) noexcept
     {
         const real_t dist = P.x * P.x + P.z * P.z;
         const real_t r = radius( C );
@@ -56,10 +56,10 @@ namespace crimild {
             return Normal3 { 0, -1, 0 };
         }
 
-        return Normal3f { P.x, 0, P.z };
+        return Normal3 { P.x, 0, P.z };
     }
 
-    [[nodiscard]] inline constexpr Normal3f normal( const Cylinder &C, const Transformation &T, const Point3f &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Transformation &T, const Point3f &P ) noexcept
     {
         const auto localP = inverse( T )( P );
         return normalize( T( normal( C, localP ) ) );

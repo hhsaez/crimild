@@ -36,8 +36,8 @@
 TEST( Ray3, construction )
 {
     constexpr auto r = crimild::Ray3 {
-        crimild::Point3f { 10, 20, 30 },
-        crimild::Vector3f { 0, 0, -1 },
+        crimild::Point3 { 10, 20, 30 },
+        crimild::Vector3 { 0, 0, -1 },
     };
 
     constexpr auto o = crimild::Point3f { 10, 20, 30 };
@@ -52,8 +52,8 @@ TEST( Ray3, construction )
 TEST( Ray3, apply )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3f { 2, 3, 4 },
-        crimild::Vector3f { 1, 0, 0 },
+        crimild::Point3 { 2, 3, 4 },
+        crimild::Vector3 { 1, 0, 0 },
     };
 
     static_assert( R( 0 ) == crimild::Point3f { 2, 3, 4 } );
@@ -66,8 +66,8 @@ TEST( Ray3, apply )
 TEST( Ray3, ostream )
 {
     constexpr auto R = crimild::Ray3 {
-        crimild::Point3f { 10, 20, 30 },
-        crimild::Vector3f { 0, 0, -1 },
+        crimild::Point3 { 10, 20, 30 },
+        crimild::Vector3 { 0, 0, -1 },
     };
 
     std::stringstream ss;

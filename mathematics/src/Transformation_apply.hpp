@@ -66,7 +66,7 @@ namespace crimild {
         return Point3f( V );
     }
 
-    [[nodiscard]] constexpr Vector3f Transformation::operator()( const Vector3f &v ) const noexcept
+    [[nodiscard]] constexpr Vector3 Transformation::operator()( const Vector3 &v ) const noexcept
     {
         if ( isIdentity( *this ) ) {
             return v;
@@ -81,7 +81,7 @@ namespace crimild {
         };
     }
 
-    [[nodiscard]] constexpr Normal3f Transformation::operator()( const Normal3f &N ) const noexcept
+    [[nodiscard]] constexpr Normal3 Transformation::operator()( const Normal3 &N ) const noexcept
     {
         if ( isIdentity( *this ) ) {
             return N;
@@ -116,19 +116,19 @@ namespace crimild {
         return t( Point3f::Constants::ZERO );
     }
 
-    [[nodiscard]] inline constexpr Vector3f right( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3 right( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3f::Constants::RIGHT ) );
+        return normalize( t( Vector3::Constants::RIGHT ) );
     }
 
-    [[nodiscard]] inline constexpr Vector3f up( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3 up( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3f::Constants::UP ) );
+        return normalize( t( Vector3::Constants::UP ) );
     }
 
-    [[nodiscard]] inline constexpr Vector3f forward( const Transformation &t ) noexcept
+    [[nodiscard]] inline constexpr Vector3 forward( const Transformation &t ) noexcept
     {
-        return normalize( t( Vector3f::Constants::FORWARD ) );
+        return normalize( t( Vector3::Constants::FORWARD ) );
     }
 
 }

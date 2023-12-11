@@ -36,16 +36,16 @@ using namespace crimild;
 
 TEST( reflect, reflect1 )
 {
-    const auto V = Vector3f { 1, -1, 0 };
-    const auto N = Normal3f { 0, 1, 0 };
+    const auto V = Vector3 { 1, -1, 0 };
+    const auto N = Normal3 { 0, 1, 0 };
 
-    EXPECT_EQ( reflect( V, N ), ( Vector3f { 1, 1, 0 } ) );
+    EXPECT_EQ( reflect( V, N ), ( Vector3 { 1, 1, 0 } ) );
 }
 
 TEST( reflect, reflect2 )
 {
-    const auto V = Vector3f { 0, -1, 0 };
-    const auto N = Normal3f { numbers::SQRT_2_DIV_2, numbers::SQRT_2_DIV_2, 0 };
+    const auto V = Vector3 { 0, -1, 0 };
+    const auto N = Normal3 { numbers::SQRT_2_DIV_2, numbers::SQRT_2_DIV_2, 0 };
 
-    EXPECT_TRUE( isEqual( reflect( V, N ), Vector3f { 1, 0, 0 } ) );
+    EXPECT_TRUE( isEqual( reflect( V, N ), Vector3 { 1, 0, 0 } ) );
 }

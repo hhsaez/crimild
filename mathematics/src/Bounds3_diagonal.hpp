@@ -33,7 +33,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3f diagonal( const Bounds3 &B ) noexcept
+    [[nodiscard]] inline constexpr Vector3 diagonal( const Bounds3 &B ) noexcept
     {
         return B.max - B.min;
     }

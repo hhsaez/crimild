@@ -39,15 +39,15 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Normal3f normal( const Sphere &S, const Point3f &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Point3f &P ) noexcept
     {
-        return normalize( Normal3f( P - center( S ) ) );
+        return normalize( Normal3( P - center( S ) ) );
     }
 
-    [[nodiscard]] inline constexpr Normal3f normal( const Sphere &S, const Transformation &T, const Point3f &P ) noexcept
+    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Transformation &T, const Point3f &P ) noexcept
     {
         const auto localP = inverse( T )( P );
-        const auto N = Normal3f( localP - center( S ) );
+        const auto N = Normal3( localP - center( S ) );
         return normalize( T( N ) );
     }
 

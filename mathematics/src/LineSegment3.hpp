@@ -37,8 +37,8 @@ namespace crimild {
         */
     template< typename T >
     struct LineSegment3Impl {
-        Point3< T > p0;
-        Point3< T > p1;
+        Point3Impl< T > p0;
+        Point3Impl< T > p1;
 
         [[nodiscard]] constexpr bool operator==( const LineSegment3Impl &other ) const noexcept
         {
@@ -52,13 +52,13 @@ namespace crimild {
     };
 
     template< typename T >
-    [[nodiscard]] inline constexpr const Point3< T > &origin( const LineSegment3Impl< T > &l ) noexcept
+    [[nodiscard]] inline constexpr const Point3Impl< T > &origin( const LineSegment3Impl< T > &l ) noexcept
     {
         return l.p0;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr const Point3< T > &destination( const LineSegment3Impl< T > &l ) noexcept
+    [[nodiscard]] inline constexpr const Point3Impl< T > &destination( const LineSegment3Impl< T > &l ) noexcept
     {
         return l.p1;
     }

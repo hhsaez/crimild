@@ -35,14 +35,16 @@
 namespace crimild {
 
     /**
-        \brief Defines a plane in three-dimensional space
-
-        A plane is represented by a normal vector and a constant
-
-        The default plane is the XZ-plane
-    */
+     * @brief Defines a plane in three-dimensional space
+     *
+     * A plane is represented by a normal vector and a constant
+     *
+     * The default plane is the XZ-plane
+     *
+     * @remarks Use the default precision
+     */
     struct Plane3 {
-        Normal3f n = Normal3f { 0, 1, 0 };
+        Normal3 n = Normal3 { 0, 1, 0 };
         real_t d = 0;
 
         [[nodiscard]] inline constexpr bool operator==( const Plane3 &other ) const noexcept
@@ -56,7 +58,7 @@ namespace crimild {
         }
     };
 
-    [[nodiscard]] inline constexpr const Normal3f &normal( const Plane3 &p ) noexcept
+    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
     {
         return p.n;
     }

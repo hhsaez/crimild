@@ -96,8 +96,8 @@ TEST( Point3, vectorAddition )
 
 TEST( Point3, subtraction )
 {
-    constexpr auto u = crimild::Point3f { 10, 20, 30 };
-    constexpr auto v = crimild::Point3f { 30, 40, 50 };
+    constexpr auto u = crimild::Point3 { 10, 20, 30 };
+    constexpr auto v = crimild::Point3 { 30, 40, 50 };
     constexpr auto res = crimild::Vector3 { -20, -20, -20 };
 
     static_assert( crimild::isEqual( res, u - v ) );
@@ -107,9 +107,9 @@ TEST( Point3, subtraction )
 
 TEST( Point3, vectorSubtraction )
 {
-    constexpr auto u = crimild::Point3f { 10, 20, 30 };
-    constexpr auto v = crimild::Vector3f { 30, 40, 50 };
-    constexpr auto res = crimild::Point3f { -20, -20, -20 };
+    constexpr auto u = crimild::Point3 { 10, 20, 30 };
+    constexpr auto v = crimild::Vector3 { 30, 40, 50 };
+    constexpr auto res = crimild::Point3 { -20, -20, -20 };
 
     static_assert( crimild::isEqual( res, u - v ) );
 

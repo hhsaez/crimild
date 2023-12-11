@@ -32,7 +32,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Bounds3 expand( const Bounds3 &B, const Vector3f &padding ) noexcept
+    [[nodiscard]] static constexpr Bounds3 expand( const Bounds3 &B, const Vector3 &padding ) noexcept
     {
         return Bounds3 {
             min( B ) - padding,

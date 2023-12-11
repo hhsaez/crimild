@@ -33,9 +33,9 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3f lerp( const Bounds3 &B, const Vector3f &t ) noexcept
+    [[nodiscard]] inline constexpr Point3 lerp( const Bounds3 &B, const Vector3 &t ) noexcept
     {
-        return Point3f {
+        return Point3 {
             lerp( min( B ).x, max( B ).x, t.x ),
             lerp( min( B ).y, max( B ).y, t.y ),
             lerp( min( B ).z, max( B ).z, t.z ),
