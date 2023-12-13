@@ -35,13 +35,12 @@ namespace crimild {
 
     namespace impl {
 
-        template< typename T >
-        constexpr T sqrt( T x, T curr, T prev ) noexcept
+        constexpr double sqrt( double x, double curr, double prev ) noexcept
         {
             return (
                 curr == prev
                     ? curr
-                    : sqrt< T >( x, 0.5 * ( curr + x / curr ), curr )
+                    : sqrt( x, 0.5 * ( curr + x / curr ), curr )
             );
         }
 
@@ -53,12 +52,12 @@ namespace crimild {
        Error is 2.22045e-16 when compared with std::sqrt
     */
     template< typename T >
-    [[nodiscard]] inline constexpr T sqrt( T x ) noexcept
+    [[nodiscard]] inline constexpr double sqrt( T x ) noexcept
     {
         if constexpr ( std::is_same< real_t, double >::value ) {
             return std::sqrt( x );
         } else {
-            return impl::sqrt< T >( x, x, 0 );
+            return impl::sqrt( x, x, 0 );
         }
     }
 
