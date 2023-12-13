@@ -61,9 +61,15 @@ namespace crimild {
             /**
              * @brief Forward vector
              *
-             * @ref Readme.md
+             * Tuple3
              *
-             * [Readme](Readme.md)
+             * @ref Tuple3
+             *
+             * @ref crimild::Tuple3
+             *
+             * @ref crimild::Tuple3 "Tuple3"
+             *
+             * @see [Readme](mathematics/README.md)
              */
             static constexpr Vector3Impl FORWARD = { 0, 0, -1 };
         };

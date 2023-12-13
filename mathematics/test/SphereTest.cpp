@@ -55,8 +55,8 @@ TEST( Sphere, normal )
     static_assert( normal( S, Point3f { 1, 0, 0 } ) == Normal3 { 1, 0, 0 } );
     static_assert( normal( S, Point3f { 0, 1, 0 } ) == Normal3 { 0, 1, 0 } );
     static_assert( normal( S, Point3f { 0, 0, 1 } ) == Normal3 { 0, 0, 1 } );
-    static_assert( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) == Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } );
-    static_assert( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ) == real_t( 1 ) );
+    static_assert( isEqual( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ), Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) );
+    static_assert( isEqual( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ), 1 ) );
 
     EXPECT_TRUE(
         isEqual(

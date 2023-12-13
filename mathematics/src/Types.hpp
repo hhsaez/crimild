@@ -30,12 +30,16 @@
 
 #include <cstdint>
 
-/**
- * @brief Alias for the default floating-point type
- */
-using real_t = float;
+namespace crimild {
 
-using radians_t = real_t;
-using degrees_t = real_t;
+    /**
+     * @brief Alias for the default floating-point type
+     */
+    using real_t = float;
+
+    using radians_t = real_t;
+    using degrees_t = real_t;
+
+}
 
 #endif

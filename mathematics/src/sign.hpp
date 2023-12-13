@@ -28,6 +28,8 @@
 #ifndef CRIMILD_MATHEMATICS_SIGN_
 #define CRIMILD_MATHEMATICS_SIGN_
 
+#include <cstdint>
+
 namespace crimild {
 
     template< typename T >

@@ -36,50 +36,60 @@
 
 namespace crimild {
 
+    template< typename T >
+    struct Length {
+        using type = real_t;
+    };
+
+    template<>
+    struct Length< double > {
+        using type = double;
+    };
+
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector2Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T lengthSquared( const Vector2Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y;
     }
 
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t length( const Vector2Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr typename Length< T >::type length( const Vector2Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector4Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T lengthSquared( const Vector4Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z + u.w * u.w;
     }
 
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t length( const Vector4Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr typename Length< T >::type length( const Vector4Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t lengthSquared( const Vector3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T lengthSquared( const Vector3Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< ArithmeticType T >
-    [[nodiscard]] inline constexpr real_t length( const Vector3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr typename Length< T >::type length( const Vector3Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr real_t lengthSquared( const Normal3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr T lengthSquared( const Normal3Impl< T > &u ) noexcept
     {
         return u.x * u.x + u.y * u.y + u.z * u.z;
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr real_t length( const Normal3Impl< T > &u ) noexcept
+    [[nodiscard]] inline constexpr typename Length< T >::type length( const Normal3Impl< T > &u ) noexcept
     {
         return sqrt( lengthSquared( u ) );
     }

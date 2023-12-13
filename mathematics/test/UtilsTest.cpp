@@ -36,9 +36,9 @@ using namespace crimild;
 
 TEST( Utils, sqrt )
 {
-    EXPECT_EQ( Real( 5.3851648071 ), crimild::sqrt( Real( 29 ) ) );
+    EXPECT_EQ( real_t( 5.3851648071 ), real_t( crimild::sqrt( 29 ) ) );
 
-    static_assert( Real( 5.3851648071 ) == crimild::sqrt( Real( 29 ) ), "sqrt" );
+    static_assert( real_t( 5.3851648071 ) == real_t( crimild::sqrt( 29 ) ), "sqrt" );
 }
 
 namespace crimild {

@@ -31,7 +31,6 @@ target_sources(
     Box_normal.hpp
     ceil.hpp
     clamp.hpp
-    Clock.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
     ColorRGBAOps.hpp
@@ -91,7 +90,6 @@ target_sources(
     Ray3.hpp
     Ray3_operators.hpp
     Ray_apply.hpp
-    README.md
     Rect.hpp
     reflect.hpp
     refract.hpp
@@ -133,16 +131,10 @@ target_sources(
     Crimild_Mathematics.cpp
     
     PRIVATE
-    Clock.cpp
     Random.cpp
 )
 
 target_include_directories( crimild_mathematics PUBLIC . )
-
-# target_link_libraries( 
-#     crimild_mathematics
-#     PRIVATE Crimild::Foundation
-# )
 
 target_compile_features( crimild_mathematics PUBLIC cxx_std_20 )
 add_library( Crimild::Mathematics ALIAS crimild_mathematics )
