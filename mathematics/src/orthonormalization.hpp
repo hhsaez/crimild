@@ -30,25 +30,44 @@
 
 #include "Vector3.hpp"
 #include "abs.hpp"
+#include "isEqual.hpp"
 #include "normalize.hpp"
+#include "pow.hpp"
+#include "sign.hpp"
 
 namespace crimild {
 
     /**
        \brief Creates a orthonormal coordinate system from a vector
 
+       Find two normalized vectors given a normalized 3D one such that all three vectors
+       are mutually perpendicular. Such vectors can be expressed as follows:
+
+       v2 = [
+        (1 - vx^2) / (1 + vz),
+        (vx * vy) / (1 + vz),
+        -vx
+       ]
+
+       v3 = [
+        (vx * vy) / (1 + vz),
+        (1 - vy^2) / (1 + vz),
+        -vy
+       ]
+
+       Handles special case where v1.z ~= -1, in which case there is a loss of accuracy when `1 / (1 + v1.z)` is calculated.
+
        \remarks The input vector v1 is assumed to be already normalized.
      */
     template< typename T >
     static constexpr void orthonormalBasis( const Vector3Impl< T > &v1, Vector3Impl< T > &v2, Vector3Impl< T > &v3 ) noexcept
     {
-        // TODO: not sure about handedness...
-        if ( abs( v1.x ) > abs( v1.y ) ) {
-            v2 = normalize( Vector3Impl< T > { -v1.z, 0, v1.x } );
-        } else {
-            v2 = normalize( Vector3Impl< T > { 0, v1.z, -v1.y } );
-        }
-        v3 = cross( v1, v2 );
+        assert( isEqual( lengthSquared( v1 ), 1 ) );
+        const real_t s = sign( v1.z );
+        const real_t a = -1 / ( s + v1.z );
+        const real_t b = v1.x * v1.y * a;
+        v2 = Vector3Impl< T >( 1 + s * pow( v1.x, 2 ) * a, s * b, -s * v1.x );
+        v3 = Vector3Impl< T >( b, s + pow( v1.y, 2 ) * a, -v1.y );
     }
 
 }

@@ -28,7 +28,6 @@
 #ifndef CRIMILD_MATHEMATICS_
 #define CRIMILD_MATHEMATICS_
 
-#include "Clock.hpp"
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
 #include "ColorRGBAOps.hpp"

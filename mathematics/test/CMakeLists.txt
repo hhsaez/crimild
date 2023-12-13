@@ -8,7 +8,6 @@ target_sources(
     PRIVATE
     Bounds3Test.cpp
     BoxTest.cpp
-    ClockTest.cpp
     ColorRGBATest.cpp
     ColorRGBTest.cpp
     CylinderTest.cpp

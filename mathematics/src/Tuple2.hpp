@@ -38,19 +38,8 @@ namespace crimild {
     /**
      * @brief Base class for two-dimensional classes like vectors and points
      *
-     * @details
-     * This template class provides common utilities for all two dimensional
-     * classes. Makes use of the "curiously recurring template pattern" (CRTP)
-     * to know the type of a Derived class (i.e. Vector2) and, therefore, the
-     * exact type that should be returned from some of its generic functions below
-     * (see the various operators overloads, for example). This helps reducing
-     * the amount of repeated code in derived classes, while also ensuring
-     * those operations cannot be mixed (if we use Tuple2 instead of the
-     * type of a derived class, we could end up mixing Vector2 and Point2 in
-     * some operations that are not supposed to mix them).
-     *
-     * The use of CRTP makes Tuple2 a kind of an abstract class, although no actual
-     * abstract virtual functions are used for performance reasons.
+     * @see
+     * [Tuples](mathematics/README.md)
      */
     template< template< ArithmeticType > class Derived, ArithmeticType T >
     class Tuple2 {

@@ -292,7 +292,10 @@ TEST( Vector3, orthonormalBasis )
     constexpr auto v1 = crimild::Vector3 { 4, 5, 6 };
     crimild::Vector3 v2, v3;
 
-    crimild::orthonormalBasis( v1, v2, v3 );
+    crimild::orthonormalBasis( normalize( v1 ), v2, v3 );
+
+    EXPECT_TRUE( isEqual( length( v2 ), 1 ) );
+    EXPECT_TRUE( isEqual( length( v3 ), 1 ) );
 
     EXPECT_TRUE( crimild::isZero( crimild::dot( v1, v2 ) ) );
     EXPECT_TRUE( crimild::isZero( crimild::dot( v1, v3 ) ) );
