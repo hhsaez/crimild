@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_MATRIX_4_
 #define CRIMILD_MATHEMATICS_MATRIX_4_
 
+#include "Ray3.hpp"
 #include "Vector4.hpp"
 
 namespace crimild {
@@ -81,6 +82,14 @@ namespace crimild {
         [[nodiscard]] inline constexpr size_t operator!=( const Matrix4Impl< U > &other ) const noexcept
         {
             return !( *this == other );
+        }
+
+        [[nodiscard]] inline constexpr Ray3 operator*( const Ray3 &R ) const noexcept
+        {
+            return Ray3 {
+                Point3( *this * Vector4( origin( R ) ) ),
+                Vector3( *this * Vector4( direction( R ) ) ),
+            };
         }
     };
 
