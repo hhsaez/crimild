@@ -88,8 +88,6 @@ target_sources(
     Quaternion.hpp
     Random.hpp
     Ray3.hpp
-    Ray3_operators.hpp
-    Ray_apply.hpp
     Rect.hpp
     reflect.hpp
     refract.hpp

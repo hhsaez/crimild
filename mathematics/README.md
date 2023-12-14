@@ -146,25 +146,36 @@ right? In order to solve this situation, the [Length](@ref crimild::Length) type
 implementation of [length()](@ref crimild::length) for reference about how this trait is used to return the correct value type.
 
 ### Points 
+A point is a zero-dimensional location in 2D, 3D or 4D space, represented by the [Point2](@ref crimild::Point2Impl), 
+[Point3](@ref crimild::Point3Impl) and [Point4](@ref crimild::Point4Impl), respectively. Although it has a similar
+implementation as vectors, the fact that points represents a position whereas a vector represents a direction leads
+to a number of important differences in how they should be treated in different parts of the engine. 
 
+Please not that some methods of point classes return or take vectors. This requires some operators to be overloaded
+in the respective point classes instead of using the ones provided by their base tuple class. 
+
+See [Point2](@ref crimild::Point2), [Point3](@ref crimild::Point3)
 
 ### Normals
+Normals are vectors that are penpendicular to a surface at a given position. What makes them special is that they are
+defined in terms of a specific surface, and they behave differently from vectors in some situations, like when applying
+transformations. 
 
-@ref crimild::Tuple3
-
-[Tuple](@ref crimild::Tuple3)
-
-See crimild::Tuple3
-
-See crimild::Vector3
-
-See crimild::Vector3Impl
-
-## Medium-level entities
-
-### Ray
+See [Normal3](@ref crimild::Normal3)
 
 ## High-level entities
+
+### Rays
+
+Rays are semi-infinite lines represented by their origin point and direction vector. 
+
+The _parametric form_ of a ray expresses it as a function of a scalar value _t_, such us:
+
+```
+r(t) = o + t * d    (0 <= t < Inf)
+```
+
+See [Ray3](@ref crimild::Ray3)
 
 ### Transformation
 

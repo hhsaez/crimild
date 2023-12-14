@@ -36,32 +36,66 @@ namespace crimild {
     /**
      * @brief A ray in 3D space
      *
-     * Uses default precision for members
+     * A semi-infinte line specified by its origin and a direction.
+     *
+     * Rays are represented using the default precision (real_t) for its
+     * members, since there is no need for non-floating-points rays.
      */
     struct Ray3 {
-        Point3 o;
-        Vector3 d;
+        constexpr Ray3( void ) = default;
 
-        [[nodiscard]] inline constexpr Point3f operator()( real_t t ) const noexcept;
+        constexpr explicit Ray3( const Point3 &origin, const Vector3 &direction ) noexcept
+            : origin( origin ),
+              direction( direction )
+        {
+            // no-op
+        }
+
+        ~Ray3( void ) = default;
+
+        /**
+         * @name Origin and direction
+         *
+         * Both origin and direction are public variables for convenience.
+         */
+        //@{
+
+        Point3 origin;
+        Vector3 direction;
+
+        //@}
 
         [[nodiscard]] inline constexpr bool operator==( const Ray3 &other ) const noexcept
         {
-            return o == other.o && d == other.d;
+            return origin == other.origin && direction == other.direction;
         }
 
         [[nodiscard]] inline constexpr bool operator!=( const Ray3 &other ) const noexcept
         {
             return !( *this == other );
         }
+
+        /**
+         * @brief Evaluates the ray at a given value
+         *
+         * @code
+         * r(t) = o + t * d    // 0 <= t < Inf
+         * @encode
+         */
+        [[nodiscard]] inline constexpr Point3 operator()( real_t t ) const noexcept
+        {
+            return origin + t * direction;
+        }
     };
 
     [[nodiscard]] inline constexpr const Point3 &origin( const Ray3 &r ) noexcept
     {
-        return r.o;
+        return r.origin;
     }
+
     [[nodiscard]] inline constexpr const Vector3 &direction( const Ray3 &r ) noexcept
     {
-        return r.d;
+        return r.direction;
     }
 
 }
