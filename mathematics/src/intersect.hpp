@@ -33,7 +33,6 @@
 #include "Plane3.hpp"
 #include "Point3.hpp"
 #include "Ray3.hpp"
-#include "Ray3_operators.hpp"
 #include "Sphere.hpp"
 #include "Transformation.hpp"
 #include "Transformation_apply.hpp"
@@ -157,19 +156,19 @@ namespace crimild {
 
         [[nodiscard]] static constexpr bool checkCylinderCap( const Ray3 &R, real_t t ) noexcept
         {
-            const auto x = R.o.x + t * R.d.x;
-            const auto z = R.o.z + t * R.d.z;
+            const auto x = R.origin.x + t * R.direction.x;
+            const auto z = R.origin.z + t * R.direction.z;
             return ( x * x + z * z ) <= 1;
         };
 
         [[nodiscard]] static constexpr bool intersectCylinderCaps( const Ray3 &R, const Cylinder &C, real_t &tMin, real_t &tMax ) noexcept
         {
-            if ( !isClosed( C ) || isZero( R.d.y ) ) {
+            if ( !isClosed( C ) || isZero( R.direction.y ) ) {
                 return false;
             }
 
             auto hasResult = false;
-            auto t = ( -C.height - R.o.y ) / R.d.y;
+            auto t = ( -C.height - R.origin.y ) / R.direction.y;
             if ( checkCylinderCap( R, t ) ) {
                 if ( t < tMin ) {
                     tMax = tMin;
@@ -180,7 +179,7 @@ namespace crimild {
                 hasResult = true;
             }
 
-            t = ( C.height - R.o.y ) / R.d.y;
+            t = ( C.height - R.origin.y ) / R.direction.y;
             if ( checkCylinderCap( R, t ) ) {
                 if ( t < tMin ) {
                     tMax = tMin;
@@ -201,13 +200,14 @@ namespace crimild {
         tMin = numbers::POSITIVE_INFINITY;
         tMax = numbers::POSITIVE_INFINITY;
 
-        const real_t a = ( R.d.x * R.d.x ) + ( R.d.z * R.d.z );
+        const auto Rdir = direction( R );
+        const real_t a = ( Rdir.x * Rdir.x ) + ( Rdir.z * Rdir.z );
         if ( isZero( a ) ) {
             return internal::intersectCylinderCaps( R, C, tMin, tMax );
         }
 
-        const real_t b = ( real_t( 2 ) * R.o.x * R.d.x ) + ( real_t( 2 ) * R.o.z * R.d.z );
-        const real_t c = ( R.o.x * R.o.x ) + ( R.o.z * R.o.z ) - real_t( 1 );
+        const real_t b = ( real_t( 2 ) * R.origin.x * Rdir.x ) + ( real_t( 2 ) * R.origin.z * Rdir.z );
+        const real_t c = ( R.origin.x * R.origin.x ) + ( R.origin.z * R.origin.z ) - real_t( 1 );
 
         const real_t disc = b * b - real_t( 4 ) * a * c;
         if ( disc < 0 ) {
@@ -223,14 +223,14 @@ namespace crimild {
 
         auto hasResult = false;
 
-        const auto y0 = R.o.y + t0 * R.d.y;
+        const auto y0 = R.origin.y + t0 * Rdir.y;
         if ( y0 < height( C ) && y0 > -height( C ) ) {
             tMin = t0;
             tMax = t0;
             hasResult = true;
         }
 
-        const auto y1 = R.o.y + t1 * R.d.y;
+        const auto y1 = R.origin.y + t1 * Rdir.y;
         if ( y1 < height( C ) && y1 > -height( C ) ) {
             if ( !hasResult ) {
                 tMin = t1;

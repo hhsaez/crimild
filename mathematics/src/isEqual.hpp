@@ -98,7 +98,7 @@ namespace crimild {
 
     [[nodiscard]] inline constexpr bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
     {
-        return isEqual( a.o, b.o ) && isEqual( a.d, b.d );
+        return isEqual( a.origin, b.origin ) && isEqual( a.direction, b.direction );
     }
 
 }

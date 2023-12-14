@@ -27,7 +27,6 @@
 
 #include "Ray3.hpp"
 
-#include "Ray_apply.hpp"
 #include "io.hpp"
 
 #include "gtest/gtest.h"
