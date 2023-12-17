@@ -33,6 +33,7 @@
 
 #include <functional>
 #include <iostream>
+#include <algorithm>
 
 namespace crimild {
 
