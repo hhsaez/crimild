@@ -28,19 +28,19 @@
 #ifndef CRIMILD_MATHEMATICS_IS_INFINITY_
 #define CRIMILD_MATHEMATICS_IS_INFINITY_
 
-#include <Crimild_Foundation.hpp>
+#include "Point3.hpp"
 #include <cmath>
 
 namespace crimild {
 
     template< typename T >
-    inline Bool isInfinity( const T &x ) noexcept
+    inline bool isInfinity( const T &x ) noexcept
     {
         return std::isinf( x );
     }
 
     template< typename T >
-    inline Bool isInfinity( const Point3Impl< T > &p ) noexcept
+    inline bool isInfinity( const Point3Impl< T > &p ) noexcept
     {
         return isInfinity( p.x ) || isInfinity( p.y ) || isInfinity( p.z );
     }
