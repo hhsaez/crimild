@@ -533,7 +533,7 @@ TEST( Bounds3, bisect )
         constexpr auto X0 = Bounds3 { { 1, 2, 3 }, { 2.5, 5, 6 } };
         constexpr auto X1 = Bounds3 { { 2.5, 2, 3 }, { 4, 5, 6 } };
 
-        EXPECT_EQ( Real( 2.5 ), split );
+        EXPECT_EQ( real_t( 2.5 ), split );
         EXPECT_EQ( X0, B0 );
         EXPECT_EQ( X1, B1 );
     }
@@ -544,7 +544,7 @@ TEST( Bounds3, bisect )
         constexpr auto X0 = Bounds3 { { 1, 2, 3 }, { 4, 3.5, 6 } };
         constexpr auto X1 = Bounds3 { { 1, 3.5, 3 }, { 4, 5, 6 } };
 
-        EXPECT_EQ( Real( 3.5 ), split );
+        EXPECT_EQ( real_t( 3.5 ), split );
         EXPECT_EQ( X0, B0 );
         EXPECT_EQ( X1, B1 );
     }

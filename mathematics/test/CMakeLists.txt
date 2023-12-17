@@ -2,7 +2,7 @@ crimild_trace()
 
 add_executable( crimild_mathematics_test )
 
-target_sources( 
+target_sources(
     crimild_mathematics_test
 
     PRIVATE
@@ -39,14 +39,13 @@ target_sources(
 
 target_include_directories( crimild_mathematics_test PRIVATE . )
 
-target_link_libraries( 
+target_link_libraries(
     crimild_mathematics_test
-    PRIVATE Crimild::Foundation
-    PRIVATE Crimild::Mathematics 
+    PRIVATE Crimild::Mathematics
     PRIVATE gtest gmock
 )
 
-gtest_discover_tests( 
+gtest_discover_tests(
     crimild_mathematics_test
     WORKING_DIRECTORY ${PROJECT_DIR}
     PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
