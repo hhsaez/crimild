@@ -30,6 +30,8 @@
 #include "Common/StringUtils.hpp"
 // #include "Simulation/FileSystem.hpp"
 
+#include <cassert>
+
 using namespace crimild;
 
 std::string FilePath::getExtension( void ) const noexcept
