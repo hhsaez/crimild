@@ -1,0 +1,74 @@
+#+TITLE: Crimild Mathematics Library
+#+AUTHOR: Hernan Saez (hhsaez@gmail.com)
+#+DESCRIPTION: About the Mathematics tools available in Crimild
+#+STARTUP: showeverything latexpreview
+#+OPTIONS: toc:4
+
+* Table of Contents :toc:
+- [[#real][Real]]
+- [[#low-level-abstractions][Low-level Abstractions]]
+  - [[#tuples][Tuples]]
+  - [[#vectors][Vectors]]
+  - [[#points][Points]]
+  - [[#normals][Normals]]
+- [[#higher-level-abstractions][Higher-level abstractions]]
+  - [[#transformation][Transformation]]
+- [[#coordinate-system][Coordinate system]]
+
+* Real
+
+* Low-level Abstractions
+
+$$e&{\pi i}=-1$$
+
+#+BEGIN_EXPORT latex
+\setlength{\unitlength}{1cm}
+\thicklines
+\begin{picture}(10,6)
+\put(2,2.2){\line(1,0){6}}
+\put(2,2.2){\circle{2}}
+\put(6,2.2){\oval(4,2)[r]}
+\end{picture}
+#+END_EXPORT
+
+#+BEGIN_SRC latex
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures
+\end{equation}                          % etc
+#+END_SRC
+
+#+BEGIN_SRC latex
+\LaTeX
+#+END_SRC
+
+\[
+x=\sqrt{b}                              % even tables, figures
+\]
+
+
+#+BEGIN_LaTeX
+\LaTeX
+#+END_LaTeX
+
+** Tuples
+
+
+#+BEGIN_SRC tex
+      x=\sqrt{b}
+#+END_SRC
+
+** Vectors
+
+** Points
+
+** Normals
+
+* Higher-level abstractions
+
+** Transformation
+
+There are many ways to implement transformations
+
+
+
+* Coordinate system
