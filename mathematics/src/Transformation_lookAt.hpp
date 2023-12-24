@@ -28,11 +28,11 @@
 #ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_LOOK_AT_
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_LOOK_AT_
 
-#include "Matrix4_inverse.hpp"
 #include "Point3.hpp"
 #include "Transformation.hpp"
 #include "cross.hpp"
 #include "dot.hpp"
+#include "inverse.hpp"
 #include "normalize.hpp"
 #include "orthonormalization.hpp"
 #include "swizzle.hpp"
@@ -54,7 +54,7 @@ namespace crimild {
         const auto xAxis = normalize(
             [ & ] {
                 auto ret = cross( normalize( up ), zAxis );
-                if ( lengthSquared( ret ) > 0 ) {
+                if ( length2( ret ) > 0 ) {
                     return ret;
                 } else {
                     // Pik a different up vector
