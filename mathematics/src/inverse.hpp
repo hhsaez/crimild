@@ -25,14 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_MATRIX_4_INVERSE_
-#define CRIMILD_MATHEMATICS_MATRIX_4_INVERSE_
+#ifndef CRIMILD_MATHEMATICS_INVERSE_
+#define CRIMILD_MATHEMATICS_INVERSE_
 
 #include "Matrix4.hpp"
+#include "Quaternion.hpp"
+#include "conjugate.hpp"
+#include "length.hpp"
 
 #include <cassert>
 
 namespace crimild {
+
+    /**
+     * @brief Computes the inverse of a quaternion
+     */
+    constexpr inline Quaternion inverse( const Quaternion &q ) noexcept
+    {
+        real_t N2 = length2( q );
+        const auto c = conjugate( q );
+        return real_t( 1 ) / N2 * c;
+    }
 
     template< typename T >
     [[nodiscard]] constexpr Matrix4Impl< T > inverse( const Matrix4Impl< T > &a ) noexcept

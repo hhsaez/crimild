@@ -34,6 +34,7 @@
 #include "Matrix4.hpp"
 #include "Normal3.hpp"
 #include "Point3.hpp"
+#include "Quaternion.hpp"
 #include "Ray3.hpp"
 #include "Transformation.hpp"
 #include "Vector2.hpp"
@@ -99,6 +100,11 @@ namespace crimild {
     [[nodiscard]] inline constexpr bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
     {
         return isEqual( a.origin, b.origin ) && isEqual( a.direction, b.direction );
+    }
+
+    [[nodicard]] inline constexpr bool isEqual( const Quaternion &q, const Quaternion r ) noexcept
+    {
+        return isEqual( q.v, r.v ) && isEqual( q.w, r.w );
     }
 
 }

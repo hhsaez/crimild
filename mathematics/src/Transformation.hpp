@@ -36,6 +36,13 @@
 
 namespace crimild {
 
+    /**
+     * @brief A function from points to points and vectors to vectors
+     *
+     * There are many ways to represent transformations.
+     * In the end, I chose the SRT (actually SQT) one because
+     * it's more suited for interpolations and compositions.
+     */
     struct Transformation {
         struct Constants;
 

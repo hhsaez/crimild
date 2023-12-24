@@ -27,115 +27,168 @@
 
 #include "Quaternion.hpp"
 
-#include "Interpolation.hpp"
-#include "Matrix3.hpp"
+#include "conjugate.hpp"
+#include "inverse.hpp"
+#include "io.hpp"
+#include "isEqual.hpp"
+#include "length.hpp"
+#include "normalize.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace crimild;
 
-#if 0
-
-TEST( QuaternionTest, testBasicOperations )
+TEST( Quaternion, identity )
 {
-    Quaternion q( 1, 2, 3, 4 );
-
-    EXPECT_TRUE( q.getReal() == 4 );
-    EXPECT_TRUE( q.getImaginary()[ 0 ] == 1 );
-    EXPECT_TRUE( q.getImaginary()[ 1 ] == 2 );
-    EXPECT_TRUE( q.getImaginary()[ 2 ] == 3 );
+    constexpr Quaternion q;
+    static_assert( q.v == Vector3::Constants::ZERO );
+    static_assert( q.w == 1 );
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testProduct )
+TEST( Quaternion, construction )
 {
+    constexpr Quaternion q( 1, 2, 3, 4 );
+
+    static_assert( isEqual( q.v, Vector3 { 1, 2, 3 } ) );
+    static_assert( isEqual( q.w, 4 ) );
+
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testAddition )
+TEST( Quaternion, construction_from_point )
 {
-    Quaternion q( 1, 2, 3, 4 );
-    Quaternion p( 5, 6, 7, 8 );
-    Quaternion result = q + p;
-    Quaternion expected( 6, 8, 10, 12 );
+    constexpr Point3 p( 1, 2, 3 );
+    constexpr Quaternion q( p );
+    static_assert( q == Quaternion( 1, 2, 3, 1 ) );
 
-    EXPECT_TRUE( result == expected );
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testConjugate )
+TEST( Quaternion, equality )
 {
-    /*
-    Quaternion q( 1, 2, 3, 4 );
-    Quaternion p( 5, 6, 7, 8 );
-    Quaternion r = q.getConjugate();
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion r( 5, 6, 7, 8 );
+    constexpr Quaternion s( 1, 2, 3, 4 );
 
-    EXPECT_TRUE( r == Quaternion( -1, -2, -3, 4 ) );
-    EXPECT_TRUE( r.getConjugate() == q );
-    EXPECT_TRUE( ( q + p ).getConjugate() == ( q.getConjugate() + p.getConjugate() ) );
+    static_assert( q != r );
+    static_assert( q == s );
 
-    // TODO: fix this test
-    EXPECT_EQ( ( q * p ).getConjugate(), ( p.getConjugate() * q.getConjugate() ) );
-    */
-    FAIL();
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testNorm )
+TEST( Quaternion, negation )
 {
-    /*
-    Quaternion q( 1, 2, 3, 4 );
-    Quaternion p( 5, 6, 7, 8 );
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    static_assert( -q == Quaternion( -1, -2, -3, -4 ) );
 
-    EXPECT_TRUE( Numericf::equals( q.getSquaredNorm(), 30.0f ) );
-    EXPECT_TRUE( Numericf::equals( q.getNorm(), std::sqrt( 30.0f ) ) );
-    EXPECT_TRUE( Numericf::equals( q.getNorm(), q.getConjugate().getNorm() ) );
-
-    q.normalize();
-    EXPECT_TRUE( Numericf::equals( 1, q.getNorm() ) );
-    */
-    FAIL();
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testIdentity )
+TEST( Quaternion, addition )
 {
-    /*
-    Quaternion q( 1, 2, 3, 4 );
-    q.makeIdentity();
-    EXPECT_TRUE( q == Quaternion( 0.0f, 0.0f, 0.0f, 1.0f ) );
-    */
-    FAIL();
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion r( 5, 6, 7, 8 );
+
+    static_assert( q + r == Quaternion( 6, 8, 10, 12 ) );
+
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testInverse )
+TEST( Quaternion, multiplication )
 {
-    Quaternion q( 1, 2, 3, 4 );
-    Quaternion r = q.getInverse();
+    static_assert(
+        isEqual(
+            Quaternion( 0, 0, 0, 1 ) * Quaternion( 0, 1, 0, 0 ),
+            Quaternion( 0, 1, 0, 0 )
+        )
+    );
 
-    EXPECT_TRUE( ( q * r ) == Quaternion( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion I;
+    static_assert( isEqual( q * I, q ) );
+    static_assert( isEqual( length( I * I ), 1 ) );
+
+    static_assert(
+        isEqual(
+            Quaternion( 0.0, 0.7071, 0.0, 0.7071 ) * Quaternion( 0.7071, 0.0, 0.7071, 0.0 ),
+            Quaternion( 0.999981, 0, 0, 0 )
+        )
+    );
+
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testRotationMatrix )
+TEST( Quaternion, conjugate )
 {
-    #if 0
-    Vector3 axis( 0.0f, 1.0f, 0.0f );
-    float angle = Numericf::PI;
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion p( 5, 6, 7, 8 );
+    constexpr Quaternion r = conjugate( q );
 
-    Matrix3f rotMatrix( axis, angle );
+    static_assert( r == Quaternion( -1, -2, -3, 4 ) );
+    static_assert( conjugate( conjugate( q ) ) == q );
+    static_assert( conjugate( r ) == q );
+    static_assert( conjugate( q + p ) == ( conjugate( q ) + conjugate( p ) ) );
+    static_assert( conjugate( q * p ) == ( conjugate( p ) * conjugate( q ) ) );
 
-    Quaternion rot( std::cos( angle / 2.0f ), std::sin( angle / 2.0f ) * axis );
-    Matrix3f rotMatrixFromQ;
-    rot.getRotationMatrix( rotMatrixFromQ );
-
-    for ( unsigned int i = 0; i < 9; i++ ) {
-        EXPECT_TRUE( Numericf::equals( rotMatrix[ i ], rotMatrixFromQ[ i ] ) );
-    }
-    #endif
-
-    FAIL();
+    EXPECT_TRUE( true );
 }
 
-TEST( QuaternionTest, testSlerp )
+TEST( Quaternion, length )
 {
-    Quaternion q0;
-    Quaternion q1;
-    Quaternion result = Interpolation::slerp( q0, q1, 0.5 );
+    constexpr Quaternion I;
+    static_assert( isEqual( length( I ), 1 ) );
+
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion p( 5, 6, 7, 8 );
+
+    static_assert( isEqual( length2( q ), 30.0f ) );
+    static_assert( isEqual( length( q ), crimild::sqrt( 30.0f ) ) );
+    static_assert( isEqual( length( q ), length( conjugate( q ) ) ) );
+
+    static_assert(
+        isEqual(
+            length( Quaternion( -0.5, 0.75, -0.25, 0.5 ) ),
+            1.06066
+        )
+    );
+
+    EXPECT_TRUE( true );
 }
 
-#endif
+TEST( Quaternion, normalization )
+{
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    static_assert( isEqual( length( normalize( q ) ), 1 ) );
+
+    constexpr Quaternion r;
+    static_assert( isEqual( normalize( r ), r ) );
+
+    static_assert(
+        isEqual(
+            normalize( Quaternion( -0.5, 0.75, -0.25, 0.5 ) ),
+            Quaternion( -0.471405, 0.707107, -0.235702, 0.471405 )
+        )
+    );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Quaternion, inverse )
+{
+    constexpr Quaternion q( 1, 2, 3, 4 );
+    constexpr Quaternion r = inverse( q );
+    constexpr Quaternion I;
+
+    static_assert( isEqual( q * r, I ) );
+    static_assert( isEqual( inverse( I ), I ) );
+
+    static_assert(
+        isEqual(
+            inverse( Quaternion( -0.5, 0.75, -0.25, 0.5 ) ),
+            Quaternion( 0.444444, -0.666667, 0.222222, 0.444444 )
+        )
+    );
+
+    EXPECT_TRUE( true );
+}

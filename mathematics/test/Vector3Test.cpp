@@ -204,7 +204,7 @@ TEST( Vector3, length )
 {
     constexpr auto u = crimild::Vector3 { 2, 3, 4 };
 
-    EXPECT_EQ( real_t( 29 ), crimild::lengthSquared( u ) );
+    EXPECT_EQ( real_t( 29 ), crimild::length2( u ) );
     EXPECT_EQ( real_t( 5.3851648071 ), crimild::length( u ) );
 }
 
@@ -219,7 +219,7 @@ TEST( Vector3, normalize )
 
     static_assert( crimild::isEqual( v, crimild::normalize( u ) ) );
 
-    EXPECT_TRUE( crimild::isEqual( real_t( 1 ), crimild::lengthSquared( crimild::normalize( u ) ) ) );
+    EXPECT_TRUE( crimild::isEqual( real_t( 1 ), crimild::length2( crimild::normalize( u ) ) ) );
     EXPECT_TRUE( crimild::isEqual( real_t( 1 ), crimild::length( crimild::normalize( u ) ) ) );
 }
 

@@ -39,33 +39,33 @@
 namespace crimild {
 
     template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr real_t distanceSquared( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
+    [[nodiscard]] inline constexpr real_t distance2( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
     {
-        return lengthSquared( u - v );
+        return length2( u - v );
     }
 
     template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr real_t distanceSquared( const Point3Impl< T > &u, const Point3Impl< U > &v ) noexcept
+    [[nodiscard]] inline constexpr real_t distance2( const Point3Impl< T > &u, const Point3Impl< U > &v ) noexcept
     {
-        return lengthSquared( v - u );
+        return length2( v - u );
     }
 
     template< ArithmeticType T, ArithmeticType U >
     [[nodiscard]] inline constexpr real_t distance( const Point3Impl< T > &u, const Point3Impl< U > &v ) noexcept
     {
-        return sqrt( lengthSquared( v - u ) );
+        return sqrt( length2( v - u ) );
     }
 
-    [[nodiscard]] constexpr real_t distanceSquared( const Ray3 &R, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distance2( const Ray3 &R, const Point3f &P ) noexcept
     {
         const auto V = P - origin( R );
         const auto d = dot( V, direction( R ) );
-        return ( dot( V, V ) - d * d ) / lengthSquared( direction( R ) );
+        return ( dot( V, V ) - d * d ) / length2( direction( R ) );
     }
 
     [[nodiscard]] constexpr real_t distance( const Ray3 &R, const Point3f &P ) noexcept
     {
-        return sqrt( distanceSquared( R, P ) );
+        return sqrt( distance2( R, P ) );
     }
 
     [[nodiscard]] constexpr real_t distanceSigned( const Plane3 &A, const Point3f &P ) noexcept

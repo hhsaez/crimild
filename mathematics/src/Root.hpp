@@ -28,9 +28,11 @@
 #ifndef CRIMILD_MATHEMATICS_ROOT_
 #define CRIMILD_MATHEMATICS_ROOT_
 
+#include "Types.hpp"
+
 namespace crimild {
 
-    [[nodiscard]] static constexpr bool findRoots( real_t a, real_t b, real_t c, real_t &t0, real_t &t1 ) noexcept
+    [[nodiscard]] static constexpr int findRoots( real_t a, real_t b, real_t c, real_t &t0, real_t &t1 ) noexcept
     {
         const auto discriminant = b * b - 4 * a * c;
 
