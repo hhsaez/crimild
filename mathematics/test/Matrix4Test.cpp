@@ -29,10 +29,10 @@
 
 #include "Matrix4_constants.hpp"
 #include "Matrix4_determinant.hpp"
-#include "Matrix4_inverse.hpp"
 #include "Matrix4_operators.hpp"
 #include "Matrix4_transpose.hpp"
 #include "Vector4.hpp"
+#include "inverse.hpp"
 #include "io.hpp"
 #include "isEqual.hpp"
 #include "isZero.hpp"

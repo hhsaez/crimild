@@ -12,27 +12,27 @@ crimild::real_t is used for float values
 ## Constants
 
 ## Coordinate System
-Crimild uses a right handed coordinate system. 
+Crimild uses a right handed coordinate system.
 
 ### The `FORWARD` vector
-The [FORWARD](@ref crimild::Vector3Impl<T>::Constants::FORWARD) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate. 
+The [FORWARD](@ref crimild::Vector3Impl<T>::Constants::FORWARD) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate.
 
-The [FORWARD](@ref crimild::Vector3Impl<T>::Constants) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate. 
+The [FORWARD](@ref crimild::Vector3Impl<T>::Constants) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate.
 
-The [FORWARD](@ref crimild::Vector3Impl::Constants::FORWARD) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate. 
+The [FORWARD](@ref crimild::Vector3Impl::Constants::FORWARD) vector, declared as a crimild::Vector3 constant, points towards the negative z-coordinate.
 
 ## Low-level entities
 
 ### Tuples
 
-Tuple template classes, [Tuple2](@ref crimild::Tuple2), [Tuple3](@ref crimild::Tuple3) and [Tuple4](@ref crimild::Tuple4) 
-provide common utilities for two-, three- and four-dimension entities like points, vectors and normals. 
+Tuple template classes, [Tuple2](@ref crimild::Tuple2), [Tuple3](@ref crimild::Tuple3) and [Tuple4](@ref crimild::Tuple4)
+provide common utilities for two-, three- and four-dimension entities like points, vectors and normals.
 
-They make use of the "curiously recurring template pattern" (`CRTP`) to know the type of a `Derived` class 
-(i.e. [Vector2](@ref crimild::Vector2)) and, therefore, the exact type that should be returned from some of 
-its generic functions (see their [implementations for various operators overloads](@ref crimild::Tuple2::operator+), for 
-an example). This helps reducing the amount of repeated code in derived classes, while also ensuring those operations 
-cannot be accidentally mixed. On the contast, if we use Tuple2 (or any other tuple base type) instead of the type of 
+They make use of the "curiously recurring template pattern" (`CRTP`) to know the type of a `Derived` class
+(i.e. [Vector2](@ref crimild::Vector2)) and, therefore, the exact type that should be returned from some of
+its generic functions (see their [implementations for various operators overloads](@ref crimild::Tuple2::operator+), for
+an example). This helps reducing the amount of repeated code in derived classes, while also ensuring those operations
+cannot be accidentally mixed. On the contast, if we use Tuple2 (or any other tuple base type) instead of the type of
 a derived class, we could end up mixing operations between Vector2 and Point2, which are not supposed to be allowed. For
 example, you're not supposed to add a Normal3 to a Point3 or two Point2 togheter.
 
@@ -41,7 +41,7 @@ specifying a derived type), without having to rely on pure virutal functions (th
 of virtual functions for performance reasons).
 
 #### Constructors
-Constructors are made protected to enphasize that tuples are not classes that can be instantiated directly, but 
+Constructors are made protected to enphasize that tuples are not classes that can be instantiated directly, but
 they are intended to be used by derived classes only.
 
 #### About NaN values
@@ -76,10 +76,10 @@ overload returns a reference, allowing to set the values of each component while
 
 A check is done to ensure that the provided `index` value is
 within the expected range. Otherwise, it will fail. For performance reasons, this check is done
-using an `assert` call, which is only evaluated in debug builds. 
+using an `assert` call, which is only evaluated in debug builds.
 
 #### Comparison operators
-Tuple class overload the comparison operator `==` in order to check if two tuples are the same. 
+Tuple class overload the comparison operator `==` in order to check if two tuples are the same.
 
 In order to prevent ambiguities, these overloads use TupleX base class as param. It is still
 not possible to compare objects of different Derived types, though, so comparing
@@ -117,7 +117,7 @@ There are many arithmetic operations, such as:
 - Basic oeprator for per-component addition (`+`), substraction (`-`) and negation (`-`), including the _in place_
 (i.e `operator+=`) froms of them.
 - Component-wise multiplication and division by scalar (including _in place_ variants)
-- Component-wise multiplication and division by another tuple of the same type (but potentially using a different 
+- Component-wise multiplication and division by another tuple of the same type (but potentially using a different
 storage type)
 - `abs()`, `ceil()`, `floor()` utilities for return the absolute value and rounding for each component of the input tuple
 - `min()` and `max()` for returning the minimum/maximum value of a single tuple or the minimum/maximum per component of two tuples
@@ -130,36 +130,36 @@ Crimild provides types for 2D, 3D and 4D vectors, based on the corresponding two
 tuple class. All vector types are parametrized by their underlying storage type, like integer or floating-point types.
 
 Aliases are defined for widely-used vector types, such as `Vector3f` for a three-dimensional vector type of floating point values
-or `Vector4i` for a four-dimensional vector type of signed integeres. 
+or `Vector4i` for a four-dimensional vector type of signed integeres.
 
-Default implementation for floating-point vectors, like `Vector3`, use the `real_t` type alias, meaning we can switching them 
-between 32- and 64-bits representations if needed depending on how the engine is compiled. 
+Default implementation for floating-point vectors, like `Vector3`, use the `real_t` type alias, meaning we can switching them
+between 32- and 64-bits representations if needed depending on how the engine is compiled.
 
 Special constructors for creating vectors from other tuple types are flagged as `explicit` so it is not unintentionally used
-by authomatic type conversions. 
+by authomatic type conversions.
 
 #### Length
 Computing the lenght of a vector might seem trivial, but there is a subtletly that needs to be considered: what should be the
-_type_ for the length of a vector? For floating-point vectors, the answer is simple: use the same type as the vector itself. 
+_type_ for the length of a vector? For floating-point vectors, the answer is simple: use the same type as the vector itself.
 But what if the vector has integer values? Then, the result of the `length()` function should be a floating-point value instead,
 right? In order to solve this situation, the [Length](@ref crimild::Length) type trait is introduced. See the
 implementation of [length()](@ref crimild::length) for reference about how this trait is used to return the correct value type.
 
-### Points 
-A point is a zero-dimensional location in 2D, 3D or 4D space, represented by the [Point2](@ref crimild::Point2Impl), 
+### Points
+A point is a zero-dimensional location in 2D, 3D or 4D space, represented by the [Point2](@ref crimild::Point2Impl),
 [Point3](@ref crimild::Point3Impl) and [Point4](@ref crimild::Point4Impl), respectively. Although it has a similar
 implementation as vectors, the fact that points represents a position whereas a vector represents a direction leads
-to a number of important differences in how they should be treated in different parts of the engine. 
+to a number of important differences in how they should be treated in different parts of the engine.
 
 Please not that some methods of point classes return or take vectors. This requires some operators to be overloaded
-in the respective point classes instead of using the ones provided by their base tuple class. 
+in the respective point classes instead of using the ones provided by their base tuple class.
 
 See [Point2](@ref crimild::Point2), [Point3](@ref crimild::Point3)
 
 ### Normals
 Normals are vectors that are penpendicular to a surface at a given position. What makes them special is that they are
 defined in terms of a specific surface, and they behave differently from vectors in some situations, like when applying
-transformations. 
+transformations.
 
 See [Normal3](@ref crimild::Normal3)
 
@@ -167,7 +167,7 @@ See [Normal3](@ref crimild::Normal3)
 
 ### Rays
 
-Rays are semi-infinite lines represented by their origin point and direction vector. 
+Rays are semi-infinite lines represented by their origin point and direction vector.
 
 The _parametric form_ of a ray expresses it as a function of a scalar value _t_, such us:
 
@@ -180,7 +180,7 @@ See [Ray3](@ref crimild::Ray3)
 ### Transformation
 
 ## Testing
-Most of the tests make use of the default `real_t` precision, so they will still be valid if we start using a different precision in the future. 
+Most of the tests make use of the default `real_t` precision, so they will still be valid if we start using a different precision in the future.
 
 ## Column order for matrices and vectors
 First of all, members of both Vector* and Matrix* entities are stored linearly in memory. This helps copying them around, encoding, and sending them to shaders.

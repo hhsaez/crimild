@@ -211,7 +211,7 @@ namespace crimild {
         {
             while ( true ) {
                 const auto v = nextVector3( -1, 1 );
-                if ( lengthSquared( v ) >= 1 ) {
+                if ( length2( v ) >= 1 ) {
                     continue;
                 } else {
                     return v;
@@ -229,7 +229,7 @@ namespace crimild {
         {
             while ( true ) {
                 const auto v = nextVector2( -1, 1 );
-                if ( lengthSquared( v ) >= 1 ) {
+                if ( length( v ) >= 1 ) {
                     continue;
                 } else {
                     return v;

@@ -25,34 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_NORMALIZE_
-#define CRIMILD_MATHEMATICS_NORMALIZE_
+#ifndef CRIMILD_MATHEMATICS_CONJUGATE_
+#define CRIMILD_MATHEMATICS_CONJUGATE_
 
-#include "length.hpp"
+#include "Quaternion.hpp"
 
 namespace crimild {
 
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr Vector3Impl< T > normalize( const Vector3Impl< T > &u ) noexcept
+    constexpr inline Quaternion conjugate( const Quaternion &q ) noexcept
     {
-        return u / length( u );
-    }
-
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr Vector4Impl< T > normalize( const Vector4Impl< T > &u ) noexcept
-    {
-        return u / length( u );
-    }
-
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr Normal3Impl< T > normalize( const Normal3Impl< T > &u ) noexcept
-    {
-        return u / length( u );
-    }
-
-    constexpr inline Quaternion normalize( const Quaternion &q ) noexcept
-    {
-        return real_t( 1 ) / length( q ) * q;
+        return Quaternion { -q.v, q.w };
     }
 
 }

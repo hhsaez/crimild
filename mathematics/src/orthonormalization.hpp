@@ -62,7 +62,7 @@ namespace crimild {
     template< typename T >
     static constexpr void orthonormalBasis( const Vector3Impl< T > &v1, Vector3Impl< T > &v2, Vector3Impl< T > &v3 ) noexcept
     {
-        assert( isEqual( lengthSquared( v1 ), 1 ) );
+        assert( isEqual( length2( v1 ), 1 ) );
         const real_t s = sign( v1.z );
         const real_t a = -1 / ( s + v1.z );
         const real_t b = v1.x * v1.y * a;

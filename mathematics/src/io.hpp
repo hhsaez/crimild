@@ -33,6 +33,7 @@
 #include "LineSegment3.hpp"
 #include "Matrix4.hpp"
 #include "Plane3.hpp"
+#include "Quaternion.hpp"
 #include "Ray3.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
@@ -118,6 +119,14 @@ namespace crimild {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
             << std::setprecision( 6 );
         out << "[" << a[ 0 ] << ", " << a[ 1 ] << ", " << a[ 2 ] << ", " << a[ 3 ] << "]";
+        return out;
+    }
+
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Quaternion &q ) noexcept
+    {
+        out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
+            << std::setprecision( 10 )
+            << "[" << q.v << ", " << q.w << "]";
         return out;
     }
 

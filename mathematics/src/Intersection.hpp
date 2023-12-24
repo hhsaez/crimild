@@ -46,9 +46,9 @@ namespace crimild {
     {
         const auto centerDiff = origin( R ) - center( S );
 
-        const auto a = lengthSquared( direction( R ) );
+        const auto a = length2( direction( R ) );
         const auto b = real_t( 2 ) * dot( centerDiff, direction( R ) );
-        const auto c = lengthSquared( centerDiff ) - pow( radius( S ), 2 );
+        const auto c = length2( centerDiff ) - pow( radius( S ), 2 );
 
         real_t t0 = 0;
         real_t t1 = 0;
