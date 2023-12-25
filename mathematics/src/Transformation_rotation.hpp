@@ -37,19 +37,19 @@ namespace crimild {
     // TODO: make this function constexpr
     [[nodiscard]] static Transformation rotationX( radians_t angle ) noexcept
     {
-        const auto m = Matrix4 {
-            { 1, 0, 0, 0 },
-            { 0, cos( angle ), sin( angle ), 0 },
-            { 0, -sin( angle ), cos( angle ), 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto m = Matrix4(
+            Vector4 { 1, 0, 0, 0 },
+            Vector4 { 0, cos( angle ), sin( angle ), 0 },
+            Vector4 { 0, -sin( angle ), cos( angle ), 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
-        const auto inv = Matrix4 {
-            { 1, 0, 0, 0 },
-            { 0, cos( -angle ), sin( -angle ), 0 },
-            { 0, -sin( -angle ), cos( -angle ), 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto inv = Matrix4(
+            Vector4 { 1, 0, 0, 0 },
+            Vector4 { 0, cos( -angle ), sin( -angle ), 0 },
+            Vector4 { 0, -sin( -angle ), cos( -angle ), 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
         return Transformation { m, inv, Transformation::Contents::ROTATION };
     }
@@ -57,19 +57,19 @@ namespace crimild {
     // TODO: make this function constexpr
     [[nodiscard]] static Transformation rotationY( radians_t angle ) noexcept
     {
-        const auto m = Matrix4 {
-            { cos( angle ), 0, -sin( angle ), 0 },
-            { 0, 1, 0, 0 },
-            { sin( angle ), 0, cos( angle ), 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto m = Matrix4(
+            Vector4 { cos( angle ), 0, -sin( angle ), 0 },
+            Vector4 { 0, 1, 0, 0 },
+            Vector4 { sin( angle ), 0, cos( angle ), 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
-        const auto inv = Matrix4 {
-            { cos( -angle ), 0, -sin( -angle ), 0 },
-            { 0, 1, 0, 0 },
-            { sin( -angle ), 0, cos( -angle ), 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto inv = Matrix4(
+            Vector4 { cos( -angle ), 0, -sin( -angle ), 0 },
+            Vector4 { 0, 1, 0, 0 },
+            Vector4 { sin( -angle ), 0, cos( -angle ), 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
         return Transformation { m, inv, Transformation::Contents::ROTATION };
     }
@@ -77,19 +77,19 @@ namespace crimild {
     // TODO: make this function constexpr
     [[nodiscard]] static Transformation rotationZ( radians_t angle ) noexcept
     {
-        const auto m = Matrix4 {
-            { cos( angle ), sin( angle ), 0, 0 },
-            { -sin( angle ), cos( angle ), 0, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto m = Matrix4(
+            Vector4 { cos( angle ), sin( angle ), 0, 0 },
+            Vector4 { -sin( angle ), cos( angle ), 0, 0 },
+            Vector4 { 0, 0, 1, 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
-        const auto inv = Matrix4 {
-            { cos( -angle ), sin( -angle ), 0, 0 },
-            { -sin( -angle ), cos( -angle ), 0, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto inv = Matrix4(
+            Vector4 { cos( -angle ), sin( -angle ), 0, 0 },
+            Vector4 { -sin( -angle ), cos( -angle ), 0, 0 },
+            Vector4 { 0, 0, 1, 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
         return Transformation { m, inv, Transformation::Contents::ROTATION };
     }
@@ -112,61 +112,61 @@ namespace crimild {
         const auto oneMinusSinTheta = real_t( 1 ) - sinTheta;
 
         // TODO: I think I need to transpose this matrix in order to make it work with right-hand coordinate systems
-        const auto m = Matrix4 {
-            {
+        const auto m = Matrix4(
+            Vector4 {
                 xx * oneMinusCosTheta + cosTheta,
                 xy * oneMinusCosTheta + z * sinTheta,
                 xz * oneMinusCosTheta - y * sinTheta,
                 0,
             },
-            {
+            Vector4 {
                 xy * oneMinusCosTheta - z * sinTheta,
                 yy * oneMinusCosTheta + cosTheta,
                 yz * oneMinusCosTheta + x * sinTheta,
                 0,
             },
-            {
+            Vector4 {
                 xz * oneMinusCosTheta + y * sinTheta,
                 yz * oneMinusCosTheta - x * sinTheta,
                 zz * oneMinusCosTheta + cosTheta,
                 0,
             },
-            {
+            Vector4 {
                 0,
                 0,
                 0,
                 1,
             }
-        };
+        );
 
         // cos(-theta) == cos(theta)
         // sin(-theta) == -sin(theta)
-        const auto inv = Matrix4 {
-            {
+        const auto inv = Matrix4(
+            Vector4 {
                 xx * oneMinusCosTheta + cosTheta,
                 xy * oneMinusCosTheta - z * sinTheta,
                 xz * oneMinusCosTheta + y * sinTheta,
                 0,
             },
-            {
+            Vector4 {
                 xy * oneMinusCosTheta + z * sinTheta,
                 yy * oneMinusCosTheta + cosTheta,
                 yz * oneMinusCosTheta - x * sinTheta,
                 0,
             },
-            {
+            Vector4 {
                 xz * oneMinusCosTheta - y * sinTheta,
                 yz * oneMinusCosTheta + x * sinTheta,
                 zz * oneMinusCosTheta + cosTheta,
                 0,
             },
-            {
+            Vector4 {
                 0,
                 0,
                 0,
                 1,
-            },
-        };
+            }
+        );
 
         return Transformation { m, inv, Transformation::Contents::ROTATION };
     }

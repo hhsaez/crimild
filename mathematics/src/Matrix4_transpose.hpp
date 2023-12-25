@@ -35,12 +35,12 @@ namespace crimild {
     template< typename T >
     [[nodiscard]] inline constexpr Matrix4Impl< T > transpose( const Matrix4Impl< T > &A ) noexcept
     {
-        return Matrix4Impl< T > {
-            { A[ 0 ][ 0 ], A[ 1 ][ 0 ], A[ 2 ][ 0 ], A[ 3 ][ 0 ] },
-            { A[ 0 ][ 1 ], A[ 1 ][ 1 ], A[ 2 ][ 1 ], A[ 3 ][ 1 ] },
-            { A[ 0 ][ 2 ], A[ 1 ][ 2 ], A[ 2 ][ 2 ], A[ 3 ][ 2 ] },
-            { A[ 0 ][ 3 ], A[ 1 ][ 3 ], A[ 2 ][ 3 ], A[ 3 ][ 3 ] },
-        };
+        return Matrix4Impl< T >(
+            Vector4Impl< T > { A[ 0 ][ 0 ], A[ 1 ][ 0 ], A[ 2 ][ 0 ], A[ 3 ][ 0 ] },
+            Vector4Impl< T > { A[ 0 ][ 1 ], A[ 1 ][ 1 ], A[ 2 ][ 1 ], A[ 3 ][ 1 ] },
+            Vector4Impl< T > { A[ 0 ][ 2 ], A[ 1 ][ 2 ], A[ 2 ][ 2 ], A[ 3 ][ 2 ] },
+            Vector4Impl< T > { A[ 0 ][ 3 ], A[ 1 ][ 3 ], A[ 2 ][ 3 ], A[ 3 ][ 3 ] }
+        );
     }
 
 }

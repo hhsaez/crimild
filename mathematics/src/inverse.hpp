@@ -72,32 +72,32 @@ namespace crimild {
         assert( det != 0 );
         const real_t invDet = real_t( 1 ) / det;
 
-        return Matrix4Impl< T > {
-            {
+        return Matrix4Impl< T >(
+            Vector4Impl< T > {
                 ( a11 * b11 - a12 * b10 + a13 * b09 ) * invDet,
                 ( a12 * b08 - a10 * b11 - a13 * b07 ) * invDet,
                 ( a10 * b10 - a11 * b08 + a13 * b06 ) * invDet,
                 ( a11 * b07 - a10 * b09 - a12 * b06 ) * invDet,
             },
-            {
+            Vector4Impl< T > {
                 ( a02 * b10 - a01 * b11 - a03 * b09 ) * invDet,
                 ( a00 * b11 - a02 * b08 + a03 * b07 ) * invDet,
                 ( a01 * b08 - a00 * b10 - a03 * b06 ) * invDet,
                 ( a00 * b09 - a01 * b07 + a02 * b06 ) * invDet,
             },
-            {
+            Vector4Impl< T > {
                 ( a31 * b05 - a32 * b04 + a33 * b03 ) * invDet,
                 ( a32 * b02 - a30 * b05 - a33 * b01 ) * invDet,
                 ( a30 * b04 - a31 * b02 + a33 * b00 ) * invDet,
                 ( a31 * b01 - a30 * b03 - a32 * b00 ) * invDet,
             },
-            {
+            Vector4Impl< T > {
                 ( a22 * b04 - a21 * b05 - a23 * b03 ) * invDet,
                 ( a20 * b05 - a22 * b02 + a23 * b01 ) * invDet,
                 ( a21 * b02 - a20 * b04 - a23 * b00 ) * invDet,
                 ( a20 * b03 - a21 * b01 + a22 * b00 ) * invDet,
-            },
-        };
+            }
+        );
     }
 
 }

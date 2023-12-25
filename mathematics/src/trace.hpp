@@ -25,36 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_MATRIX_4_CONSTANTS_
-#define CRIMILD_MATHEMATICS_MATRIX_4_CONSTANTS_
+#ifndef CRIMILD_MATHEMATICS_TRACE_
+#define CRIMILD_MATHEMATICS_TRACE_
 
 #include "Matrix4.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Matrix4Impl< T >::Constants {
-        static constexpr auto IDENTITY = Matrix4Impl {
-            { 1, 0, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 1 },
-        };
-
-        static constexpr auto ZERO = Matrix4Impl {
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 },
-        };
-
-        static constexpr auto ONE = Matrix4Impl {
-            { 1, 1, 1, 1 },
-            { 1, 1, 1, 1 },
-            { 1, 1, 1, 1 },
-            { 1, 1, 1, 1 },
-        };
-    };
+    template< ArithmeticType T >
+    inline constexpr T trace( const Matrix4Impl< T > &M ) noexcept
+    {
+        return M[ 0 ][ 0 ] + M[ 1 ][ 1 ] + M[ 2 ][ 2 ] + M[ 3 ][ 3 ];
+    }
 
 }
 

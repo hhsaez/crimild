@@ -37,9 +37,7 @@
 #include "dot.hpp"
 #include "sqrt.hpp"
 #include "swizzle.hpp"
-
-#include <iomanip>
-#include <iostream>
+#include "trace.hpp"
 
 namespace crimild {
 
@@ -59,6 +57,11 @@ namespace crimild {
 
        The variable qw is called the real part of a quaternion. The imaginary part
        is qv, and i, j and k are called imaginary units
+
+       For convention, a quaternion is written as [x y z w], which is not
+       the same as the convention found in academic papers (which puts the
+       `w` component first. This is so to be consistent with the represetation
+       of homogeneous coordiantes for points and vectors.
 
        \section REFERENCES References
 
@@ -89,6 +92,68 @@ namespace crimild {
         constexpr explicit Quaternion( const Vector4Impl< U > &v ) noexcept
             : v( v.x, v.y, v.z ), w( v.w ) { }
 
+        /**
+         * @brief Creates a quaternion from an orthogonal 4x4 matrix
+         *
+         * This algorithm is based on the one provided  by thee book
+         * "Real-time Rendering", 3rd Edition.
+         */
+        template< ArithmeticType U >
+        constexpr explicit Quaternion( const Matrix4Impl< U > &M ) noexcept
+        {
+            // Compute some key values that will determine which
+            // of the component of the quaternion will be the
+            // largest one.
+            const real_t a = M[ 0 ][ 0 ] - M[ 1 ][ 1 ] - M[ 2 ][ 2 ]; // 4x^2 - 1
+            const real_t b = M[ 1 ][ 1 ] - M[ 0 ][ 0 ] - M[ 2 ][ 2 ]; // 4y^2 - 1
+            const real_t c = M[ 2 ][ 2 ] - M[ 0 ][ 0 ] - M[ 1 ][ 1 ]; // 4z^2 - 1
+            const real_t d = M[ 0 ][ 0 ] + M[ 1 ][ 1 ] + M[ 2 ][ 2 ]; // 4w^2 - 1
+
+            int biggestIndex = 3;
+            real_t e = d; // Assumes w is highest one
+            if ( a > e ) {
+                e = a;
+                biggestIndex = 0;
+            }
+            if ( b > e ) {
+                e = b;
+                biggestIndex = 1;
+            }
+            if ( c > e ) {
+                e = c;
+                biggestIndex = 2;
+            }
+
+            real_t s = sqrt( e + real_t( 1 ) ) * real_t( 0.5 );
+            real_t t = real_t( 0.25 ) / s;
+
+            if ( biggestIndex == 0 ) {
+                // x is biggest
+                v.x = s;
+                v.y = ( M[ 0 ][ 1 ] + M[ 1 ][ 0 ] ) * t;
+                v.z = ( M[ 2 ][ 0 ] + M[ 0 ][ 2 ] ) * t;
+                w = ( M[ 1 ][ 2 ] - M[ 2 ][ 1 ] ) * t;
+            } else if ( biggestIndex == 1 ) {
+                // y is biggest
+                v.x = ( M[ 0 ][ 1 ] + M[ 1 ][ 0 ] ) * t;
+                v.y = s;
+                v.z = ( M[ 1 ][ 2 ] + M[ 2 ][ 1 ] ) * t;
+                w = ( M[ 2 ][ 0 ] - M[ 0 ][ 2 ] ) * t;
+            } else if ( biggestIndex == 2 ) {
+                // z is biggest
+                v.x = ( M[ 2 ][ 0 ] + M[ 0 ][ 2 ] ) * t;
+                v.y = ( M[ 1 ][ 2 ] + M[ 2 ][ 1 ] ) * t;
+                v.z = s;
+                w = ( M[ 0 ][ 1 ] - M[ 1 ][ 0 ] ) * t;
+            } else {
+                // w is biggest
+                v.x = ( M[ 1 ][ 2 ] - M[ 2 ][ 1 ] ) * t;
+                v.y = ( M[ 2 ][ 0 ] - M[ 0 ][ 2 ] ) * t;
+                v.z = ( M[ 0 ][ 1 ] - M[ 1 ][ 0 ] ) * t;
+                w = s;
+            }
+        }
+
         ~Quaternion( void ) = default;
 
         constexpr Quaternion &operator=( const Quaternion &q ) noexcept
@@ -106,6 +171,16 @@ namespace crimild {
         constexpr inline bool operator!=( const Quaternion &q ) const noexcept
         {
             return !( *this == q );
+        }
+
+        constexpr inline real_t &operator[]( size_t index ) noexcept
+        {
+            return index == 3 ? w : v[ index ];
+        }
+
+        constexpr inline real_t operator[]( size_t index ) const noexcept
+        {
+            return index == 3 ? w : v[ index ];
         }
 
         /**
@@ -194,6 +269,50 @@ namespace crimild {
 
         //@{
     };
+
+    /**
+     * @brief Creates a 4x4 Matrix from a unit Quaternion
+     *
+     * @remarks This method assumes the argument is a unit quaternion
+     */
+    template<>
+    constexpr Matrix4Impl< real_t >::Matrix4Impl( const Quaternion &q ) noexcept
+    {
+        const real_t qxx = q.v.x * q.v.x;
+        const real_t qxy = q.v.x * q.v.y;
+        const real_t qxz = q.v.x * q.v.z;
+        const real_t qyy = q.v.y * q.v.y;
+        const real_t qyz = q.v.y * q.v.z;
+        const real_t qzz = q.v.z * q.v.z;
+        const real_t qwx = q.v.x * q.w;
+        const real_t qwy = q.v.y * q.w;
+        const real_t qwz = q.v.z * q.w;
+
+        columns[ 0 ] = {
+            1 - 2 * ( qyy + qzz ),
+            2 * ( qxy + qwz ),
+            2 * ( qxz - qwy ),
+            0,
+        };
+        columns[ 1 ] = {
+            2 * ( qxy - qwz ),
+            1 - 2 * ( qxx + qzz ),
+            2 * ( qyz + qwx ),
+            0,
+        };
+        columns[ 2 ] = {
+            2 * ( qxz + qwy ),
+            2 * ( qyz - qwx ),
+            1 - 2 * ( qxx + qyy ),
+            0,
+        };
+        columns[ 3 ] = {
+            0,
+            0,
+            0,
+            1,
+        };
+    }
 
 }
 
