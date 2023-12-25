@@ -42,12 +42,12 @@ namespace crimild {
         const auto cr = cos( roll );
         const auto sr = sin( roll );
 
-        const auto mat = Matrix4 {
-            { cy * cr + sy * sp * sr, sr * cp, -sy * cr + cy * sp * sr, 0 },
-            { -cy * sr + sy * sp * cr, cr * cp, sr * sy + cy * sp * cr, 0 },
-            { sy * cp, -sp, cy * cp, 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto mat = Matrix4(
+            Vector4 { cy * cr + sy * sp * sr, sr * cp, -sy * cr + cy * sp * sr, 0 },
+            Vector4 { -cy * sr + sy * sp * cr, cr * cp, sr * sy + cy * sp * cr, 0 },
+            Vector4 { sy * cp, -sp, cy * cp, 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
         return Transformation {
             .mat = mat,

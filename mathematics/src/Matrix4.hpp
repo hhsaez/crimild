@@ -31,51 +31,79 @@
 #include "Ray3.hpp"
 #include "Vector4.hpp"
 
+#include <array>
+
 namespace crimild {
 
+    class Quaternion;
+
+    /**
+     * @brief a 4x4 matrix representation
+     *
+     * Represented as 4 Vector4 columns
+     */
     template< typename T >
     struct Matrix4Impl {
-        struct Constants;
+        struct Constants {
+            static constexpr auto IDENTITY = Matrix4Impl(
+                Vector4Impl< T > { 1, 0, 0, 0 },
+                Vector4Impl< T > { 0, 1, 0, 0 },
+                Vector4Impl< T > { 0, 0, 1, 0 },
+                Vector4Impl< T > { 0, 0, 0, 1 }
+            );
 
-        Vector4Impl< T > c0;
-        Vector4Impl< T > c1;
-        Vector4Impl< T > c2;
-        Vector4Impl< T > c3;
+            static constexpr auto ZERO = Matrix4Impl(
+                Vector4Impl< T > { 0, 0, 0, 0 },
+                Vector4Impl< T > { 0, 0, 0, 0 },
+                Vector4Impl< T > { 0, 0, 0, 0 },
+                Vector4Impl< T > { 0, 0, 0, 0 }
+            );
+
+            static constexpr auto ONE = Matrix4Impl(
+                Vector4Impl< T > { 1, 1, 1, 1 },
+                Vector4Impl< T > { 1, 1, 1, 1 },
+                Vector4Impl< T > { 1, 1, 1, 1 },
+                Vector4Impl< T > { 1, 1, 1, 1 }
+            );
+        };
+
+        constexpr Matrix4Impl( void ) noexcept = default;
+
+        template< ArithmeticType U >
+        constexpr explicit Matrix4Impl( const std::array< Vector4Impl< U >, 4 > &columns ) noexcept
+            : columns( columns ) { }
+
+        template< ArithmeticType U >
+        constexpr Matrix4Impl( const Vector4Impl< U > &c0, const Vector4Impl< U > &c1, const Vector4Impl< U > &c2, const Vector4Impl< U > &c3 ) noexcept
+            : columns( { c0, c1, c2, c3 } ) { }
+
+        template< ArithmeticType U >
+        constexpr Matrix4Impl( const Matrix4Impl< U > &other ) noexcept
+            : columns( other.columns ) { }
+
+        /**
+         * @brief Creates a Matrix from a Quaternion
+         *
+         * @see Quaternion
+         */
+        constexpr explicit Matrix4Impl( const Quaternion &q ) noexcept;
+
+        ~Matrix4Impl( void ) noexcept = default;
 
         [[nodiscard]] inline constexpr const Vector4Impl< T > &operator[]( size_t index ) const noexcept
         {
-            switch ( index ) {
-                case 0:
-                    return c0;
-                case 1:
-                    return c1;
-                case 2:
-                    return c2;
-                case 3:
-                default:
-                    return c3;
-            };
+            return columns[ index ];
         }
 
         [[nodiscard]] inline Vector4Impl< T > &operator[]( size_t index ) noexcept
         {
-            switch ( index ) {
-                case 0:
-                    return c0;
-                case 1:
-                    return c1;
-                case 2:
-                    return c2;
-                case 3:
-                default:
-                    return c3;
-            };
+            return columns[ index ];
         }
 
         template< typename U >
         [[nodiscard]] inline constexpr size_t operator==( const Matrix4Impl< U > &other ) const noexcept
         {
-            return c0 == other.c0 && c1 == other.c1 && c2 == other.c2 && c3 == other.c3;
+            return columns == other.columns;
         }
 
         template< typename U >
@@ -91,6 +119,8 @@ namespace crimild {
                 Vector3( *this * Vector4( direction( R ) ) ),
             };
         }
+
+        std::array< Vector4Impl< T >, 4 > columns = Constants::IDENTITY.columns;
     };
 
     using Matrix4 = Matrix4Impl< real_t >;

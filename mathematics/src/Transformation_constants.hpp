@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_CONSTANTS_
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_CONSTANTS_
 
-#include "Matrix4_constants.hpp"
+#include "Matrix4.hpp"
 #include "Transformation.hpp"
 
 namespace crimild {

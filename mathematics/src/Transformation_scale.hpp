@@ -34,21 +34,19 @@ namespace crimild {
 
     [[nodiscard]] static constexpr Transformation scale( const Vector3 &scale ) noexcept
     {
-        // clang-format off
-        const auto m = Matrix4 {
-            { scale.x, 0, 0, 0 },
-            { 0, scale.y, 0, 0 },
-            { 0, 0, scale.z, 0 },
-            { 0, 0, 0, 1 },
-        };
+        const auto m = Matrix4(
+            Vector4 { scale.x, 0, 0, 0 },
+            Vector4 { 0, scale.y, 0, 0 },
+            Vector4 { 0, 0, scale.z, 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
-        const auto inv = Matrix4 {
-            { real_t( 1 ) / scale.x , 0, 0, 0 },
-            { 0, real_t( 1 ) / scale.y, 0, 0 },
-            { 0, 0, real_t( 1 ) / scale.z, 0 },
-            { 0, 0, 0, 1 },
-        };
-        // clang-format on
+        const auto inv = Matrix4(
+            Vector4 { real_t( 1 ) / scale.x, 0, 0, 0 },
+            Vector4 { 0, real_t( 1 ) / scale.y, 0, 0 },
+            Vector4 { 0, 0, real_t( 1 ) / scale.z, 0 },
+            Vector4 { 0, 0, 0, 1 }
+        );
 
         return Transformation { m, inv, Transformation::Contents::SCALING };
     }

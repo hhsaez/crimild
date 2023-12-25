@@ -70,12 +70,12 @@ namespace crimild {
 
         // This matrix is in world space. It should only be used by nodes. In order to
         // use it as the view matrix, it will have to be inverted.
-        const auto mat = Matrix4 {
-            { xAxis.x, xAxis.y, xAxis.z, 0 },
-            { yAxis.x, yAxis.y, yAxis.z, 0 },
-            { zAxis.x, zAxis.y, zAxis.z, 0 },
-            { eye.x, eye.y, eye.z, 1 },
-        };
+        const auto mat = Matrix4(
+            Vector4 { xAxis.x, xAxis.y, xAxis.z, 0 },
+            Vector4 { yAxis.x, yAxis.y, yAxis.z, 0 },
+            Vector4 { zAxis.x, zAxis.y, zAxis.z, 0 },
+            Vector4 { eye.x, eye.y, eye.z, 1 }
+        );
 
         return Transformation {
             mat,
