@@ -27,7 +27,6 @@
 
 #include "Transformation.hpp"
 
-#include "Matrix4_constants.hpp"
 #include "Normal3.hpp"
 #include "Point3.hpp"
 #include "Transformation.hpp"

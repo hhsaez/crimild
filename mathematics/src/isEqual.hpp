@@ -87,7 +87,7 @@ namespace crimild {
     template< ArithmeticType T, ArithmeticType U >
     inline constexpr bool isEqual( const Matrix4Impl< T > &a, const Matrix4Impl< U > &b ) noexcept
     {
-        return isEqual( a.c0, b.c0 ) && isEqual( a.c1, b.c1 ) && isEqual( a.c2, b.c2 ) && isEqual( a.c3, b.c3 );
+        return isEqual( a.columns[ 0 ], b.columns[ 0 ] ) && isEqual( a.columns[ 1 ], b.columns[ 1 ] ) && isEqual( a.columns[ 2 ], b.columns[ 2 ] ) && isEqual( a.columns[ 3 ], b.columns[ 3 ] );
     }
 
     [[nodiscard]] inline constexpr bool isEqual( const Transformation &a, const Transformation &b ) noexcept

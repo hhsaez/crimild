@@ -34,19 +34,19 @@ namespace crimild {
 
     [[nodiscard]] static constexpr Transformation translation( const Vector3 &delta ) noexcept
     {
-        const auto m = Matrix4 {
-            { 1, 0, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 1, 0 },
-            { delta.x, delta.y, delta.z, 1 },
-        };
+        const auto m = Matrix4(
+            Vector4 { 1, 0, 0, 0 },
+            Vector4 { 0, 1, 0, 0 },
+            Vector4 { 0, 0, 1, 0 },
+            Vector4 { delta.x, delta.y, delta.z, 1 }
+        );
 
-        const auto inv = Matrix4 {
-            { 1, 0, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 1, 0 },
-            { -delta.x, -delta.y, -delta.z, 1 },
-        };
+        const auto inv = Matrix4(
+            Vector4 { 1, 0, 0, 0 },
+            Vector4 { 0, 1, 0, 0 },
+            Vector4 { 0, 0, 1, 0 },
+            Vector4 { -delta.x, -delta.y, -delta.z, 1 }
+        );
 
         return Transformation { m, inv, Transformation::Contents::TRANSLATION };
     }

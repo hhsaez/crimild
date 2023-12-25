@@ -192,3 +192,16 @@ TEST( Quaternion, inverse )
 
     EXPECT_TRUE( true );
 }
+
+TEST( Quaternion, matrix_conversion )
+{
+    constexpr auto q = normalize( Quaternion( -0.5, 0.75, -0.25, 0.5 ) );
+    constexpr auto M = Matrix4( q );
+    constexpr auto r = Quaternion( M );
+
+    static_assert( isEqual( length( q ), 1 ) );
+    static_assert( isEqual( length( r ), 1 ) );
+    static_assert( isEqual( q, r ) );
+
+    EXPECT_TRUE( true );
+}
