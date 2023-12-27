@@ -70,6 +70,8 @@ namespace crimild {
        - Wikipedia (http://en.wikipedia.org/wiki/Quaternion)
     */
     struct Quaternion {
+        struct Constants;
+
         Vector3 v = Vector3::Constants::ZERO;
         real_t w = real_t( 1 );
 
@@ -268,6 +270,11 @@ namespace crimild {
         }
 
         //@{
+    };
+
+    struct Quaternion::Constants {
+        static constexpr Quaternion IDENTITY = {};
+        static constexpr Quaternion ZERO = Quaternion( Vector3::Constants::ZERO, real_t( 0 ) );
     };
 
     /**

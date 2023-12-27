@@ -35,7 +35,7 @@
 
 namespace crimild {
 
-    class Quaternion;
+    struct Quaternion;
 
     /**
      * @brief a 4x4 matrix representation
