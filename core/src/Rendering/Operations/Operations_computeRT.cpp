@@ -29,14 +29,13 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Matrix4_inverse.hpp"
 #include "Mathematics/Random.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Triangle.hpp"
 #include "Mathematics/Triangle_edges.hpp"
 #include "Mathematics/Triangle_normal.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -803,9 +802,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
     // Triangles are always in world space
     struct TriangleDesc {
-        alignas( 16 ) Point3 p0;
-        alignas( 16 ) Point3 p1;
-        alignas( 16 ) Point3 p2;
+        alignas( 16 ) Point3f p0;
+        alignas( 16 ) Point3f p1;
+        alignas( 16 ) Point3f p2;
         alignas( 16 ) Vector3 e0;
         alignas( 16 ) Vector3 e1;
         alignas( 16 ) Normal3 n;
@@ -856,7 +855,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     .type = 1,
                                     .albedo = props.albedo,
                                     .density = props.density,
-                                } );
+                                }
+                            );
                         } else {
                             const auto &props = static_cast< materials::PrincipledBSDF * >( material )->getProps();
                             materials.add(
@@ -868,7 +868,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     .transmission = props.transmission,
                                     .indexOfRefraction = props.indexOfRefraction,
                                     .emissive = props.emissive,
-                                } );
+                                }
+                            );
                         }
                         materialIds.insert( material, materialId );
                     }
@@ -880,19 +881,22 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     {
                                         .invWorld = geometry->getWorld().invMat,
                                         .materialID = materialIds[ material ],
-                                    } );
+                                    }
+                                );
                             } else if ( primitive->getType() == Primitive::Type::BOX ) {
                                 boxes.add(
                                     {
                                         .invWorld = geometry->getWorld().invMat,
                                         .materialID = materialIds[ material ],
-                                    } );
+                                    }
+                                );
                             } else if ( primitive->getType() == Primitive::Type::CYLINDER ) {
                                 cylinders.add(
                                     {
                                         .invWorld = geometry->getWorld().invMat,
                                         .materialID = materialIds[ material ],
-                                    } );
+                                    }
+                                );
                             } else if ( primitive->getType() == Primitive::Type::TRIANGLES ) {
                                 auto positions = [ & ] {
                                     BufferAccessor *positions = nullptr;
@@ -901,7 +905,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                             if ( positions == nullptr ) {
                                                 positions = vertices->get( VertexAttribute::Name::POSITION );
                                             }
-                                        } );
+                                        }
+                                    );
                                     return positions;
                                 }();
 
@@ -913,9 +918,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     const auto N = indices->getIndexCount();
                                     for ( auto i = 0; i < N; i += 3 ) {
                                         const auto T = Triangle {
-                                            .p0 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 0 ) ) ),
-                                            .p1 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 1 ) ) ),
-                                            .p2 = geometry->getWorld()( positions->template get< Point3 >( indices->getIndex( i + 2 ) ) ),
+                                            .p0 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 0 ) ) ),
+                                            .p1 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 1 ) ) ),
+                                            .p2 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 2 ) ) ),
                                         };
 
                                         triangles.add( {
@@ -930,8 +935,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                     }
                                 }
                             }
-                        } );
-                } ) );
+                        }
+                    );
+                }
+            )
+        );
     }
 
     auto ds = crimild::alloc< DescriptorSet >();
@@ -940,11 +948,11 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
             .descriptorType = DescriptorType::STORAGE_BUFFER,
             .obj = [ & ] {
                 struct BufferData {
-                    alignas( 16 ) Point3 origin = Point3 { 0, 0, 0 };
+                    alignas( 16 ) Point3f origin = Point3f { 0, 0, 0 };
                     alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
                     alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
                     alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
-                    alignas( 16 ) Vector2 uv = Vector2 { 0, 0 };
+                    alignas( 16 ) Vector2f uv = Vector2f { 0, 0 };
                     alignas( 4 ) Int32 bounces = 0;
                     alignas( 4 ) Int32 samples = 0;
                 };
@@ -968,7 +976,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                     alignas( 4 ) UInt32 seed;
                     alignas( 16 ) Matrix4 cameraInvProj;
                     alignas( 16 ) Matrix4 cameraWorld;
-                    alignas( 16 ) Point3 cameraOrigin;
+                    alignas( 16 ) Point3f cameraOrigin;
                     alignas( 16 ) Vector3 cameraRight;
                     alignas( 16 ) Vector3 cameraUp;
                     alignas( 4 ) Real32 cameraLensRadius;
@@ -982,7 +990,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
 
                         auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
                         auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
-                        auto bounces = UInt32( 1 );                                           //settings->get< UInt32 >( "rt.bounces", 10 );
+                        auto bounces = UInt32( 1 );                                           // settings->get< UInt32 >( "rt.bounces", 10 );
                         auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
                         auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
                         auto backgroundColor = ColorRGB {
@@ -999,7 +1007,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         static auto cameraInvProj = Matrix4::Constants::IDENTITY;
                         static auto cameraWorld = Matrix4::Constants::IDENTITY;
 
-                        auto cameraOrigin = Point3::Constants::ZERO;
+                        auto cameraOrigin = Point3f::ZERO;
                         auto cameraRight = Vector3::Constants::RIGHT;
                         auto cameraUp = Vector3::Constants::UP;
 
@@ -1039,7 +1047,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             .sampleCount = sampleCount,
                             .maxSamples = maxSamples,
                             .bounces = bounces,
-                            .seed = seed++, //Random::generate< UInt32 >( 0, 1000 ),
+                            .seed = seed++, // Random::generate< UInt32 >( 0, 1000 ),
                             .cameraInvProj = cameraInvProj,
                             .cameraWorld = cameraWorld,
                             .cameraOrigin = cameraOrigin,
@@ -1049,7 +1057,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             .cameraFocusDistance = focusDist,
                             .backgroundColor = backgroundColor,
                         };
-                    } );
+                    }
+                );
             }(),
         },
         Descriptor {
@@ -1124,8 +1133,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
         },
         crimild::alloc< Shader >(
             Shader::Stage::COMPUTE,
-            PRELUDE_SRC + SCATTER_SRC + HIT_SCENE_SRC + BOUNCE_SRC ),
+            PRELUDE_SRC + SCATTER_SRC + HIT_SCENE_SRC + BOUNCE_SRC
+        ),
         Format::R32G32B32A32_SFLOAT,
         workgroup,
-        { ds, sceneDescriptors } );
+        { ds, sceneDescriptors }
+    );
 }

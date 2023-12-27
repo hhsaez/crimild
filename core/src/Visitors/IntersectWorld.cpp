@@ -94,7 +94,8 @@ void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
     geometry->forEachPrimitive(
         [ & ]( auto primitive ) {
             intersect( geometry, primitive, isInVolume );
-        } );
+        }
+    );
 }
 
 void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
@@ -152,7 +153,8 @@ void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
         std::sort(
             std::begin( res ),
             std::end( res ),
-            []( auto &a, auto &b ) { return a.t < b.t; } );
+            []( auto &a, auto &b ) { return a.t < b.t; }
+        );
         return res;
     }();
 
@@ -181,7 +183,8 @@ void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
                             std::end( leftIntersections ),
                             [ & ]( auto &other ) {
                                 return i.geometry == other.geometry;
-                            } )
+                            }
+                        )
                         != std::end( leftIntersections );
             if ( intersectionAllowed( csg->getOperator(), lHit, inL, inR ) ) {
                 res.push_back( i );
@@ -356,7 +359,8 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive, Bool i
                         if ( positions == nullptr ) {
                             positions = vertices->get( VertexAttribute::Name::POSITION );
                         }
-                    } );
+                    }
+                );
                 return positions;
             }();
 
@@ -365,13 +369,13 @@ void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive, Bool i
             }
 
             if ( auto indices = primitive->getIndices() ) {
-                //const auto N = indices->getIndexCount() / 3;
+                // const auto N = indices->getIndexCount() / 3;
                 const auto N = indices->getIndexCount();
                 for ( auto i = 0; i < N; i += 3 ) {
                     const auto T = Triangle {
-                        positions->get< Point3 >( indices->getIndex( i + 0 ) ),
-                        positions->get< Point3 >( indices->getIndex( i + 1 ) ),
-                        positions->get< Point3 >( indices->getIndex( i + 2 ) ),
+                        positions->get< Point3f >( indices->getIndex( i + 0 ) ),
+                        positions->get< Point3f >( indices->getIndex( i + 1 ) ),
+                        positions->get< Point3f >( indices->getIndex( i + 2 ) ),
                     };
 
                     Real t;

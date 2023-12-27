@@ -29,8 +29,6 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
@@ -59,7 +57,8 @@ TEST( VertexBuffer, construction )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     auto positions = vertices->get( VertexAttribute::Name::POSITION );
 
@@ -100,7 +99,8 @@ TEST( VertexBuffer, setMultipleValues )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -126,7 +126,8 @@ TEST( VertexBuffer, setPositionsInterleaved )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -149,7 +150,8 @@ TEST( VertexBuffer, setTexCoordsInterleaved )
             1.0,
             1.0,
             1.0,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector2f { 0.0f, 0.0f } ), texCoords->get< Vector2f >( 0 ) );
     ASSERT_EQ( ( Vector2f { 0.f, 1.0f } ), texCoords->get< Vector2f >( 1 ) );
@@ -175,7 +177,8 @@ TEST( VertexBuffer, setInterleaved )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
@@ -187,7 +190,8 @@ TEST( VertexBuffer, setInterleaved )
             1.0,
             1.0,
             1.0,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -217,7 +221,8 @@ TEST( VertexBuffer, setInterleavedVertex )
             0.0f,
             0.5f,
             0.0f,
-        } );
+        }
+    );
 
     auto normals = vertices->get( VertexAttribute::Name::NORMAL );
     normals->set(
@@ -225,7 +230,8 @@ TEST( VertexBuffer, setInterleavedVertex )
             Vector3f::Constants::UNIT_Z,
             Vector3f::Constants::UNIT_Z,
             Vector3f::Constants::UNIT_Z,
-        } );
+        }
+    );
 
     auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
 
@@ -237,7 +243,8 @@ TEST( VertexBuffer, setInterleavedVertex )
             1.0,
             1.0,
             1.0,
-        } );
+        }
+    );
 
     ASSERT_EQ( ( Vector3f { -0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 0 ) );
     ASSERT_EQ( ( Vector3f { 0.5f, -0.5f, 0.0f } ), positions->get< Vector3f >( 1 ) );
@@ -279,7 +286,8 @@ TEST( VertexBuffer, eachPosition )
             ASSERT_EQ( data[ i * 3 + 0 ], v[ 0 ] );
             ASSERT_EQ( data[ i * 3 + 1 ], v[ 1 ] );
             ASSERT_EQ( data[ i * 3 + 2 ], v[ 2 ] );
-        } );
+        }
+    );
 }
 
 TEST( VertexBuffer, eachTexCoord )
@@ -305,31 +313,32 @@ TEST( VertexBuffer, eachTexCoord )
         [ & ]( auto &v, auto i ) {
             ASSERT_EQ( data[ i * 2 + 0 ], v[ 0 ] );
             ASSERT_EQ( data[ i * 2 + 1 ], v[ 1 ] );
-        } );
+        }
+    );
 }
 
 TEST( VertexBuffer, sparseData )
 {
     /*
-	struct VertexLayoutType {
-		Vector3f position;
-		Vector3f normal;
-		Vector2i weights;
-		Size index;
-	};
+        struct VertexLayoutType {
+                Vector3f position;
+                Vector3f normal;
+                Vector2i weights;
+                Size index;
+        };
 
-	auto layout = VertexLayout {
-		{ VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-		{ VertexAttribute::Name::BLEND_INDICES, utils::getFormat< Vector2i >() },
-		{ VertexAttribute::Name::INDEX, utils::getFormat< crimild::Size >() },
-	};
+        auto layout = VertexLayout {
+                { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+                { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+                { VertexAttribute::Name::BLEND_INDICES, utils::getFormat< Vector2i >() },
+                { VertexAttribute::Name::INDEX, utils::getFormat< crimild::Size >() },
+        };
 
-	auto vertices = crimild::alloc< VertexBuffer >(
-		layout,
-		Array< VertexType > {
+        auto vertices = crimild::alloc< VertexBuffer >(
+                layout,
+                Array< VertexType > {
 
-		}
-	);
-	*/
+                }
+        );
+        */
 }

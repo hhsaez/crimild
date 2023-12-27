@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Vector2Ops.hpp"
+#include "Mathematics/Vector2.hpp"
 
 #include <cstring>
 
@@ -52,7 +52,10 @@ SharedPointer< Image > Image::ONE = [] {
                     0xFF,
                     0xFF,
                     0xFF,
-                } ) ) );
+                }
+            )
+        )
+    );
     return image;
 }();
 
@@ -73,7 +76,10 @@ SharedPointer< Image > Image::ZERO = [] {
                     0x00,
                     0x00,
                     0x00,
-                } ) ) );
+                }
+            )
+        )
+    );
     return image;
 }();
 
@@ -94,7 +100,10 @@ SharedPointer< Image > Image::INVALID = [] {
                     0x00,
                     0xFF,
                     0xFF,
-                } ) ) );
+                }
+            )
+        )
+    );
     return image;
 }();
 
@@ -151,7 +160,10 @@ SharedPointer< Image > createCheckerBoardImage( crimild::Int32 size )
                         }
                     }
                     return data;
-                }() ) ) );
+                }()
+            )
+        )
+    );
     return image;
 }
 
@@ -205,7 +217,10 @@ SharedPointer< Image > Image::fromRGBANoise( UInt32 size ) noexcept
                         }
                     }
                     return data;
-                }() ) ) );
+                }()
+            )
+        )
+    );
     return image;
 }
 

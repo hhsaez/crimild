@@ -29,9 +29,7 @@
 
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <gtest/gtest.h>
@@ -59,14 +57,14 @@ TEST( MotionReset, it_does_not_modify_existing_state_on_init_if_already_present 
 
     auto motion = node->attachComponent< MotionState >();
     motion->velocity = Vector3 { 1, 2, 3 };
-    motion->position = Point3 { 4, 5, 6 };
+    motion->position = Point3f { 4, 5, 6 };
     motion->steering = Vector3 { 7, 8, 9 };
 
     controller->execute( crimild::alloc< MotionReset >() );
 
     ASSERT_NE( nullptr, node->getComponent< MotionState >() );
     EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
-    EXPECT_EQ( ( Point3 { 4, 5, 6 } ), motion->position );
+    EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
 }
 
@@ -111,12 +109,12 @@ TEST( MotionReset, it_resets_motion_state_on_step )
     controller->execute( crimild::alloc< MotionReset >() );
 
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), motion->position );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
 
     controller->update( Clock {} );
 
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3 { 10, 20, 30 } ), motion->position );
+    EXPECT_EQ( ( Point3f { 10, 20, 30 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
 }

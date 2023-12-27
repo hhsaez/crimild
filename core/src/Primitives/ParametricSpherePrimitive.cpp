@@ -40,14 +40,15 @@ ParametricSpherePrimitive::ParametricSpherePrimitive( const Params &params ) noe
             .type = params.type,
             .layout = params.layout,
             .colorMode = params.colorMode,
-        } )
+        }
+    )
 {
     _radius = params.radius;
 
     ParametricInterval interval = {
         .divisions = params.divisions,
         .upperBound = Vector2f { Numericf::PI, Numericf::TWO_PI },
-        .textureCount = Vector2 { 20, 35 },
+        .textureCount = Vector2f { 20, 35 },
     };
     setInterval( interval );
     generate();

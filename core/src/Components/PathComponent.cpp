@@ -29,7 +29,7 @@
 
 #include "Debug/DebugDrawManager.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_easing.hpp"
 #include "Mathematics/ceil.hpp"

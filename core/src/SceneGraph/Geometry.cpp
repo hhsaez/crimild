@@ -100,11 +100,11 @@ void Geometry::updateModelBounds( void )
                 case Primitive::Type::OPEN_CYLINDER:
                 case Primitive::Type::CYLINDER: {
                     if ( first ) {
-                        bound->computeFrom( Point3 { -1, -1, -1 }, Point3 { 1, 1, 1 } );
+                        bound->computeFrom( Point3f { -1, -1, -1 }, Point3f { 1, 1, 1 } );
                         first = false;
                     } else {
-                        bound->expandToContain( Point3 { -1, -1, -1 } );
-                        bound->expandToContain( Point3 { 1, 1, 1 } );
+                        bound->expandToContain( Point3f { -1, -1, -1 } );
+                        bound->expandToContain( Point3f { 1, 1, 1 } );
                     }
                     break;
                 }
@@ -121,11 +121,13 @@ void Geometry::updateModelBounds( void )
                                     bound->expandToContain( crimild::get_ptr( vbo ) );
                                 }
                             }
-                        } );
+                        }
+                    );
                     break;
                 }
             }
-        } );
+        }
+    );
 }
 
 DescriptorSet *Geometry::getDescriptors( void ) noexcept

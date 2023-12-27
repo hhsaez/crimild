@@ -228,7 +228,7 @@ public:
 
                                 const auto p = location( node->getLocal() );
                                 const auto dp = 2.0f * clock.getDeltaTime() * dir;
-                                node->setLocal( translation( vector3( p + dp ) ) );
+                                node->setLocal( translation( Vector3f( p + dp ) ) );
                             }
                         );
                         return group;
@@ -239,8 +239,8 @@ public:
                     auto camera = crimild::alloc< Camera >();
                     camera->setLocal(
                         lookAt(
-                            Point3 { 15.0f, 5.0f, 40.0f },
-                            Point3 { 0, 1, 0 },
+                            Point3f { 15.0f, 5.0f, 40.0f },
+                            Point3f { 0, 1, 0 },
                             Vector3::Constants::UP
                         )
                     );

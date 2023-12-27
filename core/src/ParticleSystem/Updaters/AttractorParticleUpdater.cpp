@@ -29,13 +29,13 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Point3_constants.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Point3.hpp"
+#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 
 AttractorParticleUpdater::AttractorParticleUpdater( void )
-    : _attractor { Point3::Constants::ZERO, 1.0f },
+    : _attractor { Point3f::ZERO, 1.0f },
       _strength( 1.0f )
 {
 }
@@ -80,9 +80,9 @@ void AttractorParticleUpdater::encode( coding::Encoder &encoder )
 {
     ParticleSystemComponent::ParticleUpdater::encode( encoder );
 
-    //encoder.encode( "origin", _attractor.getCenter() );
-    //encoder.encode( "radius", _attractor.getRadius() );
-    //encoder.encode( "strengh", _strength );
+    // encoder.encode( "origin", _attractor.getCenter() );
+    // encoder.encode( "radius", _attractor.getRadius() );
+    // encoder.encode( "strengh", _strength );
 }
 
 void AttractorParticleUpdater::decode( coding::Decoder &decoder )
@@ -98,6 +98,6 @@ void AttractorParticleUpdater::decode( coding::Decoder &decoder )
     crimild::Real32 strength = 1.0f;
     decoder.decode( "strength", strength );
 
-    setAttractor( Sphere { point3( origin ), radius } );
+    setAttractor( Sphere { Point3f( origin ), radius } );
     setStrength( strength );
 }

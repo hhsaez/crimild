@@ -31,7 +31,7 @@
 #include "Foundation/Log.hpp"
 #include "Foundation/SharedObject.hpp"
 #include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Vector2_constants.hpp"
+#include "Mathematics/Vector2.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
@@ -129,7 +129,7 @@ namespace crimild {
 
         struct ClearValue {
             ColorRGBA color = ColorRGBA::Constants::CLEAR;
-            Vector2f depthStencil = Vector2f::Constants::UNIT_X;
+            Vector2f depthStencil = Vector2f::UNIT_X;
         };
         ClearValue clearValue;
 

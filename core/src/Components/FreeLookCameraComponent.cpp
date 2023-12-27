@@ -29,16 +29,15 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Point3Ops.hpp"
+#include "Mathematics/Point3.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_euler.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector2Ops.hpp"
-#include "Mathematics/Vector2_constants.hpp"
-#include "Mathematics/Vector3Ops.hpp"
+#include "Mathematics/Vector2.hpp"
+#include "Mathematics/Vector3.hpp"
 #include "Mathematics/normalize.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
@@ -47,7 +46,7 @@ using namespace crimild;
 
 void FreeLookCameraComponent::start( void )
 {
-    _lastMousePos = Vector2::Constants::ZERO;
+    _lastMousePos = Vector2f::ZERO;
 
     m_position = location( getNode()->getLocal() );
 
@@ -76,7 +75,7 @@ void FreeLookCameraComponent::update( const Clock &c )
     auto root = getNode();
 
     const auto mousePos = Input::getInstance()->getMousePosition();
-    const auto mouseDelta = _initialized ? mousePos - _lastMousePos : Vector2::Constants::ZERO;
+    const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::ZERO;
     _initialized = true;
     _lastMousePos = mousePos;
 
@@ -91,7 +90,7 @@ void FreeLookCameraComponent::update( const Clock &c )
     const auto R = right( E );
 
     m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
-    const auto T = translation( vector3( m_position ) );
+    const auto T = translation( Vector3ff( m_position ) );
 
     root->setLocal( T * E );
 }

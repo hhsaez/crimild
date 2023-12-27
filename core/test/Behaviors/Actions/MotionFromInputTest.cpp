@@ -35,10 +35,8 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Input.hpp"
@@ -146,7 +144,7 @@ TEST( MotionFromInput, integration )
 
         // Motion remains the same
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 0, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 
@@ -158,14 +156,14 @@ TEST( MotionFromInput, integration )
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         releaseW();
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 
@@ -177,26 +175,26 @@ TEST( MotionFromInput, integration )
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 2, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 3, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         releaseW();
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 3, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 }
@@ -259,7 +257,7 @@ TEST( MotionFromInput, coding_integration )
 
         // Motion remains the same
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 0, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 
@@ -271,14 +269,14 @@ TEST( MotionFromInput, coding_integration )
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         releaseW();
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 
@@ -290,26 +288,26 @@ TEST( MotionFromInput, coding_integration )
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 1, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 2, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 3, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
         releaseW();
         controller->update( Clock( 1 ) );
 
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3 { 0, 3, 0 } ), motion->position );
+        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
         EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
     }
 }

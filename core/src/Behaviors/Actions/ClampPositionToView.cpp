@@ -40,7 +40,7 @@ Behavior::State ClampPositionToView::step( BehaviorContext *context )
     const auto V = camera->getViewMatrix();
     const auto W = agent->getParent()->getWorld().mat;
 
-    auto pos = P * V * W * vector4( location( agent->getLocal() ), 1 );
+    auto pos = P * V * W * Vector4f( location( agent->getLocal() ) );
     pos.x = clamp( pos.x, -pos.w, pos.w );
     pos.y = clamp( pos.y, -pos.w, pos.w );
 

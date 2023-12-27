@@ -30,7 +30,6 @@
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -52,15 +51,15 @@ TEST( UpdateWorldStateTest, singleNode )
     node->setLocal( translation( 0, 0, -5 ) );
 
     EXPECT_FALSE( isIdentity( node->getLocal() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( node->getLocal() ) );
     EXPECT_TRUE( isIdentity( node->getWorld() ) );
 
     node->perform( UpdateWorldState() );
 
     EXPECT_FALSE( isIdentity( node->getLocal() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( node->getLocal() ) );
     EXPECT_FALSE( isIdentity( node->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( node->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( node->getWorld() ) );
 }
 
 TEST( UpdateWorldStateTest, geometry )
@@ -87,9 +86,11 @@ TEST( UpdateWorldStateTest, geometry )
                                     .position = Vector3f { 1.0f, 1.5f, 0.0f },
                                     .normal = Vector3f { 0, 0, 1 },
                                 },
-                            } );
+                            }
+                        );
                     }(),
-                } );
+                }
+            );
             primitive->setIndices(
                 crimild::alloc< IndexBuffer >(
                     Format::INDEX_32_UINT,
@@ -97,25 +98,28 @@ TEST( UpdateWorldStateTest, geometry )
                         0,
                         1,
                         2,
-                    } ) );
+                    }
+                )
+            );
             return primitive;
-        }() );
+        }()
+    );
 
     geometry->perform( UpdateWorldState() );
 
     EXPECT_TRUE( isIdentity( geometry->getLocal() ) );
     EXPECT_TRUE( isIdentity( geometry->getWorld() ) );
 
-    EXPECT_EQ( ( Point3 { 0, 0, 0 } ), geometry->getWorldBound()->getCenter() );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), geometry->getWorldBound()->getCenter() );
     EXPECT_TRUE( isEqual( Real( 2.12132 ), geometry->getWorldBound()->getRadius() ) );
 
     geometry->setLocal( translation( 0, 0, -5 ) );
     geometry->perform( UpdateWorldState() );
 
     EXPECT_FALSE( isIdentity( geometry->getLocal() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( geometry->getLocal() ) );
     EXPECT_FALSE( isIdentity( geometry->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( geometry->getWorld() ) );
 }
 
 TEST( UpdateWorldStateTest, hierarchy )
@@ -140,23 +144,23 @@ TEST( UpdateWorldStateTest, hierarchy )
 
     EXPECT_FALSE( isIdentity( group1->getLocal() ) );
     EXPECT_FALSE( isIdentity( group1->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( group1->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( group1->getWorld() ) );
 
     EXPECT_TRUE( isIdentity( group2->getLocal() ) );
     EXPECT_FALSE( isIdentity( group2->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( group2->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( group2->getWorld() ) );
 
     EXPECT_TRUE( isIdentity( geometry1->getLocal() ) );
     EXPECT_FALSE( isIdentity( geometry1->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry1->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( geometry1->getWorld() ) );
 
     EXPECT_TRUE( isIdentity( geometry2->getLocal() ) );
     EXPECT_FALSE( isIdentity( geometry2->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry2->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( geometry2->getWorld() ) );
 
     EXPECT_TRUE( isIdentity( geometry3->getLocal() ) );
     EXPECT_FALSE( isIdentity( geometry3->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 0, 0, -5 } ), location( geometry3->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -5 } ), location( geometry3->getWorld() ) );
 }
 
 TEST( UpateWorldStateTest, scale )
@@ -190,7 +194,7 @@ TEST( UpateWorldStateTest, with_csg )
 
     csg->perform( UpdateWorldState() );
 
-    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( n0->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( n1->getWorld() ) );
-    EXPECT_EQ( ( Point3 { 1, 0, 0 } ), location( csg->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 1, 0, 0 } ), location( n0->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 1, 0, 0 } ), location( n1->getWorld() ) );
+    EXPECT_EQ( ( Point3f { 1, 0, 0 } ), location( csg->getWorld() ) );
 }

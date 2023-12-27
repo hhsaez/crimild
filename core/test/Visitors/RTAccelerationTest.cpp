@@ -29,15 +29,12 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Normal3Ops.hpp"
 #include "Mathematics/Ray_apply.hpp"
 #include "Mathematics/Sphere_normal.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_inverse.hpp"
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3_isZero.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/easing.hpp"
 #include "Mathematics/intersect.hpp"
 #include "Mathematics/io.hpp"
@@ -85,10 +82,10 @@ TEST( RTAcceleration, it_optimizes_scene_with_one_geometry )
     auto optimized = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE )->perform< RTAcceleration >();
 
     ASSERT_EQ( 2, optimized.nodes.size() );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 0 ].type );
 
-    ASSERT_EQ( ( Point3 { -1, -2, -3 } ), location( inverse( optimized.nodes[ 1 ].world ) ) );
+    ASSERT_EQ( ( Point3f { -1, -2, -3 } ), location( inverse( optimized.nodes[ 1 ].world ) ) );
     ASSERT_EQ( RTAcceleratedNode::Type::PRIMITIVE_SPHERE, optimized.nodes[ 1 ].type );
     ASSERT_EQ( 0, optimized.nodes[ 1 ].materialIndex );
 
@@ -173,17 +170,17 @@ TEST( RTAcceleration, it_optimizes_scene_with_triangles )
                                 {
                                     .position = Vector3 { 1, 2, 3 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 0 },
+                                    .texCoord = Vector2f { 0, 0 },
                                 },
                                 {
                                     .position = Vector3 { 4, 5, 6 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 1 },
+                                    .texCoord = Vector2f { 0, 1 },
                                 },
                                 {
                                     .position = Vector3 { 7, 8, 9 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 1 },
+                                    .texCoord = Vector2f { 1, 1 },
                                 },
                             }
                         ),
@@ -288,7 +285,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_union )
     ASSERT_EQ( 3, optimized.nodes.size() );
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_UNION, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 
@@ -319,7 +316,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_intersection )
 
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_INTERSECTION, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 
@@ -350,7 +347,7 @@ TEST( RTAcceleration, it_optimizes_scene_with_a_csg_difference )
 
     ASSERT_EQ( RTAcceleratedNode::Type::CSG_DIFFERENCE, optimized.nodes[ 0 ].type );
     ASSERT_EQ( -1, optimized.nodes[ 0 ].secondChildIndex );
-    ASSERT_EQ( ( Point3 { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
+    ASSERT_EQ( ( Point3f { 1, 2, 3 } ), location( optimized.nodes[ 0 ].world ) );
 
     ASSERT_EQ( RTAcceleratedNode::Type::GEOMETRY, optimized.nodes[ 1 ].type );
 
@@ -778,7 +775,7 @@ TEST( RTPrimAccel, ignore_degenerated_triangle )
                                 {
                                     .position = Vector3 { 1, 2, 3 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 0 },
+                                    .texCoord = Vector2f { 0, 0 },
                                 },
                             }
                         ),
@@ -854,17 +851,17 @@ TEST( RTPrimAccel, one_triangle )
                                 {
                                     .position = Vector3 { 1, 2, 3 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 0 },
+                                    .texCoord = Vector2f { 0, 0 },
                                 },
                                 {
                                     .position = Vector3 { 4, 5, 6 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 1 },
+                                    .texCoord = Vector2f { 0, 1 },
                                 },
                                 {
                                     .position = Vector3 { 7, 8, 9 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 1 },
+                                    .texCoord = Vector2f { 1, 1 },
                                 },
                             }
                         ),
@@ -889,7 +886,7 @@ TEST( RTPrimAccel, one_triangle )
             VertexP3N3TC2 {
                 .position = Vector3 { 1, 2, 3 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 0 },
+                .texCoord = Vector2f { 0, 0 },
             }
         ),
         optimized.primitives.triangles[ 0 ]
@@ -899,7 +896,7 @@ TEST( RTPrimAccel, one_triangle )
             VertexP3N3TC2 {
                 .position = Vector3 { 4, 5, 6 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 1 },
+                .texCoord = Vector2f { 0, 1 },
             }
         ),
         optimized.primitives.triangles[ 1 ]
@@ -909,7 +906,7 @@ TEST( RTPrimAccel, one_triangle )
             VertexP3N3TC2 {
                 .position = Vector3 { 7, 8, 9 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 1 },
+                .texCoord = Vector2f { 1, 1 },
             }
         ),
         optimized.primitives.triangles[ 2 ]
@@ -944,22 +941,22 @@ TEST( RTPrimAccel, many_triangles )
                                 {
                                     .position = Vector3 { 1, 2, 3 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 0 },
+                                    .texCoord = Vector2f { 0, 0 },
                                 },
                                 {
                                     .position = Vector3 { 4, 5, 6 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 1 },
+                                    .texCoord = Vector2f { 0, 1 },
                                 },
                                 {
                                     .position = Vector3 { 7, 8, 9 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 1 },
+                                    .texCoord = Vector2f { 1, 1 },
                                 },
                                 {
                                     .position = Vector3 { 10, 11, 12 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 0 },
+                                    .texCoord = Vector2f { 1, 0 },
                                 },
                             }
                         ),
@@ -996,7 +993,7 @@ TEST( RTPrimAccel, many_triangles )
             VertexP3N3TC2 {
                 .position = Vector3 { 1, 2, 3 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 0 },
+                .texCoord = Vector2f { 0, 0 },
             }
         ),
         optimized.primitives.triangles[ 0 ]
@@ -1006,7 +1003,7 @@ TEST( RTPrimAccel, many_triangles )
             VertexP3N3TC2 {
                 .position = Vector3 { 4, 5, 6 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 1 },
+                .texCoord = Vector2f { 0, 1 },
             }
         ),
         optimized.primitives.triangles[ 1 ]
@@ -1016,7 +1013,7 @@ TEST( RTPrimAccel, many_triangles )
             VertexP3N3TC2 {
                 .position = Vector3 { 7, 8, 9 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 1 },
+                .texCoord = Vector2f { 1, 1 },
             }
         ),
         optimized.primitives.triangles[ 2 ]
@@ -1026,7 +1023,7 @@ TEST( RTPrimAccel, many_triangles )
             VertexP3N3TC2 {
                 .position = Vector3 { 10, 11, 12 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 0 },
+                .texCoord = Vector2f { 1, 0 },
             }
         ),
         optimized.primitives.triangles[ 3 ]
@@ -1065,22 +1062,22 @@ TEST( RTPrimAccel, two_independent_geometries )
                                 {
                                     .position = Vector3 { 1, 2, 3 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 0 },
+                                    .texCoord = Vector2f { 0, 0 },
                                 },
                                 {
                                     .position = Vector3 { 4, 5, 6 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 0, 1 },
+                                    .texCoord = Vector2f { 0, 1 },
                                 },
                                 {
                                     .position = Vector3 { 7, 8, 9 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 1 },
+                                    .texCoord = Vector2f { 1, 1 },
                                 },
                                 {
                                     .position = Vector3 { 10, 11, 12 },
                                     .normal = Vector3 { 0, 1, 0 },
-                                    .texCoord = Vector2 { 1, 0 },
+                                    .texCoord = Vector2f { 1, 0 },
                                 },
                             }
                         ),
@@ -1122,7 +1119,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 1, 2, 3 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 0 },
+                .texCoord = Vector2f { 0, 0 },
             }
         ),
         optimized.primitives.triangles[ 0 ]
@@ -1132,7 +1129,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 4, 5, 6 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 1 },
+                .texCoord = Vector2f { 0, 1 },
             }
         ),
         optimized.primitives.triangles[ 1 ]
@@ -1142,7 +1139,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 7, 8, 9 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 1 },
+                .texCoord = Vector2f { 1, 1 },
             }
         ),
         optimized.primitives.triangles[ 2 ]
@@ -1152,7 +1149,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 10, 11, 12 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 0 },
+                .texCoord = Vector2f { 1, 0 },
             }
         ),
         optimized.primitives.triangles[ 3 ]
@@ -1162,7 +1159,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 1, 2, 3 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 0 },
+                .texCoord = Vector2f { 0, 0 },
             }
         ),
         optimized.primitives.triangles[ 4 ]
@@ -1172,7 +1169,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 4, 5, 6 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 1 },
+                .texCoord = Vector2f { 0, 1 },
             }
         ),
         optimized.primitives.triangles[ 5 ]
@@ -1182,7 +1179,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 7, 8, 9 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 1 },
+                .texCoord = Vector2f { 1, 1 },
             }
         ),
         optimized.primitives.triangles[ 6 ]
@@ -1192,7 +1189,7 @@ TEST( RTPrimAccel, two_independent_geometries )
             VertexP3N3TC2 {
                 .position = Vector3 { 10, 11, 12 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 0 },
+                .texCoord = Vector2f { 1, 0 },
             }
         ),
         optimized.primitives.triangles[ 7 ]
@@ -1239,22 +1236,22 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
                         {
                             .position = Vector3 { 1, 2, 3 },
                             .normal = Vector3 { 0, 1, 0 },
-                            .texCoord = Vector2 { 0, 0 },
+                            .texCoord = Vector2f { 0, 0 },
                         },
                         {
                             .position = Vector3 { 4, 5, 6 },
                             .normal = Vector3 { 0, 1, 0 },
-                            .texCoord = Vector2 { 0, 1 },
+                            .texCoord = Vector2f { 0, 1 },
                         },
                         {
                             .position = Vector3 { 7, 8, 9 },
                             .normal = Vector3 { 0, 1, 0 },
-                            .texCoord = Vector2 { 1, 1 },
+                            .texCoord = Vector2f { 1, 1 },
                         },
                         {
                             .position = Vector3 { 10, 11, 12 },
                             .normal = Vector3 { 0, 1, 0 },
-                            .texCoord = Vector2 { 1, 0 },
+                            .texCoord = Vector2f { 1, 0 },
                         },
                     }
                 ),
@@ -1299,7 +1296,7 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
             VertexP3N3TC2 {
                 .position = Vector3 { 1, 2, 3 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 0 },
+                .texCoord = Vector2f { 0, 0 },
             }
         ),
         optimized.primitives.triangles[ 0 ]
@@ -1309,7 +1306,7 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
             VertexP3N3TC2 {
                 .position = Vector3 { 4, 5, 6 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 0, 1 },
+                .texCoord = Vector2f { 0, 1 },
             }
         ),
         optimized.primitives.triangles[ 1 ]
@@ -1319,7 +1316,7 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
             VertexP3N3TC2 {
                 .position = Vector3 { 7, 8, 9 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 1 },
+                .texCoord = Vector2f { 1, 1 },
             }
         ),
         optimized.primitives.triangles[ 2 ]
@@ -1329,7 +1326,7 @@ TEST( RTPrimAccel, two_geometries_with_shared_primitives )
             VertexP3N3TC2 {
                 .position = Vector3 { 10, 11, 12 },
                 .normal = Vector3 { 0, 1, 0 },
-                .texCoord = Vector2 { 1, 0 },
+                .texCoord = Vector2f { 1, 0 },
             }
         ),
         optimized.primitives.triangles[ 3 ]

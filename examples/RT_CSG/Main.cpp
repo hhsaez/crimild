@@ -40,7 +40,7 @@ public:
                 auto sphere = [ primitive = crimild::alloc< Primitive >( Primitive::Type::SPHERE ) ]( const auto &center, Real radius, auto material ) -> SharedPointer< Node > {
                     auto geometry = crimild::alloc< Geometry >();
                     geometry->attachPrimitive( primitive );
-                    geometry->setLocal( translation( vector3( center ) ) * scale( radius ) );
+                    geometry->setLocal( translation( Vector3f( center ) ) * scale( radius ) );
                     geometry->attachComponent< MaterialComponent >( material );
                     return geometry;
                 };
@@ -48,7 +48,7 @@ public:
                 auto box = [ primitive = crimild::alloc< Primitive >( Primitive::Type::BOX ) ]( const auto &center, const auto &size, auto material ) -> SharedPointer< Node > {
                     auto geometry = crimild::alloc< Geometry >();
                     geometry->attachPrimitive( primitive );
-                    geometry->setLocal( translation( vector3( center ) ) * scale( size.x, size.y, size.z ) );
+                    geometry->setLocal( translation( Vector3f( center ) ) * scale( size.x, size.y, size.z ) );
                     geometry->attachComponent< MaterialComponent >( material );
                     return geometry;
                 };
@@ -70,35 +70,45 @@ public:
                 // Ground
                 scene->attachNode(
                     sphere(
-                        Point3 { 0, -1000, 0 },
+                        Point3f { 0, -1000, 0 },
                         1000,
-                        lambertian( ColorRGB { 0.5, 0.5, 0.5 } ) ) );
+                        lambertian( ColorRGB { 0.5, 0.5, 0.5 } )
+                    )
+                );
 
                 scene->attachNode(
                     crimild::alloc< CSGNode >(
                         CSGNode::Operator::UNION,
-                        box( Point3 { 0, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.9, 0.9, 0.1 } ) ),
-                        sphere( Point3 { 1, 2, 1 }, 1.0, metallic( ColorRGB { 0.9, 0.2, 0.1 }, 0.1 ) ) ) );
+                        box( Point3f { 0, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.9, 0.9, 0.1 } ) ),
+                        sphere( Point3f { 1, 2, 1 }, 1.0, metallic( ColorRGB { 0.9, 0.2, 0.1 }, 0.1 ) )
+                    )
+                );
 
                 scene->attachNode(
                     crimild::alloc< CSGNode >(
                         CSGNode::Operator::INTERSECTION,
-                        sphere( Point3 { -3, 2, 1 }, 1.0, lambertian( ColorRGB { 0.6, 0.2, 0.1 } ) ),
-                        box( Point3 { -4, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.4, 0.4, 0.1 } ) ) ) );
+                        sphere( Point3f { -3, 2, 1 }, 1.0, lambertian( ColorRGB { 0.6, 0.2, 0.1 } ) ),
+                        box( Point3f { -4, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.4, 0.4, 0.1 } ) )
+                    )
+                );
 
                 scene->attachNode(
                     crimild::alloc< CSGNode >(
                         CSGNode::Operator::DIFFERENCE,
-                        box( Point3 { 4, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.4, 0.8, 0.1 } ) ),
-                        sphere( Point3 { 4, 1, 0 }, 1.2f, metallic( ColorRGB { 0.9, 0.2, 0.1 }, 0.1 ) ) ) );
+                        box( Point3f { 4, 1, 0 }, Vector3 { 1, 1, 1 }, lambertian( ColorRGB { 0.4, 0.8, 0.1 } ) ),
+                        sphere( Point3f { 4, 1, 0 }, 1.2f, metallic( ColorRGB { 0.9, 0.2, 0.1 }, 0.1 ) )
+                    )
+                );
 
                 scene->attachNode( [] {
                     auto camera = crimild::alloc< Camera >( 20, 4.0 / 3.0, 0.1f, 1000.0f );
                     camera->setLocal(
                         lookAt(
-                            Point3 { 0, 2, 30 },
-                            Point3 { 0, 1, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 0, 2, 30 },
+                            Point3f { 0, 1, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     camera->setFocusDistance( 10 );
                     camera->setAperture( 0.0f );
                     camera->attachComponent< FreeLookCameraComponent >();
@@ -125,7 +135,8 @@ public:
                 scene->perform( SceneDebugDump( "scene.out" ) );
 
                 return scene;
-            }() );
+            }()
+        );
 
         // Use soft RT by default
         // RenderSystem::getInstance()->useRTComputeRenderPath();

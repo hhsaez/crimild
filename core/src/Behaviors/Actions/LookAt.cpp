@@ -47,7 +47,7 @@ Behavior::State LookAt::step( BehaviorContext *context )
         lookAt(
             agentPos,
             targetPos,
-            Vector3 { 0, 1, 0 }
+            Vector3f::UP
         )
     );
 

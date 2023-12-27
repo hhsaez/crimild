@@ -30,7 +30,7 @@
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
 #include "Mathematics/Random.hpp"
-#include "Mathematics/Vector3_constants.hpp"
+#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 

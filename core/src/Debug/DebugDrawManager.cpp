@@ -32,11 +32,10 @@
 #include "Mathematics/Transformation_scale.hpp"
 #include "Mathematics/Transformation_translation.hpp"
 #include "Mathematics/distance.hpp"
+#include "Mathematics/isNaN.hpp"
 #include "Mathematics/orthonormalization.hpp"
 #include "Mathematics/swizzle.hpp"
 #include "Primitives/Primitive.hpp"
-#include "Mathematics/isNaN.hpp"
-#include "Mathematics/Vector_equality.hpp"
 
 using namespace crimild;
 
@@ -52,8 +51,8 @@ void DebugDrawManager::reset( bool clearAll ) noexcept
 }
 
 void DebugDrawManager::addLine(
-    const Point3 &from,
-    const Point3 &to,
+    const Point3f &from,
+    const Point3f &to,
     const ColorRGB &color,
     float width,
     float duration,
@@ -72,8 +71,8 @@ void DebugDrawManager::addLine(
 
         auto vertices = crimild::alloc< VertexBuffer >( layout, 2 );
         auto positions = vertices->get( VertexAttribute::Name::POSITION );
-        positions->set( 0, Point3 { 0, 0, 0 } );
-        positions->set( 1, Point3 { 0, 0, -1 } );
+        positions->set( 0, Point3f { 0, 0, 0 } );
+        positions->set( 1, Point3f { 0, 0, -1 } );
         primitive->setVertexData( { vertices } );
 
         auto indices = crimild::alloc< IndexBuffer >( Format::INDEX_32_UINT, Array< UInt32 > { 0, 1 } );
@@ -82,15 +81,15 @@ void DebugDrawManager::addLine(
     }();
 
     const auto up = [ & ] {
-        auto ret = cross( vector3( to ), vector3( from ) );
+        auto ret = cross( Vector3f( to ), Vector3f( from ) );
         const auto retLengthSquared = lengthSquared( ret );
         if ( !isNaN( ret ) && !isNaN( retLengthSquared ) && retLengthSquared > 0 ) {
             return ret;
         } else {
-            Vector3 right, up;
-            orthonormalBasis( vector3( to ), right, up );
+            Vector3f right, up;
+            orthonormalBasis( Vector3f( to ), right, up );
             if ( isNaN( up ) || isZero( lengthSquared( up ) ) ) {
-                return Vector3 { 0, 1, 0 };
+                return Vector3f { 0, 1, 0 };
             }
             return up;
         }
@@ -108,7 +107,7 @@ void DebugDrawManager::addLine(
 }
 
 void DebugDrawManager::addCross(
-    const Point3 &position,
+    const Point3f &position,
     const ColorRGB &color,
     float size,
     float duration,
@@ -118,7 +117,7 @@ void DebugDrawManager::addCross(
 }
 
 void DebugDrawManager::addSphere(
-    const Point3 &center,
+    const Point3f &center,
     float radius,
     const ColorRGB &color,
     float duration,
@@ -127,7 +126,7 @@ void DebugDrawManager::addSphere(
 {
 }
 
-void DebugDrawManager::addCircle( const Point3 &center, const Vector3 &normal, float radius, const ColorRGB &color, float duration, bool depthEnabled ) noexcept
+void DebugDrawManager::addCircle( const Point3f &center, const Vector3f &normal, float radius, const ColorRGB &color, float duration, bool depthEnabled ) noexcept
 {
     // Shared primitive
     static auto primitive = [] {
@@ -139,7 +138,7 @@ void DebugDrawManager::addCircle( const Point3 &center, const Vector3 &normal, f
         auto positions = vertices->get( VertexAttribute::Name::POSITION );
         float phi = 0;
         for ( size_t i = 0; i < N; ++i ) {
-            positions->set( i, Point3 { cos( phi ), sin( phi ), 0 } );
+            positions->set( i, Point3f { cos( phi ), sin( phi ), 0 } );
             phi += numbers::TWO_PI / N;
         }
         primitive->setVertexData( { vertices } );
@@ -173,7 +172,7 @@ void DebugDrawManager::addAxes(
 }
 
 void DebugDrawManager::addText(
-    const Point3 &position,
+    const Point3f &position,
     std::string_view text,
     const ColorRGB &color,
     float duration,

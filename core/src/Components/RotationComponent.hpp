@@ -38,7 +38,7 @@ namespace crimild {
 
     public:
         RotationComponent( void ) = default;
-        RotationComponent( const Vector3 &axis, float speed );
+        RotationComponent( const Vector3f &axis, float speed );
         ~RotationComponent( void ) = default;
 
         inline const Vector3f &getAxis( void ) const { return _axis; }
@@ -47,7 +47,7 @@ namespace crimild {
         virtual void update( const Clock &c ) override;
 
     private:
-        Vector3 _axis;
+        Vector3f _axis;
         crimild::Real32 _speed;
         crimild::Real32 _time;
 

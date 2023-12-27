@@ -57,13 +57,17 @@ public:
                                             .position = Vector3 { 0.0f, 0.5f, 0.0f },
                                             .color = ColorRGB { 0.0f, 0.0f, 1.0f },
                                         },
-                                    } );
+                                    }
+                                );
                             }(),
-                        } );
+                        }
+                    );
                     primitive->setIndices(
                         crimild::alloc< IndexBuffer >(
                             Format::INDEX_32_UINT,
-                            Array< crimild::UInt32 > { 0, 1, 2 } ) );
+                            Array< crimild::UInt32 > { 0, 1, 2 }
+                        )
+                    );
                     return primitive;
                 };
 
@@ -79,16 +83,21 @@ public:
                                         Array< SharedPointer< Shader > > {
                                             Shader::withSource(
                                                 Shader::Stage::VERTEX,
-                                                FilePath { .path = "assets/shaders/scene.vert" } ),
+                                                FilePath { .path = "assets/shaders/scene.vert" }
+                                            ),
                                             Shader::withSource(
                                                 Shader::Stage::FRAGMENT,
-                                                FilePath { .path = "assets/shaders/scene.frag" } ),
-                                        } );
+                                                FilePath { .path = "assets/shaders/scene.frag" }
+                                            ),
+                                        }
+                                    );
                                     program->vertexLayouts = { VertexLayout::P3_C3 };
                                     return program;
-                                }() );
+                                }()
+                            );
                             return pipeline;
-                        }() );
+                        }()
+                    );
                     return material;
                 };
 
@@ -114,8 +123,10 @@ public:
                                     Real( rnd.generate() ),
                                     Real( rnd.generate() ),
                                     Real( rnd.generate() ),
-                                } ),
-                            rnd.generate( 0, numbers::TWO_PI ) );
+                                }
+                            ),
+                            rnd.generate( 0, numbers::TWO_PI )
+                        );
                         const auto S = scale( rnd.generate( 0.5f, 1.5f ), rnd.generate( 0.5f, 1.5f ), 1 );
 
                         // Scale/Rotate/Translate
@@ -124,7 +135,10 @@ public:
                         scene->attachNode(
                             createTriangle(
                                 Transformation(
-                                    pose ) ) );
+                                    pose
+                                )
+                            )
+                        );
                     }
                 }
 
@@ -132,13 +146,16 @@ public:
                     auto camera = crimild::alloc< Camera >();
                     camera->setLocal(
                         lookAt(
-                            Point3 { 5, 10, 10 },
-                            Point3 { 0, -1, 0 },
-                            Vector3::Constants::UP ) );
+                            Point3f { 5, 10, 10 },
+                            Point3f { 0, -1, 0 },
+                            Vector3::Constants::UP
+                        )
+                    );
                     return camera;
                 }() );
                 return scene;
-            }() );
+            }()
+        );
     }
 };
 

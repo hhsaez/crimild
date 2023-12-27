@@ -29,14 +29,11 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/Matrix4_equality.hpp"
 #include "Mathematics/Transformation_apply.hpp"
 #include "Mathematics/Transformation_lookAt.hpp"
 #include "Mathematics/Transformation_operators.hpp"
 #include "Mathematics/Transformation_rotation.hpp"
 #include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector_equality.hpp"
 #include "Mathematics/io.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
@@ -58,8 +55,8 @@ TEST( Camera, view_matrix )
 
     camera->setLocal(
         lookAt(
-            Point3 { 1, 3, 2 },
-            Point3 { 4, -2, 8 },
+            Point3f { 1, 3, 2 },
+            Point3f { 4, -2, 8 },
             Vector3 { 1, 1, 0 }
         )
     );
@@ -75,7 +72,7 @@ TEST( Camera, view_matrix )
     const auto view = camera->getViewMatrix();
 
     // always compare with inverse matrix
-    EXPECT_EQ( M, view );
+    EXPECT_TRUE( isEqual( M, view ) );
 }
 
 TEST( Camera, get_ray_through_the_center_of_the_canvas )
@@ -95,7 +92,7 @@ TEST( Camera, get_ray_through_the_center_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
+    EXPECT_EQ( Point3f::ZERO, origin( ray ) );
     EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
 }
 
@@ -114,8 +111,8 @@ TEST( Camera, get_ray_through_the_corner_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( 0, 0, ray ) );
 
-    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
-    EXPECT_EQ( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) );
+    EXPECT_TRUE( isEqual( Point3f::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) ) );
 }
 
 TEST( Camera, get_ray_for_translated_camera )
@@ -137,7 +134,7 @@ TEST( Camera, get_ray_for_translated_camera )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( ( Point3 { 0, -2, 5 } ), origin( ray ) );
+    EXPECT_EQ( ( Point3f { 0, -2, 5 } ), origin( ray ) );
     EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
 }
 
@@ -160,8 +157,8 @@ TEST( Camera, get_ray_for_rotated_camera )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( Point3::Constants::ZERO, origin( ray ) );
-    EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
+    EXPECT_TRUE( isEqual( Point3f::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( Vector3::Constants::RIGHT, direction( ray ) ) );
 }
 
 TEST( Camera, get_ray_for_transformed_camera )
@@ -183,7 +180,7 @@ TEST( Camera, get_ray_for_transformed_camera )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( ( Point3 { 2, 1, -1 } ), origin( ray ) );
+    EXPECT_EQ( ( Point3f { 2, 1, -1 } ), origin( ray ) );
     EXPECT_EQ( ( Vector3 { 0, -numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ), direction( ray ) );
 }
 
@@ -198,8 +195,8 @@ TEST( Camera, get_ray_for_camera_using_lookAt )
 
     camera->setLocal(
         lookAt(
-            Point3 { 0, -2, 5 },
-            Point3 { 1, -2, 5 },
+            Point3f { 0, -2, 5 },
+            Point3f { 1, -2, 5 },
             Vector3 { 0, 1, 0 }
         )
     );
@@ -213,7 +210,7 @@ TEST( Camera, get_ray_for_camera_using_lookAt )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( ( Point3 { 0, -2, 5 } ), origin( ray ) );
+    EXPECT_EQ( ( Point3f { 0, -2, 5 } ), origin( ray ) );
     EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
 }
 

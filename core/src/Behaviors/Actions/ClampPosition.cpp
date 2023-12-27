@@ -38,7 +38,7 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Transformation translation( const Point3 &P ) noexcept
+    [[nodiscard]] inline constexpr Transformation translation( const Point3f &P ) noexcept
     {
         return translation( Vector3 { P.x, P.y, P.z } );
     }

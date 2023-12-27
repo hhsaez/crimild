@@ -35,6 +35,8 @@ if( CRIMILD_BUILD_TESTS )
 endif ()
 
 # Add subdirectories
+add_subdirectory( foundation )
+add_subdirectory( mathematics )
 add_subdirectory( core )
 
 # Configure Vulkan
