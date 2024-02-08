@@ -484,6 +484,121 @@ inline void setupImGuiStyles( bool dark, float alpha )
     style.GrabRounding = style.FrameRounding = 2.3f;
 }
 
+struct Panels {
+    Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
+        : scene( renderDevice ),
+          simulation( renderDevice ),
+          inspector( renderDevice ),
+          sceneRT( renderDevice )
+    {
+        // no-op
+    }
+
+    crimild::editor::panels::MainMenuBar mainMenu;
+    crimild::editor::panels::Timeline timeline;
+    crimild::editor::panels::Behaviors behaviors;
+    crimild::editor::panels::Scene scene;
+    crimild::editor::panels::SceneHierarchy sceneHierarchy;
+    crimild::editor::panels::Simulation simulation;
+    crimild::editor::panels::PlaybackControls playbackControls;
+    crimild::editor::panels::Inspector inspector;
+    crimild::editor::panels::Project project;
+    crimild::editor::panels::SceneRT sceneRT;
+    crimild::editor::panels::Console console;
+
+    void render( void ) noexcept
+    {
+        mainMenu.render();
+
+        ImGui::DockSpaceOverViewport( ImGui::GetMainViewport() );
+
+        timeline.render();
+        behaviors.render();
+        scene.render();
+        sceneHierarchy.render();
+        simulation.render();
+        playbackControls.render();
+        inspector.render();
+        project.render();
+        sceneRT.render();
+        console.render();
+    }
+};
+
+bool renderFrame(
+    GLFWwindow *window,
+    ImGuiIO &io,
+    ImGui_ImplVulkanH_Window *wd,
+    crimild::concurrency::JobScheduler &jobScheduler,
+    std::unique_ptr< crimild::Simulation > &simulation,
+    VulkanObjects &vulkanObjects,
+    std::unique_ptr< Panels > &panels
+) noexcept
+{
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    glfwPollEvents();
+
+    // This also dispatch any sync_frame calls
+    jobScheduler.executeDelayedJobs();
+
+    // Dispatch deferred messages
+    crimild::MessageQueue::getInstance()->dispatchDeferredMessages();
+
+    // Resize swap chain?
+    if ( g_SwapChainRebuild ) {
+        int width, height;
+        glfwGetFramebufferSize( window, &width, &height );
+        if ( width > 0 && height > 0 ) {
+            ImGui_ImplVulkan_SetMinImageCount( g_MinImageCount );
+            ImGui_ImplVulkanH_CreateOrResizeWindow( g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount );
+            g_MainWindowData.FrameIndex = 0;
+            g_SwapChainRebuild = false;
+        }
+    }
+
+    const auto tick = crimild::Event {
+        .type = crimild::Event::Type::TICK,
+    };
+    if ( simulation->handle( tick ).type == crimild::Event::Type::TERMINATE ) {
+        return false;
+    }
+
+    // Start the Dear ImGui frame
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
+    vulkanObjects.renderDevice->getCache()->onBeforeFrame();
+    panels->render();
+    vulkanObjects.renderDevice->getCache()->onAfterFrame();
+
+    // Rendering
+    ImGui::Render();
+    ImDrawData *draw_data = ImGui::GetDrawData();
+    const bool is_minimized = ( draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f );
+    if ( !is_minimized ) {
+        ImVec4 clear_color = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
+        wd->ClearValue.color.float32[ 0 ] = clear_color.x * clear_color.w;
+        wd->ClearValue.color.float32[ 1 ] = clear_color.y * clear_color.w;
+        wd->ClearValue.color.float32[ 2 ] = clear_color.z * clear_color.w;
+        wd->ClearValue.color.float32[ 3 ] = clear_color.w;
+        FrameRender( wd, draw_data );
+        FramePresent( wd );
+    }
+
+    if ( io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable ) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
+
+    return true;
+}
+
 // Main code
 int main( int argc, char **argv )
 {
@@ -649,48 +764,7 @@ int main( int argc, char **argv )
     }
 
     // Our state
-    ImVec4 clear_color = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
 
-    struct Panels {
-        Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
-            : scene( renderDevice ),
-              simulation( renderDevice ),
-              inspector( renderDevice ),
-              sceneRT( renderDevice )
-        {
-            // no-op
-        }
-
-        crimild::editor::panels::MainMenuBar mainMenu;
-        crimild::editor::panels::Timeline timeline;
-        crimild::editor::panels::Behaviors behaviors;
-        crimild::editor::panels::Scene scene;
-        crimild::editor::panels::SceneHierarchy sceneHierarchy;
-        crimild::editor::panels::Simulation simulation;
-        crimild::editor::panels::PlaybackControls playbackControls;
-        crimild::editor::panels::Inspector inspector;
-        crimild::editor::panels::Project project;
-        crimild::editor::panels::SceneRT sceneRT;
-        crimild::editor::panels::Console console;
-
-        void render( void ) noexcept
-        {
-            mainMenu.render();
-
-            ImGui::DockSpaceOverViewport( ImGui::GetMainViewport() );
-
-            timeline.render();
-            behaviors.render();
-            scene.render();
-            sceneHierarchy.render();
-            simulation.render();
-            playbackControls.render();
-            inspector.render();
-            project.render();
-            sceneRT.render();
-            console.render();
-        }
-    };
     auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
 
     // Start simulation to init all systems, but then pause it.
@@ -699,64 +773,26 @@ int main( int argc, char **argv )
 
     // Main loop
     while ( !glfwWindowShouldClose( window ) ) {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        glfwPollEvents();
+        // Get frame time
+        // This will be used to limit frame rate if needed.
+        const auto frameStartTime = glfwGetTime();
 
-        // This also dispatch any sync_frame calls
-        jobScheduler.executeDelayedJobs();
-
-        // Dispatch deferred messages
-        crimild::MessageQueue::getInstance()->dispatchDeferredMessages();
-
-        // Resize swap chain?
-        if ( g_SwapChainRebuild ) {
-            int width, height;
-            glfwGetFramebufferSize( window, &width, &height );
-            if ( width > 0 && height > 0 ) {
-                ImGui_ImplVulkan_SetMinImageCount( g_MinImageCount );
-                ImGui_ImplVulkanH_CreateOrResizeWindow( g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount );
-                g_MainWindowData.FrameIndex = 0;
-                g_SwapChainRebuild = false;
-            }
+        if ( !glfwGetWindowAttrib( window, GLFW_VISIBLE ) || glfwGetWindowAttrib( window, GLFW_ICONIFIED ) ) {
+            // If the application is minimized or not visible, block main thread until we
+            // receive events
+            glfwWaitEvents();
         }
 
-        const auto tick = crimild::Event {
-            .type = crimild::Event::Type::TICK,
-        };
-        if ( simulation->handle( tick ).type == crimild::Event::Type::TERMINATE ) {
+        if ( !renderFrame( window, io, wd, jobScheduler, simulation, vulkanObjects, panels ) ) {
             break;
         }
 
-        // Start the Dear ImGui frame
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
-        vulkanObjects.renderDevice->getCache()->onBeforeFrame();
-        panels->render();
-        vulkanObjects.renderDevice->getCache()->onAfterFrame();
-
-        // Rendering
-        ImGui::Render();
-        ImDrawData *draw_data = ImGui::GetDrawData();
-        const bool is_minimized = ( draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f );
-        if ( !is_minimized ) {
-            wd->ClearValue.color.float32[ 0 ] = clear_color.x * clear_color.w;
-            wd->ClearValue.color.float32[ 1 ] = clear_color.y * clear_color.w;
-            wd->ClearValue.color.float32[ 2 ] = clear_color.z * clear_color.w;
-            wd->ClearValue.color.float32[ 3 ] = clear_color.w;
-            FrameRender( wd, draw_data );
-            FramePresent( wd );
-        }
-
-        if ( io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable ) {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
+        // Limit frame rate
+        constexpr uint32_t TARGET_FPS = 60;
+        const double frameTime = glfwGetTime() - frameStartTime;
+        const double targetFrameTime = 1.0 / TARGET_FPS;
+        if ( frameTime < targetFrameTime ) {
+            glfwWaitEventsTimeout( targetFrameTime - frameTime );
         }
     }
 
