@@ -42,10 +42,22 @@ target_sources(
 
     Views/View.hpp
     Views/View.cpp
+    Views/Menus/MainMenu/MainMenu.cpp
+    Views/Menus/MainMenu/MainMenu.hpp
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
+    Views/Windows/FileSystemWindow/FileSystemWindow.hpp
+    Views/Windows/FileSystemWindow/FileSystemWindow.cpp
+    Views/Windows/InspectorWindow/InspectorWindow.hpp
+    Views/Windows/InspectorWindow/InspectorWindow.cpp
     Views/Windows/LogWindow/LogWindow.hpp
     Views/Windows/LogWindow/LogWindow.cpp
+    Views/Windows/Scene3DWindow/Scene3DWindow.hpp
+    Views/Windows/Scene3DWindow/Scene3DWindow.cpp
+    Views/Windows/SceneWindow/SceneWindow.hpp
+    Views/Windows/SceneWindow/SceneWindow.cpp
+    Views/Windows/SimulationWindow/SimulationWindow.hpp
+    Views/Windows/SimulationWindow/SimulationWindow.cpp
 
     Layout/LayoutManager.hpp
     Layout/LayoutManager.cpp
