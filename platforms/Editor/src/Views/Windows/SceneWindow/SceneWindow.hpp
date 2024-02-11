@@ -25,67 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_LAYOUT_MANAGER_
-#define CRIMILD_EDITOR_LAYOUT_MANAGER_
+#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_
+#define CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_
 
-#include "Coding/Codable.hpp"
-#include "Foundation/Named.hpp"
-#include "Rendering/Extent.hpp"
-
-#include <memory>
-#include <string>
-#include <vector>
+#include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class View;
-
-    class Layout : public Named, public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::Layout )
+    class SceneWindow : public Window {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::SceneWindow )
 
     public:
-        Layout( void ) = default;
-        Layout( std::string_view name, std::string_view imGuiLayout ) noexcept;
-        ~Layout( void ) = default;
+        SceneWindow( void ) noexcept;
+        ~SceneWindow( void ) noexcept = default;
 
-        inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
-
-        void addView( std::shared_ptr< View > const &view ) noexcept
-        {
-            m_views.push_back( view );
-        }
-
-        void makeCurrent( void ) noexcept;
-
-        void draw( void ) noexcept;
-
-    private:
-        std::vector< std::shared_ptr< View > > m_views;
-
-        Extent2D m_extent = { .width = 1024.0f, .height = 768.0f };
-
-        /**
-         * @brief Keeps track of the ImGui context, usually saved in imgui.ini
-         *
-         * Loading/saving ImGui Context is now done manually, instead of relying
-         * on ImGui's own methods.
-         */
-        std::string m_imGuiLayout;
-
-    public:
-        virtual void encode( coding::Encoder &encoder ) noexcept override;
-        virtual void decode( coding::Decoder &decoder ) noexcept override;
-    };
-
-    class LayoutManager {
-    public:
-        LayoutManager( void ) noexcept;
-        ~LayoutManager( void ) noexcept;
-
-        std::shared_ptr< Layout > &getCurrentLayout( void ) noexcept { return m_layout; }
-
-    private:
-        std::shared_ptr< Layout > m_layout;
+        void drawContent( void ) noexcept final;
     };
 
 }
