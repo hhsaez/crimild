@@ -39,6 +39,16 @@ target_sources(
     Panels/SimulationPanel.hpp
     Panels/TimelinePanel.cpp
     Panels/TimelinePanel.hpp
+
+    Views/View.hpp
+    Views/View.cpp
+    Views/Windows/Window.hpp
+    Views/Windows/Window.cpp
+    Views/Windows/LogWindow/LogWindow.hpp
+    Views/Windows/LogWindow/LogWindow.cpp
+
+    Layout/LayoutManager.hpp
+    Layout/LayoutManager.cpp
     
     Rendering/STBImageManager.cpp
     Rendering/STBImageManager.hpp

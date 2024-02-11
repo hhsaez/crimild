@@ -11,6 +11,7 @@
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Layout/LayoutManager.hpp"
 #include "Panels/BehaviorsPanel.hpp"
 #include "Panels/ConsolePanel.hpp"
 #include "Panels/InspectorPanel.hpp"
@@ -26,6 +27,7 @@
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
+#include "Views/Windows/LogWindow/LogWindow.hpp"
 
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
@@ -525,23 +527,12 @@ struct Panels {
     }
 };
 
-bool renderFrame(
+bool beginFrame(
     GLFWwindow *window,
-    ImGuiIO &io,
-    ImGui_ImplVulkanH_Window *wd,
     crimild::concurrency::JobScheduler &jobScheduler,
-    std::unique_ptr< crimild::Simulation > &simulation,
-    VulkanObjects &vulkanObjects,
-    std::unique_ptr< Panels > &panels
+    std::unique_ptr< crimild::Simulation > &simulation
 ) noexcept
 {
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-    glfwPollEvents();
-
     // This also dispatch any sync_frame calls
     jobScheduler.executeDelayedJobs();
 
@@ -572,11 +563,11 @@ bool renderFrame(
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
-    vulkanObjects.renderDevice->getCache()->onBeforeFrame();
-    panels->render();
-    vulkanObjects.renderDevice->getCache()->onAfterFrame();
+    return true;
+}
 
+void endFrame( ImGuiIO &io, ImGui_ImplVulkanH_Window *wd ) noexcept
+{
     // Rendering
     ImGui::Render();
     ImDrawData *draw_data = ImGui::GetDrawData();
@@ -595,6 +586,39 @@ bool renderFrame(
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
+}
+
+bool renderFrame(
+    GLFWwindow *window,
+    ImGuiIO &io,
+    ImGui_ImplVulkanH_Window *wd,
+    crimild::concurrency::JobScheduler &jobScheduler,
+    std::unique_ptr< crimild::Simulation > &simulation,
+    VulkanObjects &vulkanObjects,
+    std::unique_ptr< crimild::editor::LayoutManager > &layoutManager
+) noexcept
+{
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    glfwPollEvents();
+
+    if ( !beginFrame( window, jobScheduler, simulation ) ) {
+        return false;
+    }
+
+    vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
+    vulkanObjects.renderDevice->getCache()->onBeforeFrame();
+
+    if ( auto layout = layoutManager->getCurrentLayout() ) {
+        layout->draw();
+    }
+
+    vulkanObjects.renderDevice->getCache()->onAfterFrame();
+
+    endFrame( io, wd );
 
     return true;
 }
@@ -605,6 +629,8 @@ int main( int argc, char **argv )
     crimild::init();
     crimild::vulkan::init();
 
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Layout );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::LogWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Editor::State );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Project );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::PrefabNode );
@@ -634,13 +660,36 @@ int main( int argc, char **argv )
     // created
     auto simulation = crimild::Simulation::create();
 
+    // Loads layout manager early so we can get the window's dimensions from
+    // the default layout, if any
+    auto layoutManager = std::make_unique< crimild::editor::LayoutManager >();
+
     glfwSetErrorCallback( glfw_error_callback );
     if ( !glfwInit() )
         return 1;
 
     // Create window with Vulkan context
     glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-    GLFWwindow *window = glfwCreateWindow( 2560, 1440, "Crimild Editor", NULL, NULL );
+    const int windowWidth = [ & ] {
+        if ( auto layout = layoutManager->getCurrentLayout() ) {
+            return ( int ) layout->getExtent().width;
+        }
+        return 2560;
+    }();
+    const int windowHeight = [ & ] {
+        if ( auto layout = layoutManager->getCurrentLayout() ) {
+            return ( int ) layout->getExtent().height;
+        }
+        return 1440;
+    }();
+    const std::string windowTitle = [ & ] {
+        std::string title = "Crimild Editor";
+        if ( auto layout = layoutManager->getCurrentLayout() ) {
+            title += " (" + layout->getName() + ")";
+        }
+        return title;
+    }();
+    GLFWwindow *window = glfwCreateWindow( windowWidth, windowHeight, windowTitle.c_str(), NULL, NULL );
     if ( !glfwVulkanSupported() ) {
         printf( "GLFW: Vulkan Not Supported\n" );
         return 1;
@@ -765,7 +814,11 @@ int main( int argc, char **argv )
 
     // Our state
 
-    auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
+    // auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
+
+    if ( auto layout = layoutManager->getCurrentLayout() ) {
+        layout->makeCurrent();
+    }
 
     // Start simulation to init all systems, but then pause it.
     simulation->start();
@@ -783,7 +836,7 @@ int main( int argc, char **argv )
             glfwWaitEvents();
         }
 
-        if ( !renderFrame( window, io, wd, jobScheduler, simulation, vulkanObjects, panels ) ) {
+        if ( !renderFrame( window, io, wd, jobScheduler, simulation, vulkanObjects, layoutManager ) ) {
             break;
         }
 
@@ -804,7 +857,9 @@ int main( int argc, char **argv )
     jobScheduler.stop();
     crimild::MessageQueue::getInstance()->clear();
 
-    panels = nullptr;
+    // Destroy the layout manager
+    // This will persist the current layout, if any.
+    layoutManager = nullptr;
 
     // Cleanup
     err = vkDeviceWaitIdle( g_Device );
