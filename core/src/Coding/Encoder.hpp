@@ -109,6 +109,7 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Quaternion & ) = 0;
             virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
             virtual crimild::Bool encode( std::string key, const Format & ) = 0;
+            virtual crimild::Bool encode( std::string key, const Extent2D & ) = 0;
             virtual crimild::Bool encode( std::string key, const Extent3D & ) = 0;
 
             virtual crimild::Bool encode( std::string key, const VertexAttribute &attr )
