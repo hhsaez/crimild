@@ -28,6 +28,12 @@
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
+#include "Views/Windows/InspectorWindow/InspectorWindow.hpp"
+#include "Views/Windows/LogWindow/LogWindow.hpp"
+#include "Views/Windows/Scene3DWindow/Scene3DWindow.hpp"
+#include "Views/Windows/SceneWindow/SceneWindow.hpp"
+#include "Views/Windows/SimulationWindow/SimulationWindow.hpp"
 
 using namespace crimild::editor;
 
@@ -243,6 +249,78 @@ void renderFileMenu( void ) noexcept
     }
 }
 
+template< class PanelType >
+static void renderLayoutMenuItem( void ) noexcept
+{
+    auto panel = PanelType::getInstance();
+    if ( ImGui::MenuItem( panel->getName().c_str() ) ) {
+        panel->setActive( true );
+    }
+}
+
+void renderLayoutMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Layout" ) ) {
+        renderLayoutMenuItem< SceneWindow >();
+        renderLayoutMenuItem< FileSystemWindow >();
+        renderLayoutMenuItem< InspectorWindow >();
+
+        ImGui::Separator();
+
+        renderLayoutMenuItem< Scene3DWindow >();
+        renderLayoutMenuItem< SimulationWindow >();
+
+        ImGui::Separator();
+
+        renderLayoutMenuItem< LogWindow >();
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Layout..." ) ) {
+            ImGui::BeginDisabled();
+            if ( ImGui::MenuItem( "Default" ) ) {
+                // TODO
+            }
+            ImGui::EndDisabled();
+
+            ImGui::Separator();
+
+            if ( ImGui::MenuItem( "Clear" ) ) {
+                // auto panels = panels::Panel::getAllPanels();
+                // for ( auto &p : panels ) {
+                //     p->setOpen( false );
+                // }
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+void renderHelpMenu( void ) noexcept
+{
+    // static bool showHelpAboutDialog = false;
+    // static bool showImGuiDemoWindow = false;
+
+    if ( ImGui::BeginMenu( "Help" ) ) {
+        if ( ImGui::MenuItem( "About..." ) ) {
+            // showHelpAboutDialog = true;
+        }
+        if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
+            // showImGuiDemoWindow = true;
+        }
+        ImGui::EndMenu();
+    }
+
+    // helpAboutDialog( showHelpAboutDialog );
+
+    // if ( showImGuiDemoWindow ) {
+    //     ImGui::ShowDemoWindow( &showImGuiDemoWindow );
+    // }
+}
+
 MainMenu::MainMenu( void ) noexcept
     : View( "MainMenu" )
 {
@@ -262,8 +340,8 @@ void MainMenu::drawContent( void ) noexcept
         renderFileMenu();
         // renderEditMenu();
         // renderSceneMenu();
-        // renderWorkspaceMenu();
-        // renderHelpMenu();
+        renderLayoutMenu();
+        renderHelpMenu();
         ImGui::EndMainMenuBar();
     }
 }
