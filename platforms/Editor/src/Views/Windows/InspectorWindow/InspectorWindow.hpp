@@ -28,11 +28,12 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_INSPECTOR_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_INSPECTOR_
 
+#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class InspectorWindow : public Window {
+    class InspectorWindow : public Window, public DynamicSingleton< InspectorWindow > {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::InspectorWindow )
 
     public:

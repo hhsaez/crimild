@@ -28,11 +28,12 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 
+#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class LogWindow : public Window {
+    class LogWindow : public Window, public DynamicSingleton< LogWindow > {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::LogWindow )
 
     public:

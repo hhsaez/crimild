@@ -28,11 +28,12 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SIMULATION_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_SIMULATION_
 
+#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class SimulationWindow : public Window {
+    class SimulationWindow : public Window, public DynamicSingleton< SimulationWindow > {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::SimulationWindow )
 
     public:

@@ -40,6 +40,7 @@ namespace crimild::editor {
     public:
         virtual ~Window( void ) noexcept = default;
 
+        void setActive( bool active ) noexcept { m_isOpen = active; }
         virtual bool isActive( void ) const noexcept override { return isVisible() && m_isOpen; }
 
         void draw( void ) noexcept final;
@@ -56,6 +57,7 @@ namespace crimild::editor {
         bool m_isOpen = true;
         ImVec2 m_minSize = { 300, 400 };
         ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
+        std::string m_windowName;
 
     public:
         virtual void encode( coding::Encoder &encoder ) noexcept override;
