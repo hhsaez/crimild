@@ -67,6 +67,7 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Transformation &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Format &value ) override { return decodeData( key, value ); }
+            virtual crimild::Bool decode( std::string key, Extent2D &value ) override { return decodeData( key, value ); }
             virtual crimild::Bool decode( std::string key, Extent3D &value ) override { return decodeData( key, value ); }
 
             virtual bool decode( std::string_view key, std::vector< std::byte > &value ) override
