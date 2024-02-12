@@ -37,5 +37,64 @@ LogWindow::LogWindow( void ) noexcept
 
 void LogWindow::drawContent( void ) noexcept
 {
-    // TODO
+    auto logger = LogWindow::OutputHandler::getInstance();
+    if ( !logger ) {
+        ImGui::Text( "No output handler available" );
+        return;
+    }
+
+    auto &buffer = logger->getBuffer();
+    auto &lineOffsets = logger->getLineOffsets();
+    auto &colors = logger->getColors();
+
+    bool autoScroll = true;
+
+    if ( ImGui::BeginChild( "scrolling", ImVec2( 0, 0 ), false, ImGuiWindowFlags_HorizontalScrollbar ) ) {
+        ImGuiListClipper clipper;
+        clipper.Begin( lineOffsets.size() );
+        while ( clipper.Step() ) {
+            for ( int line = clipper.DisplayStart; line < clipper.DisplayEnd; ++line ) {
+                const auto color = colors[ line ];
+                ImGui::PushStyleColor( ImGuiCol_Text, color );
+
+                const char *start = buffer.begin() + lineOffsets[ line ];
+                const char *end =
+                    ( line + 1 < lineOffsets.size() )
+                        ? ( buffer.begin() + lineOffsets[ line + 1 ] - 1 )
+                        : buffer.end();
+                ImGui::TextUnformatted( start, end );
+
+                // Unfortunatelly, ImGuiListClipper does not work correct when elements have varying sizes, like
+                // lines in the log. As a work around, I'm displaying a tooltip with a more readable log description
+                if ( ImGui::IsItemHovered() ) {
+                    ImGui::PushStyleColor( ImGuiCol_PopupBg, IM_COL32( 0, 0, 0, 255 ) );
+                    ImGui::PushStyleColor( ImGuiCol_Border, IM_COL32( 255, 255, 255, 255 ) );
+
+                    ImGui::BeginTooltip();
+
+                    ImGui::PushTextWrapPos( ImGui::GetCursorPos().x + 1000.0f );
+
+                    const std::string text( start, end );
+                    ImGui::Text( "%s", text.c_str() );
+
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::EndTooltip();
+
+                    ImGui::PopStyleColor();
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::PopStyleColor();
+            }
+        }
+        clipper.End();
+
+        // Keep up at the bottom of the scroll region if we were already at the bottom at the beginning of the frame.
+        // Using a scrollbar or mouse-wheel will take away from the bottom edge.
+        if ( autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() ) {
+            ImGui::SetScrollHereY( 1.0f );
+        }
+    }
+    ImGui::EndChild();
 }

@@ -28,6 +28,8 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 
+#include "Foundation/ImGuiUtils.hpp"
+#include "Foundation/Log.hpp"
 #include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
@@ -37,12 +39,66 @@ namespace crimild::editor {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::LogWindow )
 
     public:
+        class OutputHandler
+            : public Log::OutputHandler,
+              public DynamicSingleton< OutputHandler > {
+        public:
+            OutputHandler( int level ) noexcept
+                : Log::OutputHandler( level )
+            {
+                // no-op
+            }
+
+            virtual ~OutputHandler( void ) = default;
+
+            inline ImGuiTextBuffer &getBuffer( void ) noexcept { return m_buffer; }
+            inline ImVector< int > &getLineOffsets( void ) noexcept { return m_lineOffsets; }
+            inline ImVector< uint32_t > &getColors( void ) noexcept { return m_colors; }
+
+            virtual void print( int level, std::string const &line ) noexcept override
+            {
+                int offset = m_buffer.size();
+                m_buffer.append( line.c_str() );
+                m_lineOffsets.push_back( offset );
+
+                switch ( level ) {
+                    case Log::LOG_LEVEL_DEBUG:
+                        m_colors.push_back( IM_COL32( 255, 255, 255, 255 ) );
+                        break;
+
+                    case Log::LOG_LEVEL_ERROR:
+                    case Log::LOG_LEVEL_FATAL:
+                        m_colors.push_back( IM_COL32( 255, 0, 0, 255 ) );
+                        break;
+
+                    case Log::LOG_LEVEL_INFO:
+                        m_colors.push_back( IM_COL32( 0, 255, 0, 255 ) );
+                        break;
+
+                    case Log::LOG_LEVEL_WARNING:
+                        m_colors.push_back( IM_COL32( 255, 255, 0, 255 ) );
+                        break;
+
+                    default:
+                        m_colors.push_back( IM_COL32( 128, 128, 128, 255 ) );
+                        break;
+                }
+            }
+
+        private:
+            std::mutex m_mutex;
+
+            ImGuiTextBuffer m_buffer;
+            ImVector< int > m_lineOffsets;
+            ImVector< uint32_t > m_colors;
+        };
+
+    public:
         LogWindow( void ) noexcept;
         ~LogWindow( void ) noexcept = default;
 
         void drawContent( void ) noexcept final;
     };
-
 }
 
 #endif
