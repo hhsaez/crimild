@@ -85,14 +85,6 @@ namespace crimild::editor {
         std::weak_ptr< Layout > m_layout;
     };
 
-    class Modal : public View {
-    public:
-        void draw( void ) noexcept final
-        {
-            // TODO
-        }
-    };
-
 }
 
 #endif

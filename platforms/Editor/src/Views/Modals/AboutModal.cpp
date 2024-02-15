@@ -25,31 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
-#define CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
+#include "Views/Modals/AboutModal.hpp"
 
-#include "Views/View.hpp"
+#include <Crimild.hpp>
 
-namespace crimild::editor {
+using namespace crimild;
+using namespace crimild::editor;
 
-    class MainMenu : public View {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::MainMenu )
-
-    public:
-        MainMenu( void ) noexcept;
-        ~MainMenu( void ) noexcept = default;
-
-        void draw( void ) noexcept final;
-        void drawContent( void ) noexcept final;
-
-    private:
-        void renderFileMenu( void ) noexcept;
-        // void renderEditMenu( void ) noexcept;
-        // void renderSceneMenu( void ) noexcept;
-        void renderLayoutMenu( void ) noexcept;
-        void renderHelpMenu( void ) noexcept;
-    };
-
+AboutModal::AboutModal( void ) noexcept
+    : Modal( "About" )
+{
+    // no-op
 }
 
-#endif
+void AboutModal::drawContent( void ) noexcept
+{
+    if ( isVisible() ) {
+        Version version;
+        auto versionStr = version.getDescription();
+        ImGui::Text( "%s", versionStr.c_str() );
+        ImGui::Text( "http://crimild.hhsaez.com" );
+        ImGui::Text( "" );
+        ImGui::Text( "Copyright (c) 2002 - present, H. Hernan Saez" );
+        ImGui::Text( "All rights reserved." );
+    }
+}
