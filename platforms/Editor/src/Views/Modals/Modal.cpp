@@ -25,31 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
-#define CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
+#include "Views/Modals/Modal.hpp"
 
-#include "Views/View.hpp"
+using namespace crimild::editor;
 
-namespace crimild::editor {
-
-    class MainMenu : public View {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::MainMenu )
-
-    public:
-        MainMenu( void ) noexcept;
-        ~MainMenu( void ) noexcept = default;
-
-        void draw( void ) noexcept final;
-        void drawContent( void ) noexcept final;
-
-    private:
-        void renderFileMenu( void ) noexcept;
-        // void renderEditMenu( void ) noexcept;
-        // void renderSceneMenu( void ) noexcept;
-        void renderLayoutMenu( void ) noexcept;
-        void renderHelpMenu( void ) noexcept;
-    };
-
+Modal::Modal( std::string_view name ) noexcept
+    : View( name )
+{
+    // no-op
 }
 
-#endif
+void Modal::draw( void ) noexcept
+{
+    if ( isVisible() ) {
+        if ( m_isOpen ) {
+            ImGui::OpenPopup( getName().c_str() );
+        }
+
+        ImGui::SetNextWindowPos( ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+        ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
+        if ( ImGui::BeginPopupModal( getName().c_str(), &m_isOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking ) ) {
+            drawContent();
+            ImGui::EndPopup();
+        }
+
+        if ( ImGui::IsKeyPressed( ImGui::GetKeyIndex( ImGuiKey_Escape ) ) ) {
+            m_isOpen = false;
+        }
+    }
+}

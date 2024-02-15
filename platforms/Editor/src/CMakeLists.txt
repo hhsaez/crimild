@@ -48,6 +48,10 @@ target_sources(
     Views/Dialogs/FileDialog.hpp
     Views/Menus/MainMenu/MainMenu.cpp
     Views/Menus/MainMenu/MainMenu.hpp
+    Views/Modals/AboutModal.cpp
+    Views/Modals/AboutModal.hpp
+    Views/Modals/Modal.cpp
+    Views/Modals/Modal.hpp
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
     Views/Windows/FileSystemWindow.hpp

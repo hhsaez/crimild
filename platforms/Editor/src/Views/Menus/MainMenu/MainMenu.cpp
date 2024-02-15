@@ -32,6 +32,7 @@
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Dialogs/FileDialog.hpp"
+#include "Views/Modals/AboutModal.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
@@ -49,28 +50,6 @@ static void renderLayoutMenuItem( void ) noexcept
     if ( ImGui::MenuItem( panel->getName().c_str() ) ) {
         panel->setActive( true );
     }
-}
-
-void renderHelpMenu( void ) noexcept
-{
-    // static bool showHelpAboutDialog = false;
-    // static bool showImGuiDemoWindow = false;
-
-    if ( ImGui::BeginMenu( "Help" ) ) {
-        if ( ImGui::MenuItem( "About..." ) ) {
-            // showHelpAboutDialog = true;
-        }
-        if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
-            // showImGuiDemoWindow = true;
-        }
-        ImGui::EndMenu();
-    }
-
-    // helpAboutDialog( showHelpAboutDialog );
-
-    // if ( showImGuiDemoWindow ) {
-    //     ImGui::ShowDemoWindow( &showImGuiDemoWindow );
-    // }
 }
 
 MainMenu::MainMenu( void ) noexcept
@@ -328,4 +307,26 @@ void MainMenu::renderLayoutMenu( void ) noexcept
 
         ImGui::EndMenu();
     }
+}
+
+void MainMenu::renderHelpMenu( void ) noexcept
+{
+    // static bool showHelpAboutDialog = false;
+    // static bool showImGuiDemoWindow = false;
+
+    if ( ImGui::BeginMenu( "Help" ) ) {
+        if ( ImGui::MenuItem( "About..." ) ) {
+            getLayout()->addView( std::make_shared< AboutModal >() );
+        }
+        if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
+            // showImGuiDemoWindow = true;
+        }
+        ImGui::EndMenu();
+    }
+
+    // helpAboutDialog( showHelpAboutDialog );
+
+    // if ( showImGuiDemoWindow ) {
+    //     ImGui::ShowDemoWindow( &showImGuiDemoWindow );
+    // }
 }
