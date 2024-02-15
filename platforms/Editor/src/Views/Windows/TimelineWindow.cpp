@@ -27,6 +27,8 @@
 
 #include "Views/Windows/TimelineWindow.hpp"
 
+#include <algorithm>
+
 using namespace crimild::editor;
 
 static const char *SequencerItemTypeNames[] = { "Camera", "Music", "ScreenEffect", "FadeIn", "Animation" };
