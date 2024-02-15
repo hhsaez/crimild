@@ -32,12 +32,13 @@
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Dialogs/FileDialog.hpp"
-#include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
-#include "Views/Windows/InspectorWindow/InspectorWindow.hpp"
-#include "Views/Windows/LogWindow/LogWindow.hpp"
-#include "Views/Windows/Scene3DWindow/Scene3DWindow.hpp"
-#include "Views/Windows/SceneWindow/SceneWindow.hpp"
-#include "Views/Windows/SimulationWindow/SimulationWindow.hpp"
+#include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/InspectorWindow.hpp"
+#include "Views/Windows/LogWindow.hpp"
+#include "Views/Windows/Scene3DWindow.hpp"
+#include "Views/Windows/SceneWindow.hpp"
+#include "Views/Windows/SimulationWindow.hpp"
+#include "Views/Windows/TimelineWindow.hpp"
 
 using namespace crimild::editor;
 
@@ -47,47 +48,6 @@ static void renderLayoutMenuItem( void ) noexcept
     auto panel = PanelType::getInstance();
     if ( ImGui::MenuItem( panel->getName().c_str() ) ) {
         panel->setActive( true );
-    }
-}
-
-void renderLayoutMenu( void ) noexcept
-{
-    if ( ImGui::BeginMenu( "Layout" ) ) {
-        renderLayoutMenuItem< SceneWindow >();
-        renderLayoutMenuItem< FileSystemWindow >();
-        renderLayoutMenuItem< InspectorWindow >();
-
-        ImGui::Separator();
-
-        renderLayoutMenuItem< Scene3DWindow >();
-        renderLayoutMenuItem< SimulationWindow >();
-
-        ImGui::Separator();
-
-        renderLayoutMenuItem< LogWindow >();
-
-        ImGui::Separator();
-
-        if ( ImGui::BeginMenu( "Layout..." ) ) {
-            ImGui::BeginDisabled();
-            if ( ImGui::MenuItem( "Default" ) ) {
-                // TODO
-            }
-            ImGui::EndDisabled();
-
-            ImGui::Separator();
-
-            if ( ImGui::MenuItem( "Clear" ) ) {
-                // auto panels = panels::Panel::getAllPanels();
-                // for ( auto &p : panels ) {
-                //     p->setOpen( false );
-                // }
-            }
-
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMenu();
     }
 }
 
@@ -140,16 +100,6 @@ void MainMenu::drawContent( void ) noexcept
 
 void MainMenu::renderFileMenu( void ) noexcept
 {
-    // static std::string dialogId;
-    // static std::function< void( const std::filesystem::path & ) > dialogHandler;
-
-    // auto openDialog = [ & ]( std::string id, std::string title, auto handler, const char *filters = ".crimild", std::string pathName = "." ) {
-    //     dialogId = id;
-    //     dialogHandler = handler;
-    //     ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
-    //     ImGuiFileDialog::Instance()->OpenDialog( id, title, filters, pathName, 1, nullptr, flags );
-    // };
-
     // auto project = Editor::getInstance()->getProject();
     // const auto hasProject = project != nullptr
     const auto hasProject = false;
@@ -334,23 +284,48 @@ void MainMenu::renderFileMenu( void ) noexcept
 
         ImGui::EndMenu();
     }
+}
 
-    // if ( dialogHandler != nullptr && !dialogId.empty() ) {
-    //     ImGui::SetNextWindowSize( ImVec2( 800, 600 ) );
-    //     if ( ImGuiFileDialog::Instance()->Display( dialogId ) ) {
-    //         if ( ImGuiFileDialog::Instance()->IsOk() ) {
-    //             std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-    //             // const auto path = std::filesystem::path { filePathName };
-    //             // // Resolve at the beginning of next frame
-    //             // crimild::concurrency::sync_frame(
-    //             //     [ path, handler = dialogHandler ] {
-    //             //         handler( path );
-    //             //     }
-    //             // );
-    //         }
-    //         ImGuiFileDialog::Instance()->Close();
-    //         dialogHandler = nullptr;
-    //         dialogId = "";
-    //     }
-    // }
+void MainMenu::renderLayoutMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Layout" ) ) {
+        renderLayoutMenuItem< SceneWindow >();
+        renderLayoutMenuItem< FileSystemWindow >();
+        renderLayoutMenuItem< InspectorWindow >();
+
+        ImGui::Separator();
+
+        renderLayoutMenuItem< Scene3DWindow >();
+        renderLayoutMenuItem< SimulationWindow >();
+
+        ImGui::Separator();
+
+        renderLayoutMenuItem< LogWindow >();
+        if ( ImGui::MenuItem( TimelineWindow::TITLE ) ) {
+            getLayout()->addView( std::make_shared< TimelineWindow >() );
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Layout..." ) ) {
+            ImGui::BeginDisabled();
+            if ( ImGui::MenuItem( "Default" ) ) {
+                // TODO
+            }
+            ImGui::EndDisabled();
+
+            ImGui::Separator();
+
+            if ( ImGui::MenuItem( "Clear" ) ) {
+                // auto panels = panels::Panel::getAllPanels();
+                // for ( auto &p : panels ) {
+                //     p->setOpen( false );
+                // }
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
 }

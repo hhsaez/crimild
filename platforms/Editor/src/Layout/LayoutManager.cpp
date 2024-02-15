@@ -32,12 +32,12 @@
 #include "Foundation/ImGuiUtils.hpp"
 #include "Layout/Layout.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
-#include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
-#include "Views/Windows/InspectorWindow/InspectorWindow.hpp"
-#include "Views/Windows/LogWindow/LogWindow.hpp"
-#include "Views/Windows/Scene3DWindow/Scene3DWindow.hpp"
-#include "Views/Windows/SceneWindow/SceneWindow.hpp"
-#include "Views/Windows/SimulationWindow/SimulationWindow.hpp"
+#include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/InspectorWindow.hpp"
+#include "Views/Windows/LogWindow.hpp"
+#include "Views/Windows/Scene3DWindow.hpp"
+#include "Views/Windows/SceneWindow.hpp"
+#include "Views/Windows/SimulationWindow.hpp"
 
 #include <filesystem>
 

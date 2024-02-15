@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/Scene3DWindow/Scene3DWindow.hpp"
+#include "Views/Windows/InspectorWindow.hpp"
 
 using namespace crimild::editor;
 
-Scene3DWindow::Scene3DWindow( void ) noexcept
-    : Window( "Scene3D" )
+InspectorWindow::InspectorWindow( void ) noexcept
+    : Window( "Inspector" )
 {
     // no-op
 }
 
-void Scene3DWindow::drawContent( void ) noexcept
+void InspectorWindow::drawContent( void ) noexcept
 {
     // TODO
 }

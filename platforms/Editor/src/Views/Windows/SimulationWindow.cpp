@@ -25,28 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
-#define CRIMILD_EDITOR_VIEWS_MENUS_MAIN_
+#include "Views/Windows/SimulationWindow.hpp"
 
-#include "Views/View.hpp"
+using namespace crimild::editor;
 
-namespace crimild::editor {
-
-    class MainMenu : public View {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::MainMenu )
-
-    public:
-        MainMenu( void ) noexcept;
-        ~MainMenu( void ) noexcept = default;
-
-        void draw( void ) noexcept final;
-        void drawContent( void ) noexcept final;
-
-    private:
-        void renderFileMenu( void ) noexcept;
-        void renderLayoutMenu( void ) noexcept;
-    };
-
+SimulationWindow::SimulationWindow( void ) noexcept
+    : Window( "Simulation" )
+{
+    // no-op
 }
 
-#endif
+void SimulationWindow::drawContent( void ) noexcept
+{
+    // TODO
+}

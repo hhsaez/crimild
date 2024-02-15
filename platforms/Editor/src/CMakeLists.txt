@@ -50,19 +50,21 @@ target_sources(
     Views/Menus/MainMenu/MainMenu.hpp
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
-    Views/Windows/FileSystemWindow/FileSystemWindow.hpp
-    Views/Windows/FileSystemWindow/FileSystemWindow.cpp
-    Views/Windows/InspectorWindow/InspectorWindow.hpp
-    Views/Windows/InspectorWindow/InspectorWindow.cpp
-    Views/Windows/LogWindow/LogWindow.hpp
-    Views/Windows/LogWindow/LogWindow.cpp
-    Views/Windows/Scene3DWindow/Scene3DWindow.hpp
-    Views/Windows/Scene3DWindow/Scene3DWindow.cpp
-    Views/Windows/SceneWindow/SceneWindow.hpp
-    Views/Windows/SceneWindow/SceneWindow.cpp
-    Views/Windows/SimulationWindow/SimulationWindow.hpp
-    Views/Windows/SimulationWindow/SimulationWindow.cpp
-
+    Views/Windows/FileSystemWindow.hpp
+    Views/Windows/FileSystemWindow.cpp
+    Views/Windows/InspectorWindow.hpp
+    Views/Windows/InspectorWindow.cpp
+    Views/Windows/LogWindow.hpp
+    Views/Windows/LogWindow.cpp
+    Views/Windows/Scene3DWindow.hpp
+    Views/Windows/Scene3DWindow.cpp
+    Views/Windows/SceneWindow.hpp
+    Views/Windows/SceneWindow.cpp
+    Views/Windows/SimulationWindow.hpp
+    Views/Windows/SimulationWindow.cpp
+    Views/Windows/TimelineWindow.hpp
+    Views/Windows/TimelineWindow.cpp
+    
     Layout/Layout.hpp
     Layout/Layout.cpp
     Layout/LayoutManager.hpp
