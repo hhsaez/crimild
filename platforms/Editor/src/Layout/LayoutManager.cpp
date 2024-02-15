@@ -30,6 +30,7 @@
 #include "Coding/FileDecoder.hpp"
 #include "Coding/FileEncoder.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Layout/Layout.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 #include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow/InspectorWindow.hpp"
@@ -103,99 +104,6 @@ DockSpace         ID=0x8B93E3BD Window=0xA787BDB4 Pos=1192,321 Size=1024,768 Spl
   DockNode        ID=0x00000007 Parent=0x8B93E3BD SizeRef=300,768 Selected=0xFC755B05
 )";
 
-Layout::Layout( std::string_view name, std::string_view imGuiLayout ) noexcept
-    : Named( name ),
-      m_imGuiLayout( imGuiLayout )
-{
-    addView( std::make_shared< MainMenu >() );
-    addView( std::make_shared< FileSystemWindow >() );
-    addView( std::make_shared< InspectorWindow >() );
-    addView( std::make_shared< LogWindow >() );
-    addView( std::make_shared< Scene3DWindow >() );
-    addView( std::make_shared< SceneWindow >() );
-    addView( std::make_shared< SimulationWindow >() );
-}
-
-void Layout::draw( void ) noexcept
-{
-    ImGui::DockSpaceOverViewport( ImGui::GetMainViewport() );
-
-    std::cout << "Getting widow info from context" << std::endl;
-
-    auto ctx = ImGui::GetCurrentContext();
-    if ( ctx != nullptr ) {
-        for ( int i = 0; i < ctx->Windows.size(); ++i ) {
-            const auto window = ctx->Windows[ i ];
-            if ( window != nullptr ) {
-                std::cout << i << ": " << window->Name << "\n";
-            } else {
-                std::cout << i << ": unknown\n";
-            }
-        }
-    } else {
-        std::cout << "Context is Null" << std::endl;
-    }
-
-    std::cout << "DONE Getting widow info from context" << std::endl;
-
-    for ( auto &view : m_views ) {
-        if ( view->isActive() ) {
-            view->draw();
-        }
-    }
-}
-
-void Layout::makeCurrent( void ) noexcept
-{
-    // Disables imgui.ini file since we're going to save ImGui state to our own Layout structure
-    ImGuiIO &io = ImGui::GetIO();
-    io.IniFilename = nullptr;
-
-    if ( !m_imGuiLayout.empty() ) {
-        ImGui::LoadIniSettingsFromMemory( m_imGuiLayout.c_str() );
-    }
-}
-
-void Layout::encode( coding::Encoder &encoder ) noexcept
-{
-    Codable::encode( encoder );
-
-    encoder.encode( "name", getName() );
-
-    m_imGuiLayout = ImGui::SaveIniSettingsToMemory();
-    encoder.encode( "imGuiLayout", m_imGuiLayout );
-    std::cout << "ImGui State:\n"
-              << m_imGuiLayout << std::endl;
-
-    ImGuiIO &io = ImGui::GetIO();
-    ImVec2 displaySize = io.DisplaySize;
-    m_extent.width = displaySize.x;
-    m_extent.height = displaySize.y;
-    encoder.encode( "extent", m_extent );
-
-    Array< std::shared_ptr< View > > views;
-    for ( auto &view : m_views ) {
-        views.add( view );
-    }
-    encoder.encode( "views", views );
-}
-
-void Layout::decode( coding::Decoder &decoder ) noexcept
-{
-    Codable::decode( decoder );
-
-    decoder.decode( "name", getName() );
-
-    decoder.decode( "imGuiLayout", m_imGuiLayout );
-    decoder.decode( "extent", m_extent );
-
-    Array< std::shared_ptr< View > > views;
-    decoder.decode( "views", views );
-    views.each( [ this ]( auto view ) {
-        addView( view );
-    } );
-}
-
 LayoutManager::LayoutManager( void ) noexcept
 {
     const auto currentPath = std::filesystem::current_path();
@@ -210,6 +118,13 @@ LayoutManager::LayoutManager( void ) noexcept
 
     if ( m_layout == nullptr ) {
         m_layout = std::make_unique< Layout >( "Default", DEFAULT_LAYOUT );
+        m_layout->addView( std::make_shared< MainMenu >() );
+        m_layout->addView( std::make_shared< FileSystemWindow >() );
+        m_layout->addView( std::make_shared< InspectorWindow >() );
+        m_layout->addView( std::make_shared< LogWindow >() );
+        m_layout->addView( std::make_shared< Scene3DWindow >() );
+        m_layout->addView( std::make_shared< SceneWindow >() );
+        m_layout->addView( std::make_shared< SimulationWindow >() );
     }
 }
 

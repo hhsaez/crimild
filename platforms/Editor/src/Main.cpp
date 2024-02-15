@@ -11,6 +11,7 @@
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Layout/Layout.hpp"
 #include "Layout/LayoutManager.hpp"
 #include "Panels/BehaviorsPanel.hpp"
 #include "Panels/ConsolePanel.hpp"

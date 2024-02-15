@@ -32,7 +32,11 @@
 #include "Foundation/Named.hpp"
 #include "Foundation/RTTI.hpp"
 
+#include <memory>
+
 namespace crimild::editor {
+
+    class Layout;
 
     class View
         : public Named,
@@ -42,6 +46,9 @@ namespace crimild::editor {
 
     public:
         virtual ~View( void ) noexcept = default;
+
+        inline void setLayout( std::shared_ptr< Layout > const &layout ) noexcept { m_layout = layout; }
+        inline std::shared_ptr< Layout > getLayout( void ) noexcept { return m_layout.lock(); }
 
         /**
          * @brief Indicates if this view needs to be processed
@@ -73,6 +80,9 @@ namespace crimild::editor {
          * @brief Draw the actual content for this view
          */
         virtual void drawContent( void ) noexcept = 0;
+
+    private:
+        std::weak_ptr< Layout > m_layout;
     };
 
     class Modal : public View {

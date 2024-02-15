@@ -25,48 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
-#define CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
+#include "Views/Dialogs/FileDialog.hpp"
 
-#include "Foundation/ImGuiUtils.hpp"
-#include "Views/View.hpp"
+#include "Concurrency/Async.hpp"
+#include "Simulation/Editor.hpp"
 
-namespace crimild::editor {
+#include <filesystem>
 
-    class Window : public View {
-    protected:
-        Window( std::string_view name ) noexcept;
+using namespace crimild::editor;
 
-    public:
-        virtual ~Window( void ) noexcept = default;
+FileDialog::FileDialog(
+    std::string_view title,
+    Handler handler,
+    std::string_view filters,
+    std::string_view pathName
+) noexcept
+    : Dialog( title ),
+      m_handler( handler ),
+      m_filters( filters ),
+      m_pathName( pathName )
+{
+    setMinSize( { 600, 400 } );
 
-        void setActive( bool active ) noexcept { m_isOpen = active; }
-        virtual bool isActive( void ) const noexcept override { return isVisible() && m_isOpen; }
-
-        void draw( void ) noexcept final;
-
-    protected:
-        inline ImGuiWindowFlags getFlags( void ) const noexcept { return m_flags; }
-        inline void setFlags( ImGuiWindowFlags flags ) noexcept { m_flags = flags; }
-
-        inline void setMinSize( const ImVec2 &minSize ) noexcept { m_minSize = minSize; }
-        inline ImVec2 getMinSize( void ) const noexcept { return m_minSize; }
-
-        inline void setMaxSize( const ImVec2 &maxSize ) noexcept { m_maxSize = maxSize; }
-        inline ImVec2 getMaxSize( void ) const noexcept { return m_maxSize; }
-
-    private:
-        ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
-        bool m_isOpen = true;
-        ImVec2 m_minSize = { 300, 400 };
-        ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
-        std::string m_windowName;
-
-    public:
-        virtual void encode( coding::Encoder &encoder ) noexcept override;
-        virtual void decode( coding::Decoder &decoder ) noexcept override;
-    };
-
+    ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
+    ImGuiFileDialog::Instance()->OpenDialog(
+        getName().c_str(),
+        getName().c_str(),
+        m_filters.c_str(),
+        m_pathName.c_str(),
+        1,
+        nullptr,
+        flags
+    );
 }
 
-#endif
+void FileDialog::drawContent( void ) noexcept
+{
+    if ( isVisible() ) {
+        if ( ImGuiFileDialog::Instance()->Display( getName(), ImGuiWindowFlags_NoDocking, getMinSize(), getMaxSize() ) ) {
+            if ( ImGuiFileDialog::Instance()->IsOk() ) {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                const auto path = std::filesystem::path { filePathName };
+                // Resolve at the beginning of next frame
+                crimild::concurrency::sync_frame(
+                    [ path, handler = m_handler ] {
+                        handler( path );
+                    }
+                );
+            }
+            ImGuiFileDialog::Instance()->Close();
+        }
+    }
+}

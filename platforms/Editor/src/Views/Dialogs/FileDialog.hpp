@@ -25,46 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
-#define CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
+#ifndef CRIMILD_EDITOR_VIEWS_DIALOGS_FILE_
+#define CRIMILD_EDITOR_VIEWS_DIALOGS_FILE_
 
-#include "Foundation/ImGuiUtils.hpp"
-#include "Views/View.hpp"
+#include "Views/Dialogs/Dialog.hpp"
 
 namespace crimild::editor {
 
-    class Window : public View {
-    protected:
-        Window( std::string_view name ) noexcept;
+    class FileDialog : public Dialog {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::FileDialog )
 
     public:
-        virtual ~Window( void ) noexcept = default;
+        using Handler = std::function< void( const std::filesystem::path & ) >;
 
-        void setActive( bool active ) noexcept { m_isOpen = active; }
-        virtual bool isActive( void ) const noexcept override { return isVisible() && m_isOpen; }
+    public:
+        FileDialog(
+            std::string_view title,
+            Handler handler,
+            std::string_view filters = ".crimild",
+            std::string_view pathName = "."
+        ) noexcept;
+        ~FileDialog( void ) noexcept = default;
 
-        void draw( void ) noexcept final;
-
-    protected:
-        inline ImGuiWindowFlags getFlags( void ) const noexcept { return m_flags; }
-        inline void setFlags( ImGuiWindowFlags flags ) noexcept { m_flags = flags; }
-
-        inline void setMinSize( const ImVec2 &minSize ) noexcept { m_minSize = minSize; }
-        inline ImVec2 getMinSize( void ) const noexcept { return m_minSize; }
-
-        inline void setMaxSize( const ImVec2 &maxSize ) noexcept { m_maxSize = maxSize; }
-        inline ImVec2 getMaxSize( void ) const noexcept { return m_maxSize; }
+        void drawContent( void ) noexcept final;
 
     private:
-        ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
-        bool m_isOpen = true;
-        ImVec2 m_minSize = { 300, 400 };
-        ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
-        std::string m_windowName;
-
-    public:
-        virtual void encode( coding::Encoder &encoder ) noexcept override;
-        virtual void decode( coding::Decoder &decoder ) noexcept override;
+        Handler m_handler;
+        std::string m_filters;
+        std::string m_pathName;
     };
 
 }

@@ -41,6 +41,9 @@ namespace crimild::editor {
 
         void draw( void ) noexcept final;
         void drawContent( void ) noexcept final;
+
+    private:
+        void renderFileMenu( void ) noexcept;
     };
 
 }
