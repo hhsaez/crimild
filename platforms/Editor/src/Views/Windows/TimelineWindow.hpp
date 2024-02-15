@@ -25,17 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
+#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
+#define CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
 
-using namespace crimild::editor;
+#include "Foundation/Singleton.hpp"
+#include "Views/Windows/Window.hpp"
 
-FileSystemWindow::FileSystemWindow( void ) noexcept
-    : Window( "FileSystem" )
-{
-    // no-op
+namespace crimild::editor {
+
+    class TimelineWindow
+        : public Window {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::TimelineWindow )
+
+    public:
+        static constexpr const char *TITLE = "Timeline";
+
+    public:
+        TimelineWindow( void ) noexcept;
+        ~TimelineWindow( void ) noexcept = default;
+
+        void drawContent( void ) noexcept final;
+    };
+
 }
 
-void FileSystemWindow::drawContent( void ) noexcept
-{
-    // TODO
-}
+#endif

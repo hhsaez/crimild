@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/SceneWindow/SceneWindow.hpp"
+#include "Views/Windows/SceneWindow.hpp"
 
 using namespace crimild::editor;
 

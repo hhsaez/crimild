@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/LogWindow/LogWindow.hpp"
+#include "Views/Windows/LogWindow.hpp"
 
 using namespace crimild::editor;
 

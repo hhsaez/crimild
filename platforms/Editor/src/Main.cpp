@@ -29,12 +29,13 @@
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
-#include "Views/Windows/FileSystemWindow/FileSystemWindow.hpp"
-#include "Views/Windows/InspectorWindow/InspectorWindow.hpp"
-#include "Views/Windows/LogWindow/LogWindow.hpp"
-#include "Views/Windows/Scene3DWindow/Scene3DWindow.hpp"
-#include "Views/Windows/SceneWindow/SceneWindow.hpp"
-#include "Views/Windows/SimulationWindow/SimulationWindow.hpp"
+#include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/InspectorWindow.hpp"
+#include "Views/Windows/LogWindow.hpp"
+#include "Views/Windows/Scene3DWindow.hpp"
+#include "Views/Windows/SceneWindow.hpp"
+#include "Views/Windows/SimulationWindow.hpp"
+#include "Views/Windows/TimelineWindow.hpp"
 
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
@@ -644,6 +645,7 @@ int main( int argc, char **argv )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Scene3DWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::SceneWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::SimulationWindow );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::TimelineWindow );
 
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Editor::State );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Project );

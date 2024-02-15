@@ -25,17 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/SimulationWindow/SimulationWindow.hpp"
+#include "Views/Windows/FileSystemWindow.hpp"
 
 using namespace crimild::editor;
 
-SimulationWindow::SimulationWindow( void ) noexcept
-    : Window( "Simulation" )
+FileSystemWindow::FileSystemWindow( void ) noexcept
+    : Window( "FileSystem" )
 {
     // no-op
 }
 
-void SimulationWindow::drawContent( void ) noexcept
+void FileSystemWindow::drawContent( void ) noexcept
 {
     // TODO
 }
