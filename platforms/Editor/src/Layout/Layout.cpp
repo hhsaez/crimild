@@ -68,7 +68,8 @@ void Layout::draw( void ) noexcept
 
     // std::cout << "DONE Getting widow info from context" << std::endl;
 
-    for ( auto &view : m_views ) {
+    auto views = m_views;
+    for ( auto &view : views ) {
         if ( view->isActive() ) {
             view->draw();
         }
