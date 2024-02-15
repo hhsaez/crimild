@@ -42,6 +42,10 @@ target_sources(
 
     Views/View.hpp
     Views/View.cpp
+    Views/Dialogs/Dialog.cpp
+    Views/Dialogs/Dialog.hpp
+    Views/Dialogs/FileDialog.cpp
+    Views/Dialogs/FileDialog.hpp
     Views/Menus/MainMenu/MainMenu.cpp
     Views/Menus/MainMenu/MainMenu.hpp
     Views/Windows/Window.hpp
@@ -59,6 +63,8 @@ target_sources(
     Views/Windows/SimulationWindow/SimulationWindow.hpp
     Views/Windows/SimulationWindow/SimulationWindow.cpp
 
+    Layout/Layout.hpp
+    Layout/Layout.cpp
     Layout/LayoutManager.hpp
     Layout/LayoutManager.cpp
     

@@ -29,7 +29,6 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Foundation/ImGuiUtils.hpp"
 
 using namespace crimild::editor;
 

@@ -25,42 +25,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
-#define CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
+#ifndef CRIMILD_EDITOR_LAYOUT_
+#define CRIMILD_EDITOR_LAYOUT_
 
-#include "Foundation/ImGuiUtils.hpp"
-#include "Views/View.hpp"
+#include "Coding/Codable.hpp"
+#include "Foundation/Named.hpp"
+#include "Rendering/Extent.hpp"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace crimild::editor {
 
-    class Window : public View {
-    protected:
-        Window( std::string_view name ) noexcept;
+    class View;
+
+    class Layout
+        : public Named,
+          public coding::Codable {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::Layout )
 
     public:
-        virtual ~Window( void ) noexcept = default;
+        Layout( void ) = default;
+        Layout( std::string_view name, std::string_view imGuiLayout ) noexcept;
+        ~Layout( void ) = default;
 
-        void setActive( bool active ) noexcept { m_isOpen = active; }
-        virtual bool isActive( void ) const noexcept override { return isVisible() && m_isOpen; }
+        inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
 
-        void draw( void ) noexcept final;
+        void addView( std::shared_ptr< View > const &view ) noexcept;
 
-    protected:
-        inline ImGuiWindowFlags getFlags( void ) const noexcept { return m_flags; }
-        inline void setFlags( ImGuiWindowFlags flags ) noexcept { m_flags = flags; }
+        void makeCurrent( void ) noexcept;
 
-        inline void setMinSize( const ImVec2 &minSize ) noexcept { m_minSize = minSize; }
-        inline ImVec2 getMinSize( void ) const noexcept { return m_minSize; }
-
-        inline void setMaxSize( const ImVec2 &maxSize ) noexcept { m_maxSize = maxSize; }
-        inline ImVec2 getMaxSize( void ) const noexcept { return m_maxSize; }
+        void draw( void ) noexcept;
 
     private:
-        ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
-        bool m_isOpen = true;
-        ImVec2 m_minSize = { 300, 400 };
-        ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
-        std::string m_windowName;
+        std::vector< std::shared_ptr< View > > m_views;
+
+        Extent2D m_extent = { .width = 1024.0f, .height = 768.0f };
+
+        /**
+         * @brief Keeps track of the ImGui context, usually saved in imgui.ini
+         *
+         * Loading/saving ImGui Context is now done manually, instead of relying
+         * on ImGui's own methods.
+         */
+        std::string m_imGuiLayout;
 
     public:
         virtual void encode( coding::Encoder &encoder ) noexcept override;

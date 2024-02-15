@@ -25,29 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
-#define CRIMILD_EDITOR_VIEWS_WINDOWS_WINDOW_
+#ifndef CRIMILD_EDITOR_VIEWS_DIALOGS_DIALOG_
+#define CRIMILD_EDITOR_VIEWS_DIALOGS_DIALOG_
 
 #include "Foundation/ImGuiUtils.hpp"
 #include "Views/View.hpp"
 
 namespace crimild::editor {
 
-    class Window : public View {
+    /**
+     * @brief A view that renders as a floating window
+     *
+     * Dialogs are similar to Windows, but cannot be docked. Also, in contrast with
+     * Modals, Dialogs allows the user to interact with other views behind it.
+     */
+    class Dialog : public View {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::Dialog )
     protected:
-        Window( std::string_view name ) noexcept;
+        Dialog( std::string_view name ) noexcept;
 
     public:
-        virtual ~Window( void ) noexcept = default;
-
-        void setActive( bool active ) noexcept { m_isOpen = active; }
-        virtual bool isActive( void ) const noexcept override { return isVisible() && m_isOpen; }
+        virtual ~Dialog( void ) noexcept = default;
 
         void draw( void ) noexcept final;
-
-    protected:
-        inline ImGuiWindowFlags getFlags( void ) const noexcept { return m_flags; }
-        inline void setFlags( ImGuiWindowFlags flags ) noexcept { m_flags = flags; }
 
         inline void setMinSize( const ImVec2 &minSize ) noexcept { m_minSize = minSize; }
         inline ImVec2 getMinSize( void ) const noexcept { return m_minSize; }
@@ -56,15 +56,8 @@ namespace crimild::editor {
         inline ImVec2 getMaxSize( void ) const noexcept { return m_maxSize; }
 
     private:
-        ImGuiWindowFlags m_flags = ImGuiWindowFlags_None;
-        bool m_isOpen = true;
         ImVec2 m_minSize = { 300, 400 };
         ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
-        std::string m_windowName;
-
-    public:
-        virtual void encode( coding::Encoder &encoder ) noexcept override;
-        virtual void decode( coding::Decoder &decoder ) noexcept override;
     };
 
 }
