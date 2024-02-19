@@ -30,12 +30,11 @@
 
 #include "Foundation/ImGuiUtils.hpp"
 #include "Foundation/Log.hpp"
-#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class LogWindow : public Window, public DynamicSingleton< LogWindow > {
+    class LogWindow : public Window {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::LogWindow )
 
     public:

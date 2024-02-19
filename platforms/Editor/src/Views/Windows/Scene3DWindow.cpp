@@ -30,7 +30,7 @@
 using namespace crimild::editor;
 
 Scene3DWindow::Scene3DWindow( void ) noexcept
-    : Window( "Scene3D" )
+    : Window( "Scene 3D" )
 {
     // no-op
 }

@@ -43,15 +43,6 @@
 
 using namespace crimild::editor;
 
-template< class PanelType >
-static void renderLayoutMenuItem( void ) noexcept
-{
-    auto panel = PanelType::getInstance();
-    if ( ImGui::MenuItem( panel->getName().c_str() ) ) {
-        panel->setActive( true );
-    }
-}
-
 MainMenu::MainMenu( void ) noexcept
     : View( "MainMenu" )
 {
@@ -265,25 +256,33 @@ void MainMenu::renderFileMenu( void ) noexcept
     }
 }
 
+template< typename WindowType >
+void renderLayoutMenuItem( std::shared_ptr< Layout > const &layout, const char *title ) noexcept
+{
+    const bool existing = layout->hasViewWithTitle( title );
+    if ( existing ) {
+        ImGui::BeginDisabled();
+    }
+    if ( ImGui::MenuItem( title ) ) {
+        layout->addView( crimild::alloc< WindowType >() );
+    }
+    if ( existing ) {
+        ImGui::EndDisabled();
+    }
+}
+
 void MainMenu::renderLayoutMenu( void ) noexcept
 {
     if ( ImGui::BeginMenu( "Layout" ) ) {
-        renderLayoutMenuItem< SceneWindow >();
-        renderLayoutMenuItem< FileSystemWindow >();
-        renderLayoutMenuItem< InspectorWindow >();
-
+        renderLayoutMenuItem< SceneWindow >( getLayout(), "Scene" );
+        renderLayoutMenuItem< FileSystemWindow >( getLayout(), "File System" );
+        renderLayoutMenuItem< InspectorWindow >( getLayout(), "Inspector" );
         ImGui::Separator();
-
-        renderLayoutMenuItem< Scene3DWindow >();
-        renderLayoutMenuItem< SimulationWindow >();
-
+        renderLayoutMenuItem< Scene3DWindow >( getLayout(), "Scene 3D" );
+        renderLayoutMenuItem< SimulationWindow >( getLayout(), "Simulation" );
         ImGui::Separator();
-
-        renderLayoutMenuItem< LogWindow >();
-        if ( ImGui::MenuItem( TimelineWindow::TITLE ) ) {
-            getLayout()->addView( std::make_shared< TimelineWindow >() );
-        }
-
+        renderLayoutMenuItem< LogWindow >( getLayout(), "Log" );
+        renderLayoutMenuItem< TimelineWindow >( getLayout(), "Timeline" );
         ImGui::Separator();
 
         if ( ImGui::BeginMenu( "Layout..." ) ) {

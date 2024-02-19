@@ -28,12 +28,11 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_
 
-#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class SceneWindow : public Window, public DynamicSingleton< SceneWindow > {
+    class SceneWindow : public Window {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::SceneWindow )
 
     public:

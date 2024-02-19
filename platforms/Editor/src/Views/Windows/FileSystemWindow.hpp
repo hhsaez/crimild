@@ -28,12 +28,11 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_FILE_SYSTEM_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_FILE_SYSTEM_
 
-#include "Foundation/Singleton.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
 
-    class FileSystemWindow : public Window, public DynamicSingleton< FileSystemWindow > {
+    class FileSystemWindow : public Window {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::FileSystemWindow )
 
     public:
