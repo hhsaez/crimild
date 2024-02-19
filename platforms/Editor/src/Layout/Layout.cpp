@@ -81,7 +81,7 @@ void Layout::draw( void ) noexcept
     auto views = m_views;
     bool shouldRefreshConfig = false;
     for ( auto &view : views ) {
-        if ( view->isActive() ) {
+        if ( view->isOpen() ) {
             view->draw();
         } else {
             const auto it = std::find( std::begin( m_views ), std::end( m_views ), view );

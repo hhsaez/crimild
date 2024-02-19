@@ -51,21 +51,12 @@ namespace crimild::editor {
         inline std::shared_ptr< Layout > getLayout( void ) noexcept { return m_layout.lock(); }
 
         /**
-         * @brief Indicates if this view needs to be processed
+         * @brief Indicates if a view is opened and needs to be drawn
          *
-         * Views may be alive, but they are not actually active unless the current layout
-         * does requires it explicitely. If the view is not active, it will not be executed nor
-         * rendered.
+         * If the view is not opened, it will be removed from the layout (and memory)
+         * automatically.
          */
-        [[nodiscard]] virtual bool isActive( void ) const noexcept;
-
-        /**
-         * @brief Indicates if the view is visible and needs to be rendered
-         *
-         * Even if the view is active, it might be possible for it to not be visible. If
-         * so, there is no need to render it.
-         */
-        [[nodiscard]] virtual bool isVisible( void ) const noexcept;
+        [[nodiscard]] inline bool isOpen( void ) const noexcept { return m_open; }
 
         /**
          * @brief Draws the view
@@ -81,8 +72,18 @@ namespace crimild::editor {
          */
         virtual void drawContent( void ) noexcept = 0;
 
+    protected:
+        /**
+         * @brief Get access to the internal view state
+         *
+         * Some views may need to set the open state during rendering (i.e. ImGui::Begin())
+         * and this helper function makes things easier.
+         */
+        [[nodiscard]] inline bool &getOpenState( void ) noexcept { return m_open; }
+
     private:
         std::weak_ptr< Layout > m_layout;
+        bool m_open = true;
     };
 
 }

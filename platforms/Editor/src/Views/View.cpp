@@ -34,13 +34,3 @@ View::View( std::string_view name ) noexcept
 {
     // no-op
 }
-
-bool View::isActive( void ) const noexcept
-{
-    return true;
-}
-
-bool View::isVisible( void ) const noexcept
-{
-    return true;
-}

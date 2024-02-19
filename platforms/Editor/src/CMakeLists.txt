@@ -4,17 +4,17 @@ add_executable( crimild_editor )
 
 target_sources(
     crimild_editor
-	
+
 	PRIVATE
     Foundation/GLFWUtils.hpp
     Foundation/ImGuiUtils.cpp
     Foundation/ImGuiUtils.hpp
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp
-    
+
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
-    
+
     Panels/BehaviorsPanel.cpp
     Panels/BehaviorsPanel.hpp
     Panels/ConsolePanel.cpp
@@ -52,6 +52,8 @@ target_sources(
     Views/Modals/AboutModal.hpp
     Views/Modals/Modal.cpp
     Views/Modals/Modal.hpp
+    Views/Specials/ImGuiDemoWindow.hpp
+    Views/Specials/ImGuiDemoWindow.cpp
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
     Views/Windows/FileSystemWindow.hpp
@@ -68,26 +70,26 @@ target_sources(
     Views/Windows/SimulationWindow.cpp
     Views/Windows/TimelineWindow.hpp
     Views/Windows/TimelineWindow.cpp
-    
+
     Layout/Layout.hpp
     Layout/Layout.cpp
     Layout/LayoutManager.hpp
     Layout/LayoutManager.cpp
-    
+
     Rendering/STBImageManager.cpp
     Rendering/STBImageManager.hpp
 
     Rendering/FrameGraph/VulkanRenderSceneDebug.cpp
     Rendering/FrameGraph/VulkanRenderSceneDebug.hpp
-    
+
     SceneGraph/PrefabNode.cpp
     SceneGraph/PrefabNode.hpp
     Simulation/Editor.hpp
-    
+
     Simulation/Editor.cpp
     Simulation/Project.hpp
     Simulation/Project.cpp
-	
+
     Main.cpp
 
     PRIVATE
@@ -105,9 +107,9 @@ target_sources(
 	${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog/ImGuiFileDialog.cpp
 )
 
-target_include_directories( 
+target_include_directories(
 	crimild_editor
-	PRIVATE . 
+	PRIVATE .
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/examples
@@ -119,10 +121,9 @@ target_include_directories(
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/tinygltf
 )
 
-target_link_libraries( 
-	crimild_editor 
+target_link_libraries(
+	crimild_editor
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
     PRIVATE glfw
 )
-

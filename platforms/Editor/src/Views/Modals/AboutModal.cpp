@@ -40,13 +40,11 @@ AboutModal::AboutModal( void ) noexcept
 
 void AboutModal::drawContent( void ) noexcept
 {
-    if ( isVisible() ) {
-        Version version;
-        auto versionStr = version.getDescription();
-        ImGui::Text( "%s", versionStr.c_str() );
-        ImGui::Text( "http://crimild.hhsaez.com" );
-        ImGui::Text( "" );
-        ImGui::Text( "Copyright (c) 2002 - present, H. Hernan Saez" );
-        ImGui::Text( "All rights reserved." );
-    }
+    Version version;
+    auto versionStr = version.getDescription();
+    ImGui::Text( "%s", versionStr.c_str() );
+    ImGui::Text( "http://crimild.hhsaez.com" );
+    ImGui::Text( "" );
+    ImGui::Text( "Copyright (c) 2002 - present, H. Hernan Saez" );
+    ImGui::Text( "All rights reserved." );
 }

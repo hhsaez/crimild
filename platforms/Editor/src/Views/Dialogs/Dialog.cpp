@@ -37,8 +37,6 @@ Dialog::Dialog( std::string_view name ) noexcept
 
 void Dialog::draw( void ) noexcept
 {
-    if ( isVisible() ) {
-        ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
-        drawContent();
-    }
+    ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
+    drawContent();
 }
