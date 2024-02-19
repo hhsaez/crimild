@@ -75,3 +75,9 @@ The easiest way to contribute is to submit pull requests with your changes again
 ## License
 Crimild is distributed under the BSD license. See the LICENSE file for details
 
+# Debugging
+
+## LLDB
+```
+lldb -b -o run [PROGRAM_NAME]
+```
