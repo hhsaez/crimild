@@ -52,6 +52,7 @@ namespace crimild::editor {
 
         inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
 
+        bool hasViewWithTitle( std::string_view title ) const noexcept;
         void addView( std::shared_ptr< View > const &view ) noexcept;
 
         void makeCurrent( void ) noexcept;

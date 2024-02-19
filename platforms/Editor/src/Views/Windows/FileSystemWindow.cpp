@@ -30,7 +30,7 @@
 using namespace crimild::editor;
 
 FileSystemWindow::FileSystemWindow( void ) noexcept
-    : Window( "FileSystem" )
+    : Window( "File System" )
 {
     // no-op
 }

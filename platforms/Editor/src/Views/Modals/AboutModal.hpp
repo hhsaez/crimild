@@ -39,12 +39,7 @@ namespace crimild::editor {
         AboutModal( void ) noexcept;
         ~AboutModal( void ) noexcept = default;
 
-        inline bool isActive( void ) const noexcept final { return m_isActive; }
-
         void drawContent( void ) noexcept final;
-
-    private:
-        bool m_isActive = true;
     };
 
 }

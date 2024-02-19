@@ -40,6 +40,16 @@ Layout::Layout( std::string_view name, std::string_view imGuiLayout ) noexcept
 {
 }
 
+bool Layout::hasViewWithTitle( std::string_view title ) const noexcept
+{
+    for ( const auto &view : m_views ) {
+        if ( view->getName() == title ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Layout::addView( std::shared_ptr< View > const &view ) noexcept
 {
     m_views.push_back( view );
@@ -69,13 +79,24 @@ void Layout::draw( void ) noexcept
     // std::cout << "DONE Getting widow info from context" << std::endl;
 
     auto views = m_views;
+    bool shouldRefreshConfig = false;
     for ( auto &view : views ) {
         if ( view->isActive() ) {
             view->draw();
+        } else {
+            const auto it = std::find( std::begin( m_views ), std::end( m_views ), view );
+            if ( it != std::end( m_views ) ) {
+                m_views.erase( it );
+                shouldRefreshConfig = true;
+            }
         }
     }
 
-    // TODO: Remove non-active windows
+    if ( shouldRefreshConfig ) {
+        // Marks ImGui settings as dirty whenever the panel's open state changes
+        // This forces ImGui settings to be saved to disk as soon as possible.
+        ImGui::MarkIniSettingsDirty();
+    }
 }
 
 void Layout::makeCurrent( void ) noexcept
