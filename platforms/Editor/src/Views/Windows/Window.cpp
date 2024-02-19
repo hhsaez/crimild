@@ -27,9 +27,6 @@
 
 #include "Views/Windows/Window.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
-
 using namespace crimild::editor;
 
 Window::Window( std::string_view name ) noexcept
@@ -43,25 +40,9 @@ void Window::draw( void ) noexcept
     if ( m_windowName.empty() ) {
         m_windowName = getName() + "##" + getClassName();
     }
-    if ( isVisible() ) {
-        ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
-        if ( ImGui::Begin( m_windowName.c_str(), &m_isOpen, ImGuiWindowFlags_NoCollapse | getFlags() ) ) {
-            drawContent();
-        }
-        ImGui::End();
+    ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
+    if ( ImGui::Begin( m_windowName.c_str(), &getOpenState(), ImGuiWindowFlags_NoCollapse | getFlags() ) ) {
+        drawContent();
     }
-}
-
-void Window::encode( coding::Encoder &encoder ) noexcept
-{
-    View::encode( encoder );
-
-    encoder.encode( "isOpen", m_isOpen );
-}
-
-void Window::decode( coding::Decoder &decoder ) noexcept
-{
-    View::decode( decoder );
-
-    decoder.decode( "isOpen", m_isOpen );
+    ImGui::End();
 }

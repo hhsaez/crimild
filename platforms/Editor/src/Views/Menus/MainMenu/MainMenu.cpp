@@ -33,6 +33,7 @@
 #include "Simulation/Project.hpp"
 #include "Views/Dialogs/FileDialog.hpp"
 #include "Views/Modals/AboutModal.hpp"
+#include "Views/Specials/ImGuiDemoWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
@@ -51,9 +52,7 @@ MainMenu::MainMenu( void ) noexcept
 
 void MainMenu::draw( void ) noexcept
 {
-    if ( isActive() ) {
-        drawContent();
-    }
+    drawContent();
 }
 
 void MainMenu::drawContent( void ) noexcept
@@ -318,6 +317,7 @@ void MainMenu::renderHelpMenu( void ) noexcept
             getLayout()->addView( std::make_shared< AboutModal >() );
         }
         if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
+            getLayout()->addView( crimild::alloc< ImGuiDemoWindow >() );
             // showImGuiDemoWindow = true;
         }
         ImGui::EndMenu();

@@ -25,39 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_MODALS_MODAL_
-#define CRIMILD_EDITOR_VIEWS_MODALS_MODAL_
+#ifndef CRIMILD_EDITOR_VIEWS_SPECIALS_IMGUI_DEMO_WINDOW_
+#define CRIMILD_EDITOR_VIEWS_SPECIALS_IMGUI_DEMO_WINDOW_
 
-#include "Foundation/ImGuiUtils.hpp"
 #include "Views/View.hpp"
 
 namespace crimild::editor {
 
-    /**
-     * @brief A view that renders a modal window
-     *
-     * Modals are always rendered on top of other windows, blocking input to the views
-     * behind them.
-     */
-    class Modal : public View {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::Modal )
-    protected:
-        Modal( std::string_view name ) noexcept;
+    class ImGuiDemoWindow : public View {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::ImGuiDemoWindow )
 
     public:
-        virtual ~Modal( void ) noexcept = default;
+        ImGuiDemoWindow( void ) noexcept
+            : View( "ImGuiDemo" ) { }
+
+        ~ImGuiDemoWindow( void ) noexcept = default;
 
         void draw( void ) noexcept final;
-
-        inline void setMinSize( const ImVec2 &minSize ) noexcept { m_minSize = minSize; }
-        inline ImVec2 getMinSize( void ) const noexcept { return m_minSize; }
-
-        inline void setMaxSize( const ImVec2 &maxSize ) noexcept { m_maxSize = maxSize; }
-        inline ImVec2 getMaxSize( void ) const noexcept { return m_maxSize; }
-
-    private:
-        ImVec2 m_minSize = { 300, 400 };
-        ImVec2 m_maxSize = { FLT_MAX, FLT_MAX };
+        void drawContent( void ) noexcept final;
     };
 
 }

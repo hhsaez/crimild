@@ -37,20 +37,18 @@ Modal::Modal( std::string_view name ) noexcept
 
 void Modal::draw( void ) noexcept
 {
-    if ( isVisible() ) {
-        if ( m_isOpen ) {
-            ImGui::OpenPopup( getName().c_str() );
-        }
+    if ( isOpen() ) {
+        ImGui::OpenPopup( getName().c_str() );
+    }
 
-        ImGui::SetNextWindowPos( ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
-        ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
-        if ( ImGui::BeginPopupModal( getName().c_str(), &m_isOpen, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking ) ) {
-            drawContent();
-            ImGui::EndPopup();
-        }
+    ImGui::SetNextWindowPos( ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+    ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
+    if ( ImGui::BeginPopupModal( getName().c_str(), &getOpenState(), ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking ) ) {
+        drawContent();
+        ImGui::EndPopup();
+    }
 
-        if ( ImGui::IsKeyPressed( ImGui::GetKeyIndex( ImGuiKey_Escape ) ) ) {
-            m_isOpen = false;
-        }
+    if ( ImGui::IsKeyPressed( ImGui::GetKeyIndex( ImGuiKey_Escape ) ) ) {
+        getOpenState() = false;
     }
 }

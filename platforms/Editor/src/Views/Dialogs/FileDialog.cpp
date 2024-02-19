@@ -61,19 +61,17 @@ FileDialog::FileDialog(
 
 void FileDialog::drawContent( void ) noexcept
 {
-    if ( isVisible() ) {
-        if ( ImGuiFileDialog::Instance()->Display( getName(), ImGuiWindowFlags_NoDocking, getMinSize(), getMaxSize() ) ) {
-            if ( ImGuiFileDialog::Instance()->IsOk() ) {
-                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-                const auto path = std::filesystem::path { filePathName };
-                // Resolve at the beginning of next frame
-                crimild::concurrency::sync_frame(
-                    [ path, handler = m_handler ] {
-                        handler( path );
-                    }
-                );
-            }
-            ImGuiFileDialog::Instance()->Close();
+    if ( ImGuiFileDialog::Instance()->Display( getName(), ImGuiWindowFlags_NoDocking, getMinSize(), getMaxSize() ) ) {
+        if ( ImGuiFileDialog::Instance()->IsOk() ) {
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            const auto path = std::filesystem::path { filePathName };
+            // Resolve at the beginning of next frame
+            crimild::concurrency::sync_frame(
+                [ path, handler = m_handler ] {
+                    handler( path );
+                }
+            );
         }
+        ImGuiFileDialog::Instance()->Close();
     }
 }
