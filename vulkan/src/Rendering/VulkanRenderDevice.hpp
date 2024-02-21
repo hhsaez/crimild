@@ -28,6 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
+#include "Foundation/Singleton.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -57,7 +58,8 @@ namespace crimild {
         class RenderDevice
             : public UniformBuffer::Observer,
               public VertexBuffer::Observer,
-              public IndexBuffer::Observer {
+              public IndexBuffer::Observer,
+              public DynamicSingleton< RenderDevice > {
         public:
             RenderDevice( PhysicalDevice *physicalDevice, VulkanSurface *surface, const Extent2D &extent ) noexcept;
             virtual ~RenderDevice( void ) noexcept;
