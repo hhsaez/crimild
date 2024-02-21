@@ -28,7 +28,24 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_3D_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_3D_
 
+#include "Foundation/VulkanUtils.hpp"
+#include "Mathematics/Transformation_constants.hpp"
 #include "Views/Windows/Window.hpp"
+
+#include <unordered_map>
+
+namespace crimild {
+
+    class Node;
+    class Camera;
+
+    namespace vulkan::framegraph {
+
+        class Node;
+
+    }
+
+}
 
 namespace crimild::editor {
 
@@ -40,6 +57,27 @@ namespace crimild::editor {
         ~Scene3DWindow( void ) noexcept = default;
 
         void drawContent( void ) noexcept final;
+
+    private:
+        void initialize( void ) noexcept;
+        [[nodiscard]] inline bool isInitialized( void ) const noexcept { return m_initialized; }
+
+        void updateCamera( void ) noexcept;
+
+    private:
+        bool m_initialized = false;
+
+        Extent2D m_extent = Extent2D { .width = 1280.0, .height = 1280.0 };
+
+        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::Node > > > m_framegraph;
+        std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
+        size_t m_selectedTexture = 0;
+
+        std::shared_ptr< Camera > m_editorCamera;
+        bool m_editorCameraEnabled = false;
+        Vector2 m_lastMousePos = Vector2 { 0, 0 };
+        Transformation m_cameraRotation = Transformation::Constants::IDENTITY;
+        Transformation m_cameraTranslation = Transformation::Constants::IDENTITY;
     };
 
 }
