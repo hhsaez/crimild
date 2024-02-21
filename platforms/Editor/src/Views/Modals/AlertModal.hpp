@@ -25,29 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_FILE_SYSTEM_
-#define CRIMILD_EDITOR_VIEWS_WINDOWS_FILE_SYSTEM_
+#ifndef CRIMILD_EDITOR_VIEWS_MODALS_ALERT_
+#define CRIMILD_EDITOR_VIEWS_MODALS_ALERT_
 
-#include "Views/Windows/Window.hpp"
-
-#include <filesystem>
+#include "Views/Modals/Modal.hpp"
 
 namespace crimild::editor {
 
-    class FileSystemWindow : public Window {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::FileSystemWindow )
+    class AlertModal : public Modal {
+        CRIMILD_IMPLEMENT_RTTI( crimild::editor::AlertDialog )
 
     public:
-        FileSystemWindow( void ) noexcept;
-        ~FileSystemWindow( void ) noexcept = default;
+        AlertModal( std::string_view title, std::string_view description ) noexcept;
+        ~AlertModal( void ) noexcept = default;
 
         void drawContent( void ) noexcept final;
 
     private:
-        void traverse( const std::filesystem::path &path ) noexcept;
-
-    private:
-        std::filesystem::path m_selectedPath;
+        std::string m_description;
     };
 
 }
