@@ -50,6 +50,8 @@ target_sources(
     Views/Menus/MainMenu/MainMenu.hpp
     Views/Modals/AboutModal.cpp
     Views/Modals/AboutModal.hpp
+    Views/Modals/AlertModal.cpp
+    Views/Modals/AlertModal.hpp
     Views/Modals/Modal.cpp
     Views/Modals/Modal.hpp
     Views/Specials/ImGuiDemoWindow.hpp
