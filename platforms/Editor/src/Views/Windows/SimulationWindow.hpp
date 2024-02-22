@@ -28,7 +28,16 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SIMULATION_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_SIMULATION_
 
+#include "Foundation/VulkanUtils.hpp"
 #include "Views/Windows/Window.hpp"
+
+#include <unordered_map>
+
+namespace crimild::vulkan::framegraph {
+
+    class Node;
+
+}
 
 namespace crimild::editor {
 
@@ -40,6 +49,18 @@ namespace crimild::editor {
         ~SimulationWindow( void ) noexcept = default;
 
         void drawContent( void ) noexcept final;
+
+    private:
+        void initialize( void ) noexcept;
+
+    private:
+        bool m_initialized = false;
+
+        Extent2D m_extent = Extent2D { .width = 1, .height = 1 };
+        Extent2D m_simulationExtent = Extent2D { .width = 1280, .height = 720 };
+
+        std::vector< std::vector< std::shared_ptr< vulkan::framegraph::Node > > > m_framegraph;
+        std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
     };
 
 }
