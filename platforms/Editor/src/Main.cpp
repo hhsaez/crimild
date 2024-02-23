@@ -29,6 +29,7 @@
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
+#include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
@@ -643,6 +644,7 @@ int main( int argc, char **argv )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::FileSystemWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::InspectorWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::LogWindow );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::BehaviorsWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::PlaybackControlsWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Scene3DWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::SceneWindow );
