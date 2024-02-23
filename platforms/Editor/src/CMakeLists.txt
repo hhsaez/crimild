@@ -56,14 +56,14 @@ target_sources(
     Views/Modals/Modal.hpp
     Views/Specials/ImGuiDemoWindow.hpp
     Views/Specials/ImGuiDemoWindow.cpp
-    Views/Windows/Window.hpp
-    Views/Windows/Window.cpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
     Views/Windows/InspectorWindow.hpp
     Views/Windows/InspectorWindow.cpp
     Views/Windows/LogWindow.hpp
     Views/Windows/LogWindow.cpp
+    Views/Windows/PlaybackControlsWindow.cpp
+    Views/Windows/PlaybackCOntrolsWindow.hpp
     Views/Windows/Scene3DWindow.hpp
     Views/Windows/Scene3DWindow.cpp
     Views/Windows/SceneWindow.hpp
@@ -72,6 +72,8 @@ target_sources(
     Views/Windows/SimulationWindow.cpp
     Views/Windows/TimelineWindow.hpp
     Views/Windows/TimelineWindow.cpp
+    Views/Windows/Window.hpp
+    Views/Windows/Window.cpp
 
     Layout/Layout.hpp
     Layout/Layout.cpp
