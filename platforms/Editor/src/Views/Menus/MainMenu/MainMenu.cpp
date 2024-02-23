@@ -34,6 +34,7 @@
 #include "Views/Dialogs/FileDialog.hpp"
 #include "Views/Modals/AboutModal.hpp"
 #include "Views/Specials/ImGuiDemoWindow.hpp"
+#include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
@@ -283,6 +284,7 @@ void MainMenu::renderLayoutMenu( void ) noexcept
         ImGui::Separator();
         renderLayoutMenuItem< LogWindow >( getLayout(), "Log" );
         renderLayoutMenuItem< TimelineWindow >( getLayout(), "Timeline" );
+        renderLayoutMenuItem< BehaviorsWindow >( getLayout(), "Behaviors" );
         renderLayoutMenuItem< PlaybackControlsWindow >( getLayout(), "Playback" );
         ImGui::Separator();
 

@@ -56,6 +56,8 @@ target_sources(
     Views/Modals/Modal.hpp
     Views/Specials/ImGuiDemoWindow.hpp
     Views/Specials/ImGuiDemoWindow.cpp
+    Views/Windows/BehaviorsWindow.cpp
+    Views/Windows/BehaviorsWindow.hpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
     Views/Windows/InspectorWindow.hpp
