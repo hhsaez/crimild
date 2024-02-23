@@ -44,8 +44,8 @@ namespace crimild::editor {
 
     private:
         void renderFileMenu( void ) noexcept;
-        // void renderEditMenu( void ) noexcept;
-        // void renderSceneMenu( void ) noexcept;
+        void renderEditMenu( void ) noexcept;
+        void renderSceneMenu( void ) noexcept;
         void renderLayoutMenu( void ) noexcept;
         void renderHelpMenu( void ) noexcept;
     };
