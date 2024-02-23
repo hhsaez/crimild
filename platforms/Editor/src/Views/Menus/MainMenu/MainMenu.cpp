@@ -37,6 +37,7 @@
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
+#include "Views/Windows/PlaybackControlsWindow.hpp"
 #include "Views/Windows/Scene3DWindow.hpp"
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
@@ -282,6 +283,7 @@ void MainMenu::renderLayoutMenu( void ) noexcept
         ImGui::Separator();
         renderLayoutMenuItem< LogWindow >( getLayout(), "Log" );
         renderLayoutMenuItem< TimelineWindow >( getLayout(), "Timeline" );
+        renderLayoutMenuItem< PlaybackControlsWindow >( getLayout(), "Playback" );
         ImGui::Separator();
 
         if ( ImGui::BeginMenu( "Layout..." ) ) {
