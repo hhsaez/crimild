@@ -30,6 +30,12 @@
 
 #include "Views/Windows/Window.hpp"
 
+namespace crimild {
+
+    class Node;
+
+}
+
 namespace crimild::editor {
 
     class InspectorWindow : public Window {
@@ -40,6 +46,22 @@ namespace crimild::editor {
         ~InspectorWindow( void ) noexcept = default;
 
         void drawContent( void ) noexcept final;
+
+    public:
+        class Section {
+        public:
+            virtual ~Section( void ) = default;
+
+            virtual void render( crimild::Node *node ) noexcept = 0;
+        };
+
+    private:
+        void configure( crimild::Node *node ) noexcept;
+
+    private:
+        crimild::Node *m_selectedNode = nullptr;
+
+        std::vector< std::shared_ptr< Section > > m_sections;
     };
 
 }
