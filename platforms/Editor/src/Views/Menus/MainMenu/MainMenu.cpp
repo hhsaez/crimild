@@ -44,6 +44,7 @@
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Windows/TimelineWindow.hpp"
 
+using namespace crimild;
 using namespace crimild::editor;
 
 MainMenu::MainMenu( void ) noexcept
@@ -61,11 +62,143 @@ void MainMenu::drawContent( void ) noexcept
 {
     if ( ImGui::BeginMainMenuBar() ) {
         renderFileMenu();
-        // renderEditMenu();
-        // renderSceneMenu();
+        renderEditMenu();
+        renderSceneMenu();
         renderLayoutMenu();
         renderHelpMenu();
         ImGui::EndMainMenuBar();
+    }
+}
+
+void MainMenu::renderEditMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Edit" ) ) {
+        if ( ImGui::MenuItem( "Clone" ) ) {
+            Editor::getInstance()->cloneSelectedNode();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Delete" ) ) {
+            Editor::getInstance()->deleteSelectedNode();
+        }
+
+        ImGui::EndMenu();
+    }
+}
+
+auto withName( auto node, std::string name ) noexcept
+{
+    node->setName( name );
+    return node;
+}
+
+static void addToScene( SharedPointer< Node > const &node ) noexcept
+{
+    // TODO(hernan): I'm assuming the root node of a scene is a group, which might not
+    // always be the case. Maybe I should check the class type
+    auto scene = crimild::cast_ptr< Group >( crimild::Simulation::getInstance()->getScene() );
+    node->perform( UpdateWorldState() );
+    node->perform( StartComponents() );
+    scene->attachNode( node );
+}
+
+static void addGeometry( std::string name, SharedPointer< Primitive > const &primitive, const Transformation &local = Transformation::Constants::IDENTITY ) noexcept
+{
+    auto geometry = crimild::alloc< Geometry >( name );
+    geometry->attachPrimitive( primitive );
+    geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
+    geometry->setLocal( local );
+    addToScene( geometry );
+}
+
+static void addEmptyNode( void ) noexcept
+{
+    addToScene( crimild::alloc< Group >() );
+}
+
+void MainMenu::renderSceneMenu( void ) noexcept
+{
+    if ( ImGui::BeginMenu( "Scene" ) ) {
+        if ( ImGui::MenuItem( "Add Empty" ) ) {
+            addEmptyNode();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::BeginMenu( "Geometry" ) ) {
+            if ( ImGui::MenuItem( "Plane" ) ) {
+                addGeometry( "Plane", QuadPrimitive::UNIT_QUAD, rotationX( -numbers::PI_DIV_2 ) );
+            }
+
+            if ( ImGui::MenuItem( "Box" ) ) {
+                addGeometry( "Box", BoxPrimitive::UNIT_BOX );
+            }
+
+            if ( ImGui::MenuItem( "Sphere" ) ) {
+                addGeometry( "Sphere", SpherePrimitive::UNIT_SPHERE );
+            }
+
+            ImGui::EndMenu();
+        }
+
+        if ( ImGui::BeginMenu( "Light" ) ) {
+            if ( ImGui::MenuItem( "Directional" ) ) {
+                auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+                light->setName( "Directional Light" );
+                light->setEnergy( 5 );
+                light->setCastShadows( true );
+                light->setLocal(
+                    lookAt(
+                        Point3 { -5, 5, 10 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+                addToScene( light );
+            }
+            if ( ImGui::MenuItem( "Point" ) ) {
+                addToScene(
+                    withTranslation(
+                        withName(
+                            crimild::alloc< Light >( Light::Type::POINT ),
+                            "Point Light"
+                        ),
+                        0,
+                        1,
+                        0
+                    )
+                );
+            }
+            if ( ImGui::MenuItem( "Spot" ) ) {
+                auto light = crimild::alloc< Light >( Light::Type::SPOT );
+                light->setName( "Spot Light" );
+                light->setColor( ColorRGB { 1.0f, 1.0f, 1.0f } );
+                light->setCastShadows( true );
+                light->setEnergy( 1000.0f );
+                light->setInnerCutoff( Numericf::DEG_TO_RAD * 20.0f );
+                light->setOuterCutoff( Numericf::DEG_TO_RAD * 25.0f );
+                light->setLocal(
+                    lookAt(
+                        Point3 { 10, 10, 0 },
+                        Point3 { 0, 0, 0 },
+                        Vector3::Constants::UP
+                    )
+                );
+
+                addToScene( light );
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if ( ImGui::MenuItem( "Add Camera" ) ) {
+            // TODO
+        }
+
+        ImGui::EndMenu();
     }
 }
 
@@ -313,23 +446,13 @@ void MainMenu::renderLayoutMenu( void ) noexcept
 
 void MainMenu::renderHelpMenu( void ) noexcept
 {
-    // static bool showHelpAboutDialog = false;
-    // static bool showImGuiDemoWindow = false;
-
     if ( ImGui::BeginMenu( "Help" ) ) {
         if ( ImGui::MenuItem( "About..." ) ) {
             getLayout()->addView( std::make_shared< AboutModal >() );
         }
         if ( ImGui::MenuItem( "ImGui Demo Window..." ) ) {
             getLayout()->addView( crimild::alloc< ImGuiDemoWindow >() );
-            // showImGuiDemoWindow = true;
         }
         ImGui::EndMenu();
     }
-
-    // helpAboutDialog( showHelpAboutDialog );
-
-    // if ( showImGuiDemoWindow ) {
-    //     ImGui::ShowDemoWindow( &showImGuiDemoWindow );
-    // }
 }
