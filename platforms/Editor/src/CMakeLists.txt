@@ -68,6 +68,8 @@ target_sources(
     Views/Windows/PlaybackCOntrolsWindow.hpp
     Views/Windows/Scene3DWindow.hpp
     Views/Windows/Scene3DWindow.cpp
+    Views/Windows/SceneRTWindow.cpp
+    Views/Windows/SceneRTWindow.hpp
     Views/Windows/SceneWindow.hpp
     Views/Windows/SceneWindow.cpp
     Views/Windows/SimulationWindow.hpp
