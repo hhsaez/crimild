@@ -40,6 +40,7 @@
 #include "Views/Windows/LogWindow.hpp"
 #include "Views/Windows/PlaybackControlsWindow.hpp"
 #include "Views/Windows/Scene3DWindow.hpp"
+#include "Views/Windows/SceneRTWindow.hpp"
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Windows/TimelineWindow.hpp"
@@ -414,6 +415,7 @@ void MainMenu::renderLayoutMenu( void ) noexcept
         ImGui::Separator();
         renderLayoutMenuItem< Scene3DWindow >( getLayout(), "Scene 3D" );
         renderLayoutMenuItem< SimulationWindow >( getLayout(), "Simulation" );
+        renderLayoutMenuItem< SceneRTWindow >( getLayout(), "Scene RT" );
         ImGui::Separator();
         renderLayoutMenuItem< LogWindow >( getLayout(), "Log" );
         renderLayoutMenuItem< TimelineWindow >( getLayout(), "Timeline" );
