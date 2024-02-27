@@ -27,7 +27,6 @@
 
 #include "Simulation/Editor.hpp"
 
-#include "Panels/Panel.hpp"
 #include "Simulation/Project.hpp"
 
 using namespace crimild;
@@ -92,13 +91,6 @@ Event Editor::handle( const Event &e ) noexcept
         return Event {
             .type = Event::Type::TERMINATE,
         };
-    }
-
-    if ( e.type == Event::Type::SCENE_CHANGED ) {
-        auto ps = panels::Panel::getAllPanels();
-        for ( auto p : ps ) {
-            p->handle( e );
-        }
     }
 
     const auto ret = Simulation::handle( e );
