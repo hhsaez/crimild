@@ -13,17 +13,6 @@
 #include "Foundation/ImGuiUtils.hpp"
 #include "Layout/Layout.hpp"
 #include "Layout/LayoutManager.hpp"
-#include "Panels/BehaviorsPanel.hpp"
-#include "Panels/ConsolePanel.hpp"
-#include "Panels/InspectorPanel.hpp"
-#include "Panels/MainMenuBar.hpp"
-#include "Panels/PlaybackControlsPanel.hpp"
-#include "Panels/ProjectPanel.hpp"
-#include "Panels/SceneHierarchyPanel.hpp"
-#include "Panels/ScenePanel.hpp"
-#include "Panels/SceneRTPanel.hpp"
-#include "Panels/SimulationPanel.hpp"
-#include "Panels/TimelinePanel.hpp"
 #include "Rendering/STBImageManager.hpp"
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
@@ -496,47 +485,6 @@ inline void setupImGuiStyles( bool dark, float alpha )
     style.GrabRounding = style.FrameRounding = 2.3f;
 }
 
-struct Panels {
-    Panels( crimild::vulkan::RenderDevice *renderDevice ) noexcept
-        : scene( renderDevice ),
-          simulation( renderDevice ),
-          inspector( renderDevice ),
-          sceneRT( renderDevice )
-    {
-        // no-op
-    }
-
-    crimild::editor::panels::MainMenuBar mainMenu;
-    crimild::editor::panels::Timeline timeline;
-    crimild::editor::panels::Behaviors behaviors;
-    crimild::editor::panels::Scene scene;
-    crimild::editor::panels::SceneHierarchy sceneHierarchy;
-    crimild::editor::panels::Simulation simulation;
-    crimild::editor::panels::PlaybackControls playbackControls;
-    crimild::editor::panels::Inspector inspector;
-    crimild::editor::panels::Project project;
-    crimild::editor::panels::SceneRT sceneRT;
-    crimild::editor::panels::Console console;
-
-    void render( void ) noexcept
-    {
-        mainMenu.render();
-
-        ImGui::DockSpaceOverViewport( ImGui::GetMainViewport() );
-
-        timeline.render();
-        behaviors.render();
-        scene.render();
-        sceneHierarchy.render();
-        simulation.render();
-        playbackControls.render();
-        inspector.render();
-        project.render();
-        sceneRT.render();
-        console.render();
-    }
-};
-
 bool beginFrame(
     GLFWwindow *window,
     crimild::concurrency::JobScheduler &jobScheduler,
@@ -833,8 +781,6 @@ int main( int argc, char **argv )
     }
 
     // Our state
-
-    // auto panels = std::make_unique< Panels >( vulkanObjects.renderDevice.get() );
 
     if ( auto layout = layoutManager->getCurrentLayout() ) {
         layout->makeCurrent();

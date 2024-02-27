@@ -15,31 +15,6 @@ target_sources(
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
 
-    Panels/BehaviorsPanel.cpp
-    Panels/BehaviorsPanel.hpp
-    Panels/ConsolePanel.cpp
-    Panels/ConsolePanel.hpp
-    Panels/InspectorPanel.cpp
-    Panels/InspectorPanel.hpp
-    Panels/MainMenuBar.cpp
-    Panels/MainMenuBar.hpp
-    Panels/Panel.cpp
-    Panels/Panel.hpp
-    Panels/PlaybackControlsPanel.cpp
-    Panels/PlaybackControlsPanel.hpp
-    Panels/ProjectPanel.cpp
-    Panels/ProjectPanel.hpp
-    Panels/SceneHierarchyPanel.cpp
-    Panels/SceneHierarchyPanel.hpp
-    Panels/ScenePanel.cpp
-    Panels/ScenePanel.hpp
-    Panels/SceneRTPanel.cpp
-    Panels/SceneRTPanel.hpp
-    Panels/SimulationPanel.cpp
-    Panels/SimulationPanel.hpp
-    Panels/TimelinePanel.cpp
-    Panels/TimelinePanel.hpp
-
     Views/View.hpp
     Views/View.cpp
     Views/Dialogs/Dialog.cpp
