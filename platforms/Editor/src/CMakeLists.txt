@@ -59,6 +59,8 @@ target_sources(
     Layout/LayoutManager.hpp
     Layout/LayoutManager.cpp
 
+    Rendering/GLFWVulkanSurface.cpp
+    Rendering/GLFWVUlkanSurface.hpp
     Rendering/STBImageManager.cpp
     Rendering/STBImageManager.hpp
 

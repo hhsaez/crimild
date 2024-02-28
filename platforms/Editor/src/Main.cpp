@@ -1,18 +1,35 @@
-// Dear ImGui: standalone example application for Glfw + Vulkan
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
-
-// Important note to the reader who wish to integrate imgui_impl_vulkan.cpp/.h in their own engine/app.
-// - Common ImGui_ImplVulkan_XXX functions and structures are used to interface with imgui_impl_vulkan.cpp/.h.
-//   You will use those if you want to use this rendering backend in your engine/app.
-// - Helper ImGui_ImplVulkanH_XXX functions and structures are only used by this example (main.cpp) and by
-//   the backend itself (imgui_impl_vulkan.cpp), but should PROBABLY NOT be used by your own engine/app code.
-// Read comments in imgui_impl_vulkan.h.
+/*
+ * Copyright (c) 2002 - present, H. Hernan Saez
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the copyright holder nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Layout/Layout.hpp"
 #include "Layout/LayoutManager.hpp"
+#include "Rendering/GLFWVulkanSurface.hpp"
 #include "Rendering/STBImageManager.hpp"
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
@@ -31,49 +48,7 @@
 #include <Crimild.hpp>
 #include <Crimild_Vulkan.hpp>
 
-namespace crimild::vulkan {
-
-    class GLFWVulkanSurface : public vulkan::VulkanSurface {
-    public:
-        GLFWVulkanSurface( VulkanInstance *instance, GLFWwindow *window ) noexcept
-            : vulkan::VulkanSurface(
-                instance,
-                [ & ] {
-                    CRIMILD_LOG_DEBUG( "Creating GLFW Vulkan Surface" );
-                    VkSurfaceKHR handle;
-                    auto result = glfwCreateWindowSurface(
-                        instance->getHandle(),
-                        window,
-                        nullptr,
-                        &handle
-                    );
-                    if ( result != VK_SUCCESS ) {
-                        CRIMILD_LOG_FATAL( "Failed to create window surface for Vulkan. Error: ", result );
-                        exit( -1 );
-                    }
-                    return handle;
-                }()
-            )
-        {
-            // no-op
-        }
-
-        virtual ~GLFWVulkanSurface( void ) noexcept = default;
-    };
-
-}
-
-// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
-// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
-// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
-// #if defined( _MSC_VER ) && ( _MSC_VER >= 1900 ) && !defined( IMGUI_DISABLE_WIN32_FUNCTIONS )
-//     #pragma comment( lib, "legacy_stdio_definitions" )
-// #endif
-
-// #define IMGUI_UNLIMITED_FRAME_RATE
-// #ifdef _DEBUG
 #define IMGUI_VULKAN_DEBUG_REPORT
-// #endif
 
 // Data
 static VkAllocationCallbacks *g_Allocator = NULL;
@@ -94,6 +69,7 @@ static void glfw_error_callback( int error, const char *description )
 {
     fprintf( stderr, "GLFW Error %d: %s\n", error, description );
 }
+
 static void check_vk_result( VkResult err )
 {
     if ( err == 0 )
@@ -117,144 +93,29 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_report( VkDebugReportFlagsEXT flags,
 }
 #endif // IMGUI_VULKAN_DEBUG_REPORT
 
-static void SetupVulkan( void ) noexcept ///*const char **extensions, uint32_t extensions_count*/ )
+static void SetupVulkan( void ) noexcept
 {
-    VkResult err;
-
-    //     // Create Vulkan Instance
-    //     {
-    //         VkInstanceCreateInfo create_info = {};
-    //         create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    //         create_info.enabledExtensionCount = extensions_count;
-    //         create_info.ppEnabledExtensionNames = extensions;
-    // #ifdef IMGUI_VULKAN_DEBUG_REPORT
-    //         // Enabling validation layers
-    //         const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
-    //         create_info.enabledLayerCount = 1;
-    //         create_info.ppEnabledLayerNames = layers;
-
-    //         // Enable debug report extension (we need additional storage, so we duplicate the user array to add our new extension to it)
-    //         const char **extensions_ext = ( const char ** ) malloc( sizeof( const char * ) * ( extensions_count + 2 ) );
-    //         memcpy( extensions_ext, extensions, extensions_count * sizeof( const char * ) );
-    //         extensions_ext[ extensions_count + 0 ] = "VK_EXT_debug_report";
-    //         extensions_ext[ extensions_count + 1 ] = VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
-    //         create_info.enabledExtensionCount = extensions_count + 2;
-    //         create_info.ppEnabledExtensionNames = extensions_ext;
-    //         create_info.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-
-    //         // Create Vulkan Instance
-    //         err = vkCreateInstance( &create_info, g_Allocator, &g_Instance );
-    //         check_vk_result( err );
-    //         free( extensions_ext );
-
-    //         // Get the function pointer (required for any extensions)
-    //         auto vkCreateDebugReportCallbackEXT = ( PFN_vkCreateDebugReportCallbackEXT ) vkGetInstanceProcAddr( g_Instance, "vkCreateDebugReportCallbackEXT" );
-    //         IM_ASSERT( vkCreateDebugReportCallbackEXT != NULL );
-
-    //         // Setup the debug report callback
-    //         VkDebugReportCallbackCreateInfoEXT debug_report_ci = {};
-    //         debug_report_ci.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    //         debug_report_ci.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
-    //         debug_report_ci.pfnCallback = debug_report;
-    //         debug_report_ci.pUserData = NULL;
-    //         err = vkCreateDebugReportCallbackEXT( g_Instance, &debug_report_ci, g_Allocator, &g_DebugReport );
-    //         check_vk_result( err );
-    // #else
-    //         // Create Vulkan Instance without any debug feature
-    //         err = vkCreateInstance( &create_info, g_Allocator, &g_Instance );
-    //         check_vk_result( err );
-    //         IM_UNUSED( g_DebugReport );
-    // #endif
-    //     }
-
-    // // Select GPU
-    // {
-    //     uint32_t gpu_count;
-    //     err = vkEnumeratePhysicalDevices( g_Instance, &gpu_count, NULL );
-    //     check_vk_result( err );
-    //     IM_ASSERT( gpu_count > 0 );
-
-    //     VkPhysicalDevice *gpus = ( VkPhysicalDevice * ) malloc( sizeof( VkPhysicalDevice ) * gpu_count );
-    //     err = vkEnumeratePhysicalDevices( g_Instance, &gpu_count, gpus );
-    //     check_vk_result( err );
-
-    //     // If a number >1 of GPUs got reported, find discrete GPU if present, or use first one available. This covers
-    //     // most common cases (multi-gpu/integrated+dedicated graphics). Handling more complicated setups (multiple
-    //     // dedicated GPUs) is out of scope of this sample.
-    //     int use_gpu = 0;
-    //     for ( int i = 0; i < ( int ) gpu_count; i++ ) {
-    //         VkPhysicalDeviceProperties properties;
-    //         vkGetPhysicalDeviceProperties( gpus[ i ], &properties );
-    //         if ( properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ) {
-    //             use_gpu = i;
-    //             break;
-    //         }
-    //     }
-
-    //     g_PhysicalDevice = gpus[ use_gpu ];
-    //     free( gpus );
-    // }
-
-    // // Select graphics queue family
-    // {
-    //     uint32_t count;
-    //     vkGetPhysicalDeviceQueueFamilyProperties( g_PhysicalDevice, &count, NULL );
-    //     VkQueueFamilyProperties *queues = ( VkQueueFamilyProperties * ) malloc( sizeof( VkQueueFamilyProperties ) * count );
-    //     vkGetPhysicalDeviceQueueFamilyProperties( g_PhysicalDevice, &count, queues );
-    //     for ( uint32_t i = 0; i < count; i++ )
-    //         if ( queues[ i ].queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-    //             g_QueueFamily = i;
-    //             break;
-    //         }
-    //     free( queues );
-    //     IM_ASSERT( g_QueueFamily != ( uint32_t ) -1 );
-    // }
-
-    // // Create Logical Device (with 1 queue)
-    // {
-    //     int device_extension_count = 1;
-    //     const char *device_extensions[] = { "VK_KHR_swapchain", "VK_KHR_portability_subset" };
-    //     const float queue_priority[] = { 1.0f };
-    //     VkDeviceQueueCreateInfo queue_info[ 1 ] = {};
-    //     queue_info[ 0 ].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    //     queue_info[ 0 ].queueFamilyIndex = g_QueueFamily;
-    //     queue_info[ 0 ].queueCount = 1;
-    //     queue_info[ 0 ].pQueuePriorities = queue_priority;
-    //     VkDeviceCreateInfo create_info = {};
-    //     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    //     create_info.queueCreateInfoCount = sizeof( queue_info ) / sizeof( queue_info[ 0 ] );
-    //     create_info.pQueueCreateInfos = queue_info;
-    //     create_info.enabledExtensionCount = device_extension_count;
-    //     create_info.ppEnabledExtensionNames = device_extensions;
-    //     err = vkCreateDevice( g_PhysicalDevice, &create_info, g_Allocator, &g_Device );
-    //     check_vk_result( err );
-    //     vkGetDeviceQueue( g_Device, g_QueueFamily, 0, &g_Queue );
-    // }
-
-    // Create Descriptor Pool
-    {
-        VkDescriptorPoolSize pool_sizes[] = {
-            { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-        };
-        VkDescriptorPoolCreateInfo pool_info = {};
-        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-        pool_info.maxSets = 1000 * IM_ARRAYSIZE( pool_sizes );
-        pool_info.poolSizeCount = ( uint32_t ) IM_ARRAYSIZE( pool_sizes );
-        pool_info.pPoolSizes = pool_sizes;
-        err = vkCreateDescriptorPool( g_Device, &pool_info, g_Allocator, &g_DescriptorPool );
-        check_vk_result( err );
-    }
+    VkDescriptorPoolSize pool_sizes[] = {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000 * IM_ARRAYSIZE( pool_sizes );
+    pool_info.poolSizeCount = ( uint32_t ) IM_ARRAYSIZE( pool_sizes );
+    pool_info.pPoolSizes = pool_sizes;
+    VkResult err = vkCreateDescriptorPool( g_Device, &pool_info, g_Allocator, &g_DescriptorPool );
+    check_vk_result( err );
 }
 
 // All the ImGui_ImplVulkanH_XXX structures/functions are optional helpers used by the demo.
@@ -581,7 +442,61 @@ bool renderFrame(
     return true;
 }
 
-// Main code
+void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
+{
+    // Load Fonts
+    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
+    // - Read 'docs/FONTS.md' for more instructions and details.
+    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+    // io.Fonts->AddFontDefault();
+    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+    // IM_ASSERT(font != NULL);
+
+    // {
+    //     ImFontConfig config;
+    //     config.SizePixels = 18;
+    //     config.OversampleH = config.OversampleV = 1;
+    //     config.PixelSnapH = true;
+    //     io.Fonts->AddFontDefault( &config );
+    // }
+
+    // Upload Fonts
+    // Use any command queue
+    VkCommandPool command_pool = wd->Frames[ wd->FrameIndex ].CommandPool;
+    VkCommandBuffer command_buffer = wd->Frames[ wd->FrameIndex ].CommandBuffer;
+
+    VkResult err = vkResetCommandPool( g_Device, command_pool, 0 );
+    check_vk_result( err );
+    VkCommandBufferBeginInfo begin_info = {};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    err = vkBeginCommandBuffer( command_buffer, &begin_info );
+    check_vk_result( err );
+
+    ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
+
+    VkSubmitInfo end_info = {};
+    end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    end_info.commandBufferCount = 1;
+    end_info.pCommandBuffers = &command_buffer;
+    err = vkEndCommandBuffer( command_buffer );
+    check_vk_result( err );
+    err = vkQueueSubmit( g_Queue, 1, &end_info, VK_NULL_HANDLE );
+    check_vk_result( err );
+
+    err = vkDeviceWaitIdle( g_Device );
+    check_vk_result( err );
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
 int main( int argc, char **argv )
 {
     crimild::init();
@@ -665,11 +580,6 @@ int main( int argc, char **argv )
 
     VulkanObjects vulkanObjects;
     vulkanObjects.init( window );
-
-    // uint32_t extensions_count = 0;
-    // const char **extensions = glfwGetRequiredInstanceExtensions( &extensions_count );
-    // SetupVulkan( extensions, extensions_count );
-
     g_Instance = vulkanObjects.instance->getHandle();
     g_Allocator = vulkanObjects.instance->getAllocator();
     g_PhysicalDevice = vulkanObjects.physicalDevice->getHandle();
@@ -726,59 +636,7 @@ int main( int argc, char **argv )
 
     setupImGuiStyles( true, 1.0f );
 
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // io.Fonts->AddFontDefault();
-    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    // IM_ASSERT(font != NULL);
-
-    // {
-    //     ImFontConfig config;
-    //     config.SizePixels = 18;
-    //     config.OversampleH = config.OversampleV = 1;
-    //     config.PixelSnapH = true;
-    //     io.Fonts->AddFontDefault( &config );
-    // }
-
-    // Upload Fonts
-    {
-        // Use any command queue
-        VkCommandPool command_pool = wd->Frames[ wd->FrameIndex ].CommandPool;
-        VkCommandBuffer command_buffer = wd->Frames[ wd->FrameIndex ].CommandBuffer;
-
-        err = vkResetCommandPool( g_Device, command_pool, 0 );
-        check_vk_result( err );
-        VkCommandBufferBeginInfo begin_info = {};
-        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        err = vkBeginCommandBuffer( command_buffer, &begin_info );
-        check_vk_result( err );
-
-        ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
-
-        VkSubmitInfo end_info = {};
-        end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        end_info.commandBufferCount = 1;
-        end_info.pCommandBuffers = &command_buffer;
-        err = vkEndCommandBuffer( command_buffer );
-        check_vk_result( err );
-        err = vkQueueSubmit( g_Queue, 1, &end_info, VK_NULL_HANDLE );
-        check_vk_result( err );
-
-        err = vkDeviceWaitIdle( g_Device );
-        check_vk_result( err );
-        ImGui_ImplVulkan_DestroyFontUploadObjects();
-    }
+    loadFonts( wd );
 
     // Our state
 
