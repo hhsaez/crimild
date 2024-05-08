@@ -2,9 +2,9 @@ crimild_trace()
 
 add_library( crimild_mathematics OBJECT )
 
-target_sources( 
+target_sources(
     crimild_mathematics
-    
+
     PUBLIC
     Crimild_Mathematics.hpp
 
@@ -65,9 +65,7 @@ target_sources(
     Matrix3_operators.hpp
     Matrix3_transpose.hpp
     Matrix4.hpp
-    Matrix4_constants.hpp
     Matrix4_determinant.hpp
-    Matrix4_inverse.hpp
     Matrix4_operators.hpp
     Matrix4_transpose.hpp
     max.hpp
@@ -124,10 +122,10 @@ target_sources(
     Vector3.hpp
     Vector4.hpp
     whichSide.hpp
-    
+
     PRIVATE
     Crimild_Mathematics.cpp
-    
+
     PRIVATE
     Random.cpp
 )
@@ -136,4 +134,3 @@ target_include_directories( crimild_mathematics PUBLIC . )
 
 target_compile_features( crimild_mathematics PUBLIC cxx_std_20 )
 add_library( Crimild::Mathematics ALIAS crimild_mathematics )
-
