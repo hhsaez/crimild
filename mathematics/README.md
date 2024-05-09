@@ -212,7 +212,7 @@ v=|3|
 
 ## TODO
 
-- [ ] Bounds
+- [x] Bounds
   - [x] Bounds3
 - [x] Box
 - [ ] Colors
@@ -222,12 +222,12 @@ v=|3|
 - [ ] LineSegment3
 - [ ] Matrix3
 - [ ] Matrix4
-- [ ] Normal3
+- [x] Normal3
 - [ ] Numbers
-- [ ] Numeric
+- [x] Numeric
 - [x] Plane3
-- [ ] Point2
-- [ ] Point3
+- [x] Point2
+- [x] Point3
 - [ ] Quaternion
 - [ ] Random
 - [x] Ray3
@@ -236,7 +236,7 @@ v=|3|
 - [ ] Series
 - [x] Size2D -> Size2
 - [x] Size3D -> Size3
-- [ ] Sphere
+- [x] Sphere
 - [ ] Transformation
 - [ ] Triangle
 - [x] Tuple2
@@ -274,12 +274,14 @@ v=|3|
 - [ ] min
 - [x] normal()
 - [ ] normalize
+- [ ] origin()
 - [ ] ortho
 - [ ] orthonomalization
 - [ ] permutation
 - [ ] perspective
 - [ ] pow
 - [ ] project
+- [ ] radius()
 - [ ] reflect
 - [ ] refact
 - [ ] round

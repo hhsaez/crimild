@@ -33,6 +33,14 @@ target_sources(
     Matrix4_determinant.hpp
     Matrix4_operators.hpp
     Matrix4_transpose.hpp
+    Quaternion.hpp
+    Random.hpp
+    Ray3.hpp
+    Rect.hpp
+    Series.hpp
+    Size2.hpp
+    Size3.hpp
+    Sphere.hpp
     abs.hpp
     bisect.hpp
     ceil.hpp
@@ -64,9 +72,10 @@ target_sources(
     normalize.hpp
     Numbers.hpp
     Numeric.hpp
-    overlaps.hpp
+    origin.hpp
     ortho.hpp
     orthonormalization.hpp
+    overlaps.hpp
     permutation.hpp
     perspective.hpp
     Plane3.hpp
@@ -74,20 +83,12 @@ target_sources(
     Point3.hpp
     pow.hpp
     project.hpp
-    Quaternion.hpp
-    Random.hpp
-    Ray3.hpp
-    Rect.hpp
+    radius.hpp
     reflect.hpp
     refract.hpp
     Root.hpp
     round.hpp
-    Series.hpp
     sign.hpp
-    Size2.hpp
-    Size3.hpp
-    Sphere.hpp
-    Sphere_normal.hpp
     sqrt.hpp
     surfaceArea.hpp
     swizzle.hpp

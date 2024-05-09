@@ -32,12 +32,14 @@
 #include "Normal3.hpp"
 #include "Plane3.hpp"
 #include "Point3.hpp"
+#include "Sphere.hpp"
 #include "Transformation.hpp"
 #include "Transformation_apply.hpp"
 #include "Transformation_inverse.hpp"
 #include "abs.hpp"
 #include "max.hpp"
 #include "normalize.hpp"
+#include "origin.hpp"
 #include "swizzle.hpp"
 
 namespace crimild {
@@ -62,6 +64,18 @@ namespace crimild {
     [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
     {
         return p.n;
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Point3f &P ) noexcept
+    {
+        return normalize( Normal3( P - origin( S ) ) );
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Transformation &T, const Point3f &P ) noexcept
+    {
+        const auto localP = inverse( T )( P );
+        const auto N = Normal3( localP - origin( S ) );
+        return normalize( T( N ) );
     }
 
 }

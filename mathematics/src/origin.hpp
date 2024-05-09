@@ -25,57 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_EXPAND_
-#define CRIMILD_MATHEMATICS_EXPAND_
+#ifndef CRIMILD_MATHEMATICS_ORIGIN_
+#define CRIMILD_MATHEMATICS_ORIGIN_
 
-#include "Bounds3.hpp"
 #include "Sphere.hpp"
-#include "isZero.hpp"
-#include "length.hpp"
-#include "origin.hpp"
-#include "radius.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] constexpr Sphere expandToContain( const Sphere &S0, const Sphere &S1 ) noexcept
+    [[nodiscard]] inline constexpr const Point3 &origin( const Sphere &s ) noexcept
     {
-        const auto &C0 = origin( S0 );
-        const auto R0 = radius( S0 );
-        const auto &C1 = origin( S1 );
-        const auto R1 = radius( S1 );
-
-        const auto centerDiff = C1 - C0;
-        const auto lengthSqr = length2( centerDiff );
-        const auto radiusDiff = R1 - R0;
-        const auto radiusDiffSqr = radiusDiff * radiusDiff;
-
-        Point3f C;
-        auto R = real_t( 0 );
-        if ( radiusDiffSqr >= lengthSqr ) {
-            if ( radiusDiff >= 0 ) {
-                C = C1;
-                R = R1;
-            }
-        } else {
-            const auto length = sqrt( lengthSqr );
-            if ( !isZero( length ) ) {
-                const auto coeff = ( length + radiusDiff ) / ( 2.0 * length );
-                C = C0 + coeff * centerDiff;
-            }
-
-            R = real_t( 0.5 ) * ( length + R0 + R1 );
-        }
-
-        return Sphere { C, R };
-    }
-
-    template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] static constexpr auto expand( const Bounds3Impl< T > &B, const Vector3Impl< U > &padding ) noexcept
-    {
-        return Bounds3Impl< T > {
-            min( B ) - padding,
-            max( B ) + padding,
-        };
+        return s.origin;
     }
 
 }

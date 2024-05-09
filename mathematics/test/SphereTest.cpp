@@ -27,11 +27,13 @@
 
 #include "Sphere.hpp"
 
-#include "Sphere_normal.hpp"
 #include "Transformation_operators.hpp"
 #include "Transformation_rotation.hpp"
 #include "Transformation_scale.hpp"
 #include "isEqual.hpp"
+#include "normal.hpp"
+#include "origin.hpp"
+#include "radius.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
@@ -42,7 +44,7 @@ TEST( Sphere, construction )
 {
     constexpr auto S = Sphere {};
 
-    static_assert( center( S ) == crimild::Point3f::Constants::ZERO );
+    static_assert( origin( S ) == crimild::Point3f::Constants::ZERO );
     static_assert( radius( S ) == real_t( 1 ) );
 
     EXPECT_TRUE( true );

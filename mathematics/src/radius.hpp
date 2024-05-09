@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,30 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_SPHERE_NORMAL_
-#define CRIMILD_MATHEMATICS_SPHERE_NORMAL_
+#ifndef CRIMILD_MATHEMATICS_RADIUS_
+#define CRIMILD_MATHEMATICS_RADIUS_
 
-#include "Normal3.hpp"
-#include "Point3.hpp"
 #include "Sphere.hpp"
-#include "Transformation.hpp"
-#include "Transformation_apply.hpp"
-#include "Transformation_inverse.hpp"
-#include "normalize.hpp"
-#include "swizzle.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Point3f &P ) noexcept
+    [[nodiscard]] inline constexpr const real_t &radius( const Sphere &s ) noexcept
     {
-        return normalize( Normal3( P - center( S ) ) );
-    }
-
-    [[nodiscard]] inline constexpr Normal3 normal( const Sphere &S, const Transformation &T, const Point3f &P ) noexcept
-    {
-        const auto localP = inverse( T )( P );
-        const auto N = Normal3( localP - center( S ) );
-        return normalize( T( N ) );
+        return s.radius;
     }
 
 }
