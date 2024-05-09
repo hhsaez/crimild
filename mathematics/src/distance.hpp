@@ -35,6 +35,7 @@
 #include "abs.hpp"
 #include "dot.hpp"
 #include "length.hpp"
+#include "normal.hpp"
 
 namespace crimild {
 
@@ -66,6 +67,11 @@ namespace crimild {
     [[nodiscard]] constexpr real_t distance( const Ray3 &R, const Point3f &P ) noexcept
     {
         return sqrt( distance2( R, P ) );
+    }
+
+    [[nodiscard]] inline constexpr real_t distance( const Plane3 &p ) noexcept
+    {
+        return p.d;
     }
 
     [[nodiscard]] constexpr real_t distanceSigned( const Plane3 &A, const Point3f &P ) noexcept

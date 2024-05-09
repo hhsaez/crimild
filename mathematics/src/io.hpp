@@ -39,6 +39,8 @@
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "distance.hpp"
+#include "normal.hpp"
 
 #include <iomanip>
 #include <iostream>

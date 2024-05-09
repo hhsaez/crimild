@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,12 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_PLANE_
-#define CRIMILD_CORE_MATHEMATICS_PLANE_
+#ifndef CRIMILD_CORE_MATHEMATICS_PLANE_3_
+#define CRIMILD_CORE_MATHEMATICS_PLANE_3_
 
 #include "Normal3.hpp"
 #include "Point3.hpp"
-#include "isEqual.hpp"
 
 namespace crimild {
 
@@ -44,28 +43,34 @@ namespace crimild {
      * @remarks Use the default precision
      */
     struct Plane3 {
+    public:
+        struct Constants;
+
+    public:
         Normal3 n = Normal3 { 0, 1, 0 };
         real_t d = 0;
 
         [[nodiscard]] inline constexpr bool operator==( const Plane3 &other ) const noexcept
         {
-            return isEqual( this->n, other.n ) && isEqual( this->d, other.d );
+            return n == other.n && d == other.d;
         }
 
         [[nodiscard]] inline constexpr bool operator!=( const Plane3 &other ) const noexcept
         {
-            return !isEqual( this->n, other.n ) || !isEqual( this->d, other.d );
+            return !( *this == other );
         }
     };
 
-    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
-    {
-        return p.n;
-    }
-    [[nodiscard]] inline constexpr real_t distance( const Plane3 &p ) noexcept
-    {
-        return p.d;
-    }
+    struct Plane3::Constants {
+        static constexpr Plane3 XY = { Normal3 { 0, 0, 1 }, 0 };
+        static constexpr Plane3 XZ = { Normal3 { 0, 1, 0 }, 0 };
+
+        /**
+         *  \remarks Because we're using a right-handed coordinate system,
+         * the XY plane's normal is the negative x-axis.
+         */
+        static constexpr Plane3 YZ = { Normal3 { -1, 0, 0 }, 0 };
+    };
 
 }
 

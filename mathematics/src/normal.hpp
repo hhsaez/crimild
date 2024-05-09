@@ -30,6 +30,7 @@
 
 #include "Box.hpp"
 #include "Normal3.hpp"
+#include "Plane3.hpp"
 #include "Point3.hpp"
 #include "Transformation.hpp"
 #include "Transformation_apply.hpp"
@@ -56,6 +57,11 @@ namespace crimild {
     {
         const auto N = normal( B, inverse( T )( P ) );
         return normalize( T( N ) );
+    }
+
+    [[nodiscard]] inline constexpr const Normal3 &normal( const Plane3 &p ) noexcept
+    {
+        return p.n;
     }
 
 }

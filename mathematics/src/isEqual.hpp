@@ -33,6 +33,7 @@
 #include "Concepts.hpp"
 #include "Matrix4.hpp"
 #include "Normal3.hpp"
+#include "Plane3.hpp"
 #include "Point3.hpp"
 #include "Quaternion.hpp"
 #include "Ray3.hpp"
@@ -105,6 +106,11 @@ namespace crimild {
     [[nodiscard]] inline constexpr bool isEqual( const Quaternion &q, const Quaternion r ) noexcept
     {
         return isEqual( q.v, r.v ) && isEqual( q.w, r.w );
+    }
+
+    [[nodiscard]] inline constexpr bool isEqual( const Plane3 &a, const Plane3 &b ) noexcept
+    {
+        return isEqual( a.n, b.n ) && isEqual( a.d, b.d );
     }
 
 }

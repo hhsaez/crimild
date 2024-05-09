@@ -41,9 +41,12 @@
 #include "Triangle.hpp"
 #include "Triangle_edges.hpp"
 #include "cross.hpp"
+#include "distance.hpp"
 #include "dot.hpp"
+#include "isZero.hpp"
 #include "max.hpp"
 #include "min.hpp"
+#include "normal.hpp"
 #include "pow.hpp"
 #include "sqrt.hpp"
 
