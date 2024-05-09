@@ -27,7 +27,7 @@
 
 #include "Box.hpp"
 
-#include "Box_normal.hpp"
+#include "normal.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>

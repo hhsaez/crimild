@@ -33,16 +33,25 @@
 
 namespace crimild {
 
-    struct Box {
-        Point3 center = Point3 { 0, 0, 0 };
-        Vector3 size = Vector3 { 1, 1, 1 };
+    template< ArithmeticType T >
+    struct BoxImpl {
+        Point3Impl< T > center = Point3Impl< T >::Constants::ZERO;
+        Vector3Impl< T > size = Vector3Impl< T >::Constants::ONE;
     };
 
-    [[nodiscard]] inline constexpr const Point3f &center( const Box &b ) noexcept
+    using Box = BoxImpl< real_t >;
+    using Boxi = BoxImpl< int >;
+    using Boxf = BoxImpl< float >;
+    using Boxd = BoxImpl< double >;
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr const auto &center( const BoxImpl< T > &b ) noexcept
     {
         return b.center;
     }
-    [[nodiscard]] inline constexpr const Vector3 &size( const Box &b ) noexcept
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr const auto &size( const BoxImpl< T > &b ) noexcept
     {
         return b.size;
     }

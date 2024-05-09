@@ -11,7 +11,6 @@ target_sources(
     PRIVATE
     Bounds3.hpp
     Box.hpp
-    Box_normal.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
     ColorRGBAOps.hpp
@@ -61,6 +60,7 @@ target_sources(
     max.hpp
     min.hpp
     Normal3.hpp
+    normal.hpp
     normalize.hpp
     Numbers.hpp
     Numeric.hpp
