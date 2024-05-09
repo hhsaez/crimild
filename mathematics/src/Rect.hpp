@@ -29,14 +29,14 @@
 #define CRIMILD_MATHEMATICS_RECT_
 
 #include "Point2.hpp"
-#include "Size2D.hpp"
+#include "Size2.hpp"
 
 namespace crimild {
 
     template< typename T >
     struct RectImpl {
         Point2Impl< T > origin;
-        Size2DImpl< T > size;
+        Size2Impl< T > size;
 
         [[nodiscard]] inline constexpr bool operator==( const RectImpl &other ) const noexcept
         {

@@ -25,19 +25,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_SIZE_3D_
-#define CRIMILD_MATHEMATICS_SIZE_3D_
+#ifndef CRIMILD_MATHEMATICS_SIZE_3_
+#define CRIMILD_MATHEMATICS_SIZE_3_
 
-#include <Crimild_Foundation.hpp>
+#include "Concepts.hpp"
+#include "Types.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Size3DImpl {
+    template< ArithmeticType T >
+    struct Size3Impl {
         T width;
         T height;
         T depth;
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr bool operator==( const Size3Impl< U > &other ) const noexcept
+        {
+            return width == other.width && height == other.height && depth == other.depth;
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr bool operator!=( const Size3Impl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
+
+    using Size3 = Size3Impl< real_t >;
+    using Size3i = Size3Impl< int >;
+    using Size3f = Size3Impl< float >;
 
 }
 
