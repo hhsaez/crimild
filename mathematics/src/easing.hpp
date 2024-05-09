@@ -28,7 +28,10 @@
 #ifndef CRIMILD_MATHEMATICS_EASING_
 #define CRIMILD_MATHEMATICS_EASING_
 
+#include "Bounds3.hpp"
 #include "Types.hpp"
+#include "max.hpp"
+#include "min.hpp"
 
 namespace crimild {
 
@@ -36,6 +39,16 @@ namespace crimild {
     [[nodiscard]] inline constexpr T lerp( const T &start, const T &end, real_t t ) noexcept
     {
         return ( real_t( 1 ) - t ) * start + t * end;
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto lerp( const Bounds3Impl< T > &B, const Vector3Impl< T > &t ) noexcept
+    {
+        return Point3 {
+            lerp( min( B ).x, max( B ).x, t.x ),
+            lerp( min( B ).y, max( B ).y, t.y ),
+            lerp( min( B ).z, max( B ).z, t.z ),
+        };
     }
 
 }

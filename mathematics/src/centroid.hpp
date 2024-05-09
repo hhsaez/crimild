@@ -25,33 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_BOUNDS_3_BISECT_
-#define CRIMILD_MATHEMATICS_BOUNDS_3_BISECT_
+#ifndef CRIMILD_MATHEMATICS_CENTROID_
+#define CRIMILD_MATHEMATICS_CENTROID_
 
 #include "Bounds3.hpp"
 
 namespace crimild {
 
-    static constexpr void bisect( const Bounds3 &B, int axis, real_t &split, Bounds3 &below, Bounds3 &above ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto centroid( const Bounds3Impl< T > &B ) noexcept
     {
-        split = 0.5 * ( B.max[ axis ] + B.min[ axis ] );
-        below = Bounds3 {
-            B.min,
-            [ & ] {
-                auto P = B.max;
-                P[ axis ] = split;
-                return P;
-            }(),
-        };
-        above = Bounds3 {
-            [ & ] {
-                auto P = B.min;
-                P[ axis ] = split;
-                return P;
-            }(),
-            B.max,
-        };
+        return 0.5 * ( B.max + B.min );
     }
+
 }
 
 #endif

@@ -25,21 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_EASING_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_EASING_
+#ifndef CRIMILD_CORE_MATHEMATICS_OVERLAPS_
+#define CRIMILD_CORE_MATHEMATICS_OVERLAPS_
 
-#include "Bounds3_diagonal.hpp"
-#include "easing.hpp"
+#include "Bounds3.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3 lerp( const Bounds3 &B, const Vector3 &t ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] static constexpr bool overlaps( const Bounds3Impl< T > &A, const Bounds3Impl< U > &B ) noexcept
     {
-        return Point3 {
-            lerp( min( B ).x, max( B ).x, t.x ),
-            lerp( min( B ).y, max( B ).y, t.y ),
-            lerp( min( B ).z, max( B ).z, t.z ),
-        };
+        return A.max.x >= B.min.x && A.min.x <= B.max.x
+               && A.max.y >= B.min.y && A.min.y <= B.max.y
+               && A.max.z >= B.min.z && A.min.z <= B.max.z;
     }
 
 }

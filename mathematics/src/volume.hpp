@@ -25,17 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_BOUNDS_3_DIAGONAL_
-#define CRIMILD_MATHEMATICS_BOUNDS_3_DIAGONAL_
+#ifndef CRIMILD_CORE_MATHEMATICS_VOLUME_
+#define CRIMILD_CORE_MATHEMATICS_VOLUME_
 
-#include "Bounds3.hpp"
-#include "Point3.hpp"
+#include "diagonal.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3 diagonal( const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr real_t volume( const Bounds3Impl< T > &B ) noexcept
     {
-        return B.max - B.min;
+        const auto D = diagonal( B );
+        return D.x * D.y * D.z;
     }
 
 }

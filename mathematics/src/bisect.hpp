@@ -25,17 +25,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_IS_NAN_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_IS_NAN_
+#ifndef CRIMILD_MATHEMATICS_BISECT_
+#define CRIMILD_MATHEMATICS_BISECT_
 
 #include "Bounds3.hpp"
-#include "isNaN.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr bool isNaN( const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    constexpr void bisect( const Bounds3Impl< T > &B, int axis, real_t &split, Bounds3Impl< T > &below, Bounds3Impl< T > &above ) noexcept
     {
-        return isNaN( B.min ) || isNaN( B.max );
+        split = 0.5 * ( B.max[ axis ] + B.min[ axis ] );
+        below = Bounds3Impl< T > {
+            B.min,
+            [ & ] {
+                auto P = B.max;
+                P[ axis ] = split;
+                return P;
+            }(),
+        };
+        above = Bounds3Impl< T > {
+            [ & ] {
+                auto P = B.min;
+                P[ axis ] = split;
+                return P;
+            }(),
+            B.max,
+        };
     }
 
 }

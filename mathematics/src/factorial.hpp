@@ -28,18 +28,18 @@
 #ifndef CRIMILD_MATHEMATICS_FACTORIAL_
 #define CRIMILD_MATHEMATICS_FACTORIAL_
 
-#include <Crimild_Foundation.hpp>
+#include "Types.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr UInt64 factorial( UInt64 N ) noexcept
+    [[nodiscard]] static constexpr uint64_t factorial( uint64_t N ) noexcept
     {
         if ( N == 0 ) {
             return 1;
         }
 
-        auto ret = UInt64( 1 );
-        for ( auto i = UInt64( 1 ); i <= N; ++i ) {
+        auto ret = uint64_t( 1 );
+        for ( auto i = uint64_t( 1 ); i <= N; ++i ) {
             ret *= i;
         }
         return ret;

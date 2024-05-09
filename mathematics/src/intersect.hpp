@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_INTERSECT_
 #define CRIMILD_MATHEMATICS_INTERSECT_
 
+#include "Bounds3.hpp"
 #include "Box.hpp"
 #include "Cylinder.hpp"
 #include "Plane3.hpp"
@@ -307,6 +308,14 @@ namespace crimild {
         return intersect( invWorld * R, T, t );
     }
 
+    template< ArithmeticType T >
+    [[nodiscard]] static constexpr auto intersect( const Bounds3Impl< T > &A, const Bounds3Impl< T > &B ) noexcept
+    {
+        return Bounds3Impl< T > {
+            max( min( A ), min( B ) ),
+            min( max( A ), max( B ) ),
+        };
+    }
 }
 
 #endif

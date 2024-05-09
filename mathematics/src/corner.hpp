@@ -25,18 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_OVERLAPS_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_OVERLAPS_
+#ifndef CRIMILD_CORE_MATHEMATICS_CORNER_
+#define CRIMILD_CORE_MATHEMATICS_CORNER_
 
 #include "Bounds3.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr bool overlaps( const Bounds3 &A, const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto corner( const Bounds3Impl< T > &B, size_t i ) noexcept
     {
-        return A.max.x >= B.min.x && A.min.x <= B.max.x
-               && A.max.y >= B.min.y && A.min.y <= B.max.y
-               && A.max.z >= B.min.z && A.min.z <= B.max.z;
+        return Point3Impl< T > {
+            B[ i & 1 ].x,
+            B[ ( i & 2 ) ? 1 : 0 ].y,
+            B[ ( i & 4 ) ? 1 : 0 ].z
+        };
     }
 
 }

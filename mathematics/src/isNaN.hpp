@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_IS_NAN_
 #define CRIMILD_MATHEMATICS_IS_NAN_
 
+#include "Bounds3.hpp"
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
 #include "Normal3.hpp"
@@ -76,6 +77,12 @@ namespace crimild {
     [[nodiscard]] inline constexpr bool isNaN( const ColorRGBAImpl< T > &c ) noexcept
     {
         return isNaN( c.r ) || isNaN( c.g ) || isNaN( c.b ) || isNaN( c.a );
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isNaN( const Bounds3Impl< T > &B ) noexcept
+    {
+        return isNaN( B.min ) || isNaN( B.max );
     }
 
 }
