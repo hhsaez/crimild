@@ -164,7 +164,21 @@ transformations.
 
 See [Normal3](@ref crimild::Normal3)
 
-## High-level entities
+## Shapes
+
+### Box
+
+### Cylinder
+
+### Plane
+
+### Sphere
+
+### Triangle
+
+## Higher-level entities
+
+These are entities built on top of lower-level ones and that can also be evaluated from some paramenter.
 
 ### Rays
 

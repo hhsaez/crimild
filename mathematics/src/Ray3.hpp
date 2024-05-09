@@ -40,19 +40,10 @@ namespace crimild {
      *
      * Rays are represented using the default precision (real_t) for its
      * members, since there is no need for non-floating-points rays.
+     *
+     * By default, a Ray's is at the world origin and points to FORWARD.
      */
     struct Ray3 {
-        constexpr Ray3( void ) = default;
-
-        constexpr explicit Ray3( const Point3 &origin, const Vector3 &direction ) noexcept
-            : origin( origin ),
-              direction( direction )
-        {
-            // no-op
-        }
-
-        ~Ray3( void ) = default;
-
         /**
          * @name Origin and direction
          *
@@ -60,8 +51,8 @@ namespace crimild {
          */
         //@{
 
-        Point3 origin;
-        Vector3 direction;
+        Point3 origin = Point3::Constants::ZERO;
+        Vector3 direction = Vector3::Constants::FORWARD;
 
         //@}
 
