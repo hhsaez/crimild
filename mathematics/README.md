@@ -200,7 +200,7 @@ v=|3|
 
 - [ ] Bounds
   - [x] Bounds3
-- [ ] Box
+- [x] Box
 - [ ] Colors
 - [ ] Cylinder
 - [ ] Frustum
@@ -258,6 +258,7 @@ v=|3|
 - [ ] length
 - [ ] max
 - [ ] min
+- [x] normal()
 - [ ] normalize
 - [ ] ortho
 - [ ] orthonomalization

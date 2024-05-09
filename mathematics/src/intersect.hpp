@@ -106,7 +106,8 @@ namespace crimild {
         return intersect( invWorld * R, P, t );
     }
 
-    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, real_t &tMin, real_t &tMax ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const BoxImpl< T > &B, real_t &tMin, real_t &tMax ) noexcept
     {
         const auto BMax = center( B ) + size( B );
         const auto BMin = center( B ) - size( B );
@@ -142,13 +143,15 @@ namespace crimild {
         return true;
     }
 
-    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, const Transformation &world, real_t &t0, real_t &t1 ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const BoxImpl< T > &B, const Transformation &world, real_t &t0, real_t &t1 ) noexcept
     {
         // For better performance, use the inverse matrix
         return intersect( inverse( world )( R ), B, t0, t1 );
     }
 
-    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Box &B, const Matrix4 &invWorld, real_t &t0, real_t &t1 ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const BoxImpl< T > &B, const Matrix4 &invWorld, real_t &t0, real_t &t1 ) noexcept
     {
         return intersect( invWorld * R, B, t0, t1 );
     }

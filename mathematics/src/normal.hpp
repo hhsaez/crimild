@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_BOX_NORMAL_
-#define CRIMILD_MATHEMATICS_BOX_NORMAL_
+#ifndef CRIMILD_MATHEMATICS_NORMAL_
+#define CRIMILD_MATHEMATICS_NORMAL_
 
 #include "Box.hpp"
 #include "Normal3.hpp"
@@ -41,7 +41,8 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Point3f &P ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr Normal3 normal( const BoxImpl< T > &B, const Point3f &P ) noexcept
     {
         const auto absP = abs( P );
         const auto i = maxDimension( absP );
@@ -50,7 +51,8 @@ namespace crimild {
         return N;
     }
 
-    [[nodiscard]] inline constexpr Normal3 normal( const Box &B, const Transformation &T, const Point3f &P ) noexcept
+    template< ArithmeticType BoxType >
+    [[nodiscard]] inline constexpr Normal3 normal( const BoxImpl< BoxType > &B, const Transformation &T, const Point3f &P ) noexcept
     {
         const auto N = normal( B, inverse( T )( P ) );
         return normalize( T( N ) );
