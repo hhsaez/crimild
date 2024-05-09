@@ -40,29 +40,35 @@ namespace crimild {
      * box, ensuring that any operations on it (i.e. union) yield the
      * correct result.
      */
-    struct Bounds3 {
-        Point3f min = Point3f::Constants::POSITIVE_INFINITY;
-        Point3f max = Point3f::Constants::NEGATIVE_INFINITY;
+    template< ArithmeticType T >
+    struct Bounds3Impl {
+        Point3Impl< T > min = Point3Impl< T >::Constants::POSITIVE_INFINITY;
+        Point3Impl< T > max = Point3Impl< T >::Constants::NEGATIVE_INFINITY;
 
-        [[nodiscard]] inline constexpr const Point3f &operator[]( size_t i ) const noexcept
+        [[nodiscard]] inline constexpr const auto &operator[]( size_t i ) const noexcept
         {
             return i == 0 ? min : max;
         }
 
-        [[nodiscard]] inline Point3f &operator[]( size_t i ) noexcept
+        [[nodiscard]] inline auto &operator[]( size_t i ) noexcept
         {
             return i == 0 ? min : max;
+        }
+
+        [[nodiscard]] inline constexpr bool operator==( const Bounds3Impl &other ) const noexcept
+        {
+            return min == other.min && max == other.max;
+        }
+
+        [[nodiscard]] inline constexpr bool operator!=( const Bounds3Impl &other ) const noexcept
+        {
+            return !( *this == other );
         }
     };
 
-    [[nodiscard]] inline constexpr Point3f corner( const Bounds3 &B, size_t i ) noexcept
-    {
-        return Point3f {
-            B[ i & 1 ].x,
-            B[ ( i & 2 ) ? 1 : 0 ].y,
-            B[ ( i & 4 ) ? 1 : 0 ].z,
-        };
-    }
+    using Bounds3 = Bounds3Impl< real_t >;
+    using Bounds3f = Bounds3Impl< float >;
+    using Bounds3d = Bounds3Impl< double >;
 
 }
 

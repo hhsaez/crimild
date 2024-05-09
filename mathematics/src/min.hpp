@@ -28,11 +28,14 @@
 #ifndef CRIMILD_MATHEMATICS_MIN_
 #define CRIMILD_MATHEMATICS_MIN_
 
+#include "Bounds3.hpp"
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "abs.hpp"
+#include "diagonal.hpp"
 
 namespace crimild {
 
@@ -172,6 +175,24 @@ namespace crimild {
             }
         }
         return ret;
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr const auto &min( const Bounds3Impl< T > &B ) noexcept
+    {
+        return B.min;
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto min( const Bounds3Impl< T > &B0, const Bounds3Impl< T > &B1 ) noexcept
+    {
+        return min( min( B0 ), min( B1 ) );
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr size_t minDimension( const Bounds3Impl< T > &B ) noexcept
+    {
+        return minDimension( abs( diagonal( B ) ) );
     }
 
 }

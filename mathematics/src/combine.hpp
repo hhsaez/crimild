@@ -25,18 +25,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_IO_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_IO_
+#ifndef CRIMILD_MATHEMATICS_COMBINE_
+#define CRIMILD_MATHEMATICS_COMBINE_
 
 #include "Bounds3.hpp"
-#include "io.hpp"
+#include "max.hpp"
+#include "min.hpp"
 
 namespace crimild {
 
-    static std::ostream &operator<<( std::ostream &out, const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr Bounds3Impl< T > combine( const Bounds3Impl< T > &B, const Point3Impl< T > &P ) noexcept
     {
-        out << "[" << B.min << ", " << B.max << "]";
-        return out;
+        return Bounds3Impl< T > {
+            min( min( B ), P ),
+            max( max( B ), P ),
+        };
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr Bounds3Impl< T > combine( const Bounds3Impl< T > &B0, const Bounds3Impl< T > &B1 ) noexcept
+    {
+        return Bounds3Impl< T > {
+            min( min( B0 ), min( B1 ) ),
+            max( max( B0 ), max( B1 ) ),
+        };
     }
 
 }

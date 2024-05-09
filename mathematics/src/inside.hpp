@@ -25,17 +25,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_VOLUME_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_VOLUME_
+#ifndef CRIMILD_CORE_MATHEMATICS_INSIDE_
+#define CRIMILD_CORE_MATHEMATICS_INSIDE_
 
-#include "Bounds3_diagonal.hpp"
+#include "Bounds3.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr real_t volume( const Bounds3 &B ) noexcept
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] static constexpr bool inside( const Point3Impl< T > &P, const Bounds3Impl< U > &B ) noexcept
     {
-        const auto D = diagonal( B );
-        return D.x * D.y * D.z;
+        return B.min.x <= P.x && P.x <= B.max.x
+               && B.min.y <= P.y && P.y <= B.max.y
+               && B.min.z <= P.z && P.z <= B.max.z;
+    }
+
+    template< ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] static constexpr bool insideExclusive( const Point3Impl< T > &P, const Bounds3Impl< U > &B ) noexcept
+    {
+        return B.min.x < P.x && P.x < B.max.x
+               && B.min.y < P.y && P.y < B.max.y
+               && B.min.z < P.z && P.z < B.max.z;
     }
 
 }

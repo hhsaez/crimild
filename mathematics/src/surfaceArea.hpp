@@ -25,25 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_INSIDE_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_INSIDE_
+#ifndef CRIMILD_CORE_MATHEMATICS_SURFACE_AREA_
+#define CRIMILD_CORE_MATHEMATICS_SURFACE_AREA_
 
-#include "Bounds3.hpp"
+#include "diagonal.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr bool inside( const Point3f &P, const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr real_t surfaceArea( const Bounds3Impl< T > &B ) noexcept
     {
-        return B.min.x <= P.x && P.x <= B.max.x
-               && B.min.y <= P.y && P.y <= B.max.y
-               && B.min.z <= P.z && P.z <= B.max.z;
-    }
-
-    [[nodiscard]] static constexpr bool insideExclusive( const Point3f &P, const Bounds3 &B ) noexcept
-    {
-        return B.min.x < P.x && P.x < B.max.x
-               && B.min.y < P.y && P.y < B.max.y
-               && B.min.z < P.z && P.z < B.max.z;
+        const auto D = diagonal( B );
+        return real_t( 2 ) * ( D.x * D.y + D.x * D.z + D.y * D.z );
     }
 
 }

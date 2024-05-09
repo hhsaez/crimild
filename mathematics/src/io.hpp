@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_IO_
 #define CRIMILD_MATHEMATICS_IO_
 
+#include "Bounds3.hpp"
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
 #include "LineSegment3.hpp"
@@ -127,6 +128,13 @@ namespace crimild {
         out << std::setiosflags( std::ios::fixed | std::ios::showpoint )
             << std::setprecision( 10 )
             << "[" << q.v << ", " << q.w << "]";
+        return out;
+    }
+
+    template< ArithmeticType T >
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Bounds3Impl< T > &B ) noexcept
+    {
+        out << "[" << B.min << ", " << B.max << "]";
         return out;
     }
 

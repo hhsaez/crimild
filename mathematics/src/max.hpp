@@ -28,11 +28,14 @@
 #ifndef CRIMILD_MATHEMATICS_MAX_
 #define CRIMILD_MATHEMATICS_MAX_
 
+#include "Bounds3.hpp"
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
+#include "abs.hpp"
+#include "diagonal.hpp"
 
 namespace crimild {
 
@@ -172,6 +175,24 @@ namespace crimild {
             }
         }
         return ret;
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr const auto &max( const Bounds3Impl< T > &B ) noexcept
+    {
+        return B.max;
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto max( const Bounds3Impl< T > &B0, const Bounds3Impl< T > &B1 ) noexcept
+    {
+        return max( max( B0 ), max( B1 ) );
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr size_t maxDimension( const Bounds3Impl< T > &B ) noexcept
+    {
+        return maxDimension( abs( diagonal( B ) ) );
     }
 
 }

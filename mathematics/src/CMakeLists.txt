@@ -9,45 +9,35 @@ target_sources(
     Crimild_Mathematics.hpp
 
     PRIVATE
-    abs.hpp
     Bounds3.hpp
-    Bounds3_bisect.hpp
-    Bounds3_centroid.hpp
-    Bounds3_combine.hpp
-    Bounds3_diagonal.hpp
-    Bounds3_easing.hpp
-    Bounds3_equality.hpp
-    Bounds3_expand.hpp
-    Bounds3_inside.hpp
-    Bounds3_intersect.hpp
-    Bounds3_io.hpp
-    Bounds3_isNaN.hpp
-    Bounds3_max.hpp
-    Bounds3_min.hpp
-    Bounds3_overlaps.hpp
-    Bounds3_surfaceArea.hpp
-    Bounds3_volume.hpp
     Box.hpp
     Box_normal.hpp
-    ceil.hpp
-    clamp.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
     ColorRGBAOps.hpp
     ColorRGBOps.hpp
     ColorRGB_isZero.hpp
-    cross.hpp
     Cylinder.hpp
     Cylinder_normal.hpp
+    Frustum.hpp
+    abs.hpp
+    bisect.hpp
+    ceil.hpp
+    centroid.hpp
+    clamp.hpp
+    combine.hpp
+    corner.hpp
+    cross.hpp
+    diagonal.hpp
     distance.hpp
     dot.hpp
     easing.hpp
     expand.hpp
     factorial.hpp
     floor.hpp
-    Frustum.hpp
     get_ptr.hpp
     Interpolation.hpp
+    inside.hpp
     intersect.hpp
     Intersection.hpp
     io.hpp
@@ -74,6 +64,7 @@ target_sources(
     normalize.hpp
     Numbers.hpp
     Numeric.hpp
+    overlaps.hpp
     ortho.hpp
     orthonormalization.hpp
     permutation.hpp
@@ -98,6 +89,7 @@ target_sources(
     Sphere.hpp
     Sphere_normal.hpp
     sqrt.hpp
+    surfaceArea.hpp
     swizzle.hpp
     Transformation.hpp
     Transformation_apply.hpp
@@ -121,6 +113,7 @@ target_sources(
     Vector2.hpp
     Vector3.hpp
     Vector4.hpp
+    volume.hpp
     whichSide.hpp
 
     PRIVATE

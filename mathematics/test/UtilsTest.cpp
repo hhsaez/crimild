@@ -43,7 +43,7 @@ TEST( Utils, sqrt )
 
 namespace crimild {
 
-    template< typename T, Size N >
+    template< typename T, size_t N >
     class LookupTable {
     public:
         constexpr LookupTable( void ) = default;

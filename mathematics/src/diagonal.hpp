@@ -25,29 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_MATHEMATICS_BOUNDS_3_MIN_
-#define CRIMILD_CORE_MATHEMATICS_BOUNDS_3_MIN_
+#ifndef CRIMILD_MATHEMATICS_DIAGONAL_
+#define CRIMILD_MATHEMATICS_DIAGONAL_
 
 #include "Bounds3.hpp"
-#include "Bounds3_diagonal.hpp"
-#include "abs.hpp"
-#include "min.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Point3f min( const Bounds3 &B ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto diagonal( const Bounds3Impl< T > &B ) noexcept
     {
-        return B.min;
-    }
-
-    [[nodiscard]] inline constexpr Point3f min( const Bounds3 &B0, const Bounds3 &B1 ) noexcept
-    {
-        return min( min( B0 ), min( B1 ) );
-    }
-
-    [[nodiscard]] inline constexpr size_t minDimension( const Bounds3 &B ) noexcept
-    {
-        return minDimension( abs( diagonal( B ) ) );
+        return B.max - B.min;
     }
 
 }
