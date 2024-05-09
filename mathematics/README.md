@@ -1,12 +1,13 @@
 # Mathematics
 
+## Functional vs OOP
+Since this is a math library, it makes sense that it should be written in a functional style, which results in a much more expressive code.
+
+Then, most of the complex types in the Mathematics library (i.e. vector, matrices, tuples) are just POCOs, structs with public members.
+
+Also, most functions are organized in the default namespace (i.e. `crimild::distance()`), with overloads for the corresponding types where required.
+
 ## real_t and high-precision computations.
-real_t is used for float values
-
-crimild::real_t is used for float values
-
-[real_t](@ref crimild::real_t) is used for float values
-
 [real_t](@ref real_t) is used for float values
 
 ## Constants
@@ -194,3 +195,86 @@ v=|3|
   |4|
 
 ```
+
+## TODO
+
+- [ ] Bounds
+  - [x] Bounds3
+- [ ] Box
+- [ ] Colors
+- [ ] Cylinder
+- [ ] Frustum
+- [ ] Interpolation
+- [ ] LineSegment3
+- [ ] Matrix3
+- [ ] Matrix4
+- [ ] Normal3
+- [ ] Numbers
+- [ ] Numeric
+- [ ] Plane3
+- [ ] Point2
+- [ ] Point3
+- [ ] Quaternion
+- [ ] Random
+- [ ] Ray3
+- [ ] Rect
+- [ ] Root
+- [ ] Series
+- [ ] Size2D
+- [ ] Size3D
+- [ ] Sphere
+- [ ] Transformation
+- [ ] Triangle
+- [x] Tuple2
+- [x] Tuple3
+- [x] Tuple4
+- [x] Types
+- [x] Vector2
+- [x] Vector3
+- [x] Vector4
+- [ ] abs
+- [ ] ceil
+- [x] centroid()
+- [ ] clamp
+- [ ] conjugate
+- [x] corner()
+- [ ] cross
+- [x] diagonal()
+- [ ] distance
+- [ ] dot
+- [ ] easing
+- [ ] expand()
+- [ ] factorial
+- [ ] floor
+- [ ] get_ptr
+- [x] inside()
+- [ ] intersect
+- [ ] inverse
+- [ ] io
+- [ ] isEqual
+- [ ] isInfinity
+- [ ] isNaN
+- [ ] isZero
+- [ ] length
+- [ ] max
+- [ ] min
+- [ ] normalize
+- [ ] ortho
+- [ ] orthonomalization
+- [ ] permutation
+- [ ] perspective
+- [ ] pow
+- [ ] project
+- [ ] reflect
+- [ ] refact
+- [ ] round
+- [ ] sign
+- [ ] sqrt
+- [x] surfaceArea()
+- [ ] swizzle
+- [ ] trace
+- [ ] trigonometry
+- [x] volume()
+- [ ] whichSize
+- [ ] CMake
+- [ ] Documentation
