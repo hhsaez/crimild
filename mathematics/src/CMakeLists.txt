@@ -19,6 +19,20 @@ target_sources(
     Cylinder.hpp
     Cylinder_normal.hpp
     Frustum.hpp
+    Interpolation.hpp
+    Intersection.hpp
+    LineSegment3.hpp
+    Matrix3.hpp
+    Matrix3_constants.hpp
+    Matrix3_determinant.hpp
+    Matrix3_equality.hpp
+    Matrix3_inverse.hpp
+    Matrix3_operators.hpp
+    Matrix3_transpose.hpp
+    Matrix4.hpp
+    Matrix4_determinant.hpp
+    Matrix4_operators.hpp
+    Matrix4_transpose.hpp
     abs.hpp
     bisect.hpp
     ceil.hpp
@@ -35,28 +49,14 @@ target_sources(
     factorial.hpp
     floor.hpp
     get_ptr.hpp
-    Interpolation.hpp
     inside.hpp
     intersect.hpp
-    Intersection.hpp
     io.hpp
     isEqual.hpp
     isInfinity.hpp
     isNaN.hpp
     isZero.hpp
     length.hpp
-    LineSegment3.hpp
-    Matrix3.hpp
-    Matrix3_constants.hpp
-    Matrix3_determinant.hpp
-    Matrix3_equality.hpp
-    Matrix3_inverse.hpp
-    Matrix3_operators.hpp
-    Matrix3_transpose.hpp
-    Matrix4.hpp
-    Matrix4_determinant.hpp
-    Matrix4_operators.hpp
-    Matrix4_transpose.hpp
     max.hpp
     min.hpp
     Normal3.hpp
@@ -84,8 +84,8 @@ target_sources(
     round.hpp
     Series.hpp
     sign.hpp
-    Size2D.hpp
-    Size3D.hpp
+    Size2.hpp
+    Size3.hpp
     Sphere.hpp
     Sphere_normal.hpp
     sqrt.hpp

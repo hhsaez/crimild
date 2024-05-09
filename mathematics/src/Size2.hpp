@@ -25,16 +25,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_SIZE_2D_
-#define CRIMILD_MATHEMATICS_SIZE_2D_
+#ifndef CRIMILD_MATHEMATICS_SIZE_2_
+#define CRIMILD_MATHEMATICS_SIZE_2_
+
+#include "Concepts.hpp"
+#include "Types.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct Size2DImpl {
+    template< ArithmeticType T >
+    struct Size2Impl {
         T width;
         T height;
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr bool operator==( const Size2Impl< U > &other ) const noexcept
+        {
+            return width == other.width && height == other.height;
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr bool operator!=( const Size2Impl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
     };
+
+    using Size2 = Size2Impl< real_t >;
+    using Size2i = Size2Impl< int >;
+    using Size2f = Size2Impl< float >;
 
 }
 

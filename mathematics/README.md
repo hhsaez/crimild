@@ -225,17 +225,17 @@ v=|3|
 - [ ] Normal3
 - [ ] Numbers
 - [ ] Numeric
-- [ ] Plane3
+- [x] Plane3
 - [ ] Point2
 - [ ] Point3
 - [ ] Quaternion
 - [ ] Random
-- [ ] Ray3
+- [x] Ray3
 - [ ] Rect
 - [ ] Root
 - [ ] Series
-- [ ] Size2D
-- [ ] Size3D
+- [x] Size2D -> Size2
+- [x] Size3D -> Size3
 - [ ] Sphere
 - [ ] Transformation
 - [ ] Triangle
