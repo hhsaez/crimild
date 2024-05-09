@@ -28,6 +28,7 @@
 #include "Ray3.hpp"
 
 #include "io.hpp"
+#include "isEqual.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
