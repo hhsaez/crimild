@@ -38,13 +38,15 @@
 #include "Sphere.hpp"
 #include "Vector3.hpp"
 #include "distance.hpp"
+#include "origin.hpp"
 #include "pow.hpp"
+#include "radius.hpp"
 
 namespace crimild {
 
     [[nodiscard]] static constexpr real_t findIntersection( const Sphere &S, const Ray3 &R, real_t lowerBound = numbers::EPSILON, real_t upperBound = numbers::POSITIVE_INFINITY ) noexcept
     {
-        const auto centerDiff = origin( R ) - center( S );
+        const auto centerDiff = origin( R ) - origin( S );
 
         const auto a = length2( direction( R ) );
         const auto b = real_t( 2 ) * dot( centerDiff, direction( R ) );

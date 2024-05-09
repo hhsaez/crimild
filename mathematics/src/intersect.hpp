@@ -47,7 +47,9 @@
 #include "max.hpp"
 #include "min.hpp"
 #include "normal.hpp"
+#include "origin.hpp"
 #include "pow.hpp"
+#include "radius.hpp"
 #include "sqrt.hpp"
 
 #include <algorithm>
@@ -57,7 +59,7 @@ namespace crimild {
 
     [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Sphere &S, real_t &t0, real_t &t1 ) noexcept
     {
-        const auto CO = origin( R ) - center( S );
+        const auto CO = origin( R ) - origin( S );
         const auto a = dot( direction( R ), direction( R ) );
         const auto b = real_t( 2 ) * dot( direction( R ), CO );
         const auto c = dot( CO, CO ) - pow( radius( S ), 2 );
