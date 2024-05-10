@@ -27,7 +27,6 @@
 
 #include "ColorRGB.hpp"
 
-#include "ColorRGBOps.hpp"
 #include "dot.hpp"
 #include "io.hpp"
 #include "isEqual.hpp"

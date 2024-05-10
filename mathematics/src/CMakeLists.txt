@@ -13,9 +13,6 @@ target_sources(
     Box.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
-    ColorRGBAOps.hpp
-    ColorRGBOps.hpp
-    ColorRGB_isZero.hpp
     Cylinder.hpp
     Cylinder_normal.hpp
     Frustum.hpp
