@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_IS_ZERO_
 #define CRIMILD_MATHEMATICS_IS_ZERO_
 
+#include "ColorRGB.hpp"
 #include "Concepts.hpp"
 #include "Numbers.hpp"
 #include "Tuple2.hpp"
@@ -64,6 +65,13 @@ namespace crimild {
     {
         return isZero( t.x ) && isZero( t.y ) && isZero( t.z ) && isZero( t.w );
     }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr bool isZero( const ColorRGBImpl< T > &t ) noexcept
+    {
+        return isZero( t.r ) && isZero( t.g ) && isZero( t.b );
+    }
+
 }
 
 #endif

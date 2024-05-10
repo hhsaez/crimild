@@ -215,7 +215,8 @@ v=|3|
 - [x] Bounds
   - [x] Bounds3
 - [x] Box
-- [ ] Colors
+- [x] ColorRGB
+- [x] ColorRGBA
 - [ ] Cylinder
 - [ ] Frustum
 - [ ] Interpolation

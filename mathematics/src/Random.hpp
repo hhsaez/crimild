@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_RANDOM_
 #define CRIMILD_MATHEMATICS_RANDOM_
 
-#include "ColorRGBAOps.hpp"
+#include "ColorRGBA.hpp"
 #include "Vector3.hpp"
 #include "dot.hpp"
 #include "length.hpp"

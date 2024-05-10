@@ -30,8 +30,6 @@
 
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
-#include "ColorRGBAOps.hpp"
-#include "ColorRGBOps.hpp"
 #include "Frustum.hpp"
 #include "Interpolation.hpp"
 #include "Intersection.hpp"

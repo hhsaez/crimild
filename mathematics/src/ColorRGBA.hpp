@@ -28,23 +28,78 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGBA_
 #define CRIMILD_MATHEMATICS_COLOR_RGBA_
 
+#include "Concepts.hpp"
+#include "Tuple4.hpp"
 #include "Types.hpp"
 
-#include <cmath>
+#include <cassert>
 
 namespace crimild {
 
-    template< typename T >
-    struct ColorRGBAImpl {
+    template< ArithmeticType T >
+    class ColorRGBAImpl {
+    public:
         struct Constants;
 
-        T r;
-        T g;
-        T b;
-        T a;
+    public:
+        T r = {};
+        T g = {};
+        T b = {};
+        T a = {};
 
+    public:
+        constexpr ColorRGBAImpl( void ) noexcept = default;
+
+        constexpr ColorRGBAImpl( T r, T g, T b, T a ) noexcept
+            : r( r ), g( g ), b( b ), a( a )
+        {
+            // do nothing
+        }
+
+        template< ArithmeticType U >
+        constexpr explicit ColorRGBAImpl( U value ) noexcept
+            : ColorRGBAImpl( value, value, value, value )
+        {
+            // do nothing
+        }
+
+        template< ArithmeticType U >
+        constexpr ColorRGBAImpl( const ColorRGBAImpl< U > &other ) noexcept
+            : ColorRGBAImpl( other.r, other.g, other.b, other.a )
+        {
+            // do nothing
+        }
+
+        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        constexpr explicit ColorRGBAImpl( const Tuple4< OtherDerived, U > &other ) noexcept
+            : ColorRGBAImpl( other.x, other.y, other.z, other.w )
+        {
+            // do nothing
+        }
+
+        ~ColorRGBAImpl( void ) noexcept = default;
+
+        template< ArithmeticType U >
+        inline constexpr ColorRGBAImpl< T > &operator=( const ColorRGBAImpl< U > &other ) noexcept
+        {
+            r = other.r;
+            g = other.g;
+            b = other.b;
+            a = other.a;
+            return *this;
+        }
+
+        ///@{
+        /**
+         * @brief Index-based accessors for color components
+         *
+         * @details
+         * Some rutines do find it more useful to access color components inside a loop. The non-const
+         * overload returns a reference, allowing to set the values of each component while indexing.
+         */
         [[nodiscard]] inline constexpr T operator[]( size_t index ) const noexcept
         {
+            assert( index >= 0 && index <= 3 && "Invalid index" );
             switch ( index ) {
                 case 0:
                     return r;
@@ -60,6 +115,7 @@ namespace crimild {
 
         [[nodiscard]] inline constexpr T &operator[]( size_t index ) noexcept
         {
+            assert( index >= 0 && index <= 3 && "Invalid index" );
             switch ( index ) {
                 case 0:
                     return r;
@@ -72,19 +128,72 @@ namespace crimild {
                     return a;
             }
         }
+        ///@}
 
-        [[nodiscard]] inline constexpr bool operator==( const ColorRGBAImpl &other ) const noexcept
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator+( const ColorRGBAImpl< U > &u ) const noexcept
         {
-            return r == other.r && g == other.g && b == other.b && a == other.a;
+            return ColorRGBAImpl< decltype( T {} + U {} ) > {
+                r + u.r,
+                g + u.g,
+                b + u.b,
+                a + u.a,
+            };
         }
 
-        [[nodiscard]] inline constexpr bool operator!=( const ColorRGBAImpl &other ) const noexcept
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator-( const ColorRGBAImpl< U > &u ) const noexcept
         {
-            return !( *this == other );
+            return ColorRGBAImpl< decltype( T {} - U {} ) > {
+                r - u.r,
+                g - u.g,
+                b - u.b,
+                a - u.a,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator*( const U &s ) const noexcept
+        {
+            return ColorRGBAImpl< decltype( T {} * U {} ) > {
+                r * s,
+                g * s,
+                b * s,
+                a * s,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] friend inline constexpr auto operator*( const U &s, const ColorRGBAImpl< T > &u ) noexcept
+        {
+            return ColorRGBAImpl< decltype( T {} * U {} ) > {
+                u.r * s,
+                u.g * s,
+                u.b * s,
+                u.a * s,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator*( const ColorRGBAImpl< U > &u ) const noexcept
+        {
+            return ColorRGBAImpl< decltype( T {} * U {} ) > {
+                r * u.r,
+                g * u.g,
+                b * u.b,
+                a * u.a,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator/( const U &s ) const noexcept
+        {
+            const auto invS = real_t( 1 ) / s;
+            return ( *this * invS );
         }
     };
 
-    template< typename T >
+    template< ArithmeticType T >
     struct ColorRGBAImpl< T >::Constants {
         static constexpr auto CLEAR = ColorRGBAImpl< T > { 0, 0, 0, 0 };
         static constexpr auto BLACK = ColorRGBAImpl< T > { 0, 0, 0, 1 };
