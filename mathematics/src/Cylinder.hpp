@@ -38,14 +38,6 @@ namespace crimild {
         bool closed = true;
     };
 
-    [[nodiscard]] inline constexpr real_t radius( const Cylinder &c ) noexcept
-    {
-        return c.radius;
-    }
-    [[nodiscard]] inline constexpr real_t height( const Cylinder &c ) noexcept
-    {
-        return c.height;
-    }
     [[nodiscard]] inline constexpr bool isClosed( const Cylinder &c ) noexcept
     {
         return c.closed;

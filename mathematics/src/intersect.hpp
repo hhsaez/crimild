@@ -43,6 +43,7 @@
 #include "cross.hpp"
 #include "distance.hpp"
 #include "dot.hpp"
+#include "height.hpp"
 #include "isZero.hpp"
 #include "max.hpp"
 #include "min.hpp"
