@@ -25,22 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_RADIUS_
-#define CRIMILD_MATHEMATICS_RADIUS_
+#ifndef CRIMILD_MATHEMATICS_HEIGHT_
+#define CRIMILD_MATHEMATICS_HEIGHT_
 
 #include "Cylinder.hpp"
-#include "Sphere.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr const real_t &radius( const Sphere &s ) noexcept
+    [[nodiscard]] inline constexpr real_t height( const Cylinder &c ) noexcept
     {
-        return s.radius;
-    }
-
-    [[nodiscard]] inline constexpr real_t radius( const Cylinder &c ) noexcept
-    {
-        return c.radius;
+        return c.height;
     }
 
 }

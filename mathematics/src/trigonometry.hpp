@@ -30,6 +30,8 @@
 
 #include "Numbers.hpp"
 
+#include <cmath>
+
 namespace crimild {
 
     [[nodiscard]] inline constexpr radians_t radians( degrees_t deg ) noexcept

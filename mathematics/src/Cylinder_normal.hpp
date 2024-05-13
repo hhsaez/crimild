@@ -34,7 +34,9 @@
 #include "Transformation.hpp"
 #include "Transformation_apply.hpp"
 #include "Transformation_inverse.hpp"
+#include "height.hpp"
 #include "normalize.hpp"
+#include "radius.hpp"
 #include "swizzle.hpp"
 
 namespace crimild {
