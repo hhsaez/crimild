@@ -34,7 +34,6 @@
 #include "Interpolation.hpp"
 #include "Intersection.hpp"
 #include "Matrix3.hpp"
-#include "Matrix3_equality.hpp"
 #include "Matrix4.hpp"
 #include "Numeric.hpp"
 #include "Plane3.hpp"

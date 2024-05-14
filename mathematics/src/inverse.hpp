@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_INVERSE_
 #define CRIMILD_MATHEMATICS_INVERSE_
 
+#include "Matrix3.hpp"
 #include "Matrix4.hpp"
 #include "Quaternion.hpp"
 #include "conjugate.hpp"
@@ -45,6 +46,25 @@ namespace crimild {
         real_t N2 = length2( q );
         const auto c = conjugate( q );
         return real_t( 1 ) / N2 * c;
+    }
+
+    template< typename T >
+    [[nodiscard]] constexpr Matrix3Impl< T > inverse( const Matrix3Impl< T > &a ) noexcept
+    {
+        const auto det = determinant( a );
+        assert( det != 0 );
+        const auto invDet = real_t( 1.0 ) / det;
+        return Matrix3Impl< T > {
+            ( a[ 4 ] * a[ 8 ] - a[ 5 ] * a[ 7 ] ) * invDet,
+            ( a[ 2 ] * a[ 7 ] - a[ 1 ] * a[ 8 ] ) * invDet,
+            ( a[ 1 ] * a[ 5 ] - a[ 2 ] * a[ 4 ] ) * invDet,
+            ( a[ 5 ] * a[ 6 ] - a[ 3 ] * a[ 8 ] ) * invDet,
+            ( a[ 0 ] * a[ 8 ] - a[ 2 ] * a[ 6 ] ) * invDet,
+            ( a[ 2 ] * a[ 3 ] - a[ 0 ] * a[ 5 ] ) * invDet,
+            ( a[ 3 ] * a[ 7 ] - a[ 4 ] * a[ 6 ] ) * invDet,
+            ( a[ 1 ] * a[ 6 ] - a[ 0 ] * a[ 7 ] ) * invDet,
+            ( a[ 0 ] * a[ 4 ] - a[ 1 ] * a[ 3 ] ) * invDet,
+        };
     }
 
     template< typename T >
@@ -72,7 +92,7 @@ namespace crimild {
         assert( det != 0 );
         const real_t invDet = real_t( 1 ) / det;
 
-        return Matrix4Impl< T >(
+        return Matrix4Impl< T > {
             Vector4Impl< T > {
                 ( a11 * b11 - a12 * b10 + a13 * b09 ) * invDet,
                 ( a12 * b08 - a10 * b11 - a13 * b07 ) * invDet,
@@ -97,7 +117,7 @@ namespace crimild {
                 ( a21 * b02 - a20 * b04 - a23 * b00 ) * invDet,
                 ( a20 * b03 - a21 * b01 + a22 * b00 ) * invDet,
             }
-        );
+        };
     }
 
 }

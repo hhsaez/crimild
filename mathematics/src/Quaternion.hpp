@@ -295,25 +295,25 @@ namespace crimild {
         const real_t qwy = q.v.y * q.w;
         const real_t qwz = q.v.z * q.w;
 
-        columns[ 0 ] = {
+        ( *this )[ 0 ] = {
             1 - 2 * ( qyy + qzz ),
             2 * ( qxy + qwz ),
             2 * ( qxz - qwy ),
             0,
         };
-        columns[ 1 ] = {
+        ( *this )[ 1 ] = {
             2 * ( qxy - qwz ),
             1 - 2 * ( qxx + qzz ),
             2 * ( qyz + qwx ),
             0,
         };
-        columns[ 2 ] = {
+        ( *this )[ 2 ] = {
             2 * ( qxz + qwy ),
             2 * ( qyz - qwx ),
             1 - 2 * ( qxx + qyy ),
             0,
         };
-        columns[ 3 ] = {
+        ( *this )[ 3 ] = {
             0,
             0,
             0,

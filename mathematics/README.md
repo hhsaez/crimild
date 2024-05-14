@@ -217,12 +217,12 @@ v=|3|
 - [x] Box
 - [x] ColorRGB
 - [x] ColorRGBA
-- [ ] Cylinder
+- [x] Cylinder
 - [ ] Frustum
 - [ ] Interpolation
 - [ ] LineSegment3
-- [ ] Matrix3
-- [ ] Matrix4
+- [x] Matrix3
+- [x] Matrix4
 - [x] Normal3
 - [ ] Numbers
 - [x] Numeric

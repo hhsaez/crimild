@@ -25,25 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_MATRIX_3_EQUALITY_
-#define CRIMILD_MATHEMATICS_MATRIX_3_EQUALITY_
+#ifndef CRIMILD_MATHEMATICS_TRANSPOSE_
+#define CRIMILD_MATHEMATICS_TRANSPOSE_
 
 #include "Matrix3.hpp"
+#include "Matrix4.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    [[nodiscard]] inline constexpr bool Matrix3Impl< T >::operator==( const Matrix3Impl< T > &other ) const noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] constexpr auto transpose( const Matrix3Impl< T > &M ) noexcept
     {
-        return c0 == other.c0 && c1 == other.c1 && c2 == other.c2;
+        return Matrix3Impl< T > {
+            { M[ 0 ][ 0 ], M[ 1 ][ 0 ], M[ 2 ][ 0 ] },
+            { M[ 0 ][ 1 ], M[ 1 ][ 1 ], M[ 2 ][ 1 ] },
+            { M[ 0 ][ 2 ], M[ 1 ][ 2 ], M[ 2 ][ 2 ] },
+        };
     }
 
     template< typename T >
-    [[nodiscard]] inline constexpr bool Matrix3Impl< T >::operator!=( const Matrix3Impl< T > &other ) const noexcept
+    [[nodiscard]] inline constexpr Matrix4Impl< T > transpose( const Matrix4Impl< T > &A ) noexcept
     {
-        return c0 != other.c0 || c1 != other.c1 || c2 != other.c2;
+        return Matrix4Impl< T > {
+            Vector4Impl< T > { A[ 0 ][ 0 ], A[ 1 ][ 0 ], A[ 2 ][ 0 ], A[ 3 ][ 0 ] },
+            Vector4Impl< T > { A[ 0 ][ 1 ], A[ 1 ][ 1 ], A[ 2 ][ 1 ], A[ 3 ][ 1 ] },
+            Vector4Impl< T > { A[ 0 ][ 2 ], A[ 1 ][ 2 ], A[ 2 ][ 2 ], A[ 3 ][ 2 ] },
+            Vector4Impl< T > { A[ 0 ][ 3 ], A[ 1 ][ 3 ], A[ 2 ][ 3 ], A[ 3 ][ 3 ] }
+        };
     }
-
 }
 
 #endif
