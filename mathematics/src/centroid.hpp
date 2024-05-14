@@ -29,6 +29,10 @@
 #define CRIMILD_MATHEMATICS_CENTROID_
 
 #include "Bounds3.hpp"
+#include "Rect.hpp"
+#include "Vector2.hpp"
+#include "origin.hpp"
+#include "size.hpp"
 
 namespace crimild {
 
@@ -36,6 +40,12 @@ namespace crimild {
     [[nodiscard]] inline constexpr auto centroid( const Bounds3Impl< T > &B ) noexcept
     {
         return 0.5 * ( B.max + B.min );
+    }
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto centroid( const RectImpl< T > &rect ) noexcept
+    {
+        return origin( rect ) + real_t( 0.5 ) * Vector2Impl< T >( size( rect ) );
     }
 
 }

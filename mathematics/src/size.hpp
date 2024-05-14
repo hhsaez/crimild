@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Hernan Saez
+ * Copyright (c) 2002 - present, H. Hernan Saez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
+ *     * Neither the name of the copyright holder nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,34 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_RECT_
-#define CRIMILD_MATHEMATICS_RECT_
+#ifndef CRIMILD_MATHEMATICS_SIZE_
+#define CRIMILD_MATHEMATICS_SIZE_
 
-#include "Point2.hpp"
-#include "Size2.hpp"
+#include "Rect.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    struct RectImpl {
-        Point2Impl< T > origin;
-        Size2Impl< T > size;
-
-        [[nodiscard]] inline constexpr bool operator==( const RectImpl &other ) const noexcept
-        {
-            return origin == other.origin && size == other.size;
-        }
-
-        [[nodiscard]] inline constexpr bool operator!=( const RectImpl &other ) const noexcept
-        {
-            return !( *this == other );
-        }
-    };
-
-    using Rect = RectImpl< real_t >;
-    using Rectf = RectImpl< float >;
-    using Rectd = RectImpl< double >;
-    using Recti = RectImpl< int32_t >;
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto size( const RectImpl< T > &rect ) noexcept
+    {
+        return rect.size;
+    }
 
 }
 
