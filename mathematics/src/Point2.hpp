@@ -30,6 +30,7 @@
 
 #include "Tuple2.hpp"
 #include "Types.hpp"
+#include "Vector2.hpp"
 
 namespace crimild {
 
@@ -65,6 +66,56 @@ namespace crimild {
             : Tuple2< Point2Impl, T >( value ) { }
 
         ~Point2Impl( void ) noexcept = default;
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator+( const Point2Impl< U > &v ) const noexcept
+        {
+            return Tuple2< Point2Impl, T >::operator+( v );
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator+( const Vector2Impl< U > &v ) const noexcept
+        {
+            return Point2Impl< decltype( T {} + U {} ) > {
+                x + v.x,
+                y + v.y,
+            };
+        }
+
+        template< ArithmeticType U >
+        inline constexpr auto &operator+=( const Vector2Impl< U > &other ) noexcept
+        {
+            x += other.x;
+            y += other.y;
+            return *this;
+        }
+
+        // Special case: Subtracting two points always results in a vector.
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator-( const Point2Impl< U > &p ) const noexcept
+        {
+            return Vector2Impl< decltype( T {} - U {} ) > {
+                x - p.x,
+                y - p.y,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator-( const Vector2Impl< U > &v ) const noexcept
+        {
+            return Point2Impl< decltype( T {} - U {} ) > {
+                x - v.x,
+                y - v.y,
+            };
+        }
+
+        template< ArithmeticType U >
+        inline constexpr auto &operator-=( const Vector2Impl< U > &other ) noexcept
+        {
+            x -= other.x;
+            y -= other.y;
+            return *this;
+        }
     };
 
     using Point2 = Point2Impl< real_t >;

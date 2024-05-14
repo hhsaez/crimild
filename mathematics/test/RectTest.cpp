@@ -27,6 +27,9 @@
 
 #include "Rect.hpp"
 
+#include "centroid.hpp"
+#include "isEqual.hpp"
+
 #include "gtest/gtest.h"
 
 using namespace crimild;
@@ -47,4 +50,16 @@ TEST( RectTest, testConstruction )
 
     rect2.origin.x = 20;
     EXPECT_TRUE( rect2.origin.x == 20 );
+}
+
+TEST( Rect, centroid )
+{
+    constexpr auto R = Rect {
+        { 0, 0 },
+        { 1, 1 },
+    };
+
+    static_assert( isEqual( Point2( 0.5, 0.5 ), centroid( R ) ) );
+
+    EXPECT_TRUE( true );
 }

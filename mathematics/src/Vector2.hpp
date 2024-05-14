@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_2_
 #define CRIMILD_MATHEMATICS_VECTOR_2_
 
+#include "Size2.hpp"
 #include "Tuple2.hpp"
 #include "Types.hpp"
 
@@ -63,6 +64,10 @@ namespace crimild {
         template< ArithmeticType U >
         constexpr explicit Vector2Impl( U value ) noexcept
             : Tuple2< Vector2Impl, T >( value ) { }
+
+        template< ArithmeticType U >
+        constexpr explicit Vector2Impl( const Size2Impl< U > &size ) noexcept
+            : Tuple2< Vector2Impl, T >( size.width, size.height ) { }
 
         ~Vector2Impl( void ) noexcept = default;
     };
