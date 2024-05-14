@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_APPLY_
 
-#include "Matrix4_transpose.hpp"
+#include "Matrix4.hpp"
 #include "Point3.hpp"
 #include "Transformation.hpp"
 #include "Transformation_isIdentity.hpp"
@@ -36,6 +36,7 @@
 #include "Vector3.hpp"
 #include "normalize.hpp"
 #include "swizzle.hpp"
+#include "transpose.hpp"
 
 namespace crimild {
 

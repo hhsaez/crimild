@@ -25,12 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_MATRIX_4_DETERMINANT_
-#define CRIMILD_MATHEMATICS_MATRIX_4_DETERMINANT_
+#ifndef CRIMILD_MATHEMATICS_DETERMINANT_
+#define CRIMILD_MATHEMATICS_DETERMINANT_
 
+#include "Matrix3.hpp"
 #include "Matrix4.hpp"
 
 namespace crimild {
+
+    template< typename T >
+    [[nodiscard]] constexpr real_t determinant( const Matrix3Impl< T > &M ) noexcept
+    {
+        const auto a = M[ 0 ][ 0 ];
+        const auto b = M[ 1 ][ 0 ];
+        const auto c = M[ 2 ][ 0 ];
+        const auto d = M[ 0 ][ 1 ];
+        const auto e = M[ 1 ][ 1 ];
+        const auto f = M[ 2 ][ 1 ];
+        const auto g = M[ 0 ][ 2 ];
+        const auto h = M[ 1 ][ 2 ];
+        const auto i = M[ 2 ][ 2 ];
+
+        return a * ( e * i - f * h ) - b * ( d * i - f * g ) + c * ( d * h - e * g );
+    }
 
     template< typename T >
     [[nodiscard]] constexpr real_t determinant( const Matrix4Impl< T > &a ) noexcept

@@ -30,44 +30,100 @@
 
 #include "Vector3.hpp"
 
+#include <array>
+
 namespace crimild {
 
-    template< typename T >
-    struct Matrix3Impl {
+    /**
+     * A 3x3 column-based matrix representation
+     */
+    template< ArithmeticType T >
+    class Matrix3Impl : public std::array< Vector3Impl< T >, 3 > {
+    public:
         struct Constants;
 
-        Vector3Impl< T > c0;
-        Vector3Impl< T > c1;
-        Vector3Impl< T > c2;
+    public:
+        constexpr Matrix3Impl( void ) = default;
 
-        [[nodiscard]] inline constexpr const Vector3Impl< T > &operator[]( size_t index ) const noexcept
+        constexpr Matrix3Impl( std::initializer_list< Vector3Impl< T > > cols ) noexcept
         {
-            switch ( index ) {
-                case 0:
-                    return c0;
-                case 1:
-                    return c1;
-                case 2:
-                default:
-                    return c2;
+            size_t i = 0;
+            for ( auto &col : cols ) {
+                ( *this )[ i++ ] = col;
+            }
+        }
+
+        constexpr Matrix3Impl( std::initializer_list< T > xs ) noexcept
+        {
+            size_t i = 0;
+            for ( auto &x : xs ) {
+                ( *this )[ i % 3 ][ i / 3 ] = x;
+                ++i;
+            }
+        }
+
+        ~Matrix3Impl( void ) = default;
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator+( const Matrix3Impl< U > &M ) noexcept
+        {
+            return Matrix3Impl< decltype( T {} + U {} ) > {
+                ( *this )[ 0 ] + M[ 0 ],
+                ( *this )[ 1 ] + M[ 1 ],
+                ( *this )[ 2 ] + M[ 2 ],
             };
         }
 
-        [[nodiscard]] inline Vector3Impl< T > &operator[]( size_t index ) noexcept
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator-( const Matrix3Impl< U > &M ) noexcept
         {
-            switch ( index ) {
-                case 0:
-                    return c0;
-                case 1:
-                    return c1;
-                case 2:
-                default:
-                    return c2;
+            return Matrix3Impl< decltype( T {} - U {} ) > {
+                ( *this )[ 0 ] - M[ 0 ],
+                ( *this )[ 1 ] - M[ 1 ],
+                ( *this )[ 2 ] - M[ 2 ],
             };
         }
 
-        [[nodiscard]] inline constexpr bool operator==( const Matrix3Impl &other ) const noexcept;
-        [[nodiscard]] inline constexpr bool operator!=( const Matrix3Impl &other ) const noexcept;
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator*( const U &s ) noexcept
+        {
+            return Matrix3Impl< decltype( T {} * U {} ) > {
+                ( *this )[ 0 ] * s,
+                ( *this )[ 1 ] * s,
+                ( *this )[ 2 ] * s,
+            };
+        }
+
+        template< ArithmeticType U >
+        [[nodiscard]] inline constexpr auto operator/( const U &s ) noexcept
+        {
+            return Matrix3Impl< decltype( T {} * U {} ) > {
+                ( *this )[ 0 ] / s,
+                ( *this )[ 1 ] / s,
+                ( *this )[ 2 ] / s,
+            };
+        }
+    };
+
+    template< ArithmeticType T >
+    struct Matrix3Impl< T >::Constants {
+        static constexpr auto IDENTITY = Matrix3Impl {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 },
+        };
+
+        static constexpr auto ZERO = Matrix3Impl {
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+            { 0, 0, 0 },
+        };
+
+        static constexpr auto ONE = Matrix3Impl {
+            { 1, 1, 1 },
+            { 1, 1, 1 },
+            { 1, 1, 1 },
+        };
     };
 
     using Matrix3 = Matrix3Impl< real_t >;

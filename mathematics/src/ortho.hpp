@@ -35,19 +35,19 @@ namespace crimild {
     [[nodiscard]] constexpr Matrix4 ortho( real_t l, real_t r, real_t b, real_t t, real_t n, real_t f ) noexcept
     {
 #if CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
-        return Matrix4(
+        return Matrix4 {
             Vector4 { Real( 2 ) / ( r - l ), 0, 0, 0 },
             Vector4 { 0, Real( 2 ) / ( t - b ), 0, 0 },
             Vector4 { 0, 0, -Real( 1 ) / ( f - n ), 0 },
             Vector4 { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -n / ( f - n ), 1 }
-        );
+        };
 #else
-        return Matrix4(
+        return Matrix4 {
             Vector4 { real_t( 2 ) / ( r - l ), 0, 0, 0 },
             Vector4 { 0, real_t( 2 ) / ( t - b ), 0, 0 },
             Vector4 { 0, 0, -real_t( 2 ) / ( f - n ), 0 },
             Vector4 { -( r + l ) / ( r - l ), -( t + b ) / ( t - b ), -( f + n ) / ( f - n ), 1 }
-        );
+        };
 #endif
     }
 

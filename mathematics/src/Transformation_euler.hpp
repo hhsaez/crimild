@@ -28,8 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_EULER_
 #define CRIMILD_MATHEMATICS_TRANSFORMATION_EULER_
 
-#include "Matrix4_transpose.hpp"
+#include "Matrix4.hpp"
 #include "Transformation.hpp"
+#include "transpose.hpp"
 
 namespace crimild {
 
@@ -42,12 +43,12 @@ namespace crimild {
         const auto cr = cos( roll );
         const auto sr = sin( roll );
 
-        const auto mat = Matrix4(
+        const auto mat = Matrix4 {
             Vector4 { cy * cr + sy * sp * sr, sr * cp, -sy * cr + cy * sp * sr, 0 },
             Vector4 { -cy * sr + sy * sp * cr, cr * cp, sr * sy + cy * sp * cr, 0 },
             Vector4 { sy * cp, -sp, cy * cp, 0 },
             Vector4 { 0, 0, 0, 1 }
-        );
+        };
 
         return Transformation {
             .mat = mat,

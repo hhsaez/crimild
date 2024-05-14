@@ -27,12 +27,19 @@
 
 #include "Matrix3.hpp"
 
-#include "Matrix3_constants.hpp"
-#include "Matrix3_equality.hpp"
-#include "Vector3.hpp"
+#include "determinant.hpp"
+#include "transpose.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include <sstream>
+
+TEST( Matrix3, sizeof )
+{
+    static_assert( sizeof( crimild::Matrix3 {} ) == 9 * sizeof( crimild::real_t ) );
+
+    // Seems redudant to check at run time, right?
+    EXPECT_EQ( sizeof( crimild::Matrix3 {} ), 9 * sizeof( crimild::real_t ) );
+}
 
 TEST( Matrix3, construction )
 {
@@ -45,6 +52,17 @@ TEST( Matrix3, construction )
     static_assert( M[ 0 ] == crimild::Vector3 { 1, 2, 3 } );
     static_assert( M[ 1 ] == crimild::Vector3 { 4, 5, 6 } );
     static_assert( M[ 2 ] == crimild::Vector3 { 7, 8, 9 } );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix3, fromValues )
+{
+    constexpr auto M = crimild::Matrix3 { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    static_assert( M[ 0 ] == crimild::Vector3 { 1, 4, 7 } );
+    static_assert( M[ 1 ] == crimild::Vector3 { 2, 5, 8 } );
+    static_assert( M[ 2 ] == crimild::Vector3 { 3, 6, 9 } );
 
     EXPECT_TRUE( true );
 }
@@ -71,6 +89,38 @@ TEST( Matrix3, ZERO )
             { 0, 0, 0 },
         }
     );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix3, determinant )
+{
+    constexpr auto M = crimild::Matrix3 {
+        { 2, 1, 1 },
+        { 1, 3, 2 },
+        { 1, 2, 4 },
+    };
+
+    static_assert( determinant( M ) == 13 );
+
+    EXPECT_TRUE( true );
+}
+
+TEST( Matrix3, transpose )
+{
+    constexpr auto M = crimild::Matrix3 {
+        { 1, 2, 3 },
+        { 4, 5, 6 },
+        { 7, 8, 9 },
+    };
+
+    constexpr auto T = crimild::Matrix3 {
+        { 1, 4, 7 },
+        { 2, 5, 8 },
+        { 3, 6, 9 },
+    };
+
+    static_assert( transpose( M ) == T );
 
     EXPECT_TRUE( true );
 }

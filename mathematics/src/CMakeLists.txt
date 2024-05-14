@@ -20,9 +20,6 @@ target_sources(
     Intersection.hpp
     LineSegment3.hpp
     Matrix3.hpp
-    Matrix3_constants.hpp
-    Matrix3_determinant.hpp
-    Matrix3_equality.hpp
     Matrix3_inverse.hpp
     Matrix3_operators.hpp
     Matrix3_transpose.hpp
@@ -46,6 +43,7 @@ target_sources(
     combine.hpp
     corner.hpp
     cross.hpp
+    determinant.hpp
     diagonal.hpp
     distance.hpp
     dot.hpp

@@ -27,14 +27,13 @@
 
 #include "Matrix4.hpp"
 
-#include "Matrix4_determinant.hpp"
-#include "Matrix4_operators.hpp"
-#include "Matrix4_transpose.hpp"
 #include "Vector4.hpp"
+#include "determinant.hpp"
 #include "inverse.hpp"
 #include "io.hpp"
 #include "isEqual.hpp"
 #include "isZero.hpp"
+#include "transpose.hpp"
 
 #include "gtest/gtest.h"
 #include <sstream>
