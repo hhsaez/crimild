@@ -25,28 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRIANGLE_EDGES_
-#define CRIMILD_MATHEMATICS_TRIANGLE_EDGES_
+#ifndef CRIMILD_MATHEMATICS_EDGES_
+#define CRIMILD_MATHEMATICS_EDGES_
 
 #include "Point3.hpp"
 #include "Triangle.hpp"
 #include "Vector3.hpp"
 
+#include <array>
+
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3 edge0( const Triangle &T ) noexcept
+    [[nodiscard]] inline constexpr auto edges( const Triangle &T ) noexcept
     {
-        return T.p1 - T.p0;
-    }
-
-    [[nodiscard]] inline constexpr Vector3 edge1( const Triangle &T ) noexcept
-    {
-        return T.p2 - T.p0;
-    }
-
-    [[nodiscard]] inline constexpr Vector3 edge2( const Triangle &T ) noexcept
-    {
-        return T.p2 - T.p1;
+        return std::array< Vector3, 3 > {
+            ( T.p1 - T.p0 ),
+            ( T.p2 - T.p0 ),
+            ( T.p2 - T.p1 ),
+        };
     }
 
 }

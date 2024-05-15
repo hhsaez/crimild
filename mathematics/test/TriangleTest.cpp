@@ -28,7 +28,7 @@
 #include "Triangle.hpp"
 
 #include "Normal3.hpp"
-#include "Triangle_normal.hpp"
+#include "normal.hpp"
 
 #include "gtest/gtest.h"
 
@@ -55,9 +55,11 @@ TEST( Triangle, edges )
         { 1, 0, 0 },
     };
 
-    EXPECT_EQ( ( Vector3 { -1, -1, 0 } ), edge0( T ) );
-    EXPECT_EQ( ( Vector3 { 1, -1, 0 } ), edge1( T ) );
-    EXPECT_EQ( ( Vector3 { 2, 0, 0 } ), edge2( T ) );
+    const auto [ edge0, edge1, edge2 ] = edges( T );
+
+    EXPECT_EQ( ( Vector3 { -1, -1, 0 } ), edge0 );
+    EXPECT_EQ( ( Vector3 { 1, -1, 0 } ), edge1 );
+    EXPECT_EQ( ( Vector3 { 2, 0, 0 } ), edge2 );
 }
 
 TEST( Triangle, normal )
