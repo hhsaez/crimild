@@ -37,7 +37,7 @@
 namespace crimild {
 
     template< typename PRECISION >
-    class Numeric {
+    class [[deprecated]] Numeric {
     public:
         static const PRECISION ZERO_TOLERANCE;
         static const PRECISION PI;

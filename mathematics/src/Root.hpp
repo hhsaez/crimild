@@ -56,7 +56,7 @@ namespace crimild {
     /**
                 \brief Find the roots for a polynomial
          */
-    class Root {
+    class [[deprecated]] Root {
     public:
         /**
                         \brief Determine if the polynomial has real roots

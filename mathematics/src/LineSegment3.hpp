@@ -52,12 +52,6 @@ namespace crimild {
     };
 
     template< typename T >
-    [[nodiscard]] inline constexpr const Point3Impl< T > &origin( const LineSegment3Impl< T > &l ) noexcept
-    {
-        return l.p0;
-    }
-
-    template< typename T >
     [[nodiscard]] inline constexpr const Point3Impl< T > &destination( const LineSegment3Impl< T > &l ) noexcept
     {
         return l.p1;

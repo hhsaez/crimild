@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_ORIGIN_
 #define CRIMILD_MATHEMATICS_ORIGIN_
 
+#include "LineSegment3.hpp"
 #include "Rect.hpp"
 #include "Sphere.hpp"
 
@@ -42,6 +43,12 @@ namespace crimild {
     [[nodiscard]] inline constexpr const auto &origin( const RectImpl< T > &R ) noexcept
     {
         return R.origin;
+    }
+
+    template< typename T >
+    [[nodiscard]] inline constexpr const Point3Impl< T > &origin( const LineSegment3Impl< T > &l ) noexcept
+    {
+        return l.p0;
     }
 
 }

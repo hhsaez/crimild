@@ -39,10 +39,10 @@
 #include "Transformation_apply.hpp"
 #include "Transformation_inverse.hpp"
 #include "Triangle.hpp"
-#include "Triangle_edges.hpp"
 #include "cross.hpp"
 #include "distance.hpp"
 #include "dot.hpp"
+#include "edges.hpp"
 #include "height.hpp"
 #include "isZero.hpp"
 #include "max.hpp"
@@ -278,11 +278,10 @@ namespace crimild {
      */
     [[nodiscard]] static constexpr bool intersect( const Ray3 &R, const Triangle &T, real_t &t ) noexcept
     {
-        const auto E0 = edge0( T );
-        const auto E1 = edge1( T );
+        [[maybe_unused]] const auto [ E0, E1, E2 ] = edges( T );
 
         const auto dirCrossE1 = cross( direction( R ), E1 );
-        const real_t det = dot( edge0( T ), dirCrossE1 );
+        const real_t det = dot( E0, dirCrossE1 );
         if ( isZero( det ) ) {
             return false;
         }

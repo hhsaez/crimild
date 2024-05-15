@@ -30,62 +30,60 @@
 
 #include "Vector3.hpp"
 
+#include <vector>
+
 namespace crimild {
 
-    namespace math {
-
-        template< typename T >
-        static std::vector< T > fibonacci( size_t N ) noexcept
-        {
-            std::vector< T > ret( N );
-            T a = 0;
-            T b = 1;
-            for ( size_t i = 0; i < N; ++i ) {
-                if ( i < 2 ) {
-                    ret[ i ] = i;
-                } else {
-                    ret[ i ] = a + b;
-                    a = b;
-                    b = ret[ i ];
-                }
+    template< typename T >
+    static std::vector< T > fibonacci( size_t N ) noexcept
+    {
+        std::vector< T > ret( N );
+        T a = 0;
+        T b = 1;
+        for ( size_t i = 0; i < N; ++i ) {
+            if ( i < 2 ) {
+                ret[ i ] = i;
+            } else {
+                ret[ i ] = a + b;
+                a = b;
+                b = ret[ i ];
             }
-            return ret;
+        }
+        return ret;
+    }
+
+    static auto fibonacciSquares( size_t N ) noexcept
+    {
+        auto ret = std::vector< std::pair< Vector3, float > >( N );
+        real_t s0 = 1.0f;
+        real_t s1 = 1.0f;
+        Vector3 c0 = Vector3::Constants::ZERO;
+        Vector3 c1 = -Vector3::Constants::UNIT_X;
+        const auto OFFSET = std::array< Vector3, 4 > {
+            -Vector3::Constants::UNIT_Y,
+            -Vector3::Constants::UNIT_X,
+            Vector3::Constants::UNIT_Y,
+            Vector3::Constants::UNIT_X,
+        };
+        for ( size_t i = 0; i < N; ++i ) {
+
+            if ( i == 0 ) {
+                ret[ i ] = std::make_pair( c0, 1.0f );
+            } else if ( i == 1 ) {
+                ret[ i ] = std::make_pair( c1, 1.0f );
+            } else {
+                auto s = s0 + s1;
+                s0 = s1;
+                s1 = s;
+
+                auto c = c1 + 0.5f * ( s0 + s1 ) * OFFSET[ i % 4 ] + 0.5f * ( s1 - s0 ) * OFFSET[ ( i + 1 ) % 4 ];
+                c0 = c1;
+                c1 = c;
+                ret[ i ] = std::make_pair( c, s );
+            }
         }
 
-        static auto fibonacciSquares( size_t N ) noexcept
-        {
-            auto ret = std::vector< std::pair< Vector3, float > >( N );
-            real_t s0 = 1.0f;
-            real_t s1 = 1.0f;
-            Vector3 c0 = Vector3::Constants::ZERO;
-            Vector3 c1 = -Vector3::Constants::UNIT_X;
-            const auto OFFSET = std::array< Vector3, 4 > {
-                -Vector3::Constants::UNIT_Y,
-                -Vector3::Constants::UNIT_X,
-                Vector3::Constants::UNIT_Y,
-                Vector3::Constants::UNIT_X,
-            };
-            for ( size_t i = 0; i < N; ++i ) {
-
-                if ( i == 0 ) {
-                    ret[ i ] = std::make_pair( c0, 1.0f );
-                } else if ( i == 1 ) {
-                    ret[ i ] = std::make_pair( c1, 1.0f );
-                } else {
-                    auto s = s0 + s1;
-                    s0 = s1;
-                    s1 = s;
-
-                    auto c = c1 + 0.5f * ( s0 + s1 ) * OFFSET[ i % 4 ] + 0.5f * ( s1 - s0 ) * OFFSET[ ( i + 1 ) % 4 ];
-                    c0 = c1;
-                    c1 = c;
-                    ret[ i ] = std::make_pair( c, s );
-                }
-            }
-
-            return ret;
-        }
-
+        return ret;
     }
 
 }

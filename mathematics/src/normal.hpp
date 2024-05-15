@@ -36,7 +36,9 @@
 #include "Transformation.hpp"
 #include "Transformation_apply.hpp"
 #include "Transformation_inverse.hpp"
+#include "Triangle.hpp"
 #include "abs.hpp"
+#include "edges.hpp"
 #include "max.hpp"
 #include "normalize.hpp"
 #include "origin.hpp"
@@ -76,6 +78,18 @@ namespace crimild {
         const auto localP = inverse( T )( P );
         const auto N = Normal3( localP - origin( S ) );
         return normalize( T( N ) );
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Point3f & ) noexcept
+    {
+        [[maybe_unused]] const auto [ E0, E1, E2 ] = edges( T );
+        return normalize( Normal3( cross( E0, E1 ) ) );
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Triangle &T, const Transformation &X, const Point3f &P ) noexcept
+    {
+        const auto N = normal( T, P );
+        return normalize( X( N ) );
     }
 
 }
