@@ -25,45 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_SCALE_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_SCALE_
+#ifndef CRIMILD_MATHEMATICS_ROTATION_
+#define CRIMILD_MATHEMATICS_ROTATION_
 
 #include "Transformation.hpp"
+#include "dot.hpp"
+#include "euler.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Transformation scale( const Vector3 &scale ) noexcept
+    /**
+     * \brief Creates a rotation transformation from an arbitrary axis and angle
+     *
+     * \warning It is assumed the input axis is already normalized
+     */
+    [[nodiscard]] static auto rotation( const Vector3 &axis, radians_t angle ) noexcept
     {
-        const auto m = Matrix4 {
-            Vector4 { scale.x, 0, 0, 0 },
-            Vector4 { 0, scale.y, 0, 0 },
-            Vector4 { 0, 0, scale.z, 0 },
-            Vector4 { 0, 0, 0, 1 }
+        return Transformation {
+            .rotate = Quaternion {
+                axis * real_t( std::sin( 0.5 * angle ) ),
+                real_t( std::cos( 0.5 * angle ) ),
+            },
         };
-
-        const auto inv = Matrix4 {
-            Vector4 { real_t( 1 ) / scale.x, 0, 0, 0 },
-            Vector4 { 0, real_t( 1 ) / scale.y, 0, 0 },
-            Vector4 { 0, 0, real_t( 1 ) / scale.z, 0 },
-            Vector4 { 0, 0, 0, 1 }
-        };
-
-        return Transformation { m, inv, Transformation::Contents::SCALING };
     }
 
-    [[nodiscard]] inline constexpr Transformation scale( real_t x, real_t y, real_t z ) noexcept
+    [[nodiscard, maybe_unused]] static constexpr auto rotationX( radians_t angle ) noexcept
     {
-        return scale( Vector3 { x, y, z } );
+        return rotation( Vector3::Constants::UNIT_X, angle );
     }
 
-    [[nodiscard]] inline constexpr Transformation scale( real_t x ) noexcept
+    // TODO: make this function constexpr
+    [[nodiscard, maybe_unused]] static constexpr auto rotationY( radians_t angle ) noexcept
     {
-        return scale( Vector3 { x, x, x } );
+        return rotation( Vector3::Constants::UNIT_Y, angle );
     }
 
-    [[nodiscard]] inline constexpr bool hasScale( const Transformation &t ) noexcept
+    [[nodiscard, maybe_unused]] static constexpr auto rotationZ( radians_t angle ) noexcept
     {
-        return t.contents & Transformation::Contents::SCALING;
+        return rotation( Vector3::Constants::UNIT_Z, angle );
     }
 
 }

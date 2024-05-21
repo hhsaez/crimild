@@ -36,8 +36,6 @@
 #include "Ray3.hpp"
 #include "Sphere.hpp"
 #include "Transformation.hpp"
-#include "Transformation_apply.hpp"
-#include "Transformation_inverse.hpp"
 #include "Triangle.hpp"
 #include "cross.hpp"
 #include "distance.hpp"

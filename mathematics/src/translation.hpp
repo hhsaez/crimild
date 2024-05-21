@@ -25,40 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_TRANSLATION_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_TRANSLATION_
+#ifndef CRIMILD_MATHEMATICS_TRANSLATION_
+#define CRIMILD_MATHEMATICS_TRANSLATION_
 
 #include "Transformation.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr Transformation translation( const Vector3 &delta ) noexcept
+    [[nodiscard]] static constexpr auto translation( const Vector3 &delta ) noexcept
     {
-        const auto m = Matrix4 {
-            Vector4 { 1, 0, 0, 0 },
-            Vector4 { 0, 1, 0, 0 },
-            Vector4 { 0, 0, 1, 0 },
-            Vector4 { delta.x, delta.y, delta.z, 1 }
+        return Transformation {
+            .translate = Point3( delta ),
         };
-
-        const auto inv = Matrix4 {
-            Vector4 { 1, 0, 0, 0 },
-            Vector4 { 0, 1, 0, 0 },
-            Vector4 { 0, 0, 1, 0 },
-            Vector4 { -delta.x, -delta.y, -delta.z, 1 }
-        };
-
-        return Transformation { m, inv, Transformation::Contents::TRANSLATION };
     }
 
-    [[nodiscard]] inline constexpr Transformation translation( real_t x, real_t y, real_t z ) noexcept
+    [[nodiscard]] inline constexpr auto translation( real_t x, real_t y, real_t z ) noexcept
     {
-        return translation( Vector3 { x, y, z } );
-    }
-
-    [[nodiscard]] inline constexpr bool hasTranslation( const Transformation &t ) noexcept
-    {
-        return t.contents & Transformation::Contents::TRANSLATION;
+        return Transformation {
+            .translate = { x, y, z }
+        };
     }
 
 }

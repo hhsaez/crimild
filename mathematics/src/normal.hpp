@@ -29,19 +29,21 @@
 #define CRIMILD_MATHEMATICS_NORMAL_
 
 #include "Box.hpp"
+#include "Cylinder.hpp"
 #include "Normal3.hpp"
 #include "Plane3.hpp"
 #include "Point3.hpp"
 #include "Sphere.hpp"
 #include "Transformation.hpp"
-#include "Transformation_apply.hpp"
-#include "Transformation_inverse.hpp"
 #include "Triangle.hpp"
 #include "abs.hpp"
 #include "edges.hpp"
+#include "height.hpp"
+#include "inverse.hpp"
 #include "max.hpp"
 #include "normalize.hpp"
 #include "origin.hpp"
+#include "radius.hpp"
 #include "swizzle.hpp"
 
 namespace crimild {
@@ -90,6 +92,32 @@ namespace crimild {
     {
         const auto N = normal( T, P );
         return normalize( X( N ) );
+    }
+
+    // Project the point in the XZ plane and normalize
+    // TODO(hernan): Take into account the cylinder's center
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Point3f &P ) noexcept
+    {
+        const real_t dist = P.x * P.x + P.z * P.z;
+        const real_t r = radius( C );
+        const real_t r2 = r * r;
+        const real_t h = height( C );
+
+        if ( dist < r2 && P.y >= -h - numbers::EPSILON ) {
+            return Normal3 { 0, 1, 0 };
+        }
+
+        if ( dist < r2 && P.y <= h + numbers::EPSILON ) {
+            return Normal3 { 0, -1, 0 };
+        }
+
+        return Normal3 { P.x, 0, P.z };
+    }
+
+    [[nodiscard]] inline constexpr Normal3 normal( const Cylinder &C, const Transformation &T, const Point3f &P ) noexcept
+    {
+        const auto localP = inverse( T )( P );
+        return normalize( T( normal( C, localP ) ) );
     }
 
 }

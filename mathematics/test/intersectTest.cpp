@@ -27,9 +27,9 @@
 
 #include "intersect.hpp"
 
-#include "Transformation_scale.hpp"
+#include "scale.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

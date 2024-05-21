@@ -31,6 +31,7 @@
 #include "LineSegment3.hpp"
 #include "Rect.hpp"
 #include "Sphere.hpp"
+#include "Transformation.hpp"
 
 namespace crimild {
 
@@ -49,6 +50,11 @@ namespace crimild {
     [[nodiscard]] inline constexpr const Point3Impl< T > &origin( const LineSegment3Impl< T > &l ) noexcept
     {
         return l.p0;
+    }
+
+    [[nodiscard]] inline constexpr const auto &origin( const Transformation &T ) noexcept
+    {
+        return T.translate;
     }
 
 }

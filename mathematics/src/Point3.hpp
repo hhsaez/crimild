@@ -148,6 +148,15 @@ namespace crimild {
             z -= other.z;
             return *this;
         }
+
+        [[nodiscard]] inline constexpr auto operator-( void ) const noexcept
+        {
+            return Point3Impl< T > {
+                -x,
+                -y,
+                -z
+            };
+        }
     };
 
     using Point3 = Point3Impl< real_t >;

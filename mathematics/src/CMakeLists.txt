@@ -13,34 +13,45 @@ target_sources(
     Box.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
+    Concepts.hpp
     Cylinder.hpp
-    Cylinder_normal.hpp
     Frustum.hpp
     Interpolation.hpp
     Intersection.hpp
     LineSegment3.hpp
     Matrix3.hpp
-    Matrix3_inverse.hpp
-    Matrix3_operators.hpp
-    Matrix3_transpose.hpp
     Matrix4.hpp
-    Matrix4_determinant.hpp
-    Matrix4_operators.hpp
-    Matrix4_transpose.hpp
+    Normal3.hpp
+    Numbers.hpp
+    Numeric.hpp
+    Plane3.hpp
+    Point2.hpp
+    Point3.hpp
     Quaternion.hpp
     Random.hpp
     Ray3.hpp
     Rect.hpp
+    Root.hpp
     Series.hpp
     Size2.hpp
     Size3.hpp
     Sphere.hpp
+    Transformation.hpp
+    Triangle.hpp
+    Tuple2.hpp
+    Tuple3.hpp
+    Tuple4.hpp
+    Vector2.hpp
+    Vector3.hpp
+    Vector4.hpp
+
     abs.hpp
     bisect.hpp
     ceil.hpp
     centroid.hpp
     clamp.hpp
     combine.hpp
+    conjugate.hpp
     corner.hpp
     cross.hpp
     determinant.hpp
@@ -48,6 +59,8 @@ target_sources(
     distance.hpp
     dot.hpp
     easing.hpp
+    edges.hpp
+    euler.hpp
     expand.hpp
     factorial.hpp
     floor.hpp
@@ -60,55 +73,33 @@ target_sources(
     isNaN.hpp
     isZero.hpp
     length.hpp
+    lookAt.hpp
     max.hpp
     min.hpp
-    Normal3.hpp
     normal.hpp
     normalize.hpp
-    Numbers.hpp
-    Numeric.hpp
     origin.hpp
     ortho.hpp
     orthonormalization.hpp
     overlaps.hpp
     permutation.hpp
     perspective.hpp
-    Plane3.hpp
-    Point2.hpp
-    Point3.hpp
     pow.hpp
     project.hpp
     radius.hpp
     reflect.hpp
     refract.hpp
-    Root.hpp
+    rotation.hpp
     round.hpp
+    scale.hpp
     sign.hpp
+    size.hpp
     sqrt.hpp
     surfaceArea.hpp
     swizzle.hpp
-    Transformation.hpp
-    Transformation_apply.hpp
-    Transformation_constants.hpp
-    Transformation_easing.hpp
-    Transformation_euler.hpp
-    Transformation_inverse.hpp
-    Transformation_isIdentity.hpp
-    Transformation_lookAt.hpp
-    Transformation_operators.hpp
-    Transformation_rotation.hpp
-    Transformation_scale.hpp
-    Transformation_translation.hpp
-    Triangle.hpp
-    Triangle_edges.hpp
-    Triangle_normal.hpp
+    translation.hpp
+    transpose.hpp
     trigonometry.hpp
-    Tuple2.hpp
-    Tuple3.hpp
-    Tuple4.hpp
-    Vector2.hpp
-    Vector3.hpp
-    Vector4.hpp
     volume.hpp
     whichSide.hpp
 

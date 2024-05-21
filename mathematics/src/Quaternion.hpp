@@ -165,12 +165,12 @@ namespace crimild {
             return *this;
         }
 
-        constexpr inline bool operator==( const Quaternion &q ) const noexcept
+        [[nodiscard]] inline constexpr bool operator==( const Quaternion &q ) const noexcept
         {
             return v == q.v && w == q.w;
         }
 
-        constexpr inline bool operator!=( const Quaternion &q ) const noexcept
+        [[nodiscard]] constexpr inline bool operator!=( const Quaternion &q ) const noexcept
         {
             return !( *this == q );
         }
@@ -252,6 +252,30 @@ namespace crimild {
             v *= scalar;
             w *= scalar;
             return *this;
+        }
+
+        template< ArithmeticType T >
+        [[nodiscard]] inline constexpr auto operator*( const Vector3Impl< T > &u ) const noexcept
+        {
+            auto x = u[ 0 ];
+            auto y = u[ 1 ];
+            auto z = u[ 2 ];
+
+            auto qx = v[ 0 ];
+            auto qy = v[ 1 ];
+            auto qz = v[ 2 ];
+            auto qw = w;
+
+            auto ix = qw * x + qy * z - qz * y;
+            auto iy = qw * y + qz * x - qx * z;
+            auto iz = qw * z + qx * y - qy * x;
+            auto iw = -qx * x - qy * y - qz * z;
+
+            return Vector3Impl< decltype( real_t {} * T {} ) > {
+                ix * qw + iw * -qx + iy * -qz - iz * -qy,
+                iy * qw + iw * -qy + iz * -qx - ix * -qz,
+                iz * qw + iw * -qz + ix * -qy - iy * -qx,
+            };
         }
 
         [[nodiscard]] inline constexpr Quaternion operator/( real_t scalar ) const noexcept

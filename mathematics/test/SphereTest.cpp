@@ -27,9 +27,8 @@
 
 #include "Sphere.hpp"
 
-#include "Transformation_operators.hpp"
-#include "Transformation_rotation.hpp"
-#include "Transformation_scale.hpp"
+#include "euler.hpp"
+#include "io.hpp"
 #include "isEqual.hpp"
 #include "normal.hpp"
 #include "origin.hpp"
@@ -60,23 +59,23 @@ TEST( Sphere, normal )
     static_assert( isEqual( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ), Normal3 { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) );
     static_assert( isEqual( length( normal( S, Point3f { numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3, numbers::SQRT_3_DIV_3 } ) ), 1 ) );
 
-    EXPECT_TRUE(
-        isEqual(
-            Normal3 { 0, 0.97014, -0.24254 },
-            normal(
-                S,
-                scale( 1, 0.5, 1 ) * rotationZ( numbers::PI / 5 ),
-                Point3f { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
-            )
-        )
+    const auto N1 = Normal3( 0, 0.894427, -0.447214 );
+    const auto N2 = normal(
+        S,
+        Transformation {
+            .scale = Vector3 { 1, 0.5, 1 },
+            .rotate = euler( 0, 0, numbers::PI / 5 ),
+        },
+        Point3f { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
     );
-
-    EXPECT_TRUE( true );
+    EXPECT_TRUE( isEqual( N1, N2 ) );
 }
 
-TEST( Sphere, negate_normal )
+TEST( Sphere, scaling_does_not_affect_normal )
 {
     constexpr auto S = Sphere {};
 
-    EXPECT_EQ( ( Normal3 { -1, 0, 0 } ), normal( S, scale( -1 ), Point3f { 1, 0, 0 } ) );
+    const auto N1 = Normal3 { 1, 0, 0 };
+    const auto N2 = normal( S, Transformation { .scale = 0.5f * Vector3::Constants::ONE }, Point3f { 1, 0, 0 } );
+    EXPECT_EQ( N1, N2 );
 }
