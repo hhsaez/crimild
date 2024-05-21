@@ -30,7 +30,9 @@
 
 #include "Matrix3.hpp"
 #include "Matrix4.hpp"
+#include "Numbers.hpp"
 #include "Quaternion.hpp"
+#include "Transformation.hpp"
 #include "conjugate.hpp"
 #include "length.hpp"
 
@@ -120,6 +122,17 @@ namespace crimild {
         };
     }
 
+    [[nodiscard]] inline constexpr Transformation inverse( const Transformation &t ) noexcept
+    {
+        const auto invRotate = inverse( t.rotate );
+        const auto invScale = Vector3::Constants::ONE / t.scale;
+        const auto invTranslate = Point3( ( invRotate * -Vector3( t.translate ) ) * invScale );
+        return Transformation {
+            .translate = invTranslate,
+            .rotate = invRotate,
+            .scale = invScale,
+        };
+    }
 }
 
 #endif

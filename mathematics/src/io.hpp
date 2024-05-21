@@ -36,6 +36,7 @@
 #include "Plane3.hpp"
 #include "Quaternion.hpp"
 #include "Ray3.hpp"
+#include "Transformation.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
@@ -137,6 +138,12 @@ namespace crimild {
     [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Bounds3Impl< T > &B ) noexcept
     {
         out << "[" << B.min << ", " << B.max << "]";
+        return out;
+    }
+
+    [[maybe_unused]] static std::ostream &operator<<( std::ostream &out, const Transformation &T ) noexcept
+    {
+        out << "{ T: " << T.translate << ", R: " << T.rotate << ", S: " << T.scale << " }";
         return out;
     }
 

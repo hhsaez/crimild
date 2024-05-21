@@ -91,21 +91,19 @@ namespace crimild {
         return isEqual( a[ 0 ], b[ 0 ] ) && isEqual( a[ 1 ], b[ 1 ] ) && isEqual( a[ 2 ], b[ 2 ] ) && isEqual( a[ 3 ], b[ 3 ] );
     }
 
+    [[nodiscard]] inline constexpr bool isEqual( const Quaternion &q, const Quaternion &r ) noexcept
+    {
+        return isEqual( q.v, r.v ) && isEqual( q.w, r.w );
+    }
+
     [[nodiscard]] inline constexpr bool isEqual( const Transformation &a, const Transformation &b ) noexcept
     {
-        // Check for contents first, since it should be faster
-        // TODO: checking for `invMat` should not be necessary
-        return isEqual( a.contents, b.contents ) && isEqual( a.mat, b.mat ) && isEqual( a.invMat, b.invMat );
+        return isEqual( a.translate, b.translate ) && isEqual( a.rotate, b.rotate ) && isEqual( a.scale, b.scale );
     }
 
     [[nodiscard]] inline constexpr bool isEqual( const Ray3 a, const Ray3 &b ) noexcept
     {
         return isEqual( a.origin, b.origin ) && isEqual( a.direction, b.direction );
-    }
-
-    [[nodiscard]] inline constexpr bool isEqual( const Quaternion &q, const Quaternion r ) noexcept
-    {
-        return isEqual( q.v, r.v ) && isEqual( q.w, r.w );
     }
 
     [[nodiscard]] inline constexpr bool isEqual( const Plane3 &a, const Plane3 &b ) noexcept

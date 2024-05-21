@@ -25,32 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_OPERATORS_
+#ifndef CRIMILD_MATHEMATICS_SCALE_
+#define CRIMILD_MATHEMATICS_SCALE_
 
-#include "Matrix4.hpp"
 #include "Transformation.hpp"
-#include "Transformation_isIdentity.hpp"
 
 namespace crimild {
 
-    [[nodiscard]] constexpr Transformation operator*( const Transformation &t0, const Transformation &t1 ) noexcept
+    [[nodiscard]] static constexpr auto scale( const Vector3 &scale ) noexcept
     {
-        if ( isIdentity( t1 ) ) {
-            return t0;
-        }
-
-        if ( isIdentity( t0 ) ) {
-            return t1;
-        }
-
-        return crimild::Transformation {
-            // Matrices are multiplied as usual...
-            .mat = t0.mat * t1.mat,
-            // ... but inverses must be multiplied in reverse order since `inv(A * B) = inv(B) * inv(A)`
-            .invMat = t1.invMat * t0.invMat,
-            .contents = t0.contents | t1.contents,
+        return Transformation {
+            .scale = scale,
         };
+    }
+
+    [[nodiscard]] inline constexpr auto scale( real_t x, real_t y, real_t z ) noexcept
+    {
+        return scale( Vector3 { x, y, z } );
+    }
+
+    [[nodiscard]] inline constexpr auto scale( real_t x ) noexcept
+    {
+        return scale( Vector3 { x, x, x } );
     }
 
 }

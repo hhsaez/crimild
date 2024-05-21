@@ -27,9 +27,11 @@
 
 #include "Cylinder.hpp"
 
-#include "Cylinder_normal.hpp"
+#include "height.hpp"
+#include "normal.hpp"
+#include "radius.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include <sstream>
 
 using namespace crimild;
