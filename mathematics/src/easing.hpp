@@ -29,9 +29,11 @@
 #define CRIMILD_MATHEMATICS_EASING_
 
 #include "Bounds3.hpp"
+#include "Transformation.hpp"
 #include "Types.hpp"
 #include "max.hpp"
 #include "min.hpp"
+#include "trigonometry.hpp"
 
 namespace crimild {
 
@@ -48,6 +50,59 @@ namespace crimild {
             lerp( min( B ).x, max( B ).x, t.x ),
             lerp( min( B ).y, max( B ).y, t.y ),
             lerp( min( B ).z, max( B ).z, t.z ),
+        };
+    }
+
+    /**
+     * \brief Calculate spherical liner interpolation for two quaternions
+     *
+     * \param q0 Original quaternion. Must be unit length
+     * \param q1 Destination quaternion. Must be unit length
+     *
+     * \remarks This interpolation requires the use of quaternions only
+     */
+    [[nodiscard]] static Quaternion slerp( const Quaternion &a, const Quaternion &b, real_t t ) noexcept
+    {
+        real_t cosTheta = ( a.w * b.w ) + dot( a.v, b.v );
+        Quaternion b1 = b;
+        if ( cosTheta < 0.0 ) {
+            // fix rotation for big angles
+            b1 = -b;
+            cosTheta = a.w * b1.w + dot( a.v, b1.v );
+        }
+
+        real_t w1, w2;
+        real_t theta = crimild::acos( cosTheta );
+        real_t sinTheta = crimild::sin( theta );
+
+        if ( sinTheta > 0.0001 ) {
+            w1 = crimild::sin( ( 1.0 - t ) * theta ) / sinTheta;
+            w2 = crimild::sin( t * theta ) / sinTheta;
+        } else {
+            w1 = 1.0 - t;
+            w2 = t;
+        }
+
+        Quaternion result = a * w1 + b1 * w2;
+        return normalize( result );
+    }
+
+    // Interpolate two transformations
+    // This is a very complex operation and should not be used frequently.
+    [[nodiscard]] constexpr Transformation lerp( const Transformation &start, const Transformation &end, real_t t ) noexcept
+    {
+        if ( t <= 0 ) {
+            return start;
+        }
+
+        if ( t >= 1 ) {
+            return end;
+        }
+
+        return Transformation {
+            .translate = lerp( start.translate, end.translate, t ),
+            .rotate = slerp( start.rotate, end.rotate, t ),
+            .scale = lerp( start.scale, end.scale, t ),
         };
     }
 

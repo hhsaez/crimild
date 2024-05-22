@@ -25,18 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_MATHEMATICS_TRANSFORMATION_EASING_
-#define CRIMILD_MATHEMATICS_TRANSFORMATION_EASING_
+#ifndef CRIMILD_MATHEMATICS_DECOMPOSE_
+#define CRIMILD_MATHEMATICS_DECOMPOSE_
 
-#include "Matrix4_constants.hpp"
-#include "Matrix4_inverse.hpp"
-#include "Matrix4_operators.hpp"
-#include "Transformation.hpp"
-#include "Transformation_rotation.hpp"
-#include "Transformation_scale.hpp"
-#include "Transformation_translation.hpp"
-#include "easing.hpp"
+#include "Matrix4.hpp"
+#include "inverse.hpp"
 #include "max.hpp"
+#include "transpose.hpp"
 
 namespace crimild {
 
@@ -91,45 +86,6 @@ namespace crimild {
         // Finally, the scalling matrix is computed by simply removing the rotation part from RS
         // matrix using the inverse operation
         S = inverse( R ) * RS;
-    }
-
-    // Interpolate two transformations
-    // This is a very complex operation and should not be used frequently.
-    // TODO: This is way I needed to represent transformations using separated components for
-    // translation, rotation and scaling.
-    [[nodiscard]] constexpr Transformation lerp( const Transformation &start, const Transformation &end, real_t t ) noexcept
-    {
-        if ( t <= 0 ) {
-            return start;
-        }
-
-        if ( t >= 1 ) {
-            return end;
-        }
-
-        auto T0 = Matrix4 {};
-        auto R0 = Matrix4 {};
-        auto S0 = Matrix4 {};
-        decompose( start.mat, T0, R0, S0 );
-
-        auto T1 = Matrix4 {};
-        auto R1 = Matrix4 {};
-        auto S1 = Matrix4 {};
-        decompose( end.mat, T1, R1, S1 );
-
-        const auto T = lerp( T0, T1, t );
-        const auto R = lerp( R0, R1, t );
-        const auto S = lerp( S0, S1, t );
-
-        const auto mat = T * R * S;
-        const auto invMat = inverse( mat );
-
-        return Transformation { mat, invMat };
-
-        // return Transformation {
-        //     lerp( start.mat, end.mat, t ),
-        //     lerp( start.invMat, end.invMat, t ),
-        // };
     }
 
 }

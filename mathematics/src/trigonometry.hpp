@@ -51,6 +51,12 @@ namespace crimild {
     }
 
     // TODO: Make this function constexpr
+    [[nodiscard]] inline real_t acos( radians_t rad ) noexcept
+    {
+        return std::acos( rad );
+    }
+
+    // TODO: Make this function constexpr
     [[nodiscard]] inline real_t sin( radians_t rad ) noexcept
     {
         return std::sin( rad );

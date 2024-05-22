@@ -220,26 +220,26 @@ v=|3|
 - [x] Cylinder
 - [ ] Frustum
 - [ ] Interpolation
-- [ ] LineSegment3
+- [x] LineSegment3
 - [x] Matrix3
 - [x] Matrix4
 - [x] Normal3
-- [ ] Numbers
+- [x] Numbers
 - [x] Numeric
 - [x] Plane3
 - [x] Point2
 - [x] Point3
-- [ ] Quaternion
+- [x] Quaternion
 - [ ] Random
 - [x] Ray3
-- [ ] Rect
+- [x] Rect
 - [ ] Root
 - [ ] Series
 - [x] Size2D -> Size2
 - [x] Size3D -> Size3
 - [x] Sphere
-- [ ] Transformation
-- [ ] Triangle
+- [x] Transformation
+- [x] Triangle
 - [x] Tuple2
 - [x] Tuple3
 - [x] Tuple4
