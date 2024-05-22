@@ -31,6 +31,7 @@
 #include "Point3.hpp"
 #include "Transformation.hpp"
 #include "Vector3.hpp"
+#include "easing.hpp"
 #include "io.hpp"
 #include "isEqual.hpp"
 #include "lookAt.hpp"
@@ -480,4 +481,27 @@ TEST( Transfromation, forward )
 
     const auto R = crimild::rotationY( -crimild::numbers::PI_DIV_2 );
     EXPECT_TRUE( isEqual( crimild::Vector3::Constants::RIGHT, crimild::forward( R ) ) );
+}
+
+TEST( Transformation, easing )
+{
+    constexpr auto T0 = crimild::translation( 1, 2, 3 );
+    constexpr auto T1 = crimild::translation( 2, 4, 6 );
+    constexpr auto T2 = crimild::translation( 1.5, 3, 4.5 );
+    EXPECT_TRUE( crimild::isEqual( crimild::lerp( T0, T1, 0.5 ), T2 ) );
+
+    constexpr auto S0 = crimild::scale( 1 );
+    constexpr auto S1 = crimild::scale( 2 );
+    EXPECT_TRUE( crimild::isEqual( crimild::lerp( S0, S1, 0.5 ), crimild::scale( 1.5 ) ) );
+
+    EXPECT_TRUE(
+        crimild::isEqual(
+            crimild::lerp(
+                crimild::rotationX( 0 ),
+                crimild::rotationX( 1 ),
+                0.5
+            ),
+            crimild::rotationX( 0.5 )
+        )
+    );
 }
