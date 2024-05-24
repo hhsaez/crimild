@@ -5,8 +5,7 @@ add_library( crimild_mathematics OBJECT )
 target_sources(
     crimild_mathematics
 
-    PUBLIC
-    Crimild_Mathematics.hpp
+    PUBLIC Crimild_Mathematics.hpp
 
     PRIVATE
     Bounds3.hpp

@@ -96,16 +96,28 @@ namespace crimild {
     /**
      * @brief Swizzle function for Tuple4 derived classes
      */
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr auto xyz( const Vector4Impl< T > &u ) noexcept
+    template< template< ArithmeticType > class Derived, ArithmeticType T >
+    [[nodiscard]] inline constexpr auto xyzw( const Tuple4< Derived, T > &u ) noexcept
     {
-        return Vector3Impl< T > {
+        return Derived< T > {
             u.x,
             u.y,
             u.z,
+            u.w,
         };
     }
     ///@}
+
+    template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto rgba( const ColorRGBImpl< T > &color ) noexcept
+    {
+        return ColorRGBAImpl< T > {
+            color.r,
+            color.g,
+            color.b,
+            1,
+        };
+    }
 
 }
 

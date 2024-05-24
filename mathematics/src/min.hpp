@@ -84,6 +84,16 @@ namespace crimild {
         };
     }
 
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const U &s ) noexcept
+    {
+        return Derived< decltype( min( T {}, U {} ) ) > {
+            min( u.x, s ),
+            min( u.y, s ),
+            min( u.z, s ),
+        };
+    }
+
     template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto minDimension( const Tuple3< Derived, T > &t ) noexcept
     {

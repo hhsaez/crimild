@@ -84,6 +84,16 @@ namespace crimild {
         };
     }
 
+    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+    [[nodiscard]] inline constexpr auto max( const Tuple3< Derived, T > &u, const U &s ) noexcept
+    {
+        return Derived< decltype( max( T {}, U {} ) ) > {
+            max( u.x, s ),
+            max( u.y, s ),
+            max( u.z, s ),
+        };
+    }
+
     template< template< ArithmeticType > class Derived, ArithmeticType T >
     [[nodiscard]] inline constexpr auto maxDimension( const Tuple3< Derived, T > &t ) noexcept
     {

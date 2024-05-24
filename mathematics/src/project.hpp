@@ -29,29 +29,31 @@
 #define CRIMILD_MATHEMATICS_PROJECT_
 
 #include "LineSegment3.hpp"
+#include "Plane3.hpp"
+#include "distance.hpp"
+#include "isZero.hpp"
+#include "normal.hpp"
+#include "origin.hpp"
 
 namespace crimild {
 
     // Projects a given point into the line segment
-    template< typename T, Size N >
-    [[nodiscard]] constexpr impl::Point< T, N > project( const impl::LineSegment< T, N > &l, const impl::Point< T, N > &P ) noexcept
+    template< ArithmeticType T >
+    [[nodiscard]] constexpr auto project( const LineSegment3 &l, const Point3Impl< T > &P ) noexcept
     {
-        assert( false && "TODO" );
-
-#if 0
-        const auto A = getOrigin();
-        const auto B = getDestination();
+        const auto A = origin( l );
+        const auto B = destination( l );
         const auto AB = B - A;
-        const auto dAB = AB * AB;
+        const auto dAB = dot( AB, AB );
 
-        if ( Numericf::isZero( dAB ) ) {
+        if ( isZero( dAB ) ) {
             // same point
             return A;
         }
 
         const auto AP = P - A;
 
-        const auto t = ( AP * AB ) / dAB;
+        const auto t = dot( AP, AB ) / dAB;
 
         if ( t < 0 ) {
             return A;
@@ -62,24 +64,21 @@ namespace crimild {
         }
 
         return A + t * AB;
-#endif
-
-        return impl::Point< T, N > {};
     }
 
     // Projects a given line segment into this one
-    template< typename T, Size N >
-    [[nodiscard]] constexpr impl::LineSegment< T, N > project( const impl::LineSegment< T, N > &l0, const impl::LineSegment< T, N > &l1 ) noexcept
+    [[nodiscard]] constexpr auto project( const LineSegment3 &l0, const LineSegment3 &l1 ) noexcept
     {
-        assert( false && "TODO" );
-        return impl::LineSegment< T, N > {};
-        // return LineSegment( project( l.getOrigin() ), project( l.getDestination() ) );
+        return LineSegment3 {
+            .p0 = project( l0, origin( l1 ) ),
+            .p1 = project( l0, destination( l1 ) ),
+        };
     }
 
     [[nodiscard]] constexpr Point3f project( const Plane3 &A, const Point3f &P ) noexcept
     {
-        const auto d = distanceSigned( A, P );
-        const auto V = Vector3( d * A.getNormal() );
+        const auto d = distance2( A, P );
+        const auto V = Vector3( d * normal( A ) );
         return P - V;
     }
 

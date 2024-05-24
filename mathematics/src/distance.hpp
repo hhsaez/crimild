@@ -74,14 +74,14 @@ namespace crimild {
         return p.d;
     }
 
-    [[nodiscard]] constexpr real_t distanceSigned( const Plane3 &A, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr real_t distance2( const Plane3 &A, const Point3f &P ) noexcept
     {
         return dot( normal( A ), Vector3 { P.x, P.y, P.z } ) + distance( A );
     }
 
     [[nodiscard]] constexpr real_t distance( const Plane3 &A, const Point3f &P ) noexcept
     {
-        return abs( distanceSigned( A, P ) );
+        return abs( distance2( A, P ) );
     }
 
 }

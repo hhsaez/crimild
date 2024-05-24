@@ -7,6 +7,11 @@ Then, most of the complex types in the Mathematics library (i.e. vector, matrice
 
 Also, most functions are organized in the default namespace (i.e. `crimild::distance()`), with overloads for the corresponding types where required.
 
+## Immutability
+In previous iterations of math library I forced all entities (i.e. vectors, matrices, etc.) to be immutable. In order to achieve that goal, I provided all possible constructors variants, plus getters for accessing each member. This decision lead to the code being much more verbose.
+
+Now, I'm leaving that up to the consumer how the entities are used. I am enforcing const-ness in most function arguments, which should help with compiler optimizations (maybe?).
+
 ## real_t and high-precision computations.
 [real_t](@ref real_t) is used for float values
 
