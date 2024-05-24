@@ -38,14 +38,17 @@
 #include "Common/Version.hpp"
 #include "Common/Versionable.hpp"
 #include "Containers/Array.hpp"
+#include "Containers/List.hpp"
 #include "Containers/Map.hpp"
 #include "Containers/PriorityQueue.hpp"
 #include "Containers/Queue.hpp"
+#include "Containers/Set.hpp"
 #include "Containers/Stack.hpp"
 #include "FileSystem/FilePath.hpp"
 #include "Log/Log.hpp"
 #include "Log/LogOutputHandler.hpp"
 #include "Memory/Memory.hpp"
+#include "Policies/CachePolicy.hpp"
 #include "Policies/ThreadingPolicy.hpp"
 
 #endif
