@@ -28,9 +28,8 @@
 #ifndef CRIMILD_SIMULATION_SYSTEM_
 #define CRIMILD_SIMULATION_SYSTEM_
 
-#include "Foundation/Memory.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Simulation/Event.hpp"
 
 #include <string>
@@ -45,7 +44,7 @@ namespace crimild {
         void attachSystem( std::unique_ptr< System > &&other ) noexcept;
 
         template< class SystemType, typename... Args >
-        SystemType *attachSystem( Args &&... args ) noexcept
+        SystemType *attachSystem( Args &&...args ) noexcept
         {
             m_systems.push_back( std::make_unique< SystemType >( std::forward< Args >( args )... ) );
             return static_cast< SystemType * >( m_systems.back().get() );

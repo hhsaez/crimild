@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,77 +28,74 @@
 #ifndef CRIMILD_CORE_BEHAVIORS_BEHAVIOR_
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_
 
-#include "Foundation/SharedObject.hpp"
-#include "Messaging/MessageQueue.hpp"
-#include "Coding/Codable.hpp"
-
 #include "BehaviorContext.hpp"
+#include "Coding/Codable.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Messaging/MessageQueue.hpp"
 
 namespace crimild {
 
-	namespace messaging {
+    namespace messaging {
 
-		/**
-		   \brief A simple struct for sending messages between behaviors
-		 */
-		struct BehaviorEvent {
-			std::string name;
-		};
-		
-	}
+        /**
+           \brief A simple struct for sending messages between behaviors
+         */
+        struct BehaviorEvent {
+            std::string name;
+        };
 
-	namespace behaviors {
+    }
 
-		class Behavior;
+    namespace behaviors {
 
-		/**
-		   \brief Base class for behaviors
-		*/
-		class Behavior :
-            public coding::Codable,
-			public crimild::Messenger {
-		public:
-			enum class State {
-				SUCCESS,
-				FAILURE,
-				RUNNING
-			};
-			
-		protected:
-			Behavior( void );
-			
-		public:
-			virtual ~Behavior( void );
-			
-			/**
-			   \brief Invoked the first time a behavior is invoked by its parent
-			   
-			   It may be invoked multiple times if the parent behavior is
-			   reset or restarted
-			*/
-			virtual void init( BehaviorContext *context );
-			
-			/**
-			   \brief Invoked every update of the behavior tree
-			*/
-			virtual State step( BehaviorContext *context ) = 0;
-				
-			/**
-			   \name Coding support
-			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}
-		};
+        class Behavior;
 
-		using BehaviorPtr = crimild::SharedPointer< Behavior >;
-	}
-	
+        /**
+           \brief Base class for behaviors
+        */
+        class Behavior : public coding::Codable,
+                         public crimild::Messenger {
+        public:
+            enum class State {
+                SUCCESS,
+                FAILURE,
+                RUNNING
+            };
+
+        protected:
+            Behavior( void );
+
+        public:
+            virtual ~Behavior( void );
+
+            /**
+               \brief Invoked the first time a behavior is invoked by its parent
+
+               It may be invoked multiple times if the parent behavior is
+               reset or restarted
+            */
+            virtual void init( BehaviorContext *context );
+
+            /**
+               \brief Invoked every update of the behavior tree
+            */
+            virtual State step( BehaviorContext *context ) = 0;
+
+            /**
+               \name Coding support
+            */
+            //@{
+
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+        };
+
+        using BehaviorPtr = crimild::SharedPointer< Behavior >;
+    }
+
 }
 
 #endif
-

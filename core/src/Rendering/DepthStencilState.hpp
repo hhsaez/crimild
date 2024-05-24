@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_DEPTH_STENCIL_STATE_
 #define CRIMILD_CORE_RENDERING_DEPTH_STENCIL_STATE_
 
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/CompareOp.hpp"
 
 namespace crimild {
@@ -45,10 +45,10 @@ namespace crimild {
     };
 
     struct StencilOpState {
-        StencilOp failOp = StencilOp::KEEP; // action to take if stencil test fails
-        StencilOp passOp = StencilOp::KEEP; // action to take if both depth and stencil tests pass
+        StencilOp failOp = StencilOp::KEEP;      // action to take if stencil test fails
+        StencilOp passOp = StencilOp::KEEP;      // action to take if both depth and stencil tests pass
         StencilOp depthFailOp = StencilOp::KEEP; // action to take if stencil test passes but depth test fails
-        CompareOp compareOp; // comparison operator for stencil test
+        CompareOp compareOp;                     // comparison operator for stencil test
         UInt32 compareMask;
         UInt32 writeMask;
         UInt32 reference;
@@ -60,7 +60,7 @@ namespace crimild {
         CompareOp depthCompareOp = CompareOp::LESS_OR_EQUAL;
         Bool depthBoundsTestEnable = false;
         Bool stencilTestEnable = false;
-        StencilOpState front = { };
+        StencilOpState front = {};
         StencilOpState back = { .compareOp = CompareOp::ALWAYS };
         Real32 minDepthBounds = 0.0f;
         Real32 maxDepthBounds = 1.0f;

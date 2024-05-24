@@ -28,9 +28,8 @@
 #ifndef CRIMILD_ANIMATION_ACCUMULATOR_
 #define CRIMILD_ANIMATION_ACCUMULATOR_
 
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Quaternion.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -96,7 +95,7 @@ namespace crimild {
             {
                 auto otherAcc = static_cast< AccumulatorImpl< Quaternion > * >( other );
 
-                Interpolation::slerp( _value, otherAcc->_value, factor, _value );
+                _value = slerp( _value, otherAcc->_value, factor );
             }
 
             virtual void add( Accumulator *other, crimild::Real32 strength ) override

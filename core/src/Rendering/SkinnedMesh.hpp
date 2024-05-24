@@ -29,11 +29,8 @@
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/Transformation.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

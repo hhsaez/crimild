@@ -27,9 +27,9 @@
 
 #include "FileSystem.hpp"
 
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
-#include "Foundation/Log.hpp"
-#include "Mathematics/Numeric.hpp"
 
 #include <fstream>
 

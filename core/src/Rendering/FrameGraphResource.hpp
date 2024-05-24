@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
 
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

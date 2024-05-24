@@ -1,7 +1,6 @@
 #include "SceneDebugDump.hpp"
 
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/io.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"

@@ -28,13 +28,8 @@
 #ifndef CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Plane3.hpp"
-#include "Mathematics/Ray3.hpp"
-#include "Mathematics/Sphere.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

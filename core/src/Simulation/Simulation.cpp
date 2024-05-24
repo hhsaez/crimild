@@ -28,9 +28,8 @@
 #include "Simulation.hpp"
 
 #include "Concurrency/Async.hpp"
+#include "Crimild_Foundation.hpp"
 #include "FileSystem.hpp"
-#include "Foundation/Log.hpp"
-#include "Foundation/Version.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Console/ConsoleCommand.hpp"

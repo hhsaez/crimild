@@ -9,7 +9,7 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Concurrency/Async.hpp"
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;

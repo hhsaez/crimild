@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_RENDER_STATE_
 #define CRIMILD_COMPONENTS_RENDER_STATE_
 
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Light.hpp"

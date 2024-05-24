@@ -28,8 +28,7 @@
 #ifndef CRIMILD_CORE_CONCURRENCY_JOB_SCHEDULER_
 #define CRIMILD_CORE_CONCURRENCY_JOB_SCHEDULER_
 
-#include "Foundation/Containers/List.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Job.hpp"
 #include "WorkStealingDeque.hpp"
 

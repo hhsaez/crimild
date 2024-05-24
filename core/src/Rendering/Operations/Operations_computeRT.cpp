@@ -28,14 +28,7 @@
 #include "Rendering/Operations/Operations_computeRT.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Random.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Triangle.hpp"
-#include "Mathematics/Triangle_edges.hpp"
-#include "Mathematics/Triangle_normal.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -879,21 +872,21 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                             if ( primitive->getType() == Primitive::Type::SPHERE ) {
                                 spheres.add(
                                     {
-                                        .invWorld = geometry->getWorld().invMat,
+                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
                                         .materialID = materialIds[ material ],
                                     }
                                 );
                             } else if ( primitive->getType() == Primitive::Type::BOX ) {
                                 boxes.add(
                                     {
-                                        .invWorld = geometry->getWorld().invMat,
+                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
                                         .materialID = materialIds[ material ],
                                     }
                                 );
                             } else if ( primitive->getType() == Primitive::Type::CYLINDER ) {
                                 cylinders.add(
                                     {
-                                        .invWorld = geometry->getWorld().invMat,
+                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
                                         .materialID = materialIds[ material ],
                                     }
                                 );
@@ -923,12 +916,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                             .p2 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 2 ) ) ),
                                         };
 
+                                        [[maybe_unused]] const auto [ e0, e1, e2 ] = edges( T );
                                         triangles.add( {
                                             .p0 = T.p0,
                                             .p1 = T.p1,
                                             .p2 = T.p2,
-                                            .e0 = edge0( T ),
-                                            .e1 = edge1( T ),
+                                            .e0 = e0,
+                                            .e1 = e1,
                                             .n = normal( T, T.p0 ),
                                             .materialID = materialIds[ material ],
                                         } );
@@ -1007,7 +1001,7 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                         static auto cameraInvProj = Matrix4::Constants::IDENTITY;
                         static auto cameraWorld = Matrix4::Constants::IDENTITY;
 
-                        auto cameraOrigin = Point3f::ZERO;
+                        auto cameraOrigin = Point3f::Constants::ZERO;
                         auto cameraRight = Vector3::Constants::RIGHT;
                         auto cameraUp = Vector3::Constants::UP;
 
@@ -1020,13 +1014,13 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noex
                                 sampleCount = 1; // reset sampling
                             }
 
-                            const auto &world = camera->getWorld().mat;
+                            const auto world = Matrix4f( camera->getWorld() );
                             if ( cameraWorld != world ) {
                                 cameraWorld = world;
                                 sampleCount = 1; // reset sampling
                             }
 
-                            cameraOrigin = location( camera->getWorld() );
+                            cameraOrigin = origin( camera->getWorld() );
                             cameraRight = right( camera->getWorld() );
                             cameraUp = up( camera->getWorld() );
 

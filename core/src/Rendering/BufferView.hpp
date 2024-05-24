@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_BUFFER_VIEW_
 #define CRIMILD_RENDERING_BUFFER_VIEW_
 
-#include "Mathematics/Numeric.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 

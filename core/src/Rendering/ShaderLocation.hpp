@@ -28,9 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_LOCATION_
 #define CRIMILD_RENDERING_SHADER_LOCATION_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

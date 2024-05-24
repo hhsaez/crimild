@@ -28,9 +28,9 @@
 #ifndef CRIMILD_CORE_CODING_MEMORY_DECODER_
 #define CRIMILD_CORE_CODING_MEMORY_DECODER_
 
+#include "Crimild_Foundation.hpp"
 #include "Decoder.hpp"
 #include "EncodedData.hpp"
-#include "Foundation/Containers/Map.hpp"
 
 namespace crimild {
 

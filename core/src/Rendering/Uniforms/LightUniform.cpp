@@ -27,7 +27,7 @@
 
 #include "Rendering/Uniforms/LightUniform.hpp"
 
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -45,10 +45,10 @@ void LightUniform::onPreRender( void ) noexcept
     auto &props = getValue< LightProps >();
 
     props.type = static_cast< UInt32 >( m_light->getType() );
-    props.position = vector4( m_light->getPosition(), Real( 1 ) );
-    props.direction = vector4( m_light->getDirection(), Real( 0 ) );
+    props.position = Vector4( m_light->getPosition() );
+    props.direction = Vector4( m_light->getDirection() );
     // props.color = m_light->getColor();
-    props.attenuation = vector4( m_light->getAttenuation(), Real( 0 ) );
+    props.attenuation = Vector4( m_light->getAttenuation() );
     // props.ambient = m_light->getAmbient();
     props.cutoff = Vector4f {
         Numericf::cos( m_light->getInnerCutoff() ),

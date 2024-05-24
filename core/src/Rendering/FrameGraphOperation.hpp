@@ -28,10 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_OPERATION_
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_OPERATION_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Memory.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

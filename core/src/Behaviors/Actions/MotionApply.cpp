@@ -1,12 +1,7 @@
 #include "MotionApply.hpp"
 
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/isZero.hpp"
-#include "Mathematics/length.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Navigation/NavigationController.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -65,7 +60,7 @@ Behavior::State MotionApply::step( BehaviorContext *context )
     const auto mass = m_motion->mass;
     const auto maxForce = m_motion->maxForce;
 
-    steering = clamp( steering, 0, maxForce );
+    steering = clamp( steering, Vector3( 0 ), Vector3( maxForce ) );
 
     if ( isZero( mass ) ) {
         // If there is no mass, then motion is instantaneus and no inertia is applied
@@ -73,7 +68,7 @@ Behavior::State MotionApply::step( BehaviorContext *context )
     } else {
         // Agent has a mass, so movement should account for some inertia.
         steering = steering / mass;
-        velocity = clamp( velocity + steering, 0, maxVelocity );
+        velocity = clamp( velocity + steering, Vector3::Constants::ZERO, maxVelocity );
     }
 
     position = position + dt * velocity;

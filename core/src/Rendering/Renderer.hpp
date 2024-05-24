@@ -28,10 +28,8 @@
 #ifndef CRIMILD_RENDERING_RENDERER_
 #define CRIMILD_RENDERING_RENDERER_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Singleton.hpp"
-#include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Rect.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/Light.hpp"
 
@@ -178,8 +176,8 @@ namespace crimild {
         virtual void drawPrimitive( ShaderProgram *program, Primitive *primitive ) = 0;
 
         /**
-			\brief optional
-		 */
+                        \brief optional
+                 */
         virtual void drawBuffers( ShaderProgram *program, Primitive::Type type, VertexBufferObject *vbo, unsigned int count ) { }
 
         virtual void drawGeometry( Geometry *geometry, ShaderProgram *program, const Matrix4f &modelMatrix );

@@ -27,7 +27,7 @@
 
 #include "NodeParticleRenderer.hpp"
 
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -54,13 +54,13 @@ void NodeParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData 
         return;
     }
 
-	auto group = static_cast< Group * >( node );
+        auto group = static_cast< Group * >( node );
 
-	const auto ps = _positions->getData< Vector3f >();
+        const auto ps = _positions->getData< Vector3f >();
 
-	for ( int i = 0; i < pCount; i++ ) {
-		group->getNodeAt( i )->local().setTranslate( ps[ i ] );
-	}
+        for ( int i = 0; i < pCount; i++ ) {
+                group->getNodeAt( i )->local().setTranslate( ps[ i ] );
+        }
     */
 }
 

@@ -29,10 +29,8 @@
 #define CRIMILD_NAVIGATION_CELL_EDGE_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Memory.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/LineSegment3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

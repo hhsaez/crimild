@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_DESCRIPTOR_SET_
 #define CRIMILD_RENDERING_DESCRIPTOR_SET_
 
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/Shader.hpp"
 

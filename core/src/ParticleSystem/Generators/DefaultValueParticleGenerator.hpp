@@ -31,7 +31,7 @@
 #include "../ParticleSystemComponent.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -81,8 +81,8 @@ namespace crimild {
         ParticleAttribArray *_attribs;
 
         /**
-		 	\name Coding support
-		*/
+                        \name Coding support
+                */
         //@{
 
     public:
@@ -113,7 +113,7 @@ namespace crimild {
             }
             encoder.encode( "attrib", attribType );
 
-            //encoder.encode( "value", _value );
+            // encoder.encode( "value", _value );
         }
 
         virtual void decode( coding::Decoder &decoder ) override
@@ -132,7 +132,7 @@ namespace crimild {
                 setParticleAttribType( ParticleAttrib::ACCELERATION );
             }
 
-            //decoder.decode( "value", _value );
+            // decoder.decode( "value", _value );
         }
 
         //@}

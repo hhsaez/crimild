@@ -29,15 +29,15 @@
 #define CRIMILD_PARTICLE_UPDATER_ATTRACTOR_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Mathematics/Sphere.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
     /**
-	   \brief Attractor for a gravity system
+           \brief Attractor for a gravity system
 
-	   \remarks Use it before a position updater
-	 */
+           \remarks Use it before a position updater
+         */
     class AttractorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
         CRIMILD_IMPLEMENT_RTTI( crimild::AttractorParticleUpdater )
 
@@ -62,8 +62,8 @@ namespace crimild {
         ParticleAttribArray *_accelerations = nullptr;
 
         /**
-		 	\name Coding support
-		*/
+                        \name Coding support
+                */
         //@{
 
     public:

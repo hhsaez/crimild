@@ -28,9 +28,7 @@
 #ifndef CRIMILD_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_RENDERING_COMMAND_BUFFER_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 

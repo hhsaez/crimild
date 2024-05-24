@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -52,25 +52,25 @@ void ColorParticleGenerator::configure( Node *node, ParticleData *particles )
 void ColorParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
     /*
-	auto cs = _colors->getData< ColorRGBA >();
-	auto sc = _startColors->getData< ColorRGBA >();
-	auto ec = _endColors->getData< ColorRGBA >();
+        auto cs = _colors->getData< ColorRGBA >();
+        auto sc = _startColors->getData< ColorRGBA >();
+        auto ec = _endColors->getData< ColorRGBA >();
 
-	for ( ParticleId i = startId; i < endId; i++ ) {
-		auto r = Random::generate< Real32 >( _minStartColor.r(), _maxStartColor.r() );
-		auto g = Random::generate< Real32 >( _minStartColor.g(), _maxStartColor.g() );
-		auto b = Random::generate< Real32 >( _minStartColor.b(), _maxStartColor.b() );
-		auto a = Random::generate< Real32 >( _minStartColor.a(), _maxStartColor.a() );
-		sc[ i ] = ColorRGBA( r, g, b, a );
-	}
+        for ( ParticleId i = startId; i < endId; i++ ) {
+                auto r = Random::generate< Real32 >( _minStartColor.r(), _maxStartColor.r() );
+                auto g = Random::generate< Real32 >( _minStartColor.g(), _maxStartColor.g() );
+                auto b = Random::generate< Real32 >( _minStartColor.b(), _maxStartColor.b() );
+                auto a = Random::generate< Real32 >( _minStartColor.a(), _maxStartColor.a() );
+                sc[ i ] = ColorRGBA( r, g, b, a );
+        }
 
-	for ( ParticleId i = startId; i < endId; i++ ) {
-		auto r = Random::generate< Real32 >( _minEndColor.r(), _maxEndColor.r() );
-		auto g = Random::generate< Real32 >( _minEndColor.g(), _maxEndColor.g() );
-		auto b = Random::generate< Real32 >( _minEndColor.b(), _maxEndColor.b() );
-		auto a = Random::generate< Real32 >( _minEndColor.a(), _maxEndColor.a() );
-		ec[ i ] = ColorRGBA( r, g, b, a );
-	}
+        for ( ParticleId i = startId; i < endId; i++ ) {
+                auto r = Random::generate< Real32 >( _minEndColor.r(), _maxEndColor.r() );
+                auto g = Random::generate< Real32 >( _minEndColor.g(), _maxEndColor.g() );
+                auto b = Random::generate< Real32 >( _minEndColor.b(), _maxEndColor.b() );
+                auto a = Random::generate< Real32 >( _minEndColor.a(), _maxEndColor.a() );
+                ec[ i ] = ColorRGBA( r, g, b, a );
+        }
 
     for ( ParticleId i = startId; i < endId; i++ ) {
         cs[ i ] = sc[ i ];

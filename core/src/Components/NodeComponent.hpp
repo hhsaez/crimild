@@ -29,7 +29,7 @@
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
 #include "Coding/Codable.hpp"
-#include "Mathematics/Clock.hpp"
+#include "Simulation/Clock.hpp"
 
 namespace crimild {
 
@@ -81,28 +81,28 @@ namespace crimild {
 
     public:
         /**
-		   \brief Invoked once when component is attached to a node
-		*/
+                   \brief Invoked once when component is attached to a node
+                */
         virtual void onAttach( void );
 
         /**
-		   \brief Invoked once when scene is loaded
-		*/
+                   \brief Invoked once when scene is loaded
+                */
         virtual void start( void );
 
         /**
-			\brief Invoked once per scene update
-		*/
+                        \brief Invoked once per scene update
+                */
         virtual void update( const Clock & );
 
         /**
-			\brief Invoked only if debug rendering is enabled
-		*/
+                        \brief Invoked only if debug rendering is enabled
+                */
         virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
 
         /**
-		   \brief Invoked once when component is detached from a node
-		*/
+                   \brief Invoked once when component is detached from a node
+                */
         virtual void onDetach( void );
 
         /**

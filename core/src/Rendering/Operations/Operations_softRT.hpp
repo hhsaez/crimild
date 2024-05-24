@@ -28,8 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_SOFT_RT_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_SOFT_RT_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

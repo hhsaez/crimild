@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;

@@ -27,27 +27,24 @@
 
 #include "Box2DBoundingVolume.hpp"
 
+#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugRenderHelper.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/max.hpp"
 
 using namespace crimild;
 
 Box2DBoundingVolume::Box2DBoundingVolume( void )
-    : _sphere { Point3f::ZERO, 1.0f }
+    : _sphere { Point3f::Constants::ZERO, 1.0f }
 {
 }
 
 Box2DBoundingVolume::Box2DBoundingVolume( crimild::Real32 halfWidth, crimild::Real32 halfHeight )
 {
-    setRAxis( halfWidth * Vector3f::UNIT_X );
-    setSAxis( halfHeight * Vector3f::UNIT_Y );
-    setTAxis( Vector3f::UNIT_Z );
+    setRAxis( halfWidth * Vector3f::Constants::UNIT_X );
+    setSAxis( halfHeight * Vector3f::Constants::UNIT_Y );
+    setTAxis( Vector3f::Constants::UNIT_Z );
 
     _sphere = Sphere {
-        Point3f::ZERO,
+        Point3f::Constants::ZERO,
         crimild::max( halfWidth, halfHeight ),
     };
 }

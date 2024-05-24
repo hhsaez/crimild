@@ -27,7 +27,7 @@
 
 #include "MobiusStripPrimitive.hpp"
 
-#include "Mathematics/Vector3Ops.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 

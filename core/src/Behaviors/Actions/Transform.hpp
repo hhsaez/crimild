@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,63 +29,62 @@
 #define CRIMILD_CORE_BEHAVIORS_TRANSFORM_
 
 #include "Behaviors/Behavior.hpp"
-
-#include "Mathematics/Transformation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
-	namespace behaviors {
+    namespace behaviors {
 
-		namespace actions {
+        namespace actions {
 
-			class Transform : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
-				
-			public:
-				Transform( void );
-				explicit Transform(
-					const crimild::Transformation &targetTransformation,
-					crimild::Real32 duration,
-					crimild::Bool computeInTargetSpace,
-					crimild::Bool computeFromTargetPosition,
-					crimild::Bool applyTranslation,
-					crimild::Bool applyRotation );
-				virtual ~Transform( void );
+            class Transform : public Behavior {
+                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
 
-				virtual void init( BehaviorContext *context ) override;
-				virtual Behavior::State step( BehaviorContext *context ) override;
+            public:
+                Transform( void );
+                explicit Transform(
+                    const crimild::Transformation &targetTransformation,
+                    crimild::Real32 duration,
+                    crimild::Bool computeInTargetSpace,
+                    crimild::Bool computeFromTargetPosition,
+                    crimild::Bool applyTranslation,
+                    crimild::Bool applyRotation
+                );
+                virtual ~Transform( void );
 
-			private:
-				crimild::Transformation _targetTransformation;
-				crimild::Transformation _start;
-				crimild::Transformation _end;
-				
-				crimild::Real32 _duration = 0;
-				crimild::Clock _clock;
-				
-				crimild::Bool _computeInTargetSpace = false;
-				crimild::Bool _computeFromTargetPosition = false;
+                virtual void init( BehaviorContext *context ) override;
+                virtual Behavior::State step( BehaviorContext *context ) override;
 
-				crimild::Bool _applyTranslation = true;
-				crimild::Bool _applyRotation = true;
+            private:
+                crimild::Transformation _targetTransformation;
+                crimild::Transformation _start;
+                crimild::Transformation _end;
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+                crimild::Real32 _duration = 0;
+                crimild::Clock _clock;
 
-		}
+                crimild::Bool _computeInTargetSpace = false;
+                crimild::Bool _computeFromTargetPosition = false;
 
-	}
-	
+                crimild::Bool _applyTranslation = true;
+                crimild::Bool _applyRotation = true;
+
+                /**
+                   \name Coding support
+                */
+                //@{
+
+            public:
+                virtual void encode( coding::Encoder &encoder ) override;
+                virtual void decode( coding::Decoder &decoder ) override;
+
+                //@}
+            };
+
+        }
+
+    }
+
 }
 
 #endif
-

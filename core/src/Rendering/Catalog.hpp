@@ -28,8 +28,7 @@
 #ifndef CRIMILD_RENDERING_CATALOG_
 #define CRIMILD_RENDERING_CATALOG_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <functional>
 #include <list>

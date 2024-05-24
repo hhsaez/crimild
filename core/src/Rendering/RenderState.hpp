@@ -28,8 +28,7 @@
 #ifndef CRIMILD_RENDERER_RENDER_STATE_
 #define CRIMILD_RENDERER_RENDER_STATE_
 
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

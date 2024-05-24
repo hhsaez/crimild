@@ -29,10 +29,7 @@
 #define CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"

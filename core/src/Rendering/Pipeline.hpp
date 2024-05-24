@@ -28,9 +28,8 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Rect.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ColorBlendState.hpp"
 #include "Rendering/DepthStencilState.hpp"

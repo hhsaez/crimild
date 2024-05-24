@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_UNIFORM_
 #define CRIMILD_RENDERING_SHADER_UNIFORM_
 
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "ShaderLocation.hpp"
 
 namespace crimild {

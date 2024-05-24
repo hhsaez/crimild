@@ -27,8 +27,7 @@
 
 #include "SpherePrimitive.hpp"
 
-#include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include <vector>
 

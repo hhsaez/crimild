@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -50,7 +50,7 @@ void SpherePositionParticleGenerator::configure( Node *node, ParticleData *parti
 void SpherePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
     /*
-	auto ps = _positions->getData< Vector3f >();
+        auto ps = _positions->getData< Vector3f >();
 
     const auto posMin = -Vector3f::ONE;
     const auto posMax = Vector3f::ONE;
@@ -60,9 +60,9 @@ void SpherePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, 
         auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
         auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
         ps[ i ] = _origin + Vector3f( x, y, z ).getNormalized().times( _size );
-		if ( particles->shouldComputeInWorldSpace() ) {
-			node->getWorld().applyToPoint( ps[ i ], ps[ i ] );
-		}
+                if ( particles->shouldComputeInWorldSpace() ) {
+                        node->getWorld().applyToPoint( ps[ i ], ps[ i ] );
+                }
     }
     */
 }

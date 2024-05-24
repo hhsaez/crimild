@@ -26,30 +26,30 @@
  */
 
 #include "SkinnedMesh.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Crimild_Foundation.hpp"
 
 using namespace crimild;
 
 #if 0
 
 SkinnedMeshJoint::SkinnedMeshJoint( void )
-{ 
+{
 
 }
 
 SkinnedMeshJoint::SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name )
 	: NamedObject( name ),
-	  _id( id ), 
-	  _offset( offset ) 
-{ 
+	  _id( id ),
+	  _offset( offset )
+{
 
 }
 
-SkinnedMeshJoint::~SkinnedMeshJoint( void ) 
-{ 
+SkinnedMeshJoint::~SkinnedMeshJoint( void )
+{
 
 }
 
@@ -104,13 +104,13 @@ void SkinnedMeshJoint::load( Stream &s )
 	s.read( _offset );
 }
 
-SkinnedMeshJointCatalog::SkinnedMeshJointCatalog( void ) 
-{ 
+SkinnedMeshJointCatalog::SkinnedMeshJointCatalog( void )
+{
 
 }
 
-SkinnedMeshJointCatalog::~SkinnedMeshJointCatalog( void ) 
-{ 
+SkinnedMeshJointCatalog::~SkinnedMeshJointCatalog( void )
+{
 
 }
 
@@ -216,7 +216,7 @@ SkinnedMeshAnimationChannel::SkinnedMeshAnimationChannel( void )
 
 SkinnedMeshAnimationChannel::~SkinnedMeshAnimationChannel( void )
 {
-	
+
 }
 
 bool SkinnedMeshAnimationChannel::computePosition( float animationTime, Vector3f &result )
@@ -297,7 +297,7 @@ bool SkinnedMeshAnimationChannel::computeScale( float animationTime, float &resu
 void SkinnedMeshAnimationChannel::encode( coding::Encoder &encoder )
 {
 	Codable::encode( encoder );
-    
+
     encoder.encode( "name", getName() );
 
 	Array< crimild::Real32 > pTimes;
@@ -337,7 +337,7 @@ void SkinnedMeshAnimationChannel::encode( coding::Encoder &encoder )
 void SkinnedMeshAnimationChannel::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
-    
+
     std::string name;
     decoder.decode( "name", name );
     setName( name );
@@ -482,7 +482,7 @@ void SkinnedMeshAnimationClip::encode( coding::Encoder &encoder )
 void SkinnedMeshAnimationClip::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
-	
+
 	decoder.decode( "duration", _duration );
 	decoder.decode( "frame_rate", _frameRate );
 
@@ -545,7 +545,7 @@ SkinnedMeshSkeleton::SkinnedMeshSkeleton( void )
 	_joints = crimild::alloc< SkinnedMeshJointCatalog >();
 }
 
-SkinnedMeshSkeleton::~SkinnedMeshSkeleton( void ) 
+SkinnedMeshSkeleton::~SkinnedMeshSkeleton( void )
 {
 
 }
@@ -569,7 +569,7 @@ void SkinnedMeshSkeleton::encode( coding::Encoder &encoder )
 void SkinnedMeshSkeleton::decode( coding::Decoder &decoder )
 {
 	Codable::decode( decoder );
-	
+
 	Array< SharedPointer< SkinnedMeshAnimationClip >> clips;
 	decoder.decode( "clips", clips );
 	clips.each( [ this ]( SharedPointer< SkinnedMeshAnimationClip > &c, crimild::Size ) {
@@ -767,7 +767,7 @@ void SkinnedMesh::debugDump( void )
 	}
 
 	std::stringstream ss;
-	
+
 	ss << "Skinned Mesh: ";
 	getSkeleton()->getClips().foreach( [&ss]( SharedPointer< SkinnedMeshAnimationClip > &clip, unsigned int clipIdx ) {
 		ss << "\n  Animation: #" << clipIdx
@@ -777,16 +777,16 @@ void SkinnedMesh::debugDump( void )
 		   << "\n";
 
 		clip->getChannels().foreach( [&ss]( std::string name, SharedPointer< SkinnedMeshAnimationChannel > &channel, unsigned int channelIdx ) {
-			ss << "      *" 
+			ss << "      *"
 			   << " Channel: " << std::string( channel->getName() )
-			   << " P=" << channel->getPositionKeys().size() 
-			   << "(" << channel->getPositionKeys()[ 0 ].time 
+			   << " P=" << channel->getPositionKeys().size()
+			   << "(" << channel->getPositionKeys()[ 0 ].time
 			   << "-" << channel->getPositionKeys()[ channel->getPositionKeys().size() - 1 ].time << ")"
 			   << " R=" << channel->getRotationKeys().size()
-			   << "(" << channel->getRotationKeys()[ 0 ].time 
+			   << "(" << channel->getRotationKeys()[ 0 ].time
 			   << "-" << channel->getRotationKeys()[ channel->getRotationKeys().size() - 1 ].time << ")"
 			   << " S=" << channel->getScaleKeys().size()
-			   << "(" << channel->getScaleKeys()[ 0 ].time 
+			   << "(" << channel->getScaleKeys()[ 0 ].time
 			   << "-" << channel->getScaleKeys()[ channel->getScaleKeys().size() - 1 ].time << ")"
 			   << "\n";
 		});
@@ -796,4 +796,3 @@ void SkinnedMesh::debugDump( void )
 }
 
 #endif
-

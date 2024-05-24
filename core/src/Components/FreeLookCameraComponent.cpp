@@ -29,16 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_euler.hpp"
-#include "Mathematics/Transformation_inverse.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/normalize.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -46,11 +37,11 @@ using namespace crimild;
 
 void FreeLookCameraComponent::start( void )
 {
-    _lastMousePos = Vector2f::ZERO;
+    _lastMousePos = Vector2f::Constants::ZERO;
 
-    m_position = location( getNode()->getLocal() );
+    m_position = origin( getNode()->getLocal() );
 
-    extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
+    // extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
@@ -75,7 +66,7 @@ void FreeLookCameraComponent::update( const Clock &c )
     auto root = getNode();
 
     const auto mousePos = Input::getInstance()->getMousePosition();
-    const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::ZERO;
+    const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::Constants::ZERO;
     _initialized = true;
     _lastMousePos = mousePos;
 
@@ -84,15 +75,17 @@ void FreeLookCameraComponent::update( const Clock &c )
         m_yaw -= 0.005f * mouseDelta[ 0 ];
     }
 
-    const auto E = euler( m_yaw, m_pitch, m_roll );
+    /*
+        const auto E = euler( m_yaw, m_pitch, m_roll );
 
-    const auto F = forward( E );
-    const auto R = right( E );
+        const auto F = forward( E );
+        const auto R = right( E );
 
-    m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
-    const auto T = translation( Vector3ff( m_position ) );
+        m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
+        const auto T = translation( Vector3ff( m_position ) );
 
-    root->setLocal( T * E );
+        root->setLocal( T * E );
+    */
 }
 
 void FreeLookCameraComponent::encode( coding::Encoder &encoder )

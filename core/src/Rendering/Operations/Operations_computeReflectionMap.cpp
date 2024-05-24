@@ -26,9 +26,7 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Numbers.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/perspective.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -111,14 +109,15 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
                             break;
                     }
 
-                    //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = t.invMat; //t.computeModelMatrix().getInverse();
+                    // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+                    const auto vMatrix = Matrix4( inverse( t ) ); // t.computeModelMatrix().getInverse();
 
                     return crimild::alloc< UniformBuffer >(
                         Props {
                             .view = vMatrix,
                             .proj = pMatrix,
-                        } );
+                        }
+                    );
                 }(),
             },
         };
@@ -151,7 +150,9 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( 
                         commandBuffer->bindDescriptorSet( material->getDescriptors() );
                         commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
                         commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
-                    } );
+                    }
+                );
             }
-        } );
+        }
+    );
 }

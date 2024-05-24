@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_RASTERIZATION_STATE_
 #define CRIMILD_CORE_RENDERING_RASTERIZATION_STATE_
 
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/CompareOp.hpp"
 
 namespace crimild {
@@ -52,7 +52,7 @@ namespace crimild {
     };
 
     struct RasterizationState {
-        Bool depthClampEnable = false; // 'true' might be required for shadow maps
+        Bool depthClampEnable = false;        // 'true' might be required for shadow maps
         Bool rasterizerDiscardEnable = false; // 'true' disables output to the framebuffer
         PolygonMode polygonMode = PolygonMode::FILL;
         CullMode cullMode = CullMode::BACK;

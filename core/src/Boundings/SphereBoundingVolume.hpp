@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_SPHERE_
 
 #include "BoundingVolume.hpp"
-#include "Mathematics/Point3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -40,7 +40,7 @@ namespace crimild {
         explicit SphereBoundingVolume( const Sphere &sphere );
         virtual ~SphereBoundingVolume( void );
 
-        virtual const Point3f &getCenter( void ) const override { return center( _sphere ); }
+        virtual const Point3f &getCenter( void ) const override { return origin( _sphere ); }
         virtual float getRadius( void ) const override { return radius( _sphere ); }
 
     private:

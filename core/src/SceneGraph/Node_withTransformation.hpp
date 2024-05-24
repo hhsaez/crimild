@@ -28,48 +28,44 @@
 #ifndef CRIMILD_CORE_SCENE_GRAPH_NODE_WITH_TRANSFORMATION_
 #define CRIMILD_CORE_SCENE_GRAPH_NODE_WITH_TRANSFORMATION_
 
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Transformation_translation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
     static SharedPointer< Node > withScale( SharedPointer< Node > const &node, Real x, Real y, Real z ) noexcept
     {
-        node->setLocal( scale( x, y, z ) * node->getLocal() );
+        node->setLocal( scale( x, y, z )( node->getLocal() ) );
         return node;
     }
 
     static SharedPointer< Node > withScale( SharedPointer< Node > const &node, Real s ) noexcept
     {
-        node->setLocal( scale( s ) * node->getLocal() );
+        node->setLocal( scale( s )( node->getLocal() ) );
         return node;
     }
 
     static SharedPointer< Node > withRotationX( SharedPointer< Node > const &node, Radians angle ) noexcept
     {
-        node->setLocal( rotationX( angle ) * node->getLocal() );
+        node->setLocal( rotationX( angle )( node->getLocal() ) );
         return node;
     }
 
     static SharedPointer< Node > withRotationY( SharedPointer< Node > const &node, Radians angle ) noexcept
     {
-        node->setLocal( rotationY( angle ) * node->getLocal() );
+        node->setLocal( rotationY( angle )( node->getLocal() ) );
         return node;
     }
 
     static SharedPointer< Node > withRotationZ( SharedPointer< Node > const &node, Radians angle ) noexcept
     {
-        node->setLocal( rotationZ( angle ) * node->getLocal() );
+        node->setLocal( rotationZ( angle )( node->getLocal() ) );
         return node;
     }
 
     static SharedPointer< Node > withTranslation( SharedPointer< Node > const &node, Real x, Real y, Real z ) noexcept
     {
-        node->setLocal( translation( x, y, z ) * node->getLocal() );
+        node->setLocal( translation( x, y, z )( node->getLocal() ) );
         return node;
     }
 

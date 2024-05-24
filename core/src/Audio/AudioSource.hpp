@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,102 +29,100 @@
 #define CRIMILD_AUDIO_SOURCE_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Types.hpp"
-
-#include "Mathematics/Transformation.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
-	namespace audio {
+    namespace audio {
 
-		/**
-		   \brief Abstract interface for audio sources
-		 */
-		class AudioSource : public coding::Codable {
-			CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
+        /**
+           \brief Abstract interface for audio sources
+         */
+        class AudioSource : public coding::Codable {
+            CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
 
-		public:
-			enum class Status {
-				STOPPED,
-				PLAYING,
-				PAUSED
-			};
+        public:
+            enum class Status {
+                STOPPED,
+                PLAYING,
+                PAUSED
+            };
 
-			struct Chunk {
-				const crimild::Int16 *samples;
-				crimild::Size sampleCount;
-			};
+            struct Chunk {
+                const crimild::Int16 *samples;
+                crimild::Size sampleCount;
+            };
 
-		protected:
-			AudioSource( void );
+        protected:
+            AudioSource( void );
 
-		public:
-	        virtual ~AudioSource( void );
+        public:
+            virtual ~AudioSource( void );
 
-	    public:
-	    	virtual void play( void ) = 0;
-	    	virtual void pause( void ) = 0;
-	    	virtual void stop( void ) = 0;
+        public:
+            virtual void play( void ) = 0;
+            virtual void pause( void ) = 0;
+            virtual void stop( void ) = 0;
 
-			virtual crimild::Real32 getDuration( void ) const = 0;
+            virtual crimild::Real32 getDuration( void ) const = 0;
 
-	    	virtual void setLoop( crimild::Bool loop ) = 0;
-	    	virtual crimild::Bool shouldLoop( void ) const = 0;
+            virtual void setLoop( crimild::Bool loop ) = 0;
+            virtual crimild::Bool shouldLoop( void ) const = 0;
 
-	    	virtual void setAutoplay( crimild::Bool autoplay ) = 0;
-	    	virtual crimild::Bool shouldAutoplay( void ) const = 0;
+            virtual void setAutoplay( crimild::Bool autoplay ) = 0;
+            virtual crimild::Bool shouldAutoplay( void ) const = 0;
 
-	    	virtual Status getStatus( void ) const = 0;
+            virtual Status getStatus( void ) const = 0;
 
-	    	virtual void setPlayingOffset( crimild::Real32 offset ) = 0;
-	    	virtual crimild::Real32 getPlayingOffset( void ) const = 0;
+            virtual void setPlayingOffset( crimild::Real32 offset ) = 0;
+            virtual crimild::Real32 getPlayingOffset( void ) const = 0;
 
-	    	virtual void setVolume( crimild::Real32 volume ) = 0;
-	    	virtual crimild::Real32 getVolume( void ) const = 0;
+            virtual void setVolume( crimild::Real32 volume ) = 0;
+            virtual crimild::Real32 getVolume( void ) const = 0;
 
-	    	virtual void enableSpatialization( crimild::Bool enabled ) { _spatializationEnabled = enabled; }
-	    	virtual crimild::Bool isSpatializationEnabled( void ) const { return _spatializationEnabled; }
+            virtual void enableSpatialization( crimild::Bool enabled ) { _spatializationEnabled = enabled; }
+            virtual crimild::Bool isSpatializationEnabled( void ) const { return _spatializationEnabled; }
 
-	    	virtual void setTransformation( const Transformation &t ) { _transformation = t; }
-	    	virtual const Transformation &getTransformation( void ) const { return _transformation; }
+            virtual void setTransformation( const Transformation &t ) { _transformation = t; }
+            virtual const Transformation &getTransformation( void ) const { return _transformation; }
 
-	    	virtual void setRelativeToListener( crimild::Bool relative ) = 0;
-	    	virtual crimild::Bool isRelativeToListener( void ) const = 0;
+            virtual void setRelativeToListener( crimild::Bool relative ) = 0;
+            virtual crimild::Bool isRelativeToListener( void ) const = 0;
 
-	    	virtual void setMinDistance( crimild::Real32 distance ) = 0;
-	    	virtual crimild::Real32 getMinDistance( void ) const = 0;
+            virtual void setMinDistance( crimild::Real32 distance ) = 0;
+            virtual crimild::Real32 getMinDistance( void ) const = 0;
 
-	    	virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
-	    	virtual crimild::Real32 getAttenuation( void ) const = 0;
+            virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
+            virtual crimild::Real32 getAttenuation( void ) const = 0;
 
-			using GetDataCallback = std::function< void( Chunk const & ) >;
-			virtual void onGetData( GetDataCallback const &callback ) = 0;
+            using GetDataCallback = std::function< void( Chunk const & ) >;
+            virtual void onGetData( GetDataCallback const &callback ) = 0;
 
-			virtual crimild::UInt32 getChannelCount( void ) const = 0;
+            virtual crimild::UInt32 getChannelCount( void ) const = 0;
 
-			virtual crimild::UInt32 getSampleRate( void ) const = 0;
+            virtual crimild::UInt32 getSampleRate( void ) const = 0;
 
-	    private:
-	    	crimild::Bool _spatializationEnabled = false;
-	    	Transformation _transformation;
+        private:
+            crimild::Bool _spatializationEnabled = false;
+            Transformation _transformation;
 
-			/**
-			   \name Coding support
-			*/
-			//@{
-			
-		public:
-			virtual void encode( coding::Encoder &encoder ) override;
-			virtual void decode( coding::Decoder &decoder ) override;
-			
-			//@}			
-		};
+            /**
+               \name Coding support
+            */
+            //@{
 
-		using AudioSourcePtr = SharedPointer< AudioSource >;
+        public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-	}
+            //@}
+        };
+
+        using AudioSourcePtr = SharedPointer< AudioSource >;
+
+    }
 
 }
 
 #endif
-

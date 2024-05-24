@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 #define CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/RenderResource.hpp"

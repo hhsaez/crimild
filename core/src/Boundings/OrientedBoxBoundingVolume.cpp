@@ -27,18 +27,16 @@
 
 #include "Boundings/OrientedBoxBoundingVolume.hpp"
 
+#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugRenderHelper.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector3.hpp"
 
 using namespace crimild;
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( void )
-    : _sphere { Point3f::ZERO, 1.0f }
+    : _sphere { Point3f::Constants::ZERO, 1.0f }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Point3f::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Point3f::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const Vector3f &s, const Vector3f &t )
@@ -54,15 +52,15 @@ OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Vector3f &r, const V
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Point3f &center, float radius )
     : _sphere { center, radius }
 {
-    setMin( -Numericf::COS_45 * getRadius() * Point3f::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Point3f::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::OrientedBoxBoundingVolume( const Sphere &sphere )
     : _sphere( sphere )
 {
-    setMin( -Numericf::COS_45 * getRadius() * Point3f::ONE );
-    setMax( +Numericf::COS_45 * getRadius() * Point3f::ONE );
+    setMin( -Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
+    setMax( +Numericf::COS_45 * getRadius() * Point3f::Constants::ONE );
 }
 
 OrientedBoxBoundingVolume::~OrientedBoxBoundingVolume( void )

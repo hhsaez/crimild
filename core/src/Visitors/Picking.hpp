@@ -28,7 +28,7 @@
 #ifndef CRIMILD_VISITORS_PICKING_
 #define CRIMILD_VISITORS_PICKING_
 
-#include "Mathematics/Ray3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "NodeVisitor.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"

@@ -28,14 +28,12 @@
 #ifndef CRIMILD_SIMULATION_SETTINGS_
 #define CRIMILD_SIMULATION_SETTINGS_
 
-#include "Foundation/Log.hpp"
-#include "Foundation/Memory.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 
+#include <functional>
 #include <map>
 #include <sstream>
 #include <string>
-#include <functional>
 
 namespace crimild {
 

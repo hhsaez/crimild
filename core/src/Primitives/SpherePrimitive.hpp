@@ -28,9 +28,8 @@
 #ifndef CRIMILD_PRIMITIVES_SPHERE_
 #define CRIMILD_PRIMITIVES_SPHERE_
 
-#include "Foundation/Types.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 

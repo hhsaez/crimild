@@ -29,10 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/clamp.hpp"
-#include "Mathematics/io.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -56,7 +53,7 @@ Behavior::State ClampPosition::step( BehaviorContext *context )
         return Behavior::State::FAILURE;
     }
 
-    auto P = location( agent->getLocal() );
+    auto P = origin( agent->getLocal() );
     P = clamp( P, m_limits.min, m_limits.max );
     agent->setLocal( translation( P ) );
 

@@ -28,8 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_IMAGE_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_IMAGE_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 

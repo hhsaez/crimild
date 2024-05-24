@@ -28,13 +28,8 @@
 #ifndef CRIMILD_CORE_VISITORS_INTERSECT_WORLD_
 #define CRIMILD_CORE_VISITORS_INTERSECT_WORLD_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Mathematics/Normal3.hpp"
-#include "Mathematics/Numbers.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Ray3.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/dot.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 namespace crimild {

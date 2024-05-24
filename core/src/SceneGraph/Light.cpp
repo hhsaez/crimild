@@ -29,22 +29,8 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Foundation/Log.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Numbers.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/ceil.hpp"
-#include "Mathematics/io.hpp"
-#include "Mathematics/length.hpp"
-#include "Mathematics/max.hpp"
-#include "Mathematics/ortho.hpp"
-#include "Mathematics/perspective.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -72,7 +58,7 @@ Light::~Light( void )
 
 [[nodiscard]] Point3f Light::getPosition( void ) const noexcept
 {
-    return location( getWorld() );
+    return origin( getWorld() );
 }
 
 [[nodiscard]] Vector3 Light::getDirection( void ) const noexcept
@@ -100,7 +86,7 @@ Matrix4f Light::computeLightSpaceMatrix( void ) const noexcept
         // Use a hardcoded orthographic projection for light space matrix when using
         // directional lights. This will change later when using cascade shadow
         // mapping.
-        return ortho( -200, 200, -200, 200, 0.0f, 400.0f ) * getWorld().invMat;
+        return ortho( -200, 200, -200, 200, 0.0f, 400.0f ) * Matrix4f( inverse( getWorld() ) );
     } else if ( getType() == Type::POINT ) {
         return perspective( 90.0f, 1.0f, 0.01f, 200.0f );
     } else {
@@ -204,7 +190,7 @@ auto updateCascade = []( auto cascadeId, auto light ) {
     };
 
     for ( auto i = 0l; i < 8; ++i ) {
-        const auto inversePoint = invViewProj * vector4( frustumCorners[ i ], 1 );
+        const auto inversePoint = invViewProj * Vector4( frustumCorners[ i ] );
         frustumCorners[ i ] = Vector3f( inversePoint / inversePoint.w );
     }
 
@@ -220,7 +206,7 @@ auto updateCascade = []( auto cascadeId, auto light ) {
     for ( auto i = 0l; i < 8; ++i ) {
         frustumCenter = frustumCenter + frustumCorners[ i ];
     }
-    frustumCenter = frustumCenter / 8.0;
+    frustumCenter = frustumCenter / 8.0f;
 
     auto far = numbers::NEGATIVE_INFINITY;
     auto near = numbers::POSITIVE_INFINITY;
@@ -236,12 +222,11 @@ auto updateCascade = []( auto cascadeId, auto light ) {
     const auto minExtents = -maxExtents;
 
     const auto lightDirection = light->getDirection();
-    const auto lightViewMatrix = lookAt(
-                                     Point3f { frustumCenter + lightDirection * minExtents.z },
-                                     Point3f( frustumCenter ),
-                                     Vector3f::Constants::UP
-    )
-                                     .invMat;
+    const auto lightViewMatrix = Matrix4f( inverse( lookAt(
+        Point3f { frustumCenter + lightDirection * minExtents.z },
+        Point3f( frustumCenter ),
+        Vector3f::Constants::UP
+    ) ) );
 
     // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
     const auto lightProjectionMatrix = ortho( minExtents.x, maxExtents.x, maxExtents.y, minExtents.y, 0.0f, maxExtents.z - minExtents.z );
@@ -267,7 +252,7 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                     .obj = crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
                         [ light = this, face ] {
                             // TODO (hernan): use probe's position
-                            const auto lightPos = location( light->getWorld() );
+                            const auto lightPos = origin( light->getWorld() );
                             const auto t = [ lightPos ]( auto face ) {
                                 switch ( face ) {
                                     case 0: // negative x
@@ -315,7 +300,7 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                                 }
                             }( face );
 
-                            const auto vMatrix = t.invMat;
+                            const auto vMatrix = Matrix4f( inverse( t ) );
 
                             auto pMatrix = light->computeLightSpaceMatrix();
                             return ShadowAtlasLightUniform {
@@ -340,7 +325,7 @@ Array< SharedPointer< DescriptorSet > > &Light::getShadowAtlasDescriptors( void 
                         return crimild::alloc< CallbackUniformBuffer< ShadowAtlasLightUniform > >(
                             [ light = this ] {
                                 auto shadowMap = light->getShadowMap();
-                                auto vMatrix = light->getWorld().invMat;
+                                auto vMatrix = Matrix4f( inverse( light->getWorld() ) );
                                 auto pMatrix = light->computeLightSpaceMatrix();
                                 shadowMap->setLightProjectionMatrix( 0, pMatrix * vMatrix );
                                 return ShadowAtlasLightUniform {

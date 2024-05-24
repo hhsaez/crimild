@@ -29,16 +29,15 @@
 #define CRIMILD_SIMULATION_
 
 #include "AssetManager.hpp"
+#include "Common/Profiler.hpp"
 #include "Concurrency/JobScheduler.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/Profiler.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Input.hpp"
-#include "Mathematics/Clock.hpp"
 #include "Rendering/Renderer.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Settings.hpp"
+#include "Simulation/Clock.hpp"
 #include "Simulation/Event.hpp"
 #include "Systems/System.hpp"
 

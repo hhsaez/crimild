@@ -28,8 +28,8 @@
 #ifndef CRIMILD_SIMULATION_INPUT_
 #define CRIMILD_SIMULATION_INPUT_
 
-#include "Foundation/Singleton.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include <array>
 #include <string>

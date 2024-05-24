@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
 
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

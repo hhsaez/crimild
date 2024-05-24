@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,55 +27,51 @@
 
 #include "TimeParticleGenerator.hpp"
 
-#include "Mathematics/Random.hpp"
-#include "Coding/Encoder.hpp"
 #include "Coding/Decoder.hpp"
-
+#include "Coding/Encoder.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
 
 TimeParticleGenerator::TimeParticleGenerator( void )
 {
-
 }
 
 TimeParticleGenerator::~TimeParticleGenerator( void )
 {
-
 }
 
 void TimeParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-	_times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-	_lifeTimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
+    _times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
+    _lifeTimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
 }
 
 void TimeParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-	auto ts = _times->getData< crimild::Real32 >();
-	auto lts = _lifeTimes->getData< crimild::Real32 >();
-	
+    auto ts = _times->getData< crimild::Real32 >();
+    auto lts = _lifeTimes->getData< crimild::Real32 >();
+
     for ( ParticleId i = startId; i < endId; i++ ) {
-		auto t = Random::generate< crimild::Real32 >( _minTime, _maxTime );
-		ts[ i ] = t;
-		lts[ i ] = t;
+        auto t = Random::generate< crimild::Real32 >( _minTime, _maxTime );
+        ts[ i ] = t;
+        lts[ i ] = t;
     }
 }
 
-void TimeParticleGenerator::encode( coding::Encoder &encoder ) 
+void TimeParticleGenerator::encode( coding::Encoder &encoder )
 {
-	ParticleSystemComponent::ParticleGenerator::encode( encoder );
+    ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-	encoder.encode( "minTime", _minTime );
-	encoder.encode( "maxTime", _maxTime );
+    encoder.encode( "minTime", _minTime );
+    encoder.encode( "maxTime", _maxTime );
 }
 
 void TimeParticleGenerator::decode( coding::Decoder &decoder )
 {
-	ParticleSystemComponent::ParticleGenerator::decode( decoder );
+    ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-	decoder.decode( "minTime", _minTime );
-	decoder.decode( "maxTime", _maxTime );
+    decoder.decode( "minTime", _minTime );
+    decoder.decode( "maxTime", _maxTime );
 }
-

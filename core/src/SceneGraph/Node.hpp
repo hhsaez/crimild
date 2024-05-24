@@ -31,10 +31,8 @@
 #include "Boundings/BoundingVolume.hpp"
 #include "Coding/Codable.hpp"
 #include "Components/NodeComponent.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Transformation_constants.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
 #include <map>
@@ -42,8 +40,8 @@
 namespace crimild {
 
     /**
-		\brief Base class for any object that can be attached to the scene graph
-	*/
+                \brief Base class for any object that can be attached to the scene graph
+        */
     class Node
         : public NamedObject,
           public coding::Codable {
@@ -78,11 +76,11 @@ namespace crimild {
 
     private:
         /**
-			\brief A node's parent
+                        \brief A node's parent
 
-			Every node if linked with its parent in the node hierarchy (provided
-			one is available).
-		*/
+                        Every node if linked with its parent in the node hierarchy (provided
+                        one is available).
+                */
         Node *_parent = nullptr;
 
     public:
@@ -166,13 +164,13 @@ namespace crimild {
         Transformation _world = Transformation::Constants::IDENTITY;
 
         /**
-			\brief Indicates if the world transformation needs to be updated automatically
+                        \brief Indicates if the world transformation needs to be updated automatically
 
-			This flag can be used to avoid the automatic update of world transformations.
-			By default, the engine will compute the world transformation for a node as
-			a function of its parent's one. If this flag is set to 'true' (default is 'false'),
-			you need to provide a valid world matrix manually
-		*/
+                        This flag can be used to avoid the automatic update of world transformations.
+                        By default, the engine will compute the world transformation for a node as
+                        a function of its parent's one. If this flag is set to 'true' (default is 'false'),
+                        you need to provide a valid world matrix manually
+                */
         bool _worldIsCurrent;
 
     public:
@@ -198,17 +196,17 @@ namespace crimild {
         bool _enabled = true;
 
         /**
-		   \name Layers
-		*/
+                   \name Layers
+                */
         //@{
 
     public:
         /**
-		   \brief Node layers
+                   \brief Node layers
 
-		   Layers are defined as integers so users can create their own in between
-		   the default ones.
-		 */
+                   Layers are defined as integers so users can create their own in between
+                   the default ones.
+                 */
         struct Layer {
             enum {
                 DEFAULT = 0,
@@ -228,8 +226,8 @@ namespace crimild {
         //@}
 
         /**
-		   \name Cull flag
-		 */
+                   \name Cull flag
+                 */
         //@{
     public:
         struct CullMode {

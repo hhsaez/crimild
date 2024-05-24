@@ -29,10 +29,8 @@
 #define CRIMILD_ANIMATION_SKELETON_
 
 #include "Components/NodeComponent.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Transformation.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -64,8 +62,8 @@ namespace crimild {
             Matrix4f _poseMatrix;
 
             /**
-			   \name Cloning
-			*/
+                           \name Cloning
+                        */
             //@{
 
         public:
@@ -74,8 +72,8 @@ namespace crimild {
             //@}
 
             /**
-			   \name Coding
-			*/
+                           \name Coding
+                        */
             //@{
 
         public:
@@ -117,8 +115,8 @@ namespace crimild {
             void animate( Animation *animation );
 
             /**
-			   \name Cloning
-			*/
+                           \name Cloning
+                        */
             //@{
 
         public:
@@ -127,8 +125,8 @@ namespace crimild {
             //@}
 
             /**
-			   \name Coding
-			*/
+                           \name Coding
+                        */
             //@{
 
         public:

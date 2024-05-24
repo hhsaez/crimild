@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_PRINCIPLED_BSDF_
 #define CRIMILD_CORE_RENDERING_PRINCIPLED_BSDF_
 
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Material.hpp"
 
 namespace crimild {

@@ -27,10 +27,8 @@
 
 #include "NavigationController.hpp"
 
-#include "Foundation/Log.hpp"
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/LineSegment3.hpp"
-#include "Mathematics/Ray3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "NavigationMeshContainer.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"

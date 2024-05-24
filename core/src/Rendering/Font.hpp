@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,50 +28,49 @@
 #ifndef CRIMILD_CORE_RENDERING_FONT_
 #define CRIMILD_CORE_RENDERING_FONT_
 
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <map>
 
 namespace crimild {
 
-	class Texture;
+    class Texture;
 
-	class Font : public SharedObject {
-	public:
-		struct Glyph {
-			unsigned char symbol;
-			float width;
-			float height;
-			float bearingX;
-			float bearingY;
-			float advance;
-			float uOffset;
-			float vOffset;
-			float u;		
-			float v;
-		};
+    class Font : public SharedObject {
+    public:
+        struct Glyph {
+            unsigned char symbol;
+            float width;
+            float height;
+            float bearingX;
+            float bearingY;
+            float advance;
+            float uOffset;
+            float vOffset;
+            float u;
+            float v;
+        };
 
-	public:
-		Font( void );
-		explicit Font( std::string defFileName );
-		virtual ~Font( void );
+    public:
+        Font( void );
+        explicit Font( std::string defFileName );
+        virtual ~Font( void );
 
-		Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
-		Texture *getSDFTexture( void ) { return crimild::get_ptr( _sdfTexture ); }
+        Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
+        Texture *getSDFTexture( void ) { return crimild::get_ptr( _sdfTexture ); }
 
-		Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
+        Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
 
-	private:
-		void loadGlyphs( std::string file );
+    private:
+        void loadGlyphs( std::string file );
 
-	protected:
-		SharedPointer< Texture > _texture;
-		SharedPointer< Texture > _sdfTexture;
+    protected:
+        SharedPointer< Texture > _texture;
+        SharedPointer< Texture > _sdfTexture;
 
-		std::map< unsigned char, Glyph > _glyphs;
-	};
-    
+        std::map< unsigned char, Glyph > _glyphs;
+    };
+
 }
 
 #endif
-

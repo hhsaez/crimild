@@ -29,8 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -54,7 +53,7 @@ Behavior::State Rotate::step( BehaviorContext *context ) noexcept
     const auto dt = m_clock.getDeltaTime();
 
     auto agent = context->getAgent();
-    agent->setLocal( agent->getLocal() * rotation( m_axis, dt * m_angle ) );
+    agent->setLocal( agent->getLocal()( rotation( m_axis, dt * m_angle ) ) );
 
     return Behavior::State::RUNNING;
 }

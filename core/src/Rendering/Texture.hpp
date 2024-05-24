@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_TEXTURE_
 
 #include "Catalog.hpp"
-#include "Foundation/NamedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Image.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
@@ -52,8 +52,8 @@ namespace crimild {
 
     public:
         /**
-		   \brief Destructor
-		 */
+                   \brief Destructor
+                 */
         virtual ~Texture( void );
 
         inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::TEXTURE; }
@@ -108,20 +108,20 @@ namespace crimild {
 
     public:
         /**
-		   \brief Construct an empty TEXTURE_2D texture
-		 */
+                   \brief Construct an empty TEXTURE_2D texture
+                 */
         explicit Texture( std::string name = "ColorMap" );
 
         /**
-		   \brief Construct a TEXTURE_2D texture with an image
-		 */
+                   \brief Construct a TEXTURE_2D texture with an image
+                 */
         explicit Texture( SharedPointer< Image > const &image, std::string name = "ColorMap" );
 
         /**
-		   \brief Construct a CUBE_MAP texture
+                   \brief Construct a CUBE_MAP texture
 
-		   \remarks Faces: Right, Left, Top, Bottom, Back, Front
-		 */
+                   \remarks Faces: Right, Left, Top, Bottom, Back, Front
+                 */
         explicit Texture( ImageArray const &faces );
 
         inline Target::Impl getTarget( void ) const { return _target; }

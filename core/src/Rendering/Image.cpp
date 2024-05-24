@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include <cstring>
 

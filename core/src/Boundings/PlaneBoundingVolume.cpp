@@ -27,7 +27,7 @@
 
 #include "PlaneBoundingVolume.hpp"
 
-#include "Mathematics/Intersection.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 
