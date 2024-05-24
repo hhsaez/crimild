@@ -30,8 +30,7 @@
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
 #include "Components/RotationComponent.hpp"
-#include "Mathematics/Transformation_isIdentity.hpp"
-#include "Mathematics/Transformation_translation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Utils/MockComponent.hpp"
 

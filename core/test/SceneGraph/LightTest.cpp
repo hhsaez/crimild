@@ -27,7 +27,7 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
 

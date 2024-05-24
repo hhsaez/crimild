@@ -27,14 +27,7 @@
 
 #include "Rendering/BufferAccessor.hpp"
 
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Matrix3_constants.hpp"
-#include "Mathematics/Matrix3_equality.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Matrix4_constants.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include "gtest/gtest.h"
 

@@ -27,7 +27,7 @@
 
 #include "Rendering/VertexLayout.hpp"
 
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include "gtest/gtest.h"
 
@@ -194,7 +194,8 @@ TEST( VertexLayout, eachAttribute )
     v.eachAttribute(
         [ & ]( auto &attrib ) {
             ASSERT_EQ( attribs[ callCount++ ].name, attrib.name );
-        } );
+        }
+    );
     ASSERT_EQ( 4, callCount );
 }
 

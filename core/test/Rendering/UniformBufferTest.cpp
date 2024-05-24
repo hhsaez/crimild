@@ -27,10 +27,7 @@
 
 #include "Rendering/UniformBuffer.hpp"
 
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/BufferView.hpp"
 
 #include "gtest/gtest.h"
