@@ -28,8 +28,7 @@
 #include "Visitors/BinTreeScene.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_translation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -174,7 +173,7 @@ TEST( BinTreeScene, it_handles_a_single_geometry )
     EXPECT_NE( nullptr, cast_ptr< Geometry >( res )->anyPrimitive() );
     EXPECT_NE( nullptr, res->getComponent< MaterialComponent >() );
     EXPECT_NE( nullptr, res->getComponent< MaterialComponent >()->first() );
-    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), location( res->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( res->getLocal() ) );
 }
 
 TEST( BinTreeScene, it_handles_a_group_with_a_single_child )

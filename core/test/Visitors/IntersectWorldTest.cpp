@@ -27,8 +27,8 @@
 
 #include "Visitors/IntersectWorld.hpp"
 
-#include "Mathematics/Ray3.hpp"
-#include "Mathematics/Transformation_scale.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 #include "SceneGraph/Geometry.hpp"

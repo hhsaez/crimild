@@ -29,7 +29,7 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/isEqual.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
 #include "gtest/gtest.h"

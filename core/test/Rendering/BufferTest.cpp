@@ -29,11 +29,9 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
@@ -98,7 +96,8 @@ TEST( Buffer, constructionWithStruct )
         Uniform {
             .color = ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f },
             .metalness = 0.5f,
-        } );
+        }
+    );
 
     ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
     ASSERT_NE( nullptr, buffer->getData() );

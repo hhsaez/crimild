@@ -32,8 +32,7 @@
 #include "Behaviors/Composites/Sequence.hpp"
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_translation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <gtest/gtest.h>
@@ -112,15 +111,15 @@ TEST( MotionApply, it_overrides_current_actor_location_if_reset_not_used )
     controller->execute( crimild::alloc< MotionApply >() );
 
     // not changed until update()
-    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( node->getLocal() ) );
 
     controller->update( Clock( 0 ) ); // update with no time diff
 
-    // location overriden
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), location( node->getLocal() ) );
+    // origin overriden
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), origin( node->getLocal() ) );
 }
 
-TEST( MotionApply, it_keeps_current_actor_location_if_reset_is_used )
+TEST( MotionApply, it_keeps_current_actor_origin_if_reset_is_used )
 {
     auto node = crimild::alloc< Node >();
     auto controller = node->attachComponent< BehaviorController >();
@@ -137,12 +136,12 @@ TEST( MotionApply, it_keeps_current_actor_location_if_reset_is_used )
     );
 
     // not changed until update()
-    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( node->getLocal() ) );
 
     controller->update( Clock( 0 ) ); // update with no time diff
 
-    // location does not changes
-    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), location( node->getLocal() ) );
+    // origin does not changes
+    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( node->getLocal() ) );
 }
 
 TEST( MotionApply, it_applies_steering_without_mass )
@@ -212,7 +211,7 @@ TEST( MotionApply, integration )
     motion->mass = 1.0;
 
     // Actor position not modified until update
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
@@ -220,7 +219,7 @@ TEST( MotionApply, integration )
     controller->update( Clock( 1 ) );
 
     // Nothing happens because there's no velocity
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
@@ -231,7 +230,7 @@ TEST( MotionApply, integration )
     controller->update( Clock( 1 ) );
 
     // Actor position update
-    EXPECT_EQ( ( Point3f { 0, 0, -1 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -1 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, -1 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, -1 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
@@ -239,7 +238,7 @@ TEST( MotionApply, integration )
     controller->update( Clock( 1 ) );
 
     // Actor position update
-    EXPECT_EQ( ( Point3f { 0, 0, -2 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -2 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, -1 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, -2 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
@@ -247,7 +246,7 @@ TEST( MotionApply, integration )
     controller->update( Clock( 1 ) );
 
     // Actor position update
-    EXPECT_EQ( ( Point3f { 0, 0, -3 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -3 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, -1 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, -3 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
@@ -258,7 +257,7 @@ TEST( MotionApply, integration )
     controller->update( Clock( 1 ) );
 
     // Actor position remains the same
-    EXPECT_EQ( ( Point3f { 0, 0, -3 } ), location( node->getLocal() ) );
+    EXPECT_EQ( ( Point3f { 0, 0, -3 } ), origin( node->getLocal() ) );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
     EXPECT_EQ( ( Point3f { 0, 0, -3 } ), motion->position );
     EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );

@@ -31,8 +31,8 @@
 #include "Coding/Encoder.hpp"
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Foundation/ObjectFactory.hpp"
-#include "Mathematics/Transformation_translation.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 

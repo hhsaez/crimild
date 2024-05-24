@@ -29,12 +29,7 @@
 
 #include "Coding/MemoryDecoder.hpp"
 #include "Coding/MemoryEncoder.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/io.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/SelectNodes.hpp"
@@ -92,7 +87,7 @@ TEST( Camera, get_ray_through_the_center_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( Point3f::ZERO, origin( ray ) );
+    EXPECT_EQ( Point3f::Constants::ZERO, origin( ray ) );
     EXPECT_EQ( Vector3::Constants::FORWARD, direction( ray ) );
 }
 
@@ -111,7 +106,7 @@ TEST( Camera, get_ray_through_the_corner_of_the_canvas )
 
     EXPECT_TRUE( camera->getPickRay( 0, 0, ray ) );
 
-    EXPECT_TRUE( isEqual( Point3f::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( Point3f::Constants::ZERO, origin( ray ) ) );
     EXPECT_TRUE( isEqual( normalize( Vector3 { -0.027282, 0.013709, -1.000000 } ), direction( ray ) ) );
 }
 
@@ -157,7 +152,7 @@ TEST( Camera, get_ray_for_rotated_camera )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_TRUE( isEqual( Point3f::ZERO, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( Point3f::Constants::ZERO, origin( ray ) ) );
     EXPECT_TRUE( isEqual( Vector3::Constants::RIGHT, direction( ray ) ) );
 }
 
@@ -170,7 +165,7 @@ TEST( Camera, get_ray_for_transformed_camera )
 
     auto camera = crimild::alloc< Camera >( fov, aspect, 0.1, 100 );
 
-    camera->setLocal( translation( 2, 1, -1 ) * rotationX( -numbers::PI_DIV_4 ) );
+    camera->setLocal( translation( 2, 1, -1 )( rotationX( -numbers::PI_DIV_4 ) ) );
 
     auto px = Real( 100 + 0.5 ) / Real( width );
     auto py = Real( 50 + 0.5 ) / Real( height );
