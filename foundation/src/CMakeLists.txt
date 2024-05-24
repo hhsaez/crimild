@@ -2,11 +2,10 @@ crimild_trace()
 
 add_library( crimild_foundation OBJECT )
 
-target_sources( 
+target_sources(
     crimild_foundation
-    
-    PUBLIC
-    Crimild_Foundation.hpp
+
+    PUBLIC Crimild_Foundation.hpp
 
     PRIVATE
     Common/KeyValuePair.hpp
@@ -52,6 +51,7 @@ target_sources(
 )
 
 target_include_directories( crimild_foundation PUBLIC . )
-target_compile_features( crimild_foundation PUBLIC cxx_std_20 )
-add_library( Crimild::Foundation ALIAS crimild_foundation )
 
+target_compile_features( crimild_foundation PUBLIC cxx_std_20 )
+
+add_library( Crimild::Foundation ALIAS crimild_foundation )
