@@ -30,7 +30,6 @@
 
 #include "Normal3.hpp"
 #include "Vector3.hpp"
-#include "Vector3Ops.hpp"
 #include "dot.hpp"
 #include "length.hpp"
 #include "min.hpp"
@@ -38,11 +37,11 @@
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr Vector3 refract( const Vector3 &in, const Normal3 &N, real_t eta ) noexcept
+    [[nodiscard]] inline constexpr auto refract( const Vector3 &in, const Normal3 &N, real_t eta ) noexcept
     {
-        const auto cosTheta = min( dot( -in, N ), Real( 1 ) );
+        const auto cosTheta = min( dot( -in, N ), real_t( 1 ) );
         const auto rOutPerp = eta * ( in + cosTheta * Vector3( N ) );
-        const auto rOutParallel = -sqrt( abs( Real( 1 ) - lengthSquared( rOutPerp ) ) ) * Vector3( N );
+        const auto rOutParallel = -sqrt( abs( real_t( 1 ) - length2( rOutPerp ) ) ) * Vector3( N );
         return rOutPerp + rOutParallel;
     }
 

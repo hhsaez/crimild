@@ -69,7 +69,7 @@ namespace crimild {
 
         template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
         constexpr explicit ColorRGBImpl( const Tuple3< OtherDerived, U > &other ) noexcept
-            : Tuple3< ColorRGBImpl, T >( other.x, other.y, other.z ) { }
+            : ColorRGBImpl( other.x, other.y, other.z ) { }
 
         ~ColorRGBImpl( void ) noexcept = default;
 
@@ -80,6 +80,18 @@ namespace crimild {
             g = other.g;
             b = other.b;
             return *this;
+        }
+
+        template< ArithmeticType U >
+        inline constexpr bool operator==( const ColorRGBImpl< U > &other ) const noexcept
+        {
+            return r == other.r && g == other.g && b == other.b;
+        }
+
+        template< ArithmeticType U >
+        inline constexpr bool operator!=( const ColorRGBImpl< U > &other ) const noexcept
+        {
+            return !( *this == other );
         }
 
         ///@{

@@ -36,6 +36,7 @@
 namespace crimild {
 
     struct Quaternion;
+    class Transformation;
 
     /**
      * @brief a 4x4 column-based matrix representation
@@ -71,6 +72,13 @@ namespace crimild {
          * @see Quaternion
          */
         constexpr explicit Matrix4Impl( const Quaternion &q ) noexcept;
+
+        /**
+         * @brief Creates a Matrix from a Transformation
+         *
+         * @see Transformation
+         */
+        constexpr explicit Matrix4Impl( const Transformation &t ) noexcept;
 
         ~Matrix4Impl( void ) noexcept = default;
 

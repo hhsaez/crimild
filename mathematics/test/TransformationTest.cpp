@@ -505,3 +505,10 @@ TEST( Transformation, easing )
         )
     );
 }
+
+TEST( Transformation, to_matrix )
+{
+    constexpr auto T = crimild::translation( 1, 2, 3 );
+    constexpr auto M = crimild::Matrix4( T );
+    EXPECT_TRUE( crimild::isEqual( M[ 3 ], crimild::Vector4( 1, 2, 3, 1 ) ) );
+}

@@ -236,7 +236,7 @@ namespace crimild {
          */
         ///@{
         template< ArithmeticType U >
-        [[nodiscard]] inline constexpr Derived< T > operator+( const Derived< U > &other ) const noexcept
+        [[nodiscard]] inline constexpr auto operator+( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} + U {} ) > {
                 x + other.x,
@@ -255,7 +255,7 @@ namespace crimild {
         }
 
         template< ArithmeticType U >
-        [[nodiscard]] inline constexpr Derived< T > operator-( const Derived< U > &other ) const noexcept
+        [[nodiscard]] inline constexpr auto operator-( const Derived< U > &other ) const noexcept
         {
             return Derived< decltype( T {} - U {} ) > {
                 x - other.x,
@@ -274,7 +274,7 @@ namespace crimild {
         }
 
         template< ArithmeticType U >
-        [[nodiscard]] inline constexpr Derived< T > operator*( const U &scalar ) const noexcept
+        [[nodiscard]] inline constexpr auto operator*( const U &scalar ) const noexcept
         {
             return Derived< decltype( T {} * U {} ) > {
                 x * scalar,

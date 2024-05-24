@@ -89,6 +89,18 @@ namespace crimild {
             return *this;
         }
 
+        template< ArithmeticType U >
+        inline constexpr bool operator==( const ColorRGBAImpl< U > &other ) const noexcept
+        {
+            return r == other.r && g == other.g && b == other.b && a == other.a;
+        }
+
+        template< ArithmeticType U >
+        inline constexpr bool operator!=( const ColorRGBAImpl< U > &other ) const noexcept
+        {
+            return !( *this == other );
+        }
+
         ///@{
         /**
          * @brief Index-based accessors for color components

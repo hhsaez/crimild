@@ -153,6 +153,61 @@ namespace crimild {
     {
         return normalize( t( Vector3::Constants::FORWARD ) );
     }
+
+    /**
+     * @brief Creates a 4x4 Matrix from a Transformation
+     */
+    template<>
+    constexpr Matrix4Impl< real_t >::Matrix4Impl( const Transformation &t ) noexcept
+    {
+        if ( t == Transformation::Constants::IDENTITY ) {
+            *this = Matrix4Impl::Constants::IDENTITY;
+            return;
+        }
+
+        real_t x = t.rotate.v.x;
+        real_t y = t.rotate.v.y;
+        real_t z = t.rotate.v.z;
+        real_t w = t.rotate.w;
+        real_t sx = t.scale.x;
+        real_t sy = t.scale.y;
+        real_t sz = t.scale.z;
+
+        real_t x2 = x + x;
+        real_t y2 = y + y;
+        real_t z2 = z + z;
+
+        real_t xx = x * x2;
+        real_t xy = x * y2;
+        real_t xz = x * z2;
+        real_t yy = y * y2;
+        real_t yz = y * z2;
+        real_t zz = z * z2;
+        real_t wx = w * x2;
+        real_t wy = w * y2;
+        real_t wz = w * z2;
+
+        ( *this )[ 0 ][ 0 ] = sx * ( 1 - ( yy + zz ) );
+        ( *this )[ 0 ][ 1 ] = sx * ( xy + wz );
+        ( *this )[ 0 ][ 2 ] = sx * ( xz - wy );
+        ( *this )[ 0 ][ 3 ] = 0;
+
+        ( *this )[ 1 ][ 0 ] = sy * ( xy - wz );
+        ( *this )[ 1 ][ 1 ] = sy * ( 1 - ( xx + zz ) );
+        ( *this )[ 1 ][ 2 ] = sy * ( yz + wx );
+        ( *this )[ 1 ][ 3 ] = 0;
+
+        ( *this )[ 1 ][ 0 ] = sz * ( xz + wy );
+        ( *this )[ 1 ][ 1 ] = sz * ( yz - wx );
+        ( *this )[ 1 ][ 2 ] = sz * ( 1 - ( xx + yy ) );
+        ( *this )[ 1 ][ 3 ] = 0;
+
+        ( *this )[ 3 ][ 0 ] = t.translate.x;
+        ( *this )[ 3 ][ 1 ] = t.translate.y;
+        ( *this )[ 3 ][ 2 ] = t.translate.z;
+        ( *this )[ 3 ][ 3 ] = 1;
+    }
+
 }
 
 #endif

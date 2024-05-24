@@ -33,8 +33,8 @@
 
 namespace crimild {
 
-    template< typename T, typename U >
-    [[nodiscard]] inline constexpr T clamp( T value, U lo, U hi ) noexcept
+    template< typename T, typename U, typename V >
+    [[nodiscard]] inline constexpr T clamp( T value, U lo, V hi ) noexcept
     {
         return max( lo, min( value, hi ) );
     }

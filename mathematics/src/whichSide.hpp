@@ -34,14 +34,11 @@
 namespace crimild {
 
     template< typename T >
-    [[nodiscard]] constexpr Char whichSide( const LineSegment3Impl< T > &l, const Point3< T > &p, const Normal3< T > &normal ) noexcept
+    [[nodiscard]] constexpr int8_t whichSide( const LineSegment3Impl< T > &l, const Point3Impl< T > &p, const Normal3Impl< T > &normal ) noexcept
     {
-        assert( false && "TODO" );
-
-#if 0
         // compute a plane of the half-space
-        const auto n = normal ^ ( _destination - _origin );
-        const auto c = -( n * _origin );
+        const auto n = cross( normal, ( destination( l ) - origin( l ) ) );
+        const auto c = -( n * origin( l ) );
 
         // compute signed distance to plane
         const auto d = ( n * p ) + c;
@@ -53,15 +50,13 @@ namespace crimild {
             // left
             return -1;
         }
-#endif
-
         // the point is on the line
         return 0;
     }
 
-    [[nodiscard]] constexpr Char whichSide( const Plane3 &A, const Point3f &P ) noexcept
+    [[nodiscard]] constexpr int8_t whichSide( const Plane3 &A, const Point3 &P ) noexcept
     {
-        const auto d = distanceSigned( A, P );
+        const auto d = distance2( A, P );
         if ( d > 0 ) {
             return +1;
         } else if ( d < 0 ) {
@@ -70,9 +65,9 @@ namespace crimild {
         return 0;
     }
 
-    [[nodiscard]] constexpr char whichSide( const Plane3 &P, const Sphere &S ) noexcept
+    [[nodiscard]] constexpr int8_t whichSide( const Plane3 &P, const Sphere &S ) noexcept
     {
-        const auto &C = center( S );
+        const auto &C = origin( S );
         const auto R = radius( S );
         const auto d = distance( P, C );
         if ( d < -R ) {
