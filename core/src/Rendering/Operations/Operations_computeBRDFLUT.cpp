@@ -26,7 +26,7 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Frustum.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -90,7 +90,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
                                     gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
                                     outTexCoord = texCoords[ gl_VertexIndex ];
                                 }
-                            )" ),
+                            )"
+                    ),
                     crimild::alloc< Shader >(
                         Shader::Stage::FRAGMENT,
                         R"(
@@ -200,8 +201,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
                                     vec2 integratedBRDF = integrateBRDF( inTexCoord.x, 1.0 - inTexCoord.y );
                                     outColor = vec4( integratedBRDF, 0, 1 );
                                 }
-                            )" ),
-                } );
+                            )"
+                    ),
+                }
+            );
             program->descriptorSetLayouts = {
                 [] {
                     auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -232,5 +235,6 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
             commandBuffer->setScissor( viewport );
             commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
             commandBuffer->draw( 6 );
-        } );
+        }
+    );
 }

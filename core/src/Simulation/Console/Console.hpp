@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,76 +29,73 @@
 #define CRIMILD_SIMULATION_CONSOLE_
 
 #include "ConsoleCommand.hpp"
+#include "Crimild_Foundation.hpp"
 
-#include "Foundation/Types.hpp"
-#include "Foundation/Singleton.hpp"
-
-#include <map>
 #include <list>
+#include <map>
 #include <sstream>
 
 namespace crimild {
 
-	/**
-		\brief Implements an interactive command console
-	*/
-	class Console : public DynamicSingleton< Console > {
-	public:
-		Console( void );
-		virtual ~Console( void );
+    /**
+            \brief Implements an interactive command console
+    */
+    class Console : public DynamicSingleton< Console > {
+    public:
+        Console( void );
+        virtual ~Console( void );
 
-	public:
-		inline bool isEnabled( void ) const { return _enabled; }
-		inline void setEnabled( bool enabled ) { _enabled = enabled; }
+    public:
+        inline bool isEnabled( void ) const { return _enabled; }
+        inline void setEnabled( bool enabled ) { _enabled = enabled; }
 
-		inline bool isActive( void ) const { return _active; }
-		inline void setActive( bool active ) { _active = active; }
-        
+        inline bool isActive( void ) const { return _active; }
+        inline void setActive( bool active ) { _active = active; }
+
         void open( std::string line = "" );
         void close( void );
 
-	private:
-		bool _enabled = false;
-		bool _active = false;
+    private:
+        bool _enabled = false;
+        bool _active = false;
 
-	public:
-		void registerCommand( ConsoleCommandPtr const &cmd );
+    public:
+        void registerCommand( ConsoleCommandPtr const &cmd );
 
-	private:
-		std::map< std::string, ConsoleCommandPtr > _commands;
+    private:
+        std::map< std::string, ConsoleCommandPtr > _commands;
 
-	public:
-		inline void pushLine( std::string const &line )
-		{
-			_lines.push_back( line );
-		}
+    public:
+        inline void pushLine( std::string const &line )
+        {
+            _lines.push_back( line );
+        }
 
-	private:
-		std::vector< std::string > _lines;
+    private:
+        std::vector< std::string > _lines;
 
-	public:
-		bool handleInput( crimild::Int32 key, crimild::Int32 mod );
+    public:
+        bool handleInput( crimild::Int32 key, crimild::Int32 mod );
 
-	private:
-		void pushChar( char c );
-		void popChar( void );
-		void clear( void );
+    private:
+        void pushChar( char c );
+        void popChar( void );
+        void clear( void );
 
-		void evaluate( void );
+        void evaluate( void );
 
-	private:
-		std::stringstream _commandBuffer;
-		std::list< std::string > _commandBufferHistory;
-		std::list< std::string >::iterator _commandBufferHistoryIt;
+    private:
+        std::stringstream _commandBuffer;
+        std::list< std::string > _commandBufferHistory;
+        std::list< std::string >::iterator _commandBufferHistoryIt;
 
-	public:
-		std::string getOutput( crimild::UInt8 lines = 10 ) const;
+    public:
+        std::string getOutput( crimild::UInt8 lines = 10 ) const;
 
-	private:
-		crimild::UInt32 _historyOffset = 0;
-	};
+    private:
+        crimild::UInt32 _historyOffset = 0;
+    };
 
 };
 
 #endif
-

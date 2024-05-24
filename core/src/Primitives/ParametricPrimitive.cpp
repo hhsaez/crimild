@@ -27,12 +27,7 @@
 
 #include "ParametricPrimitive.hpp"
 
-#include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/cross.hpp"
-#include "Mathematics/normalize.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 
@@ -47,7 +42,7 @@ void ParametricPrimitive::setInterval( const ParametricInterval &interval )
 {
     _upperBound = interval.upperBound;
     _divisions = interval.divisions;
-    _slices = _divisions - Vector2i::ONE;
+    _slices = _divisions - Vector2i::Constants::ONE;
     _textureCount = interval.textureCount;
 }
 
@@ -134,7 +129,7 @@ void ParametricPrimitive::generateVertexBuffer( void )
                 if ( _colorMode.type == ColorMode::Type::CONSTANT ) {
                     color = _colorMode.color;
                 } else if ( _colorMode.type == ColorMode::Type::POSITIONS ) {
-                    color = 0.5f * ( ColorRGB::Constants::WHITE + rgb( normalize( range ) ) );
+                    color = 0.5f * ( ColorRGB::Constants::WHITE + ColorRGB( normalize( range ) ) );
                 }
                 colors->set( vIdx, color );
             }

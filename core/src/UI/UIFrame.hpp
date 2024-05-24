@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2002-present, H. Hernán Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,56 +28,62 @@
 #ifndef CRIMILD_UI_FRAME_
 #define CRIMILD_UI_FRAME_
 
-#include "UIFrameConstraintMaker.hpp"
-#include "UIFrameConstraint.hpp"
-
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Rect.hpp"
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
+#include "UIFrameConstraint.hpp"
+#include "UIFrameConstraintMaker.hpp"
 
 namespace crimild {
 
-	namespace ui {
+    namespace ui {
 
-		class UIFrame : public NodeComponent {
-			CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
-			
-		public:
-			UIFrame( void );
-			UIFrame( const Rectf &extensions );
-			~UIFrame( void ) = default;
+        class UIFrame : public NodeComponent {
+            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
 
-			UIFrame *setExtensions( const Rectf &extensions ) { _extensions = extensions; return this; }
-			const Rectf &getExtensions( void ) const { return _extensions; }
+        public:
+            UIFrame( void );
+            UIFrame( const Rectf &extensions );
+            ~UIFrame( void ) = default;
 
-			UIFrame *setZIndex( crimild::Real32 z ) { _zIndex = z; return this; }
-			crimild::Real32 getZIndex( void ) const { return _zIndex; }
+            UIFrame *setExtensions( const Rectf &extensions )
+            {
+                _extensions = extensions;
+                return this;
+            }
+            const Rectf &getExtensions( void ) const { return _extensions; }
+
+            UIFrame *setZIndex( crimild::Real32 z )
+            {
+                _zIndex = z;
+                return this;
+            }
+            crimild::Real32 getZIndex( void ) const { return _zIndex; }
 
             void start( void ) override;
-			virtual void update( const Clock & ) override;
+            virtual void update( const Clock & ) override;
 
-		private:
-			Rectf _extensions;
-			crimild::Real32 _zIndex = 0;
+        private:
+            Rectf _extensions;
+            crimild::Real32 _zIndex = 0;
 
-		public:
-			UIFrame *clearConstraints( void );
-			UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
-			UIFrameConstraint *getConstraint( UIFrameConstraint::Type type );
+        public:
+            UIFrame *clearConstraints( void );
+            UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
+            UIFrameConstraint *getConstraint( UIFrameConstraint::Type type );
 
-			UIFrameConstraintMaker *pin( void );
+            UIFrameConstraintMaker *pin( void );
 
-		private:
-			UIFrameConstraintMaker _constraintMaker;
-			Array< SharedPointer< UIFrameConstraint >> _constraints;
+        private:
+            UIFrameConstraintMaker _constraintMaker;
+            Array< SharedPointer< UIFrameConstraint > > _constraints;
 
-		public:
-			void decode( coding::Decoder & ) override;
-		};
+        public:
+            void decode( coding::Decoder & ) override;
+        };
 
-	}
+    }
 
 }
 
 #endif
-

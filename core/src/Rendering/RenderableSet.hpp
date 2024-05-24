@@ -28,9 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDERABLE_SET_
 #define CRIMILD_CORE_RENDERING_RENDERABLE_SET_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 
 namespace crimild {

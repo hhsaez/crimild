@@ -29,8 +29,7 @@
 #define CRIMILD_UI_BACKGROUND_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Rect.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

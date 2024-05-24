@@ -28,9 +28,7 @@
 #ifndef CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 #define CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 
-#include "Foundation/Macros.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Visitors/ShallowCopy.hpp"
 
 #include <map>

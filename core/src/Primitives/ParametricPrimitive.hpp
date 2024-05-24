@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_PARAMETRIC_
 #define CRIMILD_PRIMITIVES_PARAMETRIC_
 
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 

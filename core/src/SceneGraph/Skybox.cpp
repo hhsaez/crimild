@@ -28,7 +28,7 @@
 #include "SceneGraph/Skybox.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"

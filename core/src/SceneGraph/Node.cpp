@@ -30,8 +30,8 @@
 #include "Boundings/AABBBoundingVolume.hpp"
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Group.hpp"
-#include "Mathematics/Transformation_constants.hpp"
 
 using namespace crimild;
 

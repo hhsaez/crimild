@@ -27,7 +27,7 @@
 
 #include "NavigationCell.hpp"
 
-#include "Mathematics/Intersection.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 using namespace crimild::navigation;

@@ -28,10 +28,7 @@
 #ifndef CRIMILD_RENDERING_RENDER_RESOURCE_
 #define CRIMILD_RENDERING_RENDER_RESOURCE_
 
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Containers/Set.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 
@@ -59,29 +59,29 @@ void NodePositionParticleGenerator::configure( Node *node, ParticleData *particl
 void NodePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
     /*
-	assert( _targetNode != nullptr );
+        assert( _targetNode != nullptr );
 
-	auto ps = _positions->getData< Vector3f >();
+        auto ps = _positions->getData< Vector3f >();
 
-	auto origin = _targetNode->getWorld().getTranslate();
-	node->getWorld().applyInverseToPoint( origin, origin );
+        auto origin = _targetNode->getWorld().getTranslate();
+        node->getWorld().applyInverseToPoint( origin, origin );
 
     const auto posMin = origin - _size;
     const auto posMax = origin + _size;
 
-	// TODO: use random vectors
+        // TODO: use random vectors
     for ( ParticleId i = startId; i < endId; i++ ) {
         auto x = Random::generate< Real32 >( posMin.x(), posMax.x() );
         auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
         auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
-		if ( particles->shouldComputeInWorldSpace() ) {
-			auto p = Vector3f( x, y, z );
-			node->getWorld().applyToPoint( p, p );
-			ps[ i ] = p;
-		}
-		else {
-			ps[ i ] = Vector3f( x, y, z );
-		}
+                if ( particles->shouldComputeInWorldSpace() ) {
+                        auto p = Vector3f( x, y, z );
+                        node->getWorld().applyToPoint( p, p );
+                        ps[ i ] = p;
+                }
+                else {
+                        ps[ i ] = Vector3f( x, y, z );
+                }
     }
     */
 }

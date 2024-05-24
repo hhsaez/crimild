@@ -27,16 +27,8 @@
 
 #include "Components/PathComponent.hpp"
 
+#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugDrawManager.hpp"
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_easing.hpp"
-#include "Mathematics/ceil.hpp"
-#include "Mathematics/easing.hpp"
-#include "Mathematics/floor.hpp"
-#include "Mathematics/max.hpp"
-#include "Mathematics/min.hpp"
 #include "SceneGraph/Group.hpp"
 
 using namespace crimild;
@@ -66,8 +58,8 @@ void Path::renderDebugInfo( Renderer *, Camera * )
     for ( auto t = 0.0f; t < 1.0f; t += dt ) {
         const auto T0 = evaluate( t );
         const auto T1 = evaluate( t + dt );
-        const auto P0 = location( T0 );
-        DebugDrawManager::addLine( P0, location( T1 ), ColorRGB { 1, 0, 1 } );
+        const auto P0 = origin( T0 );
+        DebugDrawManager::addLine( P0, origin( T1 ), ColorRGB { 1, 0, 1 } );
         DebugDrawManager::addLine( P0, P0 + up( T0 ), ColorRGB { 1, 1, 0 } );
     }
 }

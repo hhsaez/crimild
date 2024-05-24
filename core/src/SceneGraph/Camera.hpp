@@ -28,11 +28,8 @@
 #ifndef CRIMILD_SCENEGRAPH_CAMERA_
 #define CRIMILD_SCENEGRAPH_CAMERA_
 
+#include "Crimild_Mathematics.hpp"
 #include "Group.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Ray3.hpp"
-#include "Mathematics/Rect.hpp"
 
 #include <memory>
 

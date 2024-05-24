@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_ROTATION_
 #define CRIMILD_COMPONENTS_ROTATION_
 
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "NodeComponent.hpp"
 
 namespace crimild {

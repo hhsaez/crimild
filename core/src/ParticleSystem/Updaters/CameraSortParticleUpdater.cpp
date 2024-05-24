@@ -27,7 +27,7 @@
 
 #include "CameraSortParticleUpdater.hpp"
 
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
@@ -49,22 +49,22 @@ void CameraSortParticleUpdater::configure( Node *node, ParticleData *particles )
 void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
     /*
-	const auto camera = Camera::getMainCamera();
-	auto cameraPos = camera->getWorld().getTranslate();
-	auto cameraDirection = camera->getWorld().computeDirection();
-	if ( !particles->shouldComputeInWorldSpace() ) {
-		// compute local camera pos only if we're not using
-		// the world space
-		node->getWorld().applyInverseToPoint( cameraPos, cameraPos );
-		node->getWorld().applyInverseToVector( cameraDirection, cameraDirection );
-	}
+        const auto camera = Camera::getMainCamera();
+        auto cameraPos = camera->getWorld().getTranslate();
+        auto cameraDirection = camera->getWorld().computeDirection();
+        if ( !particles->shouldComputeInWorldSpace() ) {
+                // compute local camera pos only if we're not using
+                // the world space
+                node->getWorld().applyInverseToPoint( cameraPos, cameraPos );
+                node->getWorld().applyInverseToVector( cameraDirection, cameraDirection );
+        }
 
-	const auto pCount = particles->getAliveCount();
+        const auto pCount = particles->getAliveCount();
 
-	const auto ps = _positions->getData< Vector3f >();
+        const auto ps = _positions->getData< Vector3f >();
     auto ds = _distances->getData< Vector2f >();
 
-	const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
+        const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
 
     // Step 1: Precompute distances to camera plane for each particle
     for ( crimild::Size i = 0; i < pCount; ++i ) {

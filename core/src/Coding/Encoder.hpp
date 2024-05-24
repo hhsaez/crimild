@@ -28,20 +28,8 @@
 #ifndef CRIMILD_CORE_CODING_ENCODER_
 #define CRIMILD_CORE_CODING_ENCODER_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Memory.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
-#include "Foundation/Version.hpp"
-#include "Mathematics/ColorRGB.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Point2.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Quaternion.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/VertexAttribute.hpp"

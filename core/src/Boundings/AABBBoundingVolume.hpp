@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_AABB_
 
 #include "BoundingVolume.hpp"
-#include "Mathematics/Box.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -45,7 +45,7 @@ namespace crimild {
         AABBBoundingVolume( void ) noexcept;
         virtual ~AABBBoundingVolume( void ) = default;
 
-        virtual const Point3f &getCenter( void ) const override { return center( m_sphere ); }
+        virtual const Point3f &getCenter( void ) const override { return origin( m_sphere ); }
         virtual Real getRadius( void ) const override { return radius( m_sphere ); }
 
         virtual SharedPointer< BoundingVolume > clone( void ) const override;

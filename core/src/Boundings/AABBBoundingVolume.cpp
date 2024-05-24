@@ -27,16 +27,7 @@
 
 #include "AABBBoundingVolume.hpp"
 
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/distance.hpp"
-#include "Mathematics/intersect.hpp"
-#include "Mathematics/length.hpp"
-#include "Mathematics/max.hpp"
-#include "Mathematics/min.hpp"
-#include "Mathematics/swizzle.hpp"
-#include "Mathematics/whichSide.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/VertexBuffer.hpp"
 
 using namespace crimild;
@@ -123,7 +114,7 @@ void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 
 void AABBBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
-    const auto center = 0.5 * ( max + min );
+    const auto center = real_t( 0.5 ) * ( max + min );
     const auto size = max - center;
 
     m_box = Box { center, size };
@@ -207,7 +198,7 @@ int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
 
 bool AABBBoundingVolume::contains( const Point3f &point ) const
 {
-    const auto centerDiffSqr = distanceSquared( getCenter(), point );
+    const auto centerDiffSqr = distance2( getCenter(), point );
     float radiusSqr = radius( m_sphere ) * radius( m_sphere );
     return ( centerDiffSqr < radiusSqr );
 }

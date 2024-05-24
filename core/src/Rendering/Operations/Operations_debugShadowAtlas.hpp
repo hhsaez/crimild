@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_SHADOW_ATLAS_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_SHADOW_ATLAS_
 
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

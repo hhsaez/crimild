@@ -29,17 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Point3Ops.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_inverse.hpp"
-#include "Mathematics/cross.hpp"
-#include "Mathematics/io.hpp"
-#include "Mathematics/normalize.hpp"
-#include "Mathematics/perspective.hpp"
-#include "Mathematics/swizzle.hpp"
-#include "Mathematics/trigonometry.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Simulation/Settings.hpp"
 
 using namespace crimild;
@@ -90,7 +80,7 @@ void Camera::setViewMatrix( const Matrix4f &view )
 
 const Matrix4f &Camera::getViewMatrix( void ) const
 {
-    return getWorld().invMat;
+    return Matrix4f( inverse( getWorld() ) );
 }
 
 void Camera::updateProjectionMatrix( void )
@@ -106,8 +96,8 @@ bool Camera::getPickRay( float portX, float portY, Ray3 &result ) const
     const auto rayClip = Vector4 { x, y, -1.0f, 1.0f };
 
     auto rayEye = inverse( getProjectionMatrix() ) * rayClip;
-    const auto rayOrigin = location( getWorld() );
-    const auto rayDirection = normalize( getWorld()( xyz( rayEye ) ) );
+    const auto rayOrigin = origin( getWorld() );
+    const auto rayDirection = normalize( getWorld()( Vector3( rayEye ) ) );
 
     result = Ray3 {
         rayOrigin,

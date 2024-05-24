@@ -29,7 +29,7 @@
 #define CRIMILD_COMPONENTS_PATH_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Transformation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

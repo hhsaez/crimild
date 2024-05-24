@@ -28,8 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 #define CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Material.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"

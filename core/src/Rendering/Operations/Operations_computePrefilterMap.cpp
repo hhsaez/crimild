@@ -26,10 +26,7 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Frustum.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Transformation_rotation.hpp"
-#include "Mathematics/perspective.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -86,7 +83,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computePrefilterMap( S
             .layout = VertexP3::getLayout(),
             .size = Vector3f { 10.0f, 10.0f, 10.0f },
             .invertFaces = true,
-        } );
+        }
+    );
 
     auto pipeline = [ & ] {
         auto pipeline = crimild::alloc< GraphicsPipeline >();
@@ -111,7 +109,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computePrefilterMap( S
                                 gl_Position = gl_Position.xyww;
                                 outPosition = inPosition;
                             }
-                        )" ),
+                        )"
+                        ),
                         crimild::alloc< Shader >(
                             Shader::Stage::FRAGMENT,
                             R"(
@@ -304,7 +303,9 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                                 prefilteredColor = prefilteredColor / totalWeight;
                                 outColor = vec4( prefilteredColor, 1.0 );
                             }
-                        )" ) } );
+                        )"
+                        ) }
+                );
                 program->vertexLayouts = { VertexLayout::P3 };
                 program->descriptorSetLayouts = {
                     [] {
@@ -339,7 +340,8 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                     }(),
                 };
                 return program;
-            }() );
+            }()
+        );
         pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
         return pipeline;
@@ -407,14 +409,15 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                             break;
                     }
 
-                    //t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = t.invMat; //t.computeModelMatrix().getInverse();
+                    // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+                    const auto vMatrix = Matrix4f( inverse( t ) );
 
                     return crimild::alloc< UniformBuffer >(
                         Props {
                             .view = vMatrix,
                             .proj = pMatrix,
-                        } );
+                        }
+                    );
                 }(),
             },
         };
@@ -460,5 +463,6 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport, int mipLeve
                     commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
                 }
             }
-        } );
+        }
+    );
 }

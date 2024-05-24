@@ -28,10 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAMEBUFFER_
 #define CRIMILD_CORE_RENDERING_FRAMEBUFFER_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/RTTI.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/RenderResource.hpp"
 

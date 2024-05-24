@@ -28,12 +28,8 @@
 #include "ArrowPrimitive.hpp"
 
 #include "ConePrimitive.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "CylinderPrimitive.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/cross.hpp"
-#include "Mathematics/normalize.hpp"
 
 namespace crimild {
 
@@ -81,7 +77,7 @@ namespace crimild {
             auto interval = params.interval;
             auto divisions = interval.divisions;
             auto upperBound = interval.upperBound;
-            auto slices = divisions - Vector2i::ONE;
+            auto slices = divisions - Vector2i::Constants::ONE;
             auto textureCount = interval.textureCount;
             auto evaluator = params.evaluator;
 
@@ -102,7 +98,7 @@ namespace crimild {
             if ( hasTexCoords )
                 ret.texCoords.resize( N );
 
-            auto evaluate = [ = ]( auto x, auto y ) -> Vector3f {
+            auto evaluate = [ = ]( float x, float y ) -> Vector3f {
                 auto domain = Vector2f {
                     x * upperBound.x / slices.x,
                     y * upperBound.y / slices.y,
@@ -230,7 +226,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
 
     // Join the cone and the cylinder.
     // The last points in the cone will be joined with the first ones in the cylinder
-    auto slices = divisions - Vector2i::ONE;
+    auto slices = divisions - Vector2i::Constants::ONE;
     for ( auto x = 0l; x < slices.x; ++x ) {
         auto next = ( x + 1 ) % divisions.x;
         cone.indices.add( coneVertexCount - divisions.x + x );
@@ -277,7 +273,7 @@ ArrowPrimitive::ArrowPrimitive( const Params &params ) noexcept
 
     cylinder.positions.add( Vector3f::Constants::ZERO );
     cylinder.normals.add( Vector3f::Constants::UNIT_Z );
-    cylinder.texCoords.add( Vector2f::ZERO );
+    cylinder.texCoords.add( Vector2f::Constants::ZERO );
 
     auto vertexCount = coneVertexCount + cylinderVertexCount;
     auto vertices = crimild::alloc< VertexBuffer >( layout, vertexCount );

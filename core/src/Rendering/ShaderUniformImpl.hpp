@@ -28,9 +28,9 @@
 #ifndef CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
 #define CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
 
-#include "Foundation/Profiler.hpp"
-#include "Mathematics/Matrix3.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Common/Profiler.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Renderer.hpp"
 #include "ShaderUniform.hpp"
 

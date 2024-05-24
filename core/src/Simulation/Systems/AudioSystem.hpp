@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_AUDIO_
 #define CRIMILD_SIMULATION_SYSTEMS_AUDIO_
 
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/Systems/System.hpp"
 
 namespace crimild {

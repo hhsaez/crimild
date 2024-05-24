@@ -27,9 +27,7 @@
 
 #include "Coding/MemoryEncoder.hpp"
 
-#include "Foundation/Log.hpp"
-#include "Foundation/ObjectFactory.hpp"
-#include "Foundation/Version.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Tags.hpp"
 
 using namespace crimild;

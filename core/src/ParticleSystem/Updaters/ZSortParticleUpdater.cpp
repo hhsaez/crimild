@@ -27,7 +27,7 @@
 
 #include "ZSortParticleUpdater.hpp"
 
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
@@ -49,9 +49,9 @@ void ZSortParticleUpdater::configure( Node *node, ParticleData *particles )
 void ZSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
     /*
-	const auto pCount = particles->getAliveCount();
+        const auto pCount = particles->getAliveCount();
 
-	const auto ps = _positions->getData< Vector3f >();
+        const auto ps = _positions->getData< Vector3f >();
     const auto ds = _distances->getData< Vector2f >();
 
     // Step 1: Get z values form particles

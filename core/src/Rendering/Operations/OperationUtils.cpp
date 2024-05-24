@@ -27,7 +27,7 @@
 
 #include "Rendering/Operations/OperationUtils.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
 

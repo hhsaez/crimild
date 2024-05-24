@@ -27,13 +27,13 @@
 
 #include "SkinnedMeshComponent.hpp"
 
+#include "Coding/Decoder.hpp"
+#include "Coding/Encoder.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Debug/DebugRenderHelper.hpp"
 #include "Rendering/SkinnedMesh.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
-#include "Debug/DebugRenderHelper.hpp"
-#include "Foundation/Log.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 
@@ -73,13 +73,13 @@ void SkinnedMeshComponent::update( const Clock &c )
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh attach to component" );
 		return;
 	}
-	
+
 	auto skeleton = mesh->getSkeleton();
 	if ( skeleton == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh skeleton attach to component" );
 		return;
 	}
-	
+
 	auto animationState = mesh->getAnimationState();
 	if ( animationState == nullptr ) {
         Log::error( CRIMILD_CURRENT_CLASS_NAME, "No skinned mesh animation state attach to component" );
@@ -133,7 +133,7 @@ void SkinnedMeshComponent::update( const Clock &c )
 			modelTransform = node->getLocal();
 		}
         */
-		
+
 		auto joint = skeleton->getJoints()->find( node->getName() );
 		if ( joint != nullptr ) {
 			Transformation t;
@@ -143,13 +143,13 @@ void SkinnedMeshComponent::update( const Clock &c )
 		}
 
 		node->setLocal( modelTransform );
-	}));		
+	}));
 }
 
-void SkinnedMeshComponent::setAnimationParams( 
-	float firstFrame, 
-	float lastFrame, 
-	bool loop, 
+void SkinnedMeshComponent::setAnimationParams(
+	float firstFrame,
+	float lastFrame,
+	bool loop,
 	float timeScale,
 	float timeOffset,
 	SkinnedMeshComponent::AnimationProgressCallback const &callback )
@@ -225,4 +225,3 @@ void SkinnedMeshComponent::load( Stream &s )
 }
 
 #endif
-

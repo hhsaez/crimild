@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCENE_GRAPH_GROUP_
 #define CRIMILD_SCENE_GRAPH_GROUP_
 
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Node.hpp"
 
 #include <functional>

@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
@@ -93,7 +93,8 @@ SharedPointer< Texture > Texture::CUBE_ONE = [] {
             crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
             crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
             crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ) } );
+            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ) }
+    );
 }();
 
 SharedPointer< Texture > createCheckerBoardTexture( crimild::Int32 size )
@@ -141,7 +142,8 @@ SharedPointer< Texture > Texture::CHECKERBOARD_256 = createCheckerBoardTexture( 
 SharedPointer< Texture > Texture::CHECKERBOARD_512 = createCheckerBoardTexture( 512 );
 
 SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
-    crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA ) );
+    crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+);
 
 Texture::Texture( std::string name )
     : NamedObject( name )

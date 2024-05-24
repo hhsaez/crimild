@@ -28,11 +28,7 @@
 #ifndef CRIMILD_RENDERING_VERTEX_
 #define CRIMILD_RENDERING_VERTEX_
 
-#include "Mathematics/ColorRGB.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/isEqual.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/VertexLayout.hpp"
 
 namespace crimild {

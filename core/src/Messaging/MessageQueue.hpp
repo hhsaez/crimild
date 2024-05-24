@@ -28,10 +28,7 @@
 #ifndef CRIMILD_MESSAGING_MESSAGE_QUEUE_
 #define CRIMILD_MESSAGING_MESSAGE_QUEUE_
 
-#include "Foundation/Log.hpp"
-#include "Foundation/Macros.hpp"
-#include "Foundation/NonCopyable.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <functional>
 #include <map>

@@ -27,7 +27,6 @@
 
 #include "BillboardComponent.hpp"
 
-#include "Mathematics/Numeric.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/Simulation.hpp"
 
@@ -43,8 +42,8 @@ void BillboardComponent::update( const Clock &c )
     if ( getNode()->hasParent() ) {
         assert( false );
         /*
-		auto invParentRot = getNode()->getParent()->getWorld().getRotate().getInverse();
-		getNode()->local().setRotate( invParentRot * camera->getWorld().getRotate() );
+                auto invParentRot = getNode()->getParent()->getWorld().getRotate().getInverse();
+                getNode()->local().setRotate( invParentRot * camera->getWorld().getRotate() );
         */
     }
 }

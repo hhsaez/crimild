@@ -26,7 +26,8 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/max.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -324,14 +325,16 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
             auto accessor2 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_2 );
             auto accessor3 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_3 );
 
-            for ( auto i = 0; i < instanceCount; ++i ) {
-                const auto &M = geometries[ i ]->getWorld().mat;
+            /*
+                        for ( auto i = 0; i < instanceCount; ++i ) {
+                            const auto &M = geometries[ i ]->getWorld().mat;
 
-                accessor0->set( i, M[ 0 ] );
-                accessor1->set( i, M[ 1 ] );
-                accessor2->set( i, M[ 2 ] );
-                accessor3->set( i, M[ 3 ] );
-            }
+                            accessor0->set( i, M[ 0 ] );
+                            accessor1->set( i, M[ 1 ] );
+                            accessor2->set( i, M[ 2 ] );
+                            accessor3->set( i, M[ 3 ] );
+                        }
+            */
 
             return data;
         }

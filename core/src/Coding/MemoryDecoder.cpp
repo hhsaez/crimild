@@ -27,9 +27,8 @@
 
 #include "MemoryDecoder.hpp"
 
+#include "Crimild_Foundation.hpp"
 #include "EncodedData.hpp"
-#include "Foundation/Log.hpp"
-#include "Foundation/ObjectFactory.hpp"
 #include "Tags.hpp"
 
 #include <sstream>

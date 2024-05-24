@@ -2,8 +2,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -40,14 +39,14 @@ Behavior::State LookAt::step( BehaviorContext *context )
     }
 
     auto target = context->getTargetAt( 0 );
-    auto targetPos = location( target->getLocal() );
-    auto agentPos = location( agent->getLocal() );
+    auto targetPos = origin( target->getLocal() );
+    auto agentPos = origin( agent->getLocal() );
 
     agent->setLocal(
         lookAt(
             agentPos,
             targetPos,
-            Vector3f::UP
+            Vector3f::Constants::UP
         )
     );
 

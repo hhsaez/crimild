@@ -40,7 +40,7 @@ namespace crimild {
         explicit OrientedBoxBoundingVolume( const Sphere &sphere );
         virtual ~OrientedBoxBoundingVolume( void );
 
-        virtual const Point3f &getCenter( void ) const override { return center( _sphere ); }
+        virtual const Point3f &getCenter( void ) const override { return origin( _sphere ); }
         virtual float getRadius( void ) const override { return radius( _sphere ); }
 
         virtual SharedPointer< BoundingVolume > clone( void ) const override;

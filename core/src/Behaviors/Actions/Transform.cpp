@@ -2,7 +2,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Interpolation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -19,7 +19,8 @@ Transform::Transform(
     crimild::Bool computeInTargetSpace,
     crimild::Bool computeFromTargetPosition,
     crimild::Bool applyTranslation,
-    crimild::Bool applyRotation )
+    crimild::Bool applyRotation
+)
     : _targetTransformation( targetTransformation ),
       _duration( duration ),
       _computeInTargetSpace( computeInTargetSpace ),

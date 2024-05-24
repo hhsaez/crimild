@@ -28,7 +28,7 @@
 #include "Visitors/BinTreeScene.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Random.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"

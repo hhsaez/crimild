@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_BEHAVIORS_ACTIONS_CLAMP_POSITION_
 
 #include "Behaviors/Behavior.hpp"
-#include "Mathematics/Bounds3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

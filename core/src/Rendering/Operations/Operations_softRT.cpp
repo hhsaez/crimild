@@ -28,28 +28,7 @@
 #include "Rendering/Operations/Operations_softRT.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Box_normal.hpp"
-#include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/ColorRGB_isZero.hpp"
-#include "Mathematics/Cylinder_normal.hpp"
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Normal3.hpp"
-#include "Mathematics/Random.hpp"
-#include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Sphere_normal.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_inverse.hpp"
-#include "Mathematics/Vector2.hpp"
-#include "Mathematics/Vector3.hpp"
-#include "Mathematics/easing.hpp"
-#include "Mathematics/intersect.hpp"
-#include "Mathematics/io.hpp"
-#include "Mathematics/isNaN.hpp"
-#include "Mathematics/min.hpp"
-#include "Mathematics/reflect.hpp"
-#include "Mathematics/refract.hpp"
-#include "Mathematics/swizzle.hpp"
-#include "Mathematics/whichSide.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
@@ -125,9 +104,9 @@ struct IntersectionResult {
                 const auto &v2 = scene.primitives.triangles[ scene.primitives.indices[ baseIdx + 2 ] ];
 
                 const auto T = Triangle {
-                    v0.position,
-                    v1.position,
-                    v2.position,
+                    Point3( v0.position ),
+                    Point3( v1.position ),
+                    Point3( v2.position ),
                 };
 
                 Real t;
@@ -136,7 +115,7 @@ struct IntersectionResult {
                     if ( t >= numbers::EPSILON && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) && ( !hasResult || t < result.t ) ) {
                         result.t = t;
                         result.point = R( result.t );
-                        result.setFaceNormal( R, normal3( v0.normal ) );
+                        result.setFaceNormal( R, Normal3( v0.normal ) );
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
@@ -577,7 +556,7 @@ namespace crimild {
             Ray3 ray;
             ColorRGB sampleColor;
             ColorRGB accumColor;
-            Vector2<> uv;
+            Vector2 uv;
             Int32 bounces;
             Int32 samples;
         };
@@ -683,11 +662,11 @@ namespace crimild {
                 double cosTheta = min( dot( -dir, result.normal ), Real( 1 ) );
                 double sinTheta = sqrt( Real( 1 ) - cosTheta * cosTheta );
                 const auto cannotRefract = refractionRatio * sinTheta > 1;
-                const auto scatteredDirection = [ & ] {
+                const auto scatteredDirection = [ & ]() -> Vector3 {
                     if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > random::next() ) {
                         return reflect( dir, result.normal );
                     } else {
-                        return refract( dir, result.normal, refractionRatio );
+                        return Vector3( refract( dir, result.normal, refractionRatio ) );
                     }
                 }();
                 scattered = Ray3 { result.point, scatteredDirection };

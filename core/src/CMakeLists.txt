@@ -2,16 +2,16 @@ crimild_trace()
 
 add_library( crimild_core OBJECT )
 
-target_sources( 
+target_sources(
     crimild_core
-    
+
     PUBLIC
     Animation/Accumulator.hpp
     Animation/Animation.hpp
     Animation/Channel.hpp
     Animation/ChannelImpl.hpp
     Animation/Clip.hpp
-    Animation/Skeleton.hpp   
+    Animation/Skeleton.hpp
     Audio/AudioListener.hpp
     Audio/AudioSource.hpp
     Behaviors/Actions/AnimateContextValue.hpp
@@ -82,6 +82,8 @@ target_sources(
     Coding/MemoryDecoder.hpp
     Coding/MemoryEncoder.hpp
     Coding/Tags.hpp
+    Common/Profiler.hpp
+    Common/Variant.hpp
     Components/AnimatorComponent.hpp
     Components/AudioListenerComponent.hpp
     Components/AudioSourceComponent.hpp
@@ -264,6 +266,7 @@ target_sources(
     SceneGraph/Switch.hpp
     SceneGraph/Text.hpp
     Simulation/AssetManager.hpp
+    Simulation/Clock.hpp
     Simulation/Console/Commands/EchoConsoleCommand.hpp
     Simulation/Console/Commands/SetConsoleCommand.hpp
     Simulation/Console/Console.hpp
@@ -377,6 +380,8 @@ target_sources(
     Coding/MemoryDecoder.cpp
     Coding/MemoryEncoder.cpp
     Coding/Tags.cpp
+    Common/Profiler.cpp
+    Common/Variant.cpp
     Components/AudioListenerComponent.cpp
     Components/AudioSourceComponent.cpp
     Components/BillboardComponent.cpp
@@ -539,6 +544,7 @@ target_sources(
     SceneGraph/Switch.cpp
     SceneGraph/Text.cpp
     Simulation/AssetManager.cpp
+    Simulation/Clock.cpp
     Simulation/Console/Commands/EchoConsoleCommand.cpp
     Simulation/Console/Commands/SetConsoleCommand.cpp
     Simulation/Console/Console.cpp
@@ -582,5 +588,11 @@ target_sources(
 
 target_include_directories( crimild_core PUBLIC . )
 target_compile_features( crimild_core PUBLIC cxx_std_20 )
+
+target_link_libraries(
+    crimild_core
+    PRIVATE Crimild::Foundation
+    PRIVATE Crimild::Mathematics
+)
 
 add_library( Crimild::Core ALIAS crimild_core )

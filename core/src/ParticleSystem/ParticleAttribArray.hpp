@@ -28,24 +28,19 @@
 #ifndef CRIMILD_PARTICLE_SYSTEM_ATTRIB_ARRAY_
 #define CRIMILD_PARTICLE_SYSTEM_ATTRIB_ARRAY_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Memory.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Foundation/Types.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
     using ParticleId = crimild::Size;
 
     /**
-	   \brief Default attrib types
+           \brief Default attrib types
 
-	   This is kept as a standar enum so it can be easily
-	   custumized by adding new types
-	 */
+           This is kept as a standar enum so it can be easily
+           custumized by adding new types
+         */
     class ParticleAttrib {
     public:
         enum {
@@ -70,32 +65,32 @@ namespace crimild {
     using ParticleAttribType = crimild::UInt16;
 
     /**
-	   \brief Interface for all particle attributes
-	 */
+           \brief Interface for all particle attributes
+         */
     class ParticleAttribArray : public SharedObject {
     public:
         virtual ~ParticleAttribArray( void ) { }
 
         /**
-		   \brief Resizes the array
-		 */
+                   \brief Resizes the array
+                 */
         virtual void reset( crimild::Size count ) = 0;
 
         /**
-		   \brief Swaps one attribute for another
+                   \brief Swaps one attribute for another
 
-		   Usually invoked when particles are killed
-		 */
+                   Usually invoked when particles are killed
+                 */
         virtual void swap( ParticleId a, ParticleId b ) = 0;
 
         /**
-		   \brief Gets the number of elements in the array
-		 */
+                   \brief Gets the number of elements in the array
+                 */
         virtual crimild::Size getCount( void ) const = 0;
 
         /**
-		   \brief Data accessor
-		 */
+                   \brief Data accessor
+                 */
         template< typename T >
         T &operator[]( crimild::Size idx )
         {
@@ -103,8 +98,8 @@ namespace crimild {
         }
 
         /**
-		   \brief Data accessor (const version)
-		 */
+                   \brief Data accessor (const version)
+                 */
         template< typename T >
         const T &operator[]( crimild::Size idx ) const
         {
@@ -112,8 +107,8 @@ namespace crimild {
         }
 
         /**
-		   \brief Useful templated function to get the data
-		 */
+                   \brief Useful templated function to get the data
+                 */
         template< typename T >
         T *getData( void )
         {
@@ -121,8 +116,8 @@ namespace crimild {
         }
 
         /**
-		   \brief Useful templated function to get the data (const version)
-		 */
+                   \brief Useful templated function to get the data (const version)
+                 */
         template< typename T >
         const T *getData( void ) const
         {
@@ -130,24 +125,24 @@ namespace crimild {
         }
 
         /**
-		   \brief Gets the raw data for the array
-		 */
+                   \brief Gets the raw data for the array
+                 */
         virtual void *getRawData( void ) = 0;
 
         /**
-		   \brief Gets the raw data for the array (const version)
-		 */
+                   \brief Gets the raw data for the array (const version)
+                 */
         virtual const void *getRawData( void ) const = 0;
     };
 
     using ParticleAttribArrayPtr = SharedPointer< ParticleAttribArray >;
 
     /**
-	   \brief Basic implementation for an attribute array
+           \brief Basic implementation for an attribute array
 
-	   \remarks Attribute data is stored such as active elements are at
-	   the very begining of the array.
-	 */
+           \remarks Attribute data is stored such as active elements are at
+           the very begining of the array.
+         */
     template< typename T >
     class ParticleAttribArrayImpl : public ParticleAttribArray {
     public:
@@ -188,10 +183,10 @@ namespace crimild {
 
     private:
         /**
-		   \brief Holds the data for the attributes
+                   \brief Holds the data for the attributes
 
-		   \remarks This member is NOT thread safe.
-		 */
+                   \remarks This member is NOT thread safe.
+                 */
         Array< T > _data;
     };
 

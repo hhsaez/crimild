@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_SIMULATION_EVENT_
 #define CRIMILD_CORE_SIMULATION_EVENT_
 
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Simulation/Input.hpp"
 

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 #define CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Geometry.hpp"
 
 namespace crimild {
@@ -45,8 +45,8 @@ namespace crimild {
         virtual ~Skybox( void ) = default;
 
         /**
-		   \name Coding
-		*/
+                   \name Coding
+                */
         //@{
 
     public:

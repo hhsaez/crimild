@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_COLOR_BLEND_STATE_
 #define CRIMILD_CORE_RENDERING_COLOR_BLEND_STATE_
 
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/CompareOp.hpp"
 
 namespace crimild {

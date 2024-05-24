@@ -27,7 +27,7 @@
 
 #include "BoxPrimitive.hpp"
 
-#include "Mathematics/Vector3Ops.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Vertex.hpp"
 
 #include <vector>
@@ -91,7 +91,8 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
             Vector3f { +w, -h, +d },
             Vector3f { -w, -h, +d },
             Vector3f { -w, -h, -d },
-        } );
+        }
+    );
 
     if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
         auto normals = vertices->get( VertexAttribute::Name::NORMAL );
@@ -135,7 +136,8 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 -U,
                 -U,
                 -U,
-            } );
+            }
+        );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::COLOR ) ) {
@@ -183,7 +185,8 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 m,
                 m,
                 m,
-            } );
+            }
+        );
     }
 
     if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
@@ -229,7 +232,8 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 Vector2f { s0, t1 },
                 Vector2f { s1, t1 },
                 Vector2f { s1, t0 },
-            } );
+            }
+        );
     }
     setVertexData( { vertices } );
 
@@ -284,5 +288,7 @@ BoxPrimitive::BoxPrimitive( const Params &params ) noexcept
                 20,
                 22,
                 23,
-            } ) );
+            }
+        )
+    );
 }

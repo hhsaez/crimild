@@ -28,12 +28,8 @@
 #ifndef CRIMILD_VISITORS_RT_ACCELERATION_
 #define CRIMILD_VISITORS_RT_ACCELERATION_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Mathematics/ColorRGB.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/max.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Visitors/NodeVisitor.hpp"
 

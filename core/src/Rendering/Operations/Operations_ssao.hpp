@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_SSAO_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_SSAO_
 
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/DescriptorSet.hpp"
 
 namespace crimild {

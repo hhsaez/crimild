@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,20 +28,16 @@
 #ifndef CRIMILD_CORE_FOUNDATION_PROFILER_
 #define CRIMILD_CORE_FOUNDATION_PROFILER_
 
-#include "Macros.hpp"
-#include "Memory.hpp"
-#include "SharedObject.hpp"
-#include "Singleton.hpp"
-#include "Types.hpp"
+#include "Crimild_Foundation.hpp"
 
-#include <string>
-#include <sstream>
-#include <thread>
-#include <map>
 #include <deque>
+#include <map>
+#include <sstream>
+#include <string>
+#include <thread>
 
 #ifndef CRIMILD_PROFILER_ENABLED
-#define CRIMILD_PROFILER_ENABLED 1
+    #define CRIMILD_PROFILER_ENABLED 1
 #endif
 
 namespace crimild {
@@ -96,8 +92,8 @@ namespace crimild {
         Profiler( void );
         ~Profiler( void );
 
-		void step( void );
-		
+        void step( void );
+
         void dump( void );
 
         void resetAll( void );
@@ -106,16 +102,15 @@ namespace crimild {
         void setOutputHandler( ProfilerOutputHandlerPtr const &handler ) { _outputHandler = handler; }
         ProfilerOutputHandlerPtr &getOutputHandler( void ) { return _outputHandler; }
 
-    // internal use only
-    public: 
+        // internal use only
+    public:
         int onSampleCreated( std::string name );
         void onSampleDestroyed( int index );
 
     private:
-		crimild::Real64 getTime( void );
+        crimild::Real64 getTime( void );
 
     private:
-
         struct ProfilerSampleInfo {
             bool isValid = false;
             bool isOpened = false;
@@ -123,13 +118,13 @@ namespace crimild {
             std::string name;
             unsigned int callCount = 0;
 
-			crimild::Real64 startTime = 0;
-			crimild::Real64 totalTime = 0;
-			crimild::Real64 childTime = 0;
+            crimild::Real64 startTime = 0;
+            crimild::Real64 totalTime = 0;
+            crimild::Real64 childTime = 0;
 
-			crimild::Real64 avgTime = 0.0f;
-			crimild::Real64 minTime = 0.0f;
-			crimild::Real64 maxTime = 0.0f;
+            crimild::Real64 avgTime = 0.0f;
+            crimild::Real64 minTime = 0.0f;
+            crimild::Real64 maxTime = 0.0f;
 
             unsigned int dataCount = 0;
 
@@ -146,15 +141,15 @@ namespace crimild {
 
         ProfilerOutputHandlerPtr _outputHandler;
 
-		crimild::Real64 _minFrameTime = 0;
-		crimild::Real64 _maxFrameTime = 0;
-		crimild::Size _frameCount = 0;
-		crimild::Real64 _totalFrameTime = 0;
-		crimild::Real64 _lastFrameTime = 0;
+        crimild::Real64 _minFrameTime = 0;
+        crimild::Real64 _maxFrameTime = 0;
+        crimild::Size _frameCount = 0;
+        crimild::Real64 _totalFrameTime = 0;
+        crimild::Real64 _lastFrameTime = 0;
         std::deque< crimild::Real64 > _frameTimeHistory;
 
-		crimild::Size _fps = 0;
-		crimild::Real64 _avgFrameTime = 0;
+        crimild::Size _fps = 0;
+        crimild::Real64 _avgFrameTime = 0;
     };
 
 }
@@ -166,4 +161,3 @@ namespace crimild {
 #endif
 
 #endif
-

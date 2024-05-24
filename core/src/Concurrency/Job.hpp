@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,93 +28,91 @@
 #ifndef CRIMILD_CORE_CONCURRENCY_JOB_
 #define CRIMILD_CORE_CONCURRENCY_JOB_
 
-#include "Foundation/NamedObject.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <atomic>
 #include <functional>
 
 namespace crimild {
 
-	namespace concurrency {
-        
+    namespace concurrency {
+
         class Job;
-        
+
         using JobPtr = SharedPointer< Job >;
 
-		/**
-		   \brief Callback for a job
-		 */
-		using JobCallback = std::function< void( void ) >;
+        /**
+           \brief Callback for a job
+         */
+        using JobCallback = std::function< void( void ) >;
 
-		/**
-		   \brief Callback for job continuations
-		 */
-		using JobContinuationCallback = std::function< void( void ) >;
+        /**
+           \brief Callback for job continuations
+         */
+        using JobContinuationCallback = std::function< void( void ) >;
 
-		/**
-		   \brief Describes a job that can be executed concurrently
-		 */
-		class Job : public SharedObject, public NamedObject {
-		public:
-			Job( void );
-			virtual ~Job( void );
+        /**
+           \brief Describes a job that can be executed concurrently
+         */
+        class Job : public SharedObject, public NamedObject {
+        public:
+            Job( void );
+            virtual ~Job( void );
 
-			void reset( void );
-			void reset( JobCallback const &callback );
-			void reset( JobPtr const &parent, JobCallback const &callback );
-			
-			void execute( void );
-			void finish( void );
+            void reset( void );
+            void reset( JobCallback const &callback );
+            void reset( JobPtr const &parent, JobCallback const &callback );
 
-			bool isCompleted( void ) const { return _childCount == 0; }
+            void execute( void );
+            void finish( void );
 
-		private:
-			JobCallback _callback;
+            bool isCompleted( void ) const { return _childCount == 0; }
 
-		public:
-			Job *getParent( void ) const { return _parent; }
+        private:
+            JobCallback _callback;
 
-		private:
-			Job *_parent = nullptr;
+        public:
+            Job *getParent( void ) const { return _parent; }
 
-			/**
-			   \name Child management
-			 */
-		public:
-			void increaseChildCount( void );
-			void decreaseChildCount( void );
-			size_t getChildCount( void ) const { return _childCount; }
+        private:
+            Job *_parent = nullptr;
 
-		private:
-			/**
-			   \brief Keep track of child jobs
+            /**
+               \name Child management
+             */
+        public:
+            void increaseChildCount( void );
+            void decreaseChildCount( void );
+            size_t getChildCount( void ) const { return _childCount; }
 
-			   The starting value for the _childCount variable depends on
-			   whether or not the job has anything to do. If the job was
-			   created with a valid callback, the child count starts at 1.
-			   Otherwise, it starts at zero indicating this job does nothing
-			   (and will probably be used to manage child jobs)
-			 */
+        private:
+            /**
+               \brief Keep track of child jobs
+
+               The starting value for the _childCount variable depends on
+               whether or not the job has anything to do. If the job was
+               created with a valid callback, the child count starts at 1.
+               Otherwise, it starts at zero indicating this job does nothing
+               (and will probably be used to manage child jobs)
+             */
             std::atomic< size_t > _childCount;
 
-			/**
-			   \name Continuation support
-			*/
-			//@{
-			
-		public:
-			void attachContinuation( JobContinuationCallback const &continuation );
+            /**
+               \name Continuation support
+            */
+            //@{
 
-		private:
-			std::vector< JobContinuationCallback > _continuations;
+        public:
+            void attachContinuation( JobContinuationCallback const &continuation );
 
-			//@}
-		};
+        private:
+            std::vector< JobContinuationCallback > _continuations;
 
-	}
+            //@}
+        };
+
+    }
 
 }
 
 #endif
-

@@ -27,8 +27,7 @@
 
 #include "SphereBoundingVolume.hpp"
 
-#include "Mathematics/Intersection.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 

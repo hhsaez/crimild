@@ -28,20 +28,7 @@
 #include "Visitors/RTAcceleration.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Bounds3.hpp"
-#include "Mathematics/Bounds3_bisect.hpp"
-#include "Mathematics/Bounds3_combine.hpp"
-#include "Mathematics/Bounds3_io.hpp"
-#include "Mathematics/Bounds3_overlaps.hpp"
-#include "Mathematics/Point3Ops.hpp"
-#include "Mathematics/Random.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/io.hpp"
-#include "Mathematics/max.hpp"
-#include "Mathematics/min.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Primitives/SpherePrimitive.hpp"
@@ -226,7 +213,10 @@ void RTAcceleration::visitGroup( Group *group ) noexcept
 
     // Compute a transformation for representing bounding volumes
     const auto size = Real( 0.5 ) * ( group->getWorldBound()->getMax() - group->getWorldBound()->getMin() );
-    auto boundingTransform = translation( Vector3f( group->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
+    auto boundingTransform = Transformation {
+        .translate = group->getWorldBound()->getCenter(),
+        .scale = Vector3 { size.x, size.y, size.z },
+    };
 
     const auto groupIndex = m_result.nodes.size();
 
@@ -399,7 +389,10 @@ void RTAcceleration::visitGeometry( Geometry *geometry ) noexcept
             .world = [ & ] {
                 // Compute a transformation for representing bounding volumes
                 const auto size = Real( 0.5 ) * ( geometry->getWorldBound()->getMax() - geometry->getWorldBound()->getMin() );
-                return translation( Vector3f( geometry->getWorldBound()->getCenter() ) ) * scale( size.x, size.y, size.z );
+                return Transformation {
+                    .translate = geometry->getWorldBound()->getCenter(),
+                    .scale = Vector3( size.x, size.y, size.z ),
+                };
             }(),
         }
     );
@@ -432,7 +425,10 @@ void RTAcceleration::visitCSGNode( CSGNode *csg ) noexcept
     }
 
     // Compute a transformation for representing bounding volumes
-    auto boundingTransform = translation( Vector3f( csg->getWorldBound()->getCenter() ) ) * scale( csg->getWorldBound()->getRadius() );
+    auto boundingTransform = Transformation {
+        .translate = csg->getWorldBound()->getCenter(),
+        .scale = Vector3( csg->getWorldBound()->getRadius() ),
+    };
 
     const auto csgIndex = m_result.nodes.size();
 

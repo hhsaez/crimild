@@ -29,8 +29,7 @@
 #define CRIMILD_CORE_COMPONENTS_MOTION_STATE_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
@@ -52,7 +51,7 @@ namespace crimild {
          *
          * This value is updated by crimild::behaviors::actions::MotionApply
          */
-        Vector3f velocity = Vector3f::ZERO;
+        Vector3f velocity = Vector3f::Constants::ZERO;
 
         /**
          * \brief Current position
@@ -63,7 +62,7 @@ namespace crimild {
          * It is updated by crimild::behaviors::actions::MotionApply based on
          * current velocity and steering force
          */
-        Point3f position = Point3f::ZERO;
+        Point3f position = Point3f::Constants::ZERO;
 
         /**
          * \brief Steering force
@@ -71,7 +70,7 @@ namespace crimild {
          * This value is reset by crimild::behaviors::actions::MotionReset on
          * every step.
          */
-        Vector3f steering = Vector3f::ZERO;
+        Vector3f steering = Vector3f::Constants::ZERO;
 
         float maxVelocity = 1.0f;
         float maxForce = 1.0f;

@@ -29,7 +29,7 @@
 #define CRIMILD_UI_LABEL_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/ColorRGBA.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

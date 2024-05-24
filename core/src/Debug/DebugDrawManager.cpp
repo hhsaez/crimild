@@ -27,14 +27,7 @@
 
 #include "Debug/DebugDrawManager.hpp"
 
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/distance.hpp"
-#include "Mathematics/isNaN.hpp"
-#include "Mathematics/orthonormalization.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 
 using namespace crimild;
@@ -82,13 +75,13 @@ void DebugDrawManager::addLine(
 
     const auto up = [ & ] {
         auto ret = cross( Vector3f( to ), Vector3f( from ) );
-        const auto retLengthSquared = lengthSquared( ret );
+        const auto retLengthSquared = length2( ret );
         if ( !isNaN( ret ) && !isNaN( retLengthSquared ) && retLengthSquared > 0 ) {
             return ret;
         } else {
             Vector3f right, up;
             orthonormalBasis( Vector3f( to ), right, up );
-            if ( isNaN( up ) || isZero( lengthSquared( up ) ) ) {
+            if ( isNaN( up ) || isZero( length2( up ) ) ) {
                 return Vector3f { 0, 1, 0 };
             }
             return up;
@@ -98,7 +91,7 @@ void DebugDrawManager::addLine(
     s_renderables.push_back(
         Renderable {
             primitive,
-            lookAt( from, to, up ) * scale( distance( from, to ) ),
+            lookAt( from, to, up )( scale( distance( from, to ) ) ),
             color,
             duration,
             depthEnabled,
@@ -155,7 +148,7 @@ void DebugDrawManager::addCircle( const Point3f &center, const Vector3f &normal,
     s_renderables.push_back(
         Renderable {
             primitive,
-            lookAt( center, center + normal, Vector3 { 0, 1, 0 } ) * scale( radius ),
+            lookAt( center, center + normal, Vector3 { 0, 1, 0 } )( scale( radius ) ),
             color,
             duration,
             depthEnabled,

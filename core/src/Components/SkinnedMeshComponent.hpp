@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 #define CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
 
 namespace crimild {
@@ -59,7 +59,8 @@ namespace crimild {
             bool loop,
             float timeScale = 1.0f,
             float timeOffset = 0.0f,
-            AnimationProgressCallback const &animationProgressCallack = nullptr );
+            AnimationProgressCallback const &animationProgressCallack = nullptr
+        );
 
     private:
         float _time = 0.0f;
@@ -83,8 +84,8 @@ namespace crimild {
         //@}
 
         /**
-			 \name Coding support
-		*/
+                         \name Coding support
+                */
         //@{
 
     public:

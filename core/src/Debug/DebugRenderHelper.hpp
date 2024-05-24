@@ -1,9 +1,8 @@
 #ifndef CRIMILD_DEBUG_RENDER_HELPER_
 #define CRIMILD_DEBUG_RENDER_HELPER_
 
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Transformation.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 #include <string>
 

@@ -29,8 +29,8 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "ColorMaskState.hpp"
-#include "Foundation/NamedObject.hpp"
-#include "Mathematics/ColorRGBA.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "ShaderProgram.hpp"
 #include "Texture.hpp"
 

@@ -29,11 +29,10 @@
 #define CRIMILD_CORE_CODING_MEMORY_ENCODER_
 
 #include "Codable.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "EncodedData.hpp"
 #include "Encoder.hpp"
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Containers/Stack.hpp"
-#include "Mathematics/Transformation.hpp"
 
 namespace crimild {
 

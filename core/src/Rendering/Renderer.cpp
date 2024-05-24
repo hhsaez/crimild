@@ -30,7 +30,7 @@
 #include "Animation/Skeleton.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderQueue.hpp"
@@ -128,35 +128,35 @@ void Renderer::presentFrame( void )
 
 void Renderer::render( RenderQueue *renderQueue, rendergraph::RenderGraph *renderGraph )
 {
-/*
-    auto lightCatalog = getLightCatalog();
-    renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
-        lightCatalog->bind( light );
-    });
+    /*
+        auto lightCatalog = getLightCatalog();
+        renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
+            lightCatalog->bind( light );
+        });
 
-    renderGraph->execute( this, renderQueue );
+        renderGraph->execute( this, renderQueue );
 
-    auto output = renderGraph->getOutput();
-    if ( output == nullptr ) {
-        CRIMILD_LOG_ERROR( "No output provided for render graph" );
-        return;
-    }
+        auto output = renderGraph->getOutput();
+        if ( output == nullptr ) {
+            CRIMILD_LOG_ERROR( "No output provided for render graph" );
+            return;
+        }
 
-    auto texture = output->getTexture();
-    if ( texture == nullptr ) {
-        CRIMILD_LOG_ERROR( "No valid texture for render graph output" );
-        return;
-    }
+        auto texture = output->getTexture();
+        if ( texture == nullptr ) {
+            CRIMILD_LOG_ERROR( "No valid texture for render graph output" );
+            return;
+        }
 
-    auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
-    assert( program && "No valid program to render texture" );
+        auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
+        assert( program && "No valid program to render texture" );
 
-    program->bindUniform( COLOR_MAP_UNIFORM, texture );
+        program->bindUniform( COLOR_MAP_UNIFORM, texture );
 
-    bindProgram( program );
-    drawScreenPrimitive( program );
-    unbindProgram( program );
-*/
+        bindProgram( program );
+        drawScreenPrimitive( program );
+        unbindProgram( program );
+    */
 }
 
 void Renderer::bindRenderTarget( RenderTarget *target )

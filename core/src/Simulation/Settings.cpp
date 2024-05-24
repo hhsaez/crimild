@@ -27,7 +27,7 @@
 
 #include "Simulation/Settings.hpp"
 
-#include "Foundation/Macros.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/FileSystem.hpp"
 
 using namespace crimild;

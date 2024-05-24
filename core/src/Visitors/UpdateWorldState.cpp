@@ -27,7 +27,7 @@
 
 #include "UpdateWorldState.hpp"
 
-#include "Mathematics/Transformation_operators.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
@@ -49,7 +49,7 @@ void UpdateWorldState::visitNode( Node *node )
     }
 
     if ( node->hasParent() ) {
-        node->setWorld( node->getParent()->getWorld() * node->getLocal() );
+        node->setWorld( node->getParent()->getWorld()( node->getLocal() ) );
     } else {
         node->setWorld( node->getLocal() );
     }

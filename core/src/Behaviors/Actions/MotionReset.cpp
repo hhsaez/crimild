@@ -28,9 +28,7 @@
 #include "MotionReset.hpp"
 
 #include "Components/MotionStateComponent.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;
@@ -65,16 +63,16 @@ Behavior::State MotionReset::step( BehaviorContext *context )
         return Behavior::State::FAILURE;
     }
 
-    m_motion->position = location( agent->getLocal() );
-    m_motion->steering = Vector3f::ZERO;
+    m_motion->position = origin( agent->getLocal() );
+    m_motion->steering = Vector3f::Constants::ZERO;
 
     // if ( context->hasTargets() ) {
     //     auto target = context->getTargetAt( 0 );
-    //     const auto targetLocation = location( target->getLocal() );
-    //     context->setValue( "motion.target", targetLocation );
+    //     const auto targetOrigin = origin( target->getLocal() );
+    //     context->setValue( "motion.target", targetOrigin );
     // } else {
     //     // set target to self so no motion will be applied
-    //     context->setValue( "motion.target", agentLocation );
+    //     context->setValue( "motion.target", agentOrigin );
     // }
 
     return Behavior::State::SUCCESS;

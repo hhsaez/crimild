@@ -27,7 +27,7 @@
 
 #include "FileDecoder.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 
 using namespace crimild;
 using namespace crimild::coding;

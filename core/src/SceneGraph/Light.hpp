@@ -28,8 +28,8 @@
 #ifndef CRIMILD_SCENEGRAPH_LIGHT_
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Mathematics/ColorRGB.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Node.hpp"
 #include "Rendering/Catalog.hpp"
 

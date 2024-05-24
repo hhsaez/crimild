@@ -27,7 +27,7 @@
 
 #include "Font.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 

@@ -28,9 +28,7 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_STREAMING_
 #define CRIMILD_SIMULATION_SYSTEMS_STREAMING_
 
-#include "Foundation/Containers/Map.hpp"
-#include "Foundation/Log.hpp"
-#include "Foundation/Macros.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/Systems/System.hpp"
 
 namespace crimild {

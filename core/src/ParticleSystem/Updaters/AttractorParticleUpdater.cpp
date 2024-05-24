@@ -29,13 +29,12 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 
 AttractorParticleUpdater::AttractorParticleUpdater( void )
-    : _attractor { Point3f::ZERO, 1.0f },
+    : _attractor { Point3f::Constants::ZERO, 1.0f },
       _strength( 1.0f )
 {
 }

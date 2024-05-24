@@ -29,7 +29,7 @@
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/VertexLayout.hpp"

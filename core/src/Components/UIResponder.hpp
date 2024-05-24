@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
 #define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
 
-#include "Mathematics/Ray3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "NodeComponent.hpp"
 #include "SceneGraph/Node.hpp"
 

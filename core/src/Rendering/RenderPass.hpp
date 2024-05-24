@@ -28,10 +28,8 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_PASS_
 #define CRIMILD_CORE_RENDERING_RENDER_PASS_
 
-#include "Foundation/Log.hpp"
-#include "Foundation/SharedObject.hpp"
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
@@ -129,7 +127,7 @@ namespace crimild {
 
         struct ClearValue {
             ColorRGBA color = ColorRGBA::Constants::CLEAR;
-            Vector2f depthStencil = Vector2f::UNIT_X;
+            Vector2f depthStencil = Vector2f::Constants::UNIT_X;
         };
         ClearValue clearValue;
 

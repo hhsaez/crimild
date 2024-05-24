@@ -29,8 +29,8 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Exceptions/HasParentException.hpp"
-#include "Foundation/Containers/Array.hpp"
 
 #include <algorithm>
 #include <cassert>

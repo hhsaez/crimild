@@ -2,7 +2,7 @@
 #define CRIMILD_CORE_DEBUG_RENDER_COMPONENT_
 
 #include "Components/NodeComponent.hpp"
-#include "Mathematics/ColorRGBA.hpp"
+#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

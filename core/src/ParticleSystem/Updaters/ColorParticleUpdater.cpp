@@ -27,7 +27,7 @@
 
 #include "ColorParticleUpdater.hpp"
 
-#include "Mathematics/Interpolation.hpp"
+#include "Crimild_Mathematics.hpp"
 
 using namespace crimild;
 
@@ -51,24 +51,24 @@ void ColorParticleUpdater::configure( Node *node, ParticleData *particles )
 void ColorParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
     /*
-	const auto count = particles->getAliveCount();
+        const auto count = particles->getAliveCount();
 
-	auto startData = _startColors->getData< ColorRGBA >();
-	auto endData = _endColors->getData< ColorRGBA >();
-	auto colorData = _colors->getData< ColorRGBA >();
-	auto timeData = _times->getData< crimild::Real32 >();
-	auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
+        auto startData = _startColors->getData< ColorRGBA >();
+        auto endData = _endColors->getData< ColorRGBA >();
+        auto colorData = _colors->getData< ColorRGBA >();
+        auto timeData = _times->getData< crimild::Real32 >();
+        auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
 
-	for ( crimild::Size i = 0; i < count; i++ ) {
-		const auto s0 = startData[ i ];
-		const auto s1 = endData[ i ];
+        for ( crimild::Size i = 0; i < count; i++ ) {
+                const auto s0 = startData[ i ];
+                const auto s1 = endData[ i ];
 
-		const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
+                const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
 
-		ColorRGBA c;
-		Interpolation::linear( s0, s1, t, c );
-		colorData[ i ] = c;
-	}
+                ColorRGBA c;
+                Interpolation::linear( s0, s1, t, c );
+                colorData[ i ] = c;
+        }
     */
 }
 

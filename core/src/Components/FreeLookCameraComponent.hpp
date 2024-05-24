@@ -28,8 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 #define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
-#include "Mathematics/Point3.hpp"
-#include "Mathematics/Vector2.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "NodeComponent.hpp"
 #include "Simulation/Input.hpp"

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_MATERIAL_
 #define CRIMILD_COMPONENTS_MATERIAL_
 
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
 #include "Rendering/Material.hpp"
 

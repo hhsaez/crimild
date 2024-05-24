@@ -28,9 +28,7 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_LIGHT_
 #define CRIMILD_RENDERING_UNIFORMS_LIGHT_
 
-#include "Mathematics/ColorRGBA.hpp"
-#include "Mathematics/Matrix4.hpp"
-#include "Mathematics/Vector4.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/UniformBuffer.hpp"
 
 namespace crimild {

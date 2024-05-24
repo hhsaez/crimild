@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_BOX_
 #define CRIMILD_PRIMITIVES_BOX_
 
-#include "Mathematics/Vector3.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 
@@ -45,7 +45,7 @@ namespace crimild {
         struct Params {
             Primitive::Type type = Primitive::Type::TRIANGLES;
             VertexLayout layout = VertexP3N3TC2::getLayout();
-            Vector3f size = Vector3f::ONE;
+            Vector3f size = Vector3f::Constants::ONE;
 
             // When set to `true`, faces will be inverted generating a hollow box instead
             // This is useful, for example, to quickly build a room.

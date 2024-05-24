@@ -28,9 +28,9 @@
 #ifndef CRIMILD_CORE_SCENE_GRAPH_TEXT_
 #define CRIMILD_CORE_SCENE_GRAPH_TEXT_
 
+#include "Crimild_Mathematics.hpp"
 #include "Geometry.hpp"
 #include "Group.hpp"
-#include "Mathematics/ColorRGBA.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/Material.hpp"
 
@@ -68,8 +68,8 @@ namespace crimild {
         void setHorizontalAlignment( HorizontalAlignment alignment );
         HorizontalAlignment getHorizontalAlignment( void ) const { return _horizontalAlignment; }
 
-        //bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
-        //void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
+        // bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
+        // void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
 
         // internal use only
         Geometry *getGeometry( void ) { return crimild::get_ptr( _geometry ); }
@@ -89,8 +89,8 @@ namespace crimild {
         HorizontalAlignment _horizontalAlignment = HorizontalAlignment::LEFT;
 
         /**
-		   \name Coding support
-		*/
+                   \name Coding support
+                */
         //@{
 
     public:

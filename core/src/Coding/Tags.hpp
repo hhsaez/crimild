@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_CODING_TAGS_
 #define CRIMILD_CORE_CODING_TAGS_
 
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild {
 

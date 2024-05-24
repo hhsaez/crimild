@@ -29,7 +29,7 @@
 
 #include "Coding/Decoder.hpp"
 #include "Coding/Encoder.hpp"
-#include "Mathematics/Vector4.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "UIFrameConstraint.hpp"
@@ -124,7 +124,7 @@ void UIFrame::decode( coding::Decoder &decoder )
 {
     NodeComponent::decode( decoder );
 
-    auto frame = Vector4f::ZERO;
+    auto frame = Vector4f::Constants::ZERO;
     decoder.decode( "extensions", frame );
     _extensions = Rectf {
         .origin = { frame.x, frame.y },

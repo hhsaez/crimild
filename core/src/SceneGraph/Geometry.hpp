@@ -28,7 +28,7 @@
 #ifndef CRIMILD_SCENE_GRAPH_GEOMETRY_
 #define CRIMILD_SCENE_GRAPH_GEOMETRY_
 
-#include "Foundation/Containers/Array.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Node.hpp"
 
 #include <functional>
@@ -68,8 +68,8 @@ namespace crimild {
         virtual void accept( NodeVisitor &visitor ) override;
 
         /**
-		   \name Instancing
-		 */
+                   \name Instancing
+                 */
         //@{
 
     public:
@@ -82,8 +82,8 @@ namespace crimild {
         //@}
 
         /**
-		   \name Descriptors
-		*/
+                   \name Descriptors
+                */
         //@{
 
     public:

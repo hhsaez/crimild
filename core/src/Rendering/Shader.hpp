@@ -29,17 +29,16 @@
 #define CRIMILD_RENDERING_SHADER_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/FilePath.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <string>
 
 namespace crimild {
 
     /**
-	   \todo There's no point in keeping the data after the shader has been used
-	   in a rendering pipeline. We should clean it.
-	 */
+           \todo There's no point in keeping the data after the shader has been used
+           in a rendering pipeline. We should clean it.
+         */
     class Shader : public coding::Codable {
         CRIMILD_IMPLEMENT_RTTI( crimild::Shader )
 
@@ -81,10 +80,10 @@ namespace crimild {
         inline const Stage &getStage( void ) const noexcept { return m_stage; }
 
         /**
-		   \brief Returns a printable version of the shader stage
+                   \brief Returns a printable version of the shader stage
 
-		   This is mostly for debugging purposes.
-		 */
+                   This is mostly for debugging purposes.
+                 */
         inline std::string getStageDescription( void ) const noexcept
         {
             return getStageDescription( getStage() );
@@ -112,8 +111,8 @@ namespace crimild {
 
         //@}
         /**
-		   \deprecated
-		 */
+                   \deprecated
+                 */
         //@{
 
     public:

@@ -28,8 +28,7 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_RENDER_
 #define CRIMILD_SIMULATION_SYSTEMS_RENDER_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Simulation/Systems/System.hpp"
 
 namespace crimild {

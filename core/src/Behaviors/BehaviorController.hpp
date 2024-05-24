@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTROLLER_
 
 #include "Components/NodeComponent.hpp"
-#include "Foundation/Containers/Map.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Messaging/MessageQueue.hpp"
 
 namespace crimild {

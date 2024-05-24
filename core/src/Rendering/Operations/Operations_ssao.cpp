@@ -28,8 +28,7 @@
 #include "Rendering/Operations/Operations_ssao.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Mathematics/Interpolation.hpp"
-#include "Mathematics/normalize.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -68,7 +67,8 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::ssao( SharedPointer< F
 
                                     vec2( -1.0, 1.0 ),
                                     vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 ) );
+                                    vec2( 1.0, 1.0 )
+                                );
 
                                 vec2 texCoords[ 6 ] = vec2[](
                                     vec2( 0.0, 0.0 ),
@@ -77,14 +77,17 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::ssao( SharedPointer< F
 
                                     vec2( 0.0, 0.0 ),
                                     vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 ) );
+                                    vec2( 1.0, 0.0 )
+                                );
 
                                 layout( location = 0 ) out vec2 outTexCoord;
 
                                 void main() {
                                     gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
                                     outTexCoord = texCoords[ gl_VertexIndex ];
-                                } ) ),
+                                }
+                            )
+                        ),
                             crimild::alloc< Shader >(
                                 Shader::Stage::FRAGMENT,
                                 R"(
@@ -154,8 +157,10 @@ vec3 color = vec3( occlusion );
 
 
                                         outColor = vec4( color, 1.0 );
-                                    } )" ),
-                    } );
+                                    } )"
+                            ),
+                    }
+                );
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -188,7 +193,8 @@ vec3 color = vec3( occlusion );
                     }(),
                 };
                 return program;
-            }() );
+            }()
+        );
         pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
         pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
         return pipeline;
@@ -236,9 +242,10 @@ vec3 color = vec3( occlusion );
                                 distribution( generator ) * 2.0f - 1.0f,
                                 distribution( generator ) * 2.0f - 1.0f,
                                 distribution( generator ),
-                            } );
-                        //sample *= distribution( generator );
-                        // Place larger weights on samples closer to the fragment
+                            }
+                        );
+                        // sample *= distribution( generator );
+                        //  Place larger weights on samples closer to the fragment
                         auto scale = Real32( i ) / 64.0f;
                         Interpolation::linear( 0.1f, 1.0f, scale * scale, scale );
                         data.samples[ i ] = sample * scale;
@@ -249,7 +256,8 @@ vec3 color = vec3( occlusion );
                             data.radius = settings->get< Real32 >( "video.ssao.radius", 5.0 );
                             data.bias = settings->get< Real32 >( "video.ssao.bias", 0.05 );
                             return data;
-                        } );
+                        }
+                    );
                 }(),
             },
             Descriptor {
@@ -260,7 +268,7 @@ vec3 color = vec3( occlusion );
                         // Kernel rotation texture
                         auto imageView = crimild::alloc< ImageView >();
                         imageView->image = [] {
-                            //auto data = ByteArray( 16 * 4 );
+                            // auto data = ByteArray( 16 * 4 );
                             auto data = Array< Vector4f >( 16 );
                             std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
                             std::default_random_engine generator;
@@ -288,7 +296,10 @@ vec3 color = vec3( occlusion );
                                             auto bytes = ByteArray( data.size() * sizeof( Vector4f ) );
                                             memcpy( bytes.getData(), data.getData(), bytes.size() );
                                             return bytes;
-                                        }() ) ) );
+                                        }()
+                                    )
+                                )
+                            );
                             return image;
                         }();
                         return imageView;
@@ -331,5 +342,6 @@ vec3 color = vec3( occlusion );
             commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
             commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
             commandBuffer->draw( 6 );
-        } );
+        }
+    );
 }

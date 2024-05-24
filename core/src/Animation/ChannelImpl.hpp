@@ -115,7 +115,7 @@ namespace crimild {
 
             void interpolate( const Quaternion &start, const Quaternion &end, crimild::Real32 t, Quaternion &result )
             {
-                Interpolation::slerp( start, end, t, result );
+                result = slerp( start, end, t );
             }
 
         private:
@@ -123,8 +123,8 @@ namespace crimild {
             KeyArray _keys;
 
             /**
-			   \name Coding
-			*/
+                           \name Coding
+                        */
             //@{
 
         public:
