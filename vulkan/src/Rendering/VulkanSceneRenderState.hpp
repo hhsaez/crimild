@@ -28,8 +28,8 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SCENE_RENDER_STATE_
 #define CRIMILD_VULKAN_RENDERING_SCENE_RENDER_STATE_
 
+#include "Crimild_Mathematics.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Mathematics/Matrix4.hpp"
 #include "SceneGraph/Light.hpp"
 
 #include <unordered_map>

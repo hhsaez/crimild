@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 

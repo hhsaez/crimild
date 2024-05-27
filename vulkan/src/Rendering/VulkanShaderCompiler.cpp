@@ -27,7 +27,7 @@
 
 #include "Rendering/VulkanShaderCompiler.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Shader.hpp"
 
 // TODO (hernan): In order for the Vulkan shader compiler to work correctly, make sure there

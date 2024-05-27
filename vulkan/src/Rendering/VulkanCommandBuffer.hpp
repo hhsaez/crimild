@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_VULKAN_RENDERING_COMMAND_BUFFER_
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
 

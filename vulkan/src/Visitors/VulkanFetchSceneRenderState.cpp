@@ -65,17 +65,17 @@ void FetchSceneRenderState::visitGeometry( Geometry *geometry ) noexcept
 
     if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
         if ( auto m = std::dynamic_pointer_cast< UnlitMaterial >( material ) ) {
-            m_result.envRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
+            m_result.envRenderables[ m ][ primitive ].push_back( { Matrix4( geometry->getWorld() ) } );
         }
         return;
     }
 
     // TODO: replace dynamic casts with render mode for materials
     if ( auto m = std::dynamic_pointer_cast< materials::PrincipledBSDF >( material ) ) {
-        m_result.litRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
-        m_result.shadowCasters[ primitive ].push_back( { geometry->getWorld().mat } );
+        m_result.litRenderables[ m ][ primitive ].push_back( { Matrix4( geometry->getWorld() ) } );
+        m_result.shadowCasters[ primitive ].push_back( { Matrix4( geometry->getWorld() ) } );
     } else if ( auto m = std::dynamic_pointer_cast< UnlitMaterial >( material ) ) {
-        m_result.unlitRenderables[ m ][ primitive ].push_back( { geometry->getWorld().mat } );
+        m_result.unlitRenderables[ m ][ primitive ].push_back( { Matrix4( geometry->getWorld() ) } );
     }
 }
 

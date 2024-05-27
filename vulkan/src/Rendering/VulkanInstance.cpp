@@ -27,8 +27,6 @@
 
 #include "Rendering/VulkanInstance.hpp"
 
-#include "Foundation/Log.hpp"
-#include "Foundation/Version.hpp"
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Simulation/Settings.hpp"
 #include "VulkanRenderDevice.hpp"

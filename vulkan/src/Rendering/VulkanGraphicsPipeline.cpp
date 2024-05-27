@@ -27,7 +27,6 @@
 
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 
-#include "Foundation/Log.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"

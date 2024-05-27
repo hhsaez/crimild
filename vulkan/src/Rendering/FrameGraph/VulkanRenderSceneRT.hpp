@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_RT
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_RT
 
-#include "Mathematics/Normal3Ops.hpp"
-#include "Mathematics/dot.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Visitors/RTAcceleration.hpp"
 

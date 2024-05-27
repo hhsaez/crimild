@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET
 #define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanDescriptor.hpp"
 

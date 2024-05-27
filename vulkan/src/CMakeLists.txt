@@ -33,13 +33,13 @@ endif ()
 
 add_library( crimild_vulkan OBJECT )
 
-target_sources( 
+target_sources(
     crimild_vulkan
 
     PUBLIC Crimild_Vulkan.hpp
 
     PRIVATE Crimild_Vulkan.cpp
-    
+
     PRIVATE Foundation/VulkanInitializers.hpp
     PRIVATE Foundation/VulkanUtils.cpp
     PRIVATE Foundation/VulkanUtils.hpp
@@ -89,7 +89,7 @@ target_sources(
     PRIVATE Rendering/VulkanImage.hpp
     PRIVATE Rendering/VulkanImageView.cpp
     PRIVATE Rendering/VulkanImageView.hpp
-    PRIVATE Rendering/VulkanInstance.cpp 
+    PRIVATE Rendering/VulkanInstance.cpp
     PRIVATE Rendering/VulkanInstance.hpp
     PRIVATE Rendering/VulkanPhysicalDevice.cpp
     PRIVATE Rendering/VulkanPhysicalDevice.hpp
@@ -121,25 +121,27 @@ target_sources(
     PRIVATE Visitors/VulkanFetchSceneRenderState.hpp
 )
 
-target_include_directories( 
+target_include_directories(
 	crimild_vulkan
-	PUBLIC . 
+	PUBLIC .
     # Make sure to include GLSLang headers before Vulkan's so there is no conflict and
     # the app will run correctly. Otherwise, you may seem errors when compiling shaders
     # due to invalid resource settings (like when using gl_VertexIdentifier in arrays)
     PUBLIC ${PROJECT_SOURCE_DIR}/third-party/glslang
-	PUBLIC ${Vulkan_INCLUDE_DIRS} 
+	PUBLIC ${Vulkan_INCLUDE_DIRS}
 )
 
-target_link_libraries( 
+target_link_libraries(
 	crimild_vulkan
+    PRIVATE Crimild::Foundation
+    PRIVATE Crimild::Mathematics
 	PRIVATE Crimild::Core
 
-    # Vulkan libraries are made public so they can be used in other projects, like 
+    # Vulkan libraries are made public so they can be used in other projects, like
     # the editor or players
 	PUBLIC ${Vulkan_LIBRARY}
     PUBLIC glslang
-    PUBLIC SPIRV 
+    PUBLIC SPIRV
 )
 
 add_library( Crimild::Vulkan ALIAS crimild_vulkan )

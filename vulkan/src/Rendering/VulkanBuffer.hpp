@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_BUFFER
 #define CRIMILD_VULKAN_RENDERING_BUFFER
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild::vulkan {

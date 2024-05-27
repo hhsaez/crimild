@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_CACHE
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_CACHE
 
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {

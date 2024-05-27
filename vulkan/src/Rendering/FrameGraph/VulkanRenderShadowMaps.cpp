@@ -27,20 +27,7 @@
 
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
 
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Transformation_lookAt.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector3_constants.hpp"
-#include "Mathematics/Vector4Ops.hpp"
-#include "Mathematics/ceil.hpp"
-#include "Mathematics/length.hpp"
-#include "Mathematics/max.hpp"
-#include "Mathematics/ortho.hpp"
-#include "Mathematics/perspective.hpp"
-#include "Mathematics/swizzle.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/UniformBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
@@ -344,7 +331,7 @@ namespace crimild::vulkan::framegraph {
             };
 
             for ( auto i = 0l; i < 8; ++i ) {
-                const auto inversePoint = invViewProj * vector4( frustumCorners[ i ], 1 );
+                const auto inversePoint = invViewProj * Vector4( frustumCorners[ i ] );
                 frustumCorners[ i ] = Vector3f( inversePoint / inversePoint.w );
             }
 
@@ -360,7 +347,7 @@ namespace crimild::vulkan::framegraph {
             for ( auto i = 0l; i < 8; ++i ) {
                 frustumCenter = frustumCenter + frustumCorners[ i ];
             }
-            frustumCenter = frustumCenter / 8.0;
+            frustumCenter = frustumCenter / 8.0f;
 
             auto far = numbers::NEGATIVE_INFINITY;
             auto near = numbers::POSITIVE_INFINITY;
@@ -376,7 +363,15 @@ namespace crimild::vulkan::framegraph {
             const auto minExtents = -maxExtents;
 
             const auto lightDirection = light->getDirection();
-            const auto lightViewMatrix = lookAt( Point3f { frustumCenter + lightDirection * minExtents.z }, Point3f( frustumCenter ), Vector3f::Constants::UP ).invMat;
+            const auto lightViewMatrix = Matrix4(
+                inverse(
+                    lookAt(
+                        Point3f { frustumCenter + lightDirection * minExtents.z },
+                        Point3f( frustumCenter ),
+                        Vector3f::Constants::UP
+                    )
+                )
+            );
 
             // Swap Y-coordinate min/max because of Vulkan's inverted coordinate system...
             const auto lightProjectionMatrix = ortho( minExtents.x, maxExtents.x, maxExtents.y, minExtents.y, 0.0f, maxExtents.z - minExtents.z );
@@ -469,7 +464,7 @@ namespace crimild::vulkan::framegraph {
                             Shader::Stage::VERTEX,
                             R"(
                                 layout ( location = 0 ) in vec3 inPosition;
-                            
+
                                 layout ( set = 0, binding = 0 ) uniform RenderPassUniforms {
                                     mat4 lightSpaceMatrix;
                                     vec3 lightPosition;
@@ -478,7 +473,7 @@ namespace crimild::vulkan::framegraph {
                                 layout( push_constant ) uniform Uniforms {
                                     mat4 model;
                                 };
-                            
+
                                 layout ( location = 0 ) out vec3 outLightPosition;
                                 layout ( location = 1 ) out vec3 outWorldPosition;
 
@@ -486,7 +481,7 @@ namespace crimild::vulkan::framegraph {
                                 {
                                     vec4 worldPosition = model * vec4( inPosition, 1.0 );
                                     gl_Position = lightSpaceMatrix * worldPosition;
-                            
+
                                     outLightPosition = lightPosition;
                                     outWorldPosition = worldPosition.xyz;
                                 }
@@ -497,7 +492,7 @@ namespace crimild::vulkan::framegraph {
                             R"(
                                 layout ( location = 0 ) in vec3 inLightPosition;
                                 layout ( location = 1 ) in vec3 inWorldPosition;
-                            
+
                                 layout ( location = 0 ) out float outColor;
 
                                 void main()
@@ -626,11 +621,11 @@ namespace crimild::vulkan::framegraph {
 
             // Update light uniforms for this layer.
             if ( auto uniforms = m_resources.lights[ light ][ layerIndex ].uniforms.get() ) {
-                const auto lightPos = location( light->getWorld() );
+                const auto lightPos = origin( light->getWorld() );
                 uniforms->setValue(
                     Resources::LightData::UniformData {
                         .lightSpaceMatrix = lightSpaceMatrix,
-                        .lightPosition = lightPos,
+                        .lightPosition = Vector3f( lightPos ),
                     }
                 );
             }
@@ -705,14 +700,14 @@ namespace crimild::vulkan::framegraph {
             const auto S = [ layerIndex ]() {
                 switch ( layerIndex ) {
                     case 2: // positive y
-                        return scale( 1, -1, 1 ).mat;
+                        return Matrix4( scale( 1, -1, 1 ) );
                     default:
-                        return scale( -1, 1, 1 ).mat;
+                        return Matrix4( scale( -1, 1, 1 ) );
                 }
             }();
 
-            const auto lightPos = location( light->getWorld() );
-            const auto t = [ lightPos, layerIndex ]() {
+            const auto lightPos = origin( light->getWorld() );
+            const auto t = [ lightPos, layerIndex ]() -> Transformation {
                 switch ( layerIndex ) {
                     case 0: // positive x
                         return lookAt(
@@ -759,7 +754,7 @@ namespace crimild::vulkan::framegraph {
                 }
             }();
 
-            const auto vMatrix = t.invMat;
+            const auto vMatrix = Matrix4f( inverse( t ) );
 
             return S * pMatrix * vMatrix;
         }
@@ -936,7 +931,7 @@ namespace crimild::vulkan::framegraph {
 
                         // Use a perspective projection for light space matrix when using
                         // spot lights, using the radius as limit.
-                        shadowMap->setLightSpaceMatrix( 0, perspective( 90, 1, 0.01f, light->getRadius() ) * light->getWorld().invMat );
+                        shadowMap->setLightSpaceMatrix( 0, perspective( 90, 1, 0.01f, light->getRadius() ) * Matrix4( inverse( light->getWorld() ) ) );
                         renderShadowMapImage(
                             light.get(),
                             shadowCasters,

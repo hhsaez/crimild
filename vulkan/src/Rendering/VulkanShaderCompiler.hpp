@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 #define CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 
-#include "Foundation/Containers/Array.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Shader.hpp"
 
 #include <string>

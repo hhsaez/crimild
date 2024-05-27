@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_UTILS_
 #define CRIMILD_VULKAN_UTILS_
 
-#include "Foundation/Log.hpp"
-#include "Foundation/Types.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Foundation/VulkanInitializers.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Format.hpp"

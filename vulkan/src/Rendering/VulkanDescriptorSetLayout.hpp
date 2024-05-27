@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_LAYOUT
 #define CRIMILD_VULKAN_RENDERING_DESCRIPTOR_SET_LAYOUT
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild::vulkan {

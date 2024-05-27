@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FENCE
 #define CRIMILD_VULKAN_RENDERING_FENCE
 
-#include "Foundation/Named.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild::vulkan {

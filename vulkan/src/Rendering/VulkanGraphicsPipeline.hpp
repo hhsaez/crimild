@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_GRAPHICS_PIPELINE_
 #define CRIMILD_VULKAN_RENDERING_GRAPHICS_PIPELINE_
 
-#include "Foundation/Memory.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ColorBlendState.hpp"

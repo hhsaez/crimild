@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_VIEW_
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild {
