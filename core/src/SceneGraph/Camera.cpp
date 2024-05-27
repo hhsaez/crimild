@@ -78,7 +78,7 @@ void Camera::setViewMatrix( const Matrix4f &view )
     */
 }
 
-const Matrix4f &Camera::getViewMatrix( void ) const
+Matrix4f Camera::getViewMatrix( void ) const
 {
     return Matrix4f( inverse( getWorld() ) );
 }
