@@ -68,51 +68,56 @@ Behavior::State MotionApply::step( BehaviorContext *context )
     } else {
         // Agent has a mass, so movement should account for some inertia.
         steering = steering / mass;
-        velocity = clamp( velocity + steering, Vector3::Constants::ZERO, maxVelocity );
+        // velocity = clamp( velocity + steering, Vector3::Constants::ZERO, maxVelocity );
+        velocity = velocity + steering;
+    }
+
+    if ( !isZero( velocity ) ) {
+        velocity = normalize( velocity );
     }
 
     position = position + dt * velocity;
 
     agent->setLocal( translation( Vector3f( position ) ) );
+
 #if 0
-	auto velocity = context->getValue< Vector3f >( "motion.velocity" );
-	auto steering = context->getValue< Vector3f >( "motion.steering" );
-	auto position = context->getValue< Vector3f >( "motion.position" );
+    auto velocity = context->getValue< Vector3f >( "motion.velocity" );
+    auto steering = context->getValue< Vector3f >( "motion.steering" );
+    auto position = context->getValue< Vector3f >( "motion.position" );
 
-	auto maxForce = context->getValue< crimild::Real32 >( "motion.max_force" );
-	steering = steering.getTruncated( maxForce );
+    auto maxForce = context->getValue< crimild::Real32 >( "motion.max_force" );
+    steering = steering.getTruncated( maxForce );
 
-	auto mass = context->getValue< crimild::Real32 >( "motion.mass" );
-	steering /= mass;
+    auto mass = context->getValue< crimild::Real32 >( "motion.mass" );
+    steering /= mass;
 
-	auto maxVelocity = context->getValue< crimild::Real32 >( "motion.max_velocity" );
-	velocity = truncate( velocity + steering, maxVelocity );
+    auto maxVelocity = context->getValue< crimild::Real32 >( "motion.max_velocity" );
+    velocity = truncate( velocity + steering, maxVelocity );
 
-	position += context->getClock().getDeltaTime() * velocity;
+    position += context->getClock().getDeltaTime() * velocity;
 
-	auto agent = context->getAgent();
-	auto nav = agent->getComponent< NavigationController >();
-	if ( nav != nullptr ) {
-		nav->move( position );
-		position = agent->getLocal().getTranslate();
-	}
-	else {
-		agent->local().setTranslate( position );
-	}
+    auto agent = context->getAgent();
+    auto nav = agent->getComponent< NavigationController >();
+    if ( nav != nullptr ) {
+        nav->move( position );
+        position = agent->getLocal().getTranslate();
+    } else {
+        agent->local().setTranslate( position );
+    }
 
-	auto velocityMagnitude = velocity.getMagnitude();
+    auto velocityMagnitude = velocity.getMagnitude();
 
-	if ( velocityMagnitude > 1.0f ) {
-		// only apply rotation if needed
-		auto dir = velocity;
-		dir[ 1 ] = 0.0f;
-		dir.normalize();
-		agent->local().setRotate( Quaternion4f::createFromDirection( dir ) );
-	}
+    if ( velocityMagnitude > 1.0f ) {
+        // only apply rotation if needed
+        auto dir = velocity;
+        dir[ 1 ] = 0.0f;
+        dir.normalize();
+        agent->local().setRotate( Quaternion4f::createFromDirection( dir ) );
+    }
 
-	context->setValue( "motion.position", position );
-	context->setValue( "motion.velocity", velocity );
-	context->setValue( "motion.velocity.magnitude", velocityMagnitude );
+    context->setValue( "motion.position", position );
+    context->setValue( "motion.velocity", velocity );
+    context->setValue( "motion.velocity.magnitude", velocityMagnitude );
 #endif
 
     return Behavior::State::SUCCESS;

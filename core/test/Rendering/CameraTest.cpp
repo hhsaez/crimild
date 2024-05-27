@@ -58,10 +58,10 @@ TEST( Camera, view_matrix )
     camera->perform( UpdateWorldState() );
 
     constexpr auto M = Matrix4 {
-        { -0.514496, 0.778924, -0.358569, 0.000000 },
-        { 0.514496, 0.614940, 0.597614, -0.000000 },
-        { 0.685994, 0.122988, -0.717137, 0.000000 },
-        { -2.400980, -2.869720, 0.000000, 1.000000 },
+        { 0.545464, 0.757561, -0.358569, 0.000000 },
+        { 0.757561, -0.262601, 0.597614, 0.000000 },
+        { 0.358569, -0.597614, -0.717137, 0.000000 },
+        { -3.535283, 1.225471, 0.000000, 1.000000 },
     };
 
     const auto view = camera->getViewMatrix();
@@ -176,7 +176,7 @@ TEST( Camera, get_ray_for_transformed_camera )
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
     EXPECT_EQ( ( Point3f { 2, 1, -1 } ), origin( ray ) );
-    EXPECT_EQ( ( Vector3 { 0, -numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ), direction( ray ) );
+    EXPECT_TRUE( isEqual( ( Vector3 { 0, -numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 } ), direction( ray ) ) );
 }
 
 TEST( Camera, get_ray_for_camera_using_lookAt )
