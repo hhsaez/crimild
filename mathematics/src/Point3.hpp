@@ -30,8 +30,8 @@
 
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
-#include "Types.hpp"
 #include "Vector3.hpp"
+#include "types.hpp"
 
 #include <limits>
 

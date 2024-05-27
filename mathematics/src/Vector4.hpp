@@ -31,8 +31,8 @@
 #include "Normal3.hpp"
 #include "Point3.hpp"
 #include "Tuple4.hpp"
-#include "Types.hpp"
 #include "Vector3.hpp"
+#include "types.hpp"
 
 #include <limits>
 

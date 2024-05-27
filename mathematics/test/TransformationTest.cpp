@@ -511,4 +511,11 @@ TEST( Transformation, to_matrix )
     constexpr auto T = crimild::translation( 1, 2, 3 );
     constexpr auto M = crimild::Matrix4( T );
     EXPECT_TRUE( crimild::isEqual( M[ 3 ], crimild::Vector4( 1, 2, 3, 1 ) ) );
+
+    constexpr auto S = crimild::scale( 1, 2, 3 );
+    constexpr auto MS = crimild::Matrix4( S );
+    EXPECT_EQ( MS[ 0 ][ 0 ], 1 );
+    EXPECT_EQ( MS[ 1 ][ 1 ], 2 );
+    EXPECT_EQ( MS[ 2 ][ 2 ], 3 );
+    EXPECT_EQ( MS[ 3 ][ 3 ], 1 );
 }

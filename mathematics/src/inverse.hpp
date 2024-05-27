@@ -30,11 +30,11 @@
 
 #include "Matrix3.hpp"
 #include "Matrix4.hpp"
-#include "Numbers.hpp"
 #include "Quaternion.hpp"
 #include "Transformation.hpp"
 #include "conjugate.hpp"
 #include "length.hpp"
+#include "numbers.hpp"
 
 #include <cassert>
 

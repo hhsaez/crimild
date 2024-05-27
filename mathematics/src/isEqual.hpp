@@ -30,7 +30,6 @@
 
 #include "ColorRGB.hpp"
 #include "ColorRGBA.hpp"
-#include "Concepts.hpp"
 #include "Matrix4.hpp"
 #include "Normal3.hpp"
 #include "Plane3.hpp"
@@ -41,6 +40,7 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "concepts.hpp"
 #include "isZero.hpp"
 
 namespace crimild {

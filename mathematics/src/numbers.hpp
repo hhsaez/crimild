@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_NUMBERS_
 #define CRIMILD_MATHEMATICS_NUMBERS_
 
-#include "Types.hpp"
+#include "types.hpp"
 
 #include <limits>
 #include <type_traits>

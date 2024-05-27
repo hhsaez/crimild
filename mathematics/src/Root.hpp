@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_ROOT_
 #define CRIMILD_MATHEMATICS_ROOT_
 
-#include "Types.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

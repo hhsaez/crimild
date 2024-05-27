@@ -30,10 +30,10 @@
 
 #include "Bounds3.hpp"
 #include "Transformation.hpp"
-#include "Types.hpp"
 #include "max.hpp"
 #include "min.hpp"
 #include "trigonometry.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

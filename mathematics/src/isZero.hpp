@@ -29,12 +29,12 @@
 #define CRIMILD_MATHEMATICS_IS_ZERO_
 
 #include "ColorRGB.hpp"
-#include "Concepts.hpp"
-#include "Numbers.hpp"
 #include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
 #include "abs.hpp"
+#include "concepts.hpp"
+#include "numbers.hpp"
 
 namespace crimild {
 

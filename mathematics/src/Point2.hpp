@@ -29,8 +29,8 @@
 #define CRIMILD_MATHEMATICS_POINT_2_
 
 #include "Tuple2.hpp"
-#include "Types.hpp"
 #include "Vector2.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

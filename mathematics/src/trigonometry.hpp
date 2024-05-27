@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_TRIGONOMETRY_
 #define CRIMILD_MATHEMATICS_TRIGONOMETRY_
 
-#include "Numbers.hpp"
+#include "numbers.hpp"
 
 #include <cmath>
 
