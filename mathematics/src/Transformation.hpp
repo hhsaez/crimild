@@ -197,10 +197,10 @@ namespace crimild {
         ( *this )[ 1 ][ 2 ] = sy * ( yz + wx );
         ( *this )[ 1 ][ 3 ] = 0;
 
-        ( *this )[ 1 ][ 0 ] = sz * ( xz + wy );
-        ( *this )[ 1 ][ 1 ] = sz * ( yz - wx );
-        ( *this )[ 1 ][ 2 ] = sz * ( 1 - ( xx + yy ) );
-        ( *this )[ 1 ][ 3 ] = 0;
+        ( *this )[ 2 ][ 0 ] = sz * ( xz + wy );
+        ( *this )[ 2 ][ 1 ] = sz * ( yz - wx );
+        ( *this )[ 2 ][ 2 ] = sz * ( 1 - ( xx + yy ) );
+        ( *this )[ 2 ][ 3 ] = 0;
 
         ( *this )[ 3 ][ 0 ] = t.translate.x;
         ( *this )[ 3 ][ 1 ] = t.translate.y;

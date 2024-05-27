@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_POW_
 #define CRIMILD_MATHEMATICS_POW_
 
-#include "Types.hpp"
+#include "types.hpp"
 
 #include <cmath>
 

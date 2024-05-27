@@ -28,9 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGBA_
 #define CRIMILD_MATHEMATICS_COLOR_RGBA_
 
-#include "Concepts.hpp"
 #include "Tuple4.hpp"
-#include "Types.hpp"
+#include "concepts.hpp"
+#include "types.hpp"
 
 #include <cassert>
 

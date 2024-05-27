@@ -28,9 +28,9 @@
 #ifndef CRIMILD_MATHEMATICS_COLOR_RGB_
 #define CRIMILD_MATHEMATICS_COLOR_RGB_
 
-#include "Concepts.hpp"
 #include "Tuple3.hpp"
-#include "Types.hpp"
+#include "concepts.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

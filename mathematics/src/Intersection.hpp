@@ -29,7 +29,6 @@
 #define CRIMILD_MATHEMATICS_INTERSECTION_
 
 #include "LineSegment3.hpp"
-#include "Numbers.hpp"
 #include "Numeric.hpp"
 #include "Plane3.hpp"
 #include "Point3.hpp"
@@ -38,6 +37,7 @@
 #include "Sphere.hpp"
 #include "Vector3.hpp"
 #include "distance.hpp"
+#include "numbers.hpp"
 #include "origin.hpp"
 #include "pow.hpp"
 #include "radius.hpp"

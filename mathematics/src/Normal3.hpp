@@ -30,7 +30,7 @@
 
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
-#include "Types.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

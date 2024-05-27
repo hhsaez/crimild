@@ -28,7 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_FACTORIAL_
 #define CRIMILD_MATHEMATICS_FACTORIAL_
 
-#include "Types.hpp"
+#include "types.hpp"
 
 namespace crimild {
 

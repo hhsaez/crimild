@@ -30,7 +30,7 @@
 
 #include "Size2.hpp"
 #include "Tuple2.hpp"
-#include "Types.hpp"
+#include "types.hpp"
 
 namespace crimild {
 
