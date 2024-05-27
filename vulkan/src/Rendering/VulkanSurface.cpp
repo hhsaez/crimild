@@ -27,7 +27,7 @@
 
 #include "VulkanSurface.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "VulkanInstance.hpp"
 
 using namespace crimild::vulkan;

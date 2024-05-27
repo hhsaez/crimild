@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
-#include "Foundation/Singleton.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/UniformBuffer.hpp"

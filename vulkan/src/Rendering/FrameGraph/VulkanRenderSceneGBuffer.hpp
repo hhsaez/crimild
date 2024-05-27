@@ -28,7 +28,8 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
 
-#include "Mathematics/Matrix4_constants.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
 #include "Rendering/VulkanSynchronization.hpp"

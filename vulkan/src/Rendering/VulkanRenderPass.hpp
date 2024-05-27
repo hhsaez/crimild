@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 #define CRIMILD_VULKAN_RENDERING_RENDER_PASS_
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 

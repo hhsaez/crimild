@@ -27,27 +27,7 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneRT.hpp"
 
-#include "Mathematics/Box_normal.hpp"
-#include "Mathematics/ColorRGBOps.hpp"
-#include "Mathematics/ColorRGB_isZero.hpp"
-#include "Mathematics/Cylinder_normal.hpp"
-#include "Mathematics/Point3Ops.hpp"
-#include "Mathematics/Random.hpp"
-#include "Mathematics/Ray_apply.hpp"
-#include "Mathematics/Sphere_normal.hpp"
-#include "Mathematics/Transformation_apply.hpp"
-#include "Mathematics/Vector2Ops.hpp"
-#include "Mathematics/Vector3Ops.hpp"
-#include "Mathematics/Vector3_isZero.hpp"
-#include "Mathematics/dot.hpp"
-#include "Mathematics/intersect.hpp"
-#include "Mathematics/isNaN.hpp"
-#include "Mathematics/min.hpp"
-#include "Mathematics/pow.hpp"
-#include "Mathematics/reflect.hpp"
-#include "Mathematics/refract.hpp"
-#include "Mathematics/swizzle.hpp"
-#include "Mathematics/whichSide.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
@@ -228,9 +208,9 @@ bool RenderSceneRT::intersectPrim( const Ray3 &R, Int32 nodeId, Real minT, Real 
                 const auto &v2 = m_acceleratedScene.primitives.triangles[ m_acceleratedScene.primitives.indices[ baseIdx + 2 ] ];
 
                 const auto T = Triangle {
-                    v0.position,
-                    v1.position,
-                    v2.position,
+                    Point3( v0.position ),
+                    Point3( v1.position ),
+                    Point3( v2.position ),
                 };
 
                 Real t;
@@ -239,7 +219,7 @@ bool RenderSceneRT::intersectPrim( const Ray3 &R, Int32 nodeId, Real minT, Real 
                     if ( t >= numbers::EPSILON && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) && ( !hasResult || t < result.t ) ) {
                         result.t = t;
                         result.point = R( result.t );
-                        result.setFaceNormal( R, normal3( v0.normal ) );
+                        result.setFaceNormal( R, Normal3( v0.normal ) );
                         result.materialId = node.materialIndex;
                         hasResult = true;
                     }
@@ -539,7 +519,7 @@ bool RenderSceneRT::scatter( const Ray3 &R, const IntersectionResult &result, Ra
             if ( cannotRefract || reflectance( cosTheta, refractionRatio ) > random::next() ) {
                 return reflect( dir, result.normal );
             } else {
-                return refract( dir, result.normal, refractionRatio );
+                return Vector3f( refract( dir, result.normal, refractionRatio ) );
             }
         }();
         scattered = Ray3 { result.point, scatteredDirection };

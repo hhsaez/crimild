@@ -28,10 +28,8 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
 #define CRIMILD_VULKAN_RENDERING_SHADOW_MAP_
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Mathematics/Matrix4_constants.hpp"
 #include "SceneGraph/Light.hpp"
 
 namespace crimild {

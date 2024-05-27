@@ -28,8 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
+#include "Crimild_Foundation.hpp"
 
 namespace crimild::vulkan::framegraph {
 

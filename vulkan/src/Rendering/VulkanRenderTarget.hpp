@@ -28,8 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_TARGET
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_TARGET
 
-#include "Foundation/Named.hpp"
-#include "Foundation/SharedObject.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild::vulkan {

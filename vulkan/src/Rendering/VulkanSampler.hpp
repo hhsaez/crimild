@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SAMPLER
 #define CRIMILD_VULKAN_RENDERING_SAMPLER
 
-#include "Foundation/Named.hpp"
 #include "Foundation/VulkanUtils.hpp"
 
 namespace crimild::vulkan {

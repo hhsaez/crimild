@@ -27,7 +27,7 @@
 
 #include "Rendering/VulkanShadowMap.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"

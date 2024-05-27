@@ -109,6 +109,16 @@ namespace crimild {
     ///@}
 
     template< ArithmeticType T >
+    [[nodiscard]] inline constexpr auto rgb( const ColorRGBAImpl< T > &color ) noexcept
+    {
+        return ColorRGBImpl< T > {
+            color.r,
+            color.g,
+            color.b,
+        };
+    }
+
+    template< ArithmeticType T >
     [[nodiscard]] inline constexpr auto rgba( const ColorRGBImpl< T > &color ) noexcept
     {
         return ColorRGBAImpl< T > {
