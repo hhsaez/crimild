@@ -27,7 +27,7 @@
 
 #include "Views/Windows/InspectorWindow.hpp"
 
-#include "Foundation/Memory.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderDeviceCache.hpp"
@@ -198,10 +198,13 @@ namespace crimild::editor {
     public:
         virtual void render( crimild::Node *node ) noexcept override
         {
-            Point3f nodeTranslation;
-            Vector3 nodeRotation;
-            Vector3 nodeScale;
-            ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
+            Point3f nodeTranslation = node->getLocal().translate;
+            Vector3 nodeRotation = [ & ] {
+                const auto [ x, y, z ] = toEuler( node->getLocal().rotate );
+                return Vector3( x, y, z );
+            }();
+            Vector3 nodeScale = node->getLocal().scale;
+            // ImGuizmo::DecomposeMatrixToComponents( get_ptr( node->getLocal().mat ), get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ) );
 
             bool changed = false;
             changed = changed || ImGui::InputFloat3( "Tr", get_ptr( nodeTranslation ) );
@@ -209,8 +212,14 @@ namespace crimild::editor {
             changed = changed || ImGui::InputFloat3( "Sc", get_ptr( nodeScale ) );
             if ( changed ) {
                 Matrix4 mat;
-                ImGuizmo::RecomposeMatrixFromComponents( get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ), get_ptr( mat ) );
-                node->setLocal( Transformation { mat, inverse( mat ) } );
+                // ImGuizmo::RecomposeMatrixFromComponents( get_ptr( nodeTranslation ), get_ptr( nodeRotation ), get_ptr( nodeScale ), get_ptr( mat ) );
+                node->setLocal(
+                    Transformation {
+                        .translate = nodeTranslation,
+                        .rotate = euler( nodeRotation.x, nodeRotation.y, nodeRotation.z ),
+                        .scale = nodeScale,
+                    }
+                );
                 node->perform( UpdateWorldState() );
             }
         }

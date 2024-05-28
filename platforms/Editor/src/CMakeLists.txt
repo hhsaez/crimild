@@ -108,6 +108,8 @@ target_include_directories(
 
 target_link_libraries(
 	crimild_editor
+    PRIVATE Crimild::Foundation
+    PRIVATE Crimild::Mathematics
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
     PRIVATE glfw

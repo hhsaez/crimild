@@ -28,13 +28,9 @@
 #include "Importers/GLTFImporter.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Foundation/STBUtils.hpp"
-#include "Mathematics/Matrix4_inverse.hpp"
-#include "Mathematics/Transformation_operators.hpp"
-#include "Mathematics/Transformation_scale.hpp"
-#include "Mathematics/Transformation_translation.hpp"
-#include "Mathematics/normalize.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -179,7 +175,8 @@ Transformation loadTransformation( const tinygltf::Node &inNode )
             { Real( inNode.matrix[ 8 ] ), Real( inNode.matrix[ 9 ] ), Real( inNode.matrix[ 10 ] ), Real( inNode.matrix[ 11 ] ) },
             { Real( inNode.matrix[ 12 ] ), Real( inNode.matrix[ 13 ] ), Real( inNode.matrix[ 14 ] ), Real( inNode.matrix[ 15 ] ) },
         };
-        return Transformation { matrix, inverse( matrix ) };
+        // return Transformation { matrix, inverse( matrix ) };
+        assert( false && "Unhandled transformation" );
     }
 
     const auto T = [ & ] {
@@ -201,7 +198,7 @@ Transformation loadTransformation( const tinygltf::Node &inNode )
         }
     }();
 
-    return T * R * S;
+    return T( R( S ) );
 }
 
 std::shared_ptr< Node > loadNode( const tinygltf::Node &inNode, const tinygltf::Model &input, std::shared_ptr< Group > const &parent, std::vector< std::shared_ptr< Material > > &materials ) noexcept

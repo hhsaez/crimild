@@ -131,7 +131,7 @@ SharedPointer< Node > Editor::createDefaultScene( void ) noexcept
     scene->attachNode(
         [ & ] {
             auto plane = geometry( crimild::alloc< QuadPrimitive >(), ColorRGB { 0.75f, 0.75f, 0.75f } );
-            plane->setLocal( rotationX( -numbers::PI_DIV_2 ) * scale( 10.0f ) );
+            plane->setLocal( rotationX( -numbers::PI_DIV_2 )( scale( 10.0f ) ) );
             return plane;
         }()
     );

@@ -80,7 +80,7 @@ void DebugDrawManager::addLine(
             return ret;
         } else {
             Vector3f right, up;
-            orthonormalBasis( Vector3f( to ), right, up );
+            orthonormalBasis( normalize( Vector3f( to ) ), right, up );
             if ( isNaN( up ) || isZero( length2( up ) ) ) {
                 return Vector3f { 0, 1, 0 };
             }

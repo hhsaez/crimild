@@ -86,24 +86,26 @@ static void drawGizmo(
     // TODO: Snapping values should depend on the mode (i.e. meters, degrees, etc.)
     const auto snapValues = Vector3 { 1, 1, 1 };
 
-    auto newWorld = selectedNode->getWorld().mat;
+    auto newWorld = Matrix4( selectedNode->getWorld() );
     ImGuizmo::Manipulate(
-        static_cast< const float * >( &view.c0.x ),
-        static_cast< const float * >( &proj.c0.x ),
+        static_cast< const float * >( &view[ 0 ].x ),
+        static_cast< const float * >( &proj[ 0 ].x ),
         gizmoOperation,
         gizmoMode,
-        static_cast< float * >( &newWorld.c0.x ),
+        static_cast< float * >( &newWorld[ 0 ].x ),
         nullptr,
         snap ? static_cast< const float * >( &snapValues.x ) : nullptr
     );
 
     if ( selectedNode->hasParent() ) {
         // Node has a parent, so convert world transform into local transform
-        const auto newLocal = selectedNode->getParent()->getWorld().invMat * newWorld;
-        selectedNode->setLocal( Transformation { newLocal, inverse( newLocal ) } );
+        const auto newLocal = Matrix4( ( selectedNode->getParent()->getWorld() ) ) * newWorld;
+        // selectedNode->setLocal( Transformation { newLocal, inverse( newLocal ) } );
+        assert( false && "FIX ME!" );
     } else {
         // Node has no parent, so local transform is same as world
-        selectedNode->setLocal( Transformation { newWorld, inverse( newWorld ) } );
+        // selectedNode->setLocal( Transformation { newWorld, inverse( newWorld ) } );
+        assert( false && "FIX ME!" );
     }
 
     selectedNode->perform( UpdateWorldState() );
@@ -121,8 +123,10 @@ void Scene3DWindow::initialize( void ) noexcept
 
     m_editorCamera = crimild::alloc< Camera >();
     m_cameraTranslation = translation( 10, 10, 10 );
-    m_cameraRotation = euler( radians( 45 ), radians( -35 ), 0 );
-    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+    m_cameraRotation = Transformation {
+        .rotate = euler( radians( 45 ), radians( -35 ), 0 ),
+    };
+    m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
 
     const auto N = device->getInFlightFrameCount();
 
@@ -331,36 +335,36 @@ void Scene3DWindow::updateCamera( void ) noexcept
     if ( m_editorCameraEnabled ) {
         if ( !isZero( delta[ 1 ] ) ) {
             const auto R = right( m_cameraRotation );
-            m_cameraRotation = rotation( R, -0.005 * delta[ 1 ] ) * m_cameraRotation;
+            m_cameraRotation = rotation( R, -0.005 * delta[ 1 ] )( m_cameraRotation );
         }
 
         if ( !isZero( delta[ 0 ] ) ) {
             // This leads to gimbal lock when looking straight up/down, but I'm ok with it for now
             const auto U = Vector3 { 0, 1, 0 };
-            m_cameraRotation = rotation( U, -0.005 * delta[ 0 ] ) * m_cameraRotation;
+            m_cameraRotation = rotation( U, -0.005 * delta[ 0 ] )( m_cameraRotation );
         }
 
         const auto F = forward( m_cameraRotation );
         const auto R = right( m_cameraRotation );
         if ( ImGui::IsKeyDown( ImGuiKey_W ) ) {
-            m_cameraTranslation = translation( F ) * m_cameraTranslation;
-            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+            m_cameraTranslation = translation( F )( m_cameraTranslation );
+            m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
         }
         if ( ImGui::IsKeyDown( ImGuiKey_S ) ) {
-            m_cameraTranslation = translation( -F ) * m_cameraTranslation;
-            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+            m_cameraTranslation = translation( -F )( m_cameraTranslation );
+            m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
         }
         if ( ImGui::IsKeyDown( ImGuiKey_A ) ) {
-            m_cameraTranslation = translation( -R ) * m_cameraTranslation;
-            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+            m_cameraTranslation = translation( -R )( m_cameraTranslation );
+            m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
         }
         if ( ImGui::IsKeyDown( ImGuiKey_D ) ) {
-            m_cameraTranslation = translation( R ) * m_cameraTranslation;
-            m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+            m_cameraTranslation = translation( R )( m_cameraTranslation );
+            m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
         }
     }
 
     m_lastMousePos = mousePos;
-    m_editorCamera->setWorld( m_cameraTranslation * m_cameraRotation );
+    m_editorCamera->setWorld( m_cameraTranslation( m_cameraRotation ) );
     m_editorCamera->setWorldIsCurrent( true );
 }

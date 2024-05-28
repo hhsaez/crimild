@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_RENDERING_FRAME_GRAPH_RENDER_SCENE_DEBUG
 #define CRIMILD_EDITOR_RENDERING_FRAME_GRAPH_RENDER_SCENE_DEBUG
 
-#include "Mathematics/Matrix4.hpp"
+#include "Crimild_Mathematics.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
 

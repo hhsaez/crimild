@@ -27,10 +27,8 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneDebug.hpp"
 
+#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugDrawManager.hpp"
-#include "Mathematics/Matrix4_operators.hpp"
-#include "Mathematics/Point3Ops.hpp"
-#include "Mathematics/Transformation_apply.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
@@ -82,7 +80,7 @@ public:
     {
         NodeVisitor::visitCamera( camera );
 
-        const auto P = location( camera->getWorld() );
+        const auto P = origin( camera->getWorld() );
         const auto D = forward( camera->getWorld() );
         const auto R = right( camera->getWorld() );
         const auto U = up( camera->getWorld() );
@@ -110,7 +108,7 @@ public:
 
         switch ( light->getType() ) {
             case Light::Type::POINT: {
-                const auto P = location( light->getWorld() );
+                const auto P = origin( light->getWorld() );
                 DebugDrawManager::addCircle(
                     P,
                     forward( m_camera->getWorld() ),
@@ -126,7 +124,7 @@ public:
             }
 
             case Light::Type::SPOT: {
-                const auto P = location( light->getWorld() );
+                const auto P = origin( light->getWorld() );
                 DebugDrawManager::addCircle(
                     P,
                     forward( m_camera->getWorld() ),
@@ -142,7 +140,7 @@ public:
             }
 
             case Light::Type::DIRECTIONAL: {
-                const auto P = location( light->getWorld() );
+                const auto P = origin( light->getWorld() );
                 DebugDrawManager::addCircle(
                     P,
                     forward( m_camera->getWorld() ),
@@ -338,7 +336,7 @@ void RenderSceneDebug::execute( void ) noexcept
                     VK_SHADER_STAGE_VERTEX_BIT,
                     0,
                     PushConstantsData {
-                        .mvp = proj * view * renderable.world.mat,
+                        .mvp = proj * view * Matrix4( renderable.world ),
                         .color = renderable.color,
                     }
                 );

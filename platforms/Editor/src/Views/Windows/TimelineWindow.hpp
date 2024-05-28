@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
 
-#include "Foundation/Singleton.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {

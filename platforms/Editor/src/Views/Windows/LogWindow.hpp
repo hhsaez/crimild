@@ -28,8 +28,8 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_LOG_
 
+#include "Crimild_Foundation.hpp"
 #include "Foundation/ImGuiUtils.hpp"
-#include "Foundation/Log.hpp"
 #include "Views/Windows/Window.hpp"
 
 namespace crimild::editor {
