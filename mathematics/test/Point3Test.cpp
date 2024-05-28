@@ -230,7 +230,7 @@ TEST( Point3, homogeneous )
     constexpr crimild::Vector4f V = crimild::Vector4f( P );
     static_assert( crimild::isEqual( V, crimild::Vector4 { 1, 2, 3, 1 } ) );
 
-    constexpr auto Q = crimild::Point3f( crimild::xyz( V ) );
+    constexpr auto Q = crimild::Point3f( V );
     static_assert( crimild::isEqual( P, Q ) );
 
     EXPECT_TRUE( true );

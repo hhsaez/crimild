@@ -290,5 +290,5 @@ TEST( Vector4, swizzle )
 {
     constexpr auto V = crimild::Vector4 { 1, 2, 3, 4 };
 
-    static_assert( crimild::isEqual( crimild::xyz( V ), crimild::Vector3 { 1, 2, 3 } ) );
+    static_assert( crimild::isEqual( crimild::Vector3( V ), crimild::Vector3 { 1, 2, 3 } ) );
 }

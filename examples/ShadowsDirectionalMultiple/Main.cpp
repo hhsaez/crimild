@@ -68,7 +68,7 @@ public:
                                 ) );
 
                                 geometry->attachComponent< LambdaComponent >(
-                                    [ origin = location( geometry->getLocal() ),
+                                    [ origin = origin( geometry->getLocal() ),
                                       speed = ( rnd.generate( -1.0f, 1.0f ) < 0 ? -1.0f : 1.0f ) * rnd.generate( 1.0f, 6.0f ) ](
                                         auto node,
                                         const auto &clock
@@ -99,7 +99,7 @@ public:
                                 const auto R = rotationX( -Numericf::HALF_PI );
                                 const auto S = scale( 100.0f );
                                 const auto T = translation( 0.0f, -15.0f, 0.0f );
-                                return T * R * S;
+                                return T( R( S ) );
                             }()
                         );
                         geometry->attachComponent< MaterialComponent >()->attachMaterial(

@@ -4,11 +4,13 @@ function( CRIMILD_ADD_EXAMPLE EXAMPLE_NAME EXAMPLE_SOURCES )
     add_executable( ${EXAMPLE_NAME} )
     target_sources( ${EXAMPLE_NAME} PRIVATE ${EXAMPLE_SOURCES} )
     target_include_directories( ${EXAMPLE_NAME} PRIVATE . )
-    target_link_libraries( 
-        ${EXAMPLE_NAME} 
+    target_link_libraries(
+        ${EXAMPLE_NAME}
+        PRIVATE Crimild::Foundation
+        PRIVATE Crimild::Mathematics
         PRIVATE Crimild::Core
         PRIVATE Crimild::Vulkan
-        PRIVATE Crimild::Player 
+        PRIVATE Crimild::Player
     )
     set_target_properties( ${EXAMPLE_NAME} PROPERTIES FOLDER examples )
 endfunction()

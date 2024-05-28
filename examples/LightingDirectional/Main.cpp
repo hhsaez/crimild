@@ -60,7 +60,7 @@ public:
                                     rnd.generate( -10.0f, 10.0f )
                                 );
                                 const auto S = scale( rnd.generate( 0.75f, 1.5f ) );
-                                geometry->setLocal( T * S );
+                                geometry->setLocal( T( S ) );
 
                                 geometry->attachComponent< MaterialComponent >()->attachMaterial(
                                     [ & ] {
@@ -92,7 +92,7 @@ public:
                                     );
                                     constexpr auto T = translation( 35.0f * Vector3::Constants::UNIT_Z );
                                     constexpr auto S = scale( 3.0f );
-                                    geometry->setLocal( T * S );
+                                    geometry->setLocal( T( S ) );
                                     geometry->attachComponent< MaterialComponent >()->attachMaterial(
                                         [] {
                                             auto material = crimild::alloc< UnlitMaterial >();

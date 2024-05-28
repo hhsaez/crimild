@@ -64,7 +64,7 @@ public:
 
                                     const auto T = translation( 30 - 2 * i, 0, 100 - 7 * i );
                                     const auto S = scale( 1, 20, 1 );
-                                    geometry->setLocal( T * S );
+                                    geometry->setLocal( T( S ) );
 
                                     geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
 
@@ -89,7 +89,7 @@ public:
                                 const auto R = rotationX( -Numericf::HALF_PI );
                                 const auto S = scale( 100.0f );
                                 const auto T = translation( 0.0f, -15.0f, 0.0f );
-                                return T * R * S;
+                                return T( R( S ) );
                             }()
                         );
                         geometry->attachComponent< MaterialComponent >()->attachMaterial(

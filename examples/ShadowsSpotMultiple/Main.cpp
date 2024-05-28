@@ -71,7 +71,7 @@ public:
                                 );
 
                                 geometry->attachComponent< LambdaComponent >(
-                                    [ origin = location( geometry->getLocal() ),
+                                    [ origin = origin( geometry->getLocal() ),
                                       speed = ( rnd.generate( -1.0f, 1.0f ) < 0 ? -1.0f : 1.0f ) * rnd.generate( 1.0f, 6.0f ) ]( auto node, const auto &clock ) {
                                         node->setLocal( translation( Vector3f( origin + Vector3f::Constants::UNIT_Y * speed * Numericf::sin( clock.getCurrentTime() ) ) ) );
                                     }

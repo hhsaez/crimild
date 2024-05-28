@@ -122,7 +122,7 @@ public:
                                         rnd.generate( 0.0f, Numericf::TWO_PI )
                                     );
 
-                                    geometry->setLocal( T * R * S );
+                                    geometry->setLocal( T( R( S ) ) );
 
                                     geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
 
@@ -226,7 +226,7 @@ public:
                                     dir = -Vector3::Constants::UP;
                                 }
 
-                                const auto p = location( node->getLocal() );
+                                const auto p = origin( node->getLocal() );
                                 const auto dp = 2.0f * clock.getDeltaTime() * dir;
                                 node->setLocal( translation( Vector3f( p + dp ) ) );
                             }
