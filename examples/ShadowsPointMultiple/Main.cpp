@@ -113,7 +113,7 @@ public:
                                         rnd.generate( 0.0f, Numericf::TWO_PI )
                                     );
 
-                                    geometry->setLocal( T * R * S );
+                                    geometry->setLocal( T( R( S ) ) );
 
                                     geometry->attachComponent< MaterialComponent >()->attachMaterial( material );
 
