@@ -28,8 +28,8 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_3D_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_SCENE_3D_
 
+#include "Crimild_Mathematics.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "Mathematics/Transformation_constants.hpp"
 #include "Views/Windows/Window.hpp"
 
 #include <unordered_map>

@@ -27,8 +27,8 @@
 
 #include "Views/Windows/BehaviorsWindow.hpp"
 
+#include "Crimild_Foundation.hpp"
 #include "Foundation/ImGuiUtils.hpp"
-#include "Foundation/ObjectFactory.hpp"
 #include "Simulation/Editor.hpp"
 
 using namespace crimild;

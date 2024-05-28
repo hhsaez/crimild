@@ -29,7 +29,7 @@
 
 #include "Coding/FileDecoder.hpp"
 #include "Coding/FileEncoder.hpp"
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Visitors/ShallowCopy.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"

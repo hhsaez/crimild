@@ -29,7 +29,7 @@
 #define CRIMILD_EDITOR_LAYOUT_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Named.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 
 #include <memory>

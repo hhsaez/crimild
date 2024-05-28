@@ -27,9 +27,8 @@
 
 #include "Rendering/STBImageManager.hpp"
 
-#include "Foundation/Log.hpp"
+#include "Crimild_Foundation.hpp"
 #include "Foundation/STBUtils.hpp"
-#include "Foundation/Types.hpp"
 #include "Rendering/Image.hpp"
 
 using namespace crimild;

@@ -29,8 +29,7 @@
 #define CRIMILD_EDITOR_VIEWS_VIEW_
 
 #include "Coding/Codable.hpp"
-#include "Foundation/Named.hpp"
-#include "Foundation/RTTI.hpp"
+#include "Crimild_Foundation.hpp"
 
 #include <memory>
 
