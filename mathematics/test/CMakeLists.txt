@@ -39,6 +39,8 @@ target_sources(
 
 target_include_directories( crimild_mathematics_test PRIVATE . )
 
+target_compile_features( crimild_mathematics_test PUBLIC cxx_std_20 )
+
 target_link_libraries(
     crimild_mathematics_test
     PRIVATE Crimild::Mathematics

@@ -35,6 +35,8 @@
 #include "Containers/Queue.hpp"
 #include "Containers/Set.hpp"
 
+#include <cassert>
+
 namespace crimild {
 
     template< typename VERTEX_TYPE >
