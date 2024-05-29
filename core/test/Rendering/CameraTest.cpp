@@ -205,8 +205,8 @@ TEST( Camera, get_ray_for_camera_using_lookAt )
 
     EXPECT_TRUE( camera->getPickRay( px, py, ray ) );
 
-    EXPECT_EQ( ( Point3f { 0, -2, 5 } ), origin( ray ) );
-    EXPECT_EQ( Vector3::Constants::RIGHT, direction( ray ) );
+    EXPECT_TRUE( isEqual( Point3f { 0, -2, 5 }, origin( ray ) ) );
+    EXPECT_TRUE( isEqual( Vector3::Constants::RIGHT, direction( ray ) ) );
 }
 
 TEST( Camera, fetchCameras )
