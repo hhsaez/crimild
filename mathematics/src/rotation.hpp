@@ -49,18 +49,18 @@ namespace crimild {
         };
     }
 
-    [[nodiscard, maybe_unused]] static constexpr auto rotationX( radians_t angle ) noexcept
+    [[nodiscard, maybe_unused]] static auto rotationX( radians_t angle ) noexcept
     {
         return rotation( Vector3::Constants::UNIT_X, angle );
     }
 
     // TODO: make this function constexpr
-    [[nodiscard, maybe_unused]] static constexpr auto rotationY( radians_t angle ) noexcept
+    [[nodiscard, maybe_unused]] static auto rotationY( radians_t angle ) noexcept
     {
         return rotation( Vector3::Constants::UNIT_Y, angle );
     }
 
-    [[nodiscard, maybe_unused]] static constexpr auto rotationZ( radians_t angle ) noexcept
+    [[nodiscard, maybe_unused]] static auto rotationZ( radians_t angle ) noexcept
     {
         return rotation( Vector3::Constants::UNIT_Z, angle );
     }

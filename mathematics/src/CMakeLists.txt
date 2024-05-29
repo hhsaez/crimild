@@ -12,7 +12,6 @@ target_sources(
     Box.hpp
     ColorRGB.hpp
     ColorRGBA.hpp
-    Concepts.hpp
     Cylinder.hpp
     Frustum.hpp
     Interpolation.hpp
@@ -21,7 +20,6 @@ target_sources(
     Matrix3.hpp
     Matrix4.hpp
     Normal3.hpp
-    Numbers.hpp
     Numeric.hpp
     Plane3.hpp
     Point2.hpp
@@ -31,7 +29,6 @@ target_sources(
     Ray3.hpp
     Rect.hpp
     Root.hpp
-    Series.hpp
     Size2.hpp
     Size3.hpp
     Sphere.hpp
@@ -50,6 +47,7 @@ target_sources(
     centroid.hpp
     clamp.hpp
     combine.hpp
+    concepts.hpp
     conjugate.hpp
     corner.hpp
     cross.hpp
@@ -77,6 +75,7 @@ target_sources(
     min.hpp
     normal.hpp
     normalize.hpp
+    numbers.hpp
     origin.hpp
     ortho.hpp
     orthonormalization.hpp
@@ -91,6 +90,7 @@ target_sources(
     rotation.hpp
     round.hpp
     scale.hpp
+    series.hpp
     sign.hpp
     size.hpp
     sqrt.hpp
