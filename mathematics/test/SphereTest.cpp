@@ -63,8 +63,8 @@ TEST( Sphere, normal )
     const auto N2 = normal(
         S,
         Transformation {
-            .scale = Vector3 { 1, 0.5, 1 },
             .rotate = euler( 0, 0, numbers::PI / 5 ),
+            .scale = Vector3 { 1, 0.5, 1 },
         },
         Point3f { 0, numbers::SQRT_2_DIV_2, -numbers::SQRT_2_DIV_2 }
     );

@@ -415,10 +415,10 @@ TEST( Transformation, lookAt_looking_down )
         crimild::Vector3 { 0, 0, -1 }
     );
 
-    EXPECT_EQ( ( crimild::Vector3 { 0, -1, 0 } ), forward( T ) );
-    EXPECT_EQ( ( crimild::Vector3 { 0, 0, -1 } ), up( T ) );
-    EXPECT_EQ( ( crimild::Vector3 { 1, 0, 0 } ), right( T ) );
-    EXPECT_EQ( ( crimild::Point3f { 0, 0, 0 } ), origin( T ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 0, -1, 0 }, forward( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 0, 0, -1 }, up( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 1, 0, 0 }, right( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Point3f { 0, 0, 0 }, origin( T ) ) );
 }
 
 TEST( Transformation, transforms_after_lookAt )
@@ -430,10 +430,10 @@ TEST( Transformation, transforms_after_lookAt )
         crimild::Vector3 { 0, 0, -1 }
     );
 
-    EXPECT_EQ( ( crimild::Vector3 { 0, -1, 0 } ), forward( T ) );
-    EXPECT_EQ( ( crimild::Vector3 { 0, 0, -1 } ), up( T ) );
-    EXPECT_EQ( ( crimild::Vector3 { 1, 0, 0 } ), right( T ) );
-    EXPECT_EQ( ( crimild::Point3f { 0, 2, 0 } ), origin( T ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 0, -1, 0 }, forward( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 0, 0, -1 }, up( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Vector3 { 1, 0, 0 }, right( T ) ) );
+    EXPECT_TRUE( isEqual( crimild::Point3f { 0, 2, 0 }, origin( T ) ) );
 
     EXPECT_TRUE( isEqual( ( crimild::Point3f { 0, 1, -2 } ), T( crimild::Point3 { 0, 2, -1 } ) ) );
     EXPECT_TRUE( isEqual( ( crimild::Point3f { 1, 2, -2 } ), T( crimild::Point3 { 1, 2, 0 } ) ) );
