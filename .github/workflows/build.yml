@@ -63,4 +63,4 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{matrix.build_type}} --stop-on-failure  -V --parallel 2
+        run: ctest -C ${{matrix.build_type}} --output-on-failure -V --parallel 2
