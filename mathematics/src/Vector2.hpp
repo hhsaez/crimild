@@ -32,6 +32,8 @@
 #include "Tuple2.hpp"
 #include "types.hpp"
 
+#include <limits>
+
 namespace crimild {
 
     template< ArithmeticType T >
