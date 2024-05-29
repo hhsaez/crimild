@@ -54,7 +54,10 @@ jobs:
         name: Setup
         run: |
           sudo apt update
-          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev gcc-13.3 g++-13.3
+        env:
+          CC: gcc-13.3
+          CXX: g++-13.3
 
       - name: Build
         run: |
