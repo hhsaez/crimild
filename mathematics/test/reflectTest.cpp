@@ -27,8 +27,8 @@
 
 #include "reflect.hpp"
 
-#include "Numbers.hpp"
 #include "isEqual.hpp"
+#include "numbers.hpp"
 
 #include "gtest/gtest.h"
 
