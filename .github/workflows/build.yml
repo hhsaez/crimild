@@ -26,12 +26,12 @@ jobs:
             crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
           - name: "Ubuntu (Release)"
             os: ubuntu-latest
-            cmake_args: ''
+            cmake_args: '-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang'
             build_type: Release
             crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
           - name: "Ubuntu (Debug)"
             os: ubuntu-latest
-            cmake_args: ''
+            cmake_args: '-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang'
             build_type: Release
             crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
           - name: "Mac OSX (Release)"
@@ -54,10 +54,8 @@ jobs:
         name: Setup
         run: |
           sudo apt update
-          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev gcc-13.3 g++-13.3
-        env:
-          CC: gcc-13.3
-          CXX: g++-13.3
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+          sudo apt install clang-14
 
       - name: Build
         run: |
