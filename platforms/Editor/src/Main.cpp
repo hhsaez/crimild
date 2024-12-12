@@ -37,6 +37,7 @@
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 #include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/GraphEditorWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
 #include "Views/Windows/PlaybackControlsWindow.hpp"
@@ -506,6 +507,7 @@ int main( int argc, char **argv )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::MainMenu );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::FileSystemWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::InspectorWindow );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::GraphEditorWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::LogWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::BehaviorsWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::PlaybackControlsWindow );
