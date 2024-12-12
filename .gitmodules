@@ -36,3 +36,6 @@
 [submodule "third-party/doxygen-awesome-css"]
 	path = third-party/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "third-party/imgui-node-editor"]
+	path = third-party/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git
