@@ -30,19 +30,40 @@
 using namespace crimild;
 using namespace crimild::editor;
 
-namespace nd = ax::NodeEditor;
+namespace NodeEditor = ax::NodeEditor;
+
+namespace ImGui::ex {
+
+    void BeginColumn( void ) noexcept
+    {
+        ImGui::BeginGroup();
+    }
+
+    void NextColumn( void ) noexcept
+    {
+        ImGui::EndGroup();
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+    }
+
+    void EndColumn( void ) noexcept
+    {
+        ImGui::EndGroup();
+    }
+
+}
 
 GraphEditorWindow::GraphEditorWindow( void ) noexcept
     : Window( "Graph Editor" )
 {
-    ax::NodeEditor::Config config;
+    NodeEditor::Config config;
     config.SettingsFile = "./NodeEditor.json";
     m_context = ax::NodeEditor::CreateEditor( &config );
 }
 
 GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 {
-    ax::NodeEditor::DestroyEditor( m_context );
+    NodeEditor::DestroyEditor( m_context );
 }
 
 void GraphEditorWindow::drawContent( void ) noexcept
@@ -53,22 +74,116 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
     ImGui::Separator();
 
-    nd::SetCurrentEditor( m_context );
+    NodeEditor::SetCurrentEditor( m_context );
 
-    nd::Begin( "My Editor", ImVec2( 0.0f, 0.0f ) );
+    NodeEditor::Begin( "My Editor", ImVec2( 0.0f, 0.0f ) );
     int uniqueId = 1;
 
-    nd::BeginNode( uniqueId++ );
+    NodeEditor::BeginNode( uniqueId++ );
+    ImGui::Text( "Node Test" );
+    NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Input );
     ImGui::Text( "-> In" );
-    nd::BeginPin( uniqueId++, nd::PinKind::Input );
-    nd::EndPin();
+    NodeEditor::EndPin();
     ImGui::SameLine();
-    nd::BeginPin( uniqueId++, nd::PinKind::Output );
+    NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Output );
     ImGui::Text( "Out ->" );
-    nd::EndPin();
-    nd::EndNode();
+    NodeEditor::EndPin();
+    NodeEditor::EndNode();
 
-    nd::End();
+    // Node A
+    NodeEditor::NodeId nodeAId = uniqueId++;
+    NodeEditor::PinId nodeAInputPinId = uniqueId++;
+    NodeEditor::PinId nodeAOutputPinId = uniqueId++;
+    if ( m_firstFrame ) {
+        NodeEditor::SetNodePosition( nodeAId, ImVec2( 10, 10 ) );
+    }
+    NodeEditor::BeginNode( nodeAId );
+    {
+        ImGui::Text( "Node A" );
+        NodeEditor::BeginPin( nodeAInputPinId, NodeEditor::PinKind::Input );
+        {
+            ImGui::Text( "-> In" );
+        }
+        NodeEditor::EndPin();
+        ImGui::SameLine();
+        NodeEditor::BeginPin( nodeAOutputPinId, NodeEditor::PinKind::Output );
+        {
+            ImGui::Text( "Out ->" );
+        }
+        NodeEditor::EndPin();
+    }
+    NodeEditor::EndNode();
 
-    nd::SetCurrentEditor( nullptr );
+    // Node B
+    NodeEditor::NodeId nodeBId = uniqueId++;
+    NodeEditor::PinId nodeBInputPinId1 = uniqueId++;
+    NodeEditor::PinId nodeBInputPinId2 = uniqueId++;
+    NodeEditor::PinId nodeBOutputPinId = uniqueId++;
+    if ( m_firstFrame ) {
+        NodeEditor::SetNodePosition( nodeBId, ImVec2( 210, 60 ) );
+    }
+    NodeEditor::BeginNode( nodeBId );
+    {
+        ImGui::Text( "Node B" );
+        ImGui::ex::BeginColumn();
+        {
+            NodeEditor::BeginPin( nodeBInputPinId1, NodeEditor::PinKind::Input );
+            {
+                ImGui::Text( "-> In1" );
+            }
+            NodeEditor::EndPin();
+            NodeEditor::BeginPin( nodeBInputPinId2, NodeEditor::PinKind::Input );
+            {
+                ImGui::Text( "-> In2" );
+            }
+            NodeEditor::EndPin();
+        }
+        ImGui::ex::NextColumn();
+        {
+            ImGui::SameLine();
+            NodeEditor::BeginPin( nodeBOutputPinId, NodeEditor::PinKind::Output );
+            {
+                ImGui::Text( "Out ->" );
+            }
+            NodeEditor::EndPin();
+        }
+        ImGui::ex::EndColumn();
+    }
+    NodeEditor::EndNode();
+
+    for ( auto &linkInfo : m_links ) {
+        NodeEditor::Link( linkInfo.id, linkInfo.inputPinId, linkInfo.outputPinId );
+    }
+
+    // Handle interactions
+    // Handle creation action, returns true if editor want to create a new object (node or link)
+    if ( NodeEditor::BeginCreate() ) {
+        NodeEditor::PinId inputPinId;
+        NodeEditor::PinId outputPinId;
+        if ( NodeEditor::QueryNewLink( &inputPinId, &outputPinId ) ) {
+            if ( inputPinId && outputPinId ) {
+                if ( NodeEditor::AcceptNewItem() ) {
+                    const LinkInfo newLink = {
+                        .id = NodeEditor::LinkId( m_nextLinkId++ ),
+                        .inputPinId = inputPinId,
+                        .outputPinId = outputPinId,
+                    };
+                    m_links.push_back( newLink );
+                    NodeEditor::Link( newLink.id, newLink.inputPinId, newLink.outputPinId );
+                }
+            }
+        }
+    }
+    NodeEditor::EndCreate();
+
+    // End of interaction with editor
+    NodeEditor::End();
+
+    if ( m_firstFrame ) {
+        NodeEditor::NavigateToContent( 0.0f );
+    }
+
+    NodeEditor::SetCurrentEditor( nullptr );
+
+    m_firstFrame = false;
 }
