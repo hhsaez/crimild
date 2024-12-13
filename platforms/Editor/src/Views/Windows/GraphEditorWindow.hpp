@@ -35,6 +35,16 @@
 
 namespace crimild::editor {
 
+    // Holds basic information about connections between
+    // pins. Note that connection (aka, link) has its own
+    // ID. This is useful later with dealing with selections,
+    // deletion and other operations.
+    struct LinkInfo {
+        ax::NodeEditor::LinkId id;
+        ax::NodeEditor::PinId inputPinId;
+        ax::NodeEditor::PinId outputPinId;
+    };
+
     class GraphEditorWindow : public Window {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::GraphEditorWindow )
 
@@ -45,7 +55,22 @@ namespace crimild::editor {
         void drawContent( void ) noexcept final;
 
     private:
+        // Editor context
+        // Required to trace editor state.
         ax::NodeEditor::EditorContext *m_context = nullptr;
+
+        // Flag set for first frame only
+        // This is required for some actions that need to be executed only once
+        bool m_firstFrame = true;
+
+        // List of live links
+        // It is dynamic unless you want to create a read-only view over nodes
+        ImVector< LinkInfo > m_links;
+
+        // Counter to help generate link ids.
+        // In a real application this will probably based on pointer to user
+        // data structures
+        int m_nextLinkId = 100;
     };
 }
 
