@@ -37,6 +37,7 @@ endif ()
 # Add subdirectories
 add_subdirectory( foundation )
 add_subdirectory( mathematics )
+add_subdirectory( coding )
 add_subdirectory( core )
 
 # Configure Vulkan
@@ -72,4 +73,3 @@ if( CRIMILD_BUILD_EXAMPLES )
 endif()
 
 add_subdirectory( platforms )
-
