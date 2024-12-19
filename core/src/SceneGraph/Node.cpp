@@ -28,8 +28,7 @@
 #include "Node.hpp"
 
 #include "Boundings/AABBBoundingVolume.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Group.hpp"
 

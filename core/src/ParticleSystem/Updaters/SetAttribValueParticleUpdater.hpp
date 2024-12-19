@@ -29,16 +29,15 @@
 #define CRIMILD_PARTICLE_UPDATER_SET_ATTRIB_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 
 namespace crimild {
 
     /**
-	   \brief Set a constant value for an attribute whenver its updated
+           \brief Set a constant value for an attribute whenver its updated
 
-	   \remarks Useful for reseting values
-	 */
+           \remarks Useful for reseting values
+         */
     template< typename T >
     class SetAttribValueParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
     public:
@@ -79,8 +78,8 @@ namespace crimild {
         ParticleAttribArray *_attribData = nullptr;
 
         /**
-		 	\name Coding support
-		*/
+                        \name Coding support
+                */
         //@{
 
     public:
@@ -109,9 +108,9 @@ namespace crimild {
                 default:
                     break;
             }
-            //encoder.encode( "attrib", attribType );
+            // encoder.encode( "attrib", attribType );
 
-            //encoder.encode( "value", _value );
+            // encoder.encode( "value", _value );
         }
 
         virtual void decode( coding::Decoder &decoder ) override
@@ -130,7 +129,7 @@ namespace crimild {
                 _attribType = ParticleAttrib::ACCELERATION;
             }
 
-            //decoder.decode( "value", _value );
+            // decoder.decode( "value", _value );
         }
 
         //@}

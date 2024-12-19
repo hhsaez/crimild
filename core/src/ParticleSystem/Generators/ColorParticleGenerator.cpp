@@ -27,8 +27,7 @@
 
 #include "ColorParticleGenerator.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 

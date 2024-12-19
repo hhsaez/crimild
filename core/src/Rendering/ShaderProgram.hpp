@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_PROGRAM_
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/Shader.hpp"

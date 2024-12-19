@@ -28,8 +28,7 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
-#include "Coding/Codable.hpp"
-#include "Crimild_Foundation.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"

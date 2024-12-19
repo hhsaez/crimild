@@ -1,8 +1,7 @@
 #include "LoadScene.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Concurrency/Async.hpp"
+#include "Crimild_Coding.hpp"
 #include "Simulation/Simulation.hpp"
 
 using namespace crimild;

@@ -27,8 +27,7 @@
 
 #include "Group.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Exceptions/HasParentException.hpp"
 

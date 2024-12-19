@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,14 +26,14 @@
  */
 
 #include "ImageTGA.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
-#include "Simulation/FileSystem.hpp"
+
+#include "Crimild_Coding.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/InvalidFileFormatException.hpp"
+#include "Simulation/FileSystem.hpp"
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 #define TGA_RGB 2
 #define TGA_A 3
@@ -43,18 +43,16 @@ using namespace crimild;
 
 ImageTGA::ImageTGA( void )
 {
-    
 }
 
 ImageTGA::ImageTGA( std::string filePath )
-	: _filePath( filePath )
+    : _filePath( filePath )
 {
-	load();
+    load();
 }
 
 ImageTGA::~ImageTGA( void )
 {
-
 }
 
 void ImageTGA::load( void )
@@ -88,13 +86,13 @@ void ImageTGA::load( void )
 
     fseek( file, header.idLength, SEEK_CUR );
 
-    if( header.imageType != TGA_RLE ) {
-        if( bits == 24 || bits == 32 ) {
+    if ( header.imageType != TGA_RLE ) {
+        if ( bits == 24 || bits == 32 ) {
             bpp = bits / 8;
             auto stride = bpp * width;
-			data.resize( stride * height );
+            data.resize( stride * height );
 
-            for( unsigned int y = 0; y < height; y++ ) {
+            for ( unsigned int y = 0; y < height; y++ ) {
                 auto dataIdx = stride * y;
                 crimild::UInt8 *line = &data[ dataIdx ];
 
@@ -102,32 +100,28 @@ void ImageTGA::load( void )
 
                 // Swap the B and R values since TGA
                 // files are stored as BGR instead of RGB
-                for( int i = 0; i < stride; i += bpp ) {
+                for ( int i = 0; i < stride; i += bpp ) {
                     int temp = line[ i ];
                     line[ i ] = line[ i + 2 ];
                     line[ i + 2 ] = temp;
                 }
             }
-        }
-        else if ( bits == 8 ) {
-        	bpp = 1;
-			data.resize( width * height );
-        	fread( &data[ 0 ], width * height, 1, file );
-        }
-        else {
-        	// invalid format
+        } else if ( bits == 8 ) {
+            bpp = 1;
+            data.resize( width * height );
+            fread( &data[ 0 ], width * height, 1, file );
+        } else {
+            // invalid format
             throw InvalidFileFormatException( _filePath );
         }
-    }
-    else
-    {
+    } else {
         crimild::UInt8 rleID = 0;
         int colorsRead = 0;
         bpp = bits / 8;
         auto stride = bpp * width;
 
-		data.resize( stride * height );
-		std::vector< crimild::UInt8 > colors( bpp );
+        data.resize( stride * height );
+        std::vector< crimild::UInt8 > colors( bpp );
 
         int i = 0;
         while ( i < static_cast< int >( width * height ) ) {
@@ -151,8 +145,7 @@ void ImageTGA::load( void )
                     rleID--;
                     colorsRead += bpp;
                 }
-            }
-            else {
+            } else {
                 rleID -= 127;
 
                 fread( &colors[ 0 ], sizeof( crimild::UInt8 ) * bpp, 1, file );
@@ -243,4 +236,3 @@ void ImageTGA::decode( coding::Decoder &decoder )
         load();
     }
 }
-

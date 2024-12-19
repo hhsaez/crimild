@@ -27,8 +27,7 @@
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
@@ -47,7 +46,8 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
                 pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
             }
             return pipeline;
-        }() );
+        }()
+    );
 
     setDescriptors(
         [ & ] {
@@ -63,7 +63,8 @@ UnlitMaterial::UnlitMaterial( void ) noexcept
                 },
             };
             return descriptors;
-        }() );
+        }()
+    );
 }
 
 void UnlitMaterial::setColor( const ColorRGBA &color ) noexcept

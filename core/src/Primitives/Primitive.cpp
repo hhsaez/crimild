@@ -27,8 +27,7 @@
 
 #include "Primitive.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 
 using namespace crimild;
 

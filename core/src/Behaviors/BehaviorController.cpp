@@ -4,11 +4,8 @@
 #include "BehaviorContext.hpp"
 #include "BehaviorTree.hpp"
 #include "Behaviors/Actions/Success.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Concurrency/Async.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Simulation/Simulation.hpp"
 

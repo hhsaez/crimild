@@ -72,16 +72,6 @@ target_sources(
     Boundings/OrientedBoxBoundingVolume.hpp
     Boundings/PlaneBoundingVolume.hpp
     Boundings/SphereBoundingVolume.hpp
-    Coding/Codable.hpp
-    Coding/Decoder.hpp
-    Coding/EncodedData.hpp
-    Coding/EncodedObject.hpp
-    Coding/Encoder.hpp
-    Coding/FileDecoder.hpp
-    Coding/FileEncoder.hpp
-    Coding/MemoryDecoder.hpp
-    Coding/MemoryEncoder.hpp
-    Coding/Tags.hpp
     Common/Profiler.hpp
     Common/Variant.hpp
     Components/AnimatorComponent.hpp
@@ -373,13 +363,6 @@ target_sources(
     Boundings/OrientedBoxBoundingVolume.cpp
     Boundings/PlaneBoundingVolume.cpp
     Boundings/SphereBoundingVolume.cpp
-    Coding/Codable.cpp
-    Coding/Encoder.cpp
-    Coding/FileDecoder.cpp
-    Coding/FileEncoder.cpp
-    Coding/MemoryDecoder.cpp
-    Coding/MemoryEncoder.cpp
-    Coding/Tags.cpp
     Common/Profiler.cpp
     Common/Variant.cpp
     Components/AudioListenerComponent.cpp
@@ -593,6 +576,7 @@ target_link_libraries(
     crimild_core
     PRIVATE Crimild::Foundation
     PRIVATE Crimild::Mathematics
+    PRIVATE Crimild::Coding
 )
 
 add_library( Crimild::Core ALIAS crimild_core )

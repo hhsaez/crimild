@@ -27,8 +27,7 @@
 
 #include "SkinnedMeshComponent.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Rendering/SkinnedMesh.hpp"

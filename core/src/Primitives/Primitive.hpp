@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"

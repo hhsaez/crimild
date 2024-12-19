@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,10 +26,9 @@
  */
 
 #include "BehaviorTree.hpp"
-#include "Behavior.hpp"
 
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+#include "Behavior.hpp"
+#include "Crimild_Coding.hpp"
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -38,17 +37,14 @@ BehaviorTree::BehaviorTree( std::string name, SharedPointer< Behavior > const &r
     : _name( name ),
       _rootBehavior( rootBehavior )
 {
-
 }
 
 BehaviorTree::BehaviorTree( void )
 {
-
 }
 
 BehaviorTree::~BehaviorTree( void )
 {
-
 }
 
 void BehaviorTree::encode( coding::Encoder &encoder )
@@ -66,4 +62,3 @@ void BehaviorTree::decode( coding::Decoder &decoder )
     decoder.decode( "name", _name );
     decoder.decode( "rootBehavior", _rootBehavior );
 }
-

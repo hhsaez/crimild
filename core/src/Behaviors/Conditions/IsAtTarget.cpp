@@ -1,7 +1,6 @@
 #include "IsAtTarget.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;

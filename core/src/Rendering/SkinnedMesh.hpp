@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SKINNED_MESH_
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 

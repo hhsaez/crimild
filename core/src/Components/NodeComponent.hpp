@@ -28,7 +28,7 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Simulation/Clock.hpp"
 
 namespace crimild {

@@ -27,8 +27,7 @@
 
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/LitShaderProgram.hpp"
@@ -50,9 +49,11 @@ PrincipledBSDF::PrincipledBSDF( void ) noexcept
                         return crimild::retain( AssetManager::getInstance()->get< LitShaderProgram >() );
                     }
                     return nullptr;
-                }() );
+                }()
+            );
             return pipeline;
-        }() );
+        }()
+    );
 
     setDescriptors(
         [ & ] {
@@ -94,7 +95,8 @@ PrincipledBSDF::PrincipledBSDF( void ) noexcept
                 },
             };
             return descriptors;
-        }() );
+        }()
+    );
 }
 
 PrincipledBSDF::Props &PrincipledBSDF::getProps( void ) noexcept

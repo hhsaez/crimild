@@ -29,7 +29,7 @@
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_
 
 #include "BehaviorContext.hpp"
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Messaging/MessageQueue.hpp"
 

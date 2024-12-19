@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_VARIANT_
 #define CRIMILD_CORE_VARIANT_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 
 namespace crimild {
 

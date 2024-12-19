@@ -29,8 +29,8 @@
 #define CRIMILD_SCENE_GRAPH_NODE_
 
 #include "Boundings/BoundingVolume.hpp"
-#include "Coding/Codable.hpp"
 #include "Components/NodeComponent.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Visitors/NodeVisitor.hpp"

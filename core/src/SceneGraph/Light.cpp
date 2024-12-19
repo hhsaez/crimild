@@ -27,8 +27,7 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"

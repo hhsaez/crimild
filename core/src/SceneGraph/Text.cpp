@@ -27,9 +27,8 @@
 
 #include "Text.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Font.hpp"

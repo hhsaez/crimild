@@ -27,9 +27,8 @@
 
 #include "UIBackground.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/MaterialComponent.hpp"
+#include "Crimild_Coding.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Geometry.hpp"

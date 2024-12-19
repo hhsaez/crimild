@@ -26,58 +26,54 @@
  */
 
 #include "Clip.hpp"
+
 #include "Channel.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
 
 using namespace crimild;
 using namespace crimild::animation;
 
 Clip::Clip( std::string name )
-	: NamedObject( name )
+    : NamedObject( name )
 {
-	
 }
 
 Clip::Clip( std::string name, SharedPointer< Channel > const &channel )
-	: NamedObject( name )
+    : NamedObject( name )
 {
-	addChannel( channel );
+    addChannel( channel );
 }
 
 Clip::~Clip( void )
 {
-
 }
 
 void Clip::addChannel( SharedPointer< Channel > const &channel )
 {
-	_channels.add( channel );
-	_duration = Numericf::max( _duration, channel->getDuration() );
+    _channels.add( channel );
+    _duration = Numericf::max( _duration, channel->getDuration() );
 }
 
 void Clip::evaluate( crimild::Real32 t, Animation *animation )
 {
-	_channels.each( [ t, animation ]( SharedPointer< Channel > &channel ) {
-		channel->evaluate( t, animation );
-	});
+    _channels.each( [ t, animation ]( SharedPointer< Channel > &channel ) {
+        channel->evaluate( t, animation );
+    } );
 }
 
 void Clip::encode( coding::Encoder &encoder )
 {
-	Codable::encode( encoder );
+    Codable::encode( encoder );
 
-	encoder.encode( "_duration", _duration );
-	encoder.encode( "frameRate", _frameRate );
-	encoder.encode( "channels", _channels );
+    encoder.encode( "_duration", _duration );
+    encoder.encode( "frameRate", _frameRate );
+    encoder.encode( "channels", _channels );
 }
 
 void Clip::decode( coding::Decoder &decoder )
 {
-	Codable::decode( decoder );
+    Codable::decode( decoder );
 
-	decoder.decode( "_duration", _duration );
-	decoder.decode( "frameRate", _frameRate );
-	decoder.decode( "channels", _channels );
+    decoder.decode( "_duration", _duration );
+    decoder.decode( "frameRate", _frameRate );
+    decoder.decode( "channels", _channels );
 }
-

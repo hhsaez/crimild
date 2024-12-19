@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,95 +26,91 @@
  */
 
 #include "ParticleData.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+
+#include "Crimild_Coding.hpp"
 
 using namespace crimild;
 
 ParticleData::ParticleData( void )
 {
-
 }
 
 ParticleData::ParticleData( crimild::Size count )
-	: _count( count )
+    : _count( count )
 {
-
 }
 
 ParticleData::~ParticleData( void )
 {
-
 }
 
 void ParticleData::generate( void )
 {
     _aliveCount = 0;
 
-	// reset all particle attributes
-	const auto count = getParticleCount();
+    // reset all particle attributes
+    const auto count = getParticleCount();
     _attribs.each( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
-		if ( attr != nullptr ) {
-			attr->reset( count );
-		}
-    });
+        if ( attr != nullptr ) {
+            attr->reset( count );
+        }
+    } );
 
-	// reset alive flags for all particles (all dead)
-	_alive.resize( count );
-	for ( auto i = 0; i < count; i++ ) {
-		_alive[ i ] = false;
-	}
+    // reset alive flags for all particles (all dead)
+    _alive.resize( count );
+    for ( auto i = 0; i < count; i++ ) {
+        _alive[ i ] = false;
+    }
 }
 
 void ParticleData::kill( ParticleId pid )
 {
-	if ( !_alive[ pid ] ) {
-		// particle is already dead. do nothing
-		return;
-	}
-	
-	assert( _aliveCount > 0 );
+    if ( !_alive[ pid ] ) {
+        // particle is already dead. do nothing
+        return;
+    }
 
-	_alive[ pid ] = false;
-	swap( pid, --_aliveCount );
+    assert( _aliveCount > 0 );
+
+    _alive[ pid ] = false;
+    swap( pid, --_aliveCount );
 }
 
 void ParticleData::wake( ParticleId pid )
 {
-	assert( _aliveCount < _count );
-	
-	_alive[ pid ] = true;
-	swap( pid, _aliveCount++ );
+    assert( _aliveCount < _count );
+
+    _alive[ pid ] = true;
+    swap( pid, _aliveCount++ );
 }
 
 void ParticleData::swap( ParticleId a, ParticleId b )
 {
     if ( a != b ) {
         _attribs.each( [ a, b ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
-			attr->swap( a, b );
-        });
+            attr->swap( a, b );
+        } );
 
-		// Swap alive flag.
-		// std::swap does not work correctly with std::vector< bool >, so swap them manually.
-		const auto temp = _alive[ a ];
-		_alive[ a ] = _alive[ b ];
-		_alive[ b ] = temp;
+        // Swap alive flag.
+        // std::swap does not work correctly with std::vector< bool >, so swap them manually.
+        const auto temp = _alive[ a ];
+        _alive[ a ] = _alive[ b ];
+        _alive[ b ] = temp;
     }
 }
 
 void ParticleData::encode( coding::Encoder &encoder )
 {
-	Codable::encode( encoder );
+    Codable::encode( encoder );
 
-	encoder.encode( "maxParticles", _count );
-	encoder.encode( "computeInWorldSpace", _computeInWorldSpace );
+    encoder.encode( "maxParticles", _count );
+    encoder.encode( "computeInWorldSpace", _computeInWorldSpace );
 }
 
 void ParticleData::decode( coding::Decoder &decoder )
 {
-	Codable::decode( decoder );
+    Codable::decode( decoder );
 
-	decoder.decode( "maxParticles", _count );
-	decoder.decode( "computeInWorldSpace", _computeInWorldSpace );
+    decoder.decode( "maxParticles", _count );
+    decoder.decode( "computeInWorldSpace", _computeInWorldSpace );
 }
-

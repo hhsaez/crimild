@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_COMPONENTS_BEHAVIOR_TREE_
 #define CRIMILD_CORE_COMPONENTS_BEHAVIOR_TREE_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 
 namespace crimild {
 

@@ -27,9 +27,8 @@
 
 #include "UIFrameConstraint.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Concurrency/Async.hpp"
+#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Simulation.hpp"
 #include "UICanvas.hpp"

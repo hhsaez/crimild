@@ -27,8 +27,7 @@
 
 #include "NavigationMeshContainer.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Navigation/NavigationMeshOBJ.hpp"
 #include "Primitives/Primitive.hpp"
