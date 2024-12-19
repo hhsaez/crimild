@@ -35,8 +35,10 @@ target_sources(
     Views/Windows/BehaviorsWindow.hpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
-    Views/Windows/GraphEditorWindow.cpp
-    Views/Windows/GraphEditorWindow.hpp
+    Views/Windows/GraphEditor/Builders.cpp
+    Views/Windows/GraphEditor/Builders.hpp
+    Views/Windows/GraphEditor/GraphEditorWindow.cpp
+    Views/Windows/GraphEditor/GraphEditorWindow.hpp
     Views/Windows/InspectorWindow.hpp
     Views/Windows/InspectorWindow.cpp
     Views/Windows/LogWindow.hpp

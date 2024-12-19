@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Views/Windows/GraphEditorWindow.hpp"
+#include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;

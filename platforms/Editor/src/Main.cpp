@@ -37,7 +37,7 @@
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 #include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
-#include "Views/Windows/GraphEditorWindow.hpp"
+#include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
 #include "Views/Windows/PlaybackControlsWindow.hpp"
