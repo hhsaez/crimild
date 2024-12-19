@@ -35,6 +35,85 @@
 
 namespace crimild::editor {
 
+    enum class PinType {
+        Flow,
+        Bool,
+        Int,
+        Float,
+        String,
+        Object,
+        Function,
+        Delegate,
+    };
+
+    enum class PinKind {
+        Output,
+        Input,
+    };
+
+    enum class NodeType {
+        Blueprint,
+        Simple,
+        Tree,
+        Comment,
+        Houdini,
+    };
+
+    struct Node;
+
+    struct Pin {
+        ax::NodeEditor::PinId id;
+        Node *node;
+        std::string name;
+        ax::NodeEditor::PinType type;
+        ax::NodeEditor::PinKind kind;
+
+        Pin( ax::NodeEditor::PinId id, std::string_view name, PinType type )
+            : id( id ), node( nullptr ), name( name ), type( type ), kind( PinKind::Input )
+        {
+            // no-op
+        }
+    };
+
+    struct Node {
+        ax::NodeEditor::NodeId id;
+        std::string name;
+        std::vector< Pin > inputs;
+        std::vector< Pin > outputs;
+        ImColor color;
+        NodeType type;
+        ImVec2 size;
+
+        std::string state;
+        std::string savedState;
+
+        Node( ax::NodeEditor::NodeId id, std::string_view name, ImColor color = ImColor( 255, 255, 255 ) )
+            : id( id ), name( name ), color( color ), type( NodeType::Blueprint ), size( 0, 0 )
+        {
+            // no-op
+        }
+    };
+
+    struct Link {
+        ax::NodeEditor::LinkId id;
+        ax::NodeEditor::PinId startPinId;
+        ax::NodeEditor::PinId endPinId;
+        ImColor color;
+
+        Link( ax::NodeEditor::LinkId id, ax::NodeEditor::PinId startPinId, ax::NodeEditor::PinId endPinId, ImColor color = ImColor( 255, 255, 255 ) )
+            : id( id ), startPinId( startPinId ), endPinId( endPinId ), color( color )
+        {
+            // no-op
+        }
+    };
+
+    struct NodeIdLess {
+        bool operator()( const ax::NodeEditor::NodeId &lhs, const ax::NodeEditor::NodeId &rhs ) const
+        {
+            return lhs.AsPointer() < rhs.AsPointer();
+        }
+    };
+
     // Holds basic information about connections between
     // pins. Note that connection (aka, link) has its own
     // ID. This is useful later with dealing with selections,
@@ -55,22 +134,37 @@ namespace crimild::editor {
         void drawContent( void ) noexcept final;
 
     private:
+        void updateTouch( void ) noexcept;
+        void showLeftPanel( float panelWidth ) noexcept;
+
+    private:
         // Editor context
         // Required to trace editor state.
         ax::NodeEditor::EditorContext *m_context = nullptr;
 
         // Flag set for first frame only
         // This is required for some actions that need to be executed only once
-        bool m_firstFrame = true;
+        // bool m_firstFrame = true;
 
         // List of live links
         // It is dynamic unless you want to create a read-only view over nodes
-        ImVector< LinkInfo > m_links;
+        // ImVector< LinkInfo > m_links;
 
         // Counter to help generate link ids.
         // In a real application this will probably based on pointer to user
         // data structures
-        int m_nextLinkId = 100;
+        // int m_nextLinkId = 100;
+
+        int m_nextId = 1;
+        const int m_pinIconSize = 24;
+        std::vector< Node > m_nodes;
+        std::vector< Link > m_links;
+        ImTextureID m_headerBackground = nullptr;
+        ImTextureID m_saveIcon = nullptr;
+        ImTextureID m_restoreIcon = nullptr;
+        const float m_touchTime = 1.0f;
+        std::map< ax::NodeEditor::NodeId, float NodeIdLess > m_nodeTouchTime;
+        bool m_showOrdinals = false;
     };
 }
 
