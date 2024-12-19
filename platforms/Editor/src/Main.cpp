@@ -482,7 +482,7 @@ void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
     err = vkBeginCommandBuffer( command_buffer, &begin_info );
     check_vk_result( err );
 
-    ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
+    // ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
 
     VkSubmitInfo end_info = {};
     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -495,7 +495,7 @@ void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
 
     err = vkDeviceWaitIdle( g_Device );
     check_vk_result( err );
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    // ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 int main( int argc, char **argv )
@@ -624,6 +624,7 @@ int main( int argc, char **argv )
     init_info.Instance = g_Instance;
     init_info.PhysicalDevice = g_PhysicalDevice;
     init_info.Device = g_Device;
+    init_info.RenderPass = wd->RenderPass;
     init_info.QueueFamily = g_QueueFamily;
     init_info.Queue = g_Queue;
     init_info.PipelineCache = g_PipelineCache;
@@ -634,7 +635,7 @@ int main( int argc, char **argv )
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = g_Allocator;
     init_info.CheckVkResultFn = check_vk_result;
-    ImGui_ImplVulkan_Init( &init_info, wd->RenderPass );
+    ImGui_ImplVulkan_Init( &init_info );
 
     setupImGuiStyles( true, 1.0f );
 

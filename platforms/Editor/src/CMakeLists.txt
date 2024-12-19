@@ -103,7 +103,7 @@ target_sources(
 
 target_include_directories(
 	crimild_editor
-	PRIVATE .
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/examples
