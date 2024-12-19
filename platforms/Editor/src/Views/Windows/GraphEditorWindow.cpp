@@ -32,26 +32,30 @@ using namespace crimild::editor;
 
 namespace NodeEditor = ax::NodeEditor;
 
-// namespace ImGui::ex {
+#if !GRAPH_EDITOR_BLUEPRINTS
 
-//     void BeginColumn( void ) noexcept
-//     {
-//         ImGui::BeginGroup();
-//     }
+namespace ImGui::ex {
 
-//     void NextColumn( void ) noexcept
-//     {
-//         ImGui::EndGroup();
-//         ImGui::SameLine();
-//         ImGui::BeginGroup();
-//     }
+    void BeginColumn( void ) noexcept
+    {
+        ImGui::BeginGroup();
+    }
 
-//     void EndColumn( void ) noexcept
-//     {
-//         ImGui::EndGroup();
-//     }
+    void NextColumn( void ) noexcept
+    {
+        ImGui::EndGroup();
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+    }
 
-// }
+    void EndColumn( void ) noexcept
+    {
+        ImGui::EndGroup();
+    }
+
+}
+
+#endif
 
 bool splitter( bool splitVertically, float thickness, float *size1, float *size2, float minSize1, float minSize2, float splitterLongAxisSize = -1.0f ) noexcept
 {
@@ -80,15 +84,18 @@ GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 
 void GraphEditorWindow::drawContent( void ) noexcept
 {
-    updateTouch();
 
     auto &io = ImGui::GetIO();
 
     ImGui::Text( "FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0 );
 
-    // ImGui::Separator();
+    ImGui::Separator();
 
     NodeEditor::SetCurrentEditor( m_context );
+
+#if GRAPH_EDITOR_BLUEPRINTS
+
+    updateTouch();
 
     static NodeEditor::NodeId contextNodeId = 0;
     static NodeEditor::LinkId contextLinkId = 0;
@@ -282,11 +289,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowSize, 10.0f );
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowWidth, 10.0f );
-#if IMGUI_VERSION_NUM > 18101
+    #if IMGUI_VERSION_NUM > 18101
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-#else
+    #else
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 12 );
-#endif
+    #endif
                 NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
                 NodeEditor::PinPivotRect( inputsRect.GetTL(), inputsRect.GetBR() );
                 NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
@@ -323,11 +330,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 ImGui::Dummy( ImVec2( 0, padding ) );
                 ImGui::Spring( 1, 0 );
                 outputsRect = ImGui_GetItemRect();
-#if IMGUI_VERSION_NUM > 18101
+    #if IMGUI_VERSION_NUM > 18101
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-#else
+    #else
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 3 );
-#endif
+    #endif
                 NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
                 NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.getBR() );
                 NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
@@ -351,13 +358,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
             auto drawList = NodeEditor::GetNodeBackgroundDrawList( node.id );
 
-#if IMGUI_VERSION_NUM > 18101
+    #if IMGUI_VERSION_NUM > 18101
             const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
             const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
-#else
+    #else
             const auto topRoundCornersFlags = 1 | 2;
             const auto bottomRoundCornersFlags = 4 | 8;
-#endif
+    #endif
             drawList->AddRectFilled(
                 inputsRect.GetTL() + ImVec2( 0, 1 ),
                 inputsRect.GetBR(),
@@ -438,11 +445,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     inputsRect.Min.y -= padding;
                     inputsRect.Max.y -= padding;
 
-#if IMGUI_VERSION_NUM > 18101
+    #if IMGUI_VERSION_NUM > 18101
                     const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-#else
+    #else
                     const auto allRoundCornersFlags = 15;
-#endif
+    #endif
                     NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
                     NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
                     NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
@@ -501,13 +508,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     outputsRect.Min.y += padding;
                     outputsRect.Max.y += padding;
 
-#if IMGUI_VERSION_NUM 18101
+    #if IMGUI_VERSION_NUM 18101
                     const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
                     const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-#else
+    #else
                     const auto allRoundCornersFlags = 15;
                     const auto topRoundCornersFlags = 3;
-#endif
+    #endif
 
                     NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
                     NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
@@ -904,21 +911,23 @@ void GraphEditorWindow::drawContent( void ) noexcept
     }
 
     NodeEditor::SetCurrentEditor( nullptr );
+#else
+    int uniqueId = 1;
 
-    // int uniqueId = 1;
+    NodeEditor::Begin( "Node Editor" );
 
-    // NodeEditor::BeginNode( uniqueId++ );
-    // ImGui::Text( "Node Test" );
-    // NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Input );
-    // ImGui::Text( "-> In" );
-    // NodeEditor::EndPin();
-    // ImGui::SameLine();
-    // NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Output );
-    // ImGui::Text( "Out ->" );
-    // NodeEditor::EndPin();
-    // NodeEditor::EndNode();
+    NodeEditor::BeginNode( uniqueId++ );
+    ImGui::Text( "Node Test" );
+    NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Input );
+    ImGui::Text( "-> In" );
+    NodeEditor::EndPin();
+    ImGui::SameLine();
+    NodeEditor::BeginPin( uniqueId++, NodeEditor::PinKind::Output );
+    ImGui::Text( "Out ->" );
+    NodeEditor::EndPin();
+    NodeEditor::EndNode();
 
-    // // Node A
+    // Node A
     // NodeEditor::NodeId nodeAId = uniqueId++;
     // NodeEditor::PinId nodeAInputPinId = uniqueId++;
     // NodeEditor::PinId nodeAOutputPinId = uniqueId++;
@@ -1004,13 +1013,19 @@ void GraphEditorWindow::drawContent( void ) noexcept
     // }
     // NodeEditor::EndCreate();
 
-    // if ( m_firstFrame ) {
-    //     NodeEditor::NavigateToContent( 0.0f );
-    // }
+    NodeEditor::End();
 
-    // m_firstFrame = false;
+    if ( m_firstFrame ) {
+        NodeEditor::NavigateToContent( 0.0f );
+    }
+
+    m_firstFrame = false;
+
+    NodeEditor::SetCurrentEditor( nullptr );
+#endif
 }
 
+#if GRAPH_EDITOR_BLUEPRINTS
 void GraphEditorWindow::updateTouch( void ) noexcept
 {
     const auto deltaTime = ImGui::GetIO().DeltaTime;
@@ -1025,3 +1040,4 @@ void GraphEditorWindow::showLeftPanel( float panelWidth ) noexcept
 {
     // TODO
 }
+#endif

@@ -31,11 +31,12 @@
 // Disable clang-format in order to ensure that all header files are included in the right order
 
 // clang-format off
-#include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "imgui_node_editor.h"
 
 #include "ImGuizmo.h"
 #include "ImGuiFileDialog.h"

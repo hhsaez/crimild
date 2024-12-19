@@ -58,7 +58,7 @@ void Layout::addView( std::shared_ptr< View > const &view ) noexcept
 
 void Layout::draw( void ) noexcept
 {
-    ImGui::DockSpaceOverViewport( ImGui::GetMainViewport() );
+    ImGui::DockSpaceOverViewport( 0, ImGui::GetMainViewport() );
 
     // std::cout << "Getting widow info from context" << std::endl;
 

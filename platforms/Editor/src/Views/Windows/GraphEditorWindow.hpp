@@ -31,9 +31,11 @@
 #include "Foundation/ImGuiUtils.hpp"
 #include "Views/Windows/Window.hpp"
 
-#include <imgui_node_editor.h>
+#define GRAPH_EDITOR_BLUEPRINTS 0
 
 namespace crimild::editor {
+
+#if GRAPH_EDITOR_BLUEPRINTS
 
     enum class PinType {
         Flow,
@@ -113,6 +115,7 @@ namespace crimild::editor {
             return lhs.AsPointer() < rhs.AsPointer();
         }
     };
+#else
 
     // Holds basic information about connections between
     // pins. Note that connection (aka, link) has its own
@@ -123,6 +126,8 @@ namespace crimild::editor {
         ax::NodeEditor::PinId inputPinId;
         ax::NodeEditor::PinId outputPinId;
     };
+
+#endif
 
     class GraphEditorWindow : public Window {
         CRIMILD_IMPLEMENT_RTTI( crimild::editor::GraphEditorWindow )
@@ -142,19 +147,7 @@ namespace crimild::editor {
         // Required to trace editor state.
         ax::NodeEditor::EditorContext *m_context = nullptr;
 
-        // Flag set for first frame only
-        // This is required for some actions that need to be executed only once
-        // bool m_firstFrame = true;
-
-        // List of live links
-        // It is dynamic unless you want to create a read-only view over nodes
-        // ImVector< LinkInfo > m_links;
-
-        // Counter to help generate link ids.
-        // In a real application this will probably based on pointer to user
-        // data structures
-        // int m_nextLinkId = 100;
-
+#if GRAPH_EDITOR_BLUEPRINTS
         int m_nextId = 1;
         const int m_pinIconSize = 24;
         std::vector< Node > m_nodes;
@@ -165,6 +158,20 @@ namespace crimild::editor {
         const float m_touchTime = 1.0f;
         std::map< ax::NodeEditor::NodeId, float NodeIdLess > m_nodeTouchTime;
         bool m_showOrdinals = false;
+#else
+        // Flag set for first frame only
+        // This is required for some actions that need to be executed only once
+        bool m_firstFrame = true;
+
+        // List of live links
+        // It is dynamic unless you want to create a read-only view over nodes
+        ImVector< LinkInfo > m_links;
+
+        // Counter to help generate link ids.
+        // In a real application this will probably based on pointer to user
+        // data structures
+        int m_nextLinkId = 100;
+#endif
     };
 }
 
