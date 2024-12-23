@@ -28,16 +28,10 @@
 #ifndef CRIMILD_VULKAN_UTILS_
 #define CRIMILD_VULKAN_UTILS_
 
-#include "Crimild_Foundation.hpp"
 #include "Foundation/VulkanInitializers.hpp"
-#include "Rendering/DescriptorSet.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/Image.hpp"
-#include "Rendering/RenderPass.hpp"
-#include "Rendering/Sampler.hpp"
-#include "Rendering/Shader.hpp"
-#include "Rendering/Texture.hpp"
 
+#include <Crimild.hpp>
+#include <Crimild_Foundation.hpp>
 #include <vulkan/vulkan.h>
 
 namespace crimild {
