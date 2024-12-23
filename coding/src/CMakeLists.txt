@@ -7,7 +7,7 @@ target_sources(
 
     PUBLIC Crimild_Coding.hpp
 
-    PRIVATE
+    PUBLIC
     Codable.hpp
     Decoder.hpp
     EncodedData.hpp
@@ -30,7 +30,7 @@ target_sources(
     Tags.cpp
 )
 
-target_include_directories( crimild_coding PUBLIC . )
+target_include_directories( crimild_coding PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 target_compile_features( crimild_coding PUBLIC cxx_std_20 )
 

@@ -28,10 +28,9 @@
 #include "Behaviors/Actions/Rotate.hpp"
 
 #include "Behaviors/withBehavior.hpp"
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "SceneGraph/Node.hpp"
 
+#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

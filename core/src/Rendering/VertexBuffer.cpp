@@ -33,16 +33,16 @@ using namespace crimild;
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
     : VertexBuffer(
-        vertexLayout,
-        [ & ] {
-            return crimild::alloc< BufferView >(
-                BufferView::Target::VERTEX,
-                crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
-                0,
-                vertexLayout.getSize()
-            );
-        }()
-    )
+          vertexLayout,
+          [ & ] {
+              return crimild::alloc< BufferView >(
+                  BufferView::Target::VERTEX,
+                  crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+                  0,
+                  vertexLayout.getSize()
+              );
+          }()
+      )
 {
     // no-op
 }
@@ -57,10 +57,10 @@ VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, SharedPointer< Buf
         [ & ]( const auto &attrib ) {
             auto accessor = crimild::alloc< BufferAccessor >(
                 bufferView,
-                attrib.offset,
-                utils::getFormatSize( attrib.format )
+                attrib->getOffset(),
+                utils::getFormatSize( attrib->getFormat() )
             );
-            m_accessors[ attrib.name ] = accessor;
+            m_accessors[ attrib->getName() ] = accessor;
         }
     );
 }
@@ -75,7 +75,7 @@ void VertexBuffer::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    Array< VertexAttribute > attribs;
+    Array< std::shared_ptr< VertexAttribute > > attribs;
     m_vertexLayout.eachAttribute(
         [ & ]( auto attr ) {
             attribs.add( attr );
@@ -92,7 +92,7 @@ void VertexBuffer::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    Array< VertexAttribute > attribs;
+    Array< std::shared_ptr< VertexAttribute > > attribs;
     decoder.decode( "vertexLayoutAttribs", attribs );
     m_vertexLayout = VertexLayout( attribs );
 
@@ -103,10 +103,10 @@ void VertexBuffer::decode( coding::Decoder &decoder )
         [ & ]( const auto &attrib ) {
             auto accessor = crimild::alloc< BufferAccessor >(
                 m_bufferView,
-                attrib.offset,
-                utils::getFormatSize( attrib.format )
+                attrib->getOffset(),
+                utils::getFormatSize( attrib->getFormat() )
             );
-            m_accessors[ attrib.name ] = accessor;
+            m_accessors[ attrib->getName() ] = accessor;
         }
     );
 }

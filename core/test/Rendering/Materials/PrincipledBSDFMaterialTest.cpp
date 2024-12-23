@@ -27,12 +27,11 @@
 
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
 
+#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
@@ -79,23 +78,26 @@ TEST( PrincipledBSDFMaterial, coding )
     ASSERT_NE( nullptr, decoded );
     EXPECT_EQ( material->getAlbedo(), decoded->getAlbedo() );
 
-#define ASSERT_TEXTURE( name, expected, decoded )                            \
-    {                                                                        \
-        ASSERT_NE( nullptr, decoded );                                       \
-        EXPECT_EQ( name, decoded->getName() );                               \
-        ASSERT_NE( nullptr, decoded->sampler );                              \
-        ASSERT_NE( nullptr, decoded->imageView );                            \
-        ASSERT_NE( nullptr, decoded->imageView->image );                     \
-        ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() );    \
-        ASSERT_EQ(                                                           \
-            expected->imageView->image->getBufferView()->getLength(),        \
-            decoded->imageView->image->getBufferView()->getLength() );       \
-        ASSERT_EQ(                                                           \
-            0,                                                               \
-            memcmp(                                                          \
-                expected->imageView->image->getBufferView()->getData(),      \
-                decoded->imageView->image->getBufferView()->getData(),       \
-                decoded->imageView->image->getBufferView()->getLength() ) ); \
+#define ASSERT_TEXTURE( name, expected, decoded )                         \
+    {                                                                     \
+        ASSERT_NE( nullptr, decoded );                                    \
+        EXPECT_EQ( name, decoded->getName() );                            \
+        ASSERT_NE( nullptr, decoded->sampler );                           \
+        ASSERT_NE( nullptr, decoded->imageView );                         \
+        ASSERT_NE( nullptr, decoded->imageView->image );                  \
+        ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() ); \
+        ASSERT_EQ(                                                        \
+            expected->imageView->image->getBufferView()->getLength(),     \
+            decoded->imageView->image->getBufferView()->getLength()       \
+        );                                                                \
+        ASSERT_EQ(                                                        \
+            0,                                                            \
+            memcmp(                                                       \
+                expected->imageView->image->getBufferView()->getData(),   \
+                decoded->imageView->image->getBufferView()->getData(),    \
+                decoded->imageView->image->getBufferView()->getLength()   \
+            )                                                             \
+        );                                                                \
     }
 
     ASSERT_TEXTURE( "albedo", material->getAlbedoMap(), decoded->getAlbedoMap() );

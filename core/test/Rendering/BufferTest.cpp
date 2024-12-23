@@ -27,10 +27,8 @@
 
 #include "Rendering/Buffer.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
-#include "Crimild_Mathematics.hpp"
-
+#include <Crimild_Coding.hpp>
+#include <Crimild_Mathematics.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

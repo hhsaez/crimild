@@ -41,6 +41,7 @@ target_sources(
     Rendering/SkinnedMeshTest.cpp
     Rendering/TextureTest.cpp
     Rendering/UniformBufferTest.cpp
+    Rendering/VertexAttributeTest.cpp
     Rendering/VertexBufferTest.cpp
     Rendering/VertexLayoutTest.cpp
     Rendering/VertexTest.cpp

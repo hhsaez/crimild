@@ -515,6 +515,7 @@ target_sources(
     Rendering/Uniforms/LightUniform.cpp
     Rendering/Uniforms/ModelUniformBuffer.cpp
     Rendering/Uniforms/ModelViewProjectionUniformBuffer.cpp
+    Rendering/VertexAttribute.cpp
     Rendering/VertexBuffer.cpp
     Rendering/VertexLayout.cpp
     SceneGraph/Camera.cpp
@@ -569,7 +570,8 @@ target_sources(
     Visitors/UpdateWorldState.cpp
 )
 
-target_include_directories( crimild_core PUBLIC . )
+target_include_directories( crimild_coding PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+
 target_compile_features( crimild_core PUBLIC cxx_std_20 )
 
 target_link_libraries(

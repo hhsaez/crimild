@@ -199,14 +199,14 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                     }
                 );
                 program->vertexLayouts = { VertexP3N3TC2::getLayout() };
-                program->instanceLayouts = {
-                    VertexLayout {
-                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
-                    },
-                };
+                // program->instanceLayouts = {
+                //     VertexLayout {
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
+                //     },
+                // };
                 program->descriptorSetLayouts = {
                     [] {
                         auto layout = crimild::alloc< DescriptorSetLayout >();
@@ -308,15 +308,15 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
         SharedPointer< VertexBuffer > &updateInstancedData( void ) noexcept
         {
             if ( this->data == nullptr || this->data->getVertexCount() < instanceCount ) {
-                this->data = crimild::alloc< VertexBuffer >(
-                    VertexLayout {
-                        { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
-                        { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
-                    },
-                    instanceCount
-                );
+                // this->data = crimild::alloc< VertexBuffer >(
+                //     VertexLayout {
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+                //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
+                //     },
+                //     instanceCount
+                // );
                 this->data->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
             }
 

@@ -27,12 +27,11 @@
 
 #include "Rendering/Texture.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
 
+#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

@@ -52,6 +52,7 @@ void crimild::init( void )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BufferView );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::BufferAccessor );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::IndexBuffer );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexAttribute );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::VertexBuffer );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::ShaderProgram );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Shader );

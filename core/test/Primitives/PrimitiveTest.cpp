@@ -27,11 +27,10 @@
 
 #include "Primitives/Primitive.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/Vertex.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
@@ -59,7 +58,8 @@ TEST( Primitive, vertexData )
                 {
                     .position = Vector3f { 1.0f, 2.0f, 3.0f },
                 },
-            } );
+            }
+        );
     }();
 
     p->setVertexData( { vbo } );
@@ -78,7 +78,8 @@ TEST( Primitive, indices )
             0,
             1,
             2,
-        } );
+        }
+    );
 
     p->setIndices( indices );
 
@@ -89,32 +90,32 @@ TEST( Primitive, indices )
 TEST( PrimitiveTest, coding )
 {
     /*
-	auto primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
+        auto primitive = crimild::alloc< Primitive >( Primitive::Type::POINTS );
 
-	auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3 );
-	vbo->setPositionAt( 0, Vector3f( -1.0f, 0.0f, 0.0f ) );
-	vbo->setPositionAt( 1, Vector3f( 1.0f, 0.0f, 0.0f ) );
-	vbo->setPositionAt( 1, Vector3f( 0.0f, 1.0f, 0.0f ) );
-	primitive->setVertexBuffer( vbo );
+        auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3, 3 );
+        vbo->setPositionAt( 0, Vector3f( -1.0f, 0.0f, 0.0f ) );
+        vbo->setPositionAt( 1, Vector3f( 1.0f, 0.0f, 0.0f ) );
+        vbo->setPositionAt( 1, Vector3f( 0.0f, 1.0f, 0.0f ) );
+        primitive->setVertexBuffer( vbo );
 
-	auto ibo = crimild::alloc< IndexBufferObject >( 3 );
-	ibo->generateIncrementalIndices();
-	primitive->setIndexBuffer( ibo );
+        auto ibo = crimild::alloc< IndexBufferObject >( 3 );
+        ibo->generateIncrementalIndices();
+        primitive->setIndexBuffer( ibo );
 
-	auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( primitive );
-	auto bytes = encoder->getBytes();
-	auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
+        auto encoder = crimild::alloc< coding::MemoryEncoder >();
+        encoder->encode( primitive );
+        auto bytes = encoder->getBytes();
+        auto decoder = crimild::alloc< coding::MemoryDecoder >();
+        decoder->fromBytes( bytes );
 
-	auto p = decoder->getObjectAt< Primitive >( 0 );
-	EXPECT_TRUE( p != nullptr );
-	EXPECT_EQ( p->getType(), Primitive::Type::POINTS );
+        auto p = decoder->getObjectAt< Primitive >( 0 );
+        EXPECT_TRUE( p != nullptr );
+        EXPECT_EQ( p->getType(), Primitive::Type::POINTS );
 
-	EXPECT_TRUE( p->getVertexBuffer() != nullptr );
-	EXPECT_EQ( primitive->getVertexBuffer()->getVertexCount(), p->getVertexBuffer()->getVertexCount() );
+        EXPECT_TRUE( p->getVertexBuffer() != nullptr );
+        EXPECT_EQ( primitive->getVertexBuffer()->getVertexCount(), p->getVertexBuffer()->getVertexCount() );
 
-	EXPECT_TRUE( p->getIndexBuffer() != nullptr );
-	EXPECT_EQ( primitive->getIndexBuffer()->getIndexCount(), p->getIndexBuffer()->getIndexCount() );
+        EXPECT_TRUE( p->getIndexBuffer() != nullptr );
+        EXPECT_EQ( primitive->getIndexBuffer()->getIndexCount(), p->getIndexBuffer()->getIndexCount() );
     */
 }
