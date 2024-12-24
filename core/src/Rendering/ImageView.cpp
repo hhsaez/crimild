@@ -27,8 +27,7 @@
 
 #include "Rendering/ImageView.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/Image.hpp"
 
 using namespace crimild;
@@ -55,7 +54,7 @@ void ImageView::encode( coding::Encoder &encoder )
 
     encoder.encode( "type", Int32( type ) );
     encoder.encode( "image", image );
-    encoder.encode( "format", format );
+    encoder.encodeEnum( "format", format );
     encoder.encode( "mipLevels", mipLevels );
     encoder.encode( "layerCount", layerCount );
 }
@@ -69,7 +68,7 @@ void ImageView::decode( coding::Decoder &decoder )
     this->type = Type( type );
 
     decoder.decode( "image", image );
-    decoder.decode( "format", format );
+    decoder.decodeEnum( "format", format );
     decoder.decode( "mipLevels", mipLevels );
     decoder.decode( "layerCount", layerCount );
 }

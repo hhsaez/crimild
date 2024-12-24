@@ -25,20 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 
-#include "Coding/Codable.hpp"
-
-using namespace crimild;
-using namespace crimild::coding;
-
-crimild::Bool Encoder::encode( std::string key, Codable *codable )
+void crimild::coding::init( void ) noexcept
 {
-    // TODO: why retaining?
-    return encode( key, retain( codable ) );
-}
-
-std::string Encoder::dump( void )
-{
-    return "empty";
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::EncodedData );
 }

@@ -27,10 +27,8 @@
 
 #include "Rendering/BufferView.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
-
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
@@ -52,7 +50,8 @@ TEST( BufferView, constructionWithDefaults )
 
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
-        buffer );
+        buffer
+    );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 0, bufferView->getOffset() );
@@ -117,7 +116,8 @@ TEST( BufferView, constructionWithOffset )
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
         buffer,
-        12 );
+        12
+    );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 12, bufferView->getOffset() );
@@ -150,7 +150,8 @@ TEST( BufferView, constructionWithOffsetAndLength )
         buffer,
         12,
         0,
-        12 );
+        12
+    );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 12, bufferView->getOffset() );
@@ -182,7 +183,8 @@ TEST( BufferView, constructionWithStride )
         BufferView::Target::VERTEX,
         buffer,
         0,
-        sizeof( crimild::Real32 ) );
+        sizeof( crimild::Real32 )
+    );
 
     ASSERT_EQ( crimild::get_ptr( buffer ), bufferView->getBuffer() );
     ASSERT_EQ( 0, bufferView->getOffset() );
@@ -200,7 +202,8 @@ TEST( BufferView, withEmptyData )
         BufferView::Target::VERTEX,
         crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) ),
         0,
-        sizeof( crimild::Real32 ) );
+        sizeof( crimild::Real32 )
+    );
 
     ASSERT_EQ( 3 * sizeof( Real32 ), bufferView->getLength() );
     ASSERT_EQ( sizeof( Real32 ), bufferView->getStride() );
@@ -225,7 +228,8 @@ TEST( BufferView, coding )
 
     auto bufferView = crimild::alloc< BufferView >(
         BufferView::Target::VERTEX,
-        buffer );
+        buffer
+    );
 
     coding::MemoryEncoder encoder;
     ASSERT_TRUE( encoder.encode( bufferView ) );

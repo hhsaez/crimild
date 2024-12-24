@@ -27,12 +27,13 @@
 
 #include "Views/Windows/FileSystemWindow.hpp"
 
-#include "Coding/FileEncoder.hpp"
 #include "Layout/Layout.hpp"
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Modals/AlertModal.hpp"
+
+#include <Crimild_Coding.hpp>
 
 using namespace crimild::editor;
 

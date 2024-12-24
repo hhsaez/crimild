@@ -25,37 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_CODING_CODABLE_
-#define CRIMILD_CORE_CODING_CODABLE_
+#ifndef CRIMILD_CORE_CODING_ENCODED_OBJECT_
+#define CRIMILD_CORE_CODING_ENCODED_OBJECT_
 
+#include "Codable.hpp"
 #include "Crimild_Foundation.hpp"
 
 namespace crimild {
 
     namespace coding {
 
-        class Encoder;
-        class Decoder;
-
-        class Codable : public SharedObject,
-                        public RTTI {
+        class EncodedObject : public Codable {
+            CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedObject )
         public:
-            using UniqueID = crimild::Size;
-
-        protected:
-            Codable( void );
-
-        public:
-            virtual ~Codable( void ) { }
-
-            inline UniqueID getUniqueID( void ) const
+            EncodedObject( void )
             {
-                return ( UniqueID ) this;
             }
 
-            virtual void encode( Encoder &encoder );
+            virtual ~EncodedObject( void )
+            {
+            }
 
-            virtual void decode( Decoder &decoder );
+            void set( std::string key, crimild::Int32 value );
+
+            // void set( std::string key, SharedPointer< EncodedArray > &array );
+
+            void set( std::string key, SharedPointer< EncodedObject > &obj );
+
+            inline void setBytes( const ByteArray &bytes ) { _bytes = bytes; }
+            inline ByteArray &getBytes( void ) { return _bytes; }
+            inline const ByteArray &getBytes( void ) const { return _bytes; }
+
+            std::string getString( void ) const
+            {
+                return std::string( ( const char * ) &_bytes[ 0 ] );
+            }
+
+            template< typename T >
+            T getValue( void ) const
+            {
+                auto value = T();
+                if ( _bytes.size() > 0 ) {
+                    memcpy( ( void * ) &value, &_bytes[ 0 ], _bytes.size() );
+                }
+                return value;
+            }
+
+        private:
+            ByteArray _bytes;
         };
 
     }

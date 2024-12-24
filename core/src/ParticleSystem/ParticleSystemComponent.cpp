@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,112 +26,108 @@
  */
 
 #include "ParticleSystemComponent.hpp"
-#include "Coding/Encoder.hpp"
-#include "Coding/Decoder.hpp"
+
+#include "Crimild_Coding.hpp"
 
 using namespace crimild;
 
 ParticleSystemComponent::ParticleSystemComponent( void )
 {
-
 }
 
 ParticleSystemComponent::ParticleSystemComponent( ParticleDataPtr const &particles )
-	: _particles( particles )
+    : _particles( particles )
 {
-
 }
 
 ParticleSystemComponent::ParticleSystemComponent( crimild::Size maxParticles )
-	: _particles( crimild::alloc< ParticleData >( maxParticles ) )
+    : _particles( crimild::alloc< ParticleData >( maxParticles ) )
 {
-
 }
 
 ParticleSystemComponent::~ParticleSystemComponent( void )
 {
-
 }
 
 void ParticleSystemComponent::start( void )
 {
-	auto particles = getParticles();
-	assert( particles != nullptr );
-	
-	auto node = getNode();
+    auto particles = getParticles();
+    assert( particles != nullptr );
 
-	configureGenerators( node, particles );
-	configureUpdaters( node, particles );
-	configureRenderers( node, particles );
+    auto node = getNode();
 
-	_particles->generate();
+    configureGenerators( node, particles );
+    configureUpdaters( node, particles );
+    configureRenderers( node, particles );
 
-	auto warmUp = _preWarmTime;
-	while ( warmUp > 0.0 ) {
-		updateGenerators( node, Clock::DEFAULT_TICK_TIME, particles );
-		updateUpdaters( node, Clock::DEFAULT_TICK_TIME, particles );
-		warmUp -= Clock::DEFAULT_TICK_TIME;
-	}
+    _particles->generate();
+
+    auto warmUp = _preWarmTime;
+    while ( warmUp > 0.0 ) {
+        updateGenerators( node, Clock::DEFAULT_TICK_TIME, particles );
+        updateUpdaters( node, Clock::DEFAULT_TICK_TIME, particles );
+        warmUp -= Clock::DEFAULT_TICK_TIME;
+    }
 }
 
 void ParticleSystemComponent::configureGenerators( Node *node, ParticleData *particles )
 {
-	_generators.each( [ node, particles ]( SharedPointer< ParticleGenerator > &g ) {
-		g->configure( node, particles );
-	});
+    _generators.each( [ node, particles ]( SharedPointer< ParticleGenerator > &g ) {
+        g->configure( node, particles );
+    } );
 }
 
 void ParticleSystemComponent::configureUpdaters( Node *node, ParticleData *particles )
 {
-	_updaters.each( [ node, particles ]( SharedPointer< ParticleUpdater > &u ) {
-		u->configure( node, particles );
-	});
+    _updaters.each( [ node, particles ]( SharedPointer< ParticleUpdater > &u ) {
+        u->configure( node, particles );
+    } );
 }
 
 void ParticleSystemComponent::configureRenderers( Node *node, ParticleData *particles )
 {
-	_renderers.each( [ node, particles ]( SharedPointer< ParticleRenderer > &r ) {
-		if ( r != nullptr ) {
-			r->configure( node, particles );
-		}
-	});
+    _renderers.each( [ node, particles ]( SharedPointer< ParticleRenderer > &r ) {
+        if ( r != nullptr ) {
+            r->configure( node, particles );
+        }
+    } );
 }
 
 void ParticleSystemComponent::update( const Clock &c )
 {
     const auto dt = c.getDeltaTime();
 
-	auto node = getNode();
-	auto particles = getParticles();
+    auto node = getNode();
+    auto particles = getParticles();
 
-	if ( isAnimationEnabled() ) {
-		updateGenerators( node, dt, particles );
-		updateUpdaters( node, dt, particles );
-	}
-	
-	updateRenderers( node, dt, particles );
+    if ( isAnimationEnabled() ) {
+        updateGenerators( node, dt, particles );
+        updateUpdaters( node, dt, particles );
+    }
+
+    updateRenderers( node, dt, particles );
 }
 
 void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	_emitAccum += _burst ? _emitRate : dt * _emitRate;
-	if ( _emitAccum < 1.0 ) {
-		return;
-	}
-	
-    const ParticleId maxNewParticles = ( int ) _emitAccum;//_burst ? _emitRate : Numeric< ParticleId >::max( 1, dt * _emitRate );
-	_emitAccum -= maxNewParticles;
-	
-    const ParticleId startId = particles->getAliveCount();            
+    _emitAccum += _burst ? _emitRate : dt * _emitRate;
+    if ( _emitAccum < 1.0 ) {
+        return;
+    }
+
+    const ParticleId maxNewParticles = ( int ) _emitAccum; //_burst ? _emitRate : Numeric< ParticleId >::max( 1, dt * _emitRate );
+    _emitAccum -= maxNewParticles;
+
+    const ParticleId startId = particles->getAliveCount();
     const ParticleId endId = Numeric< ParticleId >::min( startId + maxNewParticles, particles->getParticleCount() - 1 );
 
-	if ( endId - startId == 0 ) {
-		return;
-	}
+    if ( endId - startId == 0 ) {
+        return;
+    }
 
-	_generators.each( [ node, dt, particles, startId, endId ]( SharedPointer< ParticleGenerator > &g ) {
-		g->generate( node, dt, particles, startId, endId );
-	});
+    _generators.each( [ node, dt, particles, startId, endId ]( SharedPointer< ParticleGenerator > &g ) {
+        g->generate( node, dt, particles, startId, endId );
+    } );
 
     for ( ParticleId i = startId; i < endId; i++ ) {
         particles->wake( i );
@@ -140,48 +136,47 @@ void ParticleSystemComponent::updateGenerators( Node *node, crimild::Real64 dt, 
 
 void ParticleSystemComponent::updateUpdaters( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	_updaters.each( [ node, dt, particles ]( SharedPointer< ParticleUpdater > &u ) {
-		u->update( node, dt, particles );
-	});
+    _updaters.each( [ node, dt, particles ]( SharedPointer< ParticleUpdater > &u ) {
+        u->update( node, dt, particles );
+    } );
 }
 
 void ParticleSystemComponent::updateRenderers( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-	_renderers.each( [ node, dt, particles ]( SharedPointer< ParticleRenderer > &r ) {
-		r->update( node, dt, particles );
-	});
+    _renderers.each( [ node, dt, particles ]( SharedPointer< ParticleRenderer > &r ) {
+        r->update( node, dt, particles );
+    } );
 }
 
-void ParticleSystemComponent::encode( coding::Encoder &encoder ) 
+void ParticleSystemComponent::encode( coding::Encoder &encoder )
 {
-	NodeComponent::encode( encoder );
+    NodeComponent::encode( encoder );
 
-	encoder.encode( "particles", _particles );
-	encoder.encode( "emitRate", _emitRate );
-	encoder.encode( "preWarmTime", _preWarmTime );
-	encoder.encode( "burst", _burst );
-	encoder.encode( "generators", _generators );
-	encoder.encode( "updaters", _updaters );
-	encoder.encode( "renderers", _renderers );
+    encoder.encode( "particles", _particles );
+    encoder.encode( "emitRate", _emitRate );
+    encoder.encode( "preWarmTime", _preWarmTime );
+    encoder.encode( "burst", _burst );
+    encoder.encode( "generators", _generators );
+    encoder.encode( "updaters", _updaters );
+    encoder.encode( "renderers", _renderers );
 }
 
 void ParticleSystemComponent::decode( coding::Decoder &decoder )
 {
-	NodeComponent::decode( decoder );
+    NodeComponent::decode( decoder );
 
-	decoder.decode( "particles", _particles );
+    decoder.decode( "particles", _particles );
 
-	_emitRate = _particles->getParticleCount();
-	decoder.decode( "emitRate", _emitRate );
+    _emitRate = _particles->getParticleCount();
+    decoder.decode( "emitRate", _emitRate );
 
-	_preWarmTime = 0;
-	decoder.decode( "preWarmTime", _preWarmTime );
+    _preWarmTime = 0;
+    decoder.decode( "preWarmTime", _preWarmTime );
 
-	_burst = false;
-	decoder.decode( "burst", _burst );
+    _burst = false;
+    decoder.decode( "burst", _burst );
 
-	decoder.decode( "generators", _generators );
+    decoder.decode( "generators", _generators );
     decoder.decode( "updaters", _updaters );
     decoder.decode( "renderers", _renderers );
 }
-

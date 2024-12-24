@@ -27,10 +27,9 @@
 
 #include "Rendering/ImageView.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/Image.hpp"
 
+#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

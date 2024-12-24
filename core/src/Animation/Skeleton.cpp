@@ -29,8 +29,7 @@
 
 #include "Animation.hpp"
 #include "Clip.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
@@ -107,14 +106,14 @@ void Skeleton::animate( Animation *animation )
         auto node = joint->getNode();
 
         // TODO
-        //animation->getValue( name + "[p]", node->local().translate() );
-        //animation->getValue( name + "[r]", node->local().rotate() );
-        //animation->getValue( name + "[s]", node->local().scale() );
+        // animation->getValue( name + "[p]", node->local().translate() );
+        // animation->getValue( name + "[r]", node->local().rotate() );
+        // animation->getValue( name + "[s]", node->local().scale() );
 
-        //Transformation pose;
-        //pose.computeFrom( node->getParent()->getWorld(), node->getLocal() );
-        //pose.computeFrom( pose, joint->getOffset() );
-        //joint->setPoseMatrix( pose.computeModelMatrix() );
+        // Transformation pose;
+        // pose.computeFrom( node->getParent()->getWorld(), node->getLocal() );
+        // pose.computeFrom( pose, joint->getOffset() );
+        // joint->setPoseMatrix( pose.computeModelMatrix() );
     } );
 }
 
@@ -155,8 +154,8 @@ void Skeleton::renderDebugInfo( Renderer *renderer, Camera *camera )
     auto parent = getNode();
     parent->perform( Apply( [ &lines, parent ]( Node *node ) {
         if ( node != parent && node->hasParent() ) {
-            //lines.push_back( node->getParent()->getWorld().getTranslate() );
-            //lines.push_back( node->getWorld().getTranslate() );
+            // lines.push_back( node->getParent()->getWorld().getTranslate() );
+            // lines.push_back( node->getWorld().getTranslate() );
         }
     } ) );
 

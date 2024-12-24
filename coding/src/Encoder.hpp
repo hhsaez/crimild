@@ -30,9 +30,9 @@
 
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
-#include "Rendering/Extent.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/VertexAttribute.hpp"
+//#include "Rendering/Extent.hpp"
+//#include "Rendering/Format.hpp"
+//#include "Rendering/VertexAttribute.hpp"
 
 #include <sstream>
 
@@ -64,7 +64,13 @@ namespace crimild {
         public:
             // objects
             virtual crimild::Bool encode( SharedPointer< Codable > const &codable ) = 0;
-            crimild::Bool encode( std::string key, Codable *codable );
+
+            crimild::Bool encode( std::string key, Codable *codable )
+            {
+                // TODO: why retaining?
+                return encode( key, retain( codable ) );
+            }
+
             virtual crimild::Bool encode( std::string key, SharedPointer< Codable > const &codable ) = 0;
 
             Bool encode( std::string key, const Version &version ) noexcept
@@ -96,16 +102,16 @@ namespace crimild {
             virtual crimild::Bool encode( std::string key, const Matrix4f & ) = 0;
             virtual crimild::Bool encode( std::string key, const Quaternion & ) = 0;
             virtual crimild::Bool encode( std::string key, const Transformation & ) = 0;
-            virtual crimild::Bool encode( std::string key, const Format & ) = 0;
-            virtual crimild::Bool encode( std::string key, const Extent2D & ) = 0;
-            virtual crimild::Bool encode( std::string key, const Extent3D & ) = 0;
+            // virtual crimild::Bool encode( std::string key, const Format & ) = 0;
+            // virtual crimild::Bool encode( std::string key, const Extent2D & ) = 0;
+            // virtual crimild::Bool encode( std::string key, const Extent3D & ) = 0;
 
-            virtual crimild::Bool encode( std::string key, const VertexAttribute &attr )
-            {
-                return encode( key + "_name", Int32( attr.name ) )
-                       && encode( key + "_format", attr.format )
-                       && encode( key + "_offset", attr.offset );
-            }
+            // virtual crimild::Bool encode( std::string key, const VertexAttribute &attr )
+            // {
+            //     return encode( key + "_name", Int32( attr.name ) )
+            //            && encode( key + "_format", attr.format )
+            //            && encode( key + "_offset", attr.offset );
+            // }
 
             virtual bool encode( std::string_view key, std::vector< std::byte > & ) = 0;
 
@@ -148,7 +154,7 @@ namespace crimild {
             virtual void encodeArrayEnd( std::string key ) = 0;
 
         public:
-            virtual std::string dump( void );
+            virtual std::string dump( void ) { return "empty"; }
         };
     }
 

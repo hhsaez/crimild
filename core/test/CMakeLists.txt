@@ -14,7 +14,6 @@ target_sources(
     Behaviors/BehaviorControllerTest.cpp
     Behaviors/BehaviorTreeTest.cpp
     Boundings/AABBBoundingVolumeTest.cpp
-    Coding/CodableTest.cpp
     Components/MaterialComponentTest.cpp
     Components/MotionStateComponentTest.cpp
     Messaging/MessageQueueTest.cpp
@@ -42,6 +41,7 @@ target_sources(
     Rendering/SkinnedMeshTest.cpp
     Rendering/TextureTest.cpp
     Rendering/UniformBufferTest.cpp
+    Rendering/VertexAttributeTest.cpp
     Rendering/VertexBufferTest.cpp
     Rendering/VertexLayoutTest.cpp
     Rendering/VertexTest.cpp
@@ -69,6 +69,7 @@ target_link_libraries(
     crimild_core_test
     PRIVATE Crimild::Foundation
     PRIVATE Crimild::Mathematics
+    PRIVATE Crimild::Coding
     PRIVATE Crimild::Core
     PRIVATE gtest gmock
 )

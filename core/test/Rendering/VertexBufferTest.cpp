@@ -27,22 +27,21 @@
 
 #include "Rendering/VertexBuffer.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/Vertex.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( VertexBuffer, construction )
 {
     auto layout = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
     };
 
     auto vertices = crimild::alloc< VertexBuffer >(

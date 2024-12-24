@@ -49,7 +49,7 @@ Renderer::Renderer( void )
       _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject > >() ),
       _instancedBufferObjectCatalog( crimild::alloc< Catalog< InstancedBufferObject > >() ),
       _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject > >() ),
-      _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget > >() ),
+      //   _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget > >() ),
       _primitiveCatalog( crimild::alloc< Catalog< Primitive > >() ),
       _lightCatalog( crimild::alloc< Catalog< Light > >() )
 {
@@ -68,7 +68,7 @@ Renderer::~Renderer( void )
     getIndexBufferObjectCatalog()->unloadAll();
     getInstancedBufferObjectCatalog()->unloadAll();
     getPrimitiveCatalog()->unloadAll();
-    getRenderTargetCatalog()->unloadAll();
+    // getRenderTargetCatalog()->unloadAll();
     getFrameBufferObjectCatalog()->unloadAll();
 }
 
@@ -81,7 +81,7 @@ void Renderer::configure( void )
     getIndexBufferObjectCatalog()->configure();
     getInstancedBufferObjectCatalog()->configure();
     getPrimitiveCatalog()->configure();
-    getRenderTargetCatalog()->configure();
+    // getRenderTargetCatalog()->configure();
     getFrameBufferObjectCatalog()->configure();
 }
 
@@ -118,7 +118,7 @@ void Renderer::endRender( void )
     getIndexBufferObjectCatalog()->cleanup();
     getInstancedBufferObjectCatalog()->cleanup();
     getPrimitiveCatalog()->cleanup();
-    getRenderTargetCatalog()->cleanup();
+    // getRenderTargetCatalog()->cleanup();
     getFrameBufferObjectCatalog()->cleanup();
 }
 
@@ -159,15 +159,15 @@ void Renderer::render( RenderQueue *renderQueue, rendergraph::RenderGraph *rende
     */
 }
 
-void Renderer::bindRenderTarget( RenderTarget *target )
-{
-    getRenderTargetCatalog()->bind( target );
-}
+// void Renderer::bindRenderTarget( RenderTarget *target )
+// {
+//     getRenderTargetCatalog()->bind( target );
+// }
 
-void Renderer::unbindRenderTarget( RenderTarget *target )
-{
-    getRenderTargetCatalog()->unbind( target );
-}
+// void Renderer::unbindRenderTarget( RenderTarget *target )
+// {
+//     getRenderTargetCatalog()->unbind( target );
+// }
 
 void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
 {

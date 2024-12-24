@@ -28,8 +28,8 @@
 #ifndef CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 
-#include "Coding/Codable.hpp"
 #include "Common/Variant.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Simulation/Clock.hpp"

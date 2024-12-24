@@ -56,7 +56,7 @@ TEST( VertexLayout, P3_C3 )
 TEST( VertexLayout, positionsOnly )
 {
     auto v = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
     };
 
     ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
@@ -94,10 +94,10 @@ TEST( VertexLayout, hasAttribute )
 TEST( VertexLayout, multipleAttributes )
 {
     auto v = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
-        { VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
     };
 
     ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
@@ -122,10 +122,10 @@ TEST( VertexLayout, multipleAttributes )
 TEST( VertexLayout, multipleAttributesDifferentOrder )
 {
     auto v = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
     };
 
     ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
@@ -149,11 +149,11 @@ TEST( VertexLayout, multipleAttributesDifferentOrder )
 
 TEST( VertexLayout, fromArray )
 {
-    auto attribs = Array< VertexAttribute > {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+    auto attribs = Array< std::shared_ptr< VertexAttribute > > {
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
     };
 
     auto v = VertexLayout( attribs );
@@ -179,11 +179,11 @@ TEST( VertexLayout, fromArray )
 
 TEST( VertexLayout, eachAttribute )
 {
-    auto attribs = Array< VertexAttribute > {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+    auto attribs = Array< std::shared_ptr< VertexAttribute > > {
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
     };
 
     auto v = VertexLayout( attribs );
@@ -193,7 +193,7 @@ TEST( VertexLayout, eachAttribute )
     auto callCount = 0;
     v.eachAttribute(
         [ & ]( auto &attrib ) {
-            ASSERT_EQ( attribs[ callCount++ ].name, attrib.name );
+            ASSERT_EQ( attribs[ callCount++ ]->getName(), attrib->getName() );
         }
     );
     ASSERT_EQ( 4, callCount );
@@ -208,10 +208,10 @@ TEST( VertexLayout, withAttribute )
                  .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
 
     auto expected = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
     };
 
     ASSERT_EQ( expected, v );
@@ -238,15 +238,15 @@ TEST( VertexLayout, withAttribute )
 TEST( VertexLayout, equality )
 {
     auto v1 = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
     };
 
     auto v2 = VertexLayout {
-        { VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() },
-        { VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() },
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
     };
 
     ASSERT_EQ( v1, v2 );

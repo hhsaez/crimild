@@ -27,8 +27,7 @@
 
 #include "ShaderProgram.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Shader.hpp"
 
 using namespace crimild;

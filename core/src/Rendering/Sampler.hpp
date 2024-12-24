@@ -28,23 +28,22 @@
 #ifndef CRIMILD_RENDERING_SAMPLER_
 #define CRIMILD_RENDERING_SAMPLER_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/CompareOp.hpp"
 #include "Rendering/RenderResource.hpp"
 
 namespace crimild {
 
-    class Sampler :
-		public coding::Codable,
-    	public RenderResourceImpl< Sampler > {
+    class Sampler : public coding::Codable,
+                    public RenderResourceImpl< Sampler > {
         CRIMILD_IMPLEMENT_RTTI( crimild::Sampler )
 
-	public:
+    public:
         enum class WrapMode : uint8_t {
-            REPEAT,         //< Default
-			MIRRORED_REPEAT,
+            REPEAT, //< Default
+            MIRRORED_REPEAT,
             CLAMP_TO_EDGE,
-			CLAMP_TO_BORDER,
+            CLAMP_TO_BORDER,
         };
 
         WrapMode getWrapMode( void ) const { return m_wrapMode; }
@@ -56,7 +55,7 @@ namespace crimild {
     public:
         enum class Filter : uint8_t {
             NEAREST,
-            LINEAR,                     //< Default
+            LINEAR, //< Default
             NEAREST_MIPMAP_NEAREST,
             NEAREST_MIPMAP_LINEAR,
             LINEAR_MIPMAP_NEAREST,
@@ -80,7 +79,7 @@ namespace crimild {
 
     public:
         enum class BorderColor {
-			FLOAT_TRANSPARENT_BLACK,
+            FLOAT_TRANSPARENT_BLACK,
             INT_TRANSPARENT_BLACK,
             FLOAT_OPAQUE_BLACK,
             INT_OPAQUE_BLACK,
@@ -94,24 +93,24 @@ namespace crimild {
         BorderColor m_borderColor = BorderColor::INT_OPAQUE_BLACK;
 
         /**
-		   \name Level of detail
+                   \name Level of detail
 
-		   Usually, set minLod to 0 and maxLod to image->getMipLevels()
+                   Usually, set minLod to 0 and maxLod to image->getMipLevels()
          */
-		//@{
+        //@{
 
-	public:
-		void setMinLod( crimild::Real32 minLod ) noexcept { m_minLod = minLod; }
-		crimild::Real32 getMinLod( void ) const noexcept { return m_minLod; }
+    public:
+        void setMinLod( crimild::Real32 minLod ) noexcept { m_minLod = minLod; }
+        crimild::Real32 getMinLod( void ) const noexcept { return m_minLod; }
 
-		void setMaxLod( crimild::Real32 maxLod ) noexcept { m_maxLod = maxLod; }
-		crimild::Real32 getMaxLod( void ) const noexcept { return m_maxLod; }
+        void setMaxLod( crimild::Real32 maxLod ) noexcept { m_maxLod = maxLod; }
+        crimild::Real32 getMaxLod( void ) const noexcept { return m_maxLod; }
 
-	private:
-		crimild::Real32 m_minLod = 0.0f;
-		crimild::Real32 m_maxLod = 1.0f;
+    private:
+        crimild::Real32 m_minLod = 0.0f;
+        crimild::Real32 m_maxLod = 1.0f;
 
-		//@}
+        //@}
 
         /**
            \name Compare
@@ -137,7 +136,6 @@ namespace crimild {
         virtual void decode( coding::Decoder &decoder ) override;
 
         //@}
-
     };
 
 }

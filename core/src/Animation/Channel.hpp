@@ -28,8 +28,8 @@
 #ifndef CRIMILD_ANIMATION_CHANNEL_
 #define CRIMILD_ANIMATION_CHANNEL_
 
-#include "Coding/Codable.hpp"
-#include "Crimild_Foundation.hpp"
+#include <Crimild_Coding.hpp>
+#include <Crimild_Foundation.hpp>
 
 namespace crimild {
 

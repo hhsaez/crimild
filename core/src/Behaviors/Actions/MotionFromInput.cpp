@@ -27,9 +27,8 @@
 
 #include "Behaviors/Actions/MotionFromInput.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/MotionStateComponent.hpp"
+#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Input.hpp"
 

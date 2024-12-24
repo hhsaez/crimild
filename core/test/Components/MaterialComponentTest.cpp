@@ -27,12 +27,11 @@
 
 #include "Components/MaterialComponent.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <Crimild_Mathematics.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

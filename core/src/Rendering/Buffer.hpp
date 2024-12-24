@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_BUFFER_
 #define CRIMILD_RENDERING_BUFFER_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"

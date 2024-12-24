@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,11 +26,11 @@
  */
 
 #include "Behaviors/BehaviorTree.hpp"
-#include "Behaviors/Actions/SetContextValue.hpp"
-#include "Coding/MemoryEncoder.hpp"
-#include "Coding/MemoryDecoder.hpp"
 
-#include "gtest/gtest.h"
+#include "Behaviors/Actions/SetContextValue.hpp"
+
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -42,15 +42,14 @@ TEST( BehaviorTreeTest, coding )
     tree->setName( "behavior" );
     tree->setRootBehavior( crimild::alloc< SetContextValue >( "input.x", "20" ) );
 
-	auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( tree );
-	auto bytes = encoder->getBytes();
-	auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
+    auto encoder = crimild::alloc< coding::MemoryEncoder >();
+    encoder->encode( tree );
+    auto bytes = encoder->getBytes();
+    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+    decoder->fromBytes( bytes );
 
     auto decodedTree = decoder->getObjectAt< BehaviorTree >( 0 );
     EXPECT_TRUE( decodedTree != nullptr );
     EXPECT_EQ( tree->getName(), decodedTree->getName() );
     EXPECT_TRUE( decodedTree->getRootBehavior() );
 }
-

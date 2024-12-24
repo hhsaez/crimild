@@ -28,7 +28,7 @@
 #ifndef CRIMILD_RENDERING_SHADER_
 #define CRIMILD_RENDERING_SHADER_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 
 #include <string>

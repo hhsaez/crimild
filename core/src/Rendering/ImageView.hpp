@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 #define CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"

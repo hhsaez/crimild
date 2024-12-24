@@ -33,6 +33,7 @@
 
 namespace crimild {
 
+    // TODO(hernan): Make this class inherit from `Codable`
     class VertexLayout {
     public:
         static const VertexLayout P3;
@@ -42,9 +43,9 @@ namespace crimild {
         static const VertexLayout P3_N3_TC2;
 
     public:
-        VertexLayout( void ) noexcept;
-        VertexLayout( std::initializer_list< VertexAttribute > attribs ) noexcept;
-        VertexLayout( const Array< VertexAttribute > &attribs ) noexcept;
+        VertexLayout( void ) noexcept = default;
+        VertexLayout( std::initializer_list< std::shared_ptr< VertexAttribute > > attribs ) noexcept;
+        explicit VertexLayout( const Array< std::shared_ptr< VertexAttribute > > &attribs ) noexcept;
         ~VertexLayout( void ) = default;
 
         crimild::Bool operator==( const VertexLayout &other ) const noexcept;
@@ -58,17 +59,17 @@ namespace crimild {
 
         inline crimild::UInt32 getAttributeOffset( VertexAttribute::Name name ) const noexcept
         {
-            return m_attributes[ name ].offset;
+            return m_attributes[ name ]->getOffset();
         }
 
         inline Format getAttributeFormat( VertexAttribute::Name attrib ) const noexcept
         {
-            return m_attributes[ attrib ].format;
+            return m_attributes[ attrib ]->getFormat();
         }
 
         inline crimild::Size getAttributeSize( VertexAttribute::Name attrib ) const noexcept
         {
-            return utils::getFormatSize( m_attributes[ attrib ].format );
+            return utils::getFormatSize( m_attributes[ attrib ]->getFormat() );
         }
 
         template< typename Fn >
@@ -94,12 +95,7 @@ namespace crimild {
         VertexLayout &withAttribute( VertexAttribute::Name attrib ) noexcept
         {
             auto format = utils::getFormat< AttributeType >();
-            m_attributes[ attrib ] = {
-                .name = attrib,
-                .format = format,
-                .offset = m_size,
-            };
-
+            m_attributes[ attrib ] = crimild::alloc< VertexAttribute >( attrib, format, m_size );
             m_sorted.add( attrib );
 
             // What if there is already another attrib with the same name?
@@ -114,7 +110,7 @@ namespace crimild {
 
     private:
         crimild::UInt32 m_size = 0;
-        Map< VertexAttribute::Name, VertexAttribute > m_attributes;
+        Map< VertexAttribute::Name, std::shared_ptr< VertexAttribute > > m_attributes;
         Array< VertexAttribute::Name > m_sorted;
     };
 

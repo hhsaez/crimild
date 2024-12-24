@@ -27,14 +27,13 @@
 
 #include "SceneGraph/Node.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Components/RotationComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Utils/MockComponent.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <Crimild_Mathematics.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

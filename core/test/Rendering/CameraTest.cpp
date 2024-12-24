@@ -27,15 +27,14 @@
 
 #include "SceneGraph/Camera.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchCameras.hpp"
 #include "Visitors/SelectNodes.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <Crimild_Mathematics.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

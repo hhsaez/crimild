@@ -27,14 +27,13 @@
 
 #include "SceneGraph/Geometry.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
@@ -123,7 +122,7 @@ TEST( GeometryTest, detachAllPrimitives )
     EXPECT_EQ( count, 0 );
 }
 
-//TEST( GeometryTest, geometryStream )
+// TEST( GeometryTest, geometryStream )
 //{
 //	{
 //		auto geometry = crimild::alloc< Geometry >( "a geometry" );
@@ -150,7 +149,7 @@ TEST( GeometryTest, detachAllPrimitives )
 //		});
 //		EXPECT_EQ( 1, primitiveCount );
 //	}
-//}
+// }
 
 TEST( Geometry, getDescriptors )
 {
@@ -167,29 +166,29 @@ TEST( Geometry, getDescriptors )
 TEST( GeometryTest, coding )
 {
     /*
-	auto geometry = crimild::alloc< Geometry >( "a geometry" );
-	geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
+        auto geometry = crimild::alloc< Geometry >( "a geometry" );
+        geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
 
     auto encoder = crimild::alloc< coding::MemoryEncoder >();
-	encoder->encode( geometry );
+        encoder->encode( geometry );
     auto bytes = encoder->getBytes();
     auto decoder = crimild::alloc< coding::MemoryDecoder >();
-	decoder->fromBytes( bytes );
+        decoder->fromBytes( bytes );
 
-	auto g = decoder->getObjectAt< Geometry >( 0 );
-	EXPECT_TRUE( g != nullptr );
-	EXPECT_EQ( geometry->getName(), geometry->getName() );
+        auto g = decoder->getObjectAt< Geometry >( 0 );
+        EXPECT_TRUE( g != nullptr );
+        EXPECT_EQ( geometry->getName(), geometry->getName() );
 
-	crimild::Int16 count = 0;
-	g->forEachPrimitive( [ &count ]( Primitive *p ) {
-		++count;
-		EXPECT_TRUE( p->getVertexBuffer() != nullptr );
-		EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
+        crimild::Int16 count = 0;
+        g->forEachPrimitive( [ &count ]( Primitive *p ) {
+                ++count;
+                EXPECT_TRUE( p->getVertexBuffer() != nullptr );
+                EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
 
-		EXPECT_TRUE( p->getIndexBuffer() != nullptr );
-		EXPECT_EQ( 4, p->getIndexBuffer()->getIndexCount() );
-	});
+                EXPECT_TRUE( p->getIndexBuffer() != nullptr );
+                EXPECT_EQ( 4, p->getIndexBuffer()->getIndexCount() );
+        });
 
-	EXPECT_EQ( 1, count );
+        EXPECT_EQ( 1, count );
     */
 }

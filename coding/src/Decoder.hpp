@@ -31,9 +31,9 @@
 #include "Codable.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
-#include "Rendering/Extent.hpp"
-#include "Rendering/Format.hpp"
-#include "Rendering/VertexAttribute.hpp"
+//#include "Rendering/Extent.hpp"
+//#include "Rendering/Format.hpp"
+//#include "Rendering/VertexAttribute.hpp"
 
 namespace crimild {
 
@@ -99,20 +99,20 @@ namespace crimild {
             virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
             virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) = 0;
             virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Format &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Extent2D &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Extent3D &value ) = 0;
+            // virtual crimild::Bool decode( std::string key, Format &value ) = 0;
+            // virtual crimild::Bool decode( std::string key, Extent2D &value ) = 0;
+            // virtual crimild::Bool decode( std::string key, Extent3D &value ) = 0;
 
-            virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
-            {
-                Int32 name;
-                decode( key + "_name", name );
-                attr.name = VertexAttribute::Name( name );
+            // virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
+            // {
+            //     Int32 name;
+            //     decode( key + "_name", name );
+            //     attr.name = VertexAttribute::Name( name );
 
-                decode( key + "_format", attr.format );
-                decode( key + "_offset", attr.offset );
-                return true;
-            }
+            //     decode( key + "_format", attr.format );
+            //     decode( key + "_offset", attr.offset );
+            //     return true;
+            // }
 
             virtual bool decode( std::string_view key, std::vector< std::byte > & ) = 0;
 

@@ -27,8 +27,7 @@
 
 #include "Image.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 
 #include <cstring>
@@ -294,9 +293,12 @@ void Image::encode( coding::Encoder &encoder )
 {
     Codable::encode( encoder );
 
-    encoder.encode( "format", format );
+    encoder.encodeEnum( "format", format );
     encoder.encode( "type", Int32( type ) );
-    encoder.encode( "extent", extent );
+    encoder.encode( "extent.width", extent.width );
+    encoder.encode( "extent.height", extent.height );
+    encoder.encode( "extent.depth", extent.depth );
+    encoder.encodeEnum( "extent.scaling_mode", extent.scalingMode );
     encoder.encode( "bufferView", m_bufferView );
     encoder.encode( "layerCount", m_layerCount );
     encoder.encode( "mipLevels", m_mipLevels );
@@ -306,13 +308,16 @@ void Image::decode( coding::Decoder &decoder )
 {
     Codable::decode( decoder );
 
-    decoder.decode( "format", format );
+    decoder.decodeEnum( "format", format );
 
     Int32 type;
     decoder.decode( "type", type );
     this->type = Type( type );
 
-    decoder.decode( "extent", extent );
+    decoder.decode( "extent.width", extent.width );
+    decoder.decode( "extent.height", extent.height );
+    decoder.decode( "extent.depth", extent.depth );
+    decoder.decodeEnum( "extent.scaling_mode", extent.scalingMode );
     decoder.decode( "bufferView", m_bufferView );
     decoder.decode( "layerCount", m_layerCount );
     decoder.decode( "mipLevels", m_mipLevels );

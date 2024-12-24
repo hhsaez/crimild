@@ -27,11 +27,10 @@
 
 #include "SceneGraph/Group.hpp"
 
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Exceptions/HasParentException.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

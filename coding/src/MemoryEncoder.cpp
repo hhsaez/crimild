@@ -25,10 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Coding/MemoryEncoder.hpp"
+#include "MemoryEncoder.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Tags.hpp"
+
+#include <Crimild_Foundation.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;

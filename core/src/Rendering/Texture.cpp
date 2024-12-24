@@ -27,8 +27,7 @@
 
 #include "Rendering/Texture.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"

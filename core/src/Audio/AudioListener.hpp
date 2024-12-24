@@ -28,7 +28,7 @@
 #ifndef CRIMILD_AUDIO_LISTENER_
 #define CRIMILD_AUDIO_LISTENER_
 
-#include "Coding/Codable.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 
 namespace crimild {

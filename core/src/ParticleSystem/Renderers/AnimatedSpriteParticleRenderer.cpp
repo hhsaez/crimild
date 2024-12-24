@@ -27,10 +27,9 @@
 
 #include "AnimatedSpriteParticleRenderer.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Concurrency/Async.hpp"
+#include "Crimild_Coding.hpp"
 #include "Rendering/Renderer.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "Simulation/AssetManager.hpp"
@@ -78,80 +77,80 @@ void AnimatedSpriteParticleRenderer::update( Node *node, crimild::Real64 dt, Par
     }
 
     auto vbo = crimild::alloc< VertexBufferObject >( VertexFormat::VF_P3_UV2, 4 * pCount );
-	auto ibo = crimild::alloc< IndexBufferObject >( 6 * pCount );
+        auto ibo = crimild::alloc< IndexBufferObject >( 6 * pCount );
 
-	auto up = Vector3f::UNIT_Y;
-	auto right = Vector3f::UNIT_X;
+        auto up = Vector3f::UNIT_Y;
+        auto right = Vector3f::UNIT_X;
 
-	if ( shouldUseOrientedQuads() ) {
-		const auto camera = Camera::getMainCamera();
-		up = camera->getWorld().computeUp();
-		right = camera->getWorld().computeRight();
+        if ( shouldUseOrientedQuads() ) {
+                const auto camera = Camera::getMainCamera();
+                up = camera->getWorld().computeUp();
+                right = camera->getWorld().computeRight();
 
-		node->getWorld().applyInverseToVector( up, up );
-		node->getWorld().applyInverseToVector( right, right );
-	}
+                node->getWorld().applyInverseToVector( up, up );
+                node->getWorld().applyInverseToVector( right, right );
+        }
 
-	const auto offset0 = up - right;
-	const auto offset1 = -up - right;
-	const auto offset2 = -up + right;
-	const auto offset3 = up + right;
+        const auto offset0 = up - right;
+        const auto offset1 = -up - right;
+        const auto offset2 = -up + right;
+        const auto offset3 = up + right;
 
-	const crimild::UInt8 frameCount = _spriteSheetSize.x() * _spriteSheetSize.y();
-	const auto spriteSize = Vector2f( 1.0f / _spriteSheetSize.x(), 1.0f / _spriteSheetSize.y() );
+        const crimild::UInt8 frameCount = _spriteSheetSize.x() * _spriteSheetSize.y();
+        const auto spriteSize = Vector2f( 1.0f / _spriteSheetSize.x(), 1.0f / _spriteSheetSize.y() );
 
-	const auto uv0 = Vector2f( 0.0f, 0.0f );
-	const auto uv1 = Vector2f( 0.0f, spriteSize.y() );
-	const auto uv2 = Vector2f( spriteSize.x(), spriteSize.y() );
-	const auto uv3 = Vector2f( spriteSize.x(), 0.0f );
+        const auto uv0 = Vector2f( 0.0f, 0.0f );
+        const auto uv1 = Vector2f( 0.0f, spriteSize.y() );
+        const auto uv2 = Vector2f( spriteSize.x(), spriteSize.y() );
+        const auto uv3 = Vector2f( spriteSize.x(), 0.0f );
 
-	const auto ps = _positions->getData< Vector3f >();
-	const auto ss = _sizes->getData< crimild::Real32 >();
-	const auto timeData = _times->getData< crimild::Real32 >();
-	const auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
+        const auto ps = _positions->getData< Vector3f >();
+        const auto ss = _sizes->getData< crimild::Real32 >();
+        const auto timeData = _times->getData< crimild::Real32 >();
+        const auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
 
-	// Vertex data is interleaved, so it should be more efficient
-	// to set each vertex attribute per loop (as below) instead of
-	// using separated loops (as in the case of other updaters/renderers)
-	// TODO: I need to confirm this somehow
-	for ( auto i = 0; i < pCount; i++ ) {
-		auto idx = i * 4;
-		auto pos = ps[ i ];
-		if ( particles->shouldComputeInWorldSpace() ) {
-			// TODO: cache inverse transform?
-			node->getWorld().applyInverseToPoint( pos, pos );
-		}
-		auto s = ss[ i ];
+        // Vertex data is interleaved, so it should be more efficient
+        // to set each vertex attribute per loop (as below) instead of
+        // using separated loops (as in the case of other updaters/renderers)
+        // TODO: I need to confirm this somehow
+        for ( auto i = 0; i < pCount; i++ ) {
+                auto idx = i * 4;
+                auto pos = ps[ i ];
+                if ( particles->shouldComputeInWorldSpace() ) {
+                        // TODO: cache inverse transform?
+                        node->getWorld().applyInverseToPoint( pos, pos );
+                }
+                auto s = ss[ i ];
 
-		const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
-		const auto frame = ( crimild::UInt8 )( frameCount * t );
-		const auto fx = frame % ( ( crimild::UInt8 ) _spriteSheetSize.x() );
-		const auto fy = frame / ( ( crimild::UInt8 ) _spriteSheetSize.y() );
-		const auto frameOffset = Vector2f( fx * spriteSize.x(), fy * spriteSize.y() );
+                const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
+                const auto frame = ( crimild::UInt8 )( frameCount * t );
+                const auto fx = frame % ( ( crimild::UInt8 ) _spriteSheetSize.x() );
+                const auto fy = frame / ( ( crimild::UInt8 ) _spriteSheetSize.y() );
+                const auto frameOffset = Vector2f( fx * spriteSize.x(), fy * spriteSize.y() );
 
-		vbo->setPositionAt( idx + 0, pos + s * offset0 );
-		vbo->setTextureCoordAt( idx + 0, frameOffset + uv0 );
+                vbo->setPositionAt( idx + 0, pos + s * offset0 );
+                vbo->setTextureCoordAt( idx + 0, frameOffset + uv0 );
 
-		vbo->setPositionAt( idx + 1, pos + s * offset1 );
-		vbo->setTextureCoordAt( idx + 1, frameOffset + uv1 );
+                vbo->setPositionAt( idx + 1, pos + s * offset1 );
+                vbo->setTextureCoordAt( idx + 1, frameOffset + uv1 );
 
-		vbo->setPositionAt( idx + 2, pos + s * offset2 );
-		vbo->setTextureCoordAt( idx + 2, frameOffset + uv2 );
+                vbo->setPositionAt( idx + 2, pos + s * offset2 );
+                vbo->setTextureCoordAt( idx + 2, frameOffset + uv2 );
 
-		vbo->setPositionAt( idx + 3, pos + s * offset3 );
-		vbo->setTextureCoordAt( idx + 3, frameOffset + uv3 );
-	}
+                vbo->setPositionAt( idx + 3, pos + s * offset3 );
+                vbo->setTextureCoordAt( idx + 3, frameOffset + uv3 );
+        }
 
-	for ( auto i = 0; i < pCount; i++ ) {
-		const auto idx = i * 6;
-		const auto vdx = i * 4;
-		ibo->setIndexAt( idx + 0, vdx + 0 );
-		ibo->setIndexAt( idx + 1, vdx + 1 );
-		ibo->setIndexAt( idx + 2, vdx + 2 );
-		ibo->setIndexAt( idx + 3, vdx + 0 );
-		ibo->setIndexAt( idx + 4, vdx + 2 );
-		ibo->setIndexAt( idx + 5, vdx + 3 );
-	}
+        for ( auto i = 0; i < pCount; i++ ) {
+                const auto idx = i * 6;
+                const auto vdx = i * 4;
+                ibo->setIndexAt( idx + 0, vdx + 0 );
+                ibo->setIndexAt( idx + 1, vdx + 1 );
+                ibo->setIndexAt( idx + 2, vdx + 2 );
+                ibo->setIndexAt( idx + 3, vdx + 0 );
+                ibo->setIndexAt( idx + 4, vdx + 2 );
+                ibo->setIndexAt( idx + 5, vdx + 3 );
+        }
 
     crimild::concurrency::sync_frame( [this, vbo, ibo] {
         _primitive->setVertexBuffer( vbo );

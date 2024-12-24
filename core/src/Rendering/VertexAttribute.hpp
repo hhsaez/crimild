@@ -28,13 +28,18 @@
 #ifndef CRIMILD_RENDERING_VERTEX_ATTRIBUTE_
 #define CRIMILD_RENDERING_VERTEX_ATTRIBUTE_
 
+#include "Crimild_Coding.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Rendering/Format.hpp"
 
 namespace crimild {
 
-    struct VertexAttribute {
+    class VertexAttribute : public coding::Codable {
+        CRIMILD_IMPLEMENT_RTTI( crimild::VertexAttribute )
+
+    public:
         enum Name {
+            UNDEFINED,
             POSITION,
             NORMAL,
             TANGENT,
@@ -71,14 +76,29 @@ namespace crimild {
             USER_ATTRIBUTE_20 = USER_ATTRIBUTE + 20,
         };
 
-        Name name;
-        Format format;
-        crimild::UInt32 offset = 0;
+        VertexAttribute() = default;
+        VertexAttribute( Name name, Format format, crimild::UInt32 offset = 0 ) noexcept;
+        ~VertexAttribute( void ) = default;
 
-        crimild::Bool operator==( const VertexAttribute &other ) const noexcept
-        {
-            return name == other.name && format == other.format && offset == other.offset;
-        }
+        inline Name getName() const noexcept { return m_name; }
+        inline void setName( Name name ) noexcept { m_name = name; }
+
+        inline Format getFormat() const noexcept { return m_format; }
+        inline void setFormat( Format format ) noexcept { m_format = format; }
+
+        inline crimild::UInt32 getOffset() const noexcept { return m_offset; }
+        inline void setOffset( crimild::UInt32 o ) noexcept { m_offset = o; }
+
+        bool operator==( const VertexAttribute &other ) const noexcept;
+
+    private:
+        Name m_name = Name::UNDEFINED;
+        Format m_format = Format::UNDEFINED;
+        crimild::UInt32 m_offset = 0;
+
+    public:
+        virtual void encode( coding::Encoder &encoder ) override;
+        virtual void decode( coding::Decoder &decoder ) override;
     };
 
 }

@@ -27,12 +27,12 @@
 
 #include "SceneGraph/PrefabNode.hpp"
 
-#include "Coding/FileDecoder.hpp"
-#include "Coding/FileEncoder.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Visitors/ShallowCopy.hpp"
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+
+#include <Crimild_Coding.hpp>
+#include <Crimild_Foundation.hpp>
 
 using namespace crimild;
 

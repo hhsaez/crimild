@@ -27,8 +27,7 @@
 
 #include "NodePositionParticleGenerator.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"

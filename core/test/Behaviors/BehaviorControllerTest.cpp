@@ -30,15 +30,14 @@
 #include "Behaviors/Actions/SetContextValue.hpp"
 #include "Behaviors/BehaviorTree.hpp"
 #include "Behaviors/Decorators/Repeat.hpp"
-#include "Coding/MemoryDecoder.hpp"
-#include "Coding/MemoryEncoder.hpp"
 #include "Crimild_Foundation.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
 
-#include "gtest/gtest.h"
+#include <Crimild_Coding.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 using namespace crimild::behaviors;

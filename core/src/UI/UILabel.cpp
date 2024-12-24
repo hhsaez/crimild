@@ -28,9 +28,8 @@
 #include "UILabel.hpp"
 
 #include "Boundings/Box2DBoundingVolume.hpp"
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/UIResponder.hpp"
+#include "Crimild_Coding.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Rendering/Font.hpp"
 #include "SceneGraph/Text.hpp"

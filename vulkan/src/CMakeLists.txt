@@ -123,7 +123,7 @@ target_sources(
 
 target_include_directories(
 	crimild_vulkan
-	PUBLIC .
+	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     # Make sure to include GLSLang headers before Vulkan's so there is no conflict and
     # the app will run correctly. Otherwise, you may seem errors when compiling shaders
     # due to invalid resource settings (like when using gl_VertexIdentifier in arrays)
@@ -135,6 +135,7 @@ target_link_libraries(
 	crimild_vulkan
     PRIVATE Crimild::Foundation
     PRIVATE Crimild::Mathematics
+    PRIVATE Crimild::Coding
 	PRIVATE Crimild::Core
 
     # Vulkan libraries are made public so they can be used in other projects, like

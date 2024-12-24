@@ -27,10 +27,9 @@
 
 #include "Geometry.hpp"
 
-#include "Coding/Decoder.hpp"
-#include "Coding/Encoder.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
+#include "Crimild_Coding.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"

@@ -29,9 +29,10 @@
 #define CRIMILD_ANIMATION_ANIMATION_
 
 #include "Accumulator.hpp"
-#include "Coding/Codable.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Simulation/Clock.hpp"
+
+#include <Crimild_Coding.hpp>
+#include <Crimild_Foundation.hpp>
 
 namespace crimild {
 

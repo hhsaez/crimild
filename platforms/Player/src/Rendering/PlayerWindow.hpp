@@ -28,12 +28,10 @@
 #ifndef CRIMILD_PLAYER_RENDERING_WINDOW_
 #define CRIMILD_PLAYER_RENDERING_WINDOW_
 
-#include "Crimild_Mathematics.hpp"
 #include "Foundation/GLFWUtils.hpp"
-#include "Rendering/Extent.hpp"
-#include "Simulation/Clock.hpp"
-#include "Simulation/Event.hpp"
 
+#include <Crimild.hpp>
+#include <Crimild_Mathematics.hpp>
 #include <memory>
 #include <string>
 

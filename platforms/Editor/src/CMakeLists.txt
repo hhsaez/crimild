@@ -94,7 +94,7 @@ target_sources(
 
 target_include_directories(
 	crimild_editor
-	PRIVATE .
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/glfw/include
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/examples
@@ -110,6 +110,7 @@ target_link_libraries(
 	crimild_editor
     PRIVATE Crimild::Foundation
     PRIVATE Crimild::Mathematics
+    PRIVATE Crimild::Coding
 	PRIVATE Crimild::Core
     PRIVATE Crimild::Vulkan
     PRIVATE glfw
