@@ -80,8 +80,8 @@ namespace crimild {
                             VkVertexInputAttributeDescription {
                                 .location = crimild::UInt32( location++ ),
                                 .binding = crimild::UInt32( binding ),
-                                .format = utils::getFormat( attrib.format ),
-                                .offset = attrib.offset,
+                                .format = utils::getFormat( attrib->getFormat() ),
+                                .offset = attrib->getOffset(),
                             }
                         );
                     }
@@ -466,19 +466,19 @@ vulkan::GraphicsPipeline::GraphicsPipeline(
     std::vector< VkDynamicState > dynamicStates
 ) noexcept
     : vulkan::GraphicsPipeline(
-        renderDevice,
-        renderPass,
-        vulkan::GraphicsPipeline::Descriptor {
-            .descriptorSetLayouts = descriptorSetLayouts,
-            .program = program,
-            .vertexLayouts = vertexLayouts,
-            .depthStencilState = depthStencilState,
-            .rasterizationState = rasterizationState,
-            .colorBlendState = colorBlendState,
-            .colorAttachmentCount = colorAttachmentCount,
-            .dynamicStates = dynamicStates,
-        }
-    )
+          renderDevice,
+          renderPass,
+          vulkan::GraphicsPipeline::Descriptor {
+              .descriptorSetLayouts = descriptorSetLayouts,
+              .program = program,
+              .vertexLayouts = vertexLayouts,
+              .depthStencilState = depthStencilState,
+              .rasterizationState = rasterizationState,
+              .colorBlendState = colorBlendState,
+              .colorAttachmentCount = colorAttachmentCount,
+              .dynamicStates = dynamicStates,
+          }
+      )
 {
     // no-op
 }

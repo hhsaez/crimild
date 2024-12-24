@@ -43,7 +43,7 @@ namespace crimild {
     class DepthState;
     class ColorMaskState;
     class FrameBufferObject;
-    class RenderTarget;
+    // class RenderTarget;
     class Geometry;
     class IndexBufferObject;
     class InstancedBufferObject;
@@ -105,8 +105,8 @@ namespace crimild {
         virtual void presentFrame( void );
 
     public:
-        virtual void bindRenderTarget( RenderTarget *target );
-        virtual void unbindRenderTarget( RenderTarget *target );
+        // virtual void bindRenderTarget( RenderTarget *target );
+        // virtual void unbindRenderTarget( RenderTarget *target );
 
         virtual void bindFrameBuffer( FrameBufferObject *fbo );
         virtual void unbindFrameBuffer( FrameBufferObject *fbo );
@@ -213,8 +213,8 @@ namespace crimild {
         Catalog< FrameBufferObject > *getFrameBufferObjectCatalog( void ) { return crimild::get_ptr( _frameBufferObjectCatalog ); }
         void setFrameBufferObjectCatalog( SharedPointer< Catalog< FrameBufferObject > > const &catalog ) { _frameBufferObjectCatalog = catalog; }
 
-        Catalog< RenderTarget > *getRenderTargetCatalog( void ) { return crimild::get_ptr( _renderTargetCatalog ); }
-        void setRenderTargetCatalog( SharedPointer< Catalog< RenderTarget > > const &catalog ) { _renderTargetCatalog = catalog; }
+        // Catalog< RenderTarget > *getRenderTargetCatalog( void ) { return crimild::get_ptr( _renderTargetCatalog ); }
+        // void setRenderTargetCatalog( SharedPointer< Catalog< RenderTarget > > const &catalog ) { _renderTargetCatalog = catalog; }
 
         Catalog< Primitive > *getPrimitiveCatalog( void ) { return crimild::get_ptr( _primitiveCatalog ); }
         void setPrimitiveCatalog( SharedPointer< Catalog< Primitive > > const &catalog ) { _primitiveCatalog = catalog; }
@@ -229,7 +229,7 @@ namespace crimild {
         SharedPointer< Catalog< IndexBufferObject > > _indexBufferObjectCatalog;
         SharedPointer< Catalog< InstancedBufferObject > > _instancedBufferObjectCatalog;
         SharedPointer< Catalog< FrameBufferObject > > _frameBufferObjectCatalog;
-        SharedPointer< Catalog< RenderTarget > > _renderTargetCatalog;
+        // SharedPointer< Catalog< RenderTarget > > _renderTargetCatalog;
         SharedPointer< Catalog< Primitive > > _primitiveCatalog;
         SharedPointer< Catalog< Light > > _lightCatalog;
 

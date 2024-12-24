@@ -28,9 +28,8 @@
 #ifndef CRIMILD_EDITOR_VIEWS_VIEW_
 #define CRIMILD_EDITOR_VIEWS_VIEW_
 
-#include "Coding/Codable.hpp"
-#include "Crimild_Foundation.hpp"
-
+#include <Crimild_Coding.hpp>
+#include <Crimild_Foundation.hpp>
 #include <memory>
 
 namespace crimild::editor {

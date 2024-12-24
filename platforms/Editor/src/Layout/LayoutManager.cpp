@@ -27,8 +27,6 @@
 
 #include "Layout/LayoutManager.hpp"
 
-#include "Coding/FileDecoder.hpp"
-#include "Coding/FileEncoder.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Layout/Layout.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
@@ -39,6 +37,7 @@
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
 
+#include <Crimild_Coding.hpp>
 #include <filesystem>
 
 using namespace crimild::editor;

@@ -28,10 +28,10 @@
 #ifndef CRIMILD_EDITOR_LAYOUT_
 #define CRIMILD_EDITOR_LAYOUT_
 
-#include "Coding/Codable.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 
+#include <Crimild_Coding.hpp>
+#include <Crimild_Foundation.hpp>
 #include <memory>
 #include <string>
 #include <vector>

@@ -27,10 +27,10 @@
 
 #include "Layout/Layout.hpp"
 
-#include "Coding/FileDecoder.hpp"
-#include "Coding/FileEncoder.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Views/View.hpp"
+
+#include <Crimild_Coding.hpp>
 
 using namespace crimild::editor;
 
@@ -125,7 +125,9 @@ void Layout::encode( coding::Encoder &encoder ) noexcept
     ImVec2 displaySize = io.DisplaySize;
     m_extent.width = displaySize.x;
     m_extent.height = displaySize.y;
-    encoder.encode( "extent", m_extent );
+    encoder.encode( "extent.width", m_extent.width );
+    encoder.encode( "extent.height", m_extent.height );
+    encoder.encodeEnum( "extent.scaling_mode", m_extent.scalingMode );
 
     Array< std::shared_ptr< View > > views;
     for ( auto &view : m_views ) {
@@ -141,7 +143,9 @@ void Layout::decode( coding::Decoder &decoder ) noexcept
     decoder.decode( "name", getName() );
 
     decoder.decode( "imGuiLayout", m_imGuiLayout );
-    decoder.decode( "extent", m_extent );
+    decoder.decode( "extent.width", m_extent.width );
+    decoder.decode( "extent.height", m_extent.height );
+    decoder.decodeEnum( "extent.scaling_mode", m_extent.scalingMode );
 
     Array< std::shared_ptr< View > > views;
     decoder.decode( "views", views );
