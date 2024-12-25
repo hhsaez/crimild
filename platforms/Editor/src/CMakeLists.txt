@@ -35,6 +35,10 @@ target_sources(
     Views/Windows/BehaviorsWindow.hpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
+    Views/Windows/GraphEditor/Builders.cpp
+    Views/Windows/GraphEditor/Builders.hpp
+    Views/Windows/GraphEditor/GraphEditorWindow.cpp
+    Views/Windows/GraphEditor/GraphEditorWindow.hpp
     Views/Windows/InspectorWindow.hpp
     Views/Windows/InspectorWindow.cpp
     Views/Windows/LogWindow.hpp
@@ -85,11 +89,18 @@ target_sources(
 	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_widgets.cpp
     ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_glfw.cpp
     ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_vulkan.cpp
+
 	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImGuizmo.cpp
 	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImCurveEdit.cpp
 	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImSequencer.cpp
 	${PROJECT_SOURCE_DIR}/third-party/imguizmo/GraphEditor.cpp
+
 	${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog/ImGuiFileDialog.cpp
+
+    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/crude_json.cpp
+    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_canvas.cpp
+    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor.cpp
+    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor_api.cpp
 )
 
 target_include_directories(
@@ -101,6 +112,7 @@ target_include_directories(
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/backends
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/examples
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/stb
 	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/tinygltf

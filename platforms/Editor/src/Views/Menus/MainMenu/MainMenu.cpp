@@ -36,6 +36,7 @@
 #include "Views/Specials/ImGuiDemoWindow.hpp"
 #include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
 #include "Views/Windows/PlaybackControlsWindow.hpp"
@@ -420,6 +421,7 @@ void MainMenu::renderLayoutMenu( void ) noexcept
         renderLayoutMenuItem< LogWindow >( getLayout(), "Log" );
         renderLayoutMenuItem< TimelineWindow >( getLayout(), "Timeline" );
         renderLayoutMenuItem< BehaviorsWindow >( getLayout(), "Behaviors" );
+        renderLayoutMenuItem< GraphEditorWindow >( getLayout(), "Graph Editor" );
         renderLayoutMenuItem< PlaybackControlsWindow >( getLayout(), "Playback" );
         ImGui::Separator();
 

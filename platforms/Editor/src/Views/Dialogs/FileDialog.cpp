@@ -47,15 +47,18 @@ FileDialog::FileDialog(
 {
     setMinSize( { 600, 400 } );
 
-    ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
+    // ImGuiFileDialogFlags flags = ImGuiFileDialogFlags_None;
+    IGFD::FileDialogConfig config;
+    config.path = m_pathName.c_str();
     ImGuiFileDialog::Instance()->OpenDialog(
         getName().c_str(),
         getName().c_str(),
         m_filters.c_str(),
-        m_pathName.c_str(),
-        1,
-        nullptr,
-        flags
+        config
+        // m_pathName.c_str(),
+        // 1,
+        // nullptr,
+        // flags
     );
 }
 
