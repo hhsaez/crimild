@@ -53,7 +53,7 @@ tools/sceneEncoder/sceneEncoder
 third-party/vulkansdk
 resourceEncoder
 imgui.ini
-build
+build*
 .vscode
 
 *.crimild
