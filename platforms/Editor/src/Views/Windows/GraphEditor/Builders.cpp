@@ -27,7 +27,7 @@ void AssemblyNodeBuilder::begin( ax::NodeEditor::NodeId id ) noexcept
     setStage( Stage::Begin );
 }
 
-void AssemblyNodeBuilder::End( void ) noexcept
+void AssemblyNodeBuilder::end( void ) noexcept
 {
     setStage( Stage::End );
 

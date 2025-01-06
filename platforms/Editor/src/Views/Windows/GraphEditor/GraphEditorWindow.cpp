@@ -27,10 +27,43 @@
 
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
+#include "Views/Windows/GraphEditor/Builders.hpp"
+
 using namespace crimild;
 using namespace crimild::editor;
 
 namespace NodeEditor = ax::NodeEditor;
+
+static inline ImRect ImGui_GetItemRect( void ) noexcept
+{
+    return ImRect( ImGui::GetItemRectMin(), ImGui::GetItemRectMax() );
+}
+
+static inline ImRect ImRect_Expanded( const ImRect &rect, float x, float y ) noexcept
+{
+    auto result = rect;
+    result.Min.x -= x;
+    result.Min.y -= y;
+    result.Max.x += x;
+    result.Max.y += y;
+    return result;
+}
+
+static int getTextureWidth( ImTextureID texture ) noexcept
+{
+    if ( texture == nullptr ) {
+        return 0;
+    }
+    return 1; // TODO
+}
+
+static int getTextureHeight( ImTextureID texture ) noexcept
+{
+    if ( texture == nullptr ) {
+        return 0;
+    }
+    return 1; // TODO
+}
 
 #if !GRAPH_EDITOR_BLUEPRINTS
 
@@ -118,7 +151,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
     {
         auto cursorTopLeft = ImGui::GetCursorScreenPos();
-        NodeEditor::Utilities::BlueprintNodeBuilder builder( m_headerBackground, GetTextureWidth( m_headerBackground ), GetTextureHeight( m_headerBackground ) );
+        crimild::editor::utils::AssemblyNodeBuilder builder( m_headerBackground, getTextureWidth( m_headerBackground ), getTextureHeight( m_headerBackground ) );
 
         // Renders NodeType::Blueprint || NodeType::Simple
         for ( auto &node : m_nodes ) {
@@ -153,7 +186,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                                 }
 
                                 auto alpha = ImGui::GetStyle().Alpha;
-                                if ( newLinkPin && !CanCreateLink( newLinkPin, &output ) && output != newLinkPin ) {
+                                if ( newLinkPin && !canCreateLink( newLinkPin, &output ) && &output != newLinkPin ) {
                                     alpha = alpha * ( 48.0f / 255.0f );
                                 }
 
@@ -166,7 +199,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                                     ImGui::TextUnformatted( output.name.c_str() );
                                     ImGui::Spring( 0 );
                                 }
-                                DrawPinIcon( output, IsPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
+                                drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
                                 ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
                                 ImGui::EndHorizontal();
                                 ImGui::PopStyleVar();
@@ -183,13 +216,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
                 for ( auto &input : node.inputs ) {
                     auto alpha = ImGui::GetStyle().Alpha;
-                    if ( newLinkPin && !CanCreateLink( newLinkPin, &input ) && input != newLinkPin ) {
+                    if ( newLinkPin && !canCreateLink( newLinkPin, &input ) && &input != newLinkPin ) {
                         alpha *= 48.0f / 255.0f;
                     }
 
                     builder.input( input.id );
                     ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
-                    DrawPinIcon( input, IsPinLinked( input.id ), ( int ) ( alpha * 255 ) );
+                    drawPinIcon( input, isPinkLinked( input.id ), ( int ) ( alpha * 255 ) );
                     ImGui::Spring( 0 );
                     if ( !input.name.empty() ) {
                         ImGui::TextUnformatted( input.name.c_str() );
@@ -206,7 +239,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 if ( isSimple ) {
                     builder.middle();
                     ImGui::Spring( 1, 0 );
-                    ImGui::InputTextMultiline( node.name.c_str() );
+                    ImGui::TextUnformatted( node.name.c_str() );
                     ImGui::Spring( 1, 0 );
                 }
 
@@ -216,7 +249,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     }
 
                     auto alpha = ImGui::GetStyle().Alpha;
-                    if ( newLinkPin && !CanCreateLink( newLinkPin, &output ) && output != newLinkPin ) {
+                    if ( newLinkPin && !canCreateLink( newLinkPin, &output ) && &output != newLinkPin ) {
                         alpha *= 48.0f / 255.0f;
                     }
 
@@ -244,7 +277,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                         ImGui::TextUnformatted( output.name.c_str() );
                     }
                     ImGui::Spring( 0 );
-                    DrawPinIcon( output, IsPinLinked( output.id ), ( int ) ( alpha * 255 ) );
+                    drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
                     ImGui::PopStyleVar();
                     builder.endOutput();
                 }
@@ -300,7 +333,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 NodeEditor::EndPin();
                 NodeEditor::PopStyleVar( 3 );
 
-                if ( newLinkPin && !CanCreateLink( newLinkPin, &pin ) && pin != newLinkPin ) {
+                if ( newLinkPin && !canCreateLink( newLinkPin, &pin ) && &pin != newLinkPin ) {
                     inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
                 }
             } else {
@@ -336,12 +369,12 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 3 );
     #endif
                 NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
-                NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.getBR() );
+                NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.GetBR() );
                 NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
                 NodeEditor::EndPin();
                 NodeEditor::PopStyleVar();
 
-                if ( newLinkPin && !CanCreateLink( newLinkPin, &pin ) && pin != newLinkPin ) {
+                if ( newLinkPin && !canCreateLink( newLinkPin, &pin ) && &pin != newLinkPin ) {
                     outputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
                 }
             } else {
@@ -455,7 +488,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
                     NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
                     NodeEditor::EndPin();
-                    NodeEditor::PopStyleVars( 1 );
+                    NodeEditor::PopStyleVar( 1 );
 
                     auto drawList = ImGui::GetWindowDrawList();
                     drawList->AddRectFilled(
@@ -473,7 +506,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                         allRoundCornersFlags
                     );
 
-                    if ( newLinkPin && !CanCreateLink( newLinkPin, &pin ) && pin != newLinkPin ) {
+                    if ( newLinkPin && !canCreateLink( newLinkPin, &pin ) && &pin != newLinkPin ) {
                         inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
                     }
                 }
@@ -500,7 +533,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 ImGui::Spring( 1, 0 );
 
                 ImRect outputsRect;
-                int outputAlpha = 200;
+                int inputAlpha = 200;
                 for ( auto &pin : node.outputs ) {
                     ImGui::Dummy( ImVec2( padding, padding ) );
                     outputsRect = ImGui_GetItemRect();
@@ -508,7 +541,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     outputsRect.Min.y += padding;
                     outputsRect.Max.y += padding;
 
-    #if IMGUI_VERSION_NUM 18101
+    #if IMGUI_VERSION_NUM > 18101
                     const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
                     const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
     #else
@@ -525,22 +558,22 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
                     auto drawList = ImGui::GetWindowDrawList();
                     drawList->AddRectFilled(
-                        inputsRect.GetTL(),
-                        inputsRect.GetBR(),
+                        outputsRect.GetTL(),
+                        outputsRect.GetBR(),
                         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
                         4.0f,
                         allRoundCornersFlags
                     );
                     drawList->AddRect(
-                        inputsRect.GetTL(),
-                        inputsRect.GetBR(),
+                        outputsRect.GetTL(),
+                        outputsRect.GetBR(),
                         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
                         4.0f,
                         allRoundCornersFlags
                     );
 
-                    if ( newLinkPin && !CanCreateLink( newLinkPin, &pin ) && pin != newLinkPin ) {
-                        outputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+                    if ( newLinkPin && canCreateLink( newLinkPin, &pin ) && &pin != newLinkPin ) {
+                        inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
                     }
                 }
                 ImGui::EndHorizontal();
@@ -559,7 +592,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
             const float commentAlpha = 0.75f;
 
-            ImGui::PushTyleVar( ImGuiStyleVar_Alpha, commentAlpha );
+            ImGui::PushStyleVar( ImGuiStyleVar_Alpha, commentAlpha );
             NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 255, 255, 255, 64 ) );
             NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 255, 255, 255, 64 ) );
             NodeEditor::BeginNode( node.id );
@@ -619,9 +652,9 @@ void GraphEditorWindow::drawContent( void ) noexcept
                     auto size = ImGui::CalcTextSize( label );
                     auto padding = ImGui::GetStyle().FramePadding;
                     auto spacing = ImGui::GetStyle().ItemSpacing;
-                    Imgui::SetCursorPos( ImGui::GetCursorPos() + ImVec2( spacing.x, -spacing.y ) );
+                    ImGui::SetCursorPos( ImGui::GetCursorPos() + ImVec2( spacing.x, -spacing.y ) );
                     auto rectMin = ImGui::GetCursorScreenPos() - padding;
-                    auto rectMax = ImGUi::GetCursorScreenPos() + size - padding;
+                    auto rectMax = ImGui::GetCursorScreenPos() + size - padding;
                     auto drawList = ImGui::GetWindowDrawList();
                     drawList->AddRectFilled( rectMin, rectMax, color, size.y * 0.15f );
                     ImGui::TextUnformatted( label );
@@ -631,10 +664,10 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 NodeEditor::PinId endPinId = 0;
 
                 if ( NodeEditor::QueryNewLink( &startPinId, &endPinId ) ) {
-                    auto startPin = FindPin( startPinId );
-                    auto endPin = FindPin( endPinId );
+                    auto startPin = findPin( startPinId );
+                    auto endPin = findPin( endPinId );
                     newLinkPin = startPin ? startPin : endPin;
-                    if ( startPin->Kind == PinKind::Input ) {
+                    if ( startPin->kind == PinKind::Input ) {
                         // WARNING: StartPin could be null?
                         std::swap( startPin, endPin );
                         std::swap( startPinId, endPinId );
@@ -644,7 +677,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                         if ( endPin == startPin ) {
                             NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
 
-                        } else if ( endPin->Kind == startPin->Kind ) {
+                        } else if ( endPin->kind == startPin->kind ) {
                             showLabel( "x Incomtabile Pin Kind", ImColor( 45, 32, 32, 180 ) );
                             NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
                         } else if ( endPin->node == startPin->node ) [[unlikely]] {
@@ -652,12 +685,12 @@ void GraphEditorWindow::drawContent( void ) noexcept
                             NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
                         } else if ( endPin->type != startPin->type ) {
                             showLabel( "x Incompatible Pin Type", ImColor( 45, 32, 32, 180 ) );
-                            NodeEditor::RejectNewItem( ImColor( 255, 128, 128, 1.0f ) );
+                            NodeEditor::RejectNewItem( ImColor( 255.0f, 128.0f, 128.0f, 1.0f ) );
                         } else {
                             showLabel( "+ Create Link", ImColor( 32, 45, 32, 180 ) );
                             if ( NodeEditor::AcceptNewItem( ImColor( 128, 255, 128 ), 4.0f ) ) {
-                                m_links.emplace_back( Link( GetNextId(), startPinId, endPinId ) );
-                                m_links.back().color = GetIconColor( startPin->type );
+                                m_links.emplace_back( Link( getNextId(), startPinId, endPinId ) );
+                                m_links.back().color = getIconColor( startPin->type );
                             }
                         }
                     }
@@ -665,14 +698,14 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
                 NodeEditor::PinId pinId = 0;
                 if ( NodeEditor::QueryNewNode( &pinId ) ) {
-                    newLinkPin = FindPin( pinId );
+                    newLinkPin = findPin( pinId );
                     if ( newLinkPin ) {
                         showLabel( "+ Create New", ImColor( 32, 45, 32, 180 ) );
                     }
 
                     if ( NodeEditor::AcceptNewItem() ) {
                         createNewNode = true;
-                        newNodeLinkPin = FindPin( pindId );
+                        newNodeLinkPin = findPin( pinId );
                         newLinkPin = nullptr;
                         NodeEditor::Suspend();
                         ImGui::OpenPopup( "Create New Node" );
@@ -697,7 +730,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
                 NodeEditor::LinkId linkId = 0;
                 while ( NodeEditor::QueryDeletedLink( &linkId ) ) {
                     if ( NodeEditor::AcceptDeletedItem() ) {
-                        auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
+                        auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
                         if ( id != m_links.end() ) {
                             m_links.erase( id );
                         }
@@ -728,13 +761,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
     NodeEditor::Suspend();
     ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 8, 8 ) );
     if ( ImGui::BeginPopup( "Node Context Menu" ) ) {
-        auto node = FindNode( contextNodeId );
+        auto node = findNode( contextNodeId );
 
         ImGui::TextUnformatted( "Node Context Menu" );
         ImGui::Separator();
         if ( node ) {
-            ImGui::Text( "ID: %p", node->ID.AsPointer() );
-            ImGui::Text( "Type: %s", node->Type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
+            ImGui::Text( "ID: %p", node->id.AsPointer() );
+            ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
             ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
             ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
         } else {
@@ -748,7 +781,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
     }
 
     if ( ImGui::BeginPopup( "Pin Context Menu" ) ) {
-        auto pin = FindPin( contextPinId );
+        auto pin = findPin( contextPinId );
 
         ImGui::TextUnformatted( "Pin Context Menu" );
         ImGui::Separator();
@@ -766,7 +799,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
     }
 
     if ( ImGui::BeginPopup( "Link Context Menu" ) ) {
-        auto link = FindLink( contextLinkId );
+        auto link = findLink( contextLinkId );
 
         ImGui::TextUnformatted( "Link Context Menu" );
         ImGui::Separator();
@@ -787,62 +820,62 @@ void GraphEditorWindow::drawContent( void ) noexcept
     if ( ImGui::BeginPopup( "Create New Node" ) ) {
         auto newNodePosition = openPopupPosition;
 
-        Node *node = nullptr;
+        GraphNode *node = nullptr;
         if ( ImGui::MenuItem( "Input Action" ) ) {
-            node = SpawnInputActionNode();
+            node = spawnInputActionNode();
         }
         if ( ImGui::MenuItem( "Output Action" ) ) {
-            node = SpawnOutputActionNode();
+            node = spawnOutputActionNode();
         }
         if ( ImGui::MenuItem( "Branch" ) ) {
-            node = SpawnBranchNode();
+            node = spawnBranchNode();
         }
         if ( ImGui::MenuItem( "Do N" ) ) {
-            node = SpawnDoNNode();
+            node = spawnDoNNode();
         }
         if ( ImGui::MenuItem( "Set Timer" ) ) {
-            node = SpawnSetTimerNode();
+            node = spawnSetTimerNode();
         }
         if ( ImGui::MenuItem( "Less" ) ) {
-            node = SpawnLessNode();
+            node = spawnLessNode();
         }
         if ( ImGui::MenuItem( "Weird" ) ) {
-            node = SpawnWeirdNode();
+            node = spawnWeirdNode();
         }
         if ( ImGui::MenuItem( "Trace by Channel" ) ) {
-            node = SpawnTraceByChannelNode();
+            node = spawnTraceByChannelNode();
         }
         if ( ImGui::MenuItem( "Print String" ) ) {
-            node = SpawnPrintStringNode();
+            node = spawnPrintStringNode();
         }
         ImGui::Separator();
         if ( ImGui::MenuItem( "Comment" ) ) {
-            node = SpawnCommentNode();
+            node = spawnCommentNode();
         }
         ImGui::Separator();
         if ( ImGui::MenuItem( "Sequence" ) ) {
-            node = SpawnTreeSequenceNode();
+            node = spawnTreeSequenceNode();
         }
         if ( ImGui::MenuItem( "Move To" ) ) {
-            node = SpawnTreeMoveToNode(); // SpawnTreeTaskNode()
+            node = spawnTreeMoveToNode(); // SpawnTreeTaskNode()
         }
         if ( ImGui::MenuItem( "Random Wait" ) ) {
-            node = SpawnTreeRandomWaitNode(); // SpawnTreeTask2Node()
+            node = spawnTreeRandomWaitNode(); // SpawnTreeTask2Node()
         }
         ImGui::Separator();
         if ( ImGui::MenuItem( "Message" ) ) {
-            node = SpawnMessageNode();
+            node = spawnMessageNode();
         }
         ImGui::Separator();
         if ( ImGui::MenuItem( "Transform" ) ) {
-            node = SpawnHoudiniTransformNode();
+            node = spawnHoudiniTransformNode();
         }
         if ( ImGui::MenuItem( "Group" ) ) {
-            node = SpawnHoudiniGroupNode();
+            node = spawnHoudiniGroupNode();
         }
 
         if ( node ) {
-            BuildNodes();
+            buildNodes();
 
             createNewNode = false;
 
@@ -851,7 +884,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
             if ( auto startPin = newNodeLinkPin ) {
                 auto &pins = startPin->kind == PinKind::Input ? node->outputs : node->inputs;
                 for ( auto &pin : pins ) {
-                    if ( CanCreateLink( startPin, &pin ) ) {
+                    if ( canCreateLink( startPin, &pin ) ) {
                         auto endPin = &pin;
                         if ( startPin->kind == PinKind::Input ) {
                             std::swap( startPin, endPin );
@@ -881,10 +914,10 @@ void GraphEditorWindow::drawContent( void ) noexcept
         int nodeCount = NodeEditor::GetNodeCount();
         std::vector< NodeEditor::NodeId > orderedNodeIds;
         orderedNodeIds.resize( static_cast< size_t >( nodeCount ) );
-        NodeEditor::getOrderedNodeIds( orderedNodeIds.data(), nodeCount );
+        NodeEditor::GetOrderedNodeIds( orderedNodeIds.data(), nodeCount );
 
-        auto drawList = ImGui::getWindowDrawList();
-        drawList->PushClickRect( editorMin, editorMax );
+        auto drawList = ImGui::GetWindowDrawList();
+        drawList->PushClipRect( editorMin, editorMax );
 
         int ordinal = 0;
         for ( auto &nodeId : orderedNodeIds ) {
@@ -894,13 +927,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
             p1 = NodeEditor::CanvasToScreen( p1 );
 
             ImGuiTextBuffer builder;
-            builder.append( "#%d", ordinal++ );
+            builder.appendf( "#%d", ordinal++ );
 
             auto textSize = ImGui::CalcTextSize( builder.c_str() );
             auto padding = ImVec2( 2.0f, 2.0f );
             auto widgetSize = textSize + padding * 2;
 
-            auto widgetPosition = Vec2( p1.x, p0.y ) + ImVec2( 0, -widgetSize.y );
+            auto widgetPosition = ImVec2( p1.x, p0.y ) + ImVec2( 0, -widgetSize.y );
 
             drawList->AddRectFilled( widgetPosition, widgetPosition + widgetSize, IM_COL32( 100, 80, 80, 190 ), 3.0f, ImDrawFlags_RoundCornersAll );
             drawList->AddRect( widgetPosition, widgetPosition + widgetSize, IM_COL32( 200, 160, 160, 190 ), 3.0f, ImDrawFlags_RoundCornersAll );
@@ -1029,7 +1062,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
 void GraphEditorWindow::updateTouch( void ) noexcept
 {
     const auto deltaTime = ImGui::GetIO().DeltaTime;
-    for ( auto &entry : m_NodeTouchTime ) {
+    for ( auto &entry : m_nodeTouchTime ) {
         if ( entry.second > 0.0f ) {
             entry.second -= deltaTime;
         }
@@ -1040,4 +1073,154 @@ void GraphEditorWindow::showLeftPanel( float panelWidth ) noexcept
 {
     // TODO
 }
+
+void GraphEditorWindow::drawPinIcon( const Pin &pin, bool connected, int alpha ) const noexcept
+{
+    assert( false && "Missing implementation" );
+}
+
+GraphNode *GraphEditorWindow::findNode( NodeEditor::NodeId id ) noexcept
+{
+    for ( auto &node : m_nodes ) {
+        if ( node.id == id ) {
+            return &node;
+        }
+    }
+    return nullptr;
+}
+
+Link *GraphEditorWindow::findLink( NodeEditor::LinkId id ) noexcept
+{
+    for ( auto &link : m_links ) {
+        if ( link.id == id ) {
+            return &link;
+        }
+    }
+    return nullptr;
+}
+
+Pin *GraphEditorWindow::findPin( NodeEditor::PinId id ) noexcept
+{
+    if ( !id ) {
+        return nullptr;
+    }
+
+    for ( auto &node : m_nodes ) {
+        for ( auto &pin : node.inputs ) {
+            if ( pin.id == id ) {
+                return &pin;
+            }
+        }
+        for ( auto &pin : node.outputs ) {
+            if ( pin.id == id ) {
+                return &pin;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
+{
+    return nullptr;
+}
+GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnBranchNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnDoNNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnSetTimerNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnLessNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnWeirdNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnTraceByChannelNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnPrintStringNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnCommentNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnTreeSequenceNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnTreeMoveToNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnTreeRandomWaitNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnMessageNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnHoudiniTransformNode( void ) noexcept
+{
+    return nullptr;
+}
+
+GraphNode *GraphEditorWindow::spawnHoudiniGroupNode( void ) noexcept
+{
+    return nullptr;
+}
+
+ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
+{
+    switch ( type ) {
+        default:
+        case PinType::Flow:
+            return ImColor( 255, 255, 255 );
+        case PinType::Bool:
+            return ImColor( 220, 48, 48 );
+        case PinType::Int:
+            return ImColor( 68, 201, 156 );
+        case PinType::Float:
+            return ImColor( 147, 226, 74 );
+        case PinType::String:
+            return ImColor( 124, 21, 153 );
+        case PinType::Object:
+            return ImColor( 51, 150, 215 );
+        case PinType::Function:
+            return ImColor( 218, 0, 183 );
+        case PinType::Delegate:
+            return ImColor( 255, 48, 48 );
+    }
+}
+
 #endif

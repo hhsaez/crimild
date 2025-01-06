@@ -31,7 +31,7 @@ namespace crimild::editor::utils {
         /**
          * @brief Ends the construction of the current node.
          */
-        void End( void ) noexcept;
+        void end( void ) noexcept;
 
         /**
          * @brief Begins the header section of the node.
