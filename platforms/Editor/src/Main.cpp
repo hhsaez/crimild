@@ -556,16 +556,22 @@ int main( int argc, char **argv )
     // Create window with Vulkan context
     glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
     const int windowWidth = [ & ] {
+        int width = 2560;
         if ( auto layout = layoutManager->getCurrentLayout() ) {
-            return ( int ) layout->getExtent().width;
+            if ( layout->getExtent().width > 0 ) {
+                width = layout->getExtent().width;
+            }
         }
-        return 2560;
+        return width;
     }();
     const int windowHeight = [ & ] {
+        int height = 1440;
         if ( auto layout = layoutManager->getCurrentLayout() ) {
-            return ( int ) layout->getExtent().height;
+            if ( layout->getExtent().height > 0 ) {
+                height = layout->getExtent().height;
+            }
         }
-        return 1440;
+        return height;
     }();
     const std::string windowTitle = [ & ] {
         std::string title = "Crimild Editor";
