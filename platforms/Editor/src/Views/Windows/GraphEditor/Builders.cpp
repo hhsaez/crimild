@@ -4,7 +4,7 @@ using namespace crimild::editor::utils;
 
 namespace NodeEditor = ax::NodeEditor;
 
-BlueprintNodeBuilder::BlueprintNodeBuilder( ImTextureID texture, int textureWidth, int textureHeight ) noexcept
+AssemblyNodeBuilder::AssemblyNodeBuilder( ImTextureID texture, int textureWidth, int textureHeight ) noexcept
     : m_headerTextureId( texture ),
       m_headerTextureWidth( textureWidth ),
       m_headerTextureHeight( textureHeight )
@@ -12,7 +12,7 @@ BlueprintNodeBuilder::BlueprintNodeBuilder( ImTextureID texture, int textureWidt
     // no-op
 }
 
-void BlueprintNodeBuilder::begin( ax::NodeEditor::NodeId id ) noexcept
+void AssemblyNodeBuilder::begin( ax::NodeEditor::NodeId id ) noexcept
 {
     m_hasHeader = false;
     m_headerMin = m_headerMax = ImVec2();
@@ -27,7 +27,7 @@ void BlueprintNodeBuilder::begin( ax::NodeEditor::NodeId id ) noexcept
     setStage( Stage::Begin );
 }
 
-void BlueprintNodeBuilder::End( void ) noexcept
+void AssemblyNodeBuilder::End( void ) noexcept
 {
     setStage( Stage::End );
 
@@ -80,18 +80,18 @@ void BlueprintNodeBuilder::End( void ) noexcept
     setStage( Stage::Invalid );
 }
 
-void BlueprintNodeBuilder::header( const ImVec4 &color ) noexcept
+void AssemblyNodeBuilder::header( const ImVec4 &color ) noexcept
 {
     m_headerColor = ImColor( color );
     setStage( Stage::Header );
 }
 
-void BlueprintNodeBuilder::endHeader( void ) noexcept
+void AssemblyNodeBuilder::endHeader( void ) noexcept
 {
     setStage( Stage::Content );
 }
 
-void BlueprintNodeBuilder::input( ax::NodeEditor::PinId id ) noexcept
+void AssemblyNodeBuilder::input( ax::NodeEditor::PinId id ) noexcept
 {
     if ( m_currentStage == Stage::Begin ) {
         setStage( Stage::Content );
@@ -110,13 +110,13 @@ void BlueprintNodeBuilder::input( ax::NodeEditor::PinId id ) noexcept
     ImGui::BeginHorizontal( id.AsPointer() );
 }
 
-void BlueprintNodeBuilder::endInput( void ) noexcept
+void AssemblyNodeBuilder::endInput( void ) noexcept
 {
     ImGui::EndHorizontal();
     endPin();
 }
 
-void BlueprintNodeBuilder::middle( void ) noexcept
+void AssemblyNodeBuilder::middle( void ) noexcept
 {
     if ( m_currentStage == Stage::Begin ) {
         setStage( Stage::Content );
@@ -125,7 +125,7 @@ void BlueprintNodeBuilder::middle( void ) noexcept
     setStage( Stage::Middle );
 }
 
-void BlueprintNodeBuilder::output( ax::NodeEditor::PinId id ) noexcept
+void AssemblyNodeBuilder::output( ax::NodeEditor::PinId id ) noexcept
 {
     if ( m_currentStage == Stage::Begin ) {
         setStage( Stage::Content );
@@ -144,13 +144,13 @@ void BlueprintNodeBuilder::output( ax::NodeEditor::PinId id ) noexcept
     ImGui::BeginHorizontal( id.AsPointer() );
 }
 
-void BlueprintNodeBuilder::endOutput( void ) noexcept
+void AssemblyNodeBuilder::endOutput( void ) noexcept
 {
     ImGui::EndHorizontal();
     endPin();
 }
 
-bool BlueprintNodeBuilder::setStage( Stage stage ) noexcept
+bool AssemblyNodeBuilder::setStage( Stage stage ) noexcept
 {
     if ( stage == m_currentStage ) {
         return false;
@@ -283,12 +283,12 @@ bool BlueprintNodeBuilder::setStage( Stage stage ) noexcept
     return true;
 }
 
-void BlueprintNodeBuilder::pin( ax::NodeEditor::PinId id, ax::NodeEditor::PinKind kind ) noexcept
+void AssemblyNodeBuilder::pin( ax::NodeEditor::PinId id, ax::NodeEditor::PinKind kind ) noexcept
 {
     NodeEditor::BeginPin( id, kind );
 }
 
-void BlueprintNodeBuilder::endPin( void ) noexcept
+void AssemblyNodeBuilder::endPin( void ) noexcept
 {
     NodeEditor::EndPin();
 }
