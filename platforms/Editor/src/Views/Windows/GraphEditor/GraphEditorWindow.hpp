@@ -37,6 +37,12 @@ namespace crimild::editor {
 
 #if GRAPH_EDITOR_BLUEPRINTS
 
+    namespace utils {
+
+        class AssemblyNodeBuilder;
+
+    }
+
     enum class PinType {
         Flow,
         Bool,
@@ -142,6 +148,8 @@ namespace crimild::editor {
         void updateTouch( void ) noexcept;
         void showLeftPanel( float panelWidth ) noexcept;
 
+#if GRAPH_EDITOR_BLUEPRINTS
+
         GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
         Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
         Pin *findPin( ax::NodeEditor::PinId id ) noexcept;
@@ -211,6 +219,20 @@ namespace crimild::editor {
 
         ImColor getIconColor( PinType type ) const noexcept;
 
+        void renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilder &builder ) noexcept;
+        void renderTreeNodes( void ) noexcept;
+        void renderHoudiniNodes( void ) noexcept;
+        void renderCommentNodes( void ) noexcept;
+        void renderLinks( void ) noexcept;
+        void renderCreateNewNode( void ) noexcept;
+        void renderPopups( void ) noexcept;
+        void renderNodeContextMenu( void ) noexcept;
+        void renderPinContextMenu( void ) noexcept;
+        void renderLinkContextMenu( void ) noexcept;
+        void renderCreateNewNodeMenu( void ) noexcept;
+        void showOrdinals( void ) noexcept;
+#endif
+
     private:
         // Editor context
         // Required to trace editor state.
@@ -227,6 +249,15 @@ namespace crimild::editor {
         const float m_touchTime = 1.0f;
         std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
         bool m_showOrdinals = false;
+
+        bool m_createNewNode = false;
+        Pin *m_newNodeLinkPin = nullptr;
+        Pin *m_newLinkPin = nullptr;
+
+        ax::NodeEditor::NodeId m_contextNodeId = 0;
+        ax::NodeEditor::LinkId m_contextLinkId = 0;
+        ax::NodeEditor::PinId m_contextPinId = 0;
+
 #else
         // Flag set for first frame only
         // This is required for some actions that need to be executed only once
