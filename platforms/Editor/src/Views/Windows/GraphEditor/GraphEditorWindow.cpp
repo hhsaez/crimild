@@ -668,76 +668,91 @@ GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
 
 GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnBranchNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnDoNNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnSetTimerNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnLessNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnWeirdNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnTraceByChannelNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnPrintStringNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnCommentNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnTreeSequenceNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnTreeMoveToNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnTreeRandomWaitNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnMessageNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnHoudiniTransformNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 
 GraphNode *GraphEditorWindow::spawnHoudiniGroupNode( void ) noexcept
 {
+    assert( false && "Missing implementation" );
     return nullptr;
 }
 

@@ -36,29 +36,50 @@ void AssemblyNodeBuilder::end( void ) noexcept
     if ( ImGui::IsItemVisible() ) {
         auto alpha = static_cast< int >( 255 * ImGui::GetStyle().Alpha );
         auto drawList = NodeEditor::GetNodeBackgroundDrawList( m_currentNodeId );
+        const auto BORDER_WIDTH = NodeEditor::GetStyle().NodeBorderWidth;
         const auto halfBorderWidth = NodeEditor::GetStyle().NodeBorderWidth * 0.5f;
 
         auto headerColor = IM_COL32( 0, 0, 0, alpha ) | ( m_headerColor & IM_COL32( 255, 255, 255, 0 ) );
-        if ( ( m_headerMax.x > m_headerMin.x ) && ( m_headerMax.y > m_headerMin.y ) && m_headerTextureId ) {
-            const auto uv = ImVec2(
-                ( m_headerMax.x - m_headerMin.x ) / float( 4.0f * m_headerTextureWidth ),
-                ( m_headerMax.y - m_headerMin.y ) / float( 4.0f * m_headerTextureHeight )
-            );
+        if ( ( m_headerMax.x > m_headerMin.x ) && ( m_headerMax.y > m_headerMin.y ) ) {
+            if ( m_headerTextureId ) {
+                const auto uv = ImVec2(
+                    ( m_headerMax.x - m_headerMin.x ) / float( 4.0f * m_headerTextureWidth ),
+                    ( m_headerMax.y - m_headerMin.y ) / float( 4.0f * m_headerTextureHeight )
+                );
 
-            drawList->AddImageRounded(
-                m_headerTextureId,
-                m_headerMin - ImVec2( 8 - halfBorderWidth, 4 - halfBorderWidth ),
-                m_headerMax + ImVec2( 8 - halfBorderWidth, 0 ),
-                ImVec2( 0, 0 ),
-                uv,
-                headerColor,
-                NodeEditor::GetStyle().NodeRounding,
+                drawList->AddImageRounded(
+                    m_headerTextureId,
+                    m_headerMin - ImVec2( 8 - halfBorderWidth, 4 - halfBorderWidth ),
+                    m_headerMax + ImVec2( 8 - halfBorderWidth, 0 ),
+                    ImVec2( 0, 0 ),
+                    uv,
+                    headerColor,
+                    NodeEditor::GetStyle().NodeRounding,
 #if IMGUI_VERSION_NUM > 18101
-                ImDrawFlags_RoundCornersTop
+                    ImDrawFlags_RoundCornersTop
 #else
-                1 | 2
+                    1 | 2
 #endif
-            );
+                );
+            } else {
+                // If no texture is provided, render the header using a solid color.
+                // Keep in mind that we need to use round corners for the top part of the header,
+                // so we render it first and then we render the bottom part using a solid rectangle
+                // with no rounded corners
+                // TODO(hernan): what units are these?
+                drawList->AddRectFilled(
+                    m_headerMin - ImVec2( 8 - halfBorderWidth, 4 - halfBorderWidth ),
+                    m_headerMax + ImVec2( 8 - halfBorderWidth, 0 ),
+                    headerColor,
+                    NodeEditor::GetStyle().NodeRounding
+                );
+                drawList->AddRectFilled(
+                    m_headerMin - ImVec2( 8 - halfBorderWidth, -8 ),
+                    m_headerMax + ImVec2( 8 - halfBorderWidth, 0 ),
+                    headerColor,
+                    0
+                );
+            }
 
             if ( m_contentMin.y > m_headerMax.y ) {
                 drawList->AddLine(
