@@ -231,6 +231,11 @@ namespace crimild::editor {
         void renderLinkContextMenu( void ) noexcept;
         void renderCreateNewNodeMenu( void ) noexcept;
         void showOrdinals( void ) noexcept;
+
+        inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
+        {
+            m_nodeTouchTime[ id ] = m_touchTime;
+        }
 #endif
 
     private:

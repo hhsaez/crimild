@@ -34,6 +34,37 @@ using namespace crimild::editor;
 
 namespace NodeEditor = ax::NodeEditor;
 
+namespace crimild::editor {
+
+    namespace drawing {
+
+        enum class IconType : ImU32 {
+            Flow,
+            Circle,
+            Square,
+            Grid,
+            RoundSquare,
+            Diamond
+        };
+
+        void drawIcon( ImDrawList *drawList, const ImVec2 &a, const ImVec2 &b, IconType type, bool filled, ImU32 color, ImU32 innerColor ) noexcept
+        {
+            // TODO
+        }
+
+    }
+
+    namespace icons {
+
+        using drawing::IconType;
+
+        static void icon( const ImVec2 &size, IconType type, bool filled, const ImVec4 &color = ImVec4( 1, 1, 1, 1 ), const ImVec4 &innerColor = ImVec4( 0, 0, 0, 0 ) ) noexcept
+        {
+            // TODO
+        }
+    }
+}
+
 static inline ImRect ImGui_GetItemRect( void ) noexcept
 {
     return ImRect( ImGui::GetItemRectMin(), ImGui::GetItemRectMax() );
@@ -106,8 +137,55 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
     : Window( "Graph Editor" )
 {
     NodeEditor::Config config;
-    config.SettingsFile = "./NodeEditor.json";
+    config.SettingsFile = "./AssemblyEditor.json";
+
+#if GRAPH_EDITOR_BLUEPRINTS
+    config.UserPointer = this;
+
+    config.LoadNodeSettings = []( NodeEditor::NodeId nodeId, char *data, void *userPointer ) -> size_t {
+        auto self = static_cast< GraphEditorWindow * >( userPointer );
+
+        auto node = self->findNode( nodeId );
+        if ( !node ) {
+            return 0;
+        }
+
+        if ( data != nullptr ) {
+            memcpy( data, node->state.data(), node->state.size() );
+        }
+        return node->state.size();
+    };
+
+    config.SaveNodeSettings = []( NodeEditor::NodeId nodeId, const char *data, size_t size, NodeEditor::SaveReasonFlags reason, void *userPointer ) -> bool {
+        auto self = static_cast< GraphEditorWindow * >( userPointer );
+
+        auto node = self->findNode( nodeId );
+        if ( !node ) {
+            return false;
+        }
+
+        node->state.assign( data, size );
+        self->touchNode( nodeId );
+        return true;
+    };
+
+#endif
+
     m_context = ax::NodeEditor::CreateEditor( &config );
+
+#if GRAPH_EDITOR_BLUEPRINTS
+    NodeEditor::SetCurrentEditor( m_context );
+
+    GraphNode *node = nullptr;
+
+    node = spawnInputActionNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( -252, 220 ) );
+
+    NodeEditor::NavigateToContent();
+
+    buildNodes();
+
+#endif
 }
 
 GraphEditorWindow::~GraphEditorWindow( void ) noexcept
@@ -155,11 +233,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
     crimild::editor::utils::AssemblyNodeBuilder builder( m_headerBackground, getTextureWidth( m_headerBackground ), getTextureHeight( m_headerBackground ) );
 
     renderBlueprintAndSimpleNodes( builder );
-    renderTreeNodes();
-    renderHoudiniNodes();
-    renderCommentNodes();
-    renderLinks();
-    renderCreateNewNode();
+    // renderTreeNodes();
+    // renderHoudiniNodes();
+    // renderCommentNodes();
+    // renderLinks();
+    // renderCreateNewNode();
 
     ImGui::SetCursorScreenPos( cursorTopLeft );
 
@@ -304,7 +382,40 @@ void GraphEditorWindow::showLeftPanel( float panelWidth ) noexcept
 
 void GraphEditorWindow::drawPinIcon( const Pin &pin, bool connected, int alpha ) const noexcept
 {
-    assert( false && "Missing implementation" );
+    using icons::IconType;
+    IconType iconType;
+    ImColor color = getIconColor( pin.type );
+    color.Value.w = alpha / 255.0f;
+    switch ( pin.type ) {
+        case PinType::Flow:
+            iconType = IconType::Flow;
+            break;
+        case PinType::Bool:
+            iconType = IconType::Circle;
+            break;
+        case PinType::Int:
+            iconType = IconType::Circle;
+            break;
+        case PinType::Float:
+            iconType = IconType::Circle;
+            break;
+        case PinType::String:
+            iconType = IconType::Circle;
+            break;
+        case PinType::Object:
+            iconType = IconType::Circle;
+            break;
+        case PinType::Function:
+            iconType = IconType::Circle;
+            break;
+        case PinType::Delegate:
+            iconType = IconType::Square;
+            break;
+        default:
+            return;
+    }
+
+    icons::icon( ImVec2( static_cast< float >( m_pinIconSize ), m_pinIconSize ), iconType, connected, color, ImColor( 32, 32, 32, alpha ) );
 }
 
 GraphNode *GraphEditorWindow::findNode( NodeEditor::NodeId id ) noexcept
@@ -351,8 +462,14 @@ Pin *GraphEditorWindow::findPin( NodeEditor::PinId id ) noexcept
 
 GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
 {
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "InputAction Fire", ImColor( 255, 128, 128 ) );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Delegate );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Pressed", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Released", PinType::Flow );
+    buildNode( &m_nodes.back() );
+    return &m_nodes.back();
 }
+
 GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
 {
     return nullptr;
@@ -453,7 +570,6 @@ ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
 
 void GraphEditorWindow::renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilder &builder ) noexcept
 {
-    // Renders NodeType::Blueprint || NodeType::Simple
     for ( auto &node : m_nodes ) {
         if ( node.type != NodeType::Blueprint && node.type != NodeType::Simple ) {
             continue;
@@ -503,10 +619,12 @@ void GraphEditorWindow::renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilde
                             ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
                             ImGui::EndHorizontal();
                             ImGui::PopStyleVar();
+
+                            NodeEditor::EndPin();
                         }
                         ImGui::Spring( 1, 0 );
                         ImGui::EndVertical();
-                        ImGui::Spring( 0, ImGui::GetStyle().ItemInnerSpacing.x / 2 );
+                        ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
                     } else {
                         ImGui::Spring( 0 );
                     }
