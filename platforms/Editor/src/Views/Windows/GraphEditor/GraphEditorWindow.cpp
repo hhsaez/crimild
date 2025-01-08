@@ -376,6 +376,42 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 
     node = spawnInputActionNode();
     NodeEditor::SetNodePosition( node->id, ImVec2( -252, 220 ) );
+    node = spawnBranchNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( -300, 351 ) );
+    node = spawnDoNNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( -238, 504 ) );
+    node = spawnOutputActionNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 71, 80 ) );
+    node = spawnSetTimerNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 168, 316 ) );
+
+    node = spawnTreeSequenceNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 1028, 329 ) );
+    node = spawnTreeMoveToNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 1204, 458 ) );
+    node = spawnTreeRandomWaitNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 868, 538 ) );
+
+    node = spawnCommentNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 112, 576 ) );
+    NodeEditor::SetGroupSize( node->id, ImVec2( 384, 154 ) );
+    node = spawnCommentNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 800, 224 ) );
+    NodeEditor::SetGroupSize( node->id, ImVec2( 640, 400 ) );
+
+    node = spawnLessNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 366, 652 ) );
+    node = spawnWeirdNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 144, 652 ) );
+    node = spawnMessageNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( -348, 698 ) );
+    node = spawnPrintStringNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( -69, 652 ) );
+
+    node = spawnHoudiniTransformNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 500, -70 ) );
+    node = spawnHoudiniGroupNode();
+    NodeEditor::SetNodePosition( node->id, ImVec2( 500, 42 ) );
 
     NodeEditor::NavigateToContent();
 
@@ -429,11 +465,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
     crimild::editor::utils::AssemblyNodeBuilder builder( m_headerBackground, getTextureWidth( m_headerBackground ), getTextureHeight( m_headerBackground ) );
 
     renderBlueprintAndSimpleNodes( builder );
-    // renderTreeNodes();
-    // renderHoudiniNodes();
-    // renderCommentNodes();
-    // renderLinks();
-    // renderCreateNewNode();
+    renderTreeNodes();
+    renderHoudiniNodes();
+    renderCommentNodes();
+    renderLinks();
+    renderCreateNewNode();
 
     ImGui::SetCursorScreenPos( cursorTopLeft );
 
@@ -668,92 +704,193 @@ GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
 
 GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "OutputAction" );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Sample", PinType::Float );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Condition", PinType::Bool );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Event", PinType::Delegate );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnBranchNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Branch" );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Condition", PinType::Bool );
+    m_nodes.back().outputs.emplace_back( getNextId(), "True", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "False", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnDoNNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Do N" );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Enter", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "N", PinType::Int );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Reset", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Exit", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Counter", PinType::Int );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnSetTimerNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Set Timer", ImColor( 128, 195, 248 ) );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Object", PinType::Object );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Function Name", PinType::Function );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Time", PinType::Float );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Looping", PinType::Bool );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnLessNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "<", ImColor( 128, 195, 248 ) );
+    m_nodes.back().type = NodeType::Simple;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Float );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Float );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Float );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnWeirdNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "o.O", ImColor( 128, 195, 248 ) );
+    m_nodes.back().type = NodeType::Simple;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Float );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Float );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Float );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnTraceByChannelNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Single Line Trace by Channel", ImColor( 255, 128, 64 ) );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Start", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "End", PinType::Int );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Trace Channel", PinType::Float );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Trace Complex", PinType::Bool );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Actors to Ignore", PinType::Int );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Draw Debug Type", PinType::Bool );
+    m_nodes.back().inputs.emplace_back( getNextId(), "Ignore Self", PinType::Bool );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Out Hit", PinType::Float );
+    m_nodes.back().outputs.emplace_back( getNextId(), "Return Value", PinType::Bool );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnPrintStringNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Print String" );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "In String", PinType::String );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnCommentNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Test Comment" );
+    m_nodes.back().type = NodeType::Comment;
+    m_nodes.back().size = ImVec2( 300, 200 );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnTreeSequenceNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Sequence" );
+    m_nodes.back().type = NodeType::Tree;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnTreeMoveToNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Move To" );
+    m_nodes.back().type = NodeType::Tree;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnTreeRandomWaitNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Random Wait" );
+    m_nodes.back().type = NodeType::Tree;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnMessageNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "", ImColor( 128, 195, 248 ) );
+    m_nodes.back().type = NodeType::Simple;
+    m_nodes.back().outputs.emplace_back( getNextId(), "Message", PinType::String );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnHoudiniTransformNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Transform" );
+    m_nodes.back().type = NodeType::Houdini;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 GraphNode *GraphEditorWindow::spawnHoudiniGroupNode( void ) noexcept
 {
-    assert( false && "Missing implementation" );
-    return nullptr;
+    m_nodes.emplace_back( getNextId(), "Group" );
+    m_nodes.back().type = NodeType::Houdini;
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().inputs.emplace_back( getNextId(), "", PinType::Flow );
+    m_nodes.back().outputs.emplace_back( getNextId(), "", PinType::Flow );
+
+    buildNode( &m_nodes.back() );
+
+    return &m_nodes.back();
 }
 
 ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
@@ -941,9 +1078,12 @@ void GraphEditorWindow::renderTreeNodes( void ) noexcept
         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 5.0f );
 
+        NodeEditor::BeginNode( node.id );
+
         ImGui::BeginVertical( node.id.AsPointer() );
         ImGui::BeginHorizontal( "inputs" );
         ImGui::Spring( 0, padding * 2 );
+
         ImRect inputsRect;
         int inputAlpha = 200;
         if ( !node.inputs.empty() ) {
@@ -988,6 +1128,7 @@ void GraphEditorWindow::renderTreeNodes( void ) noexcept
 
         ImGui::BeginHorizontal( "otuputs" );
         ImGui::Spring( 0, padding * 2 );
+
         ImRect outputsRect;
         int outputAlpha = 255;
         if ( !node.outputs.empty() ) {
