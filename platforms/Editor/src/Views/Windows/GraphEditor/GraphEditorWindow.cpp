@@ -417,6 +417,10 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 
     buildNodes();
 
+    m_links.push_back( Link( getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
+    m_links.push_back( Link( getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
+    m_links.push_back( Link( getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
+
 #endif
 }
 

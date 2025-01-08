@@ -155,6 +155,7 @@ namespace crimild::editor {
         Pin *findPin( ax::NodeEditor::PinId id ) noexcept;
 
         inline int getNextId( void ) noexcept { return m_nextId++; }
+        inline ax::NodeEditor::LinkId getNextLinkId( void ) noexcept { return ax::NodeEditor::LinkId( getNextId() ); }
 
         bool canCreateLink( Pin *a, Pin *b ) const noexcept
         {
