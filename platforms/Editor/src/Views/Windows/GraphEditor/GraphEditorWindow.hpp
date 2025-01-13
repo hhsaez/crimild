@@ -237,6 +237,18 @@ namespace crimild::editor {
         {
             m_nodeTouchTime[ id ] = m_touchTime;
         }
+
+        inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
+        {
+            auto it = m_nodeTouchTime.find( id );
+            if ( it == m_nodeTouchTime.end() && it->second > 0.0f ) {
+                return ( m_touchTime - it->second ) / m_touchTime;
+            }
+            return 0.0f;
+        }
+
+        void showLeftPanel( void );
+        void showStyleEditor();
 #endif
 
     private:
@@ -263,6 +275,11 @@ namespace crimild::editor {
         ax::NodeEditor::NodeId m_contextNodeId = 0;
         ax::NodeEditor::LinkId m_contextLinkId = 0;
         ax::NodeEditor::PinId m_contextPinId = 0;
+
+        float m_leftPanelWidth = 400.0f;
+        float m_rightPanelWidth = 800.0f;
+        bool m_showStyleEditor = false;
+        int m_changeCount = 0;
 
 #else
         // Flag set for first frame only
