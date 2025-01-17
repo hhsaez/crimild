@@ -241,7 +241,7 @@ namespace crimild::editor {
         inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
         {
             auto it = m_nodeTouchTime.find( id );
-            if ( it == m_nodeTouchTime.end() && it->second > 0.0f ) {
+            if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
                 return ( m_touchTime - it->second ) / m_touchTime;
             }
             return 0.0f;
