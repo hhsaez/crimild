@@ -37,6 +37,7 @@
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 #include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
+#include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
 #include "Views/Windows/LogWindow.hpp"
 #include "Views/Windows/PlaybackControlsWindow.hpp"
@@ -481,7 +482,7 @@ void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
     err = vkBeginCommandBuffer( command_buffer, &begin_info );
     check_vk_result( err );
 
-    ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
+    // ImGui_ImplVulkan_CreateFontsTexture( command_buffer );
 
     VkSubmitInfo end_info = {};
     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -494,7 +495,7 @@ void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
 
     err = vkDeviceWaitIdle( g_Device );
     check_vk_result( err );
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    // ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 int main( int argc, char **argv )
@@ -506,6 +507,7 @@ int main( int argc, char **argv )
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::MainMenu );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::FileSystemWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::InspectorWindow );
+    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::GraphEditorWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::LogWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::BehaviorsWindow );
     CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::PlaybackControlsWindow );
@@ -554,16 +556,22 @@ int main( int argc, char **argv )
     // Create window with Vulkan context
     glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
     const int windowWidth = [ & ] {
+        int width = 2560;
         if ( auto layout = layoutManager->getCurrentLayout() ) {
-            return ( int ) layout->getExtent().width;
+            if ( layout->getExtent().width > 0 ) {
+                width = layout->getExtent().width;
+            }
         }
-        return 2560;
+        return width;
     }();
     const int windowHeight = [ & ] {
+        int height = 1440;
         if ( auto layout = layoutManager->getCurrentLayout() ) {
-            return ( int ) layout->getExtent().height;
+            if ( layout->getExtent().height > 0 ) {
+                height = layout->getExtent().height;
+            }
         }
-        return 1440;
+        return height;
     }();
     const std::string windowTitle = [ & ] {
         std::string title = "Crimild Editor";
@@ -622,6 +630,7 @@ int main( int argc, char **argv )
     init_info.Instance = g_Instance;
     init_info.PhysicalDevice = g_PhysicalDevice;
     init_info.Device = g_Device;
+    init_info.RenderPass = wd->RenderPass;
     init_info.QueueFamily = g_QueueFamily;
     init_info.Queue = g_Queue;
     init_info.PipelineCache = g_PipelineCache;
@@ -632,7 +641,7 @@ int main( int argc, char **argv )
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = g_Allocator;
     init_info.CheckVkResultFn = check_vk_result;
-    ImGui_ImplVulkan_Init( &init_info, wd->RenderPass );
+    ImGui_ImplVulkan_Init( &init_info );
 
     setupImGuiStyles( true, 1.0f );
 

@@ -8,8 +8,9 @@
 	ignore = dirty
 [submodule "third-party/imgui"]
 	path = third-party/imgui
-	url = https://github.com/ocornut/imgui.git
+	url = git@github.com:hhsaez/imgui.git
 	ignore = dirty
+	branch = crimild
 [submodule "third-party/glslang"]
 	path = third-party/glslang
 	url = git@github.com:KhronosGroup/glslang.git
@@ -36,3 +37,7 @@
 [submodule "third-party/doxygen-awesome-css"]
 	path = third-party/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "third-party/imgui-node-editor"]
+	path = third-party/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git
+	ignore = dirty
