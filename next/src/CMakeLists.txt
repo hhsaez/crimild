@@ -6,9 +6,18 @@ target_sources(
     crimild_next
 
     PUBLIC
+    Crimild_Next.hpp
+
+    PUBLIC
+    3D/Geometry3D.hpp
+    3D/Group3D.hpp
+    3D/Node3D.hpp    
     Object.hpp
     Node.hpp
     Editable.hpp
+
+    PRIVATE
+    Crimild_Next.cpp
 )
 
 target_include_directories( crimild_next PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
