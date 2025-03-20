@@ -20,6 +20,16 @@ namespace crimild::next {
          return m_extensions.find( ExtensionType::__CLASS_NAME ) != m_extensions.end();
       }
 
+      void attach( std::shared_ptr< Extension > const &extension )
+      {
+         m_extensions[ extension->getClassName() ] = extension;
+      }
+
+      void attach( std::string name, std::shared_ptr< Extension > const &extension )
+      {
+         m_extensions[ name ] = extension;
+      }
+
       template< typename ExtensionType, typename... Args >
       std::shared_ptr< ExtensionType > attach( Args &&...args )
       {

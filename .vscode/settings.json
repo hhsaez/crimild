@@ -94,7 +94,9 @@
         "*.tcc": "cpp",
         "utility": "cpp",
         "shared_mutex": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__verbose_abort": "cpp",
+        "charconv": "cpp"
     },
     "editor.tabSize": 3
 }

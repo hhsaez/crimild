@@ -181,6 +181,7 @@ namespace crimild::editor {
       ax::NodeEditor::EditorContext *m_context = nullptr;
 
       GraphEditorContext m_ctx;
+      std::vector< std::shared_ptr< next::Object > > m_objects;
 
 #if GRAPH_EDITOR_BLUEPRINTS
       int m_nextId = 1;

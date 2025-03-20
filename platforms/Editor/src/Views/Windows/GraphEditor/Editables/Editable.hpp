@@ -80,6 +80,12 @@ namespace crimild::editor::editables {
       [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
       [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
 
+      inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
+
+      inline const std::string &getName( void ) const { return m_name; }
+
+      virtual void render( GraphEditorContext &ctx ) = 0;
+
    private:
       ax::NodeEditor::NodeId m_id;
       std::string m_name;

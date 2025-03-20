@@ -39,6 +39,7 @@ target_sources(
     Views/Windows/GraphEditor/Builders.hpp
     Views/Windows/GraphEditor/Editables/3D/Geometry3DEditable.hpp
     Views/Windows/GraphEditor/Editables/3D/Group3DEditable.hpp
+    Views/Windows/GraphEditor/Editables/3D/Node3DEditable.cpp
     Views/Windows/GraphEditor/Editables/3D/Node3DEditable.hpp
     Views/Windows/GraphEditor/Editables/3D/Transform3DEditable.hpp
     Views/Windows/GraphEditor/Editables/Editable.hpp

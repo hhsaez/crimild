@@ -28,6 +28,7 @@
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
 #include "Views/Windows/GraphEditor/Builders.hpp"
+#include "Views/Windows/GraphEditor/Editables/3D/Node3DEditable.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
@@ -261,37 +262,6 @@ namespace crimild::editor {
    }
 }
 
-static inline ImRect ImGui_GetItemRect( void ) noexcept
-{
-   return ImRect( ImGui::GetItemRectMin(), ImGui::GetItemRectMax() );
-}
-
-static inline ImRect ImRect_Expanded( const ImRect &rect, float x, float y ) noexcept
-{
-   auto result = rect;
-   result.Min.x -= x;
-   result.Min.y -= y;
-   result.Max.x += x;
-   result.Max.y += y;
-   return result;
-}
-
-static int getTextureWidth( ImTextureID texture ) noexcept
-{
-   if ( texture == nullptr ) {
-      return 0;
-   }
-   return 1; // TODO
-}
-
-static int getTextureHeight( ImTextureID texture ) noexcept
-{
-   if ( texture == nullptr ) {
-      return 0;
-   }
-   return 1; // TODO
-}
-
 #if !GRAPH_EDITOR_BLUEPRINTS
 
 namespace ImGui::ex {
@@ -421,6 +391,13 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
+   auto node3D = crimild::alloc< next::Node3D >();
+   node3D->attach(
+      editables::Editable::__CLASS_NAME,
+      std::make_shared< editables::Node3DEditable >( m_ctx )
+   );
+   m_objects.push_back( node3D );
+
 #endif
 }
 
@@ -473,6 +450,12 @@ void GraphEditorWindow::drawContent( void ) noexcept
    renderCommentNodes();
    renderLinks();
    renderCreateNewNode();
+
+   for ( auto &obj : m_objects ) {
+      if ( auto editable = obj->getExtension< editables::Editable >() ) {
+         editable->render( m_ctx );
+      }
+   }
 
    ImGui::SetCursorScreenPos( cursorTopLeft );
 
