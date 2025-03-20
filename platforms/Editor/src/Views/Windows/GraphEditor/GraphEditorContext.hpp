@@ -7,8 +7,8 @@ namespace crimild::editor {
 
    /**
     * @brief Context for editing Assemblies
-    * 
-    * @note (Hernan): My first impulse was to make this a singleton, but that's 
+    *
+    * @note (Hernan): My first impulse was to make this a singleton, but that's
     * not a good idea since it is possible to have multiple Assembly graphs active
     * at the same time, each of them with independent contexts.
     */
@@ -16,9 +16,13 @@ namespace crimild::editor {
    public:
       inline unsigned int getNextId( void )
       {
-         // TODO: Find a more robust way to assign IDs. 
+         // TODO: Find a more robust way to assign IDs.
+         // This will fail when loading objects previously created, since their IDs will
+         // be higher than 0. We need to find a way to persist the last ID used or we can
+         // check what is the greatest ID in the current graph and use that as the starting
+         // point.
          static unsigned int nextId = 0;
-         return nextId++; 
+         return nextId++;
       }
 
       inline unsigned int getNextPinId( void )
@@ -27,10 +31,8 @@ namespace crimild::editor {
       }
 
       inline ax::NodeEditor::LinkId getNextLinkId( void ) { return ax::NodeEditor::LinkId( getNextId() ); }
-      
    };
 
 }
 
 #endif
-
