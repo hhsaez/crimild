@@ -392,11 +392,8 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
    auto node3D = crimild::alloc< next::Node3D >();
-   node3D->attach(
-      editables::Editable::__CLASS_NAME,
-      std::make_shared< editables::Node3DEditable >( m_ctx )
-   );
    m_objects.push_back( node3D );
+   m_editables.push_back( node3D->attach< editables::Node3DEditable >( m_ctx ) );
 
 #endif
 }
@@ -451,8 +448,8 @@ void GraphEditorWindow::drawContent( void ) noexcept
    renderLinks();
    renderCreateNewNode();
 
-   for ( auto &obj : m_objects ) {
-      if ( auto editable = obj->getExtension< editables::Editable >() ) {
+   for ( auto &maybeEditable : m_editables ) {
+      if ( auto editable = maybeEditable.lock() ) {
          editable->render( m_ctx );
       }
    }

@@ -182,6 +182,7 @@ namespace crimild::editor {
 
       GraphEditorContext m_ctx;
       std::vector< std::shared_ptr< next::Object > > m_objects;
+      std::vector< std::weak_ptr< editables::Editable > > m_editables;
 
 #if GRAPH_EDITOR_BLUEPRINTS
       int m_nextId = 1;
