@@ -90,7 +90,11 @@
         "codecvt": "cpp",
         "condition_variable": "cpp",
         "numbers": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "*.tcc": "cpp",
+        "utility": "cpp",
+        "shared_mutex": "cpp",
+        "cinttypes": "cpp"
     },
     "editor.tabSize": 3
 }
