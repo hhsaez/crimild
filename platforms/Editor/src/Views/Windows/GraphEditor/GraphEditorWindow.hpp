@@ -78,8 +78,8 @@ namespace crimild::editor {
       Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
       Pin *findPin( ax::NodeEditor::PinId id ) noexcept;
 
-      inline int getNextId( void ) noexcept { return m_nextId++; }
-      inline ax::NodeEditor::LinkId getNextLinkId( void ) noexcept { return ax::NodeEditor::LinkId( getNextId() ); }
+      //   inline int getNextId( void ) noexcept { return m_nextId++; }
+      //   inline ax::NodeEditor::LinkId getNextLinkId( void ) noexcept { return ax::NodeEditor::LinkId( getNextId() ); }
 
       bool canCreateLink( Pin *a, Pin *b ) const noexcept
       {
@@ -179,6 +179,8 @@ namespace crimild::editor {
       // Editor context
       // Required to trace editor state.
       ax::NodeEditor::EditorContext *m_context = nullptr;
+
+      GraphEditorContext m_ctx;
 
 #if GRAPH_EDITOR_BLUEPRINTS
       int m_nextId = 1;
