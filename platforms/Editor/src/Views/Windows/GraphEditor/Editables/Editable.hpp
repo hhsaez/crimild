@@ -1,6 +1,7 @@
 #ifndef CRIMILD_EDITOR_EDITABLE_
 #define CRIMILD_EDITOR_EDITABLE_
 
+#include "Views/Windows/GraphEditor/GraphEditorContext.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorTypes.hpp"
 
 #include <Crimild_Next.hpp>
@@ -9,9 +10,9 @@ namespace crimild::editor::editables {
 
    // inline unsigned int getNextId( void )
    // {
-   //    // TODO: Find a more robust way to assign IDs. 
+   //    // TODO: Find a more robust way to assign IDs.
    //    static unsigned int nextId = 0;
-   //    return nextId++; 
+   //    return nextId++;
    // }
 
    // inline unsigned int getNextPinId( void )
@@ -20,7 +21,7 @@ namespace crimild::editor::editables {
    // }
 
    // inline ax::NodeEditor::LinkId getNextLinkId( void ) { return ax::NodeEditor::LinkId( getNextId() ); }
-   
+
    class Editable;
 
    struct Pin {
@@ -29,30 +30,32 @@ namespace crimild::editor::editables {
       std::string name;
       PinType type;
       PinKind kind;
+
+      Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
+         : id( ctx.getNextPinId() ),
+           owner( owner ),
+           name( name ),
+           type( type ),
+           kind( kind )
+      {
+         // no-op
+      }
    };
 
-   struct InputPin {
+   struct InputPin : public Pin {
       InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-         : id( ctx.getNextPinId() ),
-           owner( owner ),
-           name( name ), 
-           type( type ), 
-           kind( PinKind::Input )
+         : Pin( ctx, owner, name, type, PinKind::Input )
       {
          // no-op
-      }      
+      }
    };
 
-   struct OutputPin {
+   struct OutputPin : public Pin {
       OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-         : id( ctx.getNextPinId() ),
-           owner( owner ),
-           name( name ), 
-           type( type ), 
-           kind( PinKind::Output )
+         : Pin( ctx, owner, name, type, PinKind::Output )
       {
          // no-op
-      }      
+      }
    };
 
    class Editable : public crimild::next::Object::Extension {

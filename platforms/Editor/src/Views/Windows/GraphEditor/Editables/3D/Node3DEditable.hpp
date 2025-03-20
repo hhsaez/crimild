@@ -8,7 +8,7 @@ namespace crimild::editor::editables {
 
    class Node3DEditable : public Editable {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::Node3DEditable )
-   
+
    public:
       explicit Node3DEditable( GraphEditorContext &ctx, std::string_view name = "Node3D" ) noexcept
          : Editable( ctx, name, NodeType::Houdini )
@@ -20,6 +20,7 @@ namespace crimild::editor::editables {
 
       virtual void render( GraphEditorContext &ctx )
       {
+#if 0
          using NodeEditor = ax::NodeEditor;
 
          const float rounding = 10.0f;
@@ -53,12 +54,12 @@ namespace crimild::editor::editables {
                  ImGui::Spring( 1, 0 );
                  inputsRect.Min.y -= padding;
                  inputsRect.Max.y -= padding;
- 
-     #if IMGUI_VERSION_NUM > 18101
+
+   #if IMGUI_VERSION_NUM > 18101
                  const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-     #else
+   #else
                  const auto allRoundCornersFlags = 15;
-     #endif
+   #endif
                  NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
                  NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
                  NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
@@ -116,14 +117,14 @@ namespace crimild::editor::editables {
                  ImGui::Spring( 1, 0 );
                  outputsRect.Min.y += padding;
                  outputsRect.Max.y += padding;
- 
-     #if IMGUI_VERSION_NUM > 18101
+
+   #if IMGUI_VERSION_NUM > 18101
                  const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
                  const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-     #else
+   #else
                  const auto allRoundCornersFlags = 15;
                  const auto topRoundCornersFlags = 3;
-     #endif
+   #endif
  
                  NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
                  NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
@@ -158,7 +159,8 @@ namespace crimild::editor::editables {
  
          NodeEditor::EndNode();
          NodeEditor::PopStyleVar( 7 );
-         NodeEditor::PopStyleColor( 4 );         
+         NodeEditor::PopStyleColor( 4 );
+#endif
       }
    };
 

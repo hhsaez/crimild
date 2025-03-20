@@ -31,7 +31,7 @@ namespace crimild::editor {
 
    struct GraphNode;
 
-   [[deprecated]] struct Pin {
+   struct [[deprecated]] Pin {
       ax::NodeEditor::PinId id;
       GraphNode *node;
       std::string name;
@@ -45,7 +45,7 @@ namespace crimild::editor {
       }
    };
 
-   [[deprecated]] struct GraphNode {
+   struct [[deprecated]] GraphNode {
       ax::NodeEditor::NodeId id;
       std::string name;
       std::vector< Pin > inputs;
