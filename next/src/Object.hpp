@@ -12,6 +12,18 @@ namespace crimild::next {
    public:
       class Extension : public coding::Codable {
          CRIMILD_IMPLEMENT_RTTI( crimild::next::Object::Extension )
+         friend class Object;
+
+      public:
+         virtual ~Extension( void ) noexcept = default;
+
+         [[nodiscard]] inline std::shared_ptr< Object > getOwner( void ) { return m_owner.lock(); }
+
+      private:
+         inline void setOwner( std::shared_ptr< Object > const &owner ) { m_owner = owner; }
+
+      private:
+         std::weak_ptr< Object > m_owner;
       };
 
       template< typename ExtensionType >
@@ -23,11 +35,13 @@ namespace crimild::next {
       void attach( std::shared_ptr< Extension > const &extension )
       {
          m_extensions[ extension->getClassName() ] = extension;
+         extension->setOwner( retain( this ) );
       }
 
       void attach( std::string name, std::shared_ptr< Extension > const &extension )
       {
          m_extensions[ name ] = extension;
+         extension->setOwner( retain( this ) );
       }
 
       template< typename ExtensionType, typename... Args >
@@ -35,6 +49,7 @@ namespace crimild::next {
       {
          auto extension = crimild::alloc< ExtensionType >( std::forward< Args >( args )... );
          m_extensions[ extension->getClassName() ] = extension;
+         extension->setOwner( retain( this ) );
          return extension;
       }
 

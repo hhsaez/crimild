@@ -101,6 +101,8 @@ target_sources(
     Debug/DebugRenderComponent.hpp
     Debug/DebugRenderHelper.hpp
     Debug/SceneDebugDump.hpp
+    Entity/Entity.hpp
+    Entity/Extension.hpp
     Exceptions/Exception.hpp
     Exceptions/FileNotFoundException.hpp
     Exceptions/HasParentException.hpp
@@ -388,6 +390,7 @@ target_sources(
     Debug/DebugRenderComponent.cpp
     Debug/DebugRenderHelper.cpp
     Debug/SceneDebugDump.cpp
+    Entity/Entity.cpp
     Loaders/OBJLoader.cpp
     Messaging/MessageQueue.cpp
     Navigation/NavigationCell.cpp
