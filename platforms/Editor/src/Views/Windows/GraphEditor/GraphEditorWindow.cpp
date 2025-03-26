@@ -391,9 +391,9 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
-   auto node3D = crimild::alloc< next::Node3D >();
-   m_objects.push_back( node3D );
-   m_editables.push_back( node3D->attach< editables::Node3DEditable >( m_ctx ) );
+   auto aNode = crimild::alloc< Node >( "This is a node in the graph" );
+   m_entities.push_back( aNode );
+   m_editables.push_back( aNode->attach< editables::Node3DEditable >( m_ctx ) );
 
 #endif
 }

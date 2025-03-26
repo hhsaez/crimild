@@ -78,7 +78,7 @@ void Node3DEditable::render( GraphEditorContext &ctx )
    ImGui::Dummy( ImVec2( 160, 0 ) );
    ImGui::Spring( 1 );
    ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0, 0, 0, 1 ) );
-   ImGui::TextUnformatted( getName().c_str() );
+   ImGui::TextUnformatted( getOwner< Node >()->getName().c_str() );
    ImGui::PopStyleColor();
    ImGui::Spring( 1 );
    ImGui::EndVertical();

@@ -14,6 +14,12 @@ namespace crimild {
 
       [[nodiscard]] inline std::shared_ptr< Entity > getOwner( void ) { return m_owner.lock(); }
 
+      template< class OwnerType >
+      [[nodiscard]] inline std::shared_ptr< OwnerType > getOwner( void )
+      {
+         return std::static_pointer_cast< OwnerType >( m_owner.lock() );
+      }
+
    private:
       inline void setOwner( std::shared_ptr< Entity > const &owner ) { m_owner = owner; }
 

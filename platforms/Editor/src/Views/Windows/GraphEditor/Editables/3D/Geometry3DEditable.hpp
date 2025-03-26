@@ -5,19 +5,19 @@
 
 namespace crimild::editor::editables {
 
-   class Geometry3DEditable : public Node3DEditable {
-      CRIMILD_IMPLEMENT_RTTI( crimild::editor::Geoemtry3DEditable)
-   
-   public:
-      explicit Geometry3DEditable( GraphEditorContext &ctx, std::string_view name = "Geometry3D" ) noexcept
-         : Node3DEditable( ctx, name )
-      {
-         // no-op
-      }
+   // class Geometry3DEditable : public Node3DEditable {
+   //    CRIMILD_IMPLEMENT_RTTI( crimild::editor::Geoemtry3DEditable)
 
-      virtual ~Geometry3DEditable( void ) noexcept = default;
+   // public:
+   //    explicit Geometry3DEditable( GraphEditorContext &ctx, std::string_view name = "Geometry3D" ) noexcept
+   //       : Node3DEditable( ctx, name )
+   //    {
+   //       // no-op
+   //    }
 
-   };
+   //    virtual ~Geometry3DEditable( void ) noexcept = default;
+
+   // };
 
 }
 

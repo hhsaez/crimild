@@ -115,6 +115,8 @@
 #include "Debug/DebugRenderComponent.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
+#include "Entity/Entity.hpp"
+#include "Entity/Extension.hpp"
 #include "Exceptions/Exception.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/HasParentException.hpp"
@@ -264,7 +266,7 @@
 
 namespace crimild {
 
-    void init( void );
+   void init( void );
 
 }
 

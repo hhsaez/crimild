@@ -9,7 +9,7 @@ namespace crimild::editor::editables {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::Node3DEditable )
 
    public:
-      explicit Node3DEditable( GraphEditorContext &ctx, std::string_view name = "Node3D" ) noexcept
+      explicit Node3DEditable( GraphEditorContext &ctx, std::string_view name = "Node" ) noexcept
          : Editable( ctx, name, NodeType::Houdini )
       {
          getInputs().emplace_back( ctx, this, "", PinType::Flow );

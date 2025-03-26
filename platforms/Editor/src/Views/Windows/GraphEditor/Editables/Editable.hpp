@@ -4,29 +4,15 @@
 #include "Views/Windows/GraphEditor/GraphEditorContext.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorTypes.hpp"
 
-#include <Crimild_Next.hpp>
+#include <Crimild.hpp>
 
 namespace crimild::editor::editables {
-
-   // inline unsigned int getNextId( void )
-   // {
-   //    // TODO: Find a more robust way to assign IDs.
-   //    static unsigned int nextId = 0;
-   //    return nextId++;
-   // }
-
-   // inline unsigned int getNextPinId( void )
-   // {
-   //    return getNextId();
-   // }
-
-   // inline ax::NodeEditor::LinkId getNextLinkId( void ) { return ax::NodeEditor::LinkId( getNextId() ); }
 
    class Editable;
 
    struct Pin {
       ax::NodeEditor::PinId id;
-      Editable *owner = nullptr;
+      Editable *owner = nullptr; // Why not a weak_ptr?
       std::string name;
       PinType type;
       PinKind kind;
@@ -58,7 +44,7 @@ namespace crimild::editor::editables {
       }
    };
 
-   class Editable : public crimild::next::Object::Extension {
+   class Editable : public crimild::Extension {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editable )
 
    protected:

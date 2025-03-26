@@ -132,7 +132,6 @@ target_link_libraries(
     PRIVATE Crimild::Mathematics
     PRIVATE Crimild::Coding
 	PRIVATE Crimild::Core
-    PRIVATE Crimild::Next
     PRIVATE Crimild::Vulkan
     PRIVATE glfw
 )
