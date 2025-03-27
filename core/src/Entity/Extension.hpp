@@ -5,6 +5,8 @@
 
 namespace crimild {
 
+   class Entity;
+
    class Extension : public coding::Codable {
       CRIMILD_IMPLEMENT_RTTI( crimild::Extension )
       friend class Entity;

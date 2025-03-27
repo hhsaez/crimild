@@ -1,7 +1,7 @@
 #ifndef CRIMILD_CORE_ENTITY_
 #define CRIMILD_CORE_ENTITY_
 
-#include "Extension.hpp"
+#include "Entity/Extension.hpp"
 
 namespace crimild {
 
