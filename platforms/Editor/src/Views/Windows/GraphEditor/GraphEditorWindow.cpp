@@ -391,9 +391,9 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
    m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
-   auto aNode = crimild::alloc< Node >( "This is a node in the graph" );
-   m_entities.push_back( aNode );
-   m_editables.push_back( aNode->attach< editables::Node3DEditable >( m_ctx ) );
+   // auto aNode = crimild::alloc< Node >( "This is a node in the graph" );
+   // m_entities.push_back( aNode );
+   // m_editables.push_back( aNode->attach< editables::Node3DEditable >( m_ctx ) );
 
 #endif
 }
@@ -405,6 +405,23 @@ GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 
 void GraphEditorWindow::drawContent( void ) noexcept
 {
+   if ( m_entities.empty() ) {
+      auto scene = Simulation::getInstance()->getScene();
+      if ( scene != nullptr ) {
+         scene->perform(
+            Apply(
+               [ & ]( Node *node ) {
+                  m_entities.push_back( retain( node ) );
+                  auto editable = node->getExtension< editables::Node3DEditable >();
+                  if ( editable == nullptr ) {
+                     editable = node->attach< editables::Node3DEditable >( m_ctx );
+                  }
+                  m_editables.push_back( editable );
+               }
+            )
+         );
+      }
+   }
 
    auto &io = ImGui::GetIO();
 

@@ -1,6 +1,7 @@
 #ifndef GRAPH_EDITOR_CONTEXT_
 #define GRAPH_EDITOR_CONTEXT_
 
+#include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 
 namespace crimild::editor {
@@ -31,6 +32,12 @@ namespace crimild::editor {
       }
 
       inline ax::NodeEditor::LinkId getNextLinkId( void ) { return ax::NodeEditor::LinkId( getNextId() ); }
+
+      inline std::shared_ptr< Assembly > &getAssembly( void ) { return m_assembly; }
+      inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
+
+   private:
+      std::shared_ptr< Assembly > m_assembly;
    };
 
 }
