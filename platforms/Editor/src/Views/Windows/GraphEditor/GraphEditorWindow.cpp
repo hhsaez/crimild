@@ -28,7 +28,6 @@
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
 #include "Views/Windows/GraphEditor/Builders.hpp"
-#include "Views/Windows/GraphEditor/Editables/3D/Node3DEditable.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
@@ -412,10 +411,7 @@ void GraphEditorWindow::drawContent( void ) noexcept
             Apply(
                [ & ]( Node *node ) {
                   m_entities.push_back( retain( node ) );
-                  auto editable = node->getExtension< editables::Node3DEditable >();
-                  if ( editable == nullptr ) {
-                     editable = node->attach< editables::Node3DEditable >( m_ctx );
-                  }
+                  auto editable = editables::Editable::getOrCreate( retain( node ) );
                   m_editables.push_back( editable );
                }
             )

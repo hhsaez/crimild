@@ -35,18 +35,22 @@ target_sources(
     Views/Windows/BehaviorsWindow.hpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
-    Views/Windows/GraphEditor/Builders.cpp
-    Views/Windows/GraphEditor/Builders.hpp
-    Views/Windows/GraphEditor/Editables/3D/Geometry3DEditable.hpp
-    Views/Windows/GraphEditor/Editables/3D/Group3DEditable.hpp
-    Views/Windows/GraphEditor/Editables/3D/Node3DEditable.cpp
-    Views/Windows/GraphEditor/Editables/3D/Node3DEditable.hpp
-    Views/Windows/GraphEditor/Editables/3D/Transform3DEditable.hpp
+
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.cpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.hpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.cpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.hpp
+    
+    Views/Windows/GraphEditor/Editables/Editable.cpp
     Views/Windows/GraphEditor/Editables/Editable.hpp
+    
+    Views/Windows/GraphEditor/Builders.cpp
+    Views/Windows/GraphEditor/Builders.hpp    
     Views/Windows/GraphEditor/GraphEditorContext.hpp
     Views/Windows/GraphEditor/GraphEditorTypes.hpp
     Views/Windows/GraphEditor/GraphEditorWindow.cpp
     Views/Windows/GraphEditor/GraphEditorWindow.hpp
+
     Views/Windows/InspectorWindow.hpp
     Views/Windows/InspectorWindow.cpp
     Views/Windows/LogWindow.hpp

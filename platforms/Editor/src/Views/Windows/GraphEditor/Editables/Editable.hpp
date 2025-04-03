@@ -47,43 +47,55 @@ namespace crimild::editor::editables {
    class Editable : public crimild::Extension {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editable )
 
+   public:
+      static std::shared_ptr< Editable > getOrCreate( std::shared_ptr< Entity > const &entity );
+
+   public:
+      class Renderer : public crimild::Entity {
+      public:
+         virtual ~Renderer( void ) noexcept = default;
+
+         virtual void render( GraphEditorContext &ctx, Editable *editable ) = 0;
+
+         [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
+         [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
+
+      private:
+         std::vector< InputPin > m_inputs;
+         std::vector< OutputPin > m_outputs;
+      };
+
    protected:
-      Editable( GraphEditorContext &ctx, std::string_view name, NodeType type ) noexcept
-         : m_id( ctx.getNextId() ),
-           m_name( name ),
-           m_type( type )
+      // // Only subclasses have write-access to input/output pins.
+      // [[nodiscard]] inline std::vector< InputPin > &getInputs( void ) { return m_inputs; }
+      // [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
+
+   public:
+      explicit Editable( std::shared_ptr< Renderer > const &renderer ) noexcept
+         : m_renderer( renderer )
       {
          // no-op
       }
 
-      // Only subclasses have write-access to input/output pins.
-      [[nodiscard]] inline std::vector< InputPin > &getInputs( void ) { return m_inputs; }
-      [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
-
-   public:
       virtual ~Editable( void ) = default;
 
-      [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
-      [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
+      // inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
 
-      inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
+      // inline const std::string &getName( void ) const { return m_name; }
 
-      inline const std::string &getName( void ) const { return m_name; }
-
-      virtual void render( GraphEditorContext &ctx ) = 0;
+      inline void render( GraphEditorContext &ctx ) { m_renderer->render( ctx, this ); }
 
    private:
-      ax::NodeEditor::NodeId m_id;
-      std::string m_name;
-      NodeType m_type;
-      std::vector< InputPin > m_inputs;
-      std::vector< OutputPin > m_outputs;
+      // ax::NodeEditor::NodeId m_id;
+      std::shared_ptr< Renderer > m_renderer;
+      // std::string m_name;
+      // NodeType m_type;
 
-      ImColor color;
-      ImVec2 size;
+      // ImColor color;
+      // ImVec2 size;
 
-      std::string state;
-      std::string savedState;
+      // std::string state;
+      // std::string savedState;
    };
 
 }

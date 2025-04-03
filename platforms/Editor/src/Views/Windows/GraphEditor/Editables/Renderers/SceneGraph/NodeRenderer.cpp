@@ -1,11 +1,16 @@
-#include "Views/Windows/GraphEditor/Editables/3D/Node3DEditable.hpp"
+#include "Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.hpp"
 
 using namespace crimild::editor::editables;
 
 namespace NodeEditor = ax::NodeEditor;
 
-void Node3DEditable::render( GraphEditorContext &ctx )
+void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
 {
+   auto entity = editable->getOwner< crimild::Node >();
+   if ( !entity ) {
+      return;
+   }
+
    const float rounding = 10.0f;
    const float padding = 12.0f;
 
@@ -24,8 +29,10 @@ void Node3DEditable::render( GraphEditorContext &ctx )
    NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
    NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 6.0f );
 
-   NodeEditor::BeginNode( getId() );
-   ImGui::BeginVertical( getId().AsPointer() );
+   NodeEditor::NodeId id = entity->getUniqueID();
+
+   NodeEditor::BeginNode( id );
+   ImGui::BeginVertical( id.AsPointer() );
    if ( !getInputs().empty() ) {
       ImGui::BeginHorizontal( "inputs" );
       ImGui::Spring( 1, 0 );
@@ -78,7 +85,7 @@ void Node3DEditable::render( GraphEditorContext &ctx )
    ImGui::Dummy( ImVec2( 160, 0 ) );
    ImGui::Spring( 1 );
    ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0, 0, 0, 1 ) );
-   ImGui::TextUnformatted( getOwner< Node >()->getName().c_str() );
+   ImGui::TextUnformatted( !entity->getName().empty() ? entity->getName().c_str() : entity->getClassName() );
    ImGui::PopStyleColor();
    ImGui::Spring( 1 );
    ImGui::EndVertical();
