@@ -45,7 +45,7 @@ namespace crimild::editor::editables {
    };
 
    class Editable : public crimild::Extension {
-      CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editable )
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::editables::Editable )
 
    public:
       static std::shared_ptr< Editable > getOrCreate( std::shared_ptr< Entity > const &entity );
@@ -57,12 +57,12 @@ namespace crimild::editor::editables {
 
          virtual void render( GraphEditorContext &ctx, Editable *editable ) = 0;
 
-         [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
-         [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
+         // [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
+         // [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
 
-      private:
-         std::vector< InputPin > m_inputs;
-         std::vector< OutputPin > m_outputs;
+         // private:
+         //    std::vector< InputPin > m_inputs;
+         //    std::vector< OutputPin > m_outputs;
       };
 
    protected:
@@ -71,6 +71,8 @@ namespace crimild::editor::editables {
       // [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
 
    public:
+      Editable( void ) noexcept = default;
+
       explicit Editable( std::shared_ptr< Renderer > const &renderer ) noexcept
          : m_renderer( renderer )
       {
@@ -96,6 +98,17 @@ namespace crimild::editor::editables {
 
       // std::string state;
       // std::string savedState;
+
+      /**
+       * @name Coding
+       */
+      //@{
+
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
+
+      //@}
    };
 
 }

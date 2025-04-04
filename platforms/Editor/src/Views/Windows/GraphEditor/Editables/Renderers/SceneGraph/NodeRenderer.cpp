@@ -31,14 +31,17 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::NodeId id = entity->getUniqueID();
 
+   std::vector< InputPin > inputs;
+   std::vector< OutputPin > outputs;
+
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
-   if ( !getInputs().empty() ) {
+   if ( !inputs.empty() ) {
       ImGui::BeginHorizontal( "inputs" );
       ImGui::Spring( 1, 0 );
       ImRect inputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : getInputs() ) {
+      for ( auto &pin : inputs ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          inputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );
@@ -95,13 +98,13 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   if ( !getOutputs().empty() ) {
+   if ( !outputs.empty() ) {
       ImGui::BeginHorizontal( "outputs" );
       ImGui::Spring( 1, 0 );
 
       ImRect outputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : getOutputs() ) {
+      for ( auto &pin : outputs ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          outputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );
@@ -150,4 +153,14 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    NodeEditor::EndNode();
    NodeEditor::PopStyleVar( 7 );
    NodeEditor::PopStyleColor( 4 );
+}
+
+void NodeRenderer::encode( coding::Encoder &encoder )
+{
+   Entity::encode( encoder );
+}
+
+void NodeRenderer::decode( coding::Decoder &decoder )
+{
+   Entity::decode( decoder );
 }

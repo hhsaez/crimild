@@ -17,3 +17,17 @@ std::shared_ptr< Editable > Editable::getOrCreate( std::shared_ptr< Entity > con
    }
    return editable;
 }
+
+void Editable::encode( coding::Encoder &encoder )
+{
+   Extension::encode( encoder );
+
+   encoder.encode( "renderer", m_renderer );
+}
+
+void Editable::decode( coding::Decoder &decoder )
+{
+    Extension::decode( decoder );
+
+   decoder.decode( "renderer", m_renderer );
+}

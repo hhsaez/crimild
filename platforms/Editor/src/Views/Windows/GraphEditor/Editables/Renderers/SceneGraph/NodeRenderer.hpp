@@ -9,17 +9,22 @@ namespace crimild::editor::editables {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::editables::NodeRenderer )
 
    public:
-      explicit NodeRenderer( /*GraphEditorContext &ctx*/ ) noexcept
-      // : Editable( ctx, name, NodeType::Houdini )
-      {
-         // getInputs().emplace_back( ctx, this, "", PinType::Flow );
-      }
-
+      NodeRenderer( void ) noexcept = default;
       virtual ~NodeRenderer( void ) noexcept = default;
 
       virtual void render( GraphEditorContext &ctx, Editable *editable ) override;
-   };
 
+      /**
+       * @name Coding
+       */
+      //@{
+
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
+
+      //@}
+   };
 }
 
 #endif
