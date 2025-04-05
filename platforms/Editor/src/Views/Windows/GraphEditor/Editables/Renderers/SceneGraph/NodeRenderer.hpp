@@ -13,6 +13,7 @@ namespace crimild::editor::editables {
       virtual ~NodeRenderer( void ) noexcept = default;
 
       virtual void render( GraphEditorContext &ctx, Editable *editable ) override;
+      virtual void renderLinks( GraphEditorContext &ctx, Editable *editable ) override;
 
    private:
       bool m_initialized = false;

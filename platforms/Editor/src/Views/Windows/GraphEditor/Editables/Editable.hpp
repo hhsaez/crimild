@@ -17,31 +17,35 @@ namespace crimild::editor::editables {
       PinType type;
       PinKind kind;
 
-      Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
-         : id( ctx.getNextPinId() ),
-           owner( owner ),
-           name( name ),
-           type( type ),
-           kind( kind )
-      {
-         // no-op
-      }
+      //Pin( void ) noexcept = default;
+
+      //Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
+      //   : id( ctx.getNextPinId() ),
+      //     owner( owner ),
+      //     name( name ),
+      //     type( type ),
+      //     kind( kind )
+      //{
+      //   // no-op
+      //}
    };
 
    struct InputPin : public Pin {
-      InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-         : Pin( ctx, owner, name, type, PinKind::Input )
-      {
-         // no-op
-      }
+      //InputPin( void ) noexcept = default;
+      //InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
+      //   : Pin( ctx, owner, name, type, PinKind::Input )
+      //{
+      //   // no-op
+      //}
    };
 
    struct OutputPin : public Pin {
-      OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-         : Pin( ctx, owner, name, type, PinKind::Output )
-      {
-         // no-op
-      }
+      //OutputPin( void ) noexcept = default;
+      //OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
+      //   : Pin( ctx, owner, name, type, PinKind::Output )
+      //{
+      //   // no-op
+      //}
    };
 
    class Editable : public crimild::Extension {
@@ -56,6 +60,7 @@ namespace crimild::editor::editables {
          virtual ~Renderer( void ) noexcept = default;
 
          virtual void render( GraphEditorContext &ctx, Editable *editable ) = 0;
+         virtual void renderLinks( GraphEditorContext &ctx, Editable *editable ) = 0;
       };
 
    public:
@@ -69,21 +74,24 @@ namespace crimild::editor::editables {
 
       virtual ~Editable( void ) = default;
 
-      [[nodiscard]] inline std::vector< InputPin > &getInputs( void ) { return m_inputs; }
-      [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
+      [[nodiscard]] bool hasInputPin( std::string pinName ) const { return m_inputs.contains( pinName ); }
+      [[nodiscard]] inline InputPin &getInputPin( std::string pinName ) { return m_inputs.at( pinName ); }
+      void inline setInputPin( std::string pinName, InputPin pin ) { m_inputs[ pinName ] = pin; }
 
-      [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
-      [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
+      [[nodiscard]] bool hasOutputPin( std::string pinName ) const { return m_outputs.contains( pinName ); }
+      [[nodiscard]] inline OutputPin &getOutputPin( std::string pinName ) { return m_outputs.at( pinName ); }
+      void inline setOutputPin( std::string pinName, OutputPin pin ) { m_outputs[ pinName ] = pin; }
 
       // inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
 
       // inline const std::string &getName( void ) const { return m_name; }
 
       inline void render( GraphEditorContext &ctx ) { m_renderer->render( ctx, this ); }
+      inline void renderLinks( GraphEditorContext &ctx ) { m_renderer->renderLinks( ctx, this ); }
 
    private:
-      std::vector< InputPin > m_inputs;
-      std::vector< OutputPin > m_outputs;
+      std::unordered_map< std::string, InputPin > m_inputs;
+      std::unordered_map< std::string, OutputPin > m_outputs;
 
       std::shared_ptr< Renderer > m_renderer;
       // ax::NodeEditor::NodeId m_id;

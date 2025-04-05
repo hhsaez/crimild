@@ -467,6 +467,12 @@ void GraphEditorWindow::drawContent( void ) noexcept
       }
    }
 
+   for ( auto &maybeEditable : m_editables ) {
+      if ( auto editable = maybeEditable.lock() ) {
+         editable->renderLinks( m_ctx );
+      }
+   }
+
    ImGui::SetCursorScreenPos( cursorTopLeft );
 
    // Popups

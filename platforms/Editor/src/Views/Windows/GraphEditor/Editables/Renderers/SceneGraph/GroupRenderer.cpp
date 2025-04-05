@@ -11,12 +11,12 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
       return;
    }
 
-   if ( editable->getOutputs().empty() ) {
-      editable->getOutputs().emplace_back( ctx, editable, "self", PinType::Flow );
+   if ( !editable->hasOutputPin( "self" ) ) {
+      editable->setOutputPin( "self", OutputPin { ctx.getNextPinId(), editable, "self", PinType::Flow } );
    }
 
-   if ( editable->getInputs().empty() ) {
-      editable->getInputs().emplace_back( ctx, editable, "children", PinType::Flow );
+   if ( !editable->hasInputPin( "children" ) ) {
+      editable->setInputPin( "children", InputPin { ctx.getNextPinId(), editable, "children", PinType::Flow } );
    }
 
    const float rounding = 10.0f;
@@ -39,14 +39,17 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::NodeId id = entity->getUniqueID();
 
+   std::vector< InputPin > inputs { editable->getInputPin( "children" ) };
+   std::vector< OutputPin > outputs { editable->getOutputPin( "self" ) };
+
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
-   if ( !editable->getInputs().empty() ) {
+   if ( !inputs.empty() ) {
       ImGui::BeginHorizontal( "inputs" );
       ImGui::Spring( 1, 0 );
       ImRect inputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : editable->getInputs() ) {
+      for ( auto &pin : inputs ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          inputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );
@@ -103,13 +106,13 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   if ( !editable->getOutputs().empty() ) {
+   if ( !outputs.empty() ) {
       ImGui::BeginHorizontal( "outputs" );
       ImGui::Spring( 1, 0 );
 
       ImRect outputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : editable->getOutputs() ) {
+      for ( auto &pin : outputs ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          outputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );
@@ -169,6 +172,35 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
          m_position = maybeNewPos;
       }
    }
+}
+
+void GroupRenderer::renderLinks( GraphEditorContext &ctx, Editable *editable )
+{
+   auto entity = editable->getOwner< crimild::Group >();
+
+   if ( !editable->hasInputPin( "children" ) ) {
+      return;
+   }
+
+   auto &childrenPin = editable->getInputPin( "children" );
+
+   entity->forEachNode(
+      [ & ]( auto child ) {
+         if ( child != nullptr ) {
+            if ( !m_links.contains( child->getUniqueID() ) ) {
+               if ( auto editable = child->getExtension< Editable >() ) {
+                  if ( !editable->hasOutputPin( "self" ) ) {
+                     return;
+                  }
+                  auto &childPin = editable->getOutputPin( "self" );
+                  m_links[ child->getUniqueID() ] = Link( ctx.getNextLinkId(), childrenPin.id, childPin.id );
+               }
+            }
+            auto &link = m_links.at( child->getUniqueID() );
+            NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
+         }
+      }
+   );
 }
 
 void GroupRenderer::encode( coding::Encoder &encoder )

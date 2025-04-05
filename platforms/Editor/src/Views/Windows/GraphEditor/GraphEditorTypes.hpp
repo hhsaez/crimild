@@ -70,6 +70,8 @@ namespace crimild::editor {
       ax::NodeEditor::PinId endPinId;
       ImColor color;
 
+      Link( void ) noexcept = default;
+
       Link( ax::NodeEditor::LinkId id, ax::NodeEditor::PinId startPinId, ax::NodeEditor::PinId endPinId, ImColor color = ImColor( 255, 255, 255 ) )
          : id( id ), startPinId( startPinId ), endPinId( endPinId ), color( color )
       {
