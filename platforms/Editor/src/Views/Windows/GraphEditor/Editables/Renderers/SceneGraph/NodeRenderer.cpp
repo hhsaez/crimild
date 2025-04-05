@@ -40,52 +40,9 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
-   if ( !inputs.empty() ) {
-      ImGui::BeginHorizontal( "inputs" );
-      ImGui::Spring( 1, 0 );
-      ImRect inputsRect;
-      int inputAlpha = 200;
-      for ( auto &pin : inputs ) {
-         ImGui::Dummy( ImVec2( padding, padding ) );
-         inputsRect = ImGui_GetItemRect();
-         ImGui::Spring( 1, 0 );
-         inputsRect.Min.y -= padding;
-         inputsRect.Max.y -= padding;
 
-#if IMGUI_VERSION_NUM > 18101
-         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-#else
-         const auto allRoundCornersFlags = 15;
-#endif
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
-         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
-         NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
-         NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
-         NodeEditor::EndPin();
-         NodeEditor::PopStyleVar( 1 );
+   renderOutputs( outputs );
 
-         auto drawList = ImGui::GetWindowDrawList();
-         drawList->AddRectFilled(
-            inputsRect.GetTL(),
-            inputsRect.GetBR(),
-            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-            4.0f,
-            allRoundCornersFlags
-         );
-         drawList->AddRect(
-            inputsRect.GetTL(),
-            inputsRect.GetBR(),
-            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-            4.0f,
-            allRoundCornersFlags
-         );
-
-         // if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-         //    inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-         // }
-      }
-      ImGui::EndHorizontal();
-   }
    ImGui::BeginHorizontal( "content_frame" );
    ImGui::Spring( 1, padding );
    ImGui::BeginVertical( "content", ImVec2( 0.0f, 0.0f ) );
@@ -102,56 +59,8 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   if ( !outputs.empty() ) {
-      ImGui::BeginHorizontal( "outputs" );
-      ImGui::Spring( 1, 0 );
+   renderInputs( inputs );
 
-      ImRect outputsRect;
-      int inputAlpha = 200;
-      for ( auto &pin : outputs ) {
-         ImGui::Dummy( ImVec2( padding, padding ) );
-         outputsRect = ImGui_GetItemRect();
-         ImGui::Spring( 1, 0 );
-         outputsRect.Min.y += padding;
-         outputsRect.Max.y += padding;
-
-#if IMGUI_VERSION_NUM > 18101
-         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-         const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-#else
-         const auto allRoundCornersFlags = 15;
-         const auto topRoundCornersFlags = 3;
-#endif
-
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
-         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
-         NodeEditor::PinPivotRect( outputsRect.GetCenter(), outputsRect.GetCenter() );
-         NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
-         NodeEditor::EndPin();
-         NodeEditor::PopStyleVar();
-
-         auto drawList = ImGui::GetWindowDrawList();
-         drawList->AddRectFilled(
-            outputsRect.GetTL(),
-            outputsRect.GetBR(),
-            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-            4.0f,
-            allRoundCornersFlags
-         );
-         drawList->AddRect(
-            outputsRect.GetTL(),
-            outputsRect.GetBR(),
-            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-            4.0f,
-            allRoundCornersFlags
-         );
-
-         // if ( m_newLinkPin && canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-         //    inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-         // }
-      }
-      ImGui::EndHorizontal();
-   }
    ImGui::EndVertical();
 
    NodeEditor::EndNode();
@@ -168,6 +77,107 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
          m_position = maybeNewPos;
       }
    }
+}
+
+void NodeRenderer::renderInputs( std::vector< InputPin > &inputs )
+{
+   if ( inputs.empty() ) {
+      return;
+   }
+
+   const float padding = 12.0f;
+   const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
+
+   ImGui::BeginHorizontal( "inputs" );
+   ImGui::Spring( 1, 0 );
+   ImRect inputsRect;
+   int inputAlpha = 200;
+   for ( auto &pin : inputs ) {
+      ImGui::Dummy( ImVec2( padding, padding ) );
+      inputsRect = ImGui_GetItemRect();
+      ImGui::Spring( 1, 0 );
+      inputsRect.Min.y += padding;
+      inputsRect.Max.y += padding;
+
+      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersAll );
+      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
+      NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
+      NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
+      NodeEditor::EndPin();
+      NodeEditor::PopStyleVar( 1 );
+
+      auto drawList = ImGui::GetWindowDrawList();
+      drawList->AddRectFilled(
+         inputsRect.GetTL(),
+         inputsRect.GetBR(),
+         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+         4.0f,
+         ImDrawFlags_RoundCornersAll
+      );
+      drawList->AddRect(
+         inputsRect.GetTL(),
+         inputsRect.GetBR(),
+         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+         4.0f,
+         ImDrawFlags_RoundCornersAll
+      );
+
+      // if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+      //    inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+      // }
+   }
+   ImGui::EndHorizontal();
+}
+
+void NodeRenderer::renderOutputs( std::vector< OutputPin > &outputs )
+{
+   if ( outputs.empty() ) {
+      return;
+   }
+
+   const float padding = 12.0f;
+   const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
+
+   ImGui::BeginHorizontal( "outputs" );
+   ImGui::Spring( 1, 0 );
+
+   ImRect outputsRect;
+   int inputAlpha = 200;
+   for ( auto &pin : outputs ) {
+      ImGui::Dummy( ImVec2( padding, padding ) );
+      outputsRect = ImGui_GetItemRect();
+      ImGui::Spring( 1, 0 );
+      outputsRect.Min.y -= padding;
+      outputsRect.Max.y -= padding;
+
+      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop );
+      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
+      NodeEditor::PinPivotRect( outputsRect.GetCenter(), outputsRect.GetCenter() );
+      NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
+      NodeEditor::EndPin();
+      NodeEditor::PopStyleVar();
+
+      auto drawList = ImGui::GetWindowDrawList();
+      drawList->AddRectFilled(
+         outputsRect.GetTL(),
+         outputsRect.GetBR(),
+         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+         4.0f,
+         ImDrawFlags_RoundCornersAll
+      );
+      drawList->AddRect(
+         outputsRect.GetTL(),
+         outputsRect.GetBR(),
+         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+         4.0f,
+         ImDrawFlags_RoundCornersAll
+      );
+
+      // if ( m_newLinkPin && canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+      //    inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+      // }
+   }
+   ImGui::EndHorizontal();
 }
 
 void NodeRenderer::renderLinks( GraphEditorContext &ctx, Editable * )

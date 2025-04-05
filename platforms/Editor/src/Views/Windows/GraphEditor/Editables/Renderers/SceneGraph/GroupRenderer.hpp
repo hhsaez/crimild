@@ -16,6 +16,10 @@ namespace crimild::editor::editables {
       virtual void renderLinks( GraphEditorContext &ctx, Editable *editable ) override;
 
    private:
+      void renderInputs( std::vector< InputPin > &inputs );
+      void renderOutputs( std::vector< OutputPin > &outputs );
+
+   private:
       bool m_initialized = false;
       Vector2 m_position = Vector2::Constants::ZERO;
 
