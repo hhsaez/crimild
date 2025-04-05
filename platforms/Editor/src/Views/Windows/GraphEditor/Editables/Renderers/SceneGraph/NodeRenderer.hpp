@@ -14,6 +14,10 @@ namespace crimild::editor::editables {
 
       virtual void render( GraphEditorContext &ctx, Editable *editable ) override;
 
+   private:
+      bool m_initialized = false;
+      Vector2 m_position = Vector2::Constants::ZERO;
+
       /**
        * @name Coding
        */

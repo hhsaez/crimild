@@ -26,12 +26,20 @@ namespace crimild::editor {
          return nextId++;
       }
 
-      inline unsigned int getNextPinId( void )
+      inline ax::NodeEditor::NodeId getNextNodeId(void)
+      {
+          return getNextId();
+      }
+
+      inline ax::NodeEditor::PinId getNextPinId( void )
       {
          return getNextId();
       }
 
-      inline ax::NodeEditor::LinkId getNextLinkId( void ) { return ax::NodeEditor::LinkId( getNextId() ); }
+      inline ax::NodeEditor::LinkId getNextLinkId( void ) 
+      { 
+          return getNextId();
+      }
 
       inline std::shared_ptr< Assembly > &getAssembly( void ) { return m_assembly; }
       inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
