@@ -11,6 +11,14 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
       return;
    }
 
+   if ( editable->getOutputs().empty() ) {
+      editable->getOutputs().emplace_back( ctx, editable, "self", PinType::Flow );
+   }
+
+   if ( editable->getInputs().empty() ) {
+      editable->getInputs().emplace_back( ctx, editable, "children", PinType::Flow );
+   }
+
    const float rounding = 10.0f;
    const float padding = 12.0f;
 
@@ -31,17 +39,14 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::NodeId id = entity->getUniqueID();
 
-   std::vector< InputPin > inputs;
-   std::vector< OutputPin > outputs;
-
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
-   if ( !inputs.empty() ) {
+   if ( !editable->getInputs().empty() ) {
       ImGui::BeginHorizontal( "inputs" );
       ImGui::Spring( 1, 0 );
       ImRect inputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : inputs ) {
+      for ( auto &pin : editable->getInputs() ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          inputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );
@@ -98,13 +103,13 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   if ( !outputs.empty() ) {
+   if ( !editable->getOutputs().empty() ) {
       ImGui::BeginHorizontal( "outputs" );
       ImGui::Spring( 1, 0 );
 
       ImRect outputsRect;
       int inputAlpha = 200;
-      for ( auto &pin : outputs ) {
+      for ( auto &pin : editable->getOutputs() ) {
          ImGui::Dummy( ImVec2( padding, padding ) );
          outputsRect = ImGui_GetItemRect();
          ImGui::Spring( 1, 0 );

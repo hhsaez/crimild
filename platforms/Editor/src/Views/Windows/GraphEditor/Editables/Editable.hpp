@@ -56,19 +56,7 @@ namespace crimild::editor::editables {
          virtual ~Renderer( void ) noexcept = default;
 
          virtual void render( GraphEditorContext &ctx, Editable *editable ) = 0;
-
-         // [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
-         // [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
-
-         // private:
-         //    std::vector< InputPin > m_inputs;
-         //    std::vector< OutputPin > m_outputs;
       };
-
-   protected:
-      // // Only subclasses have write-access to input/output pins.
-      // [[nodiscard]] inline std::vector< InputPin > &getInputs( void ) { return m_inputs; }
-      // [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
 
    public:
       Editable( void ) noexcept = default;
@@ -81,6 +69,12 @@ namespace crimild::editor::editables {
 
       virtual ~Editable( void ) = default;
 
+      [[nodiscard]] inline std::vector< InputPin > &getInputs( void ) { return m_inputs; }
+      [[nodiscard]] inline const std::vector< InputPin > &getInputs( void ) const { return m_inputs; }
+
+      [[nodiscard]] inline std::vector< OutputPin > &getOutputs( void ) { return m_outputs; }
+      [[nodiscard]] inline const std::vector< OutputPin > &getOutputs( void ) const { return m_outputs; }
+
       // inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
 
       // inline const std::string &getName( void ) const { return m_name; }
@@ -88,8 +82,11 @@ namespace crimild::editor::editables {
       inline void render( GraphEditorContext &ctx ) { m_renderer->render( ctx, this ); }
 
    private:
-      // ax::NodeEditor::NodeId m_id;
+      std::vector< InputPin > m_inputs;
+      std::vector< OutputPin > m_outputs;
+
       std::shared_ptr< Renderer > m_renderer;
+      // ax::NodeEditor::NodeId m_id;
       // std::string m_name;
       // NodeType m_type;
 
