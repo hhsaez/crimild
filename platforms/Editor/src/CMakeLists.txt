@@ -21,8 +21,11 @@ target_sources(
     Views/Dialogs/Dialog.hpp
     Views/Dialogs/FileDialog.cpp
     Views/Dialogs/FileDialog.hpp
+
     Views/Menus/MainMenu/MainMenu.cpp
     Views/Menus/MainMenu/MainMenu.hpp
+    Views/Menus/NewEntityMenu.hpp
+
     Views/Modals/AboutModal.cpp
     Views/Modals/AboutModal.hpp
     Views/Modals/AlertModal.cpp

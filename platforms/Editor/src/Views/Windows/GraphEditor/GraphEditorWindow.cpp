@@ -27,6 +27,7 @@
 
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
+#include "Views/Menus/NewEntityMenu.hpp"
 #include "Views/Windows/GraphEditor/Builders.hpp"
 
 using namespace crimild;
@@ -341,54 +342,54 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 #if GRAPH_EDITOR_BLUEPRINTS
    NodeEditor::SetCurrentEditor( m_context );
 
-   GraphNode *node = nullptr;
+   // GraphNode *node = nullptr;
 
-   node = spawnInputActionNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( -252, 220 ) );
-   node = spawnBranchNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( -300, 351 ) );
-   node = spawnDoNNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( -238, 504 ) );
-   node = spawnOutputActionNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 71, 80 ) );
-   node = spawnSetTimerNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 168, 316 ) );
+   // node = spawnInputActionNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( -252, 220 ) );
+   // node = spawnBranchNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( -300, 351 ) );
+   // node = spawnDoNNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( -238, 504 ) );
+   // node = spawnOutputActionNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 71, 80 ) );
+   // node = spawnSetTimerNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 168, 316 ) );
 
-   node = spawnTreeSequenceNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 1028, 329 ) );
-   node = spawnTreeMoveToNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 1204, 458 ) );
-   node = spawnTreeRandomWaitNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 868, 538 ) );
+   // node = spawnTreeSequenceNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 1028, 329 ) );
+   // node = spawnTreeMoveToNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 1204, 458 ) );
+   // node = spawnTreeRandomWaitNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 868, 538 ) );
 
-   node = spawnCommentNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 112, 576 ) );
-   NodeEditor::SetGroupSize( node->id, ImVec2( 384, 154 ) );
-   node = spawnCommentNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 800, 224 ) );
-   NodeEditor::SetGroupSize( node->id, ImVec2( 640, 400 ) );
+   // node = spawnCommentNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 112, 576 ) );
+   // NodeEditor::SetGroupSize( node->id, ImVec2( 384, 154 ) );
+   // node = spawnCommentNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 800, 224 ) );
+   // NodeEditor::SetGroupSize( node->id, ImVec2( 640, 400 ) );
 
-   node = spawnLessNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 366, 652 ) );
-   node = spawnWeirdNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 144, 652 ) );
-   node = spawnMessageNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( -348, 698 ) );
-   node = spawnPrintStringNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( -69, 652 ) );
+   // node = spawnLessNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 366, 652 ) );
+   // node = spawnWeirdNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 144, 652 ) );
+   // node = spawnMessageNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( -348, 698 ) );
+   // node = spawnPrintStringNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( -69, 652 ) );
 
-   node = spawnHoudiniTransformNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 500, -70 ) );
-   node = spawnHoudiniGroupNode();
-   NodeEditor::SetNodePosition( node->id, ImVec2( 500, 42 ) );
+   // node = spawnHoudiniTransformNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 500, -70 ) );
+   // node = spawnHoudiniGroupNode();
+   // NodeEditor::SetNodePosition( node->id, ImVec2( 500, 42 ) );
 
    NodeEditor::NavigateToContent();
 
    buildNodes();
 
-   m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
-   m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
-   m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
+   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
+   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
+   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
    // auto aNode = crimild::alloc< Node >( "This is a node in the graph" );
    // m_entities.push_back( aNode );
@@ -454,12 +455,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
    auto cursorTopLeft = ImGui::GetCursorScreenPos();
    crimild::editor::utils::AssemblyNodeBuilder builder( m_headerBackground, getTextureWidth( m_headerBackground ), getTextureHeight( m_headerBackground ) );
 
-   renderBlueprintAndSimpleNodes( builder );
-   renderTreeNodes();
-   renderHoudiniNodes();
-   renderCommentNodes();
-   renderLinks();
-   renderCreateNewNode();
+   // renderBlueprintAndSimpleNodes( builder );
+   // renderTreeNodes();
+   // renderHoudiniNodes();
+   // renderCommentNodes();
+   // renderLinks();
 
    for ( auto &maybeEditable : m_editables ) {
       if ( auto editable = maybeEditable.lock() ) {
@@ -472,6 +472,8 @@ void GraphEditorWindow::drawContent( void ) noexcept
          editable->renderLinks( m_ctx );
       }
    }
+
+   renderCreateNewNode();
 
    ImGui::SetCursorScreenPos( cursorTopLeft );
 
@@ -694,206 +696,206 @@ Pin *GraphEditorWindow::findPin( NodeEditor::PinId id ) noexcept
    return nullptr;
 }
 
-GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "InputAction Fire", ImColor( 255, 128, 128 ) );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Delegate );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Pressed", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Released", PinType::Flow );
-   buildNode( &m_nodes.back() );
-   return &m_nodes.back();
-}
+// GraphNode *GraphEditorWindow::spawnInputActionNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "InputAction Fire", ImColor( 255, 128, 128 ) );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Delegate );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Pressed", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Released", PinType::Flow );
+//    buildNode( &m_nodes.back() );
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "OutputAction" );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Sample", PinType::Float );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Condition", PinType::Bool );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Event", PinType::Delegate );
+// GraphNode *GraphEditorWindow::spawnOutputActionNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "OutputAction" );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Sample", PinType::Float );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Condition", PinType::Bool );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Event", PinType::Delegate );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnBranchNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Branch" );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Condition", PinType::Bool );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "True", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "False", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnBranchNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Branch" );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Condition", PinType::Bool );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "True", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "False", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnDoNNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Do N" );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Enter", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "N", PinType::Int );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Reset", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Exit", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Counter", PinType::Int );
+// GraphNode *GraphEditorWindow::spawnDoNNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Do N" );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Enter", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "N", PinType::Int );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Reset", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Exit", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Counter", PinType::Int );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnSetTimerNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Set Timer", ImColor( 128, 195, 248 ) );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Object", PinType::Object );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Function Name", PinType::Function );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Time", PinType::Float );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Looping", PinType::Bool );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnSetTimerNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Set Timer", ImColor( 128, 195, 248 ) );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Object", PinType::Object );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Function Name", PinType::Function );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Time", PinType::Float );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Looping", PinType::Bool );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnLessNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "<", ImColor( 128, 195, 248 ) );
-   m_nodes.back().type = NodeType::Simple;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+// GraphNode *GraphEditorWindow::spawnLessNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "<", ImColor( 128, 195, 248 ) );
+//    m_nodes.back().type = NodeType::Simple;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnWeirdNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "o.O", ImColor( 128, 195, 248 ) );
-   m_nodes.back().type = NodeType::Simple;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+// GraphNode *GraphEditorWindow::spawnWeirdNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "o.O", ImColor( 128, 195, 248 ) );
+//    m_nodes.back().type = NodeType::Simple;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Float );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnTraceByChannelNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Single Line Trace by Channel", ImColor( 255, 128, 64 ) );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Start", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "End", PinType::Int );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Trace Channel", PinType::Float );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Trace Complex", PinType::Bool );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Actors to Ignore", PinType::Int );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Draw Debug Type", PinType::Bool );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Ignore Self", PinType::Bool );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Out Hit", PinType::Float );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Return Value", PinType::Bool );
+// GraphNode *GraphEditorWindow::spawnTraceByChannelNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Single Line Trace by Channel", ImColor( 255, 128, 64 ) );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Start", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "End", PinType::Int );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Trace Channel", PinType::Float );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Trace Complex", PinType::Bool );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Actors to Ignore", PinType::Int );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Draw Debug Type", PinType::Bool );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "Ignore Self", PinType::Bool );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Out Hit", PinType::Float );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Return Value", PinType::Bool );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnPrintStringNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Print String" );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "In String", PinType::String );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnPrintStringNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Print String" );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "In String", PinType::String );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnCommentNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Test Comment" );
-   m_nodes.back().type = NodeType::Comment;
-   m_nodes.back().size = ImVec2( 300, 200 );
+// GraphNode *GraphEditorWindow::spawnCommentNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Test Comment" );
+//    m_nodes.back().type = NodeType::Comment;
+//    m_nodes.back().size = ImVec2( 300, 200 );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnTreeSequenceNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Sequence" );
-   m_nodes.back().type = NodeType::Tree;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnTreeSequenceNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Sequence" );
+//    m_nodes.back().type = NodeType::Tree;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnTreeMoveToNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Move To" );
-   m_nodes.back().type = NodeType::Tree;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnTreeMoveToNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Move To" );
+//    m_nodes.back().type = NodeType::Tree;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnTreeRandomWaitNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Random Wait" );
-   m_nodes.back().type = NodeType::Tree;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnTreeRandomWaitNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Random Wait" );
+//    m_nodes.back().type = NodeType::Tree;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnMessageNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "", ImColor( 128, 195, 248 ) );
-   m_nodes.back().type = NodeType::Simple;
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Message", PinType::String );
+// GraphNode *GraphEditorWindow::spawnMessageNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "", ImColor( 128, 195, 248 ) );
+//    m_nodes.back().type = NodeType::Simple;
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "Message", PinType::String );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnHoudiniTransformNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Transform" );
-   m_nodes.back().type = NodeType::Houdini;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnHoudiniTransformNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Transform" );
+//    m_nodes.back().type = NodeType::Houdini;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
-GraphNode *GraphEditorWindow::spawnHoudiniGroupNode( void ) noexcept
-{
-   m_nodes.emplace_back( m_ctx.getNextId(), "Group" );
-   m_nodes.back().type = NodeType::Houdini;
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
-   m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+// GraphNode *GraphEditorWindow::spawnHoudiniGroupNode( void ) noexcept
+// {
+//    m_nodes.emplace_back( m_ctx.getNextId(), "Group" );
+//    m_nodes.back().type = NodeType::Houdini;
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().inputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
+//    m_nodes.back().outputs.emplace_back( m_ctx.getNextId(), "", PinType::Flow );
 
-   buildNode( &m_nodes.back() );
+//    buildNode( &m_nodes.back() );
 
-   return &m_nodes.back();
-}
+//    return &m_nodes.back();
+// }
 
 ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
 {
@@ -1624,82 +1626,92 @@ void GraphEditorWindow::renderCreateNewNodeMenu( void ) noexcept
    if ( ImGui::BeginPopup( "Create New Node" ) ) {
       auto newNodePosition = openPopupPosition;
 
-      GraphNode *node = nullptr;
-      if ( ImGui::MenuItem( "Input Action" ) ) {
-         node = spawnInputActionNode();
-      }
-      if ( ImGui::MenuItem( "Output Action" ) ) {
-         node = spawnOutputActionNode();
-      }
-      if ( ImGui::MenuItem( "Branch" ) ) {
-         node = spawnBranchNode();
-      }
-      if ( ImGui::MenuItem( "Do N" ) ) {
-         node = spawnDoNNode();
-      }
-      if ( ImGui::MenuItem( "Set Timer" ) ) {
-         node = spawnSetTimerNode();
-      }
-      if ( ImGui::MenuItem( "Less" ) ) {
-         node = spawnLessNode();
-      }
-      if ( ImGui::MenuItem( "Weird" ) ) {
-         node = spawnWeirdNode();
-      }
-      if ( ImGui::MenuItem( "Trace by Channel" ) ) {
-         node = spawnTraceByChannelNode();
-      }
-      if ( ImGui::MenuItem( "Print String" ) ) {
-         node = spawnPrintStringNode();
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Comment" ) ) {
-         node = spawnCommentNode();
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Sequence" ) ) {
-         node = spawnTreeSequenceNode();
-      }
-      if ( ImGui::MenuItem( "Move To" ) ) {
-         node = spawnTreeMoveToNode(); // SpawnTreeTaskNode()
-      }
-      if ( ImGui::MenuItem( "Random Wait" ) ) {
-         node = spawnTreeRandomWaitNode(); // SpawnTreeTask2Node()
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Message" ) ) {
-         node = spawnMessageNode();
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Transform" ) ) {
-         node = spawnHoudiniTransformNode();
-      }
-      if ( ImGui::MenuItem( "Group" ) ) {
-         node = spawnHoudiniGroupNode();
-      }
+      // GraphNode *node = nullptr;
+      // if ( ImGui::MenuItem( "Input Action" ) ) {
+      //    node = spawnInputActionNode();
+      // }
+      // if ( ImGui::MenuItem( "Output Action" ) ) {
+      //    node = spawnOutputActionNode();
+      // }
+      // if ( ImGui::MenuItem( "Branch" ) ) {
+      //    node = spawnBranchNode();
+      // }
+      // if ( ImGui::MenuItem( "Do N" ) ) {
+      //    node = spawnDoNNode();
+      // }
+      // if ( ImGui::MenuItem( "Set Timer" ) ) {
+      //    node = spawnSetTimerNode();
+      // }
+      // if ( ImGui::MenuItem( "Less" ) ) {
+      //    node = spawnLessNode();
+      // }
+      // if ( ImGui::MenuItem( "Weird" ) ) {
+      //    node = spawnWeirdNode();
+      // }
+      // if ( ImGui::MenuItem( "Trace by Channel" ) ) {
+      //    node = spawnTraceByChannelNode();
+      // }
+      // if ( ImGui::MenuItem( "Print String" ) ) {
+      //    node = spawnPrintStringNode();
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Comment" ) ) {
+      //    node = spawnCommentNode();
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Sequence" ) ) {
+      //    node = spawnTreeSequenceNode();
+      // }
+      // if ( ImGui::MenuItem( "Move To" ) ) {
+      //    node = spawnTreeMoveToNode(); // SpawnTreeTaskNode()
+      // }
+      // if ( ImGui::MenuItem( "Random Wait" ) ) {
+      //    node = spawnTreeRandomWaitNode(); // SpawnTreeTask2Node()
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Message" ) ) {
+      //    node = spawnMessageNode();
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Transform" ) ) {
+      //    node = spawnHoudiniTransformNode();
+      // }
+      // if ( ImGui::MenuItem( "Group" ) ) {
+      //    node = spawnHoudiniGroupNode();
+      // }
 
-      if ( node ) {
-         buildNodes();
+      // if ( node ) {
+      //    buildNodes();
 
-         m_createNewNode = false;
+      //    m_createNewNode = false;
 
-         NodeEditor::SetNodePosition( node->id, newNodePosition );
+      //    NodeEditor::SetNodePosition( node->id, newNodePosition );
 
-         if ( auto startPin = m_newNodeLinkPin ) {
-            auto &pins = startPin->kind == PinKind::Input ? node->outputs : node->inputs;
-            for ( auto &pin : pins ) {
-               if ( canCreateLink( startPin, &pin ) ) {
-                  auto endPin = &pin;
-                  if ( startPin->kind == PinKind::Input ) {
-                     std::swap( startPin, endPin );
-                  }
-                  m_links.emplace_back( Link( m_ctx.getNextId(), startPin->id, endPin->id ) );
-                  m_links.back().color = getIconColor( startPin->type );
-                  break;
-               }
-            }
+      //    if ( auto startPin = m_newNodeLinkPin ) {
+      //       auto &pins = startPin->kind == PinKind::Input ? node->outputs : node->inputs;
+      //       for ( auto &pin : pins ) {
+      //          if ( canCreateLink( startPin, &pin ) ) {
+      //             auto endPin = &pin;
+      //             if ( startPin->kind == PinKind::Input ) {
+      //                std::swap( startPin, endPin );
+      //             }
+      //             m_links.emplace_back( Link( m_ctx.getNextId(), startPin->id, endPin->id ) );
+      //             m_links.back().color = getIconColor( startPin->type );
+      //             break;
+      //          }
+      //       }
+      //    }
+      // }
+
+      if ( auto entity = NewEntityMenu::render() ) {
+         m_entities.push_back( entity );
+
+         if ( auto editable = editables::Editable::getOrCreate( entity ) ) {
+            editable->setPosition( Vector2 { newNodePosition.x, newNodePosition.y } );
+            m_editables.push_back( editable );
          }
       }
+
       ImGui::EndPopup();
    } else {
       m_createNewNode = false;

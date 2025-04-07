@@ -17,35 +17,35 @@ namespace crimild::editor::editables {
       PinType type;
       PinKind kind;
 
-      //Pin( void ) noexcept = default;
+      // Pin( void ) noexcept = default;
 
-      //Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
-      //   : id( ctx.getNextPinId() ),
-      //     owner( owner ),
-      //     name( name ),
-      //     type( type ),
-      //     kind( kind )
+      // Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
+      //    : id( ctx.getNextPinId() ),
+      //      owner( owner ),
+      //      name( name ),
+      //      type( type ),
+      //      kind( kind )
       //{
-      //   // no-op
-      //}
+      //    // no-op
+      // }
    };
 
    struct InputPin : public Pin {
-      //InputPin( void ) noexcept = default;
-      //InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-      //   : Pin( ctx, owner, name, type, PinKind::Input )
+      // InputPin( void ) noexcept = default;
+      // InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
+      //    : Pin( ctx, owner, name, type, PinKind::Input )
       //{
-      //   // no-op
-      //}
+      //    // no-op
+      // }
    };
 
    struct OutputPin : public Pin {
-      //OutputPin( void ) noexcept = default;
-      //OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-      //   : Pin( ctx, owner, name, type, PinKind::Output )
+      // OutputPin( void ) noexcept = default;
+      // OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
+      //    : Pin( ctx, owner, name, type, PinKind::Output )
       //{
-      //   // no-op
-      //}
+      //    // no-op
+      // }
    };
 
    class Editable : public crimild::Extension {
@@ -86,10 +86,15 @@ namespace crimild::editor::editables {
 
       // inline const std::string &getName( void ) const { return m_name; }
 
+      inline const Vector2 &getPosition( void ) const { return m_position; }
+      inline void setPosition( const Vector2 &position ) { m_position = position; }
+
       inline void render( GraphEditorContext &ctx ) { m_renderer->render( ctx, this ); }
       inline void renderLinks( GraphEditorContext &ctx ) { m_renderer->renderLinks( ctx, this ); }
 
    private:
+      Vector2 m_position = Vector2::Constants::ZERO;
+
       std::unordered_map< std::string, InputPin > m_inputs;
       std::unordered_map< std::string, OutputPin > m_outputs;
 

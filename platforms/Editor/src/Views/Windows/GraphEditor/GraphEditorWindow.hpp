@@ -106,22 +106,22 @@ namespace crimild::editor {
 
       void drawPinIcon( const Pin &pin, bool connected, int alpha ) const noexcept;
 
-      GraphNode *spawnInputActionNode( void ) noexcept;
-      GraphNode *spawnOutputActionNode( void ) noexcept;
-      GraphNode *spawnBranchNode( void ) noexcept;
-      GraphNode *spawnDoNNode( void ) noexcept;
-      GraphNode *spawnSetTimerNode( void ) noexcept;
-      GraphNode *spawnLessNode( void ) noexcept;
-      GraphNode *spawnWeirdNode( void ) noexcept;
-      GraphNode *spawnTraceByChannelNode( void ) noexcept;
-      GraphNode *spawnPrintStringNode( void ) noexcept;
-      GraphNode *spawnCommentNode( void ) noexcept;
-      GraphNode *spawnTreeSequenceNode( void ) noexcept;
-      GraphNode *spawnTreeMoveToNode( void ) noexcept;
-      GraphNode *spawnTreeRandomWaitNode( void ) noexcept;
-      GraphNode *spawnMessageNode( void ) noexcept;
-      GraphNode *spawnHoudiniTransformNode( void ) noexcept;
-      GraphNode *spawnHoudiniGroupNode( void ) noexcept;
+      // GraphNode *spawnInputActionNode( void ) noexcept;
+      // GraphNode *spawnOutputActionNode( void ) noexcept;
+      // GraphNode *spawnBranchNode( void ) noexcept;
+      // GraphNode *spawnDoNNode( void ) noexcept;
+      // GraphNode *spawnSetTimerNode( void ) noexcept;
+      // GraphNode *spawnLessNode( void ) noexcept;
+      // GraphNode *spawnWeirdNode( void ) noexcept;
+      // GraphNode *spawnTraceByChannelNode( void ) noexcept;
+      // GraphNode *spawnPrintStringNode( void ) noexcept;
+      // GraphNode *spawnCommentNode( void ) noexcept;
+      // GraphNode *spawnTreeSequenceNode( void ) noexcept;
+      // GraphNode *spawnTreeMoveToNode( void ) noexcept;
+      // GraphNode *spawnTreeRandomWaitNode( void ) noexcept;
+      // GraphNode *spawnMessageNode( void ) noexcept;
+      // GraphNode *spawnHoudiniTransformNode( void ) noexcept;
+      // GraphNode *spawnHoudiniGroupNode( void ) noexcept;
 
       void buildNodes( void ) noexcept
       {
