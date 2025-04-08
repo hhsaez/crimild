@@ -387,9 +387,9 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 
    buildNodes();
 
-   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
-   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
-   //m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
+   // m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
+   // m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
+   // m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 14 ].outputs[ 0 ].id, m_nodes[ 15 ].inputs[ 0 ].id ) );
 
    // auto aNode = crimild::alloc< Node >( "This is a node in the graph" );
    // m_entities.push_back( aNode );
@@ -1622,7 +1622,7 @@ void GraphEditorWindow::renderLinkContextMenu( void ) noexcept
 
 void GraphEditorWindow::renderCreateNewNodeMenu( void ) noexcept
 {
-   auto openPopupPosition = ImGui::GetMousePos();
+   auto openPopupPosition = ax::NodeEditor::ScreenToCanvas( ImGui::GetMousePos() );
    if ( ImGui::BeginPopup( "Create New Node" ) ) {
       auto newNodePosition = openPopupPosition;
 

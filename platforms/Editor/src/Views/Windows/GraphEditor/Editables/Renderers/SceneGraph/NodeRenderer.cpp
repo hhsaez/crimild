@@ -66,17 +66,6 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    NodeEditor::EndNode();
    NodeEditor::PopStyleVar( 7 );
    NodeEditor::PopStyleColor( 4 );
-
-   if ( !m_initialized ) {
-      NodeEditor::SetNodePosition( id, ImVec2( m_position.x, m_position.y ) );
-      m_initialized = true;
-   } else {
-      ImVec2 newPos = NodeEditor::GetNodePosition( id );
-      const auto maybeNewPos = Vector2 { newPos.x, newPos.y };
-      if ( maybeNewPos != m_position ) {
-         m_position = maybeNewPos;
-      }
-   }
 }
 
 void NodeRenderer::renderInputs( std::vector< InputPin > &inputs )
@@ -188,13 +177,9 @@ void NodeRenderer::renderLinks( GraphEditorContext &ctx, Editable * )
 void NodeRenderer::encode( coding::Encoder &encoder )
 {
    Entity::encode( encoder );
-
-   encoder.encode( "position", m_position );
 }
 
 void NodeRenderer::decode( coding::Decoder &decoder )
 {
    Entity::decode( decoder );
-
-   decoder.decode( "position", m_position );
 }

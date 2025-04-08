@@ -89,10 +89,11 @@ namespace crimild::editor::editables {
       inline const Vector2 &getPosition( void ) const { return m_position; }
       inline void setPosition( const Vector2 &position ) { m_position = position; }
 
-      inline void render( GraphEditorContext &ctx ) { m_renderer->render( ctx, this ); }
-      inline void renderLinks( GraphEditorContext &ctx ) { m_renderer->renderLinks( ctx, this ); }
+      void render( GraphEditorContext &ctx );
+      void renderLinks( GraphEditorContext &ctx );
 
    private:
+      bool m_initialized = false;
       Vector2 m_position = Vector2::Constants::ZERO;
 
       std::unordered_map< std::string, InputPin > m_inputs;

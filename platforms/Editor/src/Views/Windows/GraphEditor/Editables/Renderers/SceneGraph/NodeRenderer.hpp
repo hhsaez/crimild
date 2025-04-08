@@ -19,10 +19,6 @@ namespace crimild::editor::editables {
       void renderInputs( std::vector< InputPin > &inputs );
       void renderOutputs( std::vector< OutputPin > &outputs );
 
-   private:
-      bool m_initialized = false;
-      Vector2 m_position = Vector2::Constants::ZERO;
-
       /**
        * @name Coding
        */
