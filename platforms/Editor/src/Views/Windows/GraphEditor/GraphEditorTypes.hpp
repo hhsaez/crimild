@@ -21,70 +21,92 @@ namespace crimild::editor {
       Input,
    };
 
-   enum class NodeType {
-      Blueprint,
-      Simple,
-      Tree,
-      Comment,
-      Houdini,
-   };
+   namespace editables {
 
-   struct GraphNode;
+      class Editable;
 
-   struct [[deprecated]] Pin {
-      ax::NodeEditor::PinId id;
-      GraphNode *node;
+   }
+
+   struct Pin {
+      using Id = ax::NodeEditor::PinId;
+
+      Id id;
+      editables::Editable *owner = nullptr; // Why not a weak_ptr?
       std::string name;
       PinType type;
       PinKind kind;
-
-      Pin( ax::NodeEditor::PinId id, std::string_view name, PinType type )
-         : id( id ), node( nullptr ), name( name ), type( type ), kind( PinKind::Input )
-      {
-         // no-op
-      }
    };
 
-   struct [[deprecated]] GraphNode {
-      ax::NodeEditor::NodeId id;
-      std::string name;
-      std::vector< Pin > inputs;
-      std::vector< Pin > outputs;
-      ImColor color;
-      NodeType type;
-      ImVec2 size;
+   struct InputPin : public Pin { };
 
-      std::string state;
-      std::string savedState;
+   struct OutputPin : public Pin { };
 
-      GraphNode( ax::NodeEditor::NodeId id, std::string_view name, ImColor color = ImColor( 255, 255, 255 ) )
-         : id( id ), name( name ), color( color ), type( NodeType::Blueprint ), size( 0, 0 )
-      {
-         // no-op
-      }
-   };
+   // enum class NodeType {
+   //   Blueprint,
+   //   Simple,
+   //   Tree,
+   //   Comment,
+   //   Houdini,
+   //};
 
-   struct Link {
-      ax::NodeEditor::LinkId id;
-      ax::NodeEditor::PinId startPinId;
-      ax::NodeEditor::PinId endPinId;
-      ImColor color;
+   // struct GraphNode;
+
+   // struct [[deprecated]] Pin {
+   //    ax::NodeEditor::PinId id;
+   //    GraphNode *node;
+   //    std::string name;
+   //    PinType type;
+   //    PinKind kind;
+
+   //   Pin( ax::NodeEditor::PinId id, std::string_view name, PinType type )
+   //      : id( id ), node( nullptr ), name( name ), type( type ), kind( PinKind::Input )
+   //   {
+   //      // no-op
+   //   }
+   //};
+
+   // struct [[deprecated]] GraphNode {
+   //    ax::NodeEditor::NodeId id;
+   //    std::string name;
+   //    std::vector< Pin > inputs;
+   //    std::vector< Pin > outputs;
+   //    ImColor color;
+   //    NodeType type;
+   //    ImVec2 size;
+
+   //   std::string state;
+   //   std::string savedState;
+
+   //   GraphNode( ax::NodeEditor::NodeId id, std::string_view name, ImColor color = ImColor( 255, 255, 255 ) )
+   //      : id( id ), name( name ), color( color ), type( NodeType::Blueprint ), size( 0, 0 )
+   //   {
+   //      // no-op
+   //   }
+   //};
+
+    struct Link {
+       using Id = ax::NodeEditor::LinkId;
+
+       Id id;
+       Pin::Id startPinId;
+       Pin::Id endPinId;
+       ImColor color;
 
       Link( void ) noexcept = default;
 
-      Link( ax::NodeEditor::LinkId id, ax::NodeEditor::PinId startPinId, ax::NodeEditor::PinId endPinId, ImColor color = ImColor( 255, 255, 255 ) )
+      Link( ax::NodeEditor::LinkId id, Pin::Id startPinId, Pin::Id endPinId, ImColor color = ImColor( 255, 255, 255 ) )
          : id( id ), startPinId( startPinId ), endPinId( endPinId ), color( color )
       {
          // no-op
       }
    };
 
-   struct NodeIdLess {
-      bool operator()( const ax::NodeEditor::NodeId &lhs, const ax::NodeEditor::NodeId &rhs ) const
-      {
-         return lhs.AsPointer() < rhs.AsPointer();
-      }
-   };
+   // struct NodeIdLess {
+   //    bool operator()( const ax::NodeEditor::NodeId &lhs, const ax::NodeEditor::NodeId &rhs ) const
+   //    {
+   //       return lhs.AsPointer() < rhs.AsPointer();
+   //    }
+   // };
 
 }
 

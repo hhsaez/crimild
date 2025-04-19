@@ -8,46 +8,6 @@
 
 namespace crimild::editor::editables {
 
-   class Editable;
-
-   struct Pin {
-      ax::NodeEditor::PinId id;
-      Editable *owner = nullptr; // Why not a weak_ptr?
-      std::string name;
-      PinType type;
-      PinKind kind;
-
-      // Pin( void ) noexcept = default;
-
-      // Pin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type, PinKind kind )
-      //    : id( ctx.getNextPinId() ),
-      //      owner( owner ),
-      //      name( name ),
-      //      type( type ),
-      //      kind( kind )
-      //{
-      //    // no-op
-      // }
-   };
-
-   struct InputPin : public Pin {
-      // InputPin( void ) noexcept = default;
-      // InputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-      //    : Pin( ctx, owner, name, type, PinKind::Input )
-      //{
-      //    // no-op
-      // }
-   };
-
-   struct OutputPin : public Pin {
-      // OutputPin( void ) noexcept = default;
-      // OutputPin( GraphEditorContext &ctx, Editable *owner, std::string_view name, PinType type )
-      //    : Pin( ctx, owner, name, type, PinKind::Output )
-      //{
-      //    // no-op
-      // }
-   };
-
    class Editable : public crimild::Extension {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::editables::Editable )
 
@@ -81,6 +41,21 @@ namespace crimild::editor::editables {
       [[nodiscard]] bool hasOutputPin( std::string pinName ) const { return m_outputs.contains( pinName ); }
       [[nodiscard]] inline OutputPin &getOutputPin( std::string pinName ) { return m_outputs.at( pinName ); }
       void inline setOutputPin( std::string pinName, OutputPin pin ) { m_outputs[ pinName ] = pin; }
+
+      [[nodiscard]] Pin *findPin( ax::NodeEditor::PinId id )
+      {
+         for ( auto &it : m_inputs ) {
+            if ( it.second.id == id ) {
+               return &it.second;
+            }
+         }
+         for ( auto &it : m_outputs ) {
+            if ( it.second.id == id ) {
+               return &it.second;
+            }
+         }
+         return nullptr;
+      }
 
       // inline ax::NodeEditor::NodeId getId( void ) const { return m_id; }
 

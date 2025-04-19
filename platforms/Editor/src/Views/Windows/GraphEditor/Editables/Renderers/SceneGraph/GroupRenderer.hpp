@@ -2,6 +2,7 @@
 #define CRIMILD_EDITOR_EDITABLES_RENDERERS_SCENE_GRAPH_GROUP_
 
 #include "Views/Windows/GraphEditor/Editables/Editable.hpp"
+#include "Views/Windows/GraphEditor/GraphEditorTypes.hpp"
 
 namespace crimild::editor::editables {
 

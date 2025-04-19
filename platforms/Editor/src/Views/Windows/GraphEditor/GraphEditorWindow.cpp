@@ -308,32 +308,32 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 #if GRAPH_EDITOR_BLUEPRINTS
    config.UserPointer = this;
 
-   config.LoadNodeSettings = []( NodeEditor::NodeId nodeId, char *data, void *userPointer ) -> size_t {
-      auto self = static_cast< GraphEditorWindow * >( userPointer );
+   // config.LoadNodeSettings = []( NodeEditor::NodeId nodeId, char *data, void *userPointer ) -> size_t {
+   //    auto self = static_cast< GraphEditorWindow * >( userPointer );
 
-      auto node = self->findNode( nodeId );
-      if ( !node ) {
-         return 0;
-      }
+   //   auto node = self->findNode( nodeId );
+   //   if ( !node ) {
+   //      return 0;
+   //   }
 
-      if ( data != nullptr ) {
-         memcpy( data, node->state.data(), node->state.size() );
-      }
-      return node->state.size();
-   };
+   //   if ( data != nullptr ) {
+   //      memcpy( data, node->state.data(), node->state.size() );
+   //   }
+   //   return node->state.size();
+   //};
 
-   config.SaveNodeSettings = []( NodeEditor::NodeId nodeId, const char *data, size_t size, NodeEditor::SaveReasonFlags reason, void *userPointer ) -> bool {
-      auto self = static_cast< GraphEditorWindow * >( userPointer );
+   // config.SaveNodeSettings = []( NodeEditor::NodeId nodeId, const char *data, size_t size, NodeEditor::SaveReasonFlags reason, void *userPointer ) -> bool {
+   //    auto self = static_cast< GraphEditorWindow * >( userPointer );
 
-      auto node = self->findNode( nodeId );
-      if ( !node ) {
-         return false;
-      }
+   //   auto node = self->findNode( nodeId );
+   //   if ( !node ) {
+   //      return false;
+   //   }
 
-      node->state.assign( data, size );
-      self->touchNode( nodeId );
-      return true;
-   };
+   //   node->state.assign( data, size );
+   //   self->touchNode( nodeId );
+   //   return true;
+   //};
 
 #endif
 
@@ -385,7 +385,7 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 
    NodeEditor::NavigateToContent();
 
-   buildNodes();
+   // buildNodes();
 
    // m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 6 ].inputs[ 0 ].id ) );
    // m_links.push_back( Link( m_ctx.getNextLinkId(), m_nodes[ 5 ].outputs[ 0 ].id, m_nodes[ 7 ].inputs[ 0 ].id ) );
@@ -604,11 +604,11 @@ void GraphEditorWindow::drawContent( void ) noexcept
 void GraphEditorWindow::updateTouch( void ) noexcept
 {
    const auto deltaTime = ImGui::GetIO().DeltaTime;
-   for ( auto &entry : m_nodeTouchTime ) {
-      if ( entry.second > 0.0f ) {
-         entry.second -= deltaTime;
-      }
-   }
+   // for ( auto &entry : m_nodeTouchTime ) {
+   //    if ( entry.second > 0.0f ) {
+   //       entry.second -= deltaTime;
+   //    }
+   // }
 }
 
 void GraphEditorWindow::showLeftPanel( float panelWidth ) noexcept
@@ -654,44 +654,52 @@ void GraphEditorWindow::drawPinIcon( const Pin &pin, bool connected, int alpha )
    icons::icon( ImVec2( static_cast< float >( m_pinIconSize ), m_pinIconSize ), iconType, connected, color, ImColor( 32, 32, 32, alpha ) );
 }
 
-GraphNode *GraphEditorWindow::findNode( NodeEditor::NodeId id ) noexcept
-{
-   for ( auto &node : m_nodes ) {
-      if ( node.id == id ) {
-         return &node;
-      }
-   }
-   return nullptr;
-}
+// GraphNode *GraphEditorWindow::findNode( NodeEditor::NodeId id ) noexcept
+//{
+//    for ( auto &node : m_nodes ) {
+//       if ( node.id == id ) {
+//          return &node;
+//       }
+//    }
+//    return nullptr;
+// }
+//
+// Link *GraphEditorWindow::findLink( NodeEditor::LinkId id ) noexcept
+//{
+//    for ( auto &link : m_links ) {
+//       if ( link.id == id ) {
+//          return &link;
+//       }
+//    }
+//    return nullptr;
+// }
 
-Link *GraphEditorWindow::findLink( NodeEditor::LinkId id ) noexcept
-{
-   for ( auto &link : m_links ) {
-      if ( link.id == id ) {
-         return &link;
-      }
-   }
-   return nullptr;
-}
-
-Pin *GraphEditorWindow::findPin( NodeEditor::PinId id ) noexcept
+Pin *GraphEditorWindow::findPin( Pin::Id id ) noexcept
 {
    if ( !id ) {
       return nullptr;
    }
 
-   for ( auto &node : m_nodes ) {
-      for ( auto &pin : node.inputs ) {
-         if ( pin.id == id ) {
-            return &pin;
-         }
-      }
-      for ( auto &pin : node.outputs ) {
-         if ( pin.id == id ) {
-            return &pin;
+   for ( auto &maybeEditable : m_editables ) {
+      if ( auto editable = maybeEditable.lock() ) {
+         if ( auto pin = editable->findPin( id ) ) {
+            return pin;
          }
       }
    }
+
+   // for ( auto &node : m_nodes ) {
+   //    for ( auto &pin : node.inputs ) {
+   //       if ( pin.id == id ) {
+   //          return &pin;
+   //       }
+   //    }
+   //    for ( auto &pin : node.outputs ) {
+   //       if ( pin.id == id ) {
+   //          return &pin;
+   //       }
+   //    }
+   // }
 
    return nullptr;
 }
@@ -922,513 +930,513 @@ ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
 
 void GraphEditorWindow::renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilder &builder ) noexcept
 {
-   for ( auto &node : m_nodes ) {
-      if ( node.type != NodeType::Blueprint && node.type != NodeType::Simple ) {
-         continue;
-      }
+   //for ( auto &node : m_nodes ) {
+   //   if ( node.type != NodeType::Blueprint && node.type != NodeType::Simple ) {
+   //      continue;
+   //   }
 
-      const auto isSimple = node.type == NodeType::Simple;
+   //   const auto isSimple = node.type == NodeType::Simple;
 
-      bool hasOutputDelegates = false;
-      for ( auto &output : node.outputs ) {
-         if ( output.type == PinType::Delegate ) {
-            hasOutputDelegates = true;
-         }
-      }
+   //   bool hasOutputDelegates = false;
+   //   for ( auto &output : node.outputs ) {
+   //      if ( output.type == PinType::Delegate ) {
+   //         hasOutputDelegates = true;
+   //      }
+   //   }
 
-      builder.begin( node.id );
-      {
-         if ( !isSimple ) {
-            builder.header( node.color );
-            {
-               ImGui::Spring( 0 );
-               ImGui::TextUnformatted( node.name.c_str() );
-               ImGui::Spring( 1 );
-               ImGui::Dummy( ImVec2( 0, 28 ) );
-               if ( hasOutputDelegates ) {
-                  ImGui::BeginVertical( "delegates", ImVec2( 0, 28 ) );
-                  ImGui::Spring( 1, 0 );
-                  for ( auto &output : node.outputs ) {
-                     if ( output.type != PinType::Delegate ) {
-                        continue;
-                     }
+   //   builder.begin( node.id );
+   //   {
+   //      if ( !isSimple ) {
+   //         builder.header( node.color );
+   //         {
+   //            ImGui::Spring( 0 );
+   //            ImGui::TextUnformatted( node.name.c_str() );
+   //            ImGui::Spring( 1 );
+   //            ImGui::Dummy( ImVec2( 0, 28 ) );
+   //            if ( hasOutputDelegates ) {
+   //               ImGui::BeginVertical( "delegates", ImVec2( 0, 28 ) );
+   //               ImGui::Spring( 1, 0 );
+   //               for ( auto &output : node.outputs ) {
+   //                  if ( output.type != PinType::Delegate ) {
+   //                     continue;
+   //                  }
 
-                     auto alpha = ImGui::GetStyle().Alpha;
-                     if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &output ) && &output != m_newLinkPin ) {
-                        alpha = alpha * ( 48.0f / 255.0f );
-                     }
+   //                  auto alpha = ImGui::GetStyle().Alpha;
+   //                  if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &output ) && &output != m_newLinkPin ) {
+   //                     alpha = alpha * ( 48.0f / 255.0f );
+   //                  }
 
-                     NodeEditor::BeginPin( output.id, NodeEditor::PinKind::Output );
-                     NodeEditor::PinPivotAlignment( ImVec2( 1.0f, 0.5f ) );
-                     NodeEditor::PinPivotSize( ImVec2( 0, 0 ) );
-                     ImGui::BeginHorizontal( output.id.AsPointer() );
-                     ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
-                     if ( !output.name.empty() ) {
-                        ImGui::TextUnformatted( output.name.c_str() );
-                        ImGui::Spring( 0 );
-                     }
-                     drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
-                     ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
-                     ImGui::EndHorizontal();
-                     ImGui::PopStyleVar();
+   //                  NodeEditor::BeginPin( output.id, NodeEditor::PinKind::Output );
+   //                  NodeEditor::PinPivotAlignment( ImVec2( 1.0f, 0.5f ) );
+   //                  NodeEditor::PinPivotSize( ImVec2( 0, 0 ) );
+   //                  ImGui::BeginHorizontal( output.id.AsPointer() );
+   //                  ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
+   //                  if ( !output.name.empty() ) {
+   //                     ImGui::TextUnformatted( output.name.c_str() );
+   //                     ImGui::Spring( 0 );
+   //                  }
+   //                  drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
+   //                  ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
+   //                  ImGui::EndHorizontal();
+   //                  ImGui::PopStyleVar();
 
-                     NodeEditor::EndPin();
-                  }
-                  ImGui::Spring( 1, 0 );
-                  ImGui::EndVertical();
-                  ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
-               } else {
-                  ImGui::Spring( 0 );
-               }
-            }
-            builder.endHeader();
-         }
+   //                  NodeEditor::EndPin();
+   //               }
+   //               ImGui::Spring( 1, 0 );
+   //               ImGui::EndVertical();
+   //               ImGui::Spring( 0, ImGui::GetStyle().ItemSpacing.x / 2 );
+   //            } else {
+   //               ImGui::Spring( 0 );
+   //            }
+   //         }
+   //         builder.endHeader();
+   //      }
 
-         for ( auto &input : node.inputs ) {
-            auto alpha = ImGui::GetStyle().Alpha;
-            if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &input ) && &input != m_newLinkPin ) {
-               alpha *= 48.0f / 255.0f;
-            }
+   //      for ( auto &input : node.inputs ) {
+   //         auto alpha = ImGui::GetStyle().Alpha;
+   //         if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &input ) && &input != m_newLinkPin ) {
+   //            alpha *= 48.0f / 255.0f;
+   //         }
 
-            builder.input( input.id );
-            ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
-            drawPinIcon( input, isPinkLinked( input.id ), ( int ) ( alpha * 255 ) );
-            ImGui::Spring( 0 );
-            if ( !input.name.empty() ) {
-               ImGui::TextUnformatted( input.name.c_str() );
-               ImGui::Spring( 0 );
-            }
-            if ( input.type == PinType::Bool ) {
-               ImGui::Button( "Hello" );
-               ImGui::Spring( 0 );
-            }
-            ImGui::PopStyleVar();
-            builder.endInput();
-         }
+   //         builder.input( input.id );
+   //         ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
+   //         drawPinIcon( input, isPinkLinked( input.id ), ( int ) ( alpha * 255 ) );
+   //         ImGui::Spring( 0 );
+   //         if ( !input.name.empty() ) {
+   //            ImGui::TextUnformatted( input.name.c_str() );
+   //            ImGui::Spring( 0 );
+   //         }
+   //         if ( input.type == PinType::Bool ) {
+   //            ImGui::Button( "Hello" );
+   //            ImGui::Spring( 0 );
+   //         }
+   //         ImGui::PopStyleVar();
+   //         builder.endInput();
+   //      }
 
-         if ( isSimple ) {
-            builder.middle();
-            ImGui::Spring( 1, 0 );
-            ImGui::TextUnformatted( node.name.c_str() );
-            ImGui::Spring( 1, 0 );
-         }
+   //      if ( isSimple ) {
+   //         builder.middle();
+   //         ImGui::Spring( 1, 0 );
+   //         ImGui::TextUnformatted( node.name.c_str() );
+   //         ImGui::Spring( 1, 0 );
+   //      }
 
-         for ( auto &output : node.outputs ) {
-            if ( !isSimple && output.type == PinType::Delegate ) {
-               continue;
-            }
+   //      for ( auto &output : node.outputs ) {
+   //         if ( !isSimple && output.type == PinType::Delegate ) {
+   //            continue;
+   //         }
 
-            auto alpha = ImGui::GetStyle().Alpha;
-            if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &output ) && &output != m_newLinkPin ) {
-               alpha *= 48.0f / 255.0f;
-            }
+   //         auto alpha = ImGui::GetStyle().Alpha;
+   //         if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &output ) && &output != m_newLinkPin ) {
+   //            alpha *= 48.0f / 255.0f;
+   //         }
 
-            ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
-            builder.output( output.id );
-            if ( output.type == PinType::String ) {
-               static char buffer[ 128 ] = "Edit Me\nMultiline!";
-               static bool wasActive = false;
+   //         ImGui::PushStyleVar( ImGuiStyleVar_Alpha, alpha );
+   //         builder.output( output.id );
+   //         if ( output.type == PinType::String ) {
+   //            static char buffer[ 128 ] = "Edit Me\nMultiline!";
+   //            static bool wasActive = false;
 
-               ImGui::PushItemWidth( 100.0f );
-               ImGui::InputText( "##edit", buffer, 127 );
-               ImGui::PopItemWidth();
+   //            ImGui::PushItemWidth( 100.0f );
+   //            ImGui::InputText( "##edit", buffer, 127 );
+   //            ImGui::PopItemWidth();
 
-               if ( ImGui::IsItemActive() && !wasActive ) {
-                  NodeEditor::EnableShortcuts( false );
-                  wasActive = true;
-               } else if ( !ImGui::IsItemActive() && wasActive ) {
-                  NodeEditor::EnableShortcuts( true );
-                  wasActive = false;
-               }
-               ImGui::Spring( 0 );
-            }
-            if ( !output.name.empty() ) {
-               ImGui::Spring( 0 );
-               ImGui::TextUnformatted( output.name.c_str() );
-            }
-            ImGui::Spring( 0 );
-            drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
-            ImGui::PopStyleVar();
-            builder.endOutput();
-         }
-      }
-      builder.end();
-   }
+   //            if ( ImGui::IsItemActive() && !wasActive ) {
+   //               NodeEditor::EnableShortcuts( false );
+   //               wasActive = true;
+   //            } else if ( !ImGui::IsItemActive() && wasActive ) {
+   //               NodeEditor::EnableShortcuts( true );
+   //               wasActive = false;
+   //            }
+   //            ImGui::Spring( 0 );
+   //         }
+   //         if ( !output.name.empty() ) {
+   //            ImGui::Spring( 0 );
+   //            ImGui::TextUnformatted( output.name.c_str() );
+   //         }
+   //         ImGui::Spring( 0 );
+   //         drawPinIcon( output, isPinkLinked( output.id ), ( int ) ( alpha * 255 ) );
+   //         ImGui::PopStyleVar();
+   //         builder.endOutput();
+   //      }
+   //   }
+   //   builder.end();
+   //}
 }
 
 void GraphEditorWindow::renderTreeNodes( void ) noexcept
 {
-   // Renders NodeType::Tree
-   for ( auto &node : m_nodes ) {
-      if ( node.type != NodeType::Tree ) {
-         continue;
-      }
+   //// Renders NodeType::Tree
+   //for ( auto &node : m_nodes ) {
+   //   if ( node.type != NodeType::Tree ) {
+   //      continue;
+   //   }
 
-      const float rounding = 5.0f;
-      const float padding = 12.0f;
+   //   const float rounding = 5.0f;
+   //   const float padding = 12.0f;
 
-      const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
+   //   const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
 
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 128, 128, 128, 200 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 32, 32, 32, 200 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRect, ImColor( 60, 180, 255, 150 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRectBorder, ImColor( 60, 180, 255, 150 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 128, 128, 128, 200 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 32, 32, 32, 200 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRect, ImColor( 60, 180, 255, 150 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRectBorder, ImColor( 60, 180, 255, 150 ) );
 
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodePadding, ImVec4( 0, 0, 0, 0 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodeRounding, rounding );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_SourceDirection, ImVec2( 0, 1 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_TargetDirection, ImVec2( 0, -1 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_LinkStrength, 0.0f );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 5.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodePadding, ImVec4( 0, 0, 0, 0 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodeRounding, rounding );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_SourceDirection, ImVec2( 0, 1 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_TargetDirection, ImVec2( 0, -1 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_LinkStrength, 0.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 5.0f );
 
-      NodeEditor::BeginNode( node.id );
+   //   NodeEditor::BeginNode( node.id );
 
-      ImGui::BeginVertical( node.id.AsPointer() );
-      ImGui::BeginHorizontal( "inputs" );
-      ImGui::Spring( 0, padding * 2 );
+   //   ImGui::BeginVertical( node.id.AsPointer() );
+   //   ImGui::BeginHorizontal( "inputs" );
+   //   ImGui::Spring( 0, padding * 2 );
 
-      ImRect inputsRect;
-      int inputAlpha = 200;
-      if ( !node.inputs.empty() ) {
-         auto &pin = node.inputs[ 0 ];
-         ImGui::Dummy( ImVec2( 0, padding ) );
-         ImGui::Spring( 1, 0 );
-         inputsRect = ImGui_GetItemRect();
+   //   ImRect inputsRect;
+   //   int inputAlpha = 200;
+   //   if ( !node.inputs.empty() ) {
+   //      auto &pin = node.inputs[ 0 ];
+   //      ImGui::Dummy( ImVec2( 0, padding ) );
+   //      ImGui::Spring( 1, 0 );
+   //      inputsRect = ImGui_GetItemRect();
 
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowSize, 10.0f );
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowWidth, 10.0f );
-   #if IMGUI_VERSION_NUM > 18101
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-   #else
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 12 );
-   #endif
-         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
-         NodeEditor::PinPivotRect( inputsRect.GetTL(), inputsRect.GetBR() );
-         NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
-         NodeEditor::EndPin();
-         NodeEditor::PopStyleVar( 3 );
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowSize, 10.0f );
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowWidth, 10.0f );
+   //#if IMGUI_VERSION_NUM > 18101
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
+   //#else
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 12 );
+   //#endif
+   //      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
+   //      NodeEditor::PinPivotRect( inputsRect.GetTL(), inputsRect.GetBR() );
+   //      NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
+   //      NodeEditor::EndPin();
+   //      NodeEditor::PopStyleVar( 3 );
 
-         if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-            inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-         }
-      } else {
-         ImGui::Dummy( ImVec2( 0, padding ) );
-      }
-      ImGui::Spring( 0, padding * 2 );
-      ImGui::EndHorizontal();
+   //      if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+   //         inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+   //      }
+   //   } else {
+   //      ImGui::Dummy( ImVec2( 0, padding ) );
+   //   }
+   //   ImGui::Spring( 0, padding * 2 );
+   //   ImGui::EndHorizontal();
 
-      ImGui::BeginHorizontal( "content_frame" );
-      ImGui::Spring( 1, padding );
-      ImGui::BeginVertical( "content", ImVec2( 0, 0 ) );
-      ImGui::Dummy( ImVec2( 160, 0 ) );
-      ImGui::Spring( 1 );
-      ImGui::TextUnformatted( node.name.c_str() );
-      ImGui::Spring( 1 );
-      ImGui::EndVertical();
-      auto contentRect = ImGui_GetItemRect();
-      ImGui::Spring( 1, padding );
-      ImGui::EndHorizontal();
+   //   ImGui::BeginHorizontal( "content_frame" );
+   //   ImGui::Spring( 1, padding );
+   //   ImGui::BeginVertical( "content", ImVec2( 0, 0 ) );
+   //   ImGui::Dummy( ImVec2( 160, 0 ) );
+   //   ImGui::Spring( 1 );
+   //   ImGui::TextUnformatted( node.name.c_str() );
+   //   ImGui::Spring( 1 );
+   //   ImGui::EndVertical();
+   //   auto contentRect = ImGui_GetItemRect();
+   //   ImGui::Spring( 1, padding );
+   //   ImGui::EndHorizontal();
 
-      ImGui::BeginHorizontal( "otuputs" );
-      ImGui::Spring( 0, padding * 2 );
+   //   ImGui::BeginHorizontal( "otuputs" );
+   //   ImGui::Spring( 0, padding * 2 );
 
-      ImRect outputsRect;
-      int outputAlpha = 255;
-      if ( !node.outputs.empty() ) {
-         auto &pin = node.outputs[ 0 ];
-         ImGui::Dummy( ImVec2( 0, padding ) );
-         ImGui::Spring( 1, 0 );
-         outputsRect = ImGui_GetItemRect();
-   #if IMGUI_VERSION_NUM > 18101
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-   #else
-         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 3 );
-   #endif
-         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
-         NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.GetBR() );
-         NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
-         NodeEditor::EndPin();
-         NodeEditor::PopStyleVar();
+   //   ImRect outputsRect;
+   //   int outputAlpha = 255;
+   //   if ( !node.outputs.empty() ) {
+   //      auto &pin = node.outputs[ 0 ];
+   //      ImGui::Dummy( ImVec2( 0, padding ) );
+   //      ImGui::Spring( 1, 0 );
+   //      outputsRect = ImGui_GetItemRect();
+   //#if IMGUI_VERSION_NUM > 18101
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
+   //#else
+   //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 3 );
+   //#endif
+   //      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
+   //      NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.GetBR() );
+   //      NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
+   //      NodeEditor::EndPin();
+   //      NodeEditor::PopStyleVar();
 
-         if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-            outputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-         }
-      } else {
-         ImGui::Dummy( ImVec2( 0, padding ) );
-      }
-      ImGui::Spring( 0, padding * 2 );
-      ImGui::EndHorizontal();
+   //      if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+   //         outputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+   //      }
+   //   } else {
+   //      ImGui::Dummy( ImVec2( 0, padding ) );
+   //   }
+   //   ImGui::Spring( 0, padding * 2 );
+   //   ImGui::EndHorizontal();
 
-      ImGui::EndVertical();
+   //   ImGui::EndVertical();
 
-      NodeEditor::EndNode();
-      NodeEditor::PopStyleVar( 7 );
-      NodeEditor::PopStyleColor( 4 );
+   //   NodeEditor::EndNode();
+   //   NodeEditor::PopStyleVar( 7 );
+   //   NodeEditor::PopStyleColor( 4 );
 
-      auto drawList = NodeEditor::GetNodeBackgroundDrawList( node.id );
+   //   auto drawList = NodeEditor::GetNodeBackgroundDrawList( node.id );
 
-   #if IMGUI_VERSION_NUM > 18101
-      const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-      const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
-   #else
-      const auto topRoundCornersFlags = 1 | 2;
-      const auto bottomRoundCornersFlags = 4 | 8;
-   #endif
-      drawList->AddRectFilled(
-         inputsRect.GetTL() + ImVec2( 0, 1 ),
-         inputsRect.GetBR(),
-         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-         4.0f,
-         bottomRoundCornersFlags
-      );
-      drawList->AddRect(
-         inputsRect.GetTL() + ImVec2( 0, 1 ),
-         inputsRect.GetBR(),
-         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-         4.0f,
-         bottomRoundCornersFlags
-      );
-      drawList->AddRectFilled(
-         outputsRect.GetTL(),
-         outputsRect.GetBR() - ImVec2( 0, 1 ),
-         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-         4.0f,
-         topRoundCornersFlags
-      );
-      drawList->AddRect(
-         outputsRect.GetTL(),
-         outputsRect.GetBR() - ImVec2( 0, 1 ),
-         IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-         4.0f,
-         topRoundCornersFlags
-      );
-      drawList->AddRectFilled(
-         contentRect.GetTL(),
-         contentRect.GetBR(),
-         IM_COL32( 24, 64, 128, 200 ),
-         0.0f
-      );
-      drawList->AddRect(
-         contentRect.GetTL(),
-         contentRect.GetBR(),
-         IM_COL32( 48, 128, 255, 100 ),
-         0.0f
-      );
-   }
+   //#if IMGUI_VERSION_NUM > 18101
+   //   const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
+   //   const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
+   //#else
+   //   const auto topRoundCornersFlags = 1 | 2;
+   //   const auto bottomRoundCornersFlags = 4 | 8;
+   //#endif
+   //   drawList->AddRectFilled(
+   //      inputsRect.GetTL() + ImVec2( 0, 1 ),
+   //      inputsRect.GetBR(),
+   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //      4.0f,
+   //      bottomRoundCornersFlags
+   //   );
+   //   drawList->AddRect(
+   //      inputsRect.GetTL() + ImVec2( 0, 1 ),
+   //      inputsRect.GetBR(),
+   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //      4.0f,
+   //      bottomRoundCornersFlags
+   //   );
+   //   drawList->AddRectFilled(
+   //      outputsRect.GetTL(),
+   //      outputsRect.GetBR() - ImVec2( 0, 1 ),
+   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //      4.0f,
+   //      topRoundCornersFlags
+   //   );
+   //   drawList->AddRect(
+   //      outputsRect.GetTL(),
+   //      outputsRect.GetBR() - ImVec2( 0, 1 ),
+   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //      4.0f,
+   //      topRoundCornersFlags
+   //   );
+   //   drawList->AddRectFilled(
+   //      contentRect.GetTL(),
+   //      contentRect.GetBR(),
+   //      IM_COL32( 24, 64, 128, 200 ),
+   //      0.0f
+   //   );
+   //   drawList->AddRect(
+   //      contentRect.GetTL(),
+   //      contentRect.GetBR(),
+   //      IM_COL32( 48, 128, 255, 100 ),
+   //      0.0f
+   //   );
+   //}
 }
 
 void GraphEditorWindow::renderHoudiniNodes( void ) noexcept
 {
-   // Renders NodeType::Houdini
-   for ( auto &node : m_nodes ) {
-      if ( node.type != NodeType::Houdini ) {
-         continue;
-      }
+   //// Renders NodeType::Houdini
+   //for ( auto &node : m_nodes ) {
+   //   if ( node.type != NodeType::Houdini ) {
+   //      continue;
+   //   }
 
-      const float rounding = 10.0f;
-      const float padding = 12.0f;
+   //   const float rounding = 10.0f;
+   //   const float padding = 12.0f;
 
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 229, 229, 229, 200 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 125, 125, 125, 200 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRect, ImColor( 229, 229, 229, 60 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRectBorder, ImColor( 125, 125, 125, 60 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 229, 229, 229, 200 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 125, 125, 125, 200 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRect, ImColor( 229, 229, 229, 60 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_PinRectBorder, ImColor( 125, 125, 125, 60 ) );
 
-      const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
+   //   const auto pinBackground = NodeEditor::GetStyle().Colors[ NodeEditor::StyleColor_NodeBg ];
 
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodePadding, ImVec4( 0, 0, 0, 0 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodeRounding, rounding );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_SourceDirection, ImVec2( 0, 1 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_TargetDirection, ImVec2( 0, -1 ) );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_LinkStrength, 0.0f );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
-      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 6.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodePadding, ImVec4( 0, 0, 0, 0 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_NodeRounding, rounding );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_SourceDirection, ImVec2( 0, 1 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_TargetDirection, ImVec2( 0, -1 ) );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_LinkStrength, 0.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinBorderWidth, 1.0f );
+   //   NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinRadius, 6.0f );
 
-      NodeEditor::BeginNode( node.id );
-      ImGui::BeginVertical( node.id.AsPointer() );
-      if ( !node.inputs.empty() ) {
-         ImGui::BeginHorizontal( "inputs" );
-         ImGui::Spring( 1, 0 );
-         ImRect inputsRect;
-         int inputAlpha = 200;
-         for ( auto &pin : node.inputs ) {
-            ImGui::Dummy( ImVec2( padding, padding ) );
-            inputsRect = ImGui_GetItemRect();
-            ImGui::Spring( 1, 0 );
-            inputsRect.Min.y -= padding;
-            inputsRect.Max.y -= padding;
+   //   NodeEditor::BeginNode( node.id );
+   //   ImGui::BeginVertical( node.id.AsPointer() );
+   //   if ( !node.inputs.empty() ) {
+   //      ImGui::BeginHorizontal( "inputs" );
+   //      ImGui::Spring( 1, 0 );
+   //      ImRect inputsRect;
+   //      int inputAlpha = 200;
+   //      for ( auto &pin : node.inputs ) {
+   //         ImGui::Dummy( ImVec2( padding, padding ) );
+   //         inputsRect = ImGui_GetItemRect();
+   //         ImGui::Spring( 1, 0 );
+   //         inputsRect.Min.y -= padding;
+   //         inputsRect.Max.y -= padding;
 
-   #if IMGUI_VERSION_NUM > 18101
-            const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-   #else
-            const auto allRoundCornersFlags = 15;
-   #endif
-            NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
-            NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
-            NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
-            NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
-            NodeEditor::EndPin();
-            NodeEditor::PopStyleVar( 1 );
+   //#if IMGUI_VERSION_NUM > 18101
+   //         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
+   //#else
+   //         const auto allRoundCornersFlags = 15;
+   //#endif
+   //         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
+   //         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
+   //         NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
+   //         NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
+   //         NodeEditor::EndPin();
+   //         NodeEditor::PopStyleVar( 1 );
 
-            auto drawList = ImGui::GetWindowDrawList();
-            drawList->AddRectFilled(
-               inputsRect.GetTL(),
-               inputsRect.GetBR(),
-               IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-               4.0f,
-               allRoundCornersFlags
-            );
-            drawList->AddRect(
-               inputsRect.GetTL(),
-               inputsRect.GetBR(),
-               IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-               4.0f,
-               allRoundCornersFlags
-            );
+   //         auto drawList = ImGui::GetWindowDrawList();
+   //         drawList->AddRectFilled(
+   //            inputsRect.GetTL(),
+   //            inputsRect.GetBR(),
+   //            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //            4.0f,
+   //            allRoundCornersFlags
+   //         );
+   //         drawList->AddRect(
+   //            inputsRect.GetTL(),
+   //            inputsRect.GetBR(),
+   //            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //            4.0f,
+   //            allRoundCornersFlags
+   //         );
 
-            if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-               inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-            }
-         }
-         ImGui::EndHorizontal();
-      }
-      ImGui::BeginHorizontal( "content_frame" );
-      ImGui::Spring( 1, padding );
-      ImGui::BeginVertical( "content", ImVec2( 0.0f, 0.0f ) );
-      ImGui::Dummy( ImVec2( 160, 0 ) );
-      ImGui::Spring( 1 );
-      ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0, 0, 0, 1 ) );
-      ImGui::TextUnformatted( node.name.c_str() );
-      ImGui::PopStyleColor();
-      ImGui::Spring( 1 );
-      ImGui::EndVertical();
+   //         if ( m_newLinkPin && !canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+   //            inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+   //         }
+   //      }
+   //      ImGui::EndHorizontal();
+   //   }
+   //   ImGui::BeginHorizontal( "content_frame" );
+   //   ImGui::Spring( 1, padding );
+   //   ImGui::BeginVertical( "content", ImVec2( 0.0f, 0.0f ) );
+   //   ImGui::Dummy( ImVec2( 160, 0 ) );
+   //   ImGui::Spring( 1 );
+   //   ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0, 0, 0, 1 ) );
+   //   ImGui::TextUnformatted( node.name.c_str() );
+   //   ImGui::PopStyleColor();
+   //   ImGui::Spring( 1 );
+   //   ImGui::EndVertical();
 
-      auto contentRect = ImGui_GetItemRect();
+   //   auto contentRect = ImGui_GetItemRect();
 
-      ImGui::Spring( 1, padding );
-      ImGui::EndHorizontal();
+   //   ImGui::Spring( 1, padding );
+   //   ImGui::EndHorizontal();
 
-      if ( !node.outputs.empty() ) {
-         ImGui::BeginHorizontal( "outputs" );
-         ImGui::Spring( 1, 0 );
+   //   if ( !node.outputs.empty() ) {
+   //      ImGui::BeginHorizontal( "outputs" );
+   //      ImGui::Spring( 1, 0 );
 
-         ImRect outputsRect;
-         int inputAlpha = 200;
-         for ( auto &pin : node.outputs ) {
-            ImGui::Dummy( ImVec2( padding, padding ) );
-            outputsRect = ImGui_GetItemRect();
-            ImGui::Spring( 1, 0 );
-            outputsRect.Min.y += padding;
-            outputsRect.Max.y += padding;
+   //      ImRect outputsRect;
+   //      int inputAlpha = 200;
+   //      for ( auto &pin : node.outputs ) {
+   //         ImGui::Dummy( ImVec2( padding, padding ) );
+   //         outputsRect = ImGui_GetItemRect();
+   //         ImGui::Spring( 1, 0 );
+   //         outputsRect.Min.y += padding;
+   //         outputsRect.Max.y += padding;
 
-   #if IMGUI_VERSION_NUM > 18101
-            const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-            const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-   #else
-            const auto allRoundCornersFlags = 15;
-            const auto topRoundCornersFlags = 3;
-   #endif
+   //#if IMGUI_VERSION_NUM > 18101
+   //         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
+   //         const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
+   //#else
+   //         const auto allRoundCornersFlags = 15;
+   //         const auto topRoundCornersFlags = 3;
+   //#endif
 
-            NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
-            NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
-            NodeEditor::PinPivotRect( outputsRect.GetCenter(), outputsRect.GetCenter() );
-            NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
-            NodeEditor::EndPin();
-            NodeEditor::PopStyleVar();
+   //         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
+   //         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
+   //         NodeEditor::PinPivotRect( outputsRect.GetCenter(), outputsRect.GetCenter() );
+   //         NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
+   //         NodeEditor::EndPin();
+   //         NodeEditor::PopStyleVar();
 
-            auto drawList = ImGui::GetWindowDrawList();
-            drawList->AddRectFilled(
-               outputsRect.GetTL(),
-               outputsRect.GetBR(),
-               IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-               4.0f,
-               allRoundCornersFlags
-            );
-            drawList->AddRect(
-               outputsRect.GetTL(),
-               outputsRect.GetBR(),
-               IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-               4.0f,
-               allRoundCornersFlags
-            );
+   //         auto drawList = ImGui::GetWindowDrawList();
+   //         drawList->AddRectFilled(
+   //            outputsRect.GetTL(),
+   //            outputsRect.GetBR(),
+   //            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //            4.0f,
+   //            allRoundCornersFlags
+   //         );
+   //         drawList->AddRect(
+   //            outputsRect.GetTL(),
+   //            outputsRect.GetBR(),
+   //            IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //            4.0f,
+   //            allRoundCornersFlags
+   //         );
 
-            if ( m_newLinkPin && canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
-               inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
-            }
-         }
-         ImGui::EndHorizontal();
-      }
-      ImGui::EndVertical();
+   //         if ( m_newLinkPin && canCreateLink( m_newLinkPin, &pin ) && &pin != m_newLinkPin ) {
+   //            inputAlpha = ( int ) ( 255 * ImGui::GetStyle().Alpha * ( 48.0f / 255.0f ) );
+   //         }
+   //      }
+   //      ImGui::EndHorizontal();
+   //   }
+   //   ImGui::EndVertical();
 
-      NodeEditor::EndNode();
-      NodeEditor::PopStyleVar( 7 );
-      NodeEditor::PopStyleColor( 4 );
-   }
+   //   NodeEditor::EndNode();
+   //   NodeEditor::PopStyleVar( 7 );
+   //   NodeEditor::PopStyleColor( 4 );
+   //}
 }
 
 void GraphEditorWindow::renderCommentNodes( void ) noexcept
 {
-   for ( auto &node : m_nodes ) {
-      if ( node.type != NodeType::Comment ) {
-         continue;
-      }
+   //for ( auto &node : m_nodes ) {
+   //   if ( node.type != NodeType::Comment ) {
+   //      continue;
+   //   }
 
-      const float commentAlpha = 0.75f;
+   //   const float commentAlpha = 0.75f;
 
-      ImGui::PushStyleVar( ImGuiStyleVar_Alpha, commentAlpha );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 255, 255, 255, 64 ) );
-      NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 255, 255, 255, 64 ) );
-      NodeEditor::BeginNode( node.id );
-      ImGui::PushID( node.id.AsPointer() );
-      ImGui::BeginVertical( "content" );
-      ImGui::BeginHorizontal( "horizontal" );
-      ImGui::Spring( 1 );
-      ImGui::TextUnformatted( node.name.c_str() );
-      ImGui::Spring( 1 );
-      ImGui::EndHorizontal();
-      NodeEditor::Group( node.size );
-      ImGui::EndVertical();
-      ImGui::PopID();
-      NodeEditor::EndNode();
-      NodeEditor::PopStyleColor( 2 );
-      ImGui::PopStyleVar();
+   //   ImGui::PushStyleVar( ImGuiStyleVar_Alpha, commentAlpha );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBg, ImColor( 255, 255, 255, 64 ) );
+   //   NodeEditor::PushStyleColor( NodeEditor::StyleColor_NodeBorder, ImColor( 255, 255, 255, 64 ) );
+   //   NodeEditor::BeginNode( node.id );
+   //   ImGui::PushID( node.id.AsPointer() );
+   //   ImGui::BeginVertical( "content" );
+   //   ImGui::BeginHorizontal( "horizontal" );
+   //   ImGui::Spring( 1 );
+   //   ImGui::TextUnformatted( node.name.c_str() );
+   //   ImGui::Spring( 1 );
+   //   ImGui::EndHorizontal();
+   //   NodeEditor::Group( node.size );
+   //   ImGui::EndVertical();
+   //   ImGui::PopID();
+   //   NodeEditor::EndNode();
+   //   NodeEditor::PopStyleColor( 2 );
+   //   ImGui::PopStyleVar();
 
-      if ( NodeEditor::BeginGroupHint( node.id ) ) {
-         auto bgAlpha = static_cast< int >( ImGui::GetStyle().Alpha * 255 );
+   //   if ( NodeEditor::BeginGroupHint( node.id ) ) {
+   //      auto bgAlpha = static_cast< int >( ImGui::GetStyle().Alpha * 255 );
 
-         auto min = NodeEditor::GetGroupMin();
+   //      auto min = NodeEditor::GetGroupMin();
 
-         ImGui::SetCursorScreenPos( min - ImVec2( -8, ImGui::GetTextLineHeightWithSpacing() + 4 ) );
-         ImGui::BeginGroup();
-         ImGui::TextUnformatted( node.name.c_str() );
-         ImGui::EndGroup();
+   //      ImGui::SetCursorScreenPos( min - ImVec2( -8, ImGui::GetTextLineHeightWithSpacing() + 4 ) );
+   //      ImGui::BeginGroup();
+   //      ImGui::TextUnformatted( node.name.c_str() );
+   //      ImGui::EndGroup();
 
-         auto drawList = NodeEditor::GetHintBackgroundDrawList();
-         auto hintBounds = ImGui_GetItemRect();
-         auto hintFrameBounds = ImRect_Expanded( hintBounds, 8, 4 );
+   //      auto drawList = NodeEditor::GetHintBackgroundDrawList();
+   //      auto hintBounds = ImGui_GetItemRect();
+   //      auto hintFrameBounds = ImRect_Expanded( hintBounds, 8, 4 );
 
-         drawList->AddRectFilled(
-            hintFrameBounds.GetTL(),
-            hintFrameBounds.GetBR(),
-            IM_COL32( 255, 255, 255, 64 * bgAlpha / 255 ),
-            4.0f
-         );
-         drawList->AddRect(
-            hintFrameBounds.GetTL(),
-            hintFrameBounds.GetBR(),
-            IM_COL32( 255, 255, 255, 128 * bgAlpha / 255 ),
-            4.0f
-         );
-      }
-      NodeEditor::EndGroupHint();
-   }
+   //      drawList->AddRectFilled(
+   //         hintFrameBounds.GetTL(),
+   //         hintFrameBounds.GetBR(),
+   //         IM_COL32( 255, 255, 255, 64 * bgAlpha / 255 ),
+   //         4.0f
+   //      );
+   //      drawList->AddRect(
+   //         hintFrameBounds.GetTL(),
+   //         hintFrameBounds.GetBR(),
+   //         IM_COL32( 255, 255, 255, 128 * bgAlpha / 255 ),
+   //         4.0f
+   //      );
+   //   }
+   //   NodeEditor::EndGroupHint();
+   //}
 }
 
 void GraphEditorWindow::renderLinks( void ) noexcept
 {
-   for ( auto &link : m_links ) {
-      NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
-   }
+   //for ( auto &link : m_links ) {
+   //   NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
+   //}
 }
 
 void GraphEditorWindow::renderCreateNewNode( void ) noexcept
@@ -1469,7 +1477,7 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
                } else if ( endPin->kind == startPin->kind ) {
                   showLabel( "x Incomtabile Pin Kind", ImColor( 45, 32, 32, 180 ) );
                   NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
-               } else if ( endPin->node == startPin->node ) [[unlikely]] {
+               } else if ( endPin->owner == startPin->owner ) [[unlikely]] {
                   showLabel( "x Cannot connecto to self", ImColor( 45, 32, 32, 180 ) );
                   NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
                } else if ( endPin->type != startPin->type ) {
@@ -1477,10 +1485,11 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
                   NodeEditor::RejectNewItem( ImColor( 255.0f, 128.0f, 128.0f, 1.0f ) );
                } else {
                   showLabel( "+ Create Link", ImColor( 32, 45, 32, 180 ) );
-                  if ( NodeEditor::AcceptNewItem( ImColor( 128, 255, 128 ), 4.0f ) ) {
-                     m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
-                     m_links.back().color = getIconColor( startPin->type );
-                  }
+                  assert( false );
+                  //if ( NodeEditor::AcceptNewItem( ImColor( 128, 255, 128 ), 4.0f ) ) {
+                  //   m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
+                  //   m_links.back().color = getIconColor( startPin->type );
+                  //}
                }
             }
          }
@@ -1510,19 +1519,21 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
          NodeEditor::NodeId nodeId = 0;
          while ( NodeEditor::QueryDeletedNode( &nodeId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
-               auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ nodeId ]( auto &node ) { return node.id == nodeId; } );
-               if ( id != m_nodes.end() ) {
-                  m_nodes.erase( id );
-               }
+               assert( false );
+               //auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ nodeId ]( auto &node ) { return node.id == nodeId; } );
+               //if ( id != m_nodes.end() ) {
+               //   m_nodes.erase( id );
+               //}
             }
          }
          NodeEditor::LinkId linkId = 0;
          while ( NodeEditor::QueryDeletedLink( &linkId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
-               auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
-               if ( id != m_links.end() ) {
-                  m_links.erase( id );
-               }
+                assert( false );
+               //auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
+               //if ( id != m_links.end() ) {
+               //   m_links.erase( id );
+               //}
             }
          }
          NodeEditor::EndDelete();
@@ -1557,22 +1568,23 @@ void GraphEditorWindow::renderNodeContextMenu( void ) noexcept
 {
    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 8, 8 ) );
    if ( ImGui::BeginPopup( "Node Context Menu" ) ) {
-      auto node = findNode( m_contextNodeId );
+       assert( false );
+      //auto node = findNode( m_contextNodeId );
 
-      ImGui::TextUnformatted( "Node Context Menu" );
-      ImGui::Separator();
-      if ( node ) {
-         ImGui::Text( "ID: %p", node->id.AsPointer() );
-         ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
-         ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
-         ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
-      } else {
-         ImGui::Text( "Unknown node: %p", m_contextNodeId.AsPointer() );
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Delete" ) ) {
-         NodeEditor::DeleteNode( m_contextNodeId );
-      }
+      //ImGui::TextUnformatted( "Node Context Menu" );
+      //ImGui::Separator();
+      //if ( node ) {
+      //   ImGui::Text( "ID: %p", node->id.AsPointer() );
+      //   ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
+      //   ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
+      //   ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
+      //} else {
+      //   ImGui::Text( "Unknown node: %p", m_contextNodeId.AsPointer() );
+      //}
+      //ImGui::Separator();
+      //if ( ImGui::MenuItem( "Delete" ) ) {
+      //   NodeEditor::DeleteNode( m_contextNodeId );
+      //}
       ImGui::EndPopup();
    }
 }
@@ -1580,20 +1592,21 @@ void GraphEditorWindow::renderNodeContextMenu( void ) noexcept
 void GraphEditorWindow::renderPinContextMenu( void ) noexcept
 {
    if ( ImGui::BeginPopup( "Pin Context Menu" ) ) {
-      auto pin = findPin( m_contextPinId );
+      assert( false );
+      //auto pin = findPin( m_contextPinId );
 
-      ImGui::TextUnformatted( "Pin Context Menu" );
-      ImGui::Separator();
-      if ( pin ) {
-         ImGui::Text( "ID: %p", pin->id.AsPointer() );
-         if ( pin->node ) {
-            ImGui::Text( "Node: %p", pin->node->id.AsPointer() );
-         } else {
-            ImGui::Text( "Node: %s", "<none>" );
-         }
-      } else {
-         ImGui::Text( "Unknown pin: %p", m_contextPinId.AsPointer() );
-      }
+      //ImGui::TextUnformatted( "Pin Context Menu" );
+      //ImGui::Separator();
+      //if ( pin ) {
+      //   ImGui::Text( "ID: %p", pin->id.AsPointer() );
+      //   if ( pin->node ) {
+      //      ImGui::Text( "Node: %p", pin->node->id.AsPointer() );
+      //   } else {
+      //      ImGui::Text( "Node: %s", "<none>" );
+      //   }
+      //} else {
+      //   ImGui::Text( "Unknown pin: %p", m_contextPinId.AsPointer() );
+      //}
       ImGui::EndPopup();
    }
 }
@@ -1601,21 +1614,22 @@ void GraphEditorWindow::renderPinContextMenu( void ) noexcept
 void GraphEditorWindow::renderLinkContextMenu( void ) noexcept
 {
    if ( ImGui::BeginPopup( "Link Context Menu" ) ) {
-      auto link = findLink( m_contextLinkId );
+       assert( false );
+      //auto link = findLink( m_contextLinkId );
 
-      ImGui::TextUnformatted( "Link Context Menu" );
-      ImGui::Separator();
-      if ( link ) {
-         ImGui::Text( "ID: %p", link->id.AsPointer() );
-         ImGui::Text( "From: %p", link->startPinId.AsPointer() );
-         ImGui::Text( "To: %p", link->endPinId.AsPointer() );
-      } else {
-         ImGui::Text( "Unknown link: %p", m_contextLinkId.AsPointer() );
-      }
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Delete" ) ) {
-         NodeEditor::DeleteLink( m_contextLinkId );
-      }
+      //ImGui::TextUnformatted( "Link Context Menu" );
+      //ImGui::Separator();
+      //if ( link ) {
+      //   ImGui::Text( "ID: %p", link->id.AsPointer() );
+      //   ImGui::Text( "From: %p", link->startPinId.AsPointer() );
+      //   ImGui::Text( "To: %p", link->endPinId.AsPointer() );
+      //} else {
+      //   ImGui::Text( "Unknown link: %p", m_contextLinkId.AsPointer() );
+      //}
+      //ImGui::Separator();
+      //if ( ImGui::MenuItem( "Delete" ) ) {
+      //   NodeEditor::DeleteLink( m_contextLinkId );
+      //}
       ImGui::EndPopup();
    }
 }
@@ -1738,9 +1752,10 @@ void GraphEditorWindow::showLeftPanel( void )
    }
    ImGui::Spring( 0 );
    if ( ImGui::Button( "Show Flow" ) ) {
-      for ( auto &link : m_links ) {
-         NodeEditor::Flow( link.id );
-      }
+      assert( false );
+      //for ( auto &link : m_links ) {
+      //   NodeEditor::Flow( link.id );
+      //}
    }
    ImGui::Spring();
    if ( ImGui::Button( "Edit Style" ) ) {
@@ -1780,194 +1795,194 @@ void GraphEditorWindow::showLeftPanel( void )
    ImGui::SameLine();
    ImGui::TextUnformatted( "Nodes" );
    ImGui::Indent();
-   for ( auto &node : m_nodes ) {
-      ImGui::PushID( node.id.AsPointer() );
-      auto start = ImGui::GetCursorScreenPos();
-      if ( const auto progress = getTouchProgress( node.id ) ) {
-         ImGui::GetWindowDrawList()->AddLine(
-            start + ImVec2( -8, 0 ),
-            start + ImVec2( -8, ImGui::GetTextLineHeight() ),
-            IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
-            4.0f
-         );
-      }
+   //for ( auto &node : m_nodes ) {
+   //   ImGui::PushID( node.id.AsPointer() );
+   //   auto start = ImGui::GetCursorScreenPos();
+   //   if ( const auto progress = getTouchProgress( node.id ) ) {
+   //      ImGui::GetWindowDrawList()->AddLine(
+   //         start + ImVec2( -8, 0 ),
+   //         start + ImVec2( -8, ImGui::GetTextLineHeight() ),
+   //         IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
+   //         4.0f
+   //      );
+   //   }
 
-      bool isSelected = std::find( selectedNodes.begin(), selectedNodes.end(), node.id ) != selectedNodes.end();
-   #if IMGUI_VERSION_NUM >= 18967
-      ImGui::SetNextItemAllowOverlap();
-   #endif
-      if ( ImGui::Selectable( ( node.name + "##" + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) ).c_str(), &isSelected ) ) {
-         if ( io.KeyCtrl ) {
-            if ( isSelected ) {
-               NodeEditor::SelectNode( node.id, true );
-            } else {
-               NodeEditor::DeselectNode( node.id );
-            }
-         } else {
-            NodeEditor::SelectNode( node.id, false );
-         }
-      }
+   //   bool isSelected = std::find( selectedNodes.begin(), selectedNodes.end(), node.id ) != selectedNodes.end();
+   //#if IMGUI_VERSION_NUM >= 18967
+   //   ImGui::SetNextItemAllowOverlap();
+   //#endif
+   //   if ( ImGui::Selectable( ( node.name + "##" + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) ).c_str(), &isSelected ) ) {
+   //      if ( io.KeyCtrl ) {
+   //         if ( isSelected ) {
+   //            NodeEditor::SelectNode( node.id, true );
+   //         } else {
+   //            NodeEditor::DeselectNode( node.id );
+   //         }
+   //      } else {
+   //         NodeEditor::SelectNode( node.id, false );
+   //      }
+   //   }
 
-      if ( ImGui::IsItemHovered() && !node.state.empty() ) {
-         ImGui::SetTooltip( "State: %s", node.state.c_str() );
-      }
+   //   if ( ImGui::IsItemHovered() && !node.state.empty() ) {
+   //      ImGui::SetTooltip( "State: %s", node.state.c_str() );
+   //   }
 
-      auto id = std::string( "(" ) + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) + ")";
-      auto textSize = ImGui::CalcTextSize( id.c_str(), nullptr );
-      auto iconPanelPos = start + ImVec2( panelWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x, ( ImGui::GetTextLineHeight() - saveIconHeight ) / 2.0f );
-      ImGui::GetWindowDrawList()->AddText(
-         ImVec2( iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y ),
-         IM_COL32( 255, 255, 255, 255 ),
-         id.c_str(),
-         nullptr
-      );
+   //   auto id = std::string( "(" ) + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) + ")";
+   //   auto textSize = ImGui::CalcTextSize( id.c_str(), nullptr );
+   //   auto iconPanelPos = start + ImVec2( panelWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x, ( ImGui::GetTextLineHeight() - saveIconHeight ) / 2.0f );
+   //   ImGui::GetWindowDrawList()->AddText(
+   //      ImVec2( iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y ),
+   //      IM_COL32( 255, 255, 255, 255 ),
+   //      id.c_str(),
+   //      nullptr
+   //   );
 
-      auto drawList = ImGui::GetWindowDrawList();
-      ImGui::SetCursorScreenPos( iconPanelPos );
-   #if IMGUI_VERSION_NUM < 18967
-      ImGui::SetItemAllowOverlap();
-   #else
-      ImGui::SetNextItemAllowOverlap();
-   #endif
+   //   auto drawList = ImGui::GetWindowDrawList();
+   //   ImGui::SetCursorScreenPos( iconPanelPos );
+   //#if IMGUI_VERSION_NUM < 18967
+   //   ImGui::SetItemAllowOverlap();
+   //#else
+   //   ImGui::SetNextItemAllowOverlap();
+   //#endif
 
-      if ( node.savedState.empty() ) {
-         if ( ImGui::InvisibleButton( "save", ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) ) ) {
-            node.savedState = node.state;
-         }
+   //   if ( node.savedState.empty() ) {
+   //      if ( ImGui::InvisibleButton( "save", ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) ) ) {
+   //         node.savedState = node.state;
+   //      }
 
-         if ( ImGui::IsItemActive() ) {
-            // drawList->AddImage(
-            //     m_saveIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 96 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 96 )
-            );
-         } else if ( ImGui::IsAnyItemHovered() ) {
-            // drawList->AddImage(
-            //     m_saveIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 255 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 255 )
-            );
-         } else {
-            // drawList->AddImage(
-            //     m_saveIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 160 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 160 )
-            );
-         }
-      } else {
-         ImGui::Dummy( ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) );
-         // drawList->AddImage(
-         //     m_saveIcon,
-         //     ImGui::GetItemRectMin(),
-         //     ImGui::GetItemRectMax(),
-         //     ImVec2( 0, 0 ),
-         //     ImVec2( 1, 1 ),
-         //     IM_COL32( 255, 255, 255, 32 )
-         // );
-         drawList->AddRectFilled(
-            ImGui::GetItemRectMin(),
-            ImGui::GetItemRectMax(),
-            ImColor( 255, 255, 255, 32 )
-         );
-      }
+   //      if ( ImGui::IsItemActive() ) {
+   //         // drawList->AddImage(
+   //         //     m_saveIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 96 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 96 )
+   //         );
+   //      } else if ( ImGui::IsAnyItemHovered() ) {
+   //         // drawList->AddImage(
+   //         //     m_saveIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 255 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 255 )
+   //         );
+   //      } else {
+   //         // drawList->AddImage(
+   //         //     m_saveIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 160 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 160 )
+   //         );
+   //      }
+   //   } else {
+   //      ImGui::Dummy( ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) );
+   //      // drawList->AddImage(
+   //      //     m_saveIcon,
+   //      //     ImGui::GetItemRectMin(),
+   //      //     ImGui::GetItemRectMax(),
+   //      //     ImVec2( 0, 0 ),
+   //      //     ImVec2( 1, 1 ),
+   //      //     IM_COL32( 255, 255, 255, 32 )
+   //      // );
+   //      drawList->AddRectFilled(
+   //         ImGui::GetItemRectMin(),
+   //         ImGui::GetItemRectMax(),
+   //         ImColor( 255, 255, 255, 32 )
+   //      );
+   //   }
 
-      ImGui::SameLine( 0, ImGui::GetStyle().ItemInnerSpacing.x );
-   #if IMGUI_VERSION_NUM < 18967
-      ImGui::SetItemAllowOverlap();
-   #else
-      ImGui::SetNextItemAllowOverlap();
-   #endif
+   //   ImGui::SameLine( 0, ImGui::GetStyle().ItemInnerSpacing.x );
+   //#if IMGUI_VERSION_NUM < 18967
+   //   ImGui::SetItemAllowOverlap();
+   //#else
+   //   ImGui::SetNextItemAllowOverlap();
+   //#endif
 
-      if ( !node.savedState.empty() ) {
-         if ( ImGui::InvisibleButton( "restore", ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) ) ) {
-            node.state = node.savedState;
-            NodeEditor::RestoreNodeState( node.id );
-            node.savedState.clear();
-         }
+   //   if ( !node.savedState.empty() ) {
+   //      if ( ImGui::InvisibleButton( "restore", ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) ) ) {
+   //         node.state = node.savedState;
+   //         NodeEditor::RestoreNodeState( node.id );
+   //         node.savedState.clear();
+   //      }
 
-         if ( ImGui::IsItemActive() ) {
-            // drawList->AddImage(
-            //     m_restoreIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 96 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 96 )
-            );
-         } else if ( ImGui::IsAnyItemHovered() ) {
-            // drawList->AddImage(
-            //     m_restoreIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 255 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 255 )
-            );
-         } else {
-            // drawList->AddImage(
-            //     m_restoreIcon,
-            //     ImGui::GetItemRectMin(),
-            //     ImGui::GetItemRectMax(),
-            //     ImVec2( 0, 0 ),
-            //     ImVec2( 1, 1 ),
-            //     IM_COL32( 255, 255, 255, 160 )
-            // );
-            drawList->AddRectFilled(
-               ImGui::GetItemRectMin(),
-               ImGui::GetItemRectMax(),
-               ImColor( 255, 255, 255, 160 )
-            );
-         }
-      } else {
-         ImGui::Dummy( ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) );
-         drawList->AddRectFilled(
-            ImGui::GetItemRectMin(),
-            ImGui::GetItemRectMax(),
-            ImColor( 255, 255, 255, 32 )
-         );
-      }
+   //      if ( ImGui::IsItemActive() ) {
+   //         // drawList->AddImage(
+   //         //     m_restoreIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 96 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 96 )
+   //         );
+   //      } else if ( ImGui::IsAnyItemHovered() ) {
+   //         // drawList->AddImage(
+   //         //     m_restoreIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 255 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 255 )
+   //         );
+   //      } else {
+   //         // drawList->AddImage(
+   //         //     m_restoreIcon,
+   //         //     ImGui::GetItemRectMin(),
+   //         //     ImGui::GetItemRectMax(),
+   //         //     ImVec2( 0, 0 ),
+   //         //     ImVec2( 1, 1 ),
+   //         //     IM_COL32( 255, 255, 255, 160 )
+   //         // );
+   //         drawList->AddRectFilled(
+   //            ImGui::GetItemRectMin(),
+   //            ImGui::GetItemRectMax(),
+   //            ImColor( 255, 255, 255, 160 )
+   //         );
+   //      }
+   //   } else {
+   //      ImGui::Dummy( ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) );
+   //      drawList->AddRectFilled(
+   //         ImGui::GetItemRectMin(),
+   //         ImGui::GetItemRectMax(),
+   //         ImColor( 255, 255, 255, 32 )
+   //      );
+   //   }
 
-      ImGui::SameLine( 0, 0 );
-   #if IMGUI_VERSION_NUM < 18967
-      ImGui::SetItemAllowOverlap();
-   #endif
-      ImGui::Dummy( ImVec2( 0, restoreIconHeight ) );
-      ImGui::PopID();
-   }
+   //   ImGui::SameLine( 0, 0 );
+   //#if IMGUI_VERSION_NUM < 18967
+   //   ImGui::SetItemAllowOverlap();
+   //#endif
+   //   ImGui::Dummy( ImVec2( 0, restoreIconHeight ) );
+   //   ImGui::PopID();
+   //}
    ImGui::Unindent();
 
    ImGui::GetWindowDrawList()->AddRectFilled(
@@ -1997,9 +2012,10 @@ void GraphEditorWindow::showLeftPanel( void )
    ImGui::Unindent();
 
    if ( ImGui::IsKeyPressed( ImGuiKey_Z ) ) {
-      for ( auto &link : m_links ) {
-         NodeEditor::Flow( link.id );
-      }
+       assert( false );
+      //for ( auto &link : m_links ) {
+      //   NodeEditor::Flow( link.id );
+      //}
    }
 
    if ( NodeEditor::HasSelectionChanged() ) {

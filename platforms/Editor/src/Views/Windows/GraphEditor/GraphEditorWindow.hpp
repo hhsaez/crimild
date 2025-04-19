@@ -74,32 +74,34 @@ namespace crimild::editor {
 
 #if GRAPH_EDITOR_BLUEPRINTS
 
-      GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
-      Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
-      Pin *findPin( ax::NodeEditor::PinId id ) noexcept;
+      //GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
+      //Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
+      Pin *findPin( Pin::Id id ) noexcept;
 
       //   inline int getNextId( void ) noexcept { return m_nextId++; }
       //   inline ax::NodeEditor::LinkId getNextLinkId( void ) noexcept { return ax::NodeEditor::LinkId( getNextId() ); }
 
       bool canCreateLink( Pin *a, Pin *b ) const noexcept
       {
-         if ( !a || !b || a == b || a->kind == b->kind || a->type != b->type || a->node == b->node ) {
+         if ( !a || !b || a == b || a->kind == b->kind || a->type != b->type || a->owner == b->owner ) {
             return false;
          }
          return true;
       }
 
-      bool isPinkLinked( ax::NodeEditor::PinId id ) const noexcept
+      bool isPinkLinked( Pin::Id id ) const noexcept
       {
          if ( !id ) {
             return false;
          }
 
-         for ( auto &link : m_links ) {
-            if ( link.startPinId == id || link.endPinId == id ) {
-               return true;
-            }
-         }
+         assert( false );
+
+         //for ( auto &link : m_links ) {
+         //   if ( link.startPinId == id || link.endPinId == id ) {
+         //      return true;
+         //   }
+         //}
 
          return false;
       }
@@ -123,24 +125,24 @@ namespace crimild::editor {
       // GraphNode *spawnHoudiniTransformNode( void ) noexcept;
       // GraphNode *spawnHoudiniGroupNode( void ) noexcept;
 
-      void buildNodes( void ) noexcept
-      {
-         for ( auto &node : m_nodes ) {
-            buildNode( &node );
-         }
-      }
+      //void buildNodes( void ) noexcept
+      //{
+      //   for ( auto &node : m_nodes ) {
+      //      buildNode( &node );
+      //   }
+      //}
 
-      void buildNode( GraphNode *node ) noexcept
-      {
-         for ( auto &input : node->inputs ) {
-            input.node = node;
-            input.kind = PinKind::Input;
-         }
-         for ( auto &output : node->outputs ) {
-            output.node = node;
-            output.kind = PinKind::Output;
-         }
-      }
+      //void buildNode( GraphNode *node ) noexcept
+      //{
+      //   for ( auto &input : node->inputs ) {
+      //      input.node = node;
+      //      input.kind = PinKind::Input;
+      //   }
+      //   for ( auto &output : node->outputs ) {
+      //      output.node = node;
+      //      output.kind = PinKind::Output;
+      //   }
+      //}
 
       ImColor getIconColor( PinType type ) const noexcept;
 
@@ -157,19 +159,19 @@ namespace crimild::editor {
       void renderCreateNewNodeMenu( void ) noexcept;
       void showOrdinals( void ) noexcept;
 
-      inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
-      {
-         m_nodeTouchTime[ id ] = m_touchTime;
-      }
+      //inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
+      //{
+      //   m_nodeTouchTime[ id ] = m_touchTime;
+      //}
 
-      inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
-      {
-         auto it = m_nodeTouchTime.find( id );
-         if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
-            return ( m_touchTime - it->second ) / m_touchTime;
-         }
-         return 0.0f;
-      }
+      //inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
+      //{
+      //   auto it = m_nodeTouchTime.find( id );
+      //   if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
+      //      return ( m_touchTime - it->second ) / m_touchTime;
+      //   }
+      //   return 0.0f;
+      //}
 
       void showLeftPanel( void );
       void showStyleEditor();
@@ -187,13 +189,13 @@ namespace crimild::editor {
 #if GRAPH_EDITOR_BLUEPRINTS
       int m_nextId = 1;
       const int m_pinIconSize = 24;
-      std::vector< GraphNode > m_nodes;
-      std::vector< Link > m_links;
+      //std::vector< GraphNode > m_nodes;
+      //std::vector< Link > m_links;
       ImTextureID m_headerBackground = nullptr;
       ImTextureID m_saveIcon = nullptr;
       ImTextureID m_restoreIcon = nullptr;
       const float m_touchTime = 1.0f;
-      std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
+      //std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
       bool m_showOrdinals = false;
 
       bool m_createNewNode = false;
