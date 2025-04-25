@@ -35,11 +35,10 @@ namespace crimild::editor {
       std::string name;
       PinType type;
       PinKind kind;
+
+      std::function< void( Pin *src, Pin *dst ) > onConnect;
+      std::function< void( Pin *src, Pin *dst ) > onDisconnect;
    };
-
-   struct InputPin : public Pin { };
-
-   struct OutputPin : public Pin { };
 
    // enum class NodeType {
    //   Blueprint,

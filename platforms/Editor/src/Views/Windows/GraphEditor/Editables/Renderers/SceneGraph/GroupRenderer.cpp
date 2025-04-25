@@ -11,12 +11,45 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
       return;
    }
 
-   if ( !editable->hasOutputPin( "self" ) ) {
-      editable->setOutputPin( "self", OutputPin { ctx.getNextPinId(), editable, "self", PinType::Flow } );
+   if ( !editable->hasInputPin( "parent" ) ) {
+      editable->setInputPin(
+         "parent",
+         Pin {
+            .id = ctx.getNextPinId(),
+            .owner = editable,
+            .name = "parent",
+            .type = PinType::Flow,
+            .kind = PinKind::Input,
+            .onConnect = [ editable, entity ]( Pin *src, Pin *dst ) {
+              // TODO
+            },
+            .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) {
+              // TODO 
+            },
+         }
+      );
    }
 
-   if ( !editable->hasInputPin( "children" ) ) {
-      editable->setInputPin( "children", InputPin { ctx.getNextPinId(), editable, "children", PinType::Flow } );
+   if ( !editable->hasOutputPin( "children" ) ) {
+      editable->setOutputPin( 
+          "children", 
+          Pin { 
+            .id = ctx.getNextPinId(), 
+            .owner = editable, 
+            .name = "children", 
+            .type = PinType::Flow, 
+            .kind = PinKind::Output,
+            .onConnect = [ editable, entity ]( Pin *src, Pin *dst ) {
+              CRIMILD_LOG_DEBUG( "Connected" );
+              auto group = static_pointer_cast< Group >( src->owner->getOwner() );
+              auto node = static_pointer_cast< Node >( dst->owner->getOwner() );
+              group->attachNode( node );
+            },
+            .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) {
+              CRIMILD_LOG_DEBUG( "Disconnected" );
+            },
+         }
+      );
    }
 
    const float rounding = 10.0f;
@@ -39,13 +72,13 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::NodeId id = entity->getUniqueID();
 
-   std::vector< InputPin > inputs { editable->getInputPin( "children" ) };
-   std::vector< OutputPin > outputs { editable->getOutputPin( "self" ) };
+   std::vector< Pin > inputs { editable->getInputPin( "parent" ) };
+   std::vector< Pin > outputs { editable->getOutputPin( "children" ) };
 
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
 
-   renderOutputs( outputs );
+   renderInputs( inputs );
 
    ImGui::BeginHorizontal( "content_frame" );
    ImGui::Spring( 1, padding );
@@ -63,7 +96,7 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   renderInputs( inputs );
+   renderOutputs( outputs );
 
    ImGui::EndVertical();
 
@@ -72,7 +105,7 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
    NodeEditor::PopStyleColor( 4 );
 }
 
-void GroupRenderer::renderInputs( std::vector< InputPin > &inputs )
+void GroupRenderer::renderInputs( std::vector< Pin > &inputs )
 {
    if ( inputs.empty() ) {
       return;
@@ -89,8 +122,8 @@ void GroupRenderer::renderInputs( std::vector< InputPin > &inputs )
       ImGui::Dummy( ImVec2( padding, padding ) );
       inputsRect = ImGui_GetItemRect();
       ImGui::Spring( 1, 0 );
-      inputsRect.Min.y += padding;
-      inputsRect.Max.y += padding;
+      inputsRect.Min.y -= padding;
+      inputsRect.Max.y -= padding;
 
       NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersAll );
       NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
@@ -122,7 +155,7 @@ void GroupRenderer::renderInputs( std::vector< InputPin > &inputs )
    ImGui::EndHorizontal();
 }
 
-void GroupRenderer::renderOutputs( std::vector< OutputPin > &outputs )
+void GroupRenderer::renderOutputs( std::vector< Pin > &outputs )
 {
    if ( outputs.empty() ) {
       return;
@@ -140,8 +173,8 @@ void GroupRenderer::renderOutputs( std::vector< OutputPin > &outputs )
       ImGui::Dummy( ImVec2( padding, padding ) );
       outputsRect = ImGui_GetItemRect();
       ImGui::Spring( 1, 0 );
-      outputsRect.Min.y -= padding;
-      outputsRect.Max.y -= padding;
+      outputsRect.Min.y += padding;
+      outputsRect.Max.y += padding;
 
       NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop );
       NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
@@ -177,21 +210,21 @@ void GroupRenderer::renderLinks( GraphEditorContext &ctx, Editable *editable )
 {
    auto entity = editable->getOwner< crimild::Group >();
 
-   if ( !editable->hasInputPin( "children" ) ) {
+   if ( !editable->hasOutputPin( "children" ) ) {
       return;
    }
 
-   auto &childrenPin = editable->getInputPin( "children" );
+   auto &childrenPin = editable->getOutputPin( "children" );
 
    entity->forEachNode(
       [ & ]( auto child ) {
          if ( child != nullptr ) {
             if ( !m_links.contains( child->getUniqueID() ) ) {
                if ( auto editable = child->getExtension< Editable >() ) {
-                  if ( !editable->hasOutputPin( "self" ) ) {
+                  if ( !editable->hasInputPin( "parent" ) ) {
                      return;
                   }
-                  auto &childPin = editable->getOutputPin( "self" );
+                  auto &childPin = editable->getInputPin( "parent" );
                   m_links[ child->getUniqueID() ] = Link( ctx.getNextLinkId(), childrenPin.id, childPin.id );
                } else {
                   return;

@@ -1475,21 +1475,23 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
                   NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
 
                } else if ( endPin->kind == startPin->kind ) {
-                  showLabel( "x Incomtabile Pin Kind", ImColor( 45, 32, 32, 180 ) );
+                  showLabel( "x Incompatible Pin Kind", ImColor( 45, 32, 32, 180 ) );
                   NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
                } else if ( endPin->owner == startPin->owner ) [[unlikely]] {
-                  showLabel( "x Cannot connecto to self", ImColor( 45, 32, 32, 180 ) );
+                  showLabel( "x Cannot connect to self", ImColor( 45, 32, 32, 180 ) );
                   NodeEditor::RejectNewItem( ImColor( 255, 0, 0 ), 2.0f );
                } else if ( endPin->type != startPin->type ) {
                   showLabel( "x Incompatible Pin Type", ImColor( 45, 32, 32, 180 ) );
                   NodeEditor::RejectNewItem( ImColor( 255.0f, 128.0f, 128.0f, 1.0f ) );
                } else {
                   showLabel( "+ Create Link", ImColor( 32, 45, 32, 180 ) );
-                  assert( false );
-                  //if ( NodeEditor::AcceptNewItem( ImColor( 128, 255, 128 ), 4.0f ) ) {
-                  //   m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
-                  //   m_links.back().color = getIconColor( startPin->type );
-                  //}
+                  if ( NodeEditor::AcceptNewItem( ImColor( 128, 255, 128 ), 4.0f ) ) {
+                     if ( auto callback = startPin->onConnect ) {
+                        callback( startPin, endPin );
+                     }
+                     //m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
+                     //m_links.back().color = getIconColor( startPin->type );
+                  }
                }
             }
          }

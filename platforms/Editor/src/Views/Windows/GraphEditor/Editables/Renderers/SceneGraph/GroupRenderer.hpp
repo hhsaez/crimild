@@ -17,8 +17,8 @@ namespace crimild::editor::editables {
       virtual void renderLinks( GraphEditorContext &ctx, Editable *editable ) override;
 
    private:
-      void renderInputs( std::vector< InputPin > &inputs );
-      void renderOutputs( std::vector< OutputPin > &outputs );
+      void renderInputs( std::vector< Pin > &inputs );
+      void renderOutputs( std::vector< Pin > &outputs );
 
    private:
       std::unordered_map< UniqueID, Link > m_links;

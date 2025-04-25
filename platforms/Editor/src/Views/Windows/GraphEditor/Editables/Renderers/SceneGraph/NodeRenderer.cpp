@@ -11,8 +11,8 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
       return;
    }
 
-   if ( !editable->hasOutputPin( "self" ) ) {
-      editable->setOutputPin( "self", OutputPin { ctx.getNextPinId(), editable, "self", PinType::Flow } );
+   if ( !editable->hasInputPin( "parent" ) ) {
+      editable->setInputPin( "parent", Pin { ctx.getNextPinId(), editable, "self", PinType::Flow, PinKind::Input } );
    }
 
    const float rounding = 10.0f;
@@ -35,13 +35,13 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
 
    NodeEditor::NodeId id = entity->getUniqueID();
 
-   std::vector< InputPin > inputs;
-   std::vector< OutputPin > outputs { editable->getOutputPin( "self" ) };
+   std::vector< Pin > inputs { editable->getInputPin( "parent" ) };
+   std::vector< Pin > outputs;
 
    NodeEditor::BeginNode( id );
    ImGui::BeginVertical( id.AsPointer() );
 
-   renderOutputs( outputs );
+   renderInputs( inputs );
 
    ImGui::BeginHorizontal( "content_frame" );
    ImGui::Spring( 1, padding );
@@ -59,7 +59,7 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    ImGui::Spring( 1, padding );
    ImGui::EndHorizontal();
 
-   renderInputs( inputs );
+   renderOutputs( outputs );
 
    ImGui::EndVertical();
 
@@ -68,7 +68,7 @@ void NodeRenderer::render( GraphEditorContext &ctx, Editable *editable )
    NodeEditor::PopStyleColor( 4 );
 }
 
-void NodeRenderer::renderInputs( std::vector< InputPin > &inputs )
+void NodeRenderer::renderInputs( std::vector< Pin > &inputs )
 {
    if ( inputs.empty() ) {
       return;
@@ -85,8 +85,8 @@ void NodeRenderer::renderInputs( std::vector< InputPin > &inputs )
       ImGui::Dummy( ImVec2( padding, padding ) );
       inputsRect = ImGui_GetItemRect();
       ImGui::Spring( 1, 0 );
-      inputsRect.Min.y += padding;
-      inputsRect.Max.y += padding;
+      inputsRect.Min.y -= padding;
+      inputsRect.Max.y -= padding;
 
       NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersAll );
       NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
@@ -118,7 +118,7 @@ void NodeRenderer::renderInputs( std::vector< InputPin > &inputs )
    ImGui::EndHorizontal();
 }
 
-void NodeRenderer::renderOutputs( std::vector< OutputPin > &outputs )
+void NodeRenderer::renderOutputs( std::vector< Pin > &outputs )
 {
    if ( outputs.empty() ) {
       return;
@@ -136,8 +136,8 @@ void NodeRenderer::renderOutputs( std::vector< OutputPin > &outputs )
       ImGui::Dummy( ImVec2( padding, padding ) );
       outputsRect = ImGui_GetItemRect();
       ImGui::Spring( 1, 0 );
-      outputsRect.Min.y -= padding;
-      outputsRect.Max.y -= padding;
+      outputsRect.Min.y += padding;
+      outputsRect.Max.y += padding;
 
       NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersTop );
       NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );

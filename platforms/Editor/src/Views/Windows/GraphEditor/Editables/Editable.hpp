@@ -35,12 +35,12 @@ namespace crimild::editor::editables {
       virtual ~Editable( void ) = default;
 
       [[nodiscard]] bool hasInputPin( std::string pinName ) const { return m_inputs.contains( pinName ); }
-      [[nodiscard]] inline InputPin &getInputPin( std::string pinName ) { return m_inputs.at( pinName ); }
-      void inline setInputPin( std::string pinName, InputPin pin ) { m_inputs[ pinName ] = pin; }
+      [[nodiscard]] inline Pin &getInputPin( std::string pinName ) { return m_inputs.at( pinName ); }
+      void inline setInputPin( std::string pinName, Pin pin ) { m_inputs[ pinName ] = pin; }
 
       [[nodiscard]] bool hasOutputPin( std::string pinName ) const { return m_outputs.contains( pinName ); }
-      [[nodiscard]] inline OutputPin &getOutputPin( std::string pinName ) { return m_outputs.at( pinName ); }
-      void inline setOutputPin( std::string pinName, OutputPin pin ) { m_outputs[ pinName ] = pin; }
+      [[nodiscard]] inline Pin &getOutputPin( std::string pinName ) { return m_outputs.at( pinName ); }
+      void inline setOutputPin( std::string pinName, Pin pin ) { m_outputs[ pinName ] = pin; }
 
       [[nodiscard]] Pin *findPin( ax::NodeEditor::PinId id )
       {
@@ -71,8 +71,8 @@ namespace crimild::editor::editables {
       bool m_initialized = false;
       Vector2 m_position = Vector2::Constants::ZERO;
 
-      std::unordered_map< std::string, InputPin > m_inputs;
-      std::unordered_map< std::string, OutputPin > m_outputs;
+      std::unordered_map< std::string, Pin > m_inputs;
+      std::unordered_map< std::string, Pin > m_outputs;
 
       std::shared_ptr< Renderer > m_renderer;
       // ax::NodeEditor::NodeId m_id;
