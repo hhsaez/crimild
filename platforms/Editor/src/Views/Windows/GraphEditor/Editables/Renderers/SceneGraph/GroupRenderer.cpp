@@ -217,7 +217,7 @@ void GroupRenderer::renderLinks( GraphEditorContext &ctx, Editable *editable )
    auto &childrenPin = editable->getOutputPin( "children" );
 
    entity->forEachNode(
-      [ & ]( auto child ) {
+      [ & ]( Node *child ) {
          if ( child != nullptr ) {
             if ( !m_links.contains( child->getUniqueID() ) ) {
                if ( auto editable = child->getExtension< Editable >() ) {
