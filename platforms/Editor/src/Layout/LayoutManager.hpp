@@ -39,7 +39,14 @@ namespace crimild::editor {
         LayoutManager( void ) noexcept;
         ~LayoutManager( void ) noexcept;
 
-        std::shared_ptr< Layout > &getCurrentLayout( void ) noexcept { return m_layout; }
+        //std::shared_ptr< Layout > &getCurrentLayout( void ) noexcept { return m_layout; }
+
+        /**
+        * @brief Initialize layout after main window has been created
+        */
+        void init( void );
+
+        void render( void );
 
     private:
         std::shared_ptr< Layout > m_layout;

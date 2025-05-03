@@ -434,9 +434,7 @@ bool renderFrame(
    vulkanObjects.renderDevice->setCurrentFrameIndex( wd->FrameIndex );
    vulkanObjects.renderDevice->getCache()->onBeforeFrame();
 
-   if ( auto layout = layoutManager->getCurrentLayout() ) {
-      layout->draw();
-   }
+   layoutManager->render();
 
    vulkanObjects.renderDevice->getCache()->onAfterFrame();
 
@@ -563,27 +561,29 @@ int main( int argc, char **argv )
    glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
    const int windowWidth = [ & ] {
       int width = 2560;
-      if ( auto layout = layoutManager->getCurrentLayout() ) {
-         if ( layout->getExtent().width > 0 ) {
-            width = layout->getExtent().width;
-         }
-      }
+      // TODO: Get initial size from previously saved layout
+      //if ( auto layout = layoutManager->getCurrentLayout() ) {
+      //   if ( layout->getExtent().width > 0 ) {
+      //      width = layout->getExtent().width;
+      //   }
+      //}
       return width;
    }();
    const int windowHeight = [ & ] {
       int height = 1440;
-      if ( auto layout = layoutManager->getCurrentLayout() ) {
-         if ( layout->getExtent().height > 0 ) {
-            height = layout->getExtent().height;
-         }
-      }
+      // TODO: Get initial size from previously saved layout
+      // if ( auto layout = layoutManager->getCurrentLayout() ) {
+      //   if ( layout->getExtent().height > 0 ) {
+      //      height = layout->getExtent().height;
+      //   }
+      //}
       return height;
    }();
    const std::string windowTitle = [ & ] {
       std::string title = "Crimild Editor";
-      if ( auto layout = layoutManager->getCurrentLayout() ) {
-         title += " (" + layout->getName() + ")";
-      }
+      //if ( auto layout = layoutManager->getCurrentLayout() ) {
+      //   title += " (" + layout->getName() + ")";
+      //}
       return title;
    }();
    GLFWwindow *window = glfwCreateWindow( windowWidth, windowHeight, windowTitle.c_str(), NULL, NULL );
@@ -655,9 +655,9 @@ int main( int argc, char **argv )
 
    // Our state
 
-   if ( auto layout = layoutManager->getCurrentLayout() ) {
-      layout->makeCurrent();
-   }
+   //if ( auto layout = layoutManager->getCurrentLayout() ) {
+   //   layout->makeCurrent();
+   //}
 
    // Start simulation to init all systems, but then pause it.
    simulation->start();

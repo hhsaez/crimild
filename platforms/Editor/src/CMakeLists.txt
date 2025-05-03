@@ -73,6 +73,11 @@ target_sources(
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
 
+    Views/Workspaces/Workspace.hpp
+    Views/Workspaces/Workspace.cpp
+    Views/Workspaces/WorkspaceManager.hpp
+    Views/Workspaces/WorkspaceManager.cpp
+
     Layout/Layout.hpp
     Layout/Layout.cpp
     Layout/LayoutManager.hpp
