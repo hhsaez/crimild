@@ -70,7 +70,7 @@ namespace crimild {
             // do nothing
         }
 
-        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        template< template< typename > class OtherDerived, ArithmeticType U >
         constexpr explicit ColorRGBAImpl( const Tuple4< OtherDerived, U > &other ) noexcept
             : ColorRGBAImpl( other.x, other.y, other.z, other.w )
         {

@@ -75,11 +75,11 @@ namespace crimild {
         constexpr Point3Impl( const Point3Impl< U > &other ) noexcept
             : Tuple3< Point3Impl, T >( other ) { }
 
-        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        template< template< typename > class OtherDerived, ArithmeticType U >
         constexpr explicit Point3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
             : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
 
-        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        template< template< typename > class OtherDerived, ArithmeticType U >
         constexpr Point3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
             : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
 

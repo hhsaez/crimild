@@ -90,11 +90,11 @@ namespace crimild {
         constexpr explicit Vector3Impl( U value ) noexcept
             : Tuple3< Vector3Impl, T >( value ) { }
 
-        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        template< template< typename > class OtherDerived, ArithmeticType U >
         constexpr explicit Vector3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
             : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
-        template< template< ArithmeticType > class OtherDerived, ArithmeticType U >
+        template< template< typename > class OtherDerived, ArithmeticType U >
         constexpr explicit Vector3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
             : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
