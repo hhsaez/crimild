@@ -32,6 +32,14 @@
 
 #include <set>
 
+#ifndef VK_EXT_METAL_SURFACE_EXTENSION_NAME
+    #define VK_EXT_METAL_SURFACE_EXTENSION_NAME "VK_EXT_metal_surface"
+#endif
+
+#ifndef VK_MVK_MACOS_SURFACE_EXTENSION_NAME
+    #define VK_MVK_MACOS_SURFACE_EXTENSION_NAME "VK_MVK_macos_surface"
+#endif
+
 using namespace crimild::vulkan;
 
 #define CRIMILD_VULKAN_ERROR_STRING( x ) \
@@ -521,8 +529,8 @@ utils::ExtensionArray utils::getRequiredExtensions( void ) noexcept
     };
 
 #if defined( CRIMILD_PLATFORM_OSX )
-    // TODO: no macro for platform extensions?
-    extensions.push_back( "VK_MVK_macos_surface" );
+    extensions.push_back( VK_EXT_METAL_SURFACE_EXTENSION_NAME ); // DEPRECATED
+    extensions.push_back( VK_EXT_METAL_SURFACE_EXTENSION_NAME );
     extensions.push_back( VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME );
 #elif defined( CRIMILD_PLATFORM_WIN32 )
     extensions.push_back( "VK_KHR_win32_surface" );
