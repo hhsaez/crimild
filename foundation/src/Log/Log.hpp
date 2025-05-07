@@ -31,6 +31,7 @@
 #include "Common/Macros.hpp"
 #include "Common/StringUtils.hpp"
 
+#include <chrono>
 #include <memory>
 #include <sstream>
 #include <string>
