@@ -2,43 +2,12 @@ crimild_trace()
 
 find_package(Vulkan REQUIRED COMPONENTS glslang SPIRV-Tools)
 
-# if(NOT Vulkan_FOUND)
-# if(WIN32)
-# find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${PROJECT_SOURCE_DIR}/third-party/vulkan/lib)
-
-# if(Vulkan_LIBRARY)
-# message("Using bundled Vulkan libraries")
-# set(Vulkan_FOUND ON)
-# set(Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include)
-# endif()
-# elseif(LINUX)
-# find_library(Vulkan_LIBRARY NAMES vulkan HINTS "$ENV{VULKAN_SDK}/lib" "${PROJECT_SOURCE_DIR}/third-party/vulkan/lib")
-
-# if(Vulkan_LIBRARY)
-# message("Using bundled Vulkan libraries")
-# set(Vulkan_FOUND ON)
-# set(Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include)
-# endif()
-# elseif(APPLE)
-# message("Using bundled Vulkan libraries")
-# set(Vulkan_FOUND ON)
-# set(Vulkan_LIBRARY ${PROJECT_SOURCE_DIR}/third-party/vulkan/lib/libvulkan.dylib)
-# set(Vulkan_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third-party/vulkan/include)
-# endif()
-# endif()
 if(NOT Vulkan_FOUND)
     message(FATAL_ERROR "Could not find Vulkan libraries")
 else()
     message(STATUS ${Vulkan_LIBRARY})
 endif()
 
-# find_package(GLSLang)
-
-# if(NOT GLSLang_FOUND)
-# message(FATAL_ERROR "Could not find glslang libraries")
-# else()
-# message(STATUS ${GLSLang_LIBRARY})
-# endif()
 add_library(crimild_vulkan OBJECT)
 
 target_sources(
@@ -132,13 +101,6 @@ target_sources(
 target_include_directories(
     crimild_vulkan
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-
-    # Make sure to include GLSLang headers before Vulkan's so there is no conflict and
-    # the app will run correctly. Otherwise, you may seem errors when compiling shaders
-    # due to invalid resource settings (like when using gl_VertexIdentifier in arrays)
-    # PUBLIC ${PROJECT_SOURCE_DIR}/third-party/glslang
-    # PUBLIC ${Vulkan_INCLUDE_DIRS}
-    # PUBLIC ${glslang_INCLUDE_DIRS}
 )
 
 target_link_libraries(
@@ -150,17 +112,9 @@ target_link_libraries(
 
     # Vulkan libraries are made public so they can be used in other projects, like
     # the editor or players
-    # PUBLIC ${Vulkan_LIBRARY}
     PUBLIC Vulkan::Vulkan
     PUBLIC Vulkan::glslang
     PUBLIC Vulkan::SPIRV-Tools
-
-    # PUBLIC glslang
-    # PUBLIC SPIRV
 )
 
 add_library(Crimild::Vulkan ALIAS crimild_vulkan)
-
-# Keep IDEs folders clean
-# set_target_properties( glslang PROPERTIES FOLDER extern )
-# set_target_properties( SPIRV PROPERTIES FOLDER extern )

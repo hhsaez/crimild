@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.0)
 
 # Register custom scripts
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -43,18 +43,6 @@ add_subdirectory(core)
 # Configure Vulkan
 if(CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER)
 	add_definitions(-DCRIMILD_ENABLE_VULKAN=1)
-
-	if(NOT APPLE)
-		set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "Skip installation")
-		set(ENABLE_CTEST OFF CACHE BOOL "Enables testing")
-		set(BUILD_EXTERNAL OFF CACHE BOOL "Build external dependencies in /External")
-		set(ENABLE_SPVREMAPPER OFF CACHE BOOL "Enables building of SPVRemapper")
-		set(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "Builds glslangValidator and spirv-remap")
-		set(ALLOW_EXTERNAL_SPIRV_TOOLS ON CACHE BOOL "Allows to build against installed SPIRV-Tools-opt. This is unsupported if the commit isn't the one in known_good.json")
-		set(ENABLE_OPT OFF CACHE BOOL "Enables building of SPIRV-Tools-opt")
-		add_subdirectory(${Crimild_SOURCE_DIR}/third-party/glslang)
-	endif()
-
 	add_subdirectory(vulkan)
 endif()
 
