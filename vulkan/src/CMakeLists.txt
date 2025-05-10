@@ -2,10 +2,42 @@ crimild_trace()
 
 find_package(Vulkan REQUIRED COMPONENTS glslang SPIRV-Tools)
 
+set(VULKAN_SDK $ENV{VULKAN_SDK})
+
 if(NOT Vulkan_FOUND)
     message(FATAL_ERROR "Could not find Vulkan libraries")
 else()
     message(STATUS ${Vulkan_LIBRARY})
+endif()
+
+if(NOT TARGET Vulkan::SPIRV-Tools-opt)
+    # Create the SPIRV-Tools-opt target
+    add_library(Vulkan::SPIRV-Tools-opt UNKNOWN IMPORTED)
+    set_target_properties(Vulkan::SPIRV-Tools-opt PROPERTIES
+        IMPORTED_LOCATION "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
+    )
+    if(EXISTS "${VULKAN_SDK}/Lib/SPIRV-Tools-optd.lib")
+        set_property(TARGET Vulkan::SPIRV-Tools-opt APPEND PROPERTY
+            IMPORTED_CONFIGURATIONS DEBUG
+        )
+        set_target_properties(Vulkan::SPIRV-Tools-opt PROPERTIES
+            IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/SPIRV-Tools-optd.lib"
+        )
+    endif()
+endif()
+
+# Same for glslang and SPIRV-Tools if needed
+if(NOT TARGET Vulkan::glslang)
+    add_library(Vulkan::glslang UNKNOWN IMPORTED)
+    set_target_properties(Vulkan::glslang PROPERTIES
+        IMPORTED_LOCATION "${VULKAN_SDK}/Lib/glslang.lib"
+    )
+    set_property(TARGET Vulkan::glslang APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG
+    )
+    set_target_properties(Vulkan::glslang PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/glslangd.lib"
+    )
 endif()
 
 add_library(crimild_vulkan OBJECT)
@@ -115,6 +147,7 @@ target_link_libraries(
     PUBLIC Vulkan::Vulkan
     PUBLIC Vulkan::glslang
     PUBLIC Vulkan::SPIRV-Tools
+    PUBLIC Vulkan::SPIRV-Tools-opt
 )
 
 add_library(Crimild::Vulkan ALIAS crimild_vulkan)
