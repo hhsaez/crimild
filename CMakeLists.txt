@@ -34,6 +34,13 @@ if(CRIMILD_BUILD_TESTS)
 	include(crimild_configure_tests)
 endif()
 
+# Windows-specific compiler flags
+if(WIN32)
+    # Set MSVC runtime library flags
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+endif()
+
 # Add subdirectories
 add_subdirectory(foundation)
 add_subdirectory(mathematics)
