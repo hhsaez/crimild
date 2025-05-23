@@ -36,9 +36,17 @@ endif()
 
 # Windows-specific compiler flags
 if(WIN32)
-    # Set MSVC runtime library flags
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+    # Set runtime library configuration for all targets
+    add_compile_options(
+        $<$<CONFIG:Debug>:/MDd>
+        $<$<CONFIG:Release>:/MD>
+        $<$<CONFIG:MinSizeRel>:/MD>
+        $<$<CONFIG:RelWithDebInfo>:/MD>
+    )
+
+	# Force use of MSVC dynamic runtime libraries
+    cmake_policy(SET CMP0091 NEW)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
 # Add subdirectories
