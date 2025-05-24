@@ -62,16 +62,7 @@ jobs:
         with:
           vulkan-query-version: 1.4.304.1
           vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Cross, SPIRV-Tools, SPIRV-Reflect, SPIRV-Headers
-          vulkan-use-cache: false
-
-      - if: matrix.os == 'windows-latest'
-        name: Validate Vulkan SDK
-        shell: cmd
-        run: |
-          echo "VULKAN_SDK=%VULKAN_SDK%"
-          echo "VULKAN_SDK_VERSION=%VULKAN_SDK_VERSION%"
-          echo "PATH=%PATH%"
-          dir %VULKAN_SDK%
+          vulkan-use-cache: true
 
       - name: Build
         run: |
