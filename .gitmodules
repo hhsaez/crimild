@@ -11,10 +11,6 @@
 	url = git@github.com:hhsaez/imgui.git
 	ignore = dirty
 	branch = crimild
-[submodule "third-party/glslang"]
-	path = third-party/glslang
-	url = git@github.com:KhronosGroup/glslang.git
-    ignore = dirty
 [submodule "third-party/googletest"]
 	path = third-party/googletest
 	url = https://github.com/google/googletest.git

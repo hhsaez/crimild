@@ -35,9 +35,9 @@
 // That way, the compiler uses the header files that are in `third-party` instead.
 // I definitely need to fix this
 
-#include <SPIRV/GlslangToSpv.h>
 #include <fstream>
 #include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 #include <iostream>
 #include <string>
 #include <vector>
