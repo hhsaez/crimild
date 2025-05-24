@@ -16,8 +16,8 @@ if (WIN32)
         add_library(Vulkan::SPIRV-Tools-opt UNKNOWN IMPORTED)
         set_target_properties(Vulkan::SPIRV-Tools-opt PROPERTIES
             IMPORTED_LOCATION_RELEASE "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
-            IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/SPIRV-Tools-optd.lib"
-            IMPORTED_LOCATION "${VULKAN_SDK}/Lib/$<IF:$<CONFIG:Debug>,SPIRV-Tools-optd.lib,SPIRV-Tools-opt.lib>"
+            IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
+            IMPORTED_LOCATION "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
         )
     endif()
 
