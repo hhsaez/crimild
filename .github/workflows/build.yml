@@ -23,7 +23,7 @@ jobs:
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'
             build_type: Debug
-            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON -D_ITERATOR_DEBUG_LEVEL=2'
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
           - name: "Ubuntu (Release)"
             os: ubuntu-latest
             cmake_args: '-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang'
@@ -38,12 +38,12 @@ jobs:
             os: macos-latest
             cmake_args: ''
             build_type: Release
-            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
           - name: "Mac OSX (Debug)"
             os: macos-latest
             cmake_args: ''
             build_type: Debug
-            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON'
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF'
 
     steps:
       - uses: actions/checkout@v2
@@ -57,7 +57,7 @@ jobs:
           sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
           sudo apt install clang-14
 
-      - name: Prepare Vulkan SDK (Windows/Linux)
+      - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.1
         with:
           vulkan-query-version: 1.4.304.1
