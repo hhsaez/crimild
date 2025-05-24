@@ -10,24 +10,26 @@ else()
     message(STATUS ${Vulkan_LIBRARY})
 endif()
 
-if(NOT TARGET Vulkan::SPIRV-Tools-opt)
-    # Create the SPIRV-Tools-opt target
-    add_library(Vulkan::SPIRV-Tools-opt UNKNOWN IMPORTED)
-    set_target_properties(Vulkan::SPIRV-Tools-opt PROPERTIES
-        IMPORTED_LOCATION_RELEASE "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
-        IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/SPIRV-Tools-optd.lib"
-        IMPORTED_LOCATION "${VULKAN_SDK}/Lib/$<IF:$<CONFIG:Debug>,SPIRV-Tools-optd.lib,SPIRV-Tools-opt.lib>"
-    )
-endif()
+if (WIN32)
+    if(NOT TARGET Vulkan::SPIRV-Tools-opt)
+        # Create the SPIRV-Tools-opt target
+        add_library(Vulkan::SPIRV-Tools-opt UNKNOWN IMPORTED)
+        set_target_properties(Vulkan::SPIRV-Tools-opt PROPERTIES
+            IMPORTED_LOCATION_RELEASE "${VULKAN_SDK}/Lib/SPIRV-Tools-opt.lib"
+            IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/SPIRV-Tools-optd.lib"
+            IMPORTED_LOCATION "${VULKAN_SDK}/Lib/$<IF:$<CONFIG:Debug>,SPIRV-Tools-optd.lib,SPIRV-Tools-opt.lib>"
+        )
+    endif()
 
-# Same for glslang and SPIRV-Tools if needed
-if(NOT TARGET Vulkan::glslang)
-    add_library(Vulkan::glslang UNKNOWN IMPORTED)
-    set_target_properties(Vulkan::glslang PROPERTIES
-        IMPORTED_LOCATION_RELEASE "${VULKAN_SDK}/Lib/glslang.lib"
-        IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/glslangd.lib"
-        IMPORTED_LOCATION "${VULKAN_SDK}/Lib/$<IF:$<CONFIG:Debug>,glslangd.lib,glslang.lib>"
-    )
+    # Same for glslang and SPIRV-Tools if needed
+    if(NOT TARGET Vulkan::glslang)
+        add_library(Vulkan::glslang UNKNOWN IMPORTED)
+        set_target_properties(Vulkan::glslang PROPERTIES
+            IMPORTED_LOCATION_RELEASE "${VULKAN_SDK}/Lib/glslang.lib"
+            IMPORTED_LOCATION_DEBUG "${VULKAN_SDK}/Lib/glslangd.lib"
+            IMPORTED_LOCATION "${VULKAN_SDK}/Lib/$<IF:$<CONFIG:Debug>,glslangd.lib,glslang.lib>"
+        )
+    endif()
 endif()
 
 add_library(crimild_vulkan OBJECT)

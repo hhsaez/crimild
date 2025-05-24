@@ -51,13 +51,23 @@ jobs:
           submodules: recursive
 
       - if: matrix.os == 'ubuntu-latest'
-        name: Setup
+        name: Setup Linux
         run: |
           sudo apt update
           sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
           sudo apt install clang-14
 
-      - name: Prepare Vulkan SDK
+      - if: matrix.os == 'macos-latest'
+        name: Setup macOS
+        run: |
+          brew update
+          brew install --cask molten-vk 
+          brew install glslang spirv-tools spirv-cross
+          echo "VULKAN_SDK=$(brew --prefix molten-vk)" >> $GITHUB_ENV
+          echo "$(brew --prefix molten-vk)/bin" >> $GITHUB_PATH
+
+      - if: matrix.os != 'macos-latest'
+        name: Prepare Vulkan SDK (Windows/Linux)
         uses: humbletim/setup-vulkan-sdk@v1.2.1
         with:
           vulkan-query-version: 1.4.304.1
