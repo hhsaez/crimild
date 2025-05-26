@@ -562,7 +562,7 @@ int main( int argc, char **argv )
    const int windowWidth = [ & ] {
       int width = 2560;
       // TODO: Get initial size from previously saved layout
-      //if ( auto layout = layoutManager->getCurrentLayout() ) {
+      // if ( auto layout = layoutManager->getCurrentLayout() ) {
       //   if ( layout->getExtent().width > 0 ) {
       //      width = layout->getExtent().width;
       //   }
@@ -581,9 +581,9 @@ int main( int argc, char **argv )
    }();
    const std::string windowTitle = [ & ] {
       std::string title = "Crimild Editor";
-      //if ( auto layout = layoutManager->getCurrentLayout() ) {
-      //   title += " (" + layout->getName() + ")";
-      //}
+      // if ( auto layout = layoutManager->getCurrentLayout() ) {
+      //    title += " (" + layout->getName() + ")";
+      // }
       return title;
    }();
    GLFWwindow *window = glfwCreateWindow( windowWidth, windowHeight, windowTitle.c_str(), NULL, NULL );
@@ -655,9 +655,9 @@ int main( int argc, char **argv )
 
    // Our state
 
-   //if ( auto layout = layoutManager->getCurrentLayout() ) {
-   //   layout->makeCurrent();
-   //}
+   // if ( auto layout = layoutManager->getCurrentLayout() ) {
+   //    layout->makeCurrent();
+   // }
 
    // Start simulation to init all systems, but then pause it.
    simulation->start();
@@ -673,6 +673,13 @@ int main( int argc, char **argv )
          // If the application is minimized or not visible, block main thread until we
          // receive events
          glfwWaitEvents();
+      }
+
+      if ( auto project = crimild::editor::Editor::getInstance()->getProject() ) {
+         auto projectName = project->getName();
+         if ( !projectName.empty() ) {
+            glfwSetWindowTitle( window, ( "Crimild (" + projectName + ")" ).c_str() );
+         }
       }
 
       if ( !renderFrame( window, io, wd, jobScheduler, simulation, vulkanObjects, layoutManager ) ) {
