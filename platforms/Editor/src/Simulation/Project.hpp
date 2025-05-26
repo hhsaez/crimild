@@ -33,59 +33,59 @@
 
 namespace crimild {
 
-    namespace editor {
+   namespace editor {
 
-        class Project
-            : public coding::Codable,
-              public Named,
-              public Versionable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::editor::Project )
-        public:
-            Project( void ) noexcept;
-            Project( std::string name, const Version &version ) noexcept;
-            virtual ~Project( void ) = default;
+      class Project
+         : public coding::Codable,
+           public Named,
+           public Versionable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::editor::Project )
+      public:
+         Project( void ) noexcept;
+         Project( std::string name, const Version &version ) noexcept;
+         virtual ~Project( void ) = default;
 
-            /**
-             * \brief Get the absolute path to the project.crimild file
-             */
-            inline const std::filesystem::path &getFilePath( void ) const noexcept { return m_filePath; }
+         /**
+          * \brief Get the absolute path to the project.crimild file
+          */
+         inline const std::filesystem::path &getFilePath( void ) const noexcept { return m_filePath; }
 
-            inline std::filesystem::path getRootDirectory( void ) const noexcept { return m_filePath.parent_path(); }
-            inline std::filesystem::path getAssetsDirectory( void ) const noexcept { return getRootDirectory() / "Assets/"; }
-            inline std::filesystem::path getScenesDirectory( void ) const noexcept { return getAssetsDirectory() / "Scenes/"; }
+         inline std::filesystem::path getRootDirectory( void ) const noexcept { return m_filePath.parent_path(); }
+         [[deprecated]] inline std::filesystem::path getAssetsDirectory( void ) const noexcept { return getRootDirectory() / "Assets/"; }
+         [[deprecated]] inline std::filesystem::path getScenesDirectory( void ) const noexcept { return getAssetsDirectory() / "Scenes/"; }
 
-            inline void setCurrentSceneName( std::string_view sceneName ) noexcept { m_currentSceneName = sceneName; }
-            inline const std::string &getCurrentSceneName( void ) const noexcept { return m_currentSceneName; }
-            inline std::filesystem::path getScenePath( std::string_view sceneName ) const noexcept { return getScenesDirectory() / ( std::string( sceneName ) + ".crimild" ); }
+         [[deprecated]] inline void setCurrentSceneName( std::string_view sceneName ) noexcept { m_currentSceneName = sceneName; }
+         [[deprecated]] inline const std::string &getCurrentSceneName( void ) const noexcept { return m_currentSceneName; }
+         [[deprecated]] inline std::filesystem::path getScenePath( std::string_view sceneName ) const noexcept { return getScenesDirectory() / ( std::string( sceneName ) + ".crimild" ); }
 
-        private:
-            mutable std::filesystem::path m_filePath;
+      private:
+         mutable std::filesystem::path m_filePath;
 
-            std::string m_currentSceneName = "main";
+         [[deprecated]] std::string m_currentSceneName = "main";
 
-            /**
-                \name Coding support
-             */
-            //@{
+         /**
+             \name Coding support
+          */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
+         //@}
 
-            /**
-             * \name Internal use only
-             */
-            //@{
+         /**
+          * \name Internal use only
+          */
+         //@{
 
-        public:
-            inline void setFilePath( const std::filesystem::path &path ) const noexcept { m_filePath = std::filesystem::absolute( path ); }
+      public:
+         inline void setFilePath( const std::filesystem::path &path ) const noexcept { m_filePath = std::filesystem::absolute( path ); }
 
-            //@}
-        };
+         //@}
+      };
 
-    }
+   }
 
 }
 

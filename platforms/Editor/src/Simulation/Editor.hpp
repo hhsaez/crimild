@@ -90,36 +90,36 @@ namespace crimild::editor {
 
       inline const std::list< std::string > &getRecentProjects( void ) const noexcept { return m_recentProjects; }
 
-      void createNewScene( const std::filesystem::path &path ) noexcept;
-      void loadScene( const std::filesystem::path &path ) noexcept;
-      void saveScene( void ) noexcept;
-      void saveSceneAs( const std::filesystem::path &path ) noexcept;
-      bool addToScene( SharedPointer< Node > const &node ) noexcept;
+      [[deprecated]] void createNewScene( const std::filesystem::path &path ) noexcept;
+      [[deprecated]] void loadScene( const std::filesystem::path &path ) noexcept;
+      [[deprecated]] void saveScene( void ) noexcept;
+      [[deprecated]] void saveSceneAs( const std::filesystem::path &path ) noexcept;
+      [[deprecated]] bool addToScene( SharedPointer< Node > const &node ) noexcept;
 
-      bool cloneNode( Node *node ) noexcept;
-      bool cloneSelectedNode( void ) noexcept;
+      [[deprecated]] bool cloneNode( Node *node ) noexcept;
+      [[deprecated]] bool cloneSelectedNode( void ) noexcept;
 
-      bool deleteNode( Node *node ) noexcept;
-      bool deleteSelectedNode( void ) noexcept;
+      [[deprecated]] bool deleteNode( Node *node ) noexcept;
+      [[deprecated]] bool deleteSelectedNode( void ) noexcept;
 
-      inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
-      void setSimulationState( SimulationState state ) noexcept;
+      [[deprecated]] inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
+      [[deprecated]] void setSimulationState( SimulationState state ) noexcept;
 
-      void terminate( void ) noexcept { m_didTerminate = true; }
+      [[deprecated]] void terminate( void ) noexcept { m_didTerminate = true; }
 
    private:
       void saveRecentProjects( void ) noexcept;
       void loadRecentProjects( void ) noexcept;
 
-      SharedPointer< Node > createDefaultScene( void ) noexcept;
+      [[deprecated]] SharedPointer< Node > createDefaultScene( void ) noexcept;
 
    private:
-      std::shared_ptr< State > m_state;
-      std::shared_ptr< State > m_previousState;
+      [[deprecated]] std::shared_ptr< State > m_state;
+      [[deprecated]] std::shared_ptr< State > m_previousState;
 
-      std::shared_ptr< Node > m_edittableScene;
+      [[deprecated]] std::shared_ptr< Node > m_edittableScene;
 
-      SimulationState m_simulationState = SimulationState::STOPPED;
+      [[deprecated]] SimulationState m_simulationState = SimulationState::STOPPED;
 
       std::shared_ptr< Project > m_project;
 
