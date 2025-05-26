@@ -680,6 +680,8 @@ int main( int argc, char **argv )
          if ( !projectName.empty() ) {
             glfwSetWindowTitle( window, ( "Crimild (" + projectName + ")" ).c_str() );
          }
+      } else {
+         glfwSetWindowTitle( window, "Crimild (NO PROJECT)" );
       }
 
       if ( !renderFrame( window, io, wd, jobScheduler, simulation, vulkanObjects, layoutManager ) ) {

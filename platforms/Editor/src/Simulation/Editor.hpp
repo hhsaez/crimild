@@ -32,100 +32,101 @@
 
 namespace crimild::editor {
 
-    class Project;
+   class Project;
 
-    enum class SimulationState {
-        PLAYING,
-        PAUSED,
-        STOPPED,
-    };
+   enum class SimulationState {
+      PLAYING,
+      PAUSED,
+      STOPPED,
+   };
 
-    class Editor : public Simulation {
-    public:
-        // Cannot use DynamicSingleton here since Simulation is already deriving from it.
-        // TODO: Maybe consider using virtual inheritance?
-        static Editor *getInstance( void ) noexcept { return s_instance; }
+   class Editor : public Simulation {
+   public:
+      // Cannot use DynamicSingleton here since Simulation is already deriving from it.
+      // TODO: Maybe consider using virtual inheritance?
+      static Editor *getInstance( void ) noexcept { return s_instance; }
 
-    private:
-        static Editor *s_instance;
+   private:
+      static Editor *s_instance;
 
-    public:
-        class State : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editor::State )
-        public:
-            coding::Codable *selectedObject = nullptr;
+   public:
+      class State : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::editor::Editor::State )
+      public:
+         coding::Codable *selectedObject = nullptr;
 
-            void encode( coding::Encoder &encoder ) override;
-            void decode( coding::Decoder &decoder ) override;
-        };
+         void encode( coding::Encoder &encoder ) override;
+         void decode( coding::Decoder &decoder ) override;
+      };
 
-    public:
-        Editor( void ) noexcept;
-        ~Editor( void ) noexcept;
+   public:
+      Editor( void ) noexcept;
+      ~Editor( void ) noexcept;
 
-        virtual Event handle( const Event &e ) noexcept override;
+      virtual Event handle( const Event &e ) noexcept override;
 
-        inline void setSelectedObject( coding::Codable *selected ) noexcept
-        {
-            if ( m_state != nullptr ) {
-                m_state->selectedObject = selected;
-            }
-        }
+      inline void setSelectedObject( coding::Codable *selected ) noexcept
+      {
+         if ( m_state != nullptr ) {
+            m_state->selectedObject = selected;
+         }
+      }
 
-        template< class SelectedObjectType >
-        inline SelectedObjectType *getSelectedObject( void ) noexcept
-        {
-            return m_state != nullptr
-                       ? dynamic_cast< SelectedObjectType * >( m_state->selectedObject )
-                       : nullptr;
-        }
+      template< class SelectedObjectType >
+      inline SelectedObjectType *getSelectedObject( void ) noexcept
+      {
+         return m_state != nullptr
+                   ? dynamic_cast< SelectedObjectType * >( m_state->selectedObject )
+                   : nullptr;
+      }
 
-        void createProject( const std::filesystem::path &path ) noexcept;
-        void loadProject( const std::filesystem::path &path ) noexcept;
-        void saveProject( void ) noexcept;
+      void createProject( const std::filesystem::path &path ) noexcept;
+      void loadProject( const std::filesystem::path &path ) noexcept;
+      void saveProject( void ) noexcept;
+      void closeProject( void ) noexcept;
 
-        inline Project *getProject( void ) noexcept { return m_project.get(); }
-        inline const Project *getProject( void ) const noexcept { return m_project.get(); }
+      inline Project *getProject( void ) noexcept { return m_project.get(); }
+      inline const Project *getProject( void ) const noexcept { return m_project.get(); }
 
-        inline const std::list< std::string > &getRecentProjects( void ) const noexcept { return m_recentProjects; }
+      inline const std::list< std::string > &getRecentProjects( void ) const noexcept { return m_recentProjects; }
 
-        void createNewScene( const std::filesystem::path &path ) noexcept;
-        void loadScene( const std::filesystem::path &path ) noexcept;
-        void saveScene( void ) noexcept;
-        void saveSceneAs( const std::filesystem::path &path ) noexcept;
-        bool addToScene( SharedPointer< Node > const &node ) noexcept;
+      void createNewScene( const std::filesystem::path &path ) noexcept;
+      void loadScene( const std::filesystem::path &path ) noexcept;
+      void saveScene( void ) noexcept;
+      void saveSceneAs( const std::filesystem::path &path ) noexcept;
+      bool addToScene( SharedPointer< Node > const &node ) noexcept;
 
-        bool cloneNode( Node *node ) noexcept;
-        bool cloneSelectedNode( void ) noexcept;
+      bool cloneNode( Node *node ) noexcept;
+      bool cloneSelectedNode( void ) noexcept;
 
-        bool deleteNode( Node *node ) noexcept;
-        bool deleteSelectedNode( void ) noexcept;
+      bool deleteNode( Node *node ) noexcept;
+      bool deleteSelectedNode( void ) noexcept;
 
-        inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
-        void setSimulationState( SimulationState state ) noexcept;
+      inline SimulationState getSimulationState( void ) const noexcept { return m_simulationState; }
+      void setSimulationState( SimulationState state ) noexcept;
 
-        void terminate( void ) noexcept { m_didTerminate = true; }
+      void terminate( void ) noexcept { m_didTerminate = true; }
 
-    private:
-        void saveRecentProjects( void ) noexcept;
-        void loadRecentProjects( void ) noexcept;
+   private:
+      void saveRecentProjects( void ) noexcept;
+      void loadRecentProjects( void ) noexcept;
 
-        SharedPointer< Node > createDefaultScene( void ) noexcept;
+      SharedPointer< Node > createDefaultScene( void ) noexcept;
 
-    private:
-        std::shared_ptr< State > m_state;
-        std::shared_ptr< State > m_previousState;
+   private:
+      std::shared_ptr< State > m_state;
+      std::shared_ptr< State > m_previousState;
 
-        std::shared_ptr< Node > m_edittableScene;
+      std::shared_ptr< Node > m_edittableScene;
 
-        SimulationState m_simulationState = SimulationState::STOPPED;
+      SimulationState m_simulationState = SimulationState::STOPPED;
 
-        std::shared_ptr< Project > m_project;
+      std::shared_ptr< Project > m_project;
 
-        std::list< std::string > m_recentProjects;
+      std::list< std::string > m_recentProjects;
 
-        bool m_didTerminate = false;
-    };
+      bool m_didTerminate = false;
+   };
 
 }
 

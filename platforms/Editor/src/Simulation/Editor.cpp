@@ -38,468 +38,486 @@ Editor *Editor::s_instance = nullptr;
 
 void Editor::State::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "selectedObject", selectedObject );
+   encoder.encode( "selectedObject", selectedObject );
 }
 
 void Editor::State::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    SharedPointer< coding::Codable > selected;
-    decoder.decode( "selectedObject", selected );
-    selectedObject = get_ptr( selected );
+   SharedPointer< coding::Codable > selected;
+   decoder.decode( "selectedObject", selected );
+   selectedObject = get_ptr( selected );
 }
 
 Editor::Editor( void ) noexcept
-    : m_state( crimild::alloc< State >() )
+   : m_state( crimild::alloc< State >() )
 {
-    s_instance = this;
+   s_instance = this;
 
-    CRIMILD_LOG_TRACE();
+   CRIMILD_LOG_TRACE();
 
-    loadRecentProjects();
+   loadRecentProjects();
 
-    if ( !m_recentProjects.empty() ) {
-        auto autoload = Settings::getInstance()->get( "editor.load_last_project", true );
-        if ( autoload ) {
-            auto path = m_recentProjects.front();
-            crimild::concurrency::sync_frame(
-                [ path ]() {
-                    Editor::getInstance()->loadProject( path );
-                }
-            );
-        }
-    }
+   if ( !m_recentProjects.empty() ) {
+      auto autoload = Settings::getInstance()->get( "editor.load_last_project", true );
+      if ( autoload ) {
+         auto path = m_recentProjects.front();
+         crimild::concurrency::sync_frame(
+            [ path ]() {
+               Editor::getInstance()->loadProject( path );
+            }
+         );
+      }
+   }
 }
 
 Editor::~Editor( void ) noexcept
 {
-    saveScene();
-    saveProject();
+   saveScene();
+   saveProject();
 
-    m_state = nullptr;
-    m_project = nullptr;
+   m_state = nullptr;
+   m_project = nullptr;
 
-    s_instance = nullptr;
+   s_instance = nullptr;
 }
 
 Event Editor::handle( const Event &e ) noexcept
 {
-    if ( m_didTerminate ) {
-        return Event {
-            .type = Event::Type::TERMINATE,
-        };
-    }
+   if ( m_didTerminate ) {
+      return Event {
+         .type = Event::Type::TERMINATE,
+      };
+   }
 
-    const auto ret = Simulation::handle( e );
-    return ret;
+   const auto ret = Simulation::handle( e );
+   return ret;
 }
 
 SharedPointer< Node > Editor::createDefaultScene( void ) noexcept
 {
-    auto scene = crimild::alloc< Group >();
+   auto scene = crimild::alloc< Group >();
 
-    auto geometry = []( SharedPointer< Primitive > const &primitive, const ColorRGB &albedo ) {
-        auto geometry = crimild::alloc< Geometry >();
-        geometry->attachPrimitive( primitive );
-        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
-        return geometry;
-    };
+   auto geometry = []( SharedPointer< Primitive > const &primitive, const ColorRGB &albedo ) {
+      auto geometry = crimild::alloc< Geometry >();
+      geometry->attachPrimitive( primitive );
+      geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::WorldGrid >() );
+      return geometry;
+   };
 
-    scene->attachNode(
-        [ & ] {
-            auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.5, 0.3, 0.2 } );
-            box->setLocal( translation( 0, 1, 0 ) );
-            return behaviors::withBehavior(
-                box,
-                [] {
-                    auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
-                    repeat->setBehavior(
-                        behaviors::actions::rotate(
-                            normalize( Vector3::Constants::UNIT_Y ),
-                            0.1f
-                        )
-                    );
-                    return repeat;
-                }()
-            );
-        }()
-    );
+   scene->attachNode(
+      [ & ] {
+         auto box = geometry( crimild::alloc< BoxPrimitive >(), ColorRGB { 0.5, 0.3, 0.2 } );
+         box->setLocal( translation( 0, 1, 0 ) );
+         return behaviors::withBehavior(
+            box,
+            [] {
+               auto repeat = crimild::alloc< behaviors::decorators::Repeat >();
+               repeat->setBehavior(
+                  behaviors::actions::rotate(
+                     normalize( Vector3::Constants::UNIT_Y ),
+                     0.1f
+                  )
+               );
+               return repeat;
+            }()
+         );
+      }()
+   );
 
-    scene->attachNode(
-        [ & ] {
-            auto plane = geometry( crimild::alloc< QuadPrimitive >(), ColorRGB { 0.75f, 0.75f, 0.75f } );
-            plane->setLocal( rotationX( -numbers::PI_DIV_2 )( scale( 10.0f ) ) );
-            return plane;
-        }()
-    );
+   scene->attachNode(
+      [ & ] {
+         auto plane = geometry( crimild::alloc< QuadPrimitive >(), ColorRGB { 0.75f, 0.75f, 0.75f } );
+         plane->setLocal( rotationX( -numbers::PI_DIV_2 )( scale( 10.0f ) ) );
+         return plane;
+      }()
+   );
 
-    scene->attachNode(
-        [ & ] {
-            auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
-            light->setEnergy( 5 );
-            light->setLocal(
-                lookAt(
-                    Point3f { -10, 10, 10 },
-                    Point3f { 0, 0, 0 },
-                    Vector3 { 0, 1, 0 }
-                )
-            );
-            light->setCastShadows( true );
-            return light;
-        }()
-    );
-
-    scene->attachNode( [] {
-        auto camera = crimild::alloc< Camera >();
-        camera->setLocal(
+   scene->attachNode(
+      [ & ] {
+         auto light = crimild::alloc< Light >( Light::Type::DIRECTIONAL );
+         light->setEnergy( 5 );
+         light->setLocal(
             lookAt(
-                Point3f { 10, 10, 10 },
-                Point3f { 0, 0, 0 },
-                Vector3::Constants::UP
+               Point3f { -10, 10, 10 },
+               Point3f { 0, 0, 0 },
+               Vector3 { 0, 1, 0 }
             )
-        );
-        return camera;
-    }() );
+         );
+         light->setCastShadows( true );
+         return light;
+      }()
+   );
 
-    scene->attachNode(
-        [] {
-            auto skybox = crimild::alloc< Skybox >( ColorRGB { 0.28, 0.63, 0.72 } );
-            return skybox;
-        }()
-    );
+   scene->attachNode( [] {
+      auto camera = crimild::alloc< Camera >();
+      camera->setLocal(
+         lookAt(
+            Point3f { 10, 10, 10 },
+            Point3f { 0, 0, 0 },
+            Vector3::Constants::UP
+         )
+      );
+      return camera;
+   }() );
 
-    scene->perform( StartComponents() );
-    scene->perform( UpdateWorldState() );
+   scene->attachNode(
+      [] {
+         auto skybox = crimild::alloc< Skybox >( ColorRGB { 0.28, 0.63, 0.72 } );
+         return skybox;
+      }()
+   );
 
-    return scene;
+   scene->perform( StartComponents() );
+   scene->perform( UpdateWorldState() );
+
+   return scene;
 }
 
 void Editor::createProject( const std::filesystem::path &path ) noexcept
 {
-    const auto projectName = path.stem().stem(); // Remove ".project.crimild"
-    const auto projectVersion = Version { 1, 0, 0 };
+   const auto projectName = path.stem().stem(); // Remove ".project.crimild"
+   const auto projectVersion = Version { 1, 0, 0 };
 
-    std::cout << "Creating project: "
-              << "\n\tName: " << projectName
-              << "\n\tVersion: " << projectVersion.getDescription()
-              << "\n\tPath: " << path.parent_path()
-              << "\n\tAbsolute Path: " << std::filesystem::absolute( path )
-              << "\n\tWork Dir: " << std::filesystem::current_path()
-              << "\n\tDONE"
-              << std::endl;
+   std::cout << "Creating project: "
+             << "\n\tName: " << projectName
+             << "\n\tVersion: " << projectVersion.getDescription()
+             << "\n\tPath: " << path.parent_path()
+             << "\n\tAbsolute Path: " << std::filesystem::absolute( path )
+             << "\n\tWork Dir: " << std::filesystem::current_path()
+             << "\n\tDONE"
+             << std::endl;
 
-    const auto projectRoot = path.parent_path() / projectName;
-    if ( std::filesystem::exists( projectRoot ) ) {
-        CRIMILD_LOG_ERROR( "Project root direcotory", projectRoot, " already exists" );
-        return;
-    }
+   const auto projectRoot = path.parent_path() / projectName;
+   if ( std::filesystem::exists( projectRoot ) ) {
+      CRIMILD_LOG_ERROR( "Project root direcotory", projectRoot, " already exists" );
+      return;
+   }
 
-    std::filesystem::create_directories( projectRoot / "Assets" / "Scenes" );
-    std::filesystem::create_directories( projectRoot / "Assets" / "Models" );
-    std::filesystem::create_directories( projectRoot / "Assets" / "Audio" );
-    std::filesystem::create_directories( projectRoot / "Assets" / "Textures" );
-    std::filesystem::create_directories( projectRoot / "Assets" / "Prefabs" );
+   std::filesystem::create_directories( projectRoot / "Assets" / "Scenes" );
+   std::filesystem::create_directories( projectRoot / "Assets" / "Models" );
+   std::filesystem::create_directories( projectRoot / "Assets" / "Audio" );
+   std::filesystem::create_directories( projectRoot / "Assets" / "Textures" );
+   std::filesystem::create_directories( projectRoot / "Assets" / "Prefabs" );
 
-    m_project = crimild::alloc< editor::Project >( projectName.string(), projectVersion );
-    m_project->setFilePath( projectRoot / "project.crimild" );
-    CRIMILD_LOG_INFO( "Created project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
+   m_project = crimild::alloc< editor::Project >( projectName.string(), projectVersion );
+   m_project->setFilePath( projectRoot / "project.crimild" );
+   CRIMILD_LOG_INFO( "Created project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
-    saveProject();
-    createNewScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
+   saveProject();
+   createNewScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
 }
 
 void Editor::loadProject( const std::filesystem::path &path ) noexcept
 {
-    if ( !std::filesystem::exists( path ) ) {
-        CRIMILD_LOG_ERROR( path, " does not exists" );
-        return;
-    }
+   if ( !std::filesystem::exists( path ) ) {
+      CRIMILD_LOG_ERROR( path, " does not exists" );
+      return;
+   }
 
-    const auto projectRoot = std::filesystem::is_directory( path ) ? path : path.parent_path();
-    const auto projectFilePath = projectRoot / "project.crimild";
-    if ( !std::filesystem::exists( projectFilePath ) ) {
-        CRIMILD_LOG_ERROR( path, " is not a valid Crimild project directory" );
-        return;
-    }
+   const auto projectRoot = std::filesystem::is_directory( path ) ? path : path.parent_path();
+   const auto projectFilePath = projectRoot / "project.crimild";
+   if ( !std::filesystem::exists( projectFilePath ) ) {
+      CRIMILD_LOG_ERROR( path, " is not a valid Crimild project directory" );
+      return;
+   }
 
-    coding::FileDecoder decoder;
-    decoder.read( projectFilePath );
-    if ( decoder.getObjectCount() == 0 ) {
-        CRIMILD_LOG_ERROR( "Cannot decode project from path ", path );
-        return;
-    }
-    m_project = decoder.getObjectAt< editor::Project >( 0 );
-    if ( m_project == nullptr ) {
-        CRIMILD_LOG_ERROR( "Cannot load project from path ", path );
-        return;
-    }
+   coding::FileDecoder decoder;
+   decoder.read( projectFilePath );
+   if ( decoder.getObjectCount() == 0 ) {
+      CRIMILD_LOG_ERROR( "Cannot decode project from path ", path );
+      return;
+   }
+   m_project = decoder.getObjectAt< editor::Project >( 0 );
+   if ( m_project == nullptr ) {
+      CRIMILD_LOG_ERROR( "Cannot load project from path ", path );
+      return;
+   }
 
-    m_project->setFilePath( projectFilePath );
+   m_project->setFilePath( projectFilePath );
 
-    CRIMILD_LOG_INFO( "Loaded project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
+   CRIMILD_LOG_INFO( "Loaded project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
-    loadScene( m_project->getScenePath( m_project->getCurrentSceneName() ) );
-    saveRecentProjects();
+   loadScene( m_project->getScenePath( m_project->getCurrentSceneName() ) );
+   saveRecentProjects();
 }
 
 void Editor::saveProject( void ) noexcept
 {
-    if ( m_project == nullptr ) {
-        return;
-    }
+   if ( m_project == nullptr ) {
+      return;
+   }
 
-    coding::FileEncoder encoder;
-    encoder.encode( m_project );
-    if ( !encoder.write( m_project->getFilePath() ) ) {
-        CRIMILD_LOG_ERROR( "Failed to encode project" );
-        return;
-    }
+   coding::FileEncoder encoder;
+   encoder.encode( m_project );
+   if ( !encoder.write( m_project->getFilePath() ) ) {
+      CRIMILD_LOG_ERROR( "Failed to encode project" );
+      return;
+   }
 
-    CRIMILD_LOG_INFO( "Saved project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
+   CRIMILD_LOG_INFO( "Saved project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
 
-    saveRecentProjects();
+   saveRecentProjects();
+}
+
+void Editor::closeProject( void ) noexcept
+{
+   if ( m_project == nullptr ) {
+      return;
+   }
+
+   CRIMILD_LOG_INFO( "Closing project: ", m_project->getName(), " ", m_project->getVersion().getDescription() );
+
+   saveScene();
+   saveProject();
+
+   m_project = nullptr;
+
+   // Reset the scene to the default one
+   setScene( nullptr );
+   handle( Event { .type = Event::Type::SCENE_CHANGED } );
 }
 
 void Editor::saveRecentProjects( void ) noexcept
 {
-    m_recentProjects.remove( m_project->getFilePath().string() );
-    m_recentProjects.push_front( m_project->getFilePath().string() );
+   m_recentProjects.remove( m_project->getFilePath().string() );
+   m_recentProjects.push_front( m_project->getFilePath().string() );
 
-    auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
-    auto fs = std::ofstream( settingsPath, std::ios::out );
-    if ( !fs.is_open() ) {
-        CRIMILD_LOG_WARNING( "Cannot open recent projects file: ", settingsPath );
-        return;
-    }
-    for ( const auto &path : m_recentProjects ) {
-        if ( !path.empty() ) {
-            fs << path << "\n";
-        }
-    }
-    fs.close();
+   auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
+   auto fs = std::ofstream( settingsPath, std::ios::out );
+   if ( !fs.is_open() ) {
+      CRIMILD_LOG_WARNING( "Cannot open recent projects file: ", settingsPath );
+      return;
+   }
+   for ( const auto &path : m_recentProjects ) {
+      if ( !path.empty() ) {
+         fs << path << "\n";
+      }
+   }
+   fs.close();
 }
 
 void Editor::loadRecentProjects( void ) noexcept
 {
-    m_recentProjects.clear();
-    auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
-    auto fs = std::ifstream( settingsPath, std::ios::in );
-    if ( !fs.is_open() ) {
-        return;
-    }
-    while ( !fs.eof() ) {
-        char buff[ 1024 ];
-        fs.getline( buff, 1024 );
-        auto path = std::string( buff );
-        if ( !path.empty() ) {
-            m_recentProjects.push_back( std::string( buff ) );
-        }
-    }
-    fs.close();
+   m_recentProjects.clear();
+   auto settingsPath = std::filesystem::current_path() / "recent_projects.txt";
+   auto fs = std::ifstream( settingsPath, std::ios::in );
+   if ( !fs.is_open() ) {
+      return;
+   }
+   while ( !fs.eof() ) {
+      char buff[ 1024 ];
+      fs.getline( buff, 1024 );
+      auto path = std::string( buff );
+      if ( !path.empty() ) {
+         m_recentProjects.push_back( std::string( buff ) );
+      }
+   }
+   fs.close();
 }
 
 void Editor::createNewScene( const std::filesystem::path &path ) noexcept
 {
-    if ( auto sim = Simulation::getInstance() ) {
-        sim->setScene( nullptr );
-        handle( Event { .type = Event::Type::SCENE_CHANGED } );
+   if ( auto sim = Simulation::getInstance() ) {
+      sim->setScene( nullptr );
+      handle( Event { .type = Event::Type::SCENE_CHANGED } );
 
-        sim->setScene( createDefaultScene() );
-        handle( Event { .type = Event::Type::SCENE_CHANGED } );
-    }
+      sim->setScene( createDefaultScene() );
+      handle( Event { .type = Event::Type::SCENE_CHANGED } );
+   }
 
-    saveSceneAs( path );
+   saveSceneAs( path );
 }
 
 void Editor::loadScene( const std::filesystem::path &path ) noexcept
 {
-    if ( !std::filesystem::exists( path ) ) {
-        CRIMILD_LOG_ERROR( path, " does not exists" );
-        return;
-    }
+   if ( !std::filesystem::exists( path ) ) {
+      CRIMILD_LOG_ERROR( path, " does not exists" );
+      return;
+   }
 
-    // Stop simulation to ensure we're handling the right scene
-    setSimulationState( SimulationState::STOPPED );
+   // Stop simulation to ensure we're handling the right scene
+   setSimulationState( SimulationState::STOPPED );
 
-    {
-        auto prevScene = retain( Simulation::getInstance()->getScene() );
-        Simulation::getInstance()->setScene( nullptr );
-        handle( Event { .type = Event::Type::SCENE_CHANGED } );
-    }
+   {
+      auto prevScene = retain( Simulation::getInstance()->getScene() );
+      Simulation::getInstance()->setScene( nullptr );
+      handle( Event { .type = Event::Type::SCENE_CHANGED } );
+   }
 
-    coding::FileDecoder decoder;
-    decoder.read( path );
-    if ( decoder.getObjectCount() == 0 ) {
-        CRIMILD_LOG_ERROR( "Cannot read file ", path );
-        return;
-    }
-    auto scene = decoder.getObjectAt< Node >( 0 );
-    Simulation::getInstance()->setScene( scene );
-    handle( Event { .type = Event::Type::SCENE_CHANGED } );
+   coding::FileDecoder decoder;
+   decoder.read( path );
+   if ( decoder.getObjectCount() == 0 ) {
+      CRIMILD_LOG_ERROR( "Cannot read file ", path );
+      return;
+   }
+   auto scene = decoder.getObjectAt< Node >( 0 );
+   Simulation::getInstance()->setScene( scene );
+   handle( Event { .type = Event::Type::SCENE_CHANGED } );
 
-    if ( auto project = getProject() ) {
-        project->setCurrentSceneName( path.stem().string() );
-        saveProject();
-    }
+   if ( auto project = getProject() ) {
+      project->setCurrentSceneName( path.stem().string() );
+      saveProject();
+   }
 }
 
 void Editor::saveScene( void ) noexcept
 {
-    if ( auto project = getProject() ) {
-        auto path = project->getScenePath( project->getCurrentSceneName() );
-        saveSceneAs( path );
-    }
+   if ( auto project = getProject() ) {
+      auto path = project->getScenePath( project->getCurrentSceneName() );
+      saveSceneAs( path );
+   }
 }
 
 void Editor::saveSceneAs( const std::filesystem::path &path ) noexcept
 {
-    // Always save the editable scene, not the simulated one
-    auto scene = [ & ] {
-        if ( m_edittableScene != nullptr ) {
-            return m_edittableScene;
-        } else {
-            return crimild::retain( Simulation::getInstance()->getScene() );
-        }
-    }();
-    if ( scene == nullptr ) {
-        return;
-    }
+   // Always save the editable scene, not the simulated one
+   auto scene = [ & ] {
+      if ( m_edittableScene != nullptr ) {
+         return m_edittableScene;
+      } else {
+         return crimild::retain( Simulation::getInstance()->getScene() );
+      }
+   }();
+   if ( scene == nullptr ) {
+      return;
+   }
 
-    coding::FileEncoder encoder;
-    encoder.encode( scene );
-    encoder.write( path );
+   coding::FileEncoder encoder;
+   encoder.encode( scene );
+   encoder.write( path );
 
-    if ( auto project = getProject() ) {
-        project->setCurrentSceneName( path.stem().string() );
-        saveProject();
-    }
+   if ( auto project = getProject() ) {
+      project->setCurrentSceneName( path.stem().string() );
+      saveProject();
+   }
 }
 
 bool Editor::addToScene( SharedPointer< Node > const &node ) noexcept
 {
-    auto scene = getScene();
-    if ( scene == nullptr ) {
-        node->perform( UpdateWorldState() );
-        node->perform( StartComponents() );
-        setScene( node );
-    } else if ( auto group = dynamic_cast< Group * >( scene ) ) {
-        group->attachNode( node );
-        node->perform( UpdateWorldState() );
-        node->perform( StartComponents() );
-    } else {
-        CRIMILD_LOG_ERROR( "Scene is not a valid node" );
-        return false;
-    }
-    return true;
+   auto scene = getScene();
+   if ( scene == nullptr ) {
+      node->perform( UpdateWorldState() );
+      node->perform( StartComponents() );
+      setScene( node );
+   } else if ( auto group = dynamic_cast< Group * >( scene ) ) {
+      group->attachNode( node );
+      node->perform( UpdateWorldState() );
+      node->perform( StartComponents() );
+   } else {
+      CRIMILD_LOG_ERROR( "Scene is not a valid node" );
+      return false;
+   }
+   return true;
 }
 
 bool Editor::cloneNode( Node *node ) noexcept
 {
-    auto copy = node->perform< ShallowCopy >();
-    if ( auto parent = dynamic_cast< Group * >( node->getParent() ) ) {
-        parent->attachNodeAfter( copy, retain( node ) );
-    } else {
-        return false;
-    }
+   auto copy = node->perform< ShallowCopy >();
+   if ( auto parent = dynamic_cast< Group * >( node->getParent() ) ) {
+      parent->attachNodeAfter( copy, retain( node ) );
+   } else {
+      return false;
+   }
 
-    // Start components on new node
-    copy->perform( StartComponents() );
+   // Start components on new node
+   copy->perform( StartComponents() );
 
-    // Update world state. Otherwise, transformations will be reset
-    // by the transformation gizmo control, since it operates on
-    // world transformation (which is identity up to this point).
-    copy->perform( UpdateWorldState() );
+   // Update world state. Otherwise, transformations will be reset
+   // by the transformation gizmo control, since it operates on
+   // world transformation (which is identity up to this point).
+   copy->perform( UpdateWorldState() );
 
-    setSelectedObject( get_ptr( copy ) );
+   setSelectedObject( get_ptr( copy ) );
 
-    return true;
+   return true;
 }
 
 bool Editor::cloneSelectedNode( void ) noexcept
 {
-    auto selected = getSelectedObject< Node >();
-    if ( selected == nullptr ) {
-        return false;
-    }
+   auto selected = getSelectedObject< Node >();
+   if ( selected == nullptr ) {
+      return false;
+   }
 
-    return cloneNode( selected );
+   return cloneNode( selected );
 }
 
 bool Editor::deleteNode( Node *node ) noexcept
 {
-    crimild::concurrency::sync_frame(
-        [ node = crimild::retain( node ) ] {
-            node->detachFromParent();
-            if ( auto editor = Editor::getInstance() ) {
-                editor->setSelectedObject( nullptr );
-            }
-        }
-    );
-    return true;
+   crimild::concurrency::sync_frame(
+      [ node = crimild::retain( node ) ] {
+         node->detachFromParent();
+         if ( auto editor = Editor::getInstance() ) {
+            editor->setSelectedObject( nullptr );
+         }
+      }
+   );
+   return true;
 }
 
 bool Editor::deleteSelectedNode( void ) noexcept
 {
-    auto selected = getSelectedObject< Node >();
-    if ( selected == nullptr ) {
-        return false;
-    }
+   auto selected = getSelectedObject< Node >();
+   if ( selected == nullptr ) {
+      return false;
+   }
 
-    return deleteNode( selected );
+   return deleteNode( selected );
 }
 
 void Editor::setSimulationState( SimulationState newState ) noexcept
 {
-    if ( m_simulationState == newState ) {
-        return;
-    }
+   if ( m_simulationState == newState ) {
+      return;
+   }
 
-    if ( m_simulationState == SimulationState::STOPPED && newState == SimulationState::PLAYING ) {
-        crimild::concurrency::sync_frame(
-            [ this ] {
-                m_edittableScene = crimild::retain( getScene() );
-                m_previousState = m_state;
+   if ( m_simulationState == SimulationState::STOPPED && newState == SimulationState::PLAYING ) {
+      crimild::concurrency::sync_frame(
+         [ this ] {
+            m_edittableScene = crimild::retain( getScene() );
+            m_previousState = m_state;
 
-                // Using encoders to clone the scene is overkill since it copies buffers
-                // and textures, which should not change during playback. And this is a
-                // slow operation. But it also guarrantees that the scene is a full clone,
-                // as well as providing a visual representation of what is actually saved
-                // in the file system.
-                // TODO: consider using a shallow copy (or implement shallow encoder).
-                auto encoder = crimild::alloc< coding::MemoryEncoder >();
-                encoder->encode( m_edittableScene );
-                encoder->encode( m_state );
+            // Using encoders to clone the scene is overkill since it copies buffers
+            // and textures, which should not change during playback. And this is a
+            // slow operation. But it also guarrantees that the scene is a full clone,
+            // as well as providing a visual representation of what is actually saved
+            // in the file system.
+            // TODO: consider using a shallow copy (or implement shallow encoder).
+            auto encoder = crimild::alloc< coding::MemoryEncoder >();
+            encoder->encode( m_edittableScene );
+            encoder->encode( m_state );
 
-                auto bytes = encoder->getBytes();
-                auto decoder = crimild::alloc< coding::MemoryDecoder >();
-                decoder->fromBytes( bytes );
+            auto bytes = encoder->getBytes();
+            auto decoder = crimild::alloc< coding::MemoryDecoder >();
+            decoder->fromBytes( bytes );
 
-                auto simScene = decoder->getObjectAt< Node >( 0 );
-                m_state = decoder->getObjectAt< Editor::State >( 1 );
+            auto simScene = decoder->getObjectAt< Node >( 0 );
+            m_state = decoder->getObjectAt< Editor::State >( 1 );
 
-                setScene( simScene );
-                handle( Event { .type = Event::Type::SCENE_CHANGED } );
-            }
-        );
-    } else if ( newState == SimulationState::STOPPED ) {
-        crimild::concurrency::sync_frame(
-            [ this ] {
-                setScene( m_edittableScene );
-                m_state = m_previousState;
-                m_previousState = nullptr;
-                handle( Event { .type = Event::Type::SCENE_CHANGED } );
-            }
-        );
-    }
+            setScene( simScene );
+            handle( Event { .type = Event::Type::SCENE_CHANGED } );
+         }
+      );
+   } else if ( newState == SimulationState::STOPPED ) {
+      crimild::concurrency::sync_frame(
+         [ this ] {
+            setScene( m_edittableScene );
+            m_state = m_previousState;
+            m_previousState = nullptr;
+            handle( Event { .type = Event::Type::SCENE_CHANGED } );
+         }
+      );
+   }
 
-    m_simulationState = newState;
+   m_simulationState = newState;
 
-    if ( newState == SimulationState::PLAYING ) {
-        resume();
-    } else {
-        pause();
-    }
+   if ( newState == SimulationState::PLAYING ) {
+      resume();
+   } else {
+      pause();
+   }
 }
