@@ -31,33 +31,33 @@ using namespace crimild;
 using namespace crimild::editor;
 
 Project::Project( void ) noexcept
-    : Named( "Crimild" ),
-      Versionable( Version( 1, 0, 0 ) )
+   : Named( "Crimild" ),
+     Versionable( Version( 1, 0, 0 ) )
 {
-    // no-op
+   // no-op
 }
 
 Project::Project( std::string name, const Version &version ) noexcept
-    : Named( name ),
-      Versionable( version )
+   : Named( name ),
+     Versionable( version )
 {
-    // no-op
+   // no-op
 }
 
 void Project::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "name", getNameRefForCoding() );
-    encoder.encode( "version", getVersionRefForCoding() );
-    encoder.encode( "currentSceneName", m_currentSceneName );
+   encoder.encode( "name", getNameRefForCoding() );
+   encoder.encode( "version", getVersionRefForCoding() );
+   encoder.encode( "currentSceneName", m_currentSceneName );
 }
 
 void Project::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "name", getNameRefForCoding() );
-    decoder.decode( "version", getVersionRefForCoding() );
-    decoder.decode( "currentSceneName", m_currentSceneName );
+   decoder.decode( "name", getNameRefForCoding() );
+   decoder.decode( "version", getVersionRefForCoding() );
+   decoder.decode( "currentSceneName", m_currentSceneName );
 }

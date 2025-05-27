@@ -5,7 +5,11 @@
 
 namespace crimild::editor {
 
-   class WorkspaceManager : public View {
+   class Workspace;
+
+   class WorkspaceManager
+      : public View,
+        public DynamicSingleton< WorkspaceManager > {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::WorkspaceManager )
 
    public:
@@ -16,6 +20,14 @@ namespace crimild::editor {
       }
 
       ~WorkspaceManager( void ) = default;
+
+      template< class WorkspaceType, typename... Args >
+      inline std::shared_ptr< WorkspaceType > createWorkspace( Args &&...args ) noexcept
+      {
+         auto workspace = crimild::alloc< WorkspaceType >( std::forward< Args >( args )... );
+         addSubview( workspace );
+         return workspace;
+      }
 
       virtual void draw( void ) noexcept override;
 

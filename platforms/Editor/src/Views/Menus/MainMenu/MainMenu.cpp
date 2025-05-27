@@ -45,6 +45,8 @@
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Windows/TimelineWindow.hpp"
+#include "Views/Workspaces/Workspace.hpp"
+#include "Views/Workspaces/WorkspaceManager.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
@@ -232,19 +234,32 @@ void MainMenu::renderFileMenu( void ) noexcept
          );
       }
 
+      // enabledWithProject(
+      //    [ & ] {
+      //       if ( ImGui::MenuItem( "New Scene..." ) ) {
+      //          getLayout()->addView(
+      //             std::make_shared< FileDialog >(
+      //                "Create Project",
+      //                []( const auto &path ) {
+      //                   Editor::getInstance()->createNewScene( path );
+      //                },
+      //                ".crimild",
+      //                Editor::getInstance()->getProject()->getScenesDirectory().string()
+      //             )
+      //          );
+      //       }
+      //    }
+      // );
+
       enabledWithProject(
          [ & ] {
-            if ( ImGui::MenuItem( "New Scene..." ) ) {
-               getLayout()->addView(
-                  std::make_shared< FileDialog >(
-                     "Create Project",
-                     []( const auto &path ) {
-                        Editor::getInstance()->createNewScene( path );
-                     },
-                     ".crimild",
-                     Editor::getInstance()->getProject()->getScenesDirectory().string()
-                  )
-               );
+            if ( ImGui::MenuItem( "New Workspace" ) ) {
+               if ( auto workspaces = WorkspaceManager::getInstance() ) {
+                  const int nextWorkspace = workspaces->getSubviews().size();
+                  std::stringstream ss;
+                  ss << "Workspace " << nextWorkspace;
+                  workspaces->createWorkspace< Workspace >( ss.str() );
+               }
             }
          }
       );
@@ -263,22 +278,22 @@ void MainMenu::renderFileMenu( void ) noexcept
          );
       }
 
-      enabledWithProject(
-         [ & ] {
-            if ( ImGui::MenuItem( "Open Scene..." ) ) {
-               getLayout()->addView(
-                  std::make_shared< FileDialog >(
-                     "Create Project",
-                     []( const auto &path ) {
-                        Editor::getInstance()->loadScene( path );
-                     },
-                     ".crimild",
-                     Editor::getInstance()->getProject()->getScenesDirectory().string()
-                  )
-               );
-            }
-         }
-      );
+      // enabledWithProject(
+      //    [ & ] {
+      //       if ( ImGui::MenuItem( "Open Scene..." ) ) {
+      //          getLayout()->addView(
+      //             std::make_shared< FileDialog >(
+      //                "Create Project",
+      //                []( const auto &path ) {
+      //                   Editor::getInstance()->loadScene( path );
+      //                },
+      //                ".crimild",
+      //                Editor::getInstance()->getProject()->getScenesDirectory().string()
+      //             )
+      //          );
+      //       }
+      //    }
+      // );
 
       ImGui::Separator();
 
@@ -290,30 +305,30 @@ void MainMenu::renderFileMenu( void ) noexcept
          }
       );
 
-      enabledWithProject(
-         [ & ] {
-            if ( ImGui::MenuItem( "Save Scene" ) ) {
-               Editor::getInstance()->saveScene();
-            }
-         }
-      );
+      // enabledWithProject(
+      //    [ & ] {
+      //       if ( ImGui::MenuItem( "Save Scene" ) ) {
+      //          Editor::getInstance()->saveScene();
+      //       }
+      //    }
+      // );
 
-      enabledWithProject(
-         [ & ] {
-            if ( ImGui::MenuItem( "Save Scene As..." ) ) {
-               getLayout()->addView(
-                  std::make_shared< FileDialog >(
-                     "Create Project",
-                     []( const auto &path ) {
-                        Editor::getInstance()->saveSceneAs( path );
-                     },
-                     ".crimild",
-                     Editor::getInstance()->getProject()->getScenesDirectory().string()
-                  )
-               );
-            }
-         }
-      );
+      // enabledWithProject(
+      //    [ & ] {
+      //       if ( ImGui::MenuItem( "Save Scene As..." ) ) {
+      //          getLayout()->addView(
+      //             std::make_shared< FileDialog >(
+      //                "Create Project",
+      //                []( const auto &path ) {
+      //                   Editor::getInstance()->saveSceneAs( path );
+      //                },
+      //                ".crimild",
+      //                Editor::getInstance()->getProject()->getScenesDirectory().string()
+      //             )
+      //          );
+      //       }
+      //    }
+      // );
 
       ImGui::Separator();
 

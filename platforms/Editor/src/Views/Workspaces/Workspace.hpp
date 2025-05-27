@@ -6,8 +6,22 @@
 namespace crimild::editor {
 
    class Workspace : public View {
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::Workspace )
+
    public:
-      void render( void );
+      Workspace( void ) noexcept = default;
+
+      Workspace( std::string_view name ) noexcept
+         : View( name )
+      {
+         // no-op
+      }
+
+      virtual ~Workspace( void ) noexcept = default;
+
+      virtual void draw( void ) noexcept override;
+
+      virtual void drawContent( void ) noexcept override;
    };
 
 }

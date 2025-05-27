@@ -42,19 +42,39 @@ namespace crimild::editor {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::View )
 
    protected:
+      View( void ) noexcept = default;
+
       View( std::string_view name ) noexcept;
 
    public:
       virtual ~View( void ) noexcept = default;
 
+      // TODO: This should be memoized so we don't compute it every time. Maybe
+      // if we save it and then reset it whenever the parent and/or name changes?
+      const std::string getUniqueName( void ) const noexcept
+      {
+         std::stringstream ss;
+         ss << getName() << "##";
+         if ( auto superview = getSuperview() ) {
+            ss << superview->getUniqueName();
+         }
+         ss << "/" << getClassName() << "/" << getName();
+         return ss.str();
+      }
+
       [[deprecated]] inline void setLayout( std::shared_ptr< Layout > const &layout ) noexcept { m_layout = layout; }
       [[deprecated]] inline std::shared_ptr< Layout > getLayout( void ) noexcept { return m_layout.lock(); }
 
       void addSubview( std::shared_ptr< View > const &subview );
+
+      inline const std::vector< std::shared_ptr< View > > &getSubviews( void ) const noexcept { return m_subviews; }
+
       std::shared_ptr< View > getSubview( std::string_view name );
 
       inline bool hasSuperview( void ) const { return !m_superview.expired(); }
+
       inline std::shared_ptr< View > getSuperview( void ) { return m_superview.lock(); }
+      inline const std::shared_ptr< View > getSuperview( void ) const { return m_superview.lock(); }
 
       void removeFromSuperview( void );
 

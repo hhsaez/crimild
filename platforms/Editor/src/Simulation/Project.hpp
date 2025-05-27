@@ -40,6 +40,7 @@ namespace crimild {
            public Named,
            public Versionable {
          CRIMILD_IMPLEMENT_RTTI( crimild::editor::Project )
+
       public:
          Project( void ) noexcept;
          Project( std::string name, const Version &version ) noexcept;

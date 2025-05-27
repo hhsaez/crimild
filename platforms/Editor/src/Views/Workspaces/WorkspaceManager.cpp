@@ -1,6 +1,9 @@
-#include "WorkspaceManager.hpp"
+#include "Views/Workspaces/WorkspaceManager.hpp"
 
 #include "Foundation/ImGuiUtils.hpp"
+#include "Simulation/Editor.hpp"
+#include "Simulation/Project.hpp"
+#include "Views/Workspaces/Workspace.hpp"
 
 using namespace crimild::editor;
 
@@ -30,49 +33,31 @@ void WorkspaceManager::draw( void ) noexcept
 
    ImGui::PopStyleVar( 3 );
 
-   static int currentWorkspace = 0;
-   std::vector< std::string > workspaces = { "Scene", "Animation" };
-
-   if ( ImGui::BeginTabBar( "WorkspaceTabs" ) ) {
-      for ( size_t i = 0; i < workspaces.size(); ++i ) {
-         const auto &workspace = workspaces[ i ];
-         if ( ImGui::BeginTabItem( workspace.c_str() ) ) {
-            currentWorkspace = i;
-            ImGui::EndTabItem();
-         }
-      }
-      ImGui::EndTabBar();
-   }
-
-   ImGui::BeginChild( "workspaceDock", ImVec2( 0, 0 ), false, ImGuiWindowFlags_NoScrollbar );
-
-   ImGuiID dockspaceID = ImGui::GetID( workspaces[ currentWorkspace ].c_str() );
-   ImGui::DockSpace( dockspaceID, ImVec2( 0, 0 ), ImGuiDockNodeFlags_None );
-
-   if ( currentWorkspace == 0 ) {
-      ImGui::Begin( "Viewport" );
-      ImGui::Text( "Scene Viewport" );
-      ImGui::End();
-
-      ImGui::Begin( "Inspector" );
-      ImGui::Text( "Scene Properties" );
-      ImGui::End();
-   } else if ( currentWorkspace == 1 ) {
-      ImGui::Begin( "Timeline" );
-      ImGui::Text( "Animation Timeline" );
-      ImGui::End();
-
-      ImGui::Begin( "Graph" );
-      ImGui::Text( "Animation Graph" );
-      ImGui::End();
-   }
-
-   ImGui::EndChild();
+   drawContent();
 
    ImGui::End();
 }
 
 void WorkspaceManager::drawContent( void ) noexcept
 {
-   // TODO
+   auto project = Editor::getInstance()->getProject();
+   if ( project == nullptr ) {
+      return;
+   }
+
+   const auto &workspaces = getSubviews();
+
+   ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 10.0f, 10.0f ) );
+
+   if ( ImGui::BeginTabBar( "Workspaces" ) ) {
+      for ( auto &workspace : workspaces ) {
+         if ( ImGui::BeginTabItem( workspace->getUniqueName().c_str() ) ) {
+            workspace->draw();
+            ImGui::EndTabItem();
+         }
+      }
+      ImGui::EndTabBar();
+   }
+
+   ImGui::PopStyleVar();
 }
