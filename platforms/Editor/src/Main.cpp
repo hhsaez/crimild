@@ -445,8 +445,21 @@ bool renderFrame(
    return true;
 }
 
-void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
+float getDPIScale( GLFWwindow *window )
 {
+   int framebufferWidth, framebufferHeight;
+   int windowWidth, windowHeight;
+
+   glfwGetFramebufferSize( window, &framebufferWidth, &framebufferHeight );
+   glfwGetWindowSize( window, &windowWidth, &windowHeight );
+
+   return float( framebufferWidth ) / float( windowWidth );
+}
+
+void loadFonts( GLFWwindow *window, ImGui_ImplVulkanH_Window *wd ) noexcept
+{
+   ImGuiIO &io = ImGui::GetIO();
+
    // Load Fonts
    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -463,13 +476,13 @@ void loadFonts( ImGui_ImplVulkanH_Window *wd ) noexcept
    // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
    // IM_ASSERT(font != NULL);
 
-   // {
-   //     ImFontConfig config;
-   //     config.SizePixels = 18;
-   //     config.OversampleH = config.OversampleV = 1;
-   //     config.PixelSnapH = true;
-   //     io.Fonts->AddFontDefault( &config );
-   // }
+   ImFontConfig config;
+   config.SizePixels = 18;
+   config.OversampleH = config.OversampleV = 3;
+   config.PixelSnapH = true;
+   io.FontGlobalScale = getDPIScale( window );
+   io.Fonts->AddFontDefault( &config );
+   io.Fonts->Build();
 
    // Upload Fonts
    // Use any command queue
@@ -656,7 +669,7 @@ int main( int argc, char **argv )
 
    setupImGuiStyles( true, 1.0f );
 
-   loadFonts( wd );
+   loadFonts( window, wd );
 
    // Our state
 
