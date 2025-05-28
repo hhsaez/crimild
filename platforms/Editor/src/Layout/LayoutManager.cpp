@@ -112,7 +112,7 @@ LayoutManager::LayoutManager( void ) noexcept
    if ( std::filesystem::exists( layoutFilePath ) ) {
       coding::FileDecoder decoder;
       if ( decoder.read( layoutFilePath ) && decoder.getObjectCount() > 0 ) {
-         // m_layout = decoder.getObjectAt< Layout >( 0 );
+         m_layout = decoder.getObjectAt< Layout >( 0 );
       }
    }
 
