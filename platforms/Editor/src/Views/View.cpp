@@ -48,9 +48,13 @@ void View::addSubview( std::shared_ptr< View > const &subview )
 void View::removeFromSuperview( void )
 {
    if ( auto superview = m_superview.lock() ) {
-      auto ptr = retain( this );
-      // superview->m_subviews.erase( ptr );
-      assert( false && "TODO" );
+      superview->m_subviews.erase(
+         std::remove(
+            std::begin( superview->m_subviews ),
+            std::end( superview->m_subviews ),
+            retain( this )
+         )
+      );
    }
 }
 

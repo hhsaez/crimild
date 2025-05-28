@@ -46,17 +46,27 @@ void WorkspaceManager::drawContent( void ) noexcept
    }
 
    const auto &workspaces = getSubviews();
+   std::vector< std::shared_ptr< View > > workspacesToRemove;
 
    ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 10.0f, 10.0f ) );
 
    if ( ImGui::BeginTabBar( "Workspaces" ) ) {
       for ( auto &workspace : workspaces ) {
-         if ( ImGui::BeginTabItem( workspace->getUniqueName().c_str() ) ) {
+         bool isOpen = true;
+         if ( ImGui::BeginTabItem( workspace->getUniqueName().c_str(), &isOpen ) ) {
             workspace->draw();
             ImGui::EndTabItem();
          }
+
+         if ( !isOpen ) {
+            workspacesToRemove.push_back( workspace );
+         }
       }
       ImGui::EndTabBar();
+
+      for ( auto &workspace : workspacesToRemove ) {
+         workspace->removeFromSuperview();
+      }
    }
 
    ImGui::PopStyleVar();
