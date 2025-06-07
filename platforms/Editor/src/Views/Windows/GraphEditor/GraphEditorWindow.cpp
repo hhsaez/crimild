@@ -398,6 +398,20 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
 #endif
 }
 
+void GraphEditorWindow::setContext( std::shared_ptr< GraphEditorContext > const &ctx ) noexcept
+{
+   m_ctx = ctx;
+   if ( auto assembly = m_ctx->getAssembly() ) {
+      auto &entities = assembly->getEntities();
+      for ( auto &entity : entities ) {
+         auto editable = editables::Editable::getOrCreate( entity );
+         m_editables.push_back( editable );
+      }
+   } else {
+      CRIMILD_LOG_ERROR( "Invalid context. No assembly provided" );
+   }
+}
+
 GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 {
    NodeEditor::DestroyEditor( m_context );
@@ -405,20 +419,6 @@ GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 
 void GraphEditorWindow::drawContent( void ) noexcept
 {
-   if ( m_entities.empty() ) {
-      auto scene = Simulation::getInstance()->getScene();
-      if ( scene != nullptr ) {
-         scene->perform(
-            Apply(
-               [ & ]( Node *node ) {
-                  m_entities.push_back( retain( node ) );
-                  auto editable = editables::Editable::getOrCreate( retain( node ) );
-                  m_editables.push_back( editable );
-               }
-            )
-         );
-      }
-   }
 
    auto &io = ImGui::GetIO();
 
@@ -463,13 +463,13 @@ void GraphEditorWindow::drawContent( void ) noexcept
 
    for ( auto &maybeEditable : m_editables ) {
       if ( auto editable = maybeEditable.lock() ) {
-         editable->render( m_ctx );
+         editable->render( *m_ctx );
       }
    }
 
    for ( auto &maybeEditable : m_editables ) {
       if ( auto editable = maybeEditable.lock() ) {
-         editable->renderLinks( m_ctx );
+         editable->renderLinks( *m_ctx );
       }
    }
 
@@ -930,10 +930,10 @@ ImColor GraphEditorWindow::getIconColor( PinType type ) const noexcept
 
 void GraphEditorWindow::renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilder &builder ) noexcept
 {
-   //for ( auto &node : m_nodes ) {
-   //   if ( node.type != NodeType::Blueprint && node.type != NodeType::Simple ) {
-   //      continue;
-   //   }
+   // for ( auto &node : m_nodes ) {
+   //    if ( node.type != NodeType::Blueprint && node.type != NodeType::Simple ) {
+   //       continue;
+   //    }
 
    //   const auto isSimple = node.type == NodeType::Simple;
 
@@ -1067,10 +1067,10 @@ void GraphEditorWindow::renderBlueprintAndSimpleNodes( utils::AssemblyNodeBuilde
 void GraphEditorWindow::renderTreeNodes( void ) noexcept
 {
    //// Renders NodeType::Tree
-   //for ( auto &node : m_nodes ) {
-   //   if ( node.type != NodeType::Tree ) {
-   //      continue;
-   //   }
+   // for ( auto &node : m_nodes ) {
+   //    if ( node.type != NodeType::Tree ) {
+   //       continue;
+   //    }
 
    //   const float rounding = 5.0f;
    //   const float padding = 12.0f;
@@ -1106,11 +1106,11 @@ void GraphEditorWindow::renderTreeNodes( void ) noexcept
 
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowSize, 10.0f );
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinArrowWidth, 10.0f );
-   //#if IMGUI_VERSION_NUM > 18101
+   // #if IMGUI_VERSION_NUM > 18101
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-   //#else
+   // #else
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 12 );
-   //#endif
+   // #endif
    //      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
    //      NodeEditor::PinPivotRect( inputsRect.GetTL(), inputsRect.GetBR() );
    //      NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
@@ -1148,11 +1148,11 @@ void GraphEditorWindow::renderTreeNodes( void ) noexcept
    //      ImGui::Dummy( ImVec2( 0, padding ) );
    //      ImGui::Spring( 1, 0 );
    //      outputsRect = ImGui_GetItemRect();
-   //#if IMGUI_VERSION_NUM > 18101
+   // #if IMGUI_VERSION_NUM > 18101
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, ImDrawFlags_RoundCornersBottom );
-   //#else
+   // #else
    //      NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, 3 );
-   //#endif
+   // #endif
    //      NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
    //      NodeEditor::PinPivotRect( outputsRect.GetTL(), outputsRect.GetBR() );
    //      NodeEditor::PinRect( outputsRect.GetTL(), outputsRect.GetBR() );
@@ -1176,63 +1176,63 @@ void GraphEditorWindow::renderTreeNodes( void ) noexcept
 
    //   auto drawList = NodeEditor::GetNodeBackgroundDrawList( node.id );
 
-   //#if IMGUI_VERSION_NUM > 18101
-   //   const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-   //   const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
-   //#else
-   //   const auto topRoundCornersFlags = 1 | 2;
-   //   const auto bottomRoundCornersFlags = 4 | 8;
-   //#endif
-   //   drawList->AddRectFilled(
-   //      inputsRect.GetTL() + ImVec2( 0, 1 ),
-   //      inputsRect.GetBR(),
-   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-   //      4.0f,
-   //      bottomRoundCornersFlags
-   //   );
-   //   drawList->AddRect(
-   //      inputsRect.GetTL() + ImVec2( 0, 1 ),
-   //      inputsRect.GetBR(),
-   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-   //      4.0f,
-   //      bottomRoundCornersFlags
-   //   );
-   //   drawList->AddRectFilled(
-   //      outputsRect.GetTL(),
-   //      outputsRect.GetBR() - ImVec2( 0, 1 ),
-   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-   //      4.0f,
-   //      topRoundCornersFlags
-   //   );
-   //   drawList->AddRect(
-   //      outputsRect.GetTL(),
-   //      outputsRect.GetBR() - ImVec2( 0, 1 ),
-   //      IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
-   //      4.0f,
-   //      topRoundCornersFlags
-   //   );
-   //   drawList->AddRectFilled(
-   //      contentRect.GetTL(),
-   //      contentRect.GetBR(),
-   //      IM_COL32( 24, 64, 128, 200 ),
-   //      0.0f
-   //   );
-   //   drawList->AddRect(
-   //      contentRect.GetTL(),
-   //      contentRect.GetBR(),
-   //      IM_COL32( 48, 128, 255, 100 ),
-   //      0.0f
-   //   );
-   //}
+   // #if IMGUI_VERSION_NUM > 18101
+   //    const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
+   //    const auto bottomRoundCornersFlags = ImDrawFlags_RoundCornersBottom;
+   // #else
+   //    const auto topRoundCornersFlags = 1 | 2;
+   //    const auto bottomRoundCornersFlags = 4 | 8;
+   // #endif
+   //    drawList->AddRectFilled(
+   //       inputsRect.GetTL() + ImVec2( 0, 1 ),
+   //       inputsRect.GetBR(),
+   //       IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //       4.0f,
+   //       bottomRoundCornersFlags
+   //    );
+   //    drawList->AddRect(
+   //       inputsRect.GetTL() + ImVec2( 0, 1 ),
+   //       inputsRect.GetBR(),
+   //       IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //       4.0f,
+   //       bottomRoundCornersFlags
+   //    );
+   //    drawList->AddRectFilled(
+   //       outputsRect.GetTL(),
+   //       outputsRect.GetBR() - ImVec2( 0, 1 ),
+   //       IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //       4.0f,
+   //       topRoundCornersFlags
+   //    );
+   //    drawList->AddRect(
+   //       outputsRect.GetTL(),
+   //       outputsRect.GetBR() - ImVec2( 0, 1 ),
+   //       IM_COL32( ( int ) ( 255 * pinBackground.x ), ( int ) ( 255 * pinBackground.y ), ( int ) ( 255 * pinBackground.z ), inputAlpha ),
+   //       4.0f,
+   //       topRoundCornersFlags
+   //    );
+   //    drawList->AddRectFilled(
+   //       contentRect.GetTL(),
+   //       contentRect.GetBR(),
+   //       IM_COL32( 24, 64, 128, 200 ),
+   //       0.0f
+   //    );
+   //    drawList->AddRect(
+   //       contentRect.GetTL(),
+   //       contentRect.GetBR(),
+   //       IM_COL32( 48, 128, 255, 100 ),
+   //       0.0f
+   //    );
+   // }
 }
 
 void GraphEditorWindow::renderHoudiniNodes( void ) noexcept
 {
    //// Renders NodeType::Houdini
-   //for ( auto &node : m_nodes ) {
-   //   if ( node.type != NodeType::Houdini ) {
-   //      continue;
-   //   }
+   // for ( auto &node : m_nodes ) {
+   //    if ( node.type != NodeType::Houdini ) {
+   //       continue;
+   //    }
 
    //   const float rounding = 10.0f;
    //   const float padding = 12.0f;
@@ -1266,17 +1266,17 @@ void GraphEditorWindow::renderHoudiniNodes( void ) noexcept
    //         inputsRect.Min.y -= padding;
    //         inputsRect.Max.y -= padding;
 
-   //#if IMGUI_VERSION_NUM > 18101
-   //         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-   //#else
-   //         const auto allRoundCornersFlags = 15;
-   //#endif
-   //         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
-   //         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
-   //         NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
-   //         NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
-   //         NodeEditor::EndPin();
-   //         NodeEditor::PopStyleVar( 1 );
+   // #if IMGUI_VERSION_NUM > 18101
+   //          const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
+   // #else
+   //          const auto allRoundCornersFlags = 15;
+   // #endif
+   //          NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, allRoundCornersFlags );
+   //          NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Input );
+   //          NodeEditor::PinPivotRect( inputsRect.GetCenter(), inputsRect.GetCenter() );
+   //          NodeEditor::PinRect( inputsRect.GetTL(), inputsRect.GetBR() );
+   //          NodeEditor::EndPin();
+   //          NodeEditor::PopStyleVar( 1 );
 
    //         auto drawList = ImGui::GetWindowDrawList();
    //         drawList->AddRectFilled(
@@ -1329,13 +1329,13 @@ void GraphEditorWindow::renderHoudiniNodes( void ) noexcept
    //         outputsRect.Min.y += padding;
    //         outputsRect.Max.y += padding;
 
-   //#if IMGUI_VERSION_NUM > 18101
-   //         const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
-   //         const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
-   //#else
-   //         const auto allRoundCornersFlags = 15;
-   //         const auto topRoundCornersFlags = 3;
-   //#endif
+   // #if IMGUI_VERSION_NUM > 18101
+   //          const auto allRoundCornersFlags = ImDrawFlags_RoundCornersAll;
+   //          const auto topRoundCornersFlags = ImDrawFlags_RoundCornersTop;
+   // #else
+   //          const auto allRoundCornersFlags = 15;
+   //          const auto topRoundCornersFlags = 3;
+   // #endif
 
    //         NodeEditor::PushStyleVar( NodeEditor::StyleVar_PinCorners, topRoundCornersFlags );
    //         NodeEditor::BeginPin( pin.id, NodeEditor::PinKind::Output );
@@ -1376,10 +1376,10 @@ void GraphEditorWindow::renderHoudiniNodes( void ) noexcept
 
 void GraphEditorWindow::renderCommentNodes( void ) noexcept
 {
-   //for ( auto &node : m_nodes ) {
-   //   if ( node.type != NodeType::Comment ) {
-   //      continue;
-   //   }
+   // for ( auto &node : m_nodes ) {
+   //    if ( node.type != NodeType::Comment ) {
+   //       continue;
+   //    }
 
    //   const float commentAlpha = 0.75f;
 
@@ -1434,9 +1434,9 @@ void GraphEditorWindow::renderCommentNodes( void ) noexcept
 
 void GraphEditorWindow::renderLinks( void ) noexcept
 {
-   //for ( auto &link : m_links ) {
-   //   NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
-   //}
+   // for ( auto &link : m_links ) {
+   //    NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
+   // }
 }
 
 void GraphEditorWindow::renderCreateNewNode( void ) noexcept
@@ -1489,8 +1489,8 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
                      if ( auto callback = startPin->onConnect ) {
                         callback( startPin, endPin );
                      }
-                     //m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
-                     //m_links.back().color = getIconColor( startPin->type );
+                     // m_links.emplace_back( Link( m_ctx.getNextId(), startPinId, endPinId ) );
+                     // m_links.back().color = getIconColor( startPin->type );
                   }
                }
             }
@@ -1522,20 +1522,20 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
          while ( NodeEditor::QueryDeletedNode( &nodeId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
                assert( false );
-               //auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ nodeId ]( auto &node ) { return node.id == nodeId; } );
-               //if ( id != m_nodes.end() ) {
-               //   m_nodes.erase( id );
-               //}
+               // auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ nodeId ]( auto &node ) { return node.id == nodeId; } );
+               // if ( id != m_nodes.end() ) {
+               //    m_nodes.erase( id );
+               // }
             }
          }
          NodeEditor::LinkId linkId = 0;
          while ( NodeEditor::QueryDeletedLink( &linkId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
-                assert( false );
-               //auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
-               //if ( id != m_links.end() ) {
-               //   m_links.erase( id );
-               //}
+               assert( false );
+               // auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
+               // if ( id != m_links.end() ) {
+               //    m_links.erase( id );
+               // }
             }
          }
          NodeEditor::EndDelete();
@@ -1570,23 +1570,23 @@ void GraphEditorWindow::renderNodeContextMenu( void ) noexcept
 {
    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 8, 8 ) );
    if ( ImGui::BeginPopup( "Node Context Menu" ) ) {
-       assert( false );
-      //auto node = findNode( m_contextNodeId );
+      assert( false );
+      // auto node = findNode( m_contextNodeId );
 
-      //ImGui::TextUnformatted( "Node Context Menu" );
-      //ImGui::Separator();
-      //if ( node ) {
-      //   ImGui::Text( "ID: %p", node->id.AsPointer() );
-      //   ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
-      //   ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
-      //   ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
-      //} else {
-      //   ImGui::Text( "Unknown node: %p", m_contextNodeId.AsPointer() );
-      //}
-      //ImGui::Separator();
-      //if ( ImGui::MenuItem( "Delete" ) ) {
-      //   NodeEditor::DeleteNode( m_contextNodeId );
-      //}
+      // ImGui::TextUnformatted( "Node Context Menu" );
+      // ImGui::Separator();
+      // if ( node ) {
+      //    ImGui::Text( "ID: %p", node->id.AsPointer() );
+      //    ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
+      //    ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
+      //    ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
+      // } else {
+      //    ImGui::Text( "Unknown node: %p", m_contextNodeId.AsPointer() );
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Delete" ) ) {
+      //    NodeEditor::DeleteNode( m_contextNodeId );
+      // }
       ImGui::EndPopup();
    }
 }
@@ -1595,20 +1595,20 @@ void GraphEditorWindow::renderPinContextMenu( void ) noexcept
 {
    if ( ImGui::BeginPopup( "Pin Context Menu" ) ) {
       assert( false );
-      //auto pin = findPin( m_contextPinId );
+      // auto pin = findPin( m_contextPinId );
 
-      //ImGui::TextUnformatted( "Pin Context Menu" );
-      //ImGui::Separator();
-      //if ( pin ) {
-      //   ImGui::Text( "ID: %p", pin->id.AsPointer() );
-      //   if ( pin->node ) {
-      //      ImGui::Text( "Node: %p", pin->node->id.AsPointer() );
-      //   } else {
-      //      ImGui::Text( "Node: %s", "<none>" );
-      //   }
-      //} else {
-      //   ImGui::Text( "Unknown pin: %p", m_contextPinId.AsPointer() );
-      //}
+      // ImGui::TextUnformatted( "Pin Context Menu" );
+      // ImGui::Separator();
+      // if ( pin ) {
+      //    ImGui::Text( "ID: %p", pin->id.AsPointer() );
+      //    if ( pin->node ) {
+      //       ImGui::Text( "Node: %p", pin->node->id.AsPointer() );
+      //    } else {
+      //       ImGui::Text( "Node: %s", "<none>" );
+      //    }
+      // } else {
+      //    ImGui::Text( "Unknown pin: %p", m_contextPinId.AsPointer() );
+      // }
       ImGui::EndPopup();
    }
 }
@@ -1616,22 +1616,22 @@ void GraphEditorWindow::renderPinContextMenu( void ) noexcept
 void GraphEditorWindow::renderLinkContextMenu( void ) noexcept
 {
    if ( ImGui::BeginPopup( "Link Context Menu" ) ) {
-       assert( false );
-      //auto link = findLink( m_contextLinkId );
+      assert( false );
+      // auto link = findLink( m_contextLinkId );
 
-      //ImGui::TextUnformatted( "Link Context Menu" );
-      //ImGui::Separator();
-      //if ( link ) {
-      //   ImGui::Text( "ID: %p", link->id.AsPointer() );
-      //   ImGui::Text( "From: %p", link->startPinId.AsPointer() );
-      //   ImGui::Text( "To: %p", link->endPinId.AsPointer() );
-      //} else {
-      //   ImGui::Text( "Unknown link: %p", m_contextLinkId.AsPointer() );
-      //}
-      //ImGui::Separator();
-      //if ( ImGui::MenuItem( "Delete" ) ) {
-      //   NodeEditor::DeleteLink( m_contextLinkId );
-      //}
+      // ImGui::TextUnformatted( "Link Context Menu" );
+      // ImGui::Separator();
+      // if ( link ) {
+      //    ImGui::Text( "ID: %p", link->id.AsPointer() );
+      //    ImGui::Text( "From: %p", link->startPinId.AsPointer() );
+      //    ImGui::Text( "To: %p", link->endPinId.AsPointer() );
+      // } else {
+      //    ImGui::Text( "Unknown link: %p", m_contextLinkId.AsPointer() );
+      // }
+      // ImGui::Separator();
+      // if ( ImGui::MenuItem( "Delete" ) ) {
+      //    NodeEditor::DeleteLink( m_contextLinkId );
+      // }
       ImGui::EndPopup();
    }
 }
@@ -1720,7 +1720,8 @@ void GraphEditorWindow::renderCreateNewNodeMenu( void ) noexcept
       // }
 
       if ( auto entity = NewEntityMenu::render() ) {
-         m_entities.push_back( entity );
+         auto assembly = m_ctx->getAssembly();
+         assembly->addEntity( entity );
 
          if ( auto editable = editables::Editable::getOrCreate( entity ) ) {
             editable->setPosition( Vector2 { newNodePosition.x, newNodePosition.y } );
@@ -1755,9 +1756,9 @@ void GraphEditorWindow::showLeftPanel( void )
    ImGui::Spring( 0 );
    if ( ImGui::Button( "Show Flow" ) ) {
       assert( false );
-      //for ( auto &link : m_links ) {
-      //   NodeEditor::Flow( link.id );
-      //}
+      // for ( auto &link : m_links ) {
+      //    NodeEditor::Flow( link.id );
+      // }
    }
    ImGui::Spring();
    if ( ImGui::Button( "Edit Style" ) ) {
@@ -1797,22 +1798,22 @@ void GraphEditorWindow::showLeftPanel( void )
    ImGui::SameLine();
    ImGui::TextUnformatted( "Nodes" );
    ImGui::Indent();
-   //for ( auto &node : m_nodes ) {
-   //   ImGui::PushID( node.id.AsPointer() );
-   //   auto start = ImGui::GetCursorScreenPos();
-   //   if ( const auto progress = getTouchProgress( node.id ) ) {
-   //      ImGui::GetWindowDrawList()->AddLine(
-   //         start + ImVec2( -8, 0 ),
-   //         start + ImVec2( -8, ImGui::GetTextLineHeight() ),
-   //         IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
-   //         4.0f
-   //      );
-   //   }
+   // for ( auto &node : m_nodes ) {
+   //    ImGui::PushID( node.id.AsPointer() );
+   //    auto start = ImGui::GetCursorScreenPos();
+   //    if ( const auto progress = getTouchProgress( node.id ) ) {
+   //       ImGui::GetWindowDrawList()->AddLine(
+   //          start + ImVec2( -8, 0 ),
+   //          start + ImVec2( -8, ImGui::GetTextLineHeight() ),
+   //          IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
+   //          4.0f
+   //       );
+   //    }
 
    //   bool isSelected = std::find( selectedNodes.begin(), selectedNodes.end(), node.id ) != selectedNodes.end();
-   //#if IMGUI_VERSION_NUM >= 18967
+   // #if IMGUI_VERSION_NUM >= 18967
    //   ImGui::SetNextItemAllowOverlap();
-   //#endif
+   // #endif
    //   if ( ImGui::Selectable( ( node.name + "##" + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) ).c_str(), &isSelected ) ) {
    //      if ( io.KeyCtrl ) {
    //         if ( isSelected ) {
@@ -1841,11 +1842,11 @@ void GraphEditorWindow::showLeftPanel( void )
 
    //   auto drawList = ImGui::GetWindowDrawList();
    //   ImGui::SetCursorScreenPos( iconPanelPos );
-   //#if IMGUI_VERSION_NUM < 18967
+   // #if IMGUI_VERSION_NUM < 18967
    //   ImGui::SetItemAllowOverlap();
-   //#else
+   // #else
    //   ImGui::SetNextItemAllowOverlap();
-   //#endif
+   // #endif
 
    //   if ( node.savedState.empty() ) {
    //      if ( ImGui::InvisibleButton( "save", ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) ) ) {
@@ -1913,11 +1914,11 @@ void GraphEditorWindow::showLeftPanel( void )
    //   }
 
    //   ImGui::SameLine( 0, ImGui::GetStyle().ItemInnerSpacing.x );
-   //#if IMGUI_VERSION_NUM < 18967
+   // #if IMGUI_VERSION_NUM < 18967
    //   ImGui::SetItemAllowOverlap();
-   //#else
+   // #else
    //   ImGui::SetNextItemAllowOverlap();
-   //#endif
+   // #endif
 
    //   if ( !node.savedState.empty() ) {
    //      if ( ImGui::InvisibleButton( "restore", ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) ) ) {
@@ -1979,9 +1980,9 @@ void GraphEditorWindow::showLeftPanel( void )
    //   }
 
    //   ImGui::SameLine( 0, 0 );
-   //#if IMGUI_VERSION_NUM < 18967
+   // #if IMGUI_VERSION_NUM < 18967
    //   ImGui::SetItemAllowOverlap();
-   //#endif
+   // #endif
    //   ImGui::Dummy( ImVec2( 0, restoreIconHeight ) );
    //   ImGui::PopID();
    //}
@@ -2014,10 +2015,10 @@ void GraphEditorWindow::showLeftPanel( void )
    ImGui::Unindent();
 
    if ( ImGui::IsKeyPressed( ImGuiKey_Z ) ) {
-       assert( false );
-      //for ( auto &link : m_links ) {
-      //   NodeEditor::Flow( link.id );
-      //}
+      assert( false );
+      // for ( auto &link : m_links ) {
+      //    NodeEditor::Flow( link.id );
+      // }
    }
 
    if ( NodeEditor::HasSelectionChanged() ) {

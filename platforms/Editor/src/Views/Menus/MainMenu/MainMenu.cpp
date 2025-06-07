@@ -45,7 +45,7 @@
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Windows/TimelineWindow.hpp"
-#include "Views/Workspaces/Workspace.hpp"
+#include "Views/Workspaces/AssemblyWorkspace.hpp"
 #include "Views/Workspaces/WorkspaceManager.hpp"
 
 using namespace crimild;
@@ -255,10 +255,8 @@ void MainMenu::renderFileMenu( void ) noexcept
          [ & ] {
             if ( ImGui::MenuItem( "New Workspace" ) ) {
                if ( auto workspaces = WorkspaceManager::getInstance() ) {
-                  const int nextWorkspace = workspaces->getSubviews().size();
-                  std::stringstream ss;
-                  ss << "Workspace " << nextWorkspace;
-                  workspaces->createWorkspace< Workspace >( ss.str() );
+                  auto assembly = crimild::alloc< Assembly >( "MyAssembly" );
+                  workspaces->createWorkspace< AssemblyWorkspace >( assembly );
                }
             }
          }

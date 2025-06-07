@@ -12,6 +12,9 @@ target_sources(
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp
 
+    Assemblies/Assembly.cpp
+    Assemblies/Assembly.hpp
+
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
 
@@ -75,6 +78,8 @@ target_sources(
 
     Views/Workspaces/Workspace.hpp
     Views/Workspaces/Workspace.cpp
+    Views/Workspaces/AssemblyWorkspace.hpp
+    Views/Workspaces/AssemblyWorkspace.cpp
     Views/Workspaces/WorkspaceManager.hpp
     Views/Workspaces/WorkspaceManager.cpp
 

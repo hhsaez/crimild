@@ -47,6 +47,7 @@
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Windows/TimelineWindow.hpp"
+#include "Views/Workspaces/AssemblyWorkspace.hpp"
 #include "Views/Workspaces/Workspace.hpp"
 #include "Views/Workspaces/WorkspaceManager.hpp"
 
@@ -518,6 +519,8 @@ int main( int argc, char **argv )
    crimild::init();
    crimild::vulkan::init();
 
+   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Assembly );
+
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Layout );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::MainMenu );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::FileSystemWindow );
@@ -533,6 +536,7 @@ int main( int argc, char **argv )
 
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Workspace );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::WorkspaceManager );
+   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::AssemblyWorkspace );
 
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Editor::State );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Project );

@@ -64,7 +64,9 @@ namespace crimild::editor {
 
    public:
       GraphEditorWindow( void ) noexcept;
-      ~GraphEditorWindow( void ) noexcept;
+      virtual ~GraphEditorWindow( void ) noexcept;
+
+      void setContext( std::shared_ptr< GraphEditorContext > const &ctx ) noexcept;
 
       void drawContent( void ) noexcept final;
 
@@ -74,8 +76,8 @@ namespace crimild::editor {
 
 #if GRAPH_EDITOR_BLUEPRINTS
 
-      //GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
-      //Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
+      // GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
+      // Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
       Pin *findPin( Pin::Id id ) noexcept;
 
       //   inline int getNextId( void ) noexcept { return m_nextId++; }
@@ -97,11 +99,11 @@ namespace crimild::editor {
 
          assert( false );
 
-         //for ( auto &link : m_links ) {
-         //   if ( link.startPinId == id || link.endPinId == id ) {
-         //      return true;
-         //   }
-         //}
+         // for ( auto &link : m_links ) {
+         //    if ( link.startPinId == id || link.endPinId == id ) {
+         //       return true;
+         //    }
+         // }
 
          return false;
       }
@@ -125,24 +127,24 @@ namespace crimild::editor {
       // GraphNode *spawnHoudiniTransformNode( void ) noexcept;
       // GraphNode *spawnHoudiniGroupNode( void ) noexcept;
 
-      //void buildNodes( void ) noexcept
+      // void buildNodes( void ) noexcept
       //{
-      //   for ( auto &node : m_nodes ) {
-      //      buildNode( &node );
-      //   }
-      //}
+      //    for ( auto &node : m_nodes ) {
+      //       buildNode( &node );
+      //    }
+      // }
 
-      //void buildNode( GraphNode *node ) noexcept
+      // void buildNode( GraphNode *node ) noexcept
       //{
-      //   for ( auto &input : node->inputs ) {
-      //      input.node = node;
-      //      input.kind = PinKind::Input;
-      //   }
-      //   for ( auto &output : node->outputs ) {
-      //      output.node = node;
-      //      output.kind = PinKind::Output;
-      //   }
-      //}
+      //    for ( auto &input : node->inputs ) {
+      //       input.node = node;
+      //       input.kind = PinKind::Input;
+      //    }
+      //    for ( auto &output : node->outputs ) {
+      //       output.node = node;
+      //       output.kind = PinKind::Output;
+      //    }
+      // }
 
       ImColor getIconColor( PinType type ) const noexcept;
 
@@ -159,19 +161,19 @@ namespace crimild::editor {
       void renderCreateNewNodeMenu( void ) noexcept;
       void showOrdinals( void ) noexcept;
 
-      //inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
+      // inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
       //{
-      //   m_nodeTouchTime[ id ] = m_touchTime;
-      //}
+      //    m_nodeTouchTime[ id ] = m_touchTime;
+      // }
 
-      //inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
+      // inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
       //{
-      //   auto it = m_nodeTouchTime.find( id );
-      //   if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
-      //      return ( m_touchTime - it->second ) / m_touchTime;
-      //   }
-      //   return 0.0f;
-      //}
+      //    auto it = m_nodeTouchTime.find( id );
+      //    if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
+      //       return ( m_touchTime - it->second ) / m_touchTime;
+      //    }
+      //    return 0.0f;
+      // }
 
       void showLeftPanel( void );
       void showStyleEditor();
@@ -182,20 +184,20 @@ namespace crimild::editor {
       // Required to trace editor state.
       ax::NodeEditor::EditorContext *m_context = nullptr;
 
-      GraphEditorContext m_ctx;
-      std::vector< std::shared_ptr< Entity > > m_entities;
+      std::shared_ptr< GraphEditorContext > m_ctx;
+      // std::vector< std::shared_ptr< Entity > > m_entities;
       std::vector< std::weak_ptr< editables::Editable > > m_editables;
 
 #if GRAPH_EDITOR_BLUEPRINTS
       int m_nextId = 1;
       const int m_pinIconSize = 24;
-      //std::vector< GraphNode > m_nodes;
-      //std::vector< Link > m_links;
+      // std::vector< GraphNode > m_nodes;
+      // std::vector< Link > m_links;
       ImTextureID m_headerBackground = nullptr;
       ImTextureID m_saveIcon = nullptr;
       ImTextureID m_restoreIcon = nullptr;
       const float m_touchTime = 1.0f;
-      //std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
+      // std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
       bool m_showOrdinals = false;
 
       bool m_createNewNode = false;
