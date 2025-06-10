@@ -12,7 +12,7 @@ namespace crimild::editor {
 
    public:
       AssemblyWorkspace( void ) noexcept = default;
-      explicit AssemblyWorkspace( std::shared_ptr< Assembly > const &assembly ) noexcept;
+      explicit AssemblyWorkspace( std::filesystem::path path ) noexcept;
       virtual ~AssemblyWorkspace( void ) noexcept = default;
 
       virtual void draw( void ) noexcept override;

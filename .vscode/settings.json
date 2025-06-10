@@ -96,7 +96,26 @@
         "shared_mutex": "cpp",
         "cinttypes": "cpp",
         "__verbose_abort": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "expected": "cpp",
+        "format": "cpp",
+        "span": "cpp",
+        "stop_token": "cpp",
+        "xfacet": "cpp",
+        "xhash": "cpp",
+        "xiosbase": "cpp",
+        "xlocale": "cpp",
+        "xlocbuf": "cpp",
+        "xlocinfo": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xlocnum": "cpp",
+        "xloctime": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xtr1common": "cpp",
+        "xtree": "cpp",
+        "xutility": "cpp"
     },
     "editor.tabSize": 3
 }

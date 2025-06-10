@@ -6,10 +6,22 @@
 
 using namespace crimild::editor;
 
-AssemblyWorkspace::AssemblyWorkspace( std::shared_ptr< Assembly > const &assembly ) noexcept
-   : View( assembly->getName() ),
-     m_assembly( assembly )
+AssemblyWorkspace::AssemblyWorkspace( std::filesystem::path path ) noexcept
+   : View( path.stem().string() )
 {
+   if ( std::filesystem::exists( path ) ) {
+      // TODO: This needs proper handling for path, starting from the project's root directory
+      coding::FileDecoder decoder;
+      decoder.read( path );
+      if ( decoder.getObjectCount() == 0 ) {
+         CRIMILD_LOG_ERROR( "Cannot decode assembly from path ", path );
+         return;
+      }
+      m_assembly = decoder.getObjectAt< Assembly >( 0 );
+   } else {
+      m_assembly = crimild::alloc< Assembly >( path.string() );
+   }
+
    crimild::concurrency::sync_frame(
       [ this ] {
          auto graphEditor = crimild::alloc< GraphEditorWindow >();
@@ -49,14 +61,37 @@ void AssemblyWorkspace::encode( coding::Encoder &encoder ) noexcept
 {
    View::encode( encoder );
 
-   encoder.encode( "assembly", m_assembly );
+   const auto assemblyPath = m_assembly->getName();
+   encoder.encode( "assemblyPath", assemblyPath );
+
+   {
+      // TODO: This needs proper handling for path, starting from the project's root directory
+      coding::FileEncoder encoder;
+      encoder.encode( m_assembly );
+      if ( !encoder.write( assemblyPath ) ) {
+         CRIMILD_LOG_ERROR( "Failed to encode assembly" );
+         return;
+      }
+   }
 }
 
 void AssemblyWorkspace::decode( coding::Decoder &decoder ) noexcept
 {
    View::decode( decoder );
 
-   decoder.decode( "assembly", m_assembly );
+   std::string assemblyPath;
+   decoder.decode( "assemblyPath", assemblyPath );
+
+   {
+      // TODO: This needs proper handling for path, starting from the project's root directory
+      coding::FileDecoder decoder;
+      decoder.read( assemblyPath );
+      if ( decoder.getObjectCount() == 0 ) {
+         CRIMILD_LOG_ERROR( "Cannot decode assembly from path ", assemblyPath );
+         return;
+      }
+      m_assembly = decoder.getObjectAt< Assembly >( 0 );
+   }
 
    auto &subviews = getSubviews();
    for ( auto subview : subviews ) {

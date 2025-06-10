@@ -253,11 +253,19 @@ void MainMenu::renderFileMenu( void ) noexcept
 
       enabledWithProject(
          [ & ] {
-            if ( ImGui::MenuItem( "New Workspace" ) ) {
-               if ( auto workspaces = WorkspaceManager::getInstance() ) {
-                  auto assembly = crimild::alloc< Assembly >( "MyAssembly" );
-                  workspaces->createWorkspace< AssemblyWorkspace >( assembly );
-               }
+            if ( ImGui::MenuItem( "New Assembly" ) ) {
+               getLayout()->addView(
+                  crimild::alloc< FileDialog >(
+                     "New Assembly",
+                     []( const auto &path ) {
+                        if ( auto workspaces = WorkspaceManager::getInstance() ) {
+                           workspaces->createWorkspace< AssemblyWorkspace >( path );
+                        }
+                     },
+                     ".crimild",
+                     Editor::getInstance()->getProject()->getRootDirectory().string()
+                  )
+               );
             }
          }
       );
@@ -276,22 +284,24 @@ void MainMenu::renderFileMenu( void ) noexcept
          );
       }
 
-      // enabledWithProject(
-      //    [ & ] {
-      //       if ( ImGui::MenuItem( "Open Scene..." ) ) {
-      //          getLayout()->addView(
-      //             std::make_shared< FileDialog >(
-      //                "Create Project",
-      //                []( const auto &path ) {
-      //                   Editor::getInstance()->loadScene( path );
-      //                },
-      //                ".crimild",
-      //                Editor::getInstance()->getProject()->getScenesDirectory().string()
-      //             )
-      //          );
-      //       }
-      //    }
-      // );
+      enabledWithProject(
+         [ & ] {
+            if ( ImGui::MenuItem( "Open Assembly..." ) ) {
+               getLayout()->addView(
+                  std::make_shared< FileDialog >(
+                     "Open Assembly",
+                     []( const auto &path ) {
+                        if ( auto workspaces = WorkspaceManager::getInstance() ) {
+                           workspaces->createWorkspace< AssemblyWorkspace >( path );
+                        }
+                     },
+                     ".crimild",
+                     Editor::getInstance()->getProject()->getRootDirectory().string()
+                  )
+               );
+            }
+         }
+      );
 
       ImGui::Separator();
 
