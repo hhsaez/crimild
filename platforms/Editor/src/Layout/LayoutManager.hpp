@@ -28,29 +28,37 @@
 #ifndef CRIMILD_EDITOR_LAYOUT_MANAGER_
 #define CRIMILD_EDITOR_LAYOUT_MANAGER_
 
+#include <Crimild_Foundation.hpp>
 #include <memory>
 
 namespace crimild::editor {
 
-    class Layout;
+   class Layout;
 
-    class LayoutManager {
-    public:
-        LayoutManager( void ) noexcept;
-        ~LayoutManager( void ) noexcept;
+   class LayoutManager : public DynamicSingleton< LayoutManager > {
+   public:
+      LayoutManager( void ) noexcept;
+      ~LayoutManager( void ) noexcept;
 
-        //std::shared_ptr< Layout > &getCurrentLayout( void ) noexcept { return m_layout; }
+      /**
+       * @brief Initialize layout after main window has been created
+       *
+       * This creates a simple layout
+       */
+      void init( void );
 
-        /**
-        * @brief Initialize layout after main window has been created
-        */
-        void init( void );
+      /**
+       * @brief Reload the layout
+       *
+       * This is used after a project has been loaded
+       */
+      void reload( void );
 
-        void render( void );
+      void render( void );
 
-    private:
-        std::shared_ptr< Layout > m_layout;
-    };
+   private:
+      std::shared_ptr< Layout > m_layout;
+   };
 
 }
 

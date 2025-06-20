@@ -27,6 +27,7 @@
 
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
+#include "Simulation/Project.hpp"
 #include "Views/Menus/NewEntityMenu.hpp"
 #include "Views/Windows/GraphEditor/Builders.hpp"
 
@@ -303,7 +304,12 @@ GraphEditorWindow::GraphEditorWindow( void ) noexcept
    : Window( "Graph Editor" )
 {
    NodeEditor::Config config;
-   config.SettingsFile = "./AssemblyEditor.json";
+   std::filesystem::path configPath = "./AssemblyEditor.json";
+   if ( auto project = Project::getInstance() ) {
+      auto root = project->getRootDirectory();
+      configPath = root / "AssemblyEditor.json";
+   }
+   config.SettingsFile = configPath.string().c_str();
 
 #if GRAPH_EDITOR_BLUEPRINTS
    config.UserPointer = this;

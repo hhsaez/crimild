@@ -27,6 +27,7 @@
 
 #include "Simulation/Editor.hpp"
 
+#include "Layout/LayoutManager.hpp"
 #include "Simulation/Project.hpp"
 
 using namespace crimild;
@@ -209,6 +210,10 @@ void Editor::createProject( const std::filesystem::path &path ) noexcept
 
    saveProject();
    createNewScene( projectRoot / "Assets" / "Scenes" / "main.crimild" );
+
+   if ( auto layoutManager = LayoutManager::getInstance() ) {
+      layoutManager->reload();
+   }
 }
 
 void Editor::loadProject( const std::filesystem::path &path ) noexcept
@@ -243,6 +248,10 @@ void Editor::loadProject( const std::filesystem::path &path ) noexcept
 
    loadScene( m_project->getScenePath( m_project->getCurrentSceneName() ) );
    saveRecentProjects();
+
+   if ( auto layoutManager = LayoutManager::getInstance() ) {
+      layoutManager->reload();
+   }
 }
 
 void Editor::saveProject( void ) noexcept
@@ -279,6 +288,10 @@ void Editor::closeProject( void ) noexcept
    // Reset the scene to the default one
    setScene( nullptr );
    handle( Event { .type = Event::Type::SCENE_CHANGED } );
+
+   if ( auto layoutManager = LayoutManager::getInstance() ) {
+      layoutManager->reload();
+   }
 }
 
 void Editor::saveRecentProjects( void ) noexcept
