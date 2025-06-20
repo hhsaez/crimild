@@ -38,7 +38,8 @@ namespace crimild {
       class Project
          : public coding::Codable,
            public Named,
-           public Versionable {
+           public Versionable,
+           public DynamicSingleton< Project > {
          CRIMILD_IMPLEMENT_RTTI( crimild::editor::Project )
 
       public:
@@ -58,6 +59,22 @@ namespace crimild {
          [[deprecated]] inline void setCurrentSceneName( std::string_view sceneName ) noexcept { m_currentSceneName = sceneName; }
          [[deprecated]] inline const std::string &getCurrentSceneName( void ) const noexcept { return m_currentSceneName; }
          [[deprecated]] inline std::filesystem::path getScenePath( std::string_view sceneName ) const noexcept { return getScenesDirectory() / ( std::string( sceneName ) + ".crimild" ); }
+
+         bool isRelativePath( std::filesystem::path path ) const;
+         std::filesystem::path toRelativePath( std::filesystem::path absolutePath ) const;
+
+         bool isAbsolutePath( std::filesystem::path path ) const;
+         std::filesystem::path toAbsolutePath( std::filesystem::path relativePath ) const;
+
+         std::shared_ptr< coding::Codable > load( std::filesystem::path relativePath ) const;
+
+         template< typename CodableType >
+         std::shared_ptr< CodableType > load( std::filesystem::path relativePath ) const
+         {
+            return std::static_pointer_cast< CodableType >( load( relativePath ) );
+         }
+
+         void save( std::filesystem::path relativePath, std::shared_ptr< coding::Codable > const &codable ) const;
 
       private:
          mutable std::filesystem::path m_filePath;

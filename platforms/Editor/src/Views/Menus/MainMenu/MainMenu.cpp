@@ -258,8 +258,13 @@ void MainMenu::renderFileMenu( void ) noexcept
                   crimild::alloc< FileDialog >(
                      "New Assembly",
                      []( const auto &path ) {
-                        if ( auto workspaces = WorkspaceManager::getInstance() ) {
-                           workspaces->createWorkspace< AssemblyWorkspace >( path );
+                        if ( auto project = Project::getInstance() ) {
+                           // Always work with relative paths!
+                           auto assemblyPath = project->toRelativePath( path );
+                           auto assembly = crimild::alloc< Assembly >( path.stem().string() );
+                           if ( auto workspaces = WorkspaceManager::getInstance() ) {
+                              workspaces->createWorkspace< AssemblyWorkspace >( assemblyPath, assembly );
+                           }
                         }
                      },
                      ".crimild",
@@ -291,8 +296,16 @@ void MainMenu::renderFileMenu( void ) noexcept
                   std::make_shared< FileDialog >(
                      "Open Assembly",
                      []( const auto &path ) {
-                        if ( auto workspaces = WorkspaceManager::getInstance() ) {
-                           workspaces->createWorkspace< AssemblyWorkspace >( path );
+                        if ( auto project = Project::getInstance() ) {
+                           // Always work with relative paths!
+                           auto assemblyPath = project->toRelativePath( path );
+                           if ( auto assembly = project->load< Assembly >( assemblyPath ) ) {
+                              if ( auto workspaces = WorkspaceManager::getInstance() ) {
+                                 workspaces->createWorkspace< AssemblyWorkspace >( assemblyPath, assembly );
+                              }
+                           } else {
+                              CRIMILD_LOG_ERROR( "Cannot load assembly from path ", assemblyPath );
+                           }
                         }
                      },
                      ".crimild",

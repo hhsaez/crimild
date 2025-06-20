@@ -44,6 +44,71 @@ Project::Project( std::string name, const Version &version ) noexcept
    // no-op
 }
 
+bool Project::isRelativePath( std::filesystem::path path ) const
+{
+   return path.string().starts_with( "assets://" );
+}
+
+std::filesystem::path Project::toRelativePath( std::filesystem::path absolutePath ) const
+{
+   auto root = getRootDirectory();
+   auto relative = std::filesystem::relative( absolutePath, root );
+   return std::filesystem::path( "assets://" ) / relative;
+}
+
+bool Project::isAbsolutePath( std::filesystem::path path ) const
+{
+   return !isRelativePath( path );
+}
+
+std::filesystem::path Project::toAbsolutePath( std::filesystem::path relativePath ) const
+{
+   const std::string assetsPrefix = "assets://";
+   if ( !relativePath.string().starts_with( assetsPrefix ) ) {
+      // Path is not relative. Return it as is.
+      return relativePath;
+   }
+   return getRootDirectory() / relativePath.string().substr( assetsPrefix.length() );
+}
+
+std::shared_ptr< coding::Codable > Project::load( std::filesystem::path relativePath ) const
+{
+   auto path = toAbsolutePath( relativePath );
+
+   if ( !std::filesystem::exists( path ) ) {
+      CRIMILD_LOG_WARNING( "Path does not exists: ", path );
+      return nullptr;
+   }
+
+   coding::FileDecoder decoder;
+   if ( !decoder.read( path ) ) {
+      CRIMILD_LOG_WARNING( "Cannot decode file: ", path );
+   }
+
+   if ( decoder.getObjectCount() == 0 ) {
+      CRIMILD_LOG_WARNING( "File is empty: ", path );
+      return nullptr;
+   }
+
+   return decoder.getObjectAt< coding::Codable >( 0 );
+}
+
+void Project::save( std::filesystem::path relativePath, std::shared_ptr< coding::Codable > const &codable ) const
+{
+   auto path = toAbsolutePath( relativePath );
+
+   coding::FileEncoder encoder;
+   if ( !encoder.encode( codable ) ) {
+      CRIMILD_LOG_WARNING( "Cannot encode object to file: ", path );
+      return;
+   }
+
+   if ( !encoder.write( path ) ) {
+      CRIMILD_LOG_ERROR( "Failed to write to file: ", path );
+      return;
+   }
+}
+
 void Project::encode( coding::Encoder &encoder )
 {
    Codable::encode( encoder );

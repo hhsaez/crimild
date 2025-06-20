@@ -2,26 +2,16 @@
 
 #include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
+#include "Simulation/Project.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
 using namespace crimild::editor;
 
-AssemblyWorkspace::AssemblyWorkspace( std::filesystem::path path ) noexcept
-   : View( path.stem().string() )
+AssemblyWorkspace::AssemblyWorkspace( std::filesystem::path assemblyPath, std::shared_ptr< Assembly > const &assembly ) noexcept
+   : View( assembly->getName() ),
+     m_assemblyPath( assemblyPath ),
+     m_assembly( assembly )
 {
-   if ( std::filesystem::exists( path ) ) {
-      // TODO: This needs proper handling for path, starting from the project's root directory
-      coding::FileDecoder decoder;
-      decoder.read( path );
-      if ( decoder.getObjectCount() == 0 ) {
-         CRIMILD_LOG_ERROR( "Cannot decode assembly from path ", path );
-         return;
-      }
-      m_assembly = decoder.getObjectAt< Assembly >( 0 );
-   } else {
-      m_assembly = crimild::alloc< Assembly >( path.string() );
-   }
-
    crimild::concurrency::sync_frame(
       [ this ] {
          auto graphEditor = crimild::alloc< GraphEditorWindow >();
@@ -61,16 +51,11 @@ void AssemblyWorkspace::encode( coding::Encoder &encoder ) noexcept
 {
    View::encode( encoder );
 
-   const auto assemblyPath = m_assembly->getName();
-   encoder.encode( "assemblyPath", assemblyPath );
+   encoder.encode( "assemblyPath", m_assemblyPath.string() );
 
-   {
-      // TODO: This needs proper handling for path, starting from the project's root directory
-      coding::FileEncoder encoder;
-      encoder.encode( m_assembly );
-      if ( !encoder.write( assemblyPath ) ) {
-         CRIMILD_LOG_ERROR( "Failed to encode assembly" );
-         return;
+   if ( m_assembly != nullptr ) {
+      if ( auto project = Project::getInstance() ) {
+         project->save( m_assemblyPath, m_assembly );
       }
    }
 }
@@ -81,24 +66,20 @@ void AssemblyWorkspace::decode( coding::Decoder &decoder ) noexcept
 
    std::string assemblyPath;
    decoder.decode( "assemblyPath", assemblyPath );
+   m_assemblyPath = std::filesystem::path( assemblyPath );
 
-   {
-      // TODO: This needs proper handling for path, starting from the project's root directory
-      coding::FileDecoder decoder;
-      decoder.read( assemblyPath );
-      if ( decoder.getObjectCount() == 0 ) {
-         CRIMILD_LOG_ERROR( "Cannot decode assembly from path ", assemblyPath );
-         return;
-      }
-      m_assembly = decoder.getObjectAt< Assembly >( 0 );
+   if ( auto project = Project::getInstance() ) {
+      m_assembly = project->load< Assembly >( m_assemblyPath );
    }
 
-   auto &subviews = getSubviews();
-   for ( auto subview : subviews ) {
-      if ( auto graphEditor = dynamic_cast_ptr< GraphEditorWindow >( subview ) ) {
-         auto ctx = crimild::alloc< GraphEditorContext >();
-         ctx->setAssembly( m_assembly );
-         graphEditor->setContext( ctx );
+   if ( m_assembly != nullptr ) {
+      auto &subviews = getSubviews();
+      for ( auto subview : subviews ) {
+         if ( auto graphEditor = dynamic_cast_ptr< GraphEditorWindow >( subview ) ) {
+            auto ctx = crimild::alloc< GraphEditorContext >();
+            ctx->setAssembly( m_assembly );
+            graphEditor->setContext( ctx );
+         }
       }
    }
 }
