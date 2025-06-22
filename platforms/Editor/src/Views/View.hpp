@@ -98,7 +98,7 @@ namespace crimild::editor {
       /**
        * @brief Draw the actual content for this view
        */
-      virtual void drawContent( void ) noexcept = 0;
+      virtual void drawContent( void ) noexcept { }
 
    protected:
       /**

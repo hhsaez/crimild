@@ -3,6 +3,7 @@
 #include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Simulation/Project.hpp"
+#include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
 using namespace crimild::editor;
@@ -44,6 +45,10 @@ AssemblyWorkspace::AssemblyWorkspace( std::filesystem::path assemblyPath, std::s
 void AssemblyWorkspace::draw( void ) noexcept
 {
    if ( getSubviews().empty() ) {
+      auto scene3D = crimild::alloc< Scene3DPanel >();
+      scene3D->setAssembly( m_assembly );
+      addSubview( scene3D );
+
       auto graphEditor = crimild::alloc< GraphEditorWindow >();
       auto ctx = crimild::alloc< GraphEditorContext >();
       ctx->setAssembly( m_assembly );
@@ -64,18 +69,19 @@ void AssemblyWorkspace::draw( void ) noexcept
 
 void AssemblyWorkspace::drawContent( void ) noexcept
 {
-   auto graphEditor = getSubviews()[ 0 ];
+   auto scene3D = getSubviews()[ 0 ];
+   auto graphEditor = getSubviews()[ 1 ];
 
    const float totalWidth = ImGui::GetContentRegionAvail().x;
    const float totalHeight = ImGui::GetContentRegionAvail().y;
 
    const float splitterThickness = 5.0f;
 
-   static float leftWidth = 300.0f;
+   static float leftWidth = 0.3f * totalWidth;
    static float rightWidth = 300.0f;
 
    // Sizes for the inner (vertical) splitter
-   static float topHeight = 200.0f;
+   static float topHeight = leftWidth; // squared size
    static float bottomHeight = 200.0f;
 
    // Outer horizontal splitter
@@ -92,8 +98,8 @@ void AssemblyWorkspace::drawContent( void ) noexcept
       }
 
       // Top panel
-      ImGui::BeginChild( "Scene 3D", ImVec2( 0, topHeight ), true );
-      ImGui::Text( "Scene 3D" );
+      ImGui::BeginChild( scene3D->getUniqueName().c_str(), ImVec2( 0, topHeight ), true );
+      scene3D->draw();
       ImGui::EndChild();
 
       ImGui::Separator(); // Optional: visual separation
@@ -144,6 +150,8 @@ void AssemblyWorkspace::decode( coding::Decoder &decoder ) noexcept
             auto ctx = crimild::alloc< GraphEditorContext >();
             ctx->setAssembly( m_assembly );
             graphEditor->setContext( ctx );
+         } else if ( auto scene3D = dynamic_cast_ptr< Scene3DPanel >( subview ) ) {
+            scene3D->setAssembly( m_assembly );
          }
       }
    }

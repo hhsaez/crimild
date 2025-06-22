@@ -35,6 +35,10 @@ target_sources(
     Views/Modals/AlertModal.hpp
     Views/Modals/Modal.cpp
     Views/Modals/Modal.hpp
+
+    Views/Panels/Scene3D/Scene3DPanel.cpp
+    Views/Panels/Scene3D/Scene3DPanel.hpp
+
     Views/Specials/ImGuiDemoWindow.hpp
     Views/Specials/ImGuiDemoWindow.cpp
     Views/Windows/BehaviorsWindow.cpp

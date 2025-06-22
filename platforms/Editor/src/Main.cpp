@@ -35,6 +35,7 @@
 #include "Simulation/Editor.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
+#include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 #include "Views/Windows/BehaviorsWindow.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.hpp"
@@ -533,6 +534,8 @@ int main( int argc, char **argv )
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::SceneWindow );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::SimulationWindow );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::TimelineWindow );
+
+   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Scene3DPanel );
 
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Workspace );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::WorkspaceManager );
