@@ -37,12 +37,12 @@ Window::Window( std::string_view name ) noexcept
 
 void Window::draw( void ) noexcept
 {
-   if ( m_windowName.empty() ) {
-      m_windowName = getUniqueName();
-   }
-   ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
-   if ( ImGui::Begin( m_windowName.c_str(), &getOpenState(), ImGuiWindowFlags_NoCollapse | getFlags() ) ) {
-      drawContent();
-   }
-   ImGui::End();
+   // if ( m_windowName.empty() ) {
+   //    m_windowName = getUniqueName();
+   // }
+   // ImGui::SetNextWindowSizeConstraints( getMinSize(), getMaxSize() );
+   // if ( ImGui::Begin( m_windowName.c_str(), &getOpenState(), ImGuiWindowFlags_NoCollapse | getFlags() ) ) {
+   drawContent();
+   //}
+   // ImGui::End();
 }

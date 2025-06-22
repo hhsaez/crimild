@@ -425,7 +425,6 @@ GraphEditorWindow::~GraphEditorWindow( void ) noexcept
 
 void GraphEditorWindow::drawContent( void ) noexcept
 {
-
    auto &io = ImGui::GetIO();
 
    ImGui::Text( "FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0 );
@@ -1746,7 +1745,7 @@ void GraphEditorWindow::renderCreateNewNodeMenu( void ) noexcept
 void GraphEditorWindow::showLeftPanel( void )
 {
    // TODO(Hernan): I'm still unsure about units here
-   float panelWidth = m_leftPanelWidth - 4.0f;
+   float panelWidth = m_leftPanelWidth - 4.0f; // 4.0f is splitter thickness (see spliter() call)
 
    auto &io = ImGui::GetIO();
 
