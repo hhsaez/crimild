@@ -43,6 +43,7 @@ namespace crimild {
    namespace vulkan::framegraph {
 
       class Node;
+      class RenderScene;
 
    }
 
@@ -60,7 +61,7 @@ namespace crimild::editor {
       ~Scene3DPanel( void ) noexcept = default;
 
       inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
-      inline std::shared_ptr< Assembly > &getAssembly( void ) { return m_assembly; }
+      inline std::shared_ptr< Assembly > getAssembly( void ) { return m_assembly.lock(); }
 
       void draw( void ) noexcept final;
 
@@ -73,10 +74,11 @@ namespace crimild::editor {
    private:
       bool m_initialized = false;
 
-      std::shared_ptr< Assembly > m_assembly;
+      std::weak_ptr< Assembly > m_assembly;
 
       Extent2D m_extent = Extent2D { .width = 1280.0, .height = 1280.0 };
 
+      std::vector< std::shared_ptr< vulkan::framegraph::RenderScene > > m_renderScenePasses;
       std::vector< std::vector< std::shared_ptr< vulkan::framegraph::Node > > > m_framegraph;
       std::vector< std::vector< std::shared_ptr< ImGuiVulkanTexture > > > m_outputTextures;
       size_t m_selectedTexture = 0;

@@ -34,77 +34,82 @@
 
 namespace crimild {
 
-    class Camera;
-    class Node;
+   class Camera;
+   class Node;
 
-    namespace vulkan {
+   namespace vulkan {
 
-        class RenderTarget;
+      class RenderTarget;
 
-        namespace framegraph {
+      namespace framegraph {
 
-            class ComputeSceneLighting;
-            class RenderSceneGBuffer;
-            class RenderSceneLighting;
-            class RenderSceneUnlit;
-            class RenderShadowMaps;
+         class ComputeSceneLighting;
+         class RenderSceneGBuffer;
+         class RenderSceneLighting;
+         class RenderSceneUnlit;
+         class RenderShadowMaps;
 
-            class RenderScene : public RenderBase {
-            public:
-                RenderScene(
-                    RenderDevice *device,
-                    std::string name,
-                    std::shared_ptr< Camera > const &camera,
-                    std::shared_ptr< ImageView > const &output,
-                    SyncOptions const &options = {}
-                ) noexcept;
+         class RenderScene : public RenderBase {
+         public:
+            RenderScene(
+               RenderDevice *device,
+               std::string name,
+               std::shared_ptr< Camera > const &camera,
+               std::shared_ptr< ImageView > const &output,
+               SyncOptions const &options = {}
+            ) noexcept;
 
-                virtual ~RenderScene( void ) = default;
+            virtual ~RenderScene( void ) = default;
 
-                virtual void execute( void ) noexcept override;
+            inline bool hasScene( void ) const { return !m_scene.expired(); }
+            inline void setScene( std::shared_ptr< crimild::Node > const &scene ) { m_scene = scene; }
+            inline std::shared_ptr< crimild::Node > getScene( void ) { return m_scene.lock(); }
 
-                inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
-                {
-                    return getRenderTarget( getName() + "/Targets/Color" );
-                }
+            virtual void execute( void ) noexcept override;
 
-                inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept
-                {
-                    return getRenderTarget( getName() + "/Targets/Color" );
-                }
+            inline const std::shared_ptr< RenderTarget > &getOutput( void ) const noexcept
+            {
+               return getRenderTarget( getName() + "/Targets/Color" );
+            }
 
-                inline const std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) const noexcept
-                {
-                    return m_renderTargets.at( name );
-                }
+            inline std::shared_ptr< RenderTarget > &getOutput( void ) noexcept
+            {
+               return getRenderTarget( getName() + "/Targets/Color" );
+            }
 
-                inline std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) noexcept
-                {
-                    return m_renderTargets.at( name );
-                }
+            inline const std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) const noexcept
+            {
+               return m_renderTargets.at( name );
+            }
 
-            protected:
-                virtual void onResize( void ) noexcept override;
+            inline std::shared_ptr< RenderTarget > &getRenderTarget( std::string name ) noexcept
+            {
+               return m_renderTargets.at( name );
+            }
 
-            private:
-                std::shared_ptr< Camera > m_camera;
-                std::shared_ptr< vulkan::ImageView > m_output;
-                SyncOptions m_syncOptions;
+         protected:
+            virtual void onResize( void ) noexcept override;
 
-                std::unordered_map< std::string, std::shared_ptr< RenderTarget > > m_renderTargets;
+         private:
+            std::weak_ptr< crimild::Node > m_scene;
+            std::shared_ptr< Camera > m_camera;
+            std::shared_ptr< vulkan::ImageView > m_output;
+            SyncOptions m_syncOptions;
 
-                std::shared_ptr< RenderShadowMaps > m_shadows;
-                std::shared_ptr< RenderSceneGBuffer > m_gBuffer;
-                std::shared_ptr< RenderSceneLighting > m_lighting;
-                std::shared_ptr< RenderSceneUnlit > m_unlit;
-                std::shared_ptr< RenderSceneUnlit > m_environment;
+            std::unordered_map< std::string, std::shared_ptr< RenderTarget > > m_renderTargets;
 
-                std::shared_ptr< ComputeSceneLighting > m_compute;
-            };
+            std::shared_ptr< RenderShadowMaps > m_shadows;
+            std::shared_ptr< RenderSceneGBuffer > m_gBuffer;
+            std::shared_ptr< RenderSceneLighting > m_lighting;
+            std::shared_ptr< RenderSceneUnlit > m_unlit;
+            std::shared_ptr< RenderSceneUnlit > m_environment;
 
-        }
+            std::shared_ptr< ComputeSceneLighting > m_compute;
+         };
 
-    }
+      }
+
+   }
 
 }
 

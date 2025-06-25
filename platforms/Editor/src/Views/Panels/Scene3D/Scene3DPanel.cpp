@@ -27,6 +27,7 @@
 
 #include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 
+#include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageMix.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp"
@@ -38,7 +39,6 @@
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
-#include "Simulation/Editor.hpp"
 
 using namespace crimild;
 using namespace crimild::editor;
@@ -183,6 +183,7 @@ void Scene3DPanel::initialize( void ) noexcept
 
    m_framegraph.resize( N );
    m_outputTextures.resize( N );
+   m_renderScenePasses.resize( N );
    for ( int i = 0; i < N; ++i ) {
       auto renderSceneOutput = createColorImageView( "Scene/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
       auto renderSceneSemaphore = crimild::alloc< vulkan::Semaphore >( device, "Scene/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT );
@@ -195,6 +196,7 @@ void Scene3DPanel::initialize( void ) noexcept
             // .signal = { renderSceneSemaphore },
          }
       );
+      m_renderScenePasses[ i ] = renderScene;
 
       auto renderGizmosOutput = createColorImageView( "Gizmos/Output", extent, VK_FORMAT_R32G32B32A32_SFLOAT );
       auto renderGizmosSemaphore = crimild::alloc< vulkan::Semaphore >( device, "Gizmos/Semaphore", VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT );
@@ -304,22 +306,37 @@ void Scene3DPanel::draw( void ) noexcept
       return;
    }
 
-   if ( auto editor = Editor::getInstance() ) {
-      if ( auto selected = editor->getSelectedObject< Node >() ) {
-         // TODO: Fix gizmo position
-         drawGizmo(
-            selected,
-            m_editorCamera.get(),
-            windowPos.x,
-            windowPos.y,
-            m_extent.width,
-            m_extent.height,
-            !m_editorCameraEnabled
-         );
-      }
-   }
+   //    if ( auto editor = Editor::getInstance() ) {
+   //       if ( auto selected = editor->getSelectedObject< Node >() ) {
+   //          // TODO: Fix gizmo position
+   //          drawGizmo(
+   //             selected,
+   //             m_editorCamera.get(),
+   //             windowPos.x,
+   //             windowPos.y,
+   //             m_extent.width,
+   //             m_extent.height,
+   //             !m_editorCameraEnabled
+   //          );
+   //       }
+   //    }
 
    updateCamera();
+
+   // Update the scene for each render pass
+   // This is definitely not ideal, but it should only happen when we recreate the scene in the assembly
+   for ( auto &pass : m_renderScenePasses ) {
+      if ( !pass->hasScene() ) {
+         auto assembly = getAssembly();
+         auto &entities = assembly->getEntities();
+         for ( auto &entity : entities ) {
+            if ( auto scene = std::dynamic_pointer_cast< crimild::Node >( entity ) ) {
+               pass->setScene( scene );
+               break;
+            }
+         }
+      }
+   }
 
    for ( auto &node : m_framegraph[ currentFrameIdx ] ) {
       node->execute();
