@@ -616,11 +616,6 @@ void GraphEditorWindow::updateTouch( void ) noexcept
    // }
 }
 
-void GraphEditorWindow::showLeftPanel( float panelWidth ) noexcept
-{
-   // TODO
-}
-
 void GraphEditorWindow::drawPinIcon( const Pin &pin, bool connected, int alpha ) const noexcept
 {
    using icons::IconType;
@@ -1801,196 +1796,53 @@ void GraphEditorWindow::showLeftPanel( void )
 
    ImGui::Spacing();
    ImGui::SameLine();
-   ImGui::TextUnformatted( "Nodes" );
+   ImGui::TextUnformatted( "Entities" );
    ImGui::Indent();
-   // for ( auto &node : m_nodes ) {
-   //    ImGui::PushID( node.id.AsPointer() );
-   //    auto start = ImGui::GetCursorScreenPos();
-   //    if ( const auto progress = getTouchProgress( node.id ) ) {
-   //       ImGui::GetWindowDrawList()->AddLine(
-   //          start + ImVec2( -8, 0 ),
-   //          start + ImVec2( -8, ImGui::GetTextLineHeight() ),
-   //          IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
-   //          4.0f
-   //       );
-   //    }
 
-   //   bool isSelected = std::find( selectedNodes.begin(), selectedNodes.end(), node.id ) != selectedNodes.end();
-   // #if IMGUI_VERSION_NUM >= 18967
-   //   ImGui::SetNextItemAllowOverlap();
-   // #endif
-   //   if ( ImGui::Selectable( ( node.name + "##" + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) ).c_str(), &isSelected ) ) {
-   //      if ( io.KeyCtrl ) {
-   //         if ( isSelected ) {
-   //            NodeEditor::SelectNode( node.id, true );
-   //         } else {
-   //            NodeEditor::DeselectNode( node.id );
-   //         }
-   //      } else {
-   //         NodeEditor::SelectNode( node.id, false );
-   //      }
-   //   }
+   auto assembly = m_ctx->getAssembly();
+   for ( auto entity : assembly->getEntities() ) {
+      auto entityId = entity->getUniqueID();
+      auto nodeId = ax::NodeEditor::NodeId( entityId );
+      auto entityName = std::string( entity->getClassName() );
 
-   //   if ( ImGui::IsItemHovered() && !node.state.empty() ) {
-   //      ImGui::SetTooltip( "State: %s", node.state.c_str() );
-   //   }
+      ImGui::PushID( entity->getUniqueID() );
+      auto start = ImGui::GetCursorScreenPos();
+      if ( const auto progress = getTouchProgress( entityId ) ) {
+         ImGui::GetWindowDrawList()->AddLine(
+            start + ImVec2( -8, 0 ),
+            start + ImVec2( -8, ImGui::GetTextLineHeight() ),
+            IM_COL32( 255, 0, 0, 255 - ( int ) ( 255 * progress ) ),
+            4.0f
+         );
+      }
 
-   //   auto id = std::string( "(" ) + std::to_string( reinterpret_cast< uintptr_t >( node.id.AsPointer() ) ) + ")";
-   //   auto textSize = ImGui::CalcTextSize( id.c_str(), nullptr );
-   //   auto iconPanelPos = start + ImVec2( panelWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x, ( ImGui::GetTextLineHeight() - saveIconHeight ) / 2.0f );
-   //   ImGui::GetWindowDrawList()->AddText(
-   //      ImVec2( iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y ),
-   //      IM_COL32( 255, 255, 255, 255 ),
-   //      id.c_str(),
-   //      nullptr
-   //   );
+      bool isSelected = std::find( selectedNodes.begin(), selectedNodes.end(), nodeId ) != selectedNodes.end();
+      ImGui::SetNextItemAllowOverlap();
 
-   //   auto drawList = ImGui::GetWindowDrawList();
-   //   ImGui::SetCursorScreenPos( iconPanelPos );
-   // #if IMGUI_VERSION_NUM < 18967
-   //   ImGui::SetItemAllowOverlap();
-   // #else
-   //   ImGui::SetNextItemAllowOverlap();
-   // #endif
+      if ( ImGui::Selectable( ( entityName + "##" + std::to_string( entityId ) ).c_str(), &isSelected ) ) {
+         if ( io.KeyCtrl ) {
+            if ( isSelected ) {
+               NodeEditor::SelectNode( entityId, true );
+            } else {
+               NodeEditor::DeselectNode( entityId );
+            }
+         } else {
+            NodeEditor::SelectNode( entityId, false );
+         }
+      }
 
-   //   if ( node.savedState.empty() ) {
-   //      if ( ImGui::InvisibleButton( "save", ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) ) ) {
-   //         node.savedState = node.state;
-   //      }
+      auto id = std::string( "(" ) + std::to_string( reinterpret_cast< uintptr_t >( nodeId.AsPointer() ) ) + ")";
+      auto textSize = ImGui::CalcTextSize( id.c_str(), nullptr );
+      auto iconPanelPos = start + ImVec2( panelWidth - ImGui::GetStyle().FramePadding.x - ImGui::GetStyle().IndentSpacing - saveIconWidth - restoreIconWidth - ImGui::GetStyle().ItemInnerSpacing.x, ( ImGui::GetTextLineHeight() - saveIconHeight ) / 2.0f );
+      ImGui::GetWindowDrawList()->AddText(
+         ImVec2( iconPanelPos.x - textSize.x - ImGui::GetStyle().ItemInnerSpacing.x, start.y ),
+         IM_COL32( 255, 255, 255, 255 ),
+         id.c_str(),
+         nullptr
+      );
 
-   //      if ( ImGui::IsItemActive() ) {
-   //         // drawList->AddImage(
-   //         //     m_saveIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 96 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 96 )
-   //         );
-   //      } else if ( ImGui::IsAnyItemHovered() ) {
-   //         // drawList->AddImage(
-   //         //     m_saveIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 255 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 255 )
-   //         );
-   //      } else {
-   //         // drawList->AddImage(
-   //         //     m_saveIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 160 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 160 )
-   //         );
-   //      }
-   //   } else {
-   //      ImGui::Dummy( ImVec2( max( 1, saveIconWidth ), max( 1, saveIconHeight ) ) );
-   //      // drawList->AddImage(
-   //      //     m_saveIcon,
-   //      //     ImGui::GetItemRectMin(),
-   //      //     ImGui::GetItemRectMax(),
-   //      //     ImVec2( 0, 0 ),
-   //      //     ImVec2( 1, 1 ),
-   //      //     IM_COL32( 255, 255, 255, 32 )
-   //      // );
-   //      drawList->AddRectFilled(
-   //         ImGui::GetItemRectMin(),
-   //         ImGui::GetItemRectMax(),
-   //         ImColor( 255, 255, 255, 32 )
-   //      );
-   //   }
-
-   //   ImGui::SameLine( 0, ImGui::GetStyle().ItemInnerSpacing.x );
-   // #if IMGUI_VERSION_NUM < 18967
-   //   ImGui::SetItemAllowOverlap();
-   // #else
-   //   ImGui::SetNextItemAllowOverlap();
-   // #endif
-
-   //   if ( !node.savedState.empty() ) {
-   //      if ( ImGui::InvisibleButton( "restore", ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) ) ) {
-   //         node.state = node.savedState;
-   //         NodeEditor::RestoreNodeState( node.id );
-   //         node.savedState.clear();
-   //      }
-
-   //      if ( ImGui::IsItemActive() ) {
-   //         // drawList->AddImage(
-   //         //     m_restoreIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 96 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 96 )
-   //         );
-   //      } else if ( ImGui::IsAnyItemHovered() ) {
-   //         // drawList->AddImage(
-   //         //     m_restoreIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 255 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 255 )
-   //         );
-   //      } else {
-   //         // drawList->AddImage(
-   //         //     m_restoreIcon,
-   //         //     ImGui::GetItemRectMin(),
-   //         //     ImGui::GetItemRectMax(),
-   //         //     ImVec2( 0, 0 ),
-   //         //     ImVec2( 1, 1 ),
-   //         //     IM_COL32( 255, 255, 255, 160 )
-   //         // );
-   //         drawList->AddRectFilled(
-   //            ImGui::GetItemRectMin(),
-   //            ImGui::GetItemRectMax(),
-   //            ImColor( 255, 255, 255, 160 )
-   //         );
-   //      }
-   //   } else {
-   //      ImGui::Dummy( ImVec2( max( 1, restoreIconWidth ), max( 1, restoreIconHeight ) ) );
-   //      drawList->AddRectFilled(
-   //         ImGui::GetItemRectMin(),
-   //         ImGui::GetItemRectMax(),
-   //         ImColor( 255, 255, 255, 32 )
-   //      );
-   //   }
-
-   //   ImGui::SameLine( 0, 0 );
-   // #if IMGUI_VERSION_NUM < 18967
-   //   ImGui::SetItemAllowOverlap();
-   // #endif
-   //   ImGui::Dummy( ImVec2( 0, restoreIconHeight ) );
-   //   ImGui::PopID();
-   //}
+      ImGui::PopID();
+   }
    ImGui::Unindent();
 
    ImGui::GetWindowDrawList()->AddRectFilled(

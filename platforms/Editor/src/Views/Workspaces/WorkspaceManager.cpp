@@ -64,9 +64,13 @@ void WorkspaceManager::drawContent( void ) noexcept
       }
       ImGui::EndTabBar();
 
-      for ( auto &workspace : workspacesToRemove ) {
-         workspace->removeFromSuperview();
-      }
+      crimild::concurrency::sync_frame(
+         [ workspacesToRemove ] {
+            for ( auto &workspace : workspacesToRemove ) {
+               workspace->removeFromSuperview();
+            }
+         }
+      );
    }
 
    ImGui::PopStyleVar();

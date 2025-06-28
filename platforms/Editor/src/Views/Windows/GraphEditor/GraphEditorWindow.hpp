@@ -72,7 +72,6 @@ namespace crimild::editor {
 
    private:
       void updateTouch( void ) noexcept;
-      void showLeftPanel( float panelWidth ) noexcept;
 
 #if GRAPH_EDITOR_BLUEPRINTS
 
@@ -161,19 +160,19 @@ namespace crimild::editor {
       void renderCreateNewNodeMenu( void ) noexcept;
       void showOrdinals( void ) noexcept;
 
-      // inline void touchNode( ax::NodeEditor::NodeId id ) noexcept
-      //{
-      //    m_nodeTouchTime[ id ] = m_touchTime;
-      // }
+      inline void touchNode( Codable::UniqueID id ) noexcept
+      {
+         m_nodeTouchTime[ id ] = m_touchTime;
+      }
 
-      // inline float getTouchProgress( ax::NodeEditor::NodeId id ) const noexcept
-      //{
-      //    auto it = m_nodeTouchTime.find( id );
-      //    if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
-      //       return ( m_touchTime - it->second ) / m_touchTime;
-      //    }
-      //    return 0.0f;
-      // }
+      inline float getTouchProgress( Codable::UniqueID id ) const noexcept
+      {
+         auto it = m_nodeTouchTime.find( id );
+         if ( it != m_nodeTouchTime.end() && it->second > 0.0f ) {
+            return ( m_touchTime - it->second ) / m_touchTime;
+         }
+         return 0.0f;
+      }
 
       void showLeftPanel( void );
       void showStyleEditor();
@@ -197,7 +196,7 @@ namespace crimild::editor {
       ImTextureID m_saveIcon = nullptr;
       ImTextureID m_restoreIcon = nullptr;
       const float m_touchTime = 1.0f;
-      // std::map< ax::NodeEditor::NodeId, float, NodeIdLess > m_nodeTouchTime;
+      std::map< coding::Codable::UniqueID, float, NodeIdLess > m_nodeTouchTime;
       bool m_showOrdinals = false;
 
       bool m_createNewNode = false;

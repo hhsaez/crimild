@@ -5,6 +5,13 @@
 
 namespace crimild::editor {
 
+   /**
+    * @brief
+    *
+    * @todo (hernan) I need to move `Assembly` to `Crimild::Core` (or to its own package).
+    * Right now it's part of the Editor, which prevents it from being loaded correctly
+    * when I implement players in future iterations.
+    */
    class Assembly
       : public Entity,
         public Named {

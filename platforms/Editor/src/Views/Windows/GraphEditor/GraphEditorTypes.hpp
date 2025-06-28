@@ -83,13 +83,13 @@ namespace crimild::editor {
    //   }
    //};
 
-    struct Link {
-       using Id = ax::NodeEditor::LinkId;
+   struct Link {
+      using Id = ax::NodeEditor::LinkId;
 
-       Id id;
-       Pin::Id startPinId;
-       Pin::Id endPinId;
-       ImColor color;
+      Id id;
+      Pin::Id startPinId;
+      Pin::Id endPinId;
+      ImColor color;
 
       Link( void ) noexcept = default;
 
@@ -100,12 +100,12 @@ namespace crimild::editor {
       }
    };
 
-   // struct NodeIdLess {
-   //    bool operator()( const ax::NodeEditor::NodeId &lhs, const ax::NodeEditor::NodeId &rhs ) const
-   //    {
-   //       return lhs.AsPointer() < rhs.AsPointer();
-   //    }
-   // };
+   struct NodeIdLess {
+      bool operator()( const ax::NodeEditor::NodeId &lhs, const ax::NodeEditor::NodeId &rhs ) const
+      {
+         return lhs.AsPointer() < rhs.AsPointer();
+      }
+   };
 
 }
 

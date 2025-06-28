@@ -75,7 +75,6 @@ namespace crimild::editor::editables {
       std::unordered_map< std::string, Pin > m_outputs;
 
       std::shared_ptr< Renderer > m_renderer;
-      // ax::NodeEditor::NodeId m_id;
       // std::string m_name;
       // NodeType m_type;
 
