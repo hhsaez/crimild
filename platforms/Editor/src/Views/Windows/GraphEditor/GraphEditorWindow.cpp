@@ -1521,21 +1521,28 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
          NodeEditor::NodeId nodeId = 0;
          while ( NodeEditor::QueryDeletedNode( &nodeId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
-               assert( false );
-               // auto id = std::find_if( m_nodes.begin(), m_nodes.end(), [ nodeId ]( auto &node ) { return node.id == nodeId; } );
-               // if ( id != m_nodes.end() ) {
-               //    m_nodes.erase( id );
-               // }
+               auto entity = findEntity( Codable::UniqueID( nodeId ) );
+               if ( entity != nullptr ) {
+                  auto assembly = m_ctx->getAssembly();
+                  crimild::concurrency::sync_frame(
+                     [ assembly, entity ] {
+                        if ( auto node = dynamic_cast_ptr< crimild::Node >( entity ) ) {
+                           node->detachFromParent();
+                        }
+                        assembly->removeEntity( entity );
+                     }
+                  );
+               }
             }
          }
          NodeEditor::LinkId linkId = 0;
          while ( NodeEditor::QueryDeletedLink( &linkId ) ) {
             if ( NodeEditor::AcceptDeletedItem() ) {
-               assert( false );
-               // auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
-               // if ( id != m_links.end() ) {
-               //    m_links.erase( id );
-               // }
+               // assert( false );
+               //  auto id = std::find_if( m_links.begin(), m_links.end(), [ linkId ]( auto &link ) { return link.id == linkId; } );
+               //  if ( id != m_links.end() ) {
+               //     m_links.erase( id );
+               //  }
             }
          }
          NodeEditor::EndDelete();
@@ -1566,27 +1573,44 @@ void GraphEditorWindow::renderPopups( void ) noexcept
    NodeEditor::Resume();
 }
 
+std::shared_ptr< Entity > GraphEditorWindow::findEntity( Codable::UniqueID id )
+{
+   auto assembly = m_ctx->getAssembly();
+   auto &entities = assembly->getEntities();
+   auto it = std::find_if(
+      std::begin( entities ),
+      std::end( entities ),
+      [ id ]( auto e ) {
+         return e->getUniqueID() == id;
+      }
+   );
+   return it != std::end( entities ) ? ( *it ) : nullptr;
+}
+
 void GraphEditorWindow::renderNodeContextMenu( void ) noexcept
 {
    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 8, 8 ) );
    if ( ImGui::BeginPopup( "Node Context Menu" ) ) {
-      assert( false );
-      // auto node = findNode( m_contextNodeId );
+      auto entity = findEntity( Codable::UniqueID( m_contextNodeId ) );
 
-      // ImGui::TextUnformatted( "Node Context Menu" );
-      // ImGui::Separator();
-      // if ( node ) {
-      //    ImGui::Text( "ID: %p", node->id.AsPointer() );
-      //    ImGui::Text( "Type: %s", node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
-      //    ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
-      //    ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
-      // } else {
-      //    ImGui::Text( "Unknown node: %p", m_contextNodeId.AsPointer() );
-      // }
-      // ImGui::Separator();
-      // if ( ImGui::MenuItem( "Delete" ) ) {
-      //    NodeEditor::DeleteNode( m_contextNodeId );
-      // }
+      ImGui::TextUnformatted( "Entity Context Menu" );
+      ImGui::Separator();
+
+      if ( entity != nullptr ) {
+         ImGui::Text( "ID: %p", entity->getUniqueID() );
+         ImGui::Text( "Type: %s", entity->getClassName() ); // node->type == NodeType::Blueprint ? "Blueprint" : ( node->type == NodeType::Tree ? "Tree" : "Comment" ) );
+         // ImGui::Text( "Inputs: %d", ( int ) node->inputs.size() );
+         // ImGui::Text( "Outputs: %d", ( int ) node->outputs.size() );
+      } else {
+         ImGui::Text( "Unknown entity: %p", m_contextNodeId.AsPointer() );
+      }
+
+      ImGui::Separator();
+
+      if ( ImGui::MenuItem( "Delete" ) ) {
+         NodeEditor::DeleteNode( m_contextNodeId );
+      }
+
       ImGui::EndPopup();
    }
 }

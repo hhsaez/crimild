@@ -13,6 +13,14 @@ void Assembly::addEntity( std::shared_ptr< Entity > const &entity )
    m_entities.push_back( entity );
 }
 
+void Assembly::removeEntity( std::shared_ptr< Entity > const &entity )
+{
+   auto it = std::find( m_entities.begin(), m_entities.end(), entity );
+   if ( it != m_entities.begin() ) {
+      m_entities.erase( it );
+   }
+}
+
 void Assembly::encode( coding::Encoder &encoder ) noexcept
 {
    Entity::encode( encoder );

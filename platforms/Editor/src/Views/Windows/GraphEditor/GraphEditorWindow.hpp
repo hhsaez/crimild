@@ -75,6 +75,7 @@ namespace crimild::editor {
 
 #if GRAPH_EDITOR_BLUEPRINTS
 
+      std::shared_ptr< Entity > findEntity( Codable::UniqueID id );
       // GraphNode *findNode( ax::NodeEditor::NodeId id ) noexcept;
       // Link *findLink( ax::NodeEditor::LinkId id ) noexcept;
       Pin *findPin( Pin::Id id ) noexcept;

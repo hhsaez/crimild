@@ -22,6 +22,7 @@ namespace crimild::editor {
       virtual ~Assembly( void ) noexcept = default;
 
       void addEntity( std::shared_ptr< Entity > const &entity );
+      void removeEntity( std::shared_ptr< Entity > const &entity );
       inline const std::vector< std::shared_ptr< Entity > > &getEntities( void ) const { return m_entities; }
 
    private:
