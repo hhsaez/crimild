@@ -84,19 +84,25 @@ namespace crimild::editor {
    //};
 
    struct Link {
-      using Id = ax::NodeEditor::LinkId;
+      using Id = size_t; // ax::NodeEditor::LinkId;
 
       Id id;
       Pin::Id startPinId;
       Pin::Id endPinId;
-      ImColor color;
+      ImColor color = ImColor( 255, 255, 255 );
+      float thickness = 2.0f;
 
       Link( void ) noexcept = default;
 
-      Link( ax::NodeEditor::LinkId id, Pin::Id startPinId, Pin::Id endPinId, ImColor color = ImColor( 255, 255, 255 ) )
+      [[deprecated]] Link( ax::NodeEditor::LinkId id, Pin::Id startPinId, Pin::Id endPinId, ImColor color = ImColor( 255, 255, 255 ) )
          : id( id ), startPinId( startPinId ), endPinId( endPinId ), color( color )
       {
          // no-op
+      }
+
+      void render( void ) const
+      {
+         ax::NodeEditor::Link( id, startPinId, endPinId, color, thickness );
       }
    };
 

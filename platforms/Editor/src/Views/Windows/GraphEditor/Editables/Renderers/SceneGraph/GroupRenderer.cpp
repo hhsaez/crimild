@@ -21,33 +21,30 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
             .type = PinType::Flow,
             .kind = PinKind::Input,
             .onConnect = [ editable, entity ]( Pin *src, Pin *dst ) {
-              // TODO
+               // TODO
             },
             .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) {
-              // TODO 
+               // TODO
             },
          }
       );
    }
 
    if ( !editable->hasOutputPin( "children" ) ) {
-      editable->setOutputPin( 
-          "children", 
-          Pin { 
-            .id = ctx.getNextPinId(), 
-            .owner = editable, 
-            .name = "children", 
-            .type = PinType::Flow, 
+      editable->setOutputPin(
+         "children",
+         Pin {
+            .id = ctx.getNextPinId(),
+            .owner = editable,
+            .name = "children",
+            .type = PinType::Flow,
             .kind = PinKind::Output,
             .onConnect = [ editable, entity ]( Pin *src, Pin *dst ) {
               CRIMILD_LOG_DEBUG( "Connected" );
               auto group = static_pointer_cast< Group >( src->owner->getOwner() );
               auto node = static_pointer_cast< Node >( dst->owner->getOwner() );
-              group->attachNode( node );
-            },
-            .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) {
-              CRIMILD_LOG_DEBUG( "Disconnected" );
-            },
+              group->attachNode( node ); },
+            .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) { CRIMILD_LOG_DEBUG( "Disconnected" ); },
          }
       );
    }
@@ -214,27 +211,37 @@ void GroupRenderer::renderLinks( GraphEditorContext &ctx, Editable *editable )
       return;
    }
 
-   auto &childrenPin = editable->getOutputPin( "children" );
+   auto &startPin = editable->getOutputPin( "children" );
+
+   // std::unordered_set< Link::Id > childLinksToRemove;
+   // std::transform( m_childLinks.begin(), m_childLinks.end(), childLinksToRemove.begin(), []( auto it ) { return it.second->id; } );
 
    entity->forEachNode(
       [ & ]( Node *child ) {
          if ( child != nullptr ) {
-            if ( !m_links.contains( child->getUniqueID() ) ) {
+            if ( !m_childLinks.contains( child->getUniqueID() ) ) {
                if ( auto editable = child->getExtension< Editable >() ) {
                   if ( !editable->hasInputPin( "parent" ) ) {
                      return;
                   }
                   auto &childPin = editable->getInputPin( "parent" );
-                  m_links[ child->getUniqueID() ] = Link( ctx.getNextLinkId(), childrenPin.id, childPin.id );
+                  auto link = ctx.createLink();
+                  link->startPinId = startPin.id;
+                  link->endPinId = childPin.id;
+                  m_childLinks[ child->getUniqueID() ] = link->id;
                } else {
                   return;
                }
             }
-            auto &link = m_links.at( child->getUniqueID() );
-            NodeEditor::Link( link.id, link.startPinId, link.endPinId, link.color, 2.0f );
+            auto link = ctx.getLink( m_childLinks[ child->getUniqueID() ] );
+            link->render();
          }
       }
    );
+
+   // for ( auto linkId : childLinksToRemove ) {
+   // ctx.destroyLink( linkId );
+   // }
 }
 
 void GroupRenderer::encode( coding::Encoder &encoder )
