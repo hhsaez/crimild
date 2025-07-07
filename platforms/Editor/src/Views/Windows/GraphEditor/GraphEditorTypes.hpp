@@ -92,6 +92,8 @@ namespace crimild::editor {
       ImColor color = ImColor( 255, 255, 255 );
       float thickness = 2.0f;
 
+      std::function< void( void ) > onDelete;
+
       void render( void ) const
       {
          ax::NodeEditor::Link( id, startPinId, endPinId, color, thickness );

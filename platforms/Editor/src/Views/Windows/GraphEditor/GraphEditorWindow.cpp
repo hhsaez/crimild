@@ -1660,7 +1660,14 @@ void GraphEditorWindow::renderLinkContextMenu( void ) noexcept
       }
       ImGui::Separator();
       if ( ImGui::MenuItem( "Delete" ) ) {
-         // NodeEditor::DeleteLink( link->id );
+         crimild::concurrency::sync_frame(
+            [ link ]() {
+               if ( link != nullptr && link->onDelete != nullptr ) {
+                  link->onDelete();
+               }
+            }
+         );
+         NodeEditor::DeleteLink( link->id );
       }
       ImGui::EndPopup();
    }

@@ -228,6 +228,11 @@ void GroupRenderer::renderLinks( GraphEditorContext &ctx, Editable *editable )
                   auto link = ctx.createLink();
                   link->startPinId = startPin.id;
                   link->endPinId = childPin.id;
+                  link->onDelete = [ this, child, &ctx, link ]() {
+                     m_childLinks.erase( child->getUniqueID() );
+                     child->detachFromParent();
+                     ctx.destroyLink( link->id );
+                  };
                   m_childLinks[ child->getUniqueID() ] = link->id;
                } else {
                   return;
