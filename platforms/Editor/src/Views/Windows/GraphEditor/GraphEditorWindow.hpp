@@ -205,8 +205,12 @@ namespace crimild::editor {
       Pin *m_newLinkPin = nullptr;
 
       ax::NodeEditor::NodeId m_contextNodeId = 0;
-      ax::NodeEditor::LinkId m_contextLinkId = 0;
+      // ax::NodeEditor::LinkId m_contextLinkId = 0;
       ax::NodeEditor::PinId m_contextPinId = 0;
+
+      // These variables are used to store objects for context menus. These are
+      // set once and reused many times, so we need to keep track of them.
+      std::weak_ptr< GraphLink > m_contextMenuLink;
 
       float m_leftPanelWidth = 400.0f;
       float m_rightPanelWidth = 800.0f;

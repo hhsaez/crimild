@@ -21,7 +21,7 @@ namespace crimild::editor::editables {
       void renderOutputs( std::vector< Pin > &outputs );
 
    private:
-      std::unordered_map< UniqueID, Link::Id > m_childLinks;
+      std::unordered_map< UniqueID, GraphLink::Id > m_childLinks;
 
       /**
        * @name Coding

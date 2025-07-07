@@ -1552,12 +1552,15 @@ void GraphEditorWindow::renderCreateNewNode( void ) noexcept
 
 void GraphEditorWindow::renderPopups( void ) noexcept
 {
+   NodeEditor::LinkId contextLinkId;
+
    NodeEditor::Suspend();
    if ( NodeEditor::ShowNodeContextMenu( &m_contextNodeId ) ) {
       ImGui::OpenPopup( "Node Context Menu" );
    } else if ( NodeEditor::ShowPinContextMenu( &m_contextPinId ) ) {
       ImGui::OpenPopup( "Pin Context Menu" );
-   } else if ( NodeEditor::ShowLinkContextMenu( &m_contextLinkId ) ) {
+   } else if ( NodeEditor::ShowLinkContextMenu( &contextLinkId ) ) {
+      m_contextMenuLink = m_ctx->getLink( GraphLink::Id( contextLinkId ) );
       ImGui::OpenPopup( "Link Context Menu" );
    } else if ( NodeEditor::ShowBackgroundContextMenu() ) {
       ImGui::OpenPopup( "Create New Node" );
@@ -1639,23 +1642,26 @@ void GraphEditorWindow::renderPinContextMenu( void ) noexcept
 
 void GraphEditorWindow::renderLinkContextMenu( void ) noexcept
 {
-   if ( ImGui::BeginPopup( "Link Context Menu" ) ) {
-      assert( false );
-      // auto link = findLink( m_contextLinkId );
+   if ( m_contextMenuLink.expired() ) {
+      return;
+   }
 
-      // ImGui::TextUnformatted( "Link Context Menu" );
-      // ImGui::Separator();
-      // if ( link ) {
-      //    ImGui::Text( "ID: %p", link->id.AsPointer() );
-      //    ImGui::Text( "From: %p", link->startPinId.AsPointer() );
-      //    ImGui::Text( "To: %p", link->endPinId.AsPointer() );
-      // } else {
-      //    ImGui::Text( "Unknown link: %p", m_contextLinkId.AsPointer() );
-      // }
-      // ImGui::Separator();
-      // if ( ImGui::MenuItem( "Delete" ) ) {
-      //    NodeEditor::DeleteLink( m_contextLinkId );
-      // }
+   auto link = m_contextMenuLink.lock();
+
+   if ( ImGui::BeginPopup( "Link Context Menu" ) ) {
+      ImGui::TextUnformatted( "Link" );
+      ImGui::Separator();
+      if ( link ) {
+         ImGui::Text( "ID: %p", link->id );
+         ImGui::Text( "From: %p", link->startPinId.AsPointer() );
+         ImGui::Text( "To: %p", link->endPinId.AsPointer() );
+      } else {
+         ImGui::Text( "Unknown link: %p", link->id );
+      }
+      ImGui::Separator();
+      if ( ImGui::MenuItem( "Delete" ) ) {
+         // NodeEditor::DeleteLink( link->id );
+      }
       ImGui::EndPopup();
    }
 }

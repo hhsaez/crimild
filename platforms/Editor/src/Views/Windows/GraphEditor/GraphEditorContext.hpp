@@ -31,22 +31,22 @@ namespace crimild::editor {
       inline std::shared_ptr< Assembly > &getAssembly( void ) { return m_assembly; }
       inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
 
-      std::shared_ptr< Link > createLink( void )
+      std::shared_ptr< GraphLink > createLink( void )
       {
-         auto link = crimild::alloc< Link >();
+         auto link = crimild::alloc< GraphLink >();
          link->id = getNextLinkId();
          m_links[ link->id ] = link;
          return link;
       }
 
-      void destroyLink( Link::Id linkId )
+      void destroyLink( GraphLink::Id linkId )
       {
          if ( m_links.contains( linkId ) ) {
             m_links.erase( linkId );
          }
       }
 
-      std::shared_ptr< Link > getLink( Link::Id linkId )
+      std::shared_ptr< GraphLink > getLink( GraphLink::Id linkId )
       {
          return m_links.contains( linkId ) ? m_links.at( linkId ) : nullptr;
       }
@@ -63,7 +63,7 @@ namespace crimild::editor {
          return nextId++;
       }
 
-      inline Link::Id getNextLinkId( void )
+      inline GraphLink::Id getNextLinkId( void )
       {
          return getNextId();
       }
@@ -71,7 +71,7 @@ namespace crimild::editor {
    private:
       std::shared_ptr< Assembly > m_assembly;
 
-      std::unordered_map< Link::Id, std::shared_ptr< Link > > m_links;
+      std::unordered_map< GraphLink::Id, std::shared_ptr< GraphLink > > m_links;
    };
 
 }
