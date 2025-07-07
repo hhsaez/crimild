@@ -43,6 +43,9 @@ void GroupRenderer::render( GraphEditorContext &ctx, Editable *editable )
               CRIMILD_LOG_DEBUG( "Connected" );
               auto group = static_pointer_cast< Group >( src->owner->getOwner() );
               auto node = static_pointer_cast< Node >( dst->owner->getOwner() );
+              if ( node->hasParent() ) {
+               node->detachFromParent();
+              }
               group->attachNode( node ); },
             .onDisconnect = [ editable, entity ]( Pin *src, Pin *dst ) { CRIMILD_LOG_DEBUG( "Disconnected" ); },
          }
