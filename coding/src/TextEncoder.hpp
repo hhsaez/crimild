@@ -39,10 +39,9 @@ namespace crimild {
 
    namespace coding {
 
-      class MemoryEncoder : public Encoder {
+      class TextEncoder : public Encoder {
       public:
-         MemoryEncoder( void );
-         virtual ~MemoryEncoder( void );
+         virtual ~TextEncoder( void ) noexcept = default;
 
       public:
          virtual crimild::Bool encode( SharedPointer< Codable > const &obj ) override;
@@ -92,7 +91,7 @@ namespace crimild {
          virtual crimild::Bool encode( std::string key, Array< Matrix4f > &value ) override { return encodeData( key, value ); }
          virtual crimild::Bool encode( std::string key, Array< Quaternion > &value ) override { return encodeData( key, value ); }
 
-         ByteArray getBytes( void ) const;
+         std::string getString( void ) const;
 
       protected:
          virtual void encodeArrayBegin( std::string key, crimild::Size count ) override;

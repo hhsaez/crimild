@@ -37,12 +37,12 @@ namespace crimild {
 
    namespace coding {
 
-      class MemoryDecoder : public Decoder {
+      class TextDecoder : public Decoder {
       public:
-         MemoryDecoder( void );
-         virtual ~MemoryDecoder( void );
+         virtual ~TextDecoder( void ) noexcept = default;
 
-      public:
+         void fromString( std::string str );
+
          virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) override;
 
          virtual crimild::Bool decode( std::string key, std::string &value ) override;
@@ -73,16 +73,17 @@ namespace crimild {
 
          virtual bool decode( std::string_view key, std::vector< std::byte > &value ) override
          {
-            auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ std::string( key ) ] );
-            if ( obj == nullptr ) {
-               return false;
-            }
+            // auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ std::string( key ) ] );
+            // if ( obj == nullptr ) {
+            //    return false;
+            // }
 
-            const auto N = obj->getBytes().size();
-            value.resize( N );
-            if ( N > 0 ) {
-               memcpy( value.data(), obj->getBytes().getData(), N );
-            }
+            // const auto N = obj->getBytes().size();
+            // value.resize( N );
+            // if ( N > 0 ) {
+            //    memcpy( value.data(), obj->getBytes().getData(), N );
+            // }
+            assert( false );
             return true;
          }
 
@@ -94,19 +95,19 @@ namespace crimild {
          virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) override { return decodeDataArray( key, value ); }
          virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) override { return decodeDataArray( key, value ); }
 
-         crimild::Bool fromBytes( const ByteArray &bytes );
-
       private:
          template< typename T >
          crimild::Bool decodeData( std::string key, T &value )
          {
-            auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-            if ( obj == nullptr ) {
-               value = T();
-               return false;
-            }
+            // auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+            // if ( obj == nullptr ) {
+            //    value = T();
+            //    return false;
+            // }
 
-            value = obj->getValue< T >();
+            // value = obj->getValue< T >();
+
+            assert( false );
 
             return true;
          }
@@ -114,16 +115,17 @@ namespace crimild {
          template< typename T >
          crimild::Bool decodeDataArray( std::string key, Array< T > &value )
          {
-            auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
-            if ( obj == nullptr ) {
-               return false;
-            }
+            // auto obj = crimild::cast_ptr< EncodedData >( _links[ _currentObj->getUniqueID() ][ key ] );
+            // if ( obj == nullptr ) {
+            //    return false;
+            // }
 
-            const auto N = obj->getBytes().size() / sizeof( T );
-            value.resize( N );
-            if ( N > 0 ) {
-               memcpy( &value[ 0 ], obj->getBytes().getData(), obj->getBytes().size() );
-            }
+            // const auto N = obj->getBytes().size() / sizeof( T );
+            // value.resize( N );
+            // if ( N > 0 ) {
+            //    memcpy( &value[ 0 ], obj->getBytes().getData(), obj->getBytes().size() );
+            // }
+            assert( false );
 
             return true;
          }
@@ -135,16 +137,16 @@ namespace crimild {
          virtual void endDecodingArray( std::string key ) override;
 
       private:
-         static crimild::Size read( const ByteArray &bytes, crimild::Int8 &value, crimild::Size offset );
-         static crimild::Size read( const ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
-         static crimild::Size read( const ByteArray &bytes, std::string &value, crimild::Size offset );
-         static crimild::Size read( const ByteArray &bytes, ByteArray &value, crimild::Size offset );
-         static crimild::Size readRawBytes( const ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset );
+         // static crimild::Size read( const ByteArray &bytes, crimild::Int8 &value, crimild::Size offset );
+         // static crimild::Size read( const ByteArray &bytes, Codable::UniqueID &value, crimild::Size offset );
+         // static crimild::Size read( const ByteArray &bytes, std::string &value, crimild::Size offset );
+         // static crimild::Size read( const ByteArray &bytes, ByteArray &value, crimild::Size offset );
+         // static crimild::Size readRawBytes( const ByteArray &bytes, void *data, crimild::Size count, crimild::Size offset );
 
       private:
-         Map< Codable::UniqueID, Map< std::string, SharedPointer< Codable > > > _links;
-         Map< Codable::UniqueID, SharedPointer< Codable > > _objects;
-         SharedPointer< Codable > _currentObj;
+         // Map< Codable::UniqueID, Map< std::string, SharedPointer< Codable > > > _links;
+         // Map< Codable::UniqueID, SharedPointer< Codable > > _objects;
+         // SharedPointer< Codable > _currentObj;
       };
 
    }

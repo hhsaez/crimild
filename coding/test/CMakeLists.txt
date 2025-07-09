@@ -8,6 +8,8 @@ target_sources(
     PRIVATE
     CodableTest.cpp
     TextEncoderTest.cpp
+    TextDecoderTest.cpp
+    TextCodingTest.cpp
 
     PRIVATE
     TestRunner.cpp
