@@ -7,6 +7,7 @@ target_sources(
 
     PRIVATE
     CodableTest.cpp
+    TextEncoderTest.cpp
 
     PRIVATE
     TestRunner.cpp
