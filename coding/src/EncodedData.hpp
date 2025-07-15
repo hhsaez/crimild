@@ -35,69 +35,69 @@
 
 namespace crimild {
 
-    namespace coding {
+   namespace coding {
 
-        class EncodedData : public Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedData )
-        public:
-            EncodedData( void )
-            {
+      class EncodedData : public Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::coding::EncodedData )
+      public:
+         EncodedData( void )
+         {
+         }
+
+         explicit EncodedData( std::string str )
+            : _bytes( sizeof( crimild::Char ) * str.length() + 1 )
+         {
+            if ( _bytes.size() > 0 ) {
+               memcpy( &_bytes[ 0 ], ( const void * ) &str[ 0 ], _bytes.size() );
             }
+         }
 
-            explicit EncodedData( std::string str )
-                : _bytes( sizeof( crimild::Char ) * str.length() )
-            {
-                if ( _bytes.size() > 0 ) {
-                    memcpy( &_bytes[ 0 ], ( const void * ) &str[ 0 ], _bytes.size() );
-                }
+         template< typename T >
+         explicit EncodedData( const Array< T > &data )
+            : _bytes( data.size() * sizeof( T ) )
+         {
+            if ( _bytes.size() > 0 ) {
+               memcpy( &_bytes[ 0 ], &data[ 0 ], _bytes.size() );
             }
+         }
 
-            template< typename T >
-            explicit EncodedData( const Array< T > &data )
-                : _bytes( data.size() * sizeof( T ) )
-            {
-                if ( _bytes.size() > 0 ) {
-                    memcpy( &_bytes[ 0 ], &data[ 0 ], _bytes.size() );
-                }
+         template< typename T >
+         explicit EncodedData( const T &data )
+            : _bytes( sizeof( T ) )
+         {
+            if ( _bytes.size() > 0 ) {
+               memcpy( &_bytes[ 0 ], ( const void * ) &data, _bytes.size() );
             }
+         }
 
-            template< typename T >
-            explicit EncodedData( const T &data )
-                : _bytes( sizeof( T ) )
-            {
-                if ( _bytes.size() > 0 ) {
-                    memcpy( &_bytes[ 0 ], ( const void * ) &data, _bytes.size() );
-                }
+         virtual ~EncodedData( void )
+         {
+         }
+
+         inline void setBytes( const ByteArray &bytes ) { _bytes = bytes; }
+         inline ByteArray &getBytes( void ) { return _bytes; }
+         inline const ByteArray &getBytes( void ) const { return _bytes; }
+
+         std::string getString( void ) const
+         {
+            return std::string( ( const char * ) &_bytes[ 0 ] );
+         }
+
+         template< typename T >
+         T getValue( void ) const
+         {
+            auto value = T();
+            if ( _bytes.size() > 0 ) {
+               memcpy( ( void * ) &value, &_bytes[ 0 ], _bytes.size() );
             }
+            return value;
+         }
 
-            virtual ~EncodedData( void )
-            {
-            }
+      private:
+         ByteArray _bytes;
+      };
 
-            inline void setBytes( const ByteArray &bytes ) { _bytes = bytes; }
-            inline ByteArray &getBytes( void ) { return _bytes; }
-            inline const ByteArray &getBytes( void ) const { return _bytes; }
-
-            std::string getString( void ) const
-            {
-                return std::string( ( const char * ) &_bytes[ 0 ] );
-            }
-
-            template< typename T >
-            T getValue( void ) const
-            {
-                auto value = T();
-                if ( _bytes.size() > 0 ) {
-                    memcpy( ( void * ) &value, &_bytes[ 0 ], _bytes.size() );
-                }
-                return value;
-            }
-
-        private:
-            ByteArray _bytes;
-        };
-
-    }
+   }
 
 }
 

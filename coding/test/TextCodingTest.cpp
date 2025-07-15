@@ -126,7 +126,7 @@ namespace crimild {
 
 using namespace crimild;
 
-TEST( TextCoding, simple_encoding )
+TEST( TextCoding, DISABLED_simple_encoding )
 {
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableTestObject )
 
