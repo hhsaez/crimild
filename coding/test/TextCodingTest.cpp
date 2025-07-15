@@ -126,8 +126,10 @@ namespace crimild {
 
 using namespace crimild;
 
-TEST( TextCoding, DISABLED_simple_encoding )
+TEST( TextCoding, simple_encoding )
 {
+   GTEST_SKIP() << "Test disabled - needs investigation";
+
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::CodableTestObject )
 
    auto n = crimild::alloc< crimild::CodableTestObject >( "a scene" );

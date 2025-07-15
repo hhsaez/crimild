@@ -2,8 +2,10 @@
 
 #include <gtest/gtest.h>
 
-TEST( TextDecoder, DISABLED_encodeString )
+TEST( TextDecoder, encodeString )
 {
+   GTEST_SKIP() << "Test disabled - needs implementation";
+
    /*
       auto decoder = crimild::alloc< crimild::coding::TextEncoder >();
       encoder->encode( "test", "This is a test string" );
@@ -16,5 +18,4 @@ TEST( TextDecoder, DISABLED_encodeString )
 
       EXPECT_EQ( expected, str );
    */
-   EXPECT_TRUE( true );
 }

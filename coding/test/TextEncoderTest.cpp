@@ -25,8 +25,10 @@ namespace crimild::coding::test {
 
 }
 
-TEST( TextEncoder, DISABLED_encodeString )
+TEST( TextEncoder, encodeString )
 {
+   GTEST_SKIP() << "Test disabled - needs implementation";
+
    // CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::test::StringWrapper )
 
    // auto obj = crimild::alloc< crimild::coding::test::StringWrapper >();
@@ -44,5 +46,4 @@ TEST( TextEncoder, DISABLED_encodeString )
    // )";
 
    // EXPECT_EQ( expected, str );
-   EXPECT_TRUE( true );
 }

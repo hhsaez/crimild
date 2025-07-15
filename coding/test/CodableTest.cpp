@@ -210,8 +210,10 @@ TEST( Codable, codingArray )
    EXPECT_EQ( n->getChildren()[ 2 ]->getName(), n2->getChildren()[ 2 ]->getName() );
 }
 
-TEST( Codable, DISABLED_it_ignores_unknown_types_when_encoding )
+TEST( Codable, it_ignores_unknown_types_when_encoding )
 {
+   GTEST_SKIP() << "Test disabled - needs investigation";
+
    auto n = crimild::alloc< crimild::CodableTestObject >( "a node" );
    auto child = crimild::alloc< crimild::ChildObject >();
    child->someValue = 10;
