@@ -31,162 +31,163 @@
 #include "ColorMaskState.hpp"
 #include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+#include "Entity/Entity.hpp"
 #include "ShaderProgram.hpp"
 #include "Texture.hpp"
 
 namespace crimild {
 
-    class DescriptorSet;
-    class GraphicsPipeline;
+   class DescriptorSet;
+   class GraphicsPipeline;
 
-    class Light;
+   class Light;
 
-    class Material : public NamedObject, public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Material )
+   class Material : public NamedObject, public Entity {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Material )
 
-    public:
-        Material( void ) noexcept;
-        virtual ~Material( void ) = default;
+   public:
+      Material( void ) noexcept;
+      virtual ~Material( void ) = default;
 
-        inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
-        inline const DescriptorSet *getDescriptors( void ) const noexcept { return get_ptr( m_descriptors ); }
-        inline DescriptorSet *getDescriptors( void ) noexcept { return get_ptr( m_descriptors ); }
+      inline void setDescriptors( SharedPointer< DescriptorSet > const &descriptors ) noexcept { m_descriptors = descriptors; }
+      inline const DescriptorSet *getDescriptors( void ) const noexcept { return get_ptr( m_descriptors ); }
+      inline DescriptorSet *getDescriptors( void ) noexcept { return get_ptr( m_descriptors ); }
 
-        inline void setGraphicsPipeline( SharedPointer< GraphicsPipeline > const &graphicsPipeline ) noexcept { m_graphicsPipeline = graphicsPipeline; }
-        inline const GraphicsPipeline *getGraphicsPipeline( void ) const noexcept { return get_ptr( m_graphicsPipeline ); }
-        inline GraphicsPipeline *getGraphicsPipeline( void ) noexcept { return get_ptr( m_graphicsPipeline ); }
+      inline void setGraphicsPipeline( SharedPointer< GraphicsPipeline > const &graphicsPipeline ) noexcept { m_graphicsPipeline = graphicsPipeline; }
+      inline const GraphicsPipeline *getGraphicsPipeline( void ) const noexcept { return get_ptr( m_graphicsPipeline ); }
+      inline GraphicsPipeline *getGraphicsPipeline( void ) noexcept { return get_ptr( m_graphicsPipeline ); }
 
-    private:
-        SharedPointer< DescriptorSet > m_descriptors;
-        SharedPointer< GraphicsPipeline > m_graphicsPipeline;
+   private:
+      SharedPointer< DescriptorSet > m_descriptors;
+      SharedPointer< GraphicsPipeline > m_graphicsPipeline;
 
-        /**
-           \deprecated The following fields are no longer relevant
-        */
-        //@{
+      /**
+         \deprecated The following fields are no longer relevant
+      */
+      //@{
 
-    public:
-        virtual void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
-        virtual void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
-        virtual ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
-        virtual const ShaderProgram *getProgram( void ) const { return crimild::get_ptr( _program ); }
+   public:
+      virtual void setProgram( ShaderProgram *program ) { _program = crimild::retain( program ); }
+      virtual void setProgram( SharedPointer< ShaderProgram > const &program ) { _program = program; }
+      virtual ShaderProgram *getProgram( void ) { return crimild::get_ptr( _program ); }
+      virtual const ShaderProgram *getProgram( void ) const { return crimild::get_ptr( _program ); }
 
-        virtual void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
-        virtual const ColorRGBA &getAmbient( void ) const { return _ambient; }
+      virtual void setAmbient( const ColorRGBA &ambient ) { _ambient = ambient; }
+      virtual const ColorRGBA &getAmbient( void ) const { return _ambient; }
 
-        virtual void setDiffuse( const ColorRGBA &color ) { _diffuse = color; }
-        virtual const ColorRGBA &getDiffuse( void ) const { return _diffuse; }
+      virtual void setDiffuse( const ColorRGBA &color ) { _diffuse = color; }
+      virtual const ColorRGBA &getDiffuse( void ) const { return _diffuse; }
 
-        virtual void setSpecular( const ColorRGBA &color ) { _specular = color; }
-        virtual const ColorRGBA &getSpecular( void ) const { return _specular; }
+      virtual void setSpecular( const ColorRGBA &color ) { _specular = color; }
+      virtual const ColorRGBA &getSpecular( void ) const { return _specular; }
 
-        // virtual void setEmissive( float value ) { _emissive = value; }
-        // virtual float getEmissive( void ) const { return _emissive; }
+      // virtual void setEmissive( float value ) { _emissive = value; }
+      // virtual float getEmissive( void ) const { return _emissive; }
 
-        virtual void setShininess( float value ) { _shininess = value; }
-        virtual float getShininess( void ) const { return _shininess; }
+      virtual void setShininess( float value ) { _shininess = value; }
+      virtual float getShininess( void ) const { return _shininess; }
 
-        virtual void setColorMap( Texture *texture ) { _colorMap = crimild::retain( texture ); }
-        virtual void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
-        virtual Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
+      virtual void setColorMap( Texture *texture ) { _colorMap = crimild::retain( texture ); }
+      virtual void setColorMap( SharedPointer< Texture > const &texture ) { _colorMap = texture; }
+      virtual Texture *getColorMap( void ) { return crimild::get_ptr( _colorMap ); }
 
-        virtual void setNormalMap( Texture *texture ) { _normalMap = crimild::retain( texture ); }
-        virtual void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
-        virtual Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
+      virtual void setNormalMap( Texture *texture ) { _normalMap = crimild::retain( texture ); }
+      virtual void setNormalMap( SharedPointer< Texture > const &texture ) { _normalMap = texture; }
+      virtual Texture *getNormalMap( void ) { return crimild::get_ptr( _normalMap ); }
 
-        virtual void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
-        virtual void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
-        virtual Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
+      virtual void setSpecularMap( Texture *texture ) { _specularMap = crimild::retain( texture ); }
+      virtual void setSpecularMap( SharedPointer< Texture > const &texture ) { _specularMap = texture; }
+      virtual Texture *getSpecularMap( void ) { return crimild::get_ptr( _specularMap ); }
 
-        virtual void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
-        virtual void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
-        virtual Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
+      virtual void setEmissiveMap( Texture *texture ) { _emissiveMap = crimild::retain( texture ); }
+      virtual void setEmissiveMap( SharedPointer< Texture > const &texture ) { _emissiveMap = texture; }
+      virtual Texture *getEmissiveMap( void ) { return crimild::get_ptr( _emissiveMap ); }
 
-        virtual void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
-        virtual ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
+      virtual void setColorMaskState( SharedPointer< ColorMaskState > const &colorMaskState ) { _colorMaskState = colorMaskState; }
+      virtual ColorMaskState *getColorMaskState( void ) { return crimild::get_ptr( _colorMaskState ); }
 
-        virtual bool castShadows( void ) const { return _castShadows; }
-        virtual void setCastShadows( bool value ) { _castShadows = value; }
+      virtual bool castShadows( void ) const { return _castShadows; }
+      virtual void setCastShadows( bool value ) { _castShadows = value; }
 
-        virtual bool receiveShadows( void ) const { return _receiveShadows; }
-        virtual void setReceiveShadows( bool value ) { _receiveShadows = value; }
+      virtual bool receiveShadows( void ) const { return _receiveShadows; }
+      virtual void setReceiveShadows( bool value ) { _receiveShadows = value; }
 
-    private:
-        SharedPointer< ShaderProgram > _program;
+   private:
+      SharedPointer< ShaderProgram > _program;
 
-        ColorRGBA _ambient;
-        ColorRGBA _diffuse;
-        ColorRGBA _specular;
-        float _shininess;
-        float _emissive;
+      ColorRGBA _ambient;
+      ColorRGBA _diffuse;
+      ColorRGBA _specular;
+      float _shininess;
+      float _emissive;
 
-        SharedPointer< Texture > _colorMap;
-        SharedPointer< Texture > _normalMap;
-        SharedPointer< Texture > _specularMap;
-        SharedPointer< Texture > _emissiveMap;
+      SharedPointer< Texture > _colorMap;
+      SharedPointer< Texture > _normalMap;
+      SharedPointer< Texture > _specularMap;
+      SharedPointer< Texture > _emissiveMap;
 
-        SharedPointer< ColorMaskState > _colorMaskState;
+      SharedPointer< ColorMaskState > _colorMaskState;
 
-        bool _castShadows = true;
-        bool _receiveShadows = true;
+      bool _castShadows = true;
+      bool _receiveShadows = true;
 
-        //@}
+      //@}
 
-        /**
-                   \name Reflection
-           \deprectated
+      /**
+                 \name Reflection
+         \deprectated
 
-                   In order for the reflection map to work, set reflection value to 1.0
-                */
-        //@{
+                 In order for the reflection map to work, set reflection value to 1.0
+              */
+      //@{
 
-    public:
-        void setReflection( crimild::Real32 value ) { _reflection = value; }
-        crimild::Real32 getReflection( void ) const { return _reflection; }
+   public:
+      void setReflection( crimild::Real32 value ) { _reflection = value; }
+      crimild::Real32 getReflection( void ) const { return _reflection; }
 
-        void setReflectionMap( SharedPointer< Texture > const &map ) { _reflectionMap = map; }
-        Texture *getReflectionMap( void ) { return crimild::get_ptr( _reflectionMap ); }
+      void setReflectionMap( SharedPointer< Texture > const &map ) { _reflectionMap = map; }
+      Texture *getReflectionMap( void ) { return crimild::get_ptr( _reflectionMap ); }
 
-    private:
-        crimild::Real32 _reflection = 0.0f;
-        SharedPointer< Texture > _reflectionMap;
+   private:
+      crimild::Real32 _reflection = 0.0f;
+      SharedPointer< Texture > _reflectionMap;
 
-        //@}
+      //@}
 
-        /**
-                   \name Refraction
-           \deprectated
+      /**
+                 \name Refraction
+         \deprectated
 
-                   In order for the refraction map to work, set refraction value to 1.0
-                */
-        //@{
+                 In order for the refraction map to work, set refraction value to 1.0
+              */
+      //@{
 
-    public:
-        void setRefraction( crimild::Real32 value ) { _refraction = value; }
-        crimild::Real32 getRefraction( void ) const { return _refraction; }
+   public:
+      void setRefraction( crimild::Real32 value ) { _refraction = value; }
+      crimild::Real32 getRefraction( void ) const { return _refraction; }
 
-        void setRefractionMap( SharedPointer< Texture > const &map ) { _refractionMap = map; }
-        Texture *getRefractionMap( void ) { return crimild::get_ptr( _refractionMap ); }
+      void setRefractionMap( SharedPointer< Texture > const &map ) { _refractionMap = map; }
+      Texture *getRefractionMap( void ) { return crimild::get_ptr( _refractionMap ); }
 
-    private:
-        crimild::Real32 _refraction = 0.0f;
-        SharedPointer< Texture > _refractionMap;
+   private:
+      crimild::Real32 _refraction = 0.0f;
+      SharedPointer< Texture > _refractionMap;
 
-        //@}
+      //@}
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    using MaterialPtr = SharedPointer< Material >;
+   using MaterialPtr = SharedPointer< Material >;
 
 }
 

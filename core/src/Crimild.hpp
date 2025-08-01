@@ -254,6 +254,7 @@
 #include "Visitors/ApplyToGeometries.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/FetchCameras.hpp"
+#include "Visitors/FetchGeometries.hpp"
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/Picking.hpp"

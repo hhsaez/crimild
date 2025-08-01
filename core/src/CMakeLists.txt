@@ -289,6 +289,7 @@ target_sources(
     Visitors/BinTreeScene.hpp
     Visitors/ComputeRenderQueue.hpp
     Visitors/FetchCameras.hpp
+    Visitors/FetchGeometries.hpp
     Visitors/FetchLights.hpp
     Visitors/IntersectWorld.hpp
     Visitors/NodeVisitor.hpp
@@ -559,6 +560,7 @@ target_sources(
     Visitors/BinTreeScene.cpp
     Visitors/ComputeRenderQueue.cpp
     Visitors/FetchCameras.cpp
+    Visitors/FetchGeometries.cpp
     Visitors/FetchLights.cpp
     Visitors/IntersectWorld.cpp
     Visitors/NodeVisitor.cpp

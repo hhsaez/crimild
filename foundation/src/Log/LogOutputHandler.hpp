@@ -38,69 +38,76 @@
 
 namespace crimild {
 
-    class NullOutputHandler : public Log::OutputHandler {
-    public:
-        NullOutputHandler( int level ) noexcept
-            : Log::OutputHandler( level )
-        {
-            // no-op
-        }
+   class NullOutputHandler : public Log::OutputHandler {
+   public:
+      NullOutputHandler( int level ) noexcept
+         : Log::OutputHandler( level )
+      {
+         // no-op
+      }
 
-        virtual ~NullOutputHandler( void ) = default;
+      virtual ~NullOutputHandler( void ) = default;
 
-        virtual void print( int, std::string const & ) noexcept override
-        {
-            // no-op
-        }
-    };
+      virtual void print( int, std::string const & ) noexcept override
+      {
+         // no-op
+      }
+   };
 
-    class ConsoleOutputHandler : public Log::OutputHandler {
-    public:
-        ConsoleOutputHandler( int level ) noexcept
-            : Log::OutputHandler( level )
-        {
-            // no-op
-        }
+   class ConsoleOutputHandler : public Log::OutputHandler {
+   public:
+      ConsoleOutputHandler( int level, bool flushOnPrint = false ) noexcept
+         : Log::OutputHandler( level ),
+           m_flushOnPrint( flushOnPrint )
+      {
+         // no-op
+      }
 
-        virtual ~ConsoleOutputHandler( void ) noexcept
-        {
-            // force a flush when destroying
+      virtual ~ConsoleOutputHandler( void ) noexcept
+      {
+         // force a flush when destroying
+         std::cout << std::endl;
+      }
+
+      virtual void print( int, std::string const &line ) noexcept override
+      {
+         std::lock_guard< std::mutex > lock( m_mutex );
+
+         std::cout << line;
+         if ( m_flushOnPrint ) {
             std::cout << std::endl;
-        }
+         } else {
+            std::cout << "\n";
+         }
+      }
 
-        virtual void print( int, std::string const &line ) noexcept override
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
+   private:
+      std::mutex m_mutex;
+      bool m_flushOnPrint = false;
+   };
 
-            std::cout << line << "\n";
-        }
+   class FileOutputHandler : public Log::OutputHandler {
+   public:
+      FileOutputHandler( int level, std::string const &path ) noexcept
+         : Log::OutputHandler( level ),
+           m_out( path, std::ios::out )
+      {
+         // no-op
+      }
 
-    private:
-        std::mutex m_mutex;
-    };
+      virtual ~FileOutputHandler( void ) = default;
 
-    class FileOutputHandler : public Log::OutputHandler {
-    public:
-        FileOutputHandler( int level, std::string const &path ) noexcept
-            : Log::OutputHandler( level ),
-              m_out( path, std::ios::out )
-        {
-            // no-op
-        }
+      virtual void print( int, std::string const &line ) noexcept override
+      {
+         std::lock_guard< std::mutex > lock( m_mutex );
 
-        virtual ~FileOutputHandler( void ) = default;
+         m_out << line << "\n";
+      }
 
-        virtual void print( int, std::string const &line ) noexcept override
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
-
-            m_out << line << "\n";
-        }
-
-    private:
-        std::ofstream m_out;
-        std::mutex m_mutex;
-    };
+   private:
+      std::ofstream m_out;
+      std::mutex m_mutex;
+   };
 
 }
 
