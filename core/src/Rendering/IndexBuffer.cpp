@@ -32,24 +32,24 @@
 using namespace crimild;
 
 IndexBuffer::IndexBuffer( Format format, crimild::Size count ) noexcept
-    : IndexBuffer( format, Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
+   : IndexBuffer( format, Array< crimild::Byte >( count * utils::getFormatSize( format ) ) )
 {
 }
 
 void IndexBuffer::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Entity::encode( encoder );
 
-    encoder.encodeEnum( "format", m_format );
-    encoder.encode( "bufferView", m_bufferView );
-    encoder.encode( "accessor", m_accessor );
+   encoder.encodeEnum( "format", m_format );
+   encoder.encode( "bufferView", m_bufferView );
+   encoder.encode( "accessor", m_accessor );
 }
 
 void IndexBuffer::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Entity::decode( decoder );
 
-    decoder.decodeEnum( "format", m_format );
-    decoder.decode( "bufferView", m_bufferView );
-    decoder.decode( "accessor", m_accessor );
+   decoder.decodeEnum( "format", m_format );
+   decoder.decode( "bufferView", m_bufferView );
+   decoder.decode( "accessor", m_accessor );
 }

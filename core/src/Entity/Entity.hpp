@@ -32,6 +32,16 @@ namespace crimild {
          return it != m_extensions.end() ? crimild::cast_ptr< ExtensionType >( it->second ) : nullptr;
       }
 
+      template< typename ExtensionType >
+      std::shared_ptr< ExtensionType > getOrCreateExtension( void )
+      {
+         auto it = m_extensions.find( ExtensionType::__CLASS_NAME );
+         if ( it != m_extensions.end() ) {
+            return crimild::cast_ptr< ExtensionType >( it->second );
+         }
+         return attach< ExtensionType >();
+      }
+
    private:
       void attach( std::shared_ptr< Extension > const &e )
       {

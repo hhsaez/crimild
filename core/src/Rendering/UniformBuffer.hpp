@@ -30,61 +30,62 @@
 
 #include "Common/Observable.hpp"
 #include "Crimild_Foundation.hpp"
+#include "Entity/Entity.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferView.hpp"
 
 namespace crimild {
 
-    class UniformBuffer
-        : public coding::Codable,
-          public Observable< UniformBuffer >,
-          public RenderResourceImpl< UniformBuffer > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer )
+   class UniformBuffer
+      : public Entity,
+        public Observable< UniformBuffer >,
+        public RenderResourceImpl< UniformBuffer > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::UniformBuffer )
 
-    public:
-        template< typename T >
-        UniformBuffer( const T &value ) noexcept
-        {
-            m_bufferView = crimild::alloc< BufferView >(
-                BufferView::Target::UNIFORM,
-                crimild::alloc< Buffer >( value )
-            );
-        }
+   public:
+      template< typename T >
+      UniformBuffer( const T &value ) noexcept
+      {
+         m_bufferView = crimild::alloc< BufferView >(
+            BufferView::Target::UNIFORM,
+            crimild::alloc< Buffer >( value )
+         );
+      }
 
-        virtual ~UniformBuffer( void ) = default;
+      virtual ~UniformBuffer( void ) = default;
 
-        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
-        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
+      inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+      inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
 
-        template< typename T >
-        T &getValue( void ) noexcept
-        {
-            return *reinterpret_cast< T * >( getBufferView()->getData() );
-        }
+      template< typename T >
+      T &getValue( void ) noexcept
+      {
+         return *reinterpret_cast< T * >( getBufferView()->getData() );
+      }
 
-        template< typename T >
-        const T &getValue( void ) const noexcept
-        {
-            return *reinterpret_cast< const T * >( getBufferView()->getData() );
-        }
+      template< typename T >
+      const T &getValue( void ) const noexcept
+      {
+         return *reinterpret_cast< const T * >( getBufferView()->getData() );
+      }
 
-        template< typename T >
-        void setValue( const T &value ) noexcept
-        {
-            assert( sizeof( T ) == getBufferView()->getLength() && "Invalid data type" );
-            getValue< T >() = value;
-        }
+      template< typename T >
+      void setValue( const T &value ) noexcept
+      {
+         assert( sizeof( T ) == getBufferView()->getLength() && "Invalid data type" );
+         getValue< T >() = value;
+      }
 
-        /**
-           \brief Invoked when a frame is about to be rendered
+      /**
+         \brief Invoked when a frame is about to be rendered
 
-           Derived classes can use this function to update the state of the uniform buffer if needed
-         */
-        virtual void onPreRender( void ) noexcept { }
+         Derived classes can use this function to update the state of the uniform buffer if needed
+       */
+      virtual void onPreRender( void ) noexcept { }
 
-    private:
-        SharedPointer< BufferView > m_bufferView;
-    };
+   private:
+      SharedPointer< BufferView > m_bufferView;
+   };
 
 }
 

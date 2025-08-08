@@ -30,6 +30,7 @@
 
 #include "Common/Observable.hpp"
 #include "Crimild_Foundation.hpp"
+#include "Entity/Entity.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
@@ -37,106 +38,106 @@
 
 namespace crimild {
 
-    class IndexBuffer
-        : public coding::Codable,
-          public Observable< IndexBuffer >,
-          public RenderResourceImpl< IndexBuffer > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
+   class IndexBuffer
+      : public Entity,
+        public Observable< IndexBuffer >,
+        public RenderResourceImpl< IndexBuffer > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::IndexBuffer )
 
-    public:
-        /**
-         * \brief Default constructor
-         *
-         * \remarks This is only used in order to comply with the Codable interface.
-         */
-        IndexBuffer( void ) = default;
+   public:
+      /**
+       * \brief Default constructor
+       *
+       * \remarks This is only used in order to comply with the Codable interface.
+       */
+      IndexBuffer( void ) = default;
 
-        IndexBuffer( Format format, crimild::Size count ) noexcept;
+      IndexBuffer( Format format, crimild::Size count ) noexcept;
 
-        template< typename T >
-        IndexBuffer( Format format, Array< T > const &data ) noexcept
-            : m_format( format )
-        {
-            auto stride = utils::getFormatSize( format );
+      template< typename T >
+      IndexBuffer( Format format, Array< T > const &data ) noexcept
+         : m_format( format )
+      {
+         auto stride = utils::getFormatSize( format );
 
-            auto buffer = crimild::alloc< Buffer >( data );
+         auto buffer = crimild::alloc< Buffer >( data );
 
-            m_bufferView = crimild::alloc< BufferView >(
-                BufferView::Target::INDEX,
-                buffer,
-                0,
-                stride
-            );
+         m_bufferView = crimild::alloc< BufferView >(
+            BufferView::Target::INDEX,
+            buffer,
+            0,
+            stride
+         );
 
-            m_accessor = crimild::alloc< BufferAccessor >(
-                m_bufferView,
-                0,
-                stride
-            );
-        }
+         m_accessor = crimild::alloc< BufferAccessor >(
+            m_bufferView,
+            0,
+            stride
+         );
+      }
 
-        virtual ~IndexBuffer( void ) = default;
+      virtual ~IndexBuffer( void ) = default;
 
-        inline Format getFormat( void ) const noexcept
-        {
-            return m_format;
-        }
+      inline Format getFormat( void ) const noexcept
+      {
+         return m_format;
+      }
 
-        inline crimild::Size getIndexCount( void ) const noexcept
-        {
-            return m_bufferView->getCount();
-        }
+      inline crimild::Size getIndexCount( void ) const noexcept
+      {
+         return m_bufferView->getCount();
+      }
 
-        inline BufferView *getBufferView( void ) const noexcept
-        {
-            return crimild::get_ptr( m_bufferView );
-        }
+      inline BufferView *getBufferView( void ) const noexcept
+      {
+         return crimild::get_ptr( m_bufferView );
+      }
 
-        crimild::UInt32 getIndex( crimild::Size i ) const noexcept
-        {
-            if ( m_format == Format::INDEX_16_UINT ) {
-                return m_accessor->get< crimild::UInt16 >( i );
-            }
-            return m_accessor->get< crimild::UInt32 >( i );
-        }
+      crimild::UInt32 getIndex( crimild::Size i ) const noexcept
+      {
+         if ( m_format == Format::INDEX_16_UINT ) {
+            return m_accessor->get< crimild::UInt16 >( i );
+         }
+         return m_accessor->get< crimild::UInt32 >( i );
+      }
 
-        template< typename Fn >
-        void each( Fn fn ) const noexcept
-        {
-            if ( m_format == Format::INDEX_16_UINT ) {
-                m_accessor->each< crimild::UInt16 >( fn );
-            } else {
-                m_accessor->each< crimild::UInt32 >( fn );
-            }
-        }
+      template< typename Fn >
+      void each( Fn fn ) const noexcept
+      {
+         if ( m_format == Format::INDEX_16_UINT ) {
+            m_accessor->each< crimild::UInt16 >( fn );
+         } else {
+            m_accessor->each< crimild::UInt32 >( fn );
+         }
+      }
 
-        template< typename T >
-        void setIndex( crimild::Size i, T value ) noexcept
-        {
-            m_accessor->set< T >( i, value );
-        }
+      template< typename T >
+      void setIndex( crimild::Size i, T value ) noexcept
+      {
+         m_accessor->set< T >( i, value );
+      }
 
-        template< typename T >
-        void setIndices( Array< T > const &data ) noexcept
-        {
-            m_accessor->set( data );
-        }
+      template< typename T >
+      void setIndices( Array< T > const &data ) noexcept
+      {
+         m_accessor->set( data );
+      }
 
-    private:
-        Format m_format;
-        SharedPointer< BufferView > m_bufferView;
-        SharedPointer< BufferAccessor > m_accessor;
+   private:
+      Format m_format;
+      SharedPointer< BufferView > m_bufferView;
+      SharedPointer< BufferAccessor > m_accessor;
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 
