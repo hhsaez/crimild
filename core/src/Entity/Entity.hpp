@@ -42,6 +42,35 @@ namespace crimild {
          return attach< ExtensionType >();
       }
 
+      template< typename ExtensionType >
+      std::shared_ptr< ExtensionType > detach( void )
+      {
+         auto it = m_extensions.find( ExtensionType::__CLASS_NAME );
+         if ( it == m_extensions.end() ) {
+            return nullptr;
+         }
+         if ( it->second ) {
+            it->second->setOwner( nullptr );
+         }
+         m_extensions.erase( it );
+         return crimild::cast_ptr< ExtensionType >( it->second );
+      }
+
+      bool detach( std::shared_ptr< Extension > const &extension )
+      {
+         if ( !extension ) {
+            return false;
+         }
+
+         auto it = m_extensions.find( extension->getClassName() );
+         if ( it != m_extensions.end() && it->second == extension ) {
+            extension->setOwner( nullptr );
+            m_extensions.erase( it );
+            return true;
+         }
+         return false;
+      }
+
    private:
       void attach( std::shared_ptr< Extension > const &e )
       {
