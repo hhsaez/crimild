@@ -16,6 +16,8 @@ namespace crimild::opengl {
       virtual void bind( void ) override;
       virtual void unbind( void ) override;
 
+      inline const std::shared_ptr< ShaderProgram > &getProgram( void ) const { return m_program; }
+
    private:
       void load( void );
       void unload( void );

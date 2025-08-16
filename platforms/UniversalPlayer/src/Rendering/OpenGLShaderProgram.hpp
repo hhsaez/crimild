@@ -3,6 +3,7 @@
 
 #include "Foundation/OpenGLUtils.hpp"
 
+#include <Crimild_Mathematics.hpp>
 #include <memory>
 #include <vector>
 
@@ -17,6 +18,8 @@ namespace crimild::opengl {
 
       void bind( void ) const;
       void unbind( void ) const;
+
+      void setUniform( const char *name, const Matrix4f &value );
 
    private:
       GLuint m_id = GL_NONE;

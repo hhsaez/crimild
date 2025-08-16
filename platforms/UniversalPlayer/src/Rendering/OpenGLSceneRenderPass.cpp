@@ -3,8 +3,10 @@
 #include "Foundation/OpenGLUtils.hpp"
 #include "Rendering/OpenGLMaterialBindable.hpp"
 #include "Rendering/OpenGLPrimitiveBindable.hpp"
+#include "Rendering/OpenGLShaderProgram.hpp"
 
 #include <Crimild.hpp>
+#include <Crimild_Mathematics.hpp>
 
 using namespace crimild::universal;
 
@@ -25,6 +27,11 @@ void SceneRenderPass::operator()(
       if ( auto material = ms->first() ) {
          auto bindable = material->getOrCreateExtension< opengl::MaterialBindable >();
          bindable->bind();
+
+         auto program = bindable->getProgram();
+         program->setUniform( "uProjMatrix", camera->getProjectionMatrix() );
+         program->setUniform( "uViewMatrix", camera->getViewMatrix() );
+         program->setUniform( "uModelMatrix", crimild::Matrix4f( geometry->getWorld() ) );
 
          geometry->forEachPrimitive(
             [ & ]( auto primitive ) {
