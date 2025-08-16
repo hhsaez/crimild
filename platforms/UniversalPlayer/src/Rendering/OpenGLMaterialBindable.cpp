@@ -2,6 +2,7 @@
 
 #include "OpenGLShader.hpp"
 #include "OpenGLShaderProgram.hpp"
+#include "OpenGLTextureBindable.hpp"
 
 using namespace crimild::opengl;
 
@@ -13,16 +14,28 @@ MaterialBindable::~MaterialBindable( void )
 
 void MaterialBindable::bind( void )
 {
+   auto material = getOwner< Material >();
+
    if ( m_program == nullptr ) {
       load();
    }
 
    m_program->bind();
+
+   if ( auto texture = material->getColorMap() ) {
+      texture->getOrCreateExtension< TextureBindable >()->bind();
+   }
 }
 
 void MaterialBindable::unbind( void )
 {
+   auto material = getOwner< Material >();
+
    m_program->unbind();
+
+   if ( auto texture = material->getColorMap() ) {
+      texture->getOrCreateExtension< TextureBindable >()->unbind();
+   }
 }
 
 void MaterialBindable::load( void )
@@ -38,18 +51,18 @@ void MaterialBindable::load( void )
                #extension GL_ARB_separate_shader_objects : enable
       
                layout ( location = 0 ) in vec3 inPos;
-               layout ( location = 1 ) in vec3 inColor;
+               layout ( location = 1 ) in vec2 inTexCoord;
 
                uniform mat4 uProjMatrix;
                uniform mat4 uViewMatrix;
                uniform mat4 uModelMatrix;
       
-               layout ( location = 0 ) out vec3 outColor;
+               layout ( location = 0 ) out vec2 outTexCoord;
       
                void main()
                {
                   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4( inPos, 1.0 );
-                  outColor = inColor;
+                  outTexCoord = inTexCoord;
                }
             )"
          ),
@@ -59,13 +72,16 @@ void MaterialBindable::load( void )
                #version 330 core
                #extension GL_ARB_separate_shader_objects : enable
       
-               layout( location = 0 ) in vec3 inColor;
+               layout( location = 0 ) in vec2 inTexCoord;
+
+               uniform sampler2D uColorMap;
       
                layout( location = 0 ) out vec4 outFragColor;
       
                void main()
                {
-                  outFragColor = vec4( inColor, 1.0 );
+                  outFragColor = texture( uColorMap, inTexCoord );
+                  outFragColor.a = 1.0;
                }
             )"
          ),

@@ -15,21 +15,23 @@ target_sources(
    PRIVATE Foundation/OpenGLUtils.hpp  
    PRIVATE Foundation/OpenGLUtils.cpp
 
-   PUBLIC Rendering/OpenGLBindable.hpp
+   PRIVATE Rendering/OpenGLBindable.hpp
    PRIVATE Rendering/OpenGLIndexBufferBindable.cpp
-   PUBLIC Rendering/OpenGLIndexBufferBindable.hpp
+   PRIVATE Rendering/OpenGLIndexBufferBindable.hpp
    PRIVATE Rendering/OpenGLMaterialBindable.cpp
-   PUBLIC Rendering/OpenGLMaterialBindable.hpp
+   PRIVATE Rendering/OpenGLMaterialBindable.hpp
    PRIVATE Rendering/OpenGLPrimitiveBindable.cpp
-   PUBLIC Rendering/OpenGLPrimitiveBindable.hpp
+   PRIVATE Rendering/OpenGLPrimitiveBindable.hpp
    PRIVATE Rendering/OpenGLSceneRenderPass.cpp
    PUBLIC Rendering/OpenGLSceneRenderPass.hpp
    PRIVATE Rendering/OpenGLShader.cpp
-   PUBLIC Rendering/OpenGLShader.hpp
+   PRIVATE Rendering/OpenGLShader.hpp
    PRIVATE Rendering/OpenGLShaderProgram.cpp
-   PUBLIC Rendering/OpenGLShaderProgram.hpp
+   PRIVATE Rendering/OpenGLShaderProgram.hpp
+   PRIVATE Rendering/OpenGLTextureBindable.cpp
+   PRIVATE Rendering/OpenGLTextureBindable.hpp
    PRIVATE Rendering/OpenGLVertexBufferBindable.cpp
-   PUBLIC Rendering/OpenGLVertexBufferBindable.hpp
+   PRIVATE Rendering/OpenGLVertexBufferBindable.hpp
 )
 
 target_include_directories(

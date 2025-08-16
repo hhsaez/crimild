@@ -37,97 +37,97 @@ using namespace crimild;
 
 SharedPointer< Texture > Texture::fromRGBANoise( UInt32 size ) noexcept
 {
-    auto texture = crimild::alloc< Texture >();
-    texture->imageView = [ & ] {
-        auto imageView = crimild::alloc< ImageView >();
-        imageView->image = Image::fromRGBANoise( size );
-        return imageView;
-    }();
-    texture->sampler = [ & ] {
-        auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::NEAREST );
-        sampler->setMagFilter( Sampler::Filter::NEAREST );
-        return sampler;
-    }();
-    return texture;
+   auto texture = crimild::alloc< Texture >();
+   texture->imageView = [ & ] {
+      auto imageView = crimild::alloc< ImageView >();
+      imageView->image = Image::fromRGBANoise( size );
+      return imageView;
+   }();
+   texture->sampler = [ & ] {
+      auto sampler = crimild::alloc< Sampler >();
+      sampler->setMinFilter( Sampler::Filter::NEAREST );
+      sampler->setMagFilter( Sampler::Filter::NEAREST );
+      return sampler;
+   }();
+   return texture;
 }
 
 SharedPointer< Texture > Texture::ONE = [] {
-    auto texture = crimild::alloc< Texture >();
-    texture->imageView = [ & ] {
-        auto imageView = crimild::alloc< ImageView >();
-        imageView->image = Image::ONE;
-        return imageView;
-    }();
-    texture->sampler = [ & ] {
-        auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::NEAREST );
-        sampler->setMagFilter( Sampler::Filter::NEAREST );
-        return sampler;
-    }();
-    return texture;
+   auto texture = crimild::alloc< Texture >();
+   texture->imageView = [ & ] {
+      auto imageView = crimild::alloc< ImageView >();
+      imageView->image = Image::ONE;
+      return imageView;
+   }();
+   texture->sampler = [ & ] {
+      auto sampler = crimild::alloc< Sampler >();
+      sampler->setMinFilter( Sampler::Filter::NEAREST );
+      sampler->setMagFilter( Sampler::Filter::NEAREST );
+      return sampler;
+   }();
+   return texture;
 }();
 
 SharedPointer< Texture > Texture::ZERO = [] {
-    auto texture = crimild::alloc< Texture >();
-    texture->imageView = [ & ] {
-        auto imageView = crimild::alloc< ImageView >();
-        imageView->image = Image::ZERO;
-        return imageView;
-    }();
-    texture->sampler = [ & ] {
-        auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::NEAREST );
-        sampler->setMagFilter( Sampler::Filter::NEAREST );
-        return sampler;
-    }();
-    return texture;
+   auto texture = crimild::alloc< Texture >();
+   texture->imageView = [ & ] {
+      auto imageView = crimild::alloc< ImageView >();
+      imageView->image = Image::ZERO;
+      return imageView;
+   }();
+   texture->sampler = [ & ] {
+      auto sampler = crimild::alloc< Sampler >();
+      sampler->setMinFilter( Sampler::Filter::NEAREST );
+      sampler->setMagFilter( Sampler::Filter::NEAREST );
+      return sampler;
+   }();
+   return texture;
 }();
 
 SharedPointer< Texture > Texture::CUBE_ONE = [] {
-    return crimild::alloc< Texture >(
-        Array< SharedPointer< Image > > {
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
-            crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ) }
-    );
+   return crimild::alloc< Texture >(
+      Array< SharedPointer< Image > > {
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ),
+         crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0xFF, 0xFF, 0xFF }, Image::PixelFormat::RGBA ) }
+   );
 }();
 
 SharedPointer< Texture > createCheckerBoardTexture( crimild::Int32 size )
 {
-    crimild::Byte colors[] = {
-        0x00,
-        0x00,
-        0x00,
-        0xFF, // black
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF, // white
-    };
+   crimild::Byte colors[] = {
+      0x00,
+      0x00,
+      0x00,
+      0xFF, // black
+      0xFF,
+      0xFF,
+      0xFF,
+      0xFF, // white
+   };
 
-    crimild::Int32 width = size;
-    crimild::Int32 height = size;
-    crimild::Int32 bpp = 4;
+   crimild::Int32 width = size;
+   crimild::Int32 height = size;
+   crimild::Int32 bpp = 4;
 
-    auto data = ByteArray( width * height * bpp );
-    for ( int y = 0; y < width; y++ ) {
-        for ( int x = 0; x < width; x++ ) {
-            auto colorIdx = ( y % 2 + x % 2 ) % 2;
-            for ( int i = 0; i < bpp; i++ ) {
-                data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
-            }
-        }
-    }
+   auto data = ByteArray( width * height * bpp );
+   for ( int y = 0; y < width; y++ ) {
+      for ( int x = 0; x < width; x++ ) {
+         auto colorIdx = ( y % 2 + x % 2 ) % 2;
+         for ( int i = 0; i < bpp; i++ ) {
+            data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
+         }
+      }
+   }
 
-    auto image = crimild::alloc< Image >( width, width, bpp, data, Image::PixelFormat::RGBA );
-    auto texture = crimild::alloc< Texture >( image );
-    texture->setMagFilter( Texture::Filter::NEAREST );
-    texture->setMinFilter( Texture::Filter::NEAREST );
-    return texture;
+   auto image = crimild::alloc< Image >( width, width, bpp, data, Image::PixelFormat::RGBA );
+   auto texture = crimild::alloc< Texture >( image );
+   texture->setMagFilter( Texture::Filter::NEAREST );
+   texture->setMinFilter( Texture::Filter::NEAREST );
+   return texture;
 }
 
 SharedPointer< Texture > Texture::CHECKERBOARD = createCheckerBoardTexture( 2 );
@@ -141,65 +141,65 @@ SharedPointer< Texture > Texture::CHECKERBOARD_256 = createCheckerBoardTexture( 
 SharedPointer< Texture > Texture::CHECKERBOARD_512 = createCheckerBoardTexture( 512 );
 
 SharedPointer< Texture > Texture::INVALID = crimild::alloc< Texture >(
-    crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
+   crimild::alloc< Image >( 1, 1, 4, ByteArray { 0xFF, 0x00, 0xFF, 0xFF }, Image::PixelFormat::RGBA )
 );
 
 Texture::Texture( std::string name )
-    : NamedObject( name )
+   : NamedObject( name )
 {
 }
 
 Texture::Texture( SharedPointer< Image > const &image, std::string name )
-    : NamedObject( name ),
-      _images( { image } )
+   : NamedObject( name ),
+     _images( { image } )
 {
 }
 
 Texture::Texture( Texture::ImageArray const &images )
-    : NamedObject( "CubeMap" ),
-      _target( Texture::Target::CUBE_MAP ),
-      _images( images )
+   : NamedObject( "CubeMap" ),
+     _target( Texture::Target::CUBE_MAP ),
+     _images( images )
 {
 }
 
 Texture::~Texture( void )
 {
-    unload();
+   unload();
 }
 
 void Texture::setWrittenBy( FrameGraphOperation *op ) noexcept
 {
-    FrameGraphResource::setWrittenBy( op );
-    if ( imageView != nullptr ) {
-        imageView->setWrittenBy( op );
-    }
+   FrameGraphResource::setWrittenBy( op );
+   if ( imageView != nullptr ) {
+      imageView->setWrittenBy( op );
+   }
 }
 
 void Texture::setReadBy( FrameGraphOperation *op ) noexcept
 {
-    FrameGraphResource::setReadBy( op );
-    if ( imageView != nullptr ) {
-        imageView->setReadBy( op );
-    }
+   FrameGraphResource::setReadBy( op );
+   if ( imageView != nullptr ) {
+      imageView->setReadBy( op );
+   }
 }
 
 void Texture::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Entity::encode( encoder );
 
-    encoder.encode( "name", getName() );
-    encoder.encode( "imageView", imageView );
-    encoder.encode( "sampler", sampler );
+   encoder.encode( "name", getName() );
+   encoder.encode( "imageView", imageView );
+   encoder.encode( "sampler", sampler );
 }
 
 void Texture::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Entity::decode( decoder );
 
-    std::string name;
-    decoder.decode( "name", name );
-    setName( name );
+   std::string name;
+   decoder.decode( "name", name );
+   setName( name );
 
-    decoder.decode( "imageView", imageView );
-    decoder.decode( "sampler", sampler );
+   decoder.decode( "imageView", imageView );
+   decoder.decode( "sampler", sampler );
 }

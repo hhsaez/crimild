@@ -59,6 +59,19 @@ void VertexBufferBindable::load( void )
       glEnableVertexAttribArray( attribIndex );
       attribIndex++;
    }
+
+   if ( auto texCoords = vertices->get( VertexAttribute::TEX_COORD ) ) {
+      glVertexAttribPointer(
+         attribIndex,
+         2,
+         GL_FLOAT,
+         GL_FALSE,
+         texCoords->getBufferView()->getStride(),
+         reinterpret_cast< const GLvoid * >( texCoords->getOffset() )
+      );
+      glEnableVertexAttribArray( attribIndex );
+      attribIndex++;
+   }
 }
 
 void VertexBufferBindable::unload( void )
