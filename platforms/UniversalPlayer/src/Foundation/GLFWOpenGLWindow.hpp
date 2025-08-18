@@ -1,6 +1,8 @@
 #ifndef CRIMILD_UNIVERSAL_GLFW_OPENGL_WINDOW_
 #define CRIMILD_UNIVERSAL_GLFW_OPENGL_WINDOW_
 
+#include "Foundation/Signal.hpp"
+
 #include <string>
 
 struct GLFWwindow;
@@ -11,6 +13,9 @@ namespace crimild::universal {
    public:
       GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string title ) noexcept;
       virtual ~GLFWOpenGLWindow( void ) noexcept;
+
+      Signal< int, double, double > onMouseButtonPressed;
+      Signal< int, double, double > onMouseButtonReleased;
 
       inline bool isValid( void ) const
       {

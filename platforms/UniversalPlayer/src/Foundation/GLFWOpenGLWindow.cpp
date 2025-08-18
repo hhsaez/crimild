@@ -48,6 +48,23 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
       }
    );
 
+   glfwSetMouseButtonCallback(
+      m_window,
+      []( GLFWwindow *window, int button, int action, int mods ) {
+         auto self = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
+         if ( self != nullptr && self->m_window == window ) {
+            double x, y;
+            glfwGetCursorPos( window, &x, &y );
+
+            if ( action == GLFW_PRESS ) {
+               self->onMouseButtonPressed( button, x, y );
+            } else if ( action == GLFW_RELEASE ) {
+               self->onMouseButtonReleased( button, x, y );
+            }
+         }
+      }
+   );
+
    glfwMakeContextCurrent( m_window );
 
    // TODO: Maybe move this to a different system?
