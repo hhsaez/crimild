@@ -90,6 +90,7 @@
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
 #include "Boundings/SphereBoundingVolume.hpp"
+#include "Common/Signal.hpp"
 #include "Components/AnimatorComponent.hpp"
 #include "Components/AudioListenerComponent.hpp"
 #include "Components/AudioSourceComponent.hpp"

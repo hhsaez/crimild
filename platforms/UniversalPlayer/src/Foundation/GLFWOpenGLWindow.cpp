@@ -2,8 +2,6 @@
 
 #include "Foundation/OpenGLUtils.hpp"
 
-#include <Crimild.hpp>
-
 using namespace crimild::universal;
 
 GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string title ) noexcept

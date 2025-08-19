@@ -1,8 +1,7 @@
 #ifndef CRIMILD_UNIVERSAL_GLFW_OPENGL_WINDOW_
 #define CRIMILD_UNIVERSAL_GLFW_OPENGL_WINDOW_
 
-#include "Foundation/Signal.hpp"
-
+#include <Crimild.hpp>
 #include <string>
 
 struct GLFWwindow;

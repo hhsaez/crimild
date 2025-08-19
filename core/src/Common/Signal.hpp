@@ -1,5 +1,5 @@
-#ifndef CRIMILD_FOUNDATION_SIGNAL_
-#define CRIMILD_FOUNDATION_SIGNAL_
+#ifndef CRIMILD_CORE_COMMON_SIGNAL_
+#define CRIMILD_CORE_COMMON_SIGNAL_
 
 #include <algorithm>
 #include <functional>

@@ -73,6 +73,7 @@ target_sources(
     Boundings/PlaneBoundingVolume.hpp
     Boundings/SphereBoundingVolume.hpp
     Common/Profiler.hpp
+    Common/Signal.hpp
     Common/Variant.hpp
     Components/AnimatorComponent.hpp
     Components/AudioListenerComponent.hpp
