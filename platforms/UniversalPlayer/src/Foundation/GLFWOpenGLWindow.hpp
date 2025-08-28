@@ -8,6 +8,12 @@ struct GLFWwindow;
 
 namespace crimild::universal {
 
+   struct KeyInfo {
+      UInt32 key = CRIMILD_INPUT_KEY_UNKNOWN;
+      UInt32 scancode = 0;
+      UInt32 mod = 0;
+   };
+
    class GLFWOpenGLWindow {
    public:
       GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string title ) noexcept;
@@ -15,6 +21,9 @@ namespace crimild::universal {
 
       Signal< int, double, double > onMouseButtonPressed;
       Signal< int, double, double > onMouseButtonReleased;
+      Signal< KeyInfo > onKeyPressed;
+      Signal< KeyInfo > onKeyReleased;
+      Signal< KeyInfo > onKeyRepeated;
 
       inline bool isValid( void ) const
       {
@@ -23,6 +32,8 @@ namespace crimild::universal {
 
       inline uint32_t getWidth( void ) const { return m_width; }
       inline uint32_t getHeight( void ) const { return m_height; }
+
+      void close( void );
 
       bool isOpen( void ) const;
       void swapBuffers( void ) const;

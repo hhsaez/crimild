@@ -40,8 +40,21 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
    glfwSetKeyCallback(
       m_window,
       []( GLFWwindow *window, int key, int scancode, int action, int mods ) {
-         if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS ) {
-            glfwSetWindowShouldClose( window, GLFW_TRUE );
+         auto self = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
+         if ( self != nullptr && self->m_window == window ) {
+            const auto info = KeyInfo {
+               .key = UInt32( key ),
+               .scancode = UInt32( scancode ),
+               .mod = UInt32( mods ),
+            };
+
+            if ( action == GLFW_PRESS ) {
+               self->onKeyPressed( info );
+            } else if ( action == GLFW_RELEASE ) {
+               self->onKeyReleased( info );
+            } else if ( action == GLFW_REPEAT ) {
+               self->onKeyRepeated( info );
+            }
          }
       }
    );
@@ -82,6 +95,13 @@ GLFWOpenGLWindow::~GLFWOpenGLWindow( void ) noexcept
    if ( m_window != nullptr ) {
       glfwDestroyWindow( m_window );
       m_window = nullptr;
+   }
+}
+
+void GLFWOpenGLWindow::close( void )
+{
+   if ( m_window != nullptr ) {
+      glfwSetWindowShouldClose( m_window, GLFW_TRUE );
    }
 }
 
