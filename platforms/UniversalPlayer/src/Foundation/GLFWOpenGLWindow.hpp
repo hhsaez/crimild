@@ -33,6 +33,8 @@ namespace crimild::universal {
       inline uint32_t getWidth( void ) const { return m_width; }
       inline uint32_t getHeight( void ) const { return m_height; }
 
+      void resize( uint32_t width, uint32_t height );
+
       void close( void );
 
       bool isOpen( void ) const;

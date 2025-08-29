@@ -31,6 +31,7 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
       []( GLFWwindow *window, int width, int height ) {
          auto windowInstance = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
+            CRIMILD_LOG_DEBUG( "Resizing framebuffer", width, height );
             windowInstance->m_width = width;
             windowInstance->m_height = height;
          }
@@ -96,6 +97,11 @@ GLFWOpenGLWindow::~GLFWOpenGLWindow( void ) noexcept
       glfwDestroyWindow( m_window );
       m_window = nullptr;
    }
+}
+
+void GLFWOpenGLWindow::resize( uint32_t width, uint32_t height )
+{
+   glfwSetWindowSize( m_window, width, height );
 }
 
 void GLFWOpenGLWindow::close( void )
