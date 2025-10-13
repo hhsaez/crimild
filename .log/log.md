@@ -3,23 +3,11 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
-# TODO
-- [ ] Fix deinit errors when closing `GLFWOpenWindow`s
-- [ ] Text encoding
-- [ ] Unit tests for memory decoder
-- [ ] Text decoding
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2025-10-13
+- Getting back into dev mode after a while. Feels like I need to learn everything again.
+- I decided to keep everything as simple as possible and I'm going to continue using VS Code as my main editor (instead of Emacs). 
+- I removed the TODO list from this file, in favor of using a dedicated tool (like a canvas in Obsidian). 
 
-# MAYBE
-- [ ] Create `Identifiable` class. See comments [here](./20250717_hhsaez.md)
-- [ ] Use string-based UIDs
 
 # 2025-08-28
 - [x] Add keyboard signals to `GLFWOpenGLWindow`
