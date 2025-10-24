@@ -73,6 +73,7 @@ target_sources(
     Boundings/PlaneBoundingVolume.hpp
     Boundings/SphereBoundingVolume.hpp
     Common/Profiler.hpp
+    Common/Signal.hpp
     Common/Variant.hpp
     Components/AnimatorComponent.hpp
     Components/AudioListenerComponent.hpp
@@ -101,6 +102,8 @@ target_sources(
     Debug/DebugRenderComponent.hpp
     Debug/DebugRenderHelper.hpp
     Debug/SceneDebugDump.hpp
+    Entity/Entity.hpp
+    Entity/Extension.hpp
     Exceptions/Exception.hpp
     Exceptions/FileNotFoundException.hpp
     Exceptions/HasParentException.hpp
@@ -287,6 +290,7 @@ target_sources(
     Visitors/BinTreeScene.hpp
     Visitors/ComputeRenderQueue.hpp
     Visitors/FetchCameras.hpp
+    Visitors/FetchGeometries.hpp
     Visitors/FetchLights.hpp
     Visitors/IntersectWorld.hpp
     Visitors/NodeVisitor.hpp
@@ -388,6 +392,7 @@ target_sources(
     Debug/DebugRenderComponent.cpp
     Debug/DebugRenderHelper.cpp
     Debug/SceneDebugDump.cpp
+    Entity/Entity.cpp
     Loaders/OBJLoader.cpp
     Messaging/MessageQueue.cpp
     Navigation/NavigationCell.cpp
@@ -556,6 +561,7 @@ target_sources(
     Visitors/BinTreeScene.cpp
     Visitors/ComputeRenderQueue.cpp
     Visitors/FetchCameras.cpp
+    Visitors/FetchGeometries.cpp
     Visitors/FetchLights.cpp
     Visitors/IntersectWorld.cpp
     Visitors/NodeVisitor.cpp

@@ -12,6 +12,9 @@ target_sources(
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp
 
+    Assemblies/Assembly.cpp
+    Assemblies/Assembly.hpp
+
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
 
@@ -21,24 +24,43 @@ target_sources(
     Views/Dialogs/Dialog.hpp
     Views/Dialogs/FileDialog.cpp
     Views/Dialogs/FileDialog.hpp
+
     Views/Menus/MainMenu/MainMenu.cpp
     Views/Menus/MainMenu/MainMenu.hpp
+    Views/Menus/NewEntityMenu.hpp
+
     Views/Modals/AboutModal.cpp
     Views/Modals/AboutModal.hpp
     Views/Modals/AlertModal.cpp
     Views/Modals/AlertModal.hpp
     Views/Modals/Modal.cpp
     Views/Modals/Modal.hpp
+
+    Views/Panels/Scene3D/Scene3DPanel.cpp
+    Views/Panels/Scene3D/Scene3DPanel.hpp
+
     Views/Specials/ImGuiDemoWindow.hpp
     Views/Specials/ImGuiDemoWindow.cpp
     Views/Windows/BehaviorsWindow.cpp
     Views/Windows/BehaviorsWindow.hpp
     Views/Windows/FileSystemWindow.hpp
     Views/Windows/FileSystemWindow.cpp
+
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.cpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.hpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.cpp
+    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.hpp
+    
+    Views/Windows/GraphEditor/Editables/Editable.cpp
+    Views/Windows/GraphEditor/Editables/Editable.hpp
+    
     Views/Windows/GraphEditor/Builders.cpp
-    Views/Windows/GraphEditor/Builders.hpp
+    Views/Windows/GraphEditor/Builders.hpp    
+    Views/Windows/GraphEditor/GraphEditorContext.hpp
+    Views/Windows/GraphEditor/GraphEditorTypes.hpp
     Views/Windows/GraphEditor/GraphEditorWindow.cpp
     Views/Windows/GraphEditor/GraphEditorWindow.hpp
+
     Views/Windows/InspectorWindow.hpp
     Views/Windows/InspectorWindow.cpp
     Views/Windows/LogWindow.hpp
@@ -57,6 +79,13 @@ target_sources(
     Views/Windows/TimelineWindow.cpp
     Views/Windows/Window.hpp
     Views/Windows/Window.cpp
+
+    Views/Workspaces/Workspace.hpp
+    Views/Workspaces/Workspace.cpp
+    Views/Workspaces/AssemblyWorkspace.hpp
+    Views/Workspaces/AssemblyWorkspace.cpp
+    Views/Workspaces/WorkspaceManager.hpp
+    Views/Workspaces/WorkspaceManager.cpp
 
     Layout/Layout.hpp
     Layout/Layout.cpp

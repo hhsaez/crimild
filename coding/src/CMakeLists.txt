@@ -17,6 +17,8 @@ target_sources(
     FileEncoder.hpp
     MemoryDecoder.hpp
     MemoryEncoder.hpp
+    TextDecoder.hpp
+    TextEncoder.hpp
     Tags.hpp
 
     PRIVATE
@@ -27,6 +29,8 @@ target_sources(
     FileEncoder.cpp
     MemoryDecoder.cpp
     MemoryEncoder.cpp
+    TextDecoder.cpp
+    TextEncoder.cpp
     Tags.cpp
 )
 

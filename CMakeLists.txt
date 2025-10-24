@@ -26,6 +26,7 @@ endif()
 option(CRIMILD_BUILD_TESTS "Build tests?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_PLAYER "Build crimild player?" ${CRIMILD_IS_MAIN_PROJECT})
+option(CRIMILD_BUILD_UNIVERSAL_PLAYER "Build crimild universal player?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_EXAMPLES "Build examples?" ${CRIMILD_IS_MAIN_PROJECT})
 
 # Global tests setup

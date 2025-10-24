@@ -30,7 +30,76 @@
 using namespace crimild::editor;
 
 View::View( std::string_view name ) noexcept
-    : Named( name )
+   : Named( name )
 {
-    // no-op
+   // no-op
+}
+
+void View::addSubview( std::shared_ptr< View > const &subview )
+{
+   if ( subview->hasSuperview() ) {
+      subview->removeFromSuperview();
+   }
+
+   m_subviews.push_back( subview );
+   subview->m_superview = retain( this );
+}
+
+void View::removeFromSuperview( void )
+{
+   if ( auto superview = m_superview.lock() ) {
+      superview->m_subviews.erase(
+         std::remove(
+            std::begin( superview->m_subviews ),
+            std::end( superview->m_subviews ),
+            retain( this )
+         )
+      );
+   }
+}
+
+std::shared_ptr< View > View::getSubview( std::string_view name )
+{
+   for ( auto subview : m_subviews ) {
+      if ( subview->getName() == name ) {
+         return subview;
+      }
+   }
+   return nullptr;
+}
+
+void View::encode( coding::Encoder &encoder ) noexcept
+{
+   Codable::encode( encoder );
+
+   encoder.encode( "name", getName() );
+
+   encoder.encode( "origin", m_rect.origin );
+   encoder.encode( "width", m_rect.size.width );
+   encoder.encode( "height", m_rect.size.height );
+
+   Array< std::shared_ptr< View > > views;
+   for ( auto &view : m_subviews ) {
+      views.add( view );
+   }
+   encoder.encode( "views", views );
+}
+
+void View::decode( coding::Decoder &decoder ) noexcept
+{
+   Codable::decode( decoder );
+
+   decoder.decode( "name", getName() );
+
+   decoder.decode( "origin", m_rect.origin );
+   decoder.decode( "width", m_rect.size.width );
+   decoder.decode( "height", m_rect.size.height );
+
+   Array< std::shared_ptr< View > > views;
+   decoder.decode( "views", views );
+   views.each(
+      [ this ]( auto view ) {
+         addSubview( view );
+      }
+   );
 }

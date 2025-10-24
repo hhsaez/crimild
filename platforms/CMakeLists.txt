@@ -7,3 +7,7 @@ endif()
 if( CRIMILD_BUILD_PLAYER )
     add_subdirectory( Player )
 endif()
+
+if ( CRIMILD_BUILD_UNIVERSAL_PLAYER )
+    add_subdirectory( UniversalPlayer )
+endif()

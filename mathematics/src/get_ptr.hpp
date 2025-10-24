@@ -38,89 +38,89 @@
 
 namespace crimild {
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr const T *get_ptr( const Tuple2< Derived, T > &u )
-    {
-        return static_cast< const T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr const T *get_ptr( const Tuple2< Derived, T > &u )
+   {
+      return static_cast< const T * >( &u.x );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr T *get_ptr( Tuple2< Derived, T > &u )
-    {
-        return static_cast< T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr T *get_ptr( Tuple2< Derived, T > &u )
+   {
+      return static_cast< T * >( &u.x );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr const T *get_ptr( const Tuple3< Derived, T > &u )
-    {
-        return static_cast< const T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr const T *get_ptr( const Tuple3< Derived, T > &u )
+   {
+      return static_cast< const T * >( &u.x );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr T *get_ptr( Tuple3< Derived, T > &u )
-    {
-        return static_cast< T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr T *get_ptr( Tuple3< Derived, T > &u )
+   {
+      return static_cast< T * >( &u.x );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr const T *get_ptr( const Tuple4< Derived, T > &u )
-    {
-        return static_cast< const T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr const T *get_ptr( const Tuple4< Derived, T > &u )
+   {
+      return static_cast< const T * >( &u.x );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    inline constexpr T *get_ptr( Tuple4< Derived, T > &u )
-    {
-        return static_cast< T * >( &u.x );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   inline constexpr T *get_ptr( Tuple4< Derived, T > &u )
+   {
+      return static_cast< T * >( &u.x );
+   }
 
-    template< typename T >
-    inline constexpr const T *get_ptr( const Matrix3Impl< T > &m ) noexcept
-    {
-        return static_cast< const T * >( &m.c0.x );
-    }
+   template< typename T >
+   inline constexpr const T *get_ptr( const Matrix3Impl< T > &m ) noexcept
+   {
+      return static_cast< const T * >( &m.c0.x );
+   }
 
-    template< typename T >
-    inline constexpr T *get_ptr( Matrix3Impl< T > &m ) noexcept
-    {
-        return static_cast< T * >( &m.c0.x );
-    }
+   template< typename T >
+   inline constexpr T *get_ptr( Matrix3Impl< T > &m ) noexcept
+   {
+      return static_cast< T * >( &m.c0.x );
+   }
 
-    template< typename T >
-    inline constexpr const T *get_ptr( const Matrix4Impl< T > &m ) noexcept
-    {
-        return static_cast< const T * >( &m.c0.x );
-    }
+   template< typename T >
+   inline constexpr const T *get_ptr( const Matrix4Impl< T > &m ) noexcept
+   {
+      return static_cast< const T * >( &m[ 0 ].x );
+   }
 
-    template< typename T >
-    inline constexpr T *get_ptr( Matrix4Impl< T > &m ) noexcept
-    {
-        return static_cast< T * >( &m.c0.x );
-    }
+   template< typename T >
+   inline constexpr T *get_ptr( Matrix4Impl< T > &m ) noexcept
+   {
+      return static_cast< T * >( &m[ 0 ].x );
+   }
 
-    template< typename T >
-    inline constexpr const T *get_ptr( const ColorRGBImpl< T > &c )
-    {
-        return static_cast< const T * >( &c.r );
-    }
+   template< typename T >
+   inline constexpr const T *get_ptr( const ColorRGBImpl< T > &c )
+   {
+      return static_cast< const T * >( &c.r );
+   }
 
-    template< typename T >
-    inline constexpr T *get_ptr( ColorRGBImpl< T > &c )
-    {
-        return static_cast< T * >( &c.r );
-    }
+   template< typename T >
+   inline constexpr T *get_ptr( ColorRGBImpl< T > &c )
+   {
+      return static_cast< T * >( &c.r );
+   }
 
-    template< typename T >
-    inline constexpr const T *get_ptr( const ColorRGBAImpl< T > &c )
-    {
-        return static_cast< const T * >( &c.r );
-    }
+   template< typename T >
+   inline constexpr const T *get_ptr( const ColorRGBAImpl< T > &c )
+   {
+      return static_cast< const T * >( &c.r );
+   }
 
-    template< typename T >
-    inline constexpr T *get_ptr( ColorRGBAImpl< T > &c )
-    {
-        return static_cast< T * >( &c.r );
-    }
+   template< typename T >
+   inline constexpr T *get_ptr( ColorRGBAImpl< T > &c )
+   {
+      return static_cast< T * >( &c.r );
+   }
 
 }
 

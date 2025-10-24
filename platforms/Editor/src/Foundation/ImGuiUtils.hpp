@@ -49,40 +49,71 @@
 
 namespace crimild {
 
-    namespace vulkan {
+   namespace vulkan {
 
-        class ImageView;
-        class Sampler;
+      class ImageView;
+      class Sampler;
 
-    }
+   }
 
-    /**
-     * Retains ownership of bound resources so they don't get deleted before time.
-     */
-    class ImGuiVulkanTexture
-        : public SharedObject,
-          public Named {
-    public:
-        ImGuiVulkanTexture(
-            std::string name,
-            std::shared_ptr< vulkan::ImageView > const &imageView
-        ) noexcept;
+   /**
+    * Retains ownership of bound resources so they don't get deleted before time.
+    */
+   class ImGuiVulkanTexture
+      : public SharedObject,
+        public Named {
+   public:
+      ImGuiVulkanTexture(
+         std::string name,
+         std::shared_ptr< vulkan::ImageView > const &imageView
+      ) noexcept;
 
-        ImGuiVulkanTexture(
-            std::string name,
-            std::shared_ptr< vulkan::ImageView > const &imageView,
-            std::shared_ptr< vulkan::Sampler > const &sampelr
-        ) noexcept;
+      ImGuiVulkanTexture(
+         std::string name,
+         std::shared_ptr< vulkan::ImageView > const &imageView,
+         std::shared_ptr< vulkan::Sampler > const &sampelr
+      ) noexcept;
 
-        ~ImGuiVulkanTexture( void ) = default;
+      ~ImGuiVulkanTexture( void ) = default;
 
-        inline VkDescriptorSet getDescriptorSet( void ) const noexcept { return m_descriptorSet; }
+      inline VkDescriptorSet getDescriptorSet( void ) const noexcept { return m_descriptorSet; }
 
-    private:
-        std::shared_ptr< vulkan::ImageView > m_imageView;
-        std::shared_ptr< vulkan::Sampler > m_sampler;
-        VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
-    };
+   private:
+      std::shared_ptr< vulkan::ImageView > m_imageView;
+      std::shared_ptr< vulkan::Sampler > m_sampler;
+      VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
+   };
+
+   inline ImRect ImGui_GetItemRect( void ) noexcept
+   {
+      return ImRect( ImGui::GetItemRectMin(), ImGui::GetItemRectMax() );
+   }
+
+   inline ImRect ImRect_Expanded( const ImRect &rect, float x, float y ) noexcept
+   {
+      auto result = rect;
+      result.Min.x -= x;
+      result.Min.y -= y;
+      result.Max.x += x;
+      result.Max.y += y;
+      return result;
+   }
+
+   inline int getTextureWidth( ImTextureID texture ) noexcept
+   {
+      if ( texture == nullptr ) {
+         return 0;
+      }
+      return 1; // TODO
+   }
+
+   inline int getTextureHeight( ImTextureID texture ) noexcept
+   {
+      if ( texture == nullptr ) {
+         return 0;
+      }
+      return 1; // TODO
+   }
 
 }
 

@@ -44,189 +44,189 @@ MemoryEncoder::~MemoryEncoder( void )
 
 crimild::Bool MemoryEncoder::encode( SharedPointer< Codable > const &obj )
 {
-    if ( obj == nullptr ) {
-        return false;
-    }
+   if ( obj == nullptr ) {
+      return false;
+   }
 
-    if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
-        CRIMILD_LOG_WARNING( "Ignoring object with unkown type: ", obj->getClassName() );
-        return false;
-    }
+   if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
+      CRIMILD_LOG_WARNING( "Ignoring object with unkown type: ", obj->getClassName() );
+      return false;
+   }
 
-    if ( _sortedObjects.contains( obj ) ) {
-        // object already register, remove it so it will be reinserted
-        // again with a higher priority
-        _sortedObjects.remove( obj );
-        _sortedObjects.push( obj );
-        return true;
-    }
+   if ( _sortedObjects.contains( obj ) ) {
+      // object already register, remove it so it will be reinserted
+      // again with a higher priority
+      _sortedObjects.remove( obj );
+      _sortedObjects.push( obj );
+      return true;
+   }
 
-    _sortedObjects.push( obj );
+   _sortedObjects.push( obj );
 
-    if ( _parent == nullptr ) {
-        _roots.add( obj );
-    }
+   if ( _parent == nullptr ) {
+      _roots.add( obj );
+   }
 
-    auto temp = _parent;
-    _parent = obj;
+   auto temp = _parent;
+   _parent = obj;
 
-    obj->encode( *this );
+   obj->encode( *this );
 
-    _parent = temp;
+   _parent = temp;
 
-    return true;
+   return true;
 }
 
 crimild::Bool MemoryEncoder::encode( std::string key, SharedPointer< Codable > const &obj )
 {
-    if ( obj == nullptr ) {
-        return false;
-    }
+   if ( obj == nullptr ) {
+      return false;
+   }
 
-    if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
-        CRIMILD_LOG_WARNING( "Ignoring object with unkown type: ", obj->getClassName(), " (", key, ")" );
-        return false;
-    }
+   if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
+      CRIMILD_LOG_WARNING( "Ignoring object with unkown type: ", obj->getClassName(), " (", key, ")" );
+      return false;
+   }
 
-    auto parentID = _parent->getUniqueID();
+   auto parentID = _parent->getUniqueID();
 
-    _links[ parentID ][ key ] = obj->getUniqueID();
+   _links[ parentID ][ key ] = obj->getUniqueID();
 
-    return encode( obj );
+   return encode( obj );
 }
 
 crimild::Bool MemoryEncoder::encode( std::string key, std::string value )
 {
-    crimild::Size L = value.length();
-    encode( key + "_length", L );
+   crimild::Size L = value.length();
+   encode( key + "_length", L );
 
-    return encodeData( key, value );
+   return encodeData( key, value );
 }
 
 void MemoryEncoder::encodeArrayBegin( std::string key, crimild::Size count )
 {
-    encode( key + "_size", count );
+   encode( key + "_size", count );
 }
 
 std::string MemoryEncoder::beginEncodingArrayElement( std::string key, crimild::Size index )
 {
-    std::stringstream ss;
-    ss << key << "_" << index;
-    return ss.str();
+   std::stringstream ss;
+   ss << key << "_" << index;
+   return ss.str();
 }
 
 void MemoryEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
 {
-    // no-op
+   // no-op
 }
 
 void MemoryEncoder::encodeArrayEnd( std::string key )
 {
-    // no-op
+   // no-op
 }
 
 ByteArray MemoryEncoder::getBytes( void ) const
 {
-    ByteArray result;
+   ByteArray result;
 
-    // TODO: reserve memory space beforehand in order to
-    // avoid resizing the resulting array
-    // result.reserve( XXX );
+   // TODO: reserve memory space beforehand in order to
+   // avoid resizing the resulting array
+   // result.reserve( XXX );
 
-    append( result, Tags::TAG_DATA_START );
+   append( result, Tags::TAG_DATA_START );
 
-    append( result, Tags::TAG_DATA_VERSION );
-    append( result, getVersion().getDescription() );
+   append( result, Tags::TAG_DATA_VERSION );
+   append( result, getVersion().getDescription() );
 
-    auto temp = _sortedObjects;
-    while ( !temp.empty() ) {
-        auto obj = temp.pop();
-        if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
-            // Ignore objects with unknown types
-            continue;
-        }
-        append( result, Tags::TAG_OBJECT_BEGIN );
-        append( result, obj->getUniqueID() );
-        append( result, obj->getClassName() );
-        if ( auto data = crimild::dynamic_cast_ptr< EncodedData >( obj ) ) {
-            append( result, data->getBytes() );
-        }
-        append( result, Tags::TAG_OBJECT_END );
-    }
+   auto temp = _sortedObjects;
+   while ( !temp.empty() ) {
+      auto obj = temp.pop();
+      if ( !ObjectFactory::getInstance()->hasBuilder( obj->getClassName() ) ) {
+         // Ignore objects with unknown types
+         continue;
+      }
+      append( result, Tags::TAG_OBJECT_BEGIN );
+      append( result, obj->getUniqueID() );
+      append( result, obj->getClassName() );
+      if ( auto data = crimild::dynamic_cast_ptr< EncodedData >( obj ) ) {
+         append( result, data->getBytes() );
+      }
+      append( result, Tags::TAG_OBJECT_END );
+   }
 
-    _links.each( [ &result ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
-        ls.each( [ &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
-            append( result, Tags::TAG_LINK_BEGIN );
-            append( result, key );
-            append( result, name );
-            append( result, value );
-            append( result, Tags::TAG_LINK_END );
-        } );
-    } );
+   _links.each( [ &result ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
+      ls.each( [ &result, key ]( const std::string &name, const Codable::UniqueID &value ) {
+         append( result, Tags::TAG_LINK_BEGIN );
+         append( result, key );
+         append( result, name );
+         append( result, value );
+         append( result, Tags::TAG_LINK_END );
+      } );
+   } );
 
-    _roots.each( [ &result ]( const SharedPointer< Codable > &obj ) {
-        append( result, Tags::TAG_ROOT_OBJECT_BEGIN );
-        append( result, obj->getUniqueID() );
-        append( result, Tags::TAG_ROOT_OBJECT_END );
-    } );
+   _roots.each( [ &result ]( const SharedPointer< Codable > &obj ) {
+      append( result, Tags::TAG_ROOT_OBJECT_BEGIN );
+      append( result, obj->getUniqueID() );
+      append( result, Tags::TAG_ROOT_OBJECT_END );
+   } );
 
-    append( result, Tags::TAG_DATA_END );
+   append( result, Tags::TAG_DATA_END );
 
-    return result;
+   return result;
 }
 
 void MemoryEncoder::append( ByteArray &out, crimild::Int8 value )
 {
-    appendRawBytes( out, sizeof( crimild::Int8 ), &value );
+   appendRawBytes( out, sizeof( crimild::Int8 ), &value );
 }
 
 void MemoryEncoder::append( ByteArray &out, std::string value )
 {
-    ByteArray bytes( value.length() + 1 );
-    memcpy( &bytes.getData()[ 0 ], value.c_str(), sizeof( crimild::Char ) * value.length() );
-    bytes[ value.length() ] = '\0';
-    append( out, bytes );
+   ByteArray bytes( value.length() + 1 );
+   memcpy( &bytes.getData()[ 0 ], value.c_str(), sizeof( crimild::Char ) * value.length() );
+   bytes[ value.length() ] = '\0';
+   append( out, bytes );
 }
 
 void MemoryEncoder::append( ByteArray &out, Codable::UniqueID value )
 {
-    appendRawBytes( out, sizeof( Codable::UniqueID ), &value );
+   appendRawBytes( out, sizeof( Codable::UniqueID ), &value );
 }
 
 void MemoryEncoder::append( ByteArray &out, const ByteArray &data )
 {
-    crimild::Size count = data.size();
-    appendRawBytes( out, sizeof( crimild::Size ), &count );
-    appendRawBytes( out, data.size(), data.getData() );
+   crimild::Size count = data.size();
+   appendRawBytes( out, sizeof( crimild::Size ), &count );
+   appendRawBytes( out, data.size(), data.getData() );
 }
 
 void MemoryEncoder::appendRawBytes( ByteArray &out, crimild::Size count, const void *data )
 {
-    for ( crimild::Size i = 0; i < count; i++ ) {
-        out.add( static_cast< const crimild::Byte * >( data )[ i ] );
-    }
+   for ( crimild::Size i = 0; i < count; i++ ) {
+      out.add( static_cast< const crimild::Byte * >( data )[ i ] );
+   }
 }
 
 std::string MemoryEncoder::dump( void )
 {
-    std::stringstream ss;
+   std::stringstream ss;
 
-    ss << "Sorted Objects:\n";
-    _sortedObjects.each( [ &ss ]( SharedPointer< Codable > &codable ) {
-        ss << "\t" << codable->getUniqueID() << " " << codable->getClassName() << "\n";
-    } );
+   ss << "Sorted Objects:\n";
+   _sortedObjects.each( [ &ss ]( SharedPointer< Codable > &codable ) {
+      ss << "\t" << codable->getUniqueID() << " " << codable->getClassName() << "\n";
+   } );
 
-    ss << "Links:\n";
-    _links.each( [ &ss ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
-        ls.each( [ &ss, key ]( const std::string &name, const Codable::UniqueID &value ) {
-            ss << "\t" << key << " " << name << " " << value << "\n";
-        } );
-    } );
+   ss << "Links:\n";
+   _links.each( [ &ss ]( const Codable::UniqueID &key, const Map< std::string, Codable::UniqueID > &ls ) {
+      ls.each( [ &ss, key ]( const std::string &name, const Codable::UniqueID &value ) {
+         ss << "\t" << key << " " << name << " " << value << "\n";
+      } );
+   } );
 
-    ss << "Roots:\n";
-    _roots.each( [ &ss ]( const SharedPointer< Codable > &obj ) {
-        ss << "\t" << obj->getUniqueID() << "\n";
-    } );
+   ss << "Roots:\n";
+   _roots.each( [ &ss ]( const SharedPointer< Codable > &obj ) {
+      ss << "\t" << obj->getUniqueID() << "\n";
+   } );
 
-    return ss.str();
+   return ss.str();
 }

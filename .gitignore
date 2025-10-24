@@ -54,7 +54,6 @@ third-party/vulkansdk
 resourceEncoder
 imgui.ini
 build*
-.vscode
 
 *.crimild
 *.crimild.json

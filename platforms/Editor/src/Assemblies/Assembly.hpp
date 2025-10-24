@@ -1,0 +1,44 @@
+#ifndef CRIMILD_EDITOR_ASSEMBLIES_ASSEMBLY_
+#define CRIMILD_EDITOR_ASSEMBLIES_ASSEMBLY_
+
+#include <Crimild.hpp>
+
+namespace crimild::editor {
+
+   /**
+    * @brief
+    *
+    * @todo (hernan) I need to move `Assembly` to `Crimild::Core` (or to its own package).
+    * Right now it's part of the Editor, which prevents it from being loaded correctly
+    * when I implement players in future iterations.
+    */
+   class Assembly
+      : public Entity,
+        public Named {
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::Assembly )
+   public:
+      Assembly( void ) noexcept = default;
+      explicit Assembly( std::string_view name ) noexcept;
+      virtual ~Assembly( void ) noexcept = default;
+
+      void addEntity( std::shared_ptr< Entity > const &entity );
+      void removeEntity( std::shared_ptr< Entity > const &entity );
+      inline const std::vector< std::shared_ptr< Entity > > &getEntities( void ) const { return m_entities; }
+
+   private:
+      std::vector< std::shared_ptr< Entity > > m_entities;
+
+      /**
+       * @name Coding
+       */
+      //@{
+
+   public:
+      virtual void encode( coding::Encoder &encoder ) noexcept override;
+      virtual void decode( coding::Decoder &decoder ) noexcept override;
+
+      //@}
+   };
+}
+
+#endif

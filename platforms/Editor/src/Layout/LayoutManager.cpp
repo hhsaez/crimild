@@ -29,6 +29,7 @@
 
 #include "Foundation/ImGuiUtils.hpp"
 #include "Layout/Layout.hpp"
+#include "Simulation/Project.hpp"
 #include "Views/Menus/MainMenu/MainMenu.hpp"
 #include "Views/Windows/FileSystemWindow.hpp"
 #include "Views/Windows/InspectorWindow.hpp"
@@ -36,6 +37,7 @@
 #include "Views/Windows/Scene3DWindow.hpp"
 #include "Views/Windows/SceneWindow.hpp"
 #include "Views/Windows/SimulationWindow.hpp"
+#include "Views/Workspaces/WorkspaceManager.hpp"
 
 #include <Crimild_Coding.hpp>
 #include <filesystem>
@@ -105,36 +107,61 @@ DockSpace         ID=0x8B93E3BD Window=0xA787BDB4 Pos=1192,321 Size=1024,768 Spl
 
 LayoutManager::LayoutManager( void ) noexcept
 {
-    const auto currentPath = std::filesystem::current_path();
-    const auto layoutFilePath = currentPath / "layout.crimild";
-
-    if ( std::filesystem::exists( layoutFilePath ) ) {
-        coding::FileDecoder decoder;
-        if ( decoder.read( layoutFilePath ) && decoder.getObjectCount() > 0 ) {
-            m_layout = decoder.getObjectAt< Layout >( 0 );
-        }
-    }
-
-    if ( m_layout == nullptr ) {
-        m_layout = std::make_unique< Layout >( "Default", DEFAULT_LAYOUT );
-        m_layout->addView( std::make_shared< MainMenu >() );
-        m_layout->addView( std::make_shared< FileSystemWindow >() );
-        m_layout->addView( std::make_shared< InspectorWindow >() );
-        m_layout->addView( std::make_shared< LogWindow >() );
-        m_layout->addView( std::make_shared< Scene3DWindow >() );
-        m_layout->addView( std::make_shared< SceneWindow >() );
-        m_layout->addView( std::make_shared< SimulationWindow >() );
-    }
+   reload();
 }
 
 LayoutManager::~LayoutManager( void ) noexcept
 {
-    const auto currentPath = std::filesystem::current_path();
-    const auto layoutFilePath = currentPath / "layout.crimild";
+   if ( auto project = Project::getInstance() ) {
+      auto root = project->getRootDirectory();
+      auto layoutPath = root / "layout.crimild";
+      if ( m_layout != nullptr ) {
+         coding::FileEncoder encoder;
+         encoder.encode( m_layout );
+         encoder.write( layoutPath );
+      }
+   }
+}
 
-    if ( m_layout != nullptr ) {
-        coding::FileEncoder encoder;
-        encoder.encode( m_layout );
-        encoder.write( layoutFilePath );
-    }
+void LayoutManager::init( void )
+{
+   if ( m_layout != nullptr ) {
+      m_layout->makeCurrent();
+   }
+}
+
+void LayoutManager::reload( void )
+{
+   // Required. Prevents dynamic singletons to be created twice (i.e. WorkspaceManager)
+   m_layout = nullptr;
+
+   if ( auto project = Project::getInstance() ) {
+      auto root = project->getRootDirectory();
+      auto layoutPath = root / "layout.crimild";
+      if ( std::filesystem::exists( layoutPath ) ) {
+         coding::FileDecoder decoder;
+         if ( decoder.read( layoutPath ) && decoder.getObjectCount() > 0 ) {
+            m_layout = decoder.getObjectAt< Layout >( 0 );
+         }
+      }
+   }
+
+   if ( m_layout == nullptr ) {
+      m_layout = std::make_unique< Layout >( "Default", DEFAULT_LAYOUT );
+      m_layout->addView( crimild::alloc< MainMenu >() );
+      m_layout->addView( crimild::alloc< WorkspaceManager >() );
+      //  m_layout->addView( std::make_shared< FileSystemWindow >() );
+      //  m_layout->addView( std::make_shared< InspectorWindow >() );
+      //  m_layout->addView( std::make_shared< LogWindow >() );
+      //  m_layout->addView( std::make_shared< Scene3DWindow >() );
+      //  m_layout->addView( std::make_shared< SceneWindow >() );
+      //  m_layout->addView( std::make_shared< SimulationWindow >() );
+   }
+}
+
+void LayoutManager::render( void )
+{
+   if ( m_layout != nullptr ) {
+      m_layout->draw();
+   }
 }

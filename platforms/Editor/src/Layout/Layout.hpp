@@ -38,44 +38,51 @@
 
 namespace crimild::editor {
 
-    class View;
+   class View;
 
-    class Layout
-        : public Named,
-          public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::Layout )
+   class Layout
+      : public Named,
+        public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::Layout )
 
-    public:
-        Layout( void ) = default;
-        Layout( std::string_view name, std::string_view imGuiLayout ) noexcept;
-        ~Layout( void ) = default;
+   public:
+      /**
+       * @brief Default constructor
+       *
+       * This is required for coding to work
+       */
+      Layout( void ) = default;
 
-        inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
+      Layout( std::string_view name, std::string_view imGuiLayout ) noexcept;
 
-        bool hasViewWithTitle( std::string_view title ) const noexcept;
-        void addView( std::shared_ptr< View > const &view ) noexcept;
+      virtual ~Layout( void ) = default;
 
-        void makeCurrent( void ) noexcept;
+      inline const Extent2D &getExtent( void ) const noexcept { return m_extent; }
 
-        void draw( void ) noexcept;
+      bool hasViewWithTitle( std::string_view title ) const noexcept;
+      void addView( std::shared_ptr< View > const &view ) noexcept;
 
-    private:
-        std::vector< std::shared_ptr< View > > m_views;
+      void makeCurrent( void ) noexcept;
 
-        Extent2D m_extent = { .width = 1024.0f, .height = 768.0f };
+      void draw( void ) noexcept;
 
-        /**
-         * @brief Keeps track of the ImGui context, usually saved in imgui.ini
-         *
-         * Loading/saving ImGui Context is now done manually, instead of relying
-         * on ImGui's own methods.
-         */
-        std::string m_imGuiLayout;
+   private:
+      std::vector< std::shared_ptr< View > > m_views;
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) noexcept override;
-        virtual void decode( coding::Decoder &decoder ) noexcept override;
-    };
+      Extent2D m_extent = { .width = 1024.0f, .height = 768.0f };
+
+      /**
+       * @brief Keeps track of the ImGui context, usually saved in imgui.ini
+       *
+       * Loading/saving ImGui Context is now done manually, instead of relying
+       * on ImGui's own methods.
+       */
+      std::string m_imGuiLayout;
+
+   public:
+      virtual void encode( coding::Encoder &encoder ) noexcept override;
+      virtual void decode( coding::Decoder &decoder ) noexcept override;
+   };
 
 }
 

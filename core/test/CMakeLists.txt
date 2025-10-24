@@ -16,6 +16,7 @@ target_sources(
     Boundings/AABBBoundingVolumeTest.cpp
     Components/MaterialComponentTest.cpp
     Components/MotionStateComponentTest.cpp
+    Entity/Entity.test.cpp
     Messaging/MessageQueueTest.cpp
     Primitives/PrimitiveTest.cpp
     Primitives/QuadPrimitiveTest.cpp

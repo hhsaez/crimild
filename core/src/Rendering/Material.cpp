@@ -32,48 +32,48 @@
 using namespace crimild;
 
 Material::Material( void ) noexcept
-    : _ambient { 0.0f, 0.0f, 0.0f, 1.0f },
-      _diffuse { 1.0f, 1.0f, 1.0f, 1.0f },
-      _specular { 1.0f, 1.0f, 1.0f, 1.0f },
-      _shininess( 50.0f ),
-      _emissive( 0.0f ),
-      //_depthState( crimild::alloc< DepthState >( true ) ),
-      //_alphaState( crimild::alloc< AlphaState >( false ) ),
-      //_cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) ),
-      _colorMaskState( crimild::alloc< ColorMaskState >( true, true, true, true, true ) )
+   : _ambient { 0.0f, 0.0f, 0.0f, 1.0f },
+     _diffuse { 1.0f, 1.0f, 1.0f, 1.0f },
+     _specular { 1.0f, 1.0f, 1.0f, 1.0f },
+     _shininess( 50.0f ),
+     _emissive( 0.0f ),
+     //_depthState( crimild::alloc< DepthState >( true ) ),
+     //_alphaState( crimild::alloc< AlphaState >( false ) ),
+     //_cullFaceState( crimild::alloc< CullFaceState >( true, CullFaceState::CullFaceMode::BACK ) ),
+     _colorMaskState( crimild::alloc< ColorMaskState >( true, true, true, true, true ) )
 {
 }
 
 void Material::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Entity::encode( encoder );
 
-    encoder.encode( "program", _program );
+   encoder.encode( "program", _program );
 
-    // encoder.encode( "ambient", _ambient );
-    // encoder.encode( "diffuse", _diffuse );
-    // encoder.encode( "specular", _specular );
-    // encoder.encode( "emissive", _emissive );
-    // encoder.encode( "shininess", _shininess );
-    // encoder.encode( "colorMap", _colorMap );
-    // encoder.encode( "normalMap", _normalMap );
-    // encoder.encode( "specularMap", _specularMap );
-    // encoder.encode( "emissiveMap", _emissiveMap );
+   // encoder.encode( "ambient", _ambient );
+   // encoder.encode( "diffuse", _diffuse );
+   // encoder.encode( "specular", _specular );
+   // encoder.encode( "emissive", _emissive );
+   // encoder.encode( "shininess", _shininess );
+   // encoder.encode( "colorMap", _colorMap );
+   // encoder.encode( "normalMap", _normalMap );
+   // encoder.encode( "specularMap", _specularMap );
+   // encoder.encode( "emissiveMap", _emissiveMap );
 }
 
 void Material::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Entity::decode( decoder );
 
-    decoder.decode( "program", _program );
+   decoder.decode( "program", _program );
 
-    // decoder.decode( "ambient", _ambient );
-    // decoder.decode( "diffuse", _diffuse );
-    // decoder.decode( "specular", _specular );
-    // decoder.decode( "emissive", _emissive );
-    // decoder.decode( "shininess", _shininess );
-    // decoder.decode( "colorMap", _colorMap );
-    // decoder.decode( "normalMap", _normalMap );
-    // decoder.decode( "specularMap", _specularMap );
-    // decoder.decode( "emissiveMap", _emissiveMap );
+   // decoder.decode( "ambient", _ambient );
+   // decoder.decode( "diffuse", _diffuse );
+   // decoder.decode( "specular", _specular );
+   // decoder.decode( "emissive", _emissive );
+   // decoder.decode( "shininess", _shininess );
+   // decoder.decode( "colorMap", _colorMap );
+   // decoder.decode( "normalMap", _normalMap );
+   // decoder.decode( "specularMap", _specularMap );
+   // decoder.decode( "emissiveMap", _emissiveMap );
 }

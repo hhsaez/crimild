@@ -29,6 +29,7 @@
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
 #include "Crimild_Coding.hpp"
+#include "Entity/Entity.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/IndexBuffer.hpp"
 #include "Rendering/VertexBuffer.hpp"
@@ -37,63 +38,63 @@
 
 namespace crimild {
 
-    class Primitive
-        : public coding::Codable,
-          public Catalog< Primitive >::Resource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
+   class Primitive
+      : public Entity,
+        public Catalog< Primitive >::Resource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Primitive )
 
-    private:
-        using VertexData = Array< SharedPointer< VertexBuffer > >;
-        using IndexData = SharedPointer< IndexBuffer >;
+   private:
+      using VertexData = Array< SharedPointer< VertexBuffer > >;
+      using IndexData = SharedPointer< IndexBuffer >;
 
-    public:
-        enum class Type : uint8_t {
-            POINTS,
-            LINES,
-            LINE_LOOP,
-            LINE_STRIP,
-            TRIANGLES,
-            TRIANGLE_STRIP,
-            TRIANGLE_FAN,
+   public:
+      enum class Type : uint8_t {
+         POINTS,
+         LINES,
+         LINE_LOOP,
+         LINE_STRIP,
+         TRIANGLES,
+         TRIANGLE_STRIP,
+         TRIANGLE_FAN,
 
-            SPHERE,
-            PLANE,
-            BOX,
-            CYLINDER,
-            OPEN_CYLINDER,
-        };
+         SPHERE,
+         PLANE,
+         BOX,
+         CYLINDER,
+         OPEN_CYLINDER,
+      };
 
-    public:
-        explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
-        virtual ~Primitive( void ) = default;
+   public:
+      explicit Primitive( Primitive::Type type = Primitive::Type::TRIANGLES );
+      virtual ~Primitive( void ) = default;
 
-        Primitive::Type getType( void ) const { return _type; }
+      Primitive::Type getType( void ) const { return _type; }
 
-        inline void setVertexData( VertexData const vertexData ) noexcept { m_vertexData = vertexData; }
-        inline VertexData &getVertexData( void ) noexcept { return m_vertexData; }
-        inline const VertexData &getVertexData( void ) const noexcept { return m_vertexData; }
+      inline void setVertexData( VertexData const vertexData ) noexcept { m_vertexData = vertexData; }
+      inline VertexData &getVertexData( void ) noexcept { return m_vertexData; }
+      inline const VertexData &getVertexData( void ) const noexcept { return m_vertexData; }
 
-        inline void setIndices( SharedPointer< IndexBuffer > const &indices ) noexcept { m_indices = indices; }
-        inline IndexBuffer *getIndices( void ) noexcept { return get_ptr( m_indices ); }
-        inline const IndexBuffer *getIndices( void ) const noexcept { return get_ptr( m_indices ); }
+      inline void setIndices( SharedPointer< IndexBuffer > const &indices ) noexcept { m_indices = indices; }
+      inline IndexBuffer *getIndices( void ) noexcept { return get_ptr( m_indices ); }
+      inline const IndexBuffer *getIndices( void ) const noexcept { return get_ptr( m_indices ); }
 
-    private:
-        Primitive::Type _type;
-        VertexData m_vertexData;
-        IndexData m_indices;
+   private:
+      Primitive::Type _type;
+      VertexData m_vertexData;
+      IndexData m_indices;
 
-        /**
-         */
-        //@{
+      /**
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    using PrimitivePtr = SharedPointer< Primitive >;
+   using PrimitivePtr = SharedPointer< Primitive >;
 
 }
 

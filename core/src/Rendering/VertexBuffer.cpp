@@ -32,81 +32,81 @@
 using namespace crimild;
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, crimild::Size count ) noexcept
-    : VertexBuffer(
-          vertexLayout,
-          [ & ] {
-              return crimild::alloc< BufferView >(
-                  BufferView::Target::VERTEX,
-                  crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
-                  0,
-                  vertexLayout.getSize()
-              );
-          }()
-      )
+   : VertexBuffer(
+        vertexLayout,
+        [ & ] {
+           return crimild::alloc< BufferView >(
+              BufferView::Target::VERTEX,
+              crimild::alloc< Buffer >( Array< crimild::Byte >( count * vertexLayout.getSize() ) ),
+              0,
+              vertexLayout.getSize()
+           );
+        }()
+     )
 {
-    // no-op
+   // no-op
 }
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, SharedPointer< BufferView > const &bufferView ) noexcept
-    : m_vertexLayout( vertexLayout ),
-      m_bufferView( bufferView )
+   : m_vertexLayout( vertexLayout ),
+     m_bufferView( bufferView )
 {
-    assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
+   assert( bufferView->getTarget() == BufferView::Target::VERTEX && "Invalid buffer view" );
 
-    vertexLayout.eachAttribute(
-        [ & ]( const auto &attrib ) {
-            auto accessor = crimild::alloc< BufferAccessor >(
-                bufferView,
-                attrib->getOffset(),
-                utils::getFormatSize( attrib->getFormat() )
-            );
-            m_accessors[ attrib->getName() ] = accessor;
-        }
-    );
+   vertexLayout.eachAttribute(
+      [ & ]( const auto &attrib ) {
+         auto accessor = crimild::alloc< BufferAccessor >(
+            bufferView,
+            attrib->getOffset(),
+            utils::getFormatSize( attrib->getFormat() )
+         );
+         m_accessors[ attrib->getName() ] = accessor;
+      }
+   );
 }
 
 VertexBuffer::VertexBuffer( const VertexLayout &vertexLayout, BufferView *bufferView ) noexcept
-    : VertexBuffer( vertexLayout, crimild::retain( bufferView ) )
+   : VertexBuffer( vertexLayout, crimild::retain( bufferView ) )
 {
-    // no-op
+   // no-op
 }
 
 void VertexBuffer::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Entity::encode( encoder );
 
-    Array< std::shared_ptr< VertexAttribute > > attribs;
-    m_vertexLayout.eachAttribute(
-        [ & ]( auto attr ) {
-            attribs.add( attr );
-        }
-    );
+   Array< std::shared_ptr< VertexAttribute > > attribs;
+   m_vertexLayout.eachAttribute(
+      [ & ]( auto attr ) {
+         attribs.add( attr );
+      }
+   );
 
-    encoder.encode( "vertexLayoutAttribs", attribs );
+   encoder.encode( "vertexLayoutAttribs", attribs );
 
-    encoder.encode( "bufferView", m_bufferView );
-    // encoder.encode( "accessor", m_accessors );
+   encoder.encode( "bufferView", m_bufferView );
+   // encoder.encode( "accessor", m_accessors );
 }
 
 void VertexBuffer::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Entity::decode( decoder );
 
-    Array< std::shared_ptr< VertexAttribute > > attribs;
-    decoder.decode( "vertexLayoutAttribs", attribs );
-    m_vertexLayout = VertexLayout( attribs );
+   Array< std::shared_ptr< VertexAttribute > > attribs;
+   decoder.decode( "vertexLayoutAttribs", attribs );
+   m_vertexLayout = VertexLayout( attribs );
 
-    decoder.decode( "bufferView", m_bufferView );
+   decoder.decode( "bufferView", m_bufferView );
 
-    // Re-creating accessors seems simpler than actually encoding them.
-    m_vertexLayout.eachAttribute(
-        [ & ]( const auto &attrib ) {
-            auto accessor = crimild::alloc< BufferAccessor >(
-                m_bufferView,
-                attrib->getOffset(),
-                utils::getFormatSize( attrib->getFormat() )
-            );
-            m_accessors[ attrib->getName() ] = accessor;
-        }
-    );
+   // Re-creating accessors seems simpler than actually encoding them.
+   m_vertexLayout.eachAttribute(
+      [ & ]( const auto &attrib ) {
+         auto accessor = crimild::alloc< BufferAccessor >(
+            m_bufferView,
+            attrib->getOffset(),
+            utils::getFormatSize( attrib->getFormat() )
+         );
+         m_accessors[ attrib->getName() ] = accessor;
+      }
+   );
 }

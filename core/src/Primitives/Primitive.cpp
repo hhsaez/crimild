@@ -33,85 +33,85 @@ using namespace crimild;
 
 Primitive::Primitive( Primitive::Type type )
 {
-    _type = type;
+   _type = type;
 }
 
 void Primitive::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Entity::encode( encoder );
 
-    int type;
-    switch ( _type ) {
-        case Primitive::Type::POINTS:
-            type = 0;
-            break;
+   int type;
+   switch ( _type ) {
+      case Primitive::Type::POINTS:
+         type = 0;
+         break;
 
-        case Primitive::Type::LINES:
-            type = 1;
-            break;
+      case Primitive::Type::LINES:
+         type = 1;
+         break;
 
-        case Primitive::Type::LINE_LOOP:
-            type = 2;
-            break;
+      case Primitive::Type::LINE_LOOP:
+         type = 2;
+         break;
 
-        case Primitive::Type::LINE_STRIP:
-            type = 3;
-            break;
+      case Primitive::Type::LINE_STRIP:
+         type = 3;
+         break;
 
-        case Primitive::Type::TRIANGLES:
-            type = 4;
-            break;
+      case Primitive::Type::TRIANGLES:
+         type = 4;
+         break;
 
-        case Primitive::Type::TRIANGLE_STRIP:
-            type = 5;
-            break;
+      case Primitive::Type::TRIANGLE_STRIP:
+         type = 5;
+         break;
 
-        case Primitive::Type::TRIANGLE_FAN:
-            type = 6;
-            break;
-    }
+      case Primitive::Type::TRIANGLE_FAN:
+         type = 6;
+         break;
+   }
 
-    encoder.encode( "primitiveType", type );
-    encoder.encode( "vertexData", m_vertexData );
-    encoder.encode( "indices", m_indices );
+   encoder.encode( "primitiveType", type );
+   encoder.encode( "vertexData", m_vertexData );
+   encoder.encode( "indices", m_indices );
 }
 
 void Primitive::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Entity::decode( decoder );
 
-    int type;
-    decoder.decode( "primitiveType", type );
-    switch ( type ) {
-        case 0:
-            _type = Primitive::Type::POINTS;
-            break;
+   int type;
+   decoder.decode( "primitiveType", type );
+   switch ( type ) {
+      case 0:
+         _type = Primitive::Type::POINTS;
+         break;
 
-        case 1:
-            _type = Primitive::Type::LINES;
-            break;
+      case 1:
+         _type = Primitive::Type::LINES;
+         break;
 
-        case 2:
-            _type = Primitive::Type::LINE_LOOP;
-            break;
+      case 2:
+         _type = Primitive::Type::LINE_LOOP;
+         break;
 
-        case 3:
-            _type = Primitive::Type::LINE_STRIP;
-            break;
+      case 3:
+         _type = Primitive::Type::LINE_STRIP;
+         break;
 
-        case 4:
-            _type = Primitive::Type::TRIANGLES;
-            break;
+      case 4:
+         _type = Primitive::Type::TRIANGLES;
+         break;
 
-        case 5:
-            _type = Primitive::Type::TRIANGLE_STRIP;
-            break;
+      case 5:
+         _type = Primitive::Type::TRIANGLE_STRIP;
+         break;
 
-        case 6:
-            _type = Primitive::Type::TRIANGLE_FAN;
-            break;
-    }
+      case 6:
+         _type = Primitive::Type::TRIANGLE_FAN;
+         break;
+   }
 
-    decoder.decode( "vertexData", m_vertexData );
-    decoder.decode( "indices", m_indices );
+   decoder.decode( "vertexData", m_vertexData );
+   decoder.decode( "indices", m_indices );
 }

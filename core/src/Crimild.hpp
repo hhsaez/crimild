@@ -90,6 +90,7 @@
 #include "Boundings/BoundingVolume.hpp"
 #include "Boundings/PlaneBoundingVolume.hpp"
 #include "Boundings/SphereBoundingVolume.hpp"
+#include "Common/Signal.hpp"
 #include "Components/AnimatorComponent.hpp"
 #include "Components/AudioListenerComponent.hpp"
 #include "Components/AudioSourceComponent.hpp"
@@ -115,6 +116,8 @@
 #include "Debug/DebugRenderComponent.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Debug/SceneDebugDump.hpp"
+#include "Entity/Entity.hpp"
+#include "Entity/Extension.hpp"
 #include "Exceptions/Exception.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/HasParentException.hpp"
@@ -252,6 +255,7 @@
 #include "Visitors/ApplyToGeometries.hpp"
 #include "Visitors/ComputeRenderQueue.hpp"
 #include "Visitors/FetchCameras.hpp"
+#include "Visitors/FetchGeometries.hpp"
 #include "Visitors/FetchLights.hpp"
 #include "Visitors/NodeVisitor.hpp"
 #include "Visitors/Picking.hpp"
@@ -264,7 +268,7 @@
 
 namespace crimild {
 
-    void init( void );
+   void init( void );
 
 }
 

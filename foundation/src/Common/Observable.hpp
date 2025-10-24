@@ -32,77 +32,77 @@
 
 namespace crimild {
 
-    /**
-     * \brief Implement Oberservable pattern
-     *
-     * \todo Add unit tests
-     */
-    template< typename ObservableType >
-    class Observable {
-    public:
-        class Observer {
-        public:
-            virtual ~Observer( void )
-            {
-                // Clone m_observables collection before traversing, since it could be
-                // modified if a call to ignore is made.
-                auto os = m_observables;
-                for ( auto o : os ) {
-                    ignore( o );
-                }
-                m_observables.clear();
-            }
-
-            virtual void observe( const ObservableType *observable ) noexcept
-            {
-                if ( observable != nullptr ) {
-                    observable->registerObserver( this );
-                    m_observables.insert( observable );
-                }
-            }
-
-            virtual void ignore( const ObservableType *observable ) noexcept
-            {
-                if ( observable != nullptr ) {
-                    observable->unregisterObserver( this );
-                    m_observables.erase( observable );
-                }
-            }
-
-            virtual void onUpdate( const ObservableType * ) noexcept { }
-            virtual void onDestroy( const ObservableType * ) noexcept { }
-
-        private:
-            std::unordered_set< const ObservableType * > m_observables;
-        };
-
-    public:
-        virtual ~Observable( void ) noexcept
-        {
-            // Clone m_observers collection before traversing, since it could be
-            // modified if a call to unregisterObserver is made.
-            auto os = m_observers;
+   /**
+    * \brief Implement Oberservable pattern
+    *
+    * \todo Add unit tests
+    */
+   template< typename ObservableType >
+   class [[deprecated]] Observable {
+   public:
+      class Observer {
+      public:
+         virtual ~Observer( void )
+         {
+            // Clone m_observables collection before traversing, since it could be
+            // modified if a call to ignore is made.
+            auto os = m_observables;
             for ( auto o : os ) {
-                if ( o != nullptr ) {
-                    o->onDestroy( static_cast< const ObservableType * >( this ) );
-                }
+               ignore( o );
             }
-            m_observers.clear();
-        }
+            m_observables.clear();
+         }
 
-        void registerObserver( Observer *observer ) const noexcept
-        {
-            m_observers.insert( observer );
-        }
+         virtual void observe( const ObservableType *observable ) noexcept
+         {
+            if ( observable != nullptr ) {
+               observable->registerObserver( this );
+               m_observables.insert( observable );
+            }
+         }
 
-        void unregisterObserver( Observer *observer ) const noexcept
-        {
-            m_observers.erase( observer );
-        }
+         virtual void ignore( const ObservableType *observable ) noexcept
+         {
+            if ( observable != nullptr ) {
+               observable->unregisterObserver( this );
+               m_observables.erase( observable );
+            }
+         }
 
-    private:
-        mutable std::unordered_set< Observer * > m_observers;
-    };
+         virtual void onUpdate( const ObservableType * ) noexcept { }
+         virtual void onDestroy( const ObservableType * ) noexcept { }
+
+      private:
+         std::unordered_set< const ObservableType * > m_observables;
+      };
+
+   public:
+      virtual ~Observable( void ) noexcept
+      {
+         // Clone m_observers collection before traversing, since it could be
+         // modified if a call to unregisterObserver is made.
+         auto os = m_observers;
+         for ( auto o : os ) {
+            if ( o != nullptr ) {
+               o->onDestroy( static_cast< const ObservableType * >( this ) );
+            }
+         }
+         m_observers.clear();
+      }
+
+      void registerObserver( Observer *observer ) const noexcept
+      {
+         m_observers.insert( observer );
+      }
+
+      void unregisterObserver( Observer *observer ) const noexcept
+      {
+         m_observers.erase( observer );
+      }
+
+   private:
+      mutable std::unordered_set< Observer * > m_observers;
+   };
 
 }
 

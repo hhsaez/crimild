@@ -1,0 +1,2 @@
+# Default: normalize text files to LF in repo, convert to CRLF on checkout (for Windows)
+* text=auto

@@ -34,55 +34,99 @@
 
 namespace crimild::editor {
 
-    class Layout;
+   class Layout;
 
-    class View
-        : public Named,
-          public coding::Codable {
-    protected:
-        View( std::string_view name ) noexcept;
+   class View
+      : public Named,
+        public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::View )
 
-    public:
-        virtual ~View( void ) noexcept = default;
+   protected:
+      View( void ) noexcept = default;
 
-        inline void setLayout( std::shared_ptr< Layout > const &layout ) noexcept { m_layout = layout; }
-        inline std::shared_ptr< Layout > getLayout( void ) noexcept { return m_layout.lock(); }
+      View( std::string_view name ) noexcept;
 
-        /**
-         * @brief Indicates if a view is opened and needs to be drawn
-         *
-         * If the view is not opened, it will be removed from the layout (and memory)
-         * automatically.
-         */
-        [[nodiscard]] inline bool isOpen( void ) const noexcept { return m_open; }
+   public:
+      virtual ~View( void ) noexcept = default;
 
-        /**
-         * @brief Draws the view
-         *
-         * @remarks This function is intented to be overriden by the different view
-         * types (i.e. Window, Modal, etc.), which are direct subclasses of View. For
-         * rendering the view's content, override the drawContent() function instead.
-         */
-        virtual void draw( void ) noexcept = 0;
+      // TODO: This should be memoized so we don't compute it every time. Maybe
+      // if we save it and then reset it whenever the parent and/or name changes?
+      const std::string getUniqueName( void ) const noexcept
+      {
+         std::stringstream ss;
+         ss << getName() << "##";
+         if ( auto superview = getSuperview() ) {
+            ss << superview->getUniqueName();
+         }
+         ss << "/" << getClassName() << "/" << getName();
+         return ss.str();
+      }
 
-        /**
-         * @brief Draw the actual content for this view
-         */
-        virtual void drawContent( void ) noexcept = 0;
+      [[deprecated]] inline void setLayout( std::shared_ptr< Layout > const &layout ) noexcept { m_layout = layout; }
+      [[deprecated]] inline std::shared_ptr< Layout > getLayout( void ) noexcept { return m_layout.lock(); }
 
-    protected:
-        /**
-         * @brief Get access to the internal view state
-         *
-         * Some views may need to set the open state during rendering (i.e. ImGui::Begin())
-         * and this helper function makes things easier.
-         */
-        [[nodiscard]] inline bool &getOpenState( void ) noexcept { return m_open; }
+      void addSubview( std::shared_ptr< View > const &subview );
 
-    private:
-        std::weak_ptr< Layout > m_layout;
-        bool m_open = true;
-    };
+      inline const std::vector< std::shared_ptr< View > > &getSubviews( void ) const noexcept { return m_subviews; }
+
+      std::shared_ptr< View > getSubview( std::string_view name );
+
+      inline bool hasSuperview( void ) const { return !m_superview.expired(); }
+
+      inline std::shared_ptr< View > getSuperview( void ) { return m_superview.lock(); }
+      inline const std::shared_ptr< View > getSuperview( void ) const { return m_superview.lock(); }
+
+      void removeFromSuperview( void );
+
+      /**
+       * @brief Indicates if a view is opened and needs to be drawn
+       *
+       * If the view is not opened, it will be removed from the layout (and memory)
+       * automatically.
+       */
+      [[nodiscard]] inline bool isOpen( void ) const noexcept { return m_open; }
+
+      /**
+       * @brief Draws the view
+       *
+       * @remarks This function is intented to be overriden by the different view
+       * types (i.e. Window, Modal, etc.), which are direct subclasses of View. For
+       * rendering the view's content, override the drawContent() function instead.
+       */
+      virtual void draw( void ) noexcept = 0;
+
+      /**
+       * @brief Draw the actual content for this view
+       */
+      virtual void drawContent( void ) noexcept { }
+
+   protected:
+      /**
+       * @brief Get access to the internal view state
+       *
+       * Some views may need to set the open state during rendering (i.e. ImGui::Begin())
+       * and this helper function makes things easier.
+       */
+      [[nodiscard]] inline bool &getOpenState( void ) noexcept { return m_open; }
+
+   private:
+      // TODO: Maybe I should replace layout with superview?
+      [[deprectated]] std::weak_ptr< Layout > m_layout;
+
+      bool m_open = true;
+
+      std::weak_ptr< View > m_superview;
+      std::vector< std::shared_ptr< View > > m_subviews;
+
+      Rect m_rect = {
+         .origin = { 0.0f, 0.0f },
+         .size = { 1.0f, 1.0f }
+      };
+
+   public:
+      virtual void encode( coding::Encoder &encoder ) noexcept override;
+      virtual void decode( coding::Decoder &decoder ) noexcept override;
+   };
 
 }
 

@@ -7,6 +7,10 @@ target_sources(
 
     PRIVATE
     CodableTest.cpp
+    MemoryEncoderTest.cpp
+    TextEncoderTest.cpp
+    TextDecoderTest.cpp
+    TextCodingTest.cpp
 
     PRIVATE
     TestRunner.cpp

@@ -97,15 +97,30 @@ static void drawGizmo(
         snap ? static_cast< const float * >( &snapValues.x ) : nullptr
     );
 
+    auto transformFromMatrix = []( const Matrix4 &m ) {
+       Transformation t;
+       t.scale.x = length( m * Vector4( 1, 0, 0, 0 ) );
+       t.scale.y = length( m * Vector4( 0, 1, 0, 0 ) );
+       t.scale.z = length( m * Vector4( 0, 0, 1, 0 ) );
+
+       t.translate.x = m[ 3 ].x;
+       t.translate.y = m[ 3 ].y;
+       t.translate.z = m[ 3 ].z;
+
+       return t;
+    };
+
     if ( selectedNode->hasParent() ) {
         // Node has a parent, so convert world transform into local transform
         const auto newLocal = Matrix4( ( selectedNode->getParent()->getWorld() ) ) * newWorld;
+        selectedNode->setLocal( transformFromMatrix( newLocal ) );
         // selectedNode->setLocal( Transformation { newLocal, inverse( newLocal ) } );
-        assert( false && "FIX ME!" );
+        //assert( false && "FIX ME!" );
     } else {
         // Node has no parent, so local transform is same as world
+        selectedNode->setLocal( transformFromMatrix( newWorld ) );
         // selectedNode->setLocal( Transformation { newWorld, inverse( newWorld ) } );
-        assert( false && "FIX ME!" );
+        //assert( false && "FIX ME!" );
     }
 
     selectedNode->perform( UpdateWorldState() );

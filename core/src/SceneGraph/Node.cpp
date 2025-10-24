@@ -178,7 +178,7 @@ void Node::forEachComponent( std::function< void( NodeComponent * ) > callback )
 
 void Node::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+    Entity::encode( encoder );
 
     encoder.encode( "name", getName() );
     encoder.encode( "transformation", getLocal() );
@@ -198,7 +198,7 @@ void Node::encode( coding::Encoder &encoder )
 
 void Node::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+    Entity::decode( decoder );
 
     std::string name;
     decoder.decode( "name", name );
