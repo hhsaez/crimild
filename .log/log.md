@@ -3,6 +3,10 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2025-10-24
+- Today I merged the `assemblies_experimental` branch to `master`. It was long overdue
+- From now on, I would like to focus on smaller PRs, if possible.
+
 # 2025-10-13
 - Getting back into dev mode after a while. Feels like I need to learn everything again.
 - I decided to keep everything as simple as possible and I'm going to continue using VS Code as my main editor (instead of Emacs). 
