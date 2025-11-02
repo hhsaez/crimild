@@ -65,6 +65,7 @@ namespace crimild {
 
     public:
         std::string getDescription( void ) const;
+        std::string getFullDescription( void  ) const;
 
         void fromString( std::string str );
 

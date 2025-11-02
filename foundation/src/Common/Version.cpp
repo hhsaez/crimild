@@ -78,6 +78,15 @@ std::string Version::getDescription( void ) const
     return str.str();
 }
 
+std::string Version::getFullDescription( void ) const
+{
+    std::stringstream str;
+    str << "Crimild Engine"
+        << " v" << getMajor() << "." << getMinor() << "." << getPatch()
+        << " (c) 2002-present H. Hernán Saez.";
+    return str.str();
+}
+
 void Version::fromString( std::string str )
 {
     _major = 0;
