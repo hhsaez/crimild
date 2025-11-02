@@ -36,11 +36,16 @@ target_sources(
 
 target_include_directories(
    crimild_universal_player
-
    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
    PRIVATE ${Crimild_SOURCE_DIR}/third-party/glfw/include
-   PRIVATE ${Crimild_SOURCE_DIR}/third-party/glad/include
 )
+
+if (WIN32)
+   target_include_directories(
+      crimild_universal_player
+      PRIVATE ${Crimild_SOURCE_DIR}/third-party/glad/include
+   )
+endif()
 
 target_link_libraries(
    crimild_universal_player
@@ -51,5 +56,12 @@ target_link_libraries(
    PRIVATE Crimild::Core
    PRIVATE glfw
 )
+
+if (APPLE)
+   target_link_libraries(
+      crimild_universal_player
+      PRIVATE "-framework OpenGL"
+   )
+endif()
 
 add_library( Crimild::UniversalPlayer ALIAS crimild_universal_player )

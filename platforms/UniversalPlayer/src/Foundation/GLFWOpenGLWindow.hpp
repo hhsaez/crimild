@@ -3,6 +3,7 @@
 
 #include <Crimild.hpp>
 #include <string>
+#include <utility>
 
 struct GLFWwindow;
 
@@ -32,6 +33,8 @@ namespace crimild::universal {
 
       inline uint32_t getWidth( void ) const { return m_width; }
       inline uint32_t getHeight( void ) const { return m_height; }
+
+      std::pair< uint32_t, uint32_t > getFramebufferSize( void ) const;
 
       void resize( uint32_t width, uint32_t height );
 

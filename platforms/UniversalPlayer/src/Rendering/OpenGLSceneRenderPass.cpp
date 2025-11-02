@@ -35,7 +35,7 @@ void SceneRenderPass::operator()(
 
          geometry->forEachPrimitive(
             [ & ]( auto primitive ) {
-               auto bindable = primitive->getOrCreateExtension< opengl::PrimitiveBindable >();
+               auto bindable = primitive->template getOrCreateExtension< opengl::PrimitiveBindable >();
                bindable->bind();
                bindable->render();
                bindable->unbind();

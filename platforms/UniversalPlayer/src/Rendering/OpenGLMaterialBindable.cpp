@@ -48,7 +48,6 @@ void MaterialBindable::load( void )
             Shader::Stage::VERTEX,
             R"(
                #version 330 core
-               #extension GL_ARB_separate_shader_objects : enable
       
                layout ( location = 0 ) in vec3 inPos;
                layout ( location = 1 ) in vec2 inTexCoord;
@@ -57,12 +56,12 @@ void MaterialBindable::load( void )
                uniform mat4 uViewMatrix;
                uniform mat4 uModelMatrix;
       
-               layout ( location = 0 ) out vec2 outTexCoord;
+               out vec2 vTexCoord;
       
                void main()
                {
                   gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4( inPos, 1.0 );
-                  outTexCoord = inTexCoord;
+                  vTexCoord = inTexCoord;
                }
             )"
          ),
@@ -70,9 +69,8 @@ void MaterialBindable::load( void )
             Shader::Stage::FRAGMENT,
             R"(
                #version 330 core
-               #extension GL_ARB_separate_shader_objects : enable
       
-               layout( location = 0 ) in vec2 inTexCoord;
+               in vec2 vTexCoord;
 
                uniform sampler2D uColorMap;
       
@@ -80,7 +78,7 @@ void MaterialBindable::load( void )
       
                void main()
                {
-                  outFragColor = texture( uColorMap, inTexCoord );
+                  outFragColor = texture( uColorMap, vTexCoord );
                   outFragColor.a = 1.0;
                }
             )"

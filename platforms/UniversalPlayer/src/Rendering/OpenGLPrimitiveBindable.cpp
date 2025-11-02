@@ -31,14 +31,14 @@ void PrimitiveBindable::render( void )
 
 void PrimitiveBindable::unbind( void )
 {
-   glBindVertexArray( GL_NONE );
+   glBindVertexArray( 0 );
 }
 
 void PrimitiveBindable::load( void )
 {
    CRIMILD_LOG_TRACE();
 
-   glCreateVertexArrays( 1, &m_vao );
+   glGenVertexArrays( 1, &m_vao );
    glBindVertexArray( m_vao );
 
    auto primitive = getOwner< Primitive >();
@@ -58,7 +58,7 @@ void PrimitiveBindable::unload( void )
    if ( auto primitive = getOwner< Primitive >() ) {
       primitive->getVertexData().each(
          []( auto vertices ) {
-            vertices->detach< VertexBufferBindable >();
+            vertices->template detach< VertexBufferBindable >();
          }
       );
       primitive->getIndices()->detach< IndexBufferBindable >();

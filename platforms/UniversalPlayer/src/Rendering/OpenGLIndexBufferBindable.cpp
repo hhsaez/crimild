@@ -20,7 +20,7 @@ void IndexBufferBindable::bind( void )
 
 void IndexBufferBindable::unbind( void )
 {
-   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, GL_NONE );
+   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
 void IndexBufferBindable::load( void )

@@ -1,6 +1,7 @@
 #include "Foundation/GLFWOpenGLWindow.hpp"
 
 #include "Foundation/OpenGLUtils.hpp"
+#include "GLFW/glfw3.h"
 
 using namespace crimild::universal;
 
@@ -31,12 +32,18 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
       []( GLFWwindow *window, int width, int height ) {
          auto windowInstance = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
-            CRIMILD_LOG_DEBUG( "Resizing framebuffer", width, height );
+            CRIMILD_LOG_DEBUG( "Resizing framebuffer", Vector2i { width, height } );
             windowInstance->m_width = width;
             windowInstance->m_height = height;
          }
       }
    );
+
+   int fbw, fbh;
+   glfwGetFramebufferSize( m_window, &fbw, &fbh );
+   m_width = fbw;
+   m_height = fbh;
+   CRIMILD_LOG_INFO( "Created framebuffer ", Vector2ui { m_width, m_height } );
 
    glfwSetKeyCallback(
       m_window,
@@ -79,13 +86,15 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
 
    glfwMakeContextCurrent( m_window );
 
-   // TODO: Maybe move this to a different system?
-   int version = gladLoadGL( glfwGetProcAddress );
-   if ( version == 0 ) {
-      std::cerr << "Failed to initialize GLAD" << std::endl;
-      // glfwTerminate();
-      exit( EXIT_FAILURE );
-   }
+   #ifdef CRIMILD_PLATFORM_WIN32
+      // TODO: Maybe move this to a different system?
+      int version = gladLoadGL( glfwGetProcAddress );
+      if ( version == 0 ) {
+         std::cerr << "Failed to initialize GLAD" << std::endl;
+         // glfwTerminate();
+         exit( EXIT_FAILURE );
+      }
+   #endif
 
    glfwSwapInterval( 1 );
 }
@@ -101,6 +110,7 @@ GLFWOpenGLWindow::~GLFWOpenGLWindow( void ) noexcept
 
 void GLFWOpenGLWindow::resize( uint32_t width, uint32_t height )
 {
+   CRIMILD_LOG_DEBUG( "Resizing window: ", width, "x", height );
    glfwSetWindowSize( m_window, width, height );
 }
 
