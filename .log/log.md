@@ -3,6 +3,12 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2025-11-13
+- Continue working on improving `Signal` class by adding more unit tests and documentation.
+
+# 2025-11-12
+- Finally started working on unit tests for `Signal` class
+
 # 2025-10-24
 - Today I merged the `assemblies_experimental` branch to `master`. It was long overdue
 - From now on, I would like to focus on smaller PRs, if possible.

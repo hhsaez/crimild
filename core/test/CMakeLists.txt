@@ -6,6 +6,7 @@ target_sources(
     crimild_core_test
 
     PRIVATE
+    ../src/Common/Signal.test.cpp
     Behaviors/Actions/MotionApplyTest.cpp
     Behaviors/Actions/MotionFromInputTest.cpp
     Behaviors/Actions/MotionResetTest.cpp
