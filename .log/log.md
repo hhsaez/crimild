@@ -3,6 +3,9 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2025-11-14
+- Finished adding tests for `Signal` class.
+
 # 2025-11-13
 - Continue working on improving `Signal` class by adding more unit tests and documentation.
 
@@ -17,7 +20,6 @@ author: H. Hernan Saez
 - Getting back into dev mode after a while. Feels like I need to learn everything again.
 - I decided to keep everything as simple as possible and I'm going to continue using VS Code as my main editor (instead of Emacs). 
 - I removed the TODO list from this file, in favor of using a dedicated tool (like a canvas in Obsidian). 
-
 
 # 2025-08-28
 - [x] Add keyboard signals to `GLFWOpenGLWindow`

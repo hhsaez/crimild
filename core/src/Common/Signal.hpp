@@ -73,7 +73,11 @@ namespace crimild {
          return id;
       }
 
-      // Disconnect by connection id
+      /**
+       *  @brief Disconnect by connection id
+       *
+       *  @returns true if connection id is found
+       */
       bool unbind( ConnectionId id )
       {
          auto it = std::find_if(

@@ -207,3 +207,43 @@ TEST( Signal, reentrant_modifications )
    EXPECT_EQ( s.size(), 2 );
    EXPECT_TRUE( p2->seen );
 }
+
+TEST( Signal, reentrant_unbind_skips_pending_handler )
+{
+   crimild::Signal<> s;
+   bool secondCalled = false;
+   crimild::Signal<>::ConnectionId secondId;
+   s.bind( [ & ] { s.unbind( secondId ); } );
+   secondId = s.bind( [ & ] { secondCalled = true; } );
+   s();
+   EXPECT_FALSE( secondCalled );
+}
+
+TEST( Signal, clear_then_bind )
+{
+   crimild::Signal<> s;
+   bool newCalled = false;
+   s.bind(
+      [ & ] {
+         s.clear();
+         s.bind( [ & ] { newCalled = true; } );
+      }
+   );
+   s();
+   EXPECT_TRUE( newCalled );
+}
+
+TEST( Signal, binds_in_order )
+{
+   crimild::Signal<> s;
+   std::vector< int > order;
+   s.bind(
+      [ & ] {
+         s.bind( [ & ] { order.push_back( 2 ); } );
+         s.bind( [ & ] { order.push_back( 3 ); } );
+         order.push_back( 1 );
+      }
+   );
+   s();
+   EXPECT_EQ( order, ( std::vector< int > { 1, 2, 3 } ) );
+}
