@@ -520,8 +520,6 @@ int main( int argc, char **argv )
    crimild::init();
    crimild::vulkan::init();
 
-   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Assembly );
-
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::Layout );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::MainMenu );
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::editor::FileSystemWindow );

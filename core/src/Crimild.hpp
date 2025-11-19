@@ -32,6 +32,7 @@
 #include "Animation/ChannelImpl.hpp"
 #include "Animation/Clip.hpp"
 #include "Animation/Skeleton.hpp"
+#include "Assemblies/Assembly.hpp"
 #include "Audio/AudioListener.hpp"
 #include "Audio/AudioSource.hpp"
 #include "Behaviors/Actions/AnimateContextValue.hpp"

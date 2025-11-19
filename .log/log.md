@@ -3,6 +3,9 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2025-11-19
+- Moving Assembly to Crimild::Core library
+
 # 2025-11-14
 - Finished adding tests for `Signal` class.
 

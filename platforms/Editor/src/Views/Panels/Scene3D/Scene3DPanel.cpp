@@ -27,7 +27,6 @@
 
 #include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 
-#include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageMix.hpp"
 #include "Rendering/FrameGraph/VulkanComputeImageSwizzle.hpp"

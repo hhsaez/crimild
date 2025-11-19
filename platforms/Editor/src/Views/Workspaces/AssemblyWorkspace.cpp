@@ -1,6 +1,5 @@
 #include "AssemblyWorkspace.hpp"
 
-#include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Simulation/Project.hpp"
 #include "Views/Panels/Scene3D/Scene3DPanel.hpp"

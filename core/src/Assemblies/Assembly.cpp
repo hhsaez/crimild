@@ -1,6 +1,6 @@
-#include "Assembly.hpp"
+#include "Assemblies/Assembly.hpp"
 
-using namespace crimild::editor;
+using namespace crimild;
 
 Assembly::Assembly( std::string_view name ) noexcept
    : Named( name )

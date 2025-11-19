@@ -12,6 +12,7 @@ target_sources(
     Animation/ChannelImpl.hpp
     Animation/Clip.hpp
     Animation/Skeleton.hpp
+    Assemblies/Assembly.hpp
     Audio/AudioListener.hpp
     Audio/AudioSource.hpp
     Behaviors/Actions/AnimateContextValue.hpp
@@ -309,6 +310,7 @@ target_sources(
     Animation/Channel.cpp
     Animation/Clip.cpp
     Animation/Skeleton.cpp
+    Assemblies/Assembly.cpp
     Audio/AudioListener.cpp
     Audio/AudioSource.cpp
     Behaviors/Actions/AnimateContextValue.cpp

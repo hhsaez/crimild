@@ -1,7 +1,6 @@
 #ifndef GRAPH_EDITOR_CONTEXT_
 #define GRAPH_EDITOR_CONTEXT_
 
-#include "Assemblies/Assembly.hpp"
 #include "Foundation/ImGuiUtils.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorTypes.hpp"
 

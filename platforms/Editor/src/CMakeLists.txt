@@ -12,9 +12,6 @@ target_sources(
     Foundation/STBUtils.cpp
     Foundation/STBUtils.hpp
 
-    Assemblies/Assembly.cpp
-    Assemblies/Assembly.hpp
-
     Importers/GLTFImporter.cpp
     Importers/GLTFImporter.hpp
 
