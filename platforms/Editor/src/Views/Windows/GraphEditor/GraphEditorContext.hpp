@@ -6,6 +6,12 @@
 
 #include <unordered_map>
 
+namespace crimild {
+
+   class Assembly;
+
+}
+
 namespace crimild::editor {
 
    /**

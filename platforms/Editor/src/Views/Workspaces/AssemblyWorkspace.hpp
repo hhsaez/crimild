@@ -3,9 +3,13 @@
 
 #include "Views/View.hpp"
 
-namespace crimild::editor {
+namespace crimild {
 
    class Assembly;
+
+}
+
+namespace crimild::editor {
 
    class AssemblyWorkspace : public View {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::AssemblyWorkspace )

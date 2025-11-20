@@ -37,6 +37,7 @@
 
 namespace crimild {
 
+   class Assembly;
    class Node;
    class Camera;
 
@@ -50,8 +51,6 @@ namespace crimild {
 }
 
 namespace crimild::editor {
-
-   class Assembly;
 
    class Scene3DPanel : public View {
       CRIMILD_IMPLEMENT_RTTI( crimild::editor::Scene3DPanel )

@@ -5,6 +5,8 @@
 #include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
+#include <Crimild.hpp>
+
 using namespace crimild::editor;
 
 namespace ImGui {
