@@ -46,5 +46,5 @@ TEST( Assembly, remove_missing_noop )
 
 TEST( Assembly, RTTI )
 {
-   EXPECT_EQ( crimild::Assembly::__CLASS_NAME, "crimild::Assembly" );
+   EXPECT_STREQ( crimild::Assembly::__CLASS_NAME, "crimild::Assembly" );
 }
