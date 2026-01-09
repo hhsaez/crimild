@@ -115,7 +115,7 @@ namespace crimild {
       {
          std::vector< GraphNodeId > ret;
          for ( const auto &e : edges ) {
-            ret.push_back( e.dst );
+            ret.push_back( e.first );
          }
          return ret;
       }
