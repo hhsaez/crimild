@@ -3,6 +3,10 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2026-01-12
+- Continue working on Assemblies, graphs and entities
+- The current pain point is how to support a group of entities and also hierarchical 3D transformations. 
+
 # 2025-11-19
 - Moving Assembly to Crimild::Core library
 

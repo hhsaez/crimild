@@ -206,3 +206,96 @@ TEST( Graph, test )
    EXPECT_TRUE( g.addEdge( 4, 2, 3.0f ) );
    EXPECT_TRUE( g.addEdge( 4, 3, 3.0f ) );
 }
+
+namespace crimild::next {
+
+   class Assembly;
+
+   class AssemblyEntity : public Entity {
+   public:
+      using ID = size_t;
+
+   protected:
+      AssemblyEntity( void ) = default;
+      AssemblyEntity( std::shared_ptr< Assembly > const &assembly, ID id )
+         : m_assembly( assembly ),
+           m_id( id )
+      {
+         // no-op
+      }
+
+   public:
+      virtual ~AssemblyEntity( void ) = default;
+
+      inline std::shared_ptr< Assembly > getAssembly( void ) const { return !m_assembly.expired() ? m_assembly.lock() : nullptr; }
+      inline ID getID( void ) const { return m_id; }
+
+   private:
+      // Owner of this entity
+      std::weak_ptr< Assembly > m_assembly;
+      ID m_id;
+   };
+
+   // A graph of entities
+   class Assembly
+      : public Entity,
+        public std::enable_shared_from_this< Assembly > {
+   public:
+      template< typename T >
+      std::shared_ptr< T > insert( void )
+      {
+         auto e = crimild::alloc< T >( get_shared_from_this(), getNextEntityID() );
+         return e;
+      }
+
+      bool connect( AssemblyEntity::ID src, AssemblyEntity::ID dst, std::string_view pin )
+      {
+         return false;
+      }
+
+   private:
+      static size_t getNextEntityID( void )
+      {
+         // nextEntityID must be shared between all assemblies so we can later
+         // merge assemblies without ID clashing.
+         // An alternative could be to have a single, static graph shared between
+         // all assemblies, but that could be problem when attempting to get
+         // nodes/edges for a single assembly.
+         static size_t nextEntityID = 0;
+         return nextEntityID++;
+      }
+   };
+
+   class String : public Entity { };
+   class Int : public Entity { };
+   class Vector3 : public Entity { };
+
+   // An assembly that is part of a hierarchy
+   class Node : public AssemblyEntity { };
+
+   // A node that represents a transformation
+   class Node3D : public Node { };
+   class Node3D : public Node { };
+   class Spatial3D : public Node { };
+   class Spatial2D : public Node { };
+
+   // A container of entities.
+   class Group : public Entity { };
+   class Bag : public Entity { };
+
+   // An entity that can be triggered as a response to events.
+   class Event : public Entity { };
+
+   // An entity that can be executed by other entities.
+   class Behavior : public Entity { };
+   class Composite : public Behavior { };
+   class Decorator : public Behavior { };
+   class Condition : public Decorator { };
+   class Action : public Behavior { };
+
+   // An entity that can be consumed by other entities.
+   class Resource : public Entity { };
+   class Material : public Resource { };
+   class Primitive : public Resource { };
+
+}
