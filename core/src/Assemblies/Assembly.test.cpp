@@ -3,6 +3,7 @@
 #include "Entity/Entity.hpp"
 
 #include <gtest/gtest.h>
+#include <string>
 
 TEST( Assembly, construction )
 {
@@ -211,40 +212,97 @@ namespace crimild::next {
 
    class Assembly;
 
+   /**
+    * @brief An entity that is part of an Assambly
+    *
+    * Having an setAssembly() function instead of a constructor simplifies the definition for
+    * derived classes. Otherwise, we will need to declare special constructors everywhere.
+    */
    class AssemblyEntity : public Entity {
    public:
-      using ID = size_t;
+      using ID = coding::Codable::UniqueID;
 
-   protected:
-      AssemblyEntity( void ) = default;
-      AssemblyEntity( std::shared_ptr< Assembly > const &assembly, ID id )
-         : m_assembly( assembly ),
-           m_id( id )
-      {
-         // no-op
-      }
+      // Having a type of entity could help speed up some search algorithms in the graph.
+      // For example, when looking for parent transformations, we only need to search
+      // for entities of type "Node" or "Container"
+      enum class Type {
+         NODE,
+         CONTAINER,
+         RESOURCE,
+         EVENT,
+         BEHAVIOR,
+      };
 
    public:
       virtual ~AssemblyEntity( void ) = default;
 
+      inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
       inline std::shared_ptr< Assembly > getAssembly( void ) const { return !m_assembly.expired() ? m_assembly.lock() : nullptr; }
-      inline ID getID( void ) const { return m_id; }
 
    private:
       // Owner of this entity
       std::weak_ptr< Assembly > m_assembly;
-      ID m_id;
    };
 
-   // A graph of entities
+   /**
+    * @brief A graph of entities
+    *
+    * Using AssemblyEntity::ID we ensure there won't be clashing between assemblies
+    */
    class Assembly
-      : public Entity,
-        public std::enable_shared_from_this< Assembly > {
+      : public Entity {
+
+   private:
+      struct Connection {
+         using Name = std::string;
+         Name name;
+         AssemblyEntity::ID src;
+         AssemblyEntity::ID dst;
+      };
+
+      struct AssemblyNode {
+         std::shared_ptr< AssemblyEntity > entity;
+
+         // Connections by name and ids
+         // Ensuring the connection makes sense (type, number, etc.) is left to views
+         // TODO: does it make sense to have in/out connections? It should help to traverse the graph, right?
+         std::unordered_map< Connection::Name, std::unordered_map< AssemblyEntity::ID, Connection > > connections;
+
+         std::optional< Connection > getConnection( AssemblyEntity::ID otherID ) const
+         {
+            // Look for connections with entity
+            return {};
+         }
+
+         std::optional< std::vector< Connection > > getConnections( Connection::Name name ) const
+         {
+            // Get connections for a given connection name
+            return {};
+         }
+
+         void connect( Connection::Name, AssemblyEntity::ID otherID )
+         {
+            // TODO
+         }
+
+         void disconnect( Connection::Name, AssemblyEntity::ID otherID )
+         {
+            // TODO
+         }
+      };
+
    public:
-      template< typename T >
-      std::shared_ptr< T > insert( void )
+      bool contains( std::shared_ptr< AssemblyEntity > const &entity ) const
       {
-         auto e = crimild::alloc< T >( get_shared_from_this(), getNextEntityID() );
+         return m_entities.contains( entity->getUniqueID() );
+      }
+
+      template< typename T >
+      std::shared_ptr< T > emplace( void )
+      {
+         auto e = crimild::alloc< T >();
+         e->setAssembly( std::static_pointer_cast< Assembly >( shared_from_this() ) );
+         m_entities[ e->getUniqueID() ] = e;
          return e;
       }
 
@@ -253,29 +311,74 @@ namespace crimild::next {
          return false;
       }
 
-   private:
-      static size_t getNextEntityID( void )
+      template< typename T >
+      std::shared_ptr< T > getConnection( AssemblyEntity::ID, Connection::Name name ) const
       {
-         // nextEntityID must be shared between all assemblies so we can later
-         // merge assemblies without ID clashing.
-         // An alternative could be to have a single, static graph shared between
-         // all assemblies, but that could be problem when attempting to get
-         // nodes/edges for a single assembly.
-         static size_t nextEntityID = 0;
-         return nextEntityID++;
+         return nullptr;
       }
+
+   private:
+      std::unordered_map< AssemblyEntity::ID, std::shared_ptr< AssemblyEntity > > m_entities;
    };
 
-   class String : public Entity { };
-   class Int : public Entity { };
-   class Vector3 : public Entity { };
+   // Resources
+   // An entity that can be consumed by other entities.
+   class Resource : public AssemblyEntity { };
+   class Material : public Resource { };
+   class Primitive : public Resource { };
+
+   template< typename T >
+   class Value : public Resource {
+   public:
+      T get( void ) const { return m_value; }
+      void set( T value ) { m_value = value; }
+
+   private:
+      T m_value;
+   };
+
+   class String : public Value< std::string > { };
+   class Int : public Value< uint32_t > { };
+   class Vector3 : public Value< crimild::Vector3f > { };
 
    // An assembly that is part of a hierarchy
-   class Node : public AssemblyEntity { };
+   class Node : public AssemblyEntity {
+   public:
+      virtual ~Node( void ) = default;
+
+      void setName( std::string name )
+      {
+         if ( auto value = getAssembly()->getConnection< String >( getUniqueID(), "name" ) ) {
+            value->set( name );
+         }
+         m_name = name;
+      }
+
+      void setName( std::shared_ptr< String > const name )
+      {
+         // TODO
+      }
+
+      std::string getName( void ) const
+      {
+         if ( auto name = getAssembly()->getConnection< String >( getUniqueID(), "name" ) ) {
+            return name->get();
+         }
+         return "";
+      }
+
+   private:
+      // TODO: Should we keep this here or create a new entity by default?
+      // If we create a new entity, it is possible that it ends up an orphan when
+      // overriding it with a new one. But that can be solved by "trimming" the assembly
+      // and removing orphans.
+      // We could create a new entity lazily when attempting to get/set the value
+      std::string m_name;
+   };
 
    // A node that represents a transformation
    class Node3D : public Node { };
-   class Node3D : public Node { };
+   class Node2D : public Node { };
    class Spatial3D : public Node { };
    class Spatial2D : public Node { };
 
@@ -287,15 +390,32 @@ namespace crimild::next {
    class Event : public Entity { };
 
    // An entity that can be executed by other entities.
-   class Behavior : public Entity { };
+   class Behavior : public AssemblyEntity { };
    class Composite : public Behavior { };
    class Decorator : public Behavior { };
    class Condition : public Decorator { };
    class Action : public Behavior { };
+   class Blackboard : public Resource { };
 
-   // An entity that can be consumed by other entities.
-   class Resource : public Entity { };
-   class Material : public Resource { };
-   class Primitive : public Resource { };
+}
 
+TEST( Assembly, graph )
+{
+   auto A = crimild::alloc< crimild::next::Assembly >();
+
+   auto n = A->emplace< crimild::next::Node >();
+   auto s = A->emplace< crimild::next::String >();
+
+   EXPECT_TRUE( A->contains( n ) );
+   EXPECT_TRUE( A->contains( s ) );
+
+   EXPECT_EQ( n->getName(), "" );
+
+   n->setName( "foo" );
+   EXPECT_EQ( n->getName(), "foo" );
+
+   n->setName( s );
+   EXPECT_EQ( n->getName(), "bar" );
+
+   EXPECT_TRUE( true );
 }
