@@ -3,6 +3,10 @@ date: Crimild's Development Log
 author: H. Hernan Saez
 ---
 
+# 2026-01-14
+- Continue working on Assemblies, graphs and entities
+- I always considered the graph editor and the scene view as different panels in the editor, but connected. But what if they are the same panel and suddenly all nodes in the graph editor have a physical representation in the 3D world? That's easy to visualize for a 3D model, but what if a behavior has a position and visual geometry that can be manipulated, translated and assigned, all in the 3D space? It would really be like playing with Legos, right?
+
 # 2026-01-12
 - Continue working on Assemblies, graphs and entities
 - The current pain point is how to support a group of entities and also hierarchical 3D transformations. 

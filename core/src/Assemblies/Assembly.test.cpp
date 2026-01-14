@@ -236,7 +236,13 @@ namespace crimild::next {
    public:
       virtual ~AssemblyEntity( void ) = default;
 
-      inline void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
+      /**
+       * @brief Assign an assembly to this entity
+       *
+       * This is a virtual function so derived entities can override it and set default
+       * connections as needed.
+       */
+      virtual void setAssembly( std::shared_ptr< Assembly > const &assembly ) { m_assembly = assembly; }
       inline std::shared_ptr< Assembly > getAssembly( void ) const { return !m_assembly.expired() ? m_assembly.lock() : nullptr; }
 
    private:
@@ -268,10 +274,30 @@ namespace crimild::next {
          // TODO: does it make sense to have in/out connections? It should help to traverse the graph, right?
          std::unordered_map< Connection::Name, std::unordered_map< AssemblyEntity::ID, Connection > > connections;
 
-         std::optional< Connection > getConnection( AssemblyEntity::ID otherID ) const
+         bool hasConnection( Connection::Name conn ) const
+         {
+            return connections.contains( conn );
+         }
+
+         std::optional< Connection > getConnection( Connection::Name conn, AssemblyEntity::ID otherID ) const
          {
             // Look for connections with entity
             return {};
+         }
+
+         std::optional< Connection > getConnection( Connection::Name conn ) const
+         {
+            if ( !hasConnection( conn ) ) {
+               return {};
+            }
+
+            auto &conns = connections.at( conn );
+            if ( conns.empty() ) {
+               return {};
+            }
+
+            // Get the first connection available.
+            return conns.begin()->second;
          }
 
          std::optional< std::vector< Connection > > getConnections( Connection::Name name ) const
@@ -302,7 +328,7 @@ namespace crimild::next {
       {
          auto e = crimild::alloc< T >();
          e->setAssembly( std::static_pointer_cast< Assembly >( shared_from_this() ) );
-         m_entities[ e->getUniqueID() ] = e;
+         m_entities[ e->getUniqueID() ].entity = e;
          return e;
       }
 
@@ -312,13 +338,27 @@ namespace crimild::next {
       }
 
       template< typename T >
-      std::shared_ptr< T > getConnection( AssemblyEntity::ID, Connection::Name name ) const
+      std::shared_ptr< T > getConnection( AssemblyEntity::ID srcID, Connection::Name connName ) const
       {
+         if ( m_entities.contains( srcID ) ) {
+            const auto &src = m_entities.at( srcID );
+            if ( src.hasConnection( connName ) ) {
+               if ( auto conn = src.getConnection( connName ) ) {
+                  auto dst = ( *conn ).dst;
+                  if ( m_entities.contains( dst ) ) {
+                     auto ent = m_entities.at( dst ).entity;
+                     return std::static_pointer_cast< T >( ent );
+                  }
+               }
+            }
+         }
+
          return nullptr;
       }
 
    private:
-      std::unordered_map< AssemblyEntity::ID, std::shared_ptr< AssemblyEntity > > m_entities;
+      std::unordered_map< AssemblyEntity::ID, AssemblyNode >
+         m_entities;
    };
 
    // Resources
@@ -330,7 +370,11 @@ namespace crimild::next {
    template< typename T >
    class Value : public Resource {
    public:
-      T get( void ) const { return m_value; }
+      /**
+       * @brief Returns a non-mutable reference
+       */
+      const T &get( void ) const { return m_value; }
+
       void set( T value ) { m_value = value; }
 
    private:
@@ -341,39 +385,50 @@ namespace crimild::next {
    class Int : public Value< uint32_t > { };
    class Vector3 : public Value< crimild::Vector3f > { };
 
-   // An assembly that is part of a hierarchy
+   /**
+    * @brief An assembly that is part of a hierarchy
+    * TODO: Should we keep this here or create a new entity by default?
+    * If we create a new entity, it is possible that it ends up an orphan when
+    * overriding it with a new one. But that can be solved by "trimming" the assembly
+    * and removing orphans.
+    * We could create a new entity lazily when attempting to get/set the value
+    */
    class Node : public AssemblyEntity {
    public:
       virtual ~Node( void ) = default;
 
       void setName( std::string name )
       {
+         // TODO: We should add utility functions to Assembly so we can set values to a connection
+         // and the assembly will take care of either updating the existing entity at that
+         // connection or creating a new entity for that connection.
+         // That way we can write something like
+         // - getAssembly()->connection( getUniqueID(), "name", name ); // override or create
+         // - getAssembly()->connection( getUniqueID(), "name", someStringEntity );
          if ( auto value = getAssembly()->getConnection< String >( getUniqueID(), "name" ) ) {
             value->set( name );
+         } else {
+            auto s = getAssembly()->emplace< String >();
+            s->set( name );
+            getAssembly()->connect( getUniqueID(), s->getUniqueID(), "name" );
          }
-         m_name = name;
       }
 
       void setName( std::shared_ptr< String > const name )
       {
-         // TODO
+         getAssembly()->connect( getUniqueID(), name->getUniqueID(), "name" );
       }
 
-      std::string getName( void ) const
+      const std::string &getName( void ) const
       {
          if ( auto name = getAssembly()->getConnection< String >( getUniqueID(), "name" ) ) {
             return name->get();
          }
-         return "";
-      }
 
-   private:
-      // TODO: Should we keep this here or create a new entity by default?
-      // If we create a new entity, it is possible that it ends up an orphan when
-      // overriding it with a new one. But that can be solved by "trimming" the assembly
-      // and removing orphans.
-      // We could create a new entity lazily when attempting to get/set the value
-      std::string m_name;
+         // Default value as a static so we can return a reference
+         static std::string str;
+         return str;
+      }
    };
 
    // A node that represents a transformation
@@ -396,7 +451,6 @@ namespace crimild::next {
    class Condition : public Decorator { };
    class Action : public Behavior { };
    class Blackboard : public Resource { };
-
 }
 
 TEST( Assembly, graph )
@@ -415,6 +469,7 @@ TEST( Assembly, graph )
    EXPECT_EQ( n->getName(), "foo" );
 
    n->setName( s );
+   s->set( "bar" );
    EXPECT_EQ( n->getName(), "bar" );
 
    EXPECT_TRUE( true );
