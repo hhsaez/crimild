@@ -34,46 +34,46 @@
 #include <iostream>
 
 #ifndef CRIMILD_DEFAULT_CHUNK_SIZE
-    #define CRIMILD_DEFAULT_CHUNK_SIZE 4096
+   #define CRIMILD_DEFAULT_CHUNK_SIZE 4096
 #endif
 
 #ifndef CRIMILD_MAX_SMALL_OBJECT_SIZE
-    #define CRIMILD_MAX_SMALL_OBJECT_SIZE 2048 // sizeof( Group ) > 300
+   #define CRIMILD_MAX_SMALL_OBJECT_SIZE 2048 // sizeof( Group ) > 300
 #endif
 
 #ifndef CRIMILD_DEFAULT_OBJECT_ALIGNMENT
-    #define CRIMILD_DEFAULT_OBJECT_ALIGNMENT 4
+   #define CRIMILD_DEFAULT_OBJECT_ALIGNMENT alignof( std::max_align_t )
 #endif
 
 namespace crimild {
 
-    class SmallObjectAllocator : public StaticSingleton< SmallObjectAllocator > {
-    private:
-        inline static std::size_t getOffset( std::size_t numBytes, std::size_t alignment );
-        inline static void *defaultAlloc( std::size_t numBytes );
-        inline static void defaultDealloc( void *p );
+   class SmallObjectAllocator : public StaticSingleton< SmallObjectAllocator > {
+   private:
+      inline static std::size_t getOffset( std::size_t numBytes, std::size_t alignment );
+      inline static void *defaultAlloc( std::size_t numBytes );
+      inline static void defaultDealloc( void *p );
 
-    public:
-        SmallObjectAllocator( std::size_t pageSize = CRIMILD_DEFAULT_CHUNK_SIZE, std::size_t maxObjectSize = CRIMILD_MAX_SMALL_OBJECT_SIZE, std::size_t objectAlignSize = CRIMILD_DEFAULT_OBJECT_ALIGNMENT );
-        ~SmallObjectAllocator( void );
+   public:
+      SmallObjectAllocator( std::size_t pageSize = CRIMILD_DEFAULT_CHUNK_SIZE, std::size_t maxObjectSize = CRIMILD_MAX_SMALL_OBJECT_SIZE, std::size_t objectAlignSize = CRIMILD_DEFAULT_OBJECT_ALIGNMENT );
+      ~SmallObjectAllocator( void );
 
-        void *allocate( std::size_t numBytes );
-        void deallocate( void *p, std::size_t size );
+      void *allocate( std::size_t numBytes );
+      void deallocate( void *p, std::size_t size );
 
-        const std::size_t getMaxObjectSize( void ) const { return _maxObjectSize; }
-        const std::size_t getAlignment( void ) const { return _objectAlignSize; }
+      const std::size_t getMaxObjectSize( void ) const { return _maxObjectSize; }
+      const std::size_t getAlignment( void ) const { return _objectAlignSize; }
 
-    private:
-        bool trimExcessMemory( void );
+   private:
+      bool trimExcessMemory( void );
 
-    private:
-        internal::FixedAllocator *_pool = nullptr;
+   private:
+      internal::FixedAllocator *_pool = nullptr;
 
-        std::size_t _maxObjectSize;
-        std::size_t _objectAlignSize;
-    };
+      std::size_t _maxObjectSize;
+      std::size_t _objectAlignSize;
+   };
 
-    using DefaultSmallObjectAllocator = SmallObjectAllocator;
+   using DefaultSmallObjectAllocator = SmallObjectAllocator;
 
 }
 

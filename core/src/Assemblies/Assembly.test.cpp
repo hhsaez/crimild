@@ -279,10 +279,21 @@ namespace crimild::next {
             return connections.contains( conn );
          }
 
+         bool hasConnection( Connection::Name conn, AssemblyEntity::ID other ) const
+         {
+            if ( !hasConnection( conn ) ) {
+               return false;
+            }
+
+            return connections.at( conn ).contains( other );
+         }
+
          std::optional< Connection > getConnection( Connection::Name conn, AssemblyEntity::ID otherID ) const
          {
-            // Look for connections with entity
-            return {};
+            if ( !hasConnection( conn, otherID ) ) {
+               return {};
+            }
+            return connections.at( conn ).at( otherID );
          }
 
          std::optional< Connection > getConnection( Connection::Name conn ) const
@@ -306,9 +317,17 @@ namespace crimild::next {
             return {};
          }
 
-         void connect( Connection::Name, AssemblyEntity::ID otherID )
+         bool connect( Connection::Name conn, AssemblyEntity::ID otherID )
          {
-            // TODO
+            if ( hasConnection( conn, otherID ) ) {
+               return false;
+            }
+            connections[ conn ][ otherID ] = {
+               .name = conn,
+               .src = entity->getUniqueID(),
+               .dst = otherID,
+            };
+            return true;
          }
 
          void disconnect( Connection::Name, AssemblyEntity::ID otherID )
@@ -332,9 +351,13 @@ namespace crimild::next {
          return e;
       }
 
-      bool connect( AssemblyEntity::ID src, AssemblyEntity::ID dst, std::string_view pin )
+      bool connect( AssemblyEntity::ID src, AssemblyEntity::ID dst, Connection::Name conn )
       {
-         return false;
+         if ( !m_entities.contains( src ) || !m_entities.contains( dst ) ) {
+            return false;
+         }
+
+         return m_entities[ src ].connect( conn, dst );
       }
 
       template< typename T >
@@ -357,8 +380,7 @@ namespace crimild::next {
       }
 
    private:
-      std::unordered_map< AssemblyEntity::ID, AssemblyNode >
-         m_entities;
+      std::unordered_map< AssemblyEntity::ID, AssemblyNode > m_entities;
    };
 
    // Resources

@@ -10,6 +10,7 @@ target_sources(
     ../src/Common/Signal.test.cpp
 
     ../src/Assemblies/Assembly.test.cpp
+    ../src/Assemblies/AssemblyDAG.test.cpp
     
     Behaviors/Actions/MotionApplyTest.cpp
     Behaviors/Actions/MotionFromInputTest.cpp
