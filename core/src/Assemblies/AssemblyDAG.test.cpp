@@ -2,6 +2,7 @@
 #include "Entity/Entity.hpp"
 
 #include <gtest/gtest.h>
+#include <memory>
 
 namespace crimild::experimental {
 
@@ -10,13 +11,33 @@ namespace crimild::experimental {
    /**
     * @brief An entity that is part of an Assambly
     *
-    * Entities in assemblies should always be owned by another entity and are allowed to own
-    * other entities, ultimately representing a DAG.
+    * When to use AssemblyEntity vs standard types?
+    * If something needs to cross system boundaries, it becomes an AssemblyEntity
     *
-    * Ownership has nothing to do with traversal.
+    * Entities in assemblies should always be owned by another entity, with the only
+    * exception being the Assembly itself that is allowed to have no owner.
+    * Assembly entities are allowed to own other entities, ultimately representing a DAG.
+    *
+    * Ownership has nothing to do with assembly traversal.
     *
     * Having an setOwner() function instead of a constructor simplifies the definition for
     * derived classes. Otherwise, we will need to declare special constructors everywhere.
+    *
+    * @todo: There's no references to assemblies here. Can all of this be part
+    * of the Entity class instead? Do we want that?
+    *
+    * @todo: How to enforce owner and/or owned entities to be of a specific type?
+    * For example, Events should only own Behavior-type entities.
+    * Maybe we can use a template for defining the owned entity type? Like:
+    * @code
+    * template< class OwnedType >
+    * class AssemblyEntity {
+    *    std::unordered_set< std::shared_ptr< OwnedType >> m_entities;
+      };
+    * @endcode
+    * One problem is that if an entity supports two or more types, we need to
+    * use the most common one (almost always AssemblyEntity), which does not really
+    * help.
     */
    class AssemblyEntity : public Entity {
    public:
@@ -58,16 +79,20 @@ namespace crimild::experimental {
 
       std::shared_ptr< AssemblyEntity > detachFromOwner( void )
       {
-         auto self = std::static_pointer_cast< AssemblyEntity >( shared_from_this() );
+         // Since we're detaching from our owner, keep a retained pointer so we're
+         // not destroyed yet.
+         auto self = retain( this );
          if ( auto owner = getOwner() ) {
             owner->detach( self );
          }
          return self;
       }
 
+      inline const auto &getOwned( void ) const { return m_ownedEntities; }
+
       bool owns( std::shared_ptr< AssemblyEntity > const &other ) const
       {
-         return m_ownedEntities.contains( other );
+         return getOwned().contains( other );
       }
 
    private:
@@ -95,7 +120,7 @@ namespace crimild::experimental {
    };
 }
 
-TEST( AssemblyEntity, test )
+TEST( Assembly, entities )
 {
    class Foo : public crimild::experimental::AssemblyEntity { };
 
@@ -122,8 +147,14 @@ TEST( AssemblyEntity, coding )
 namespace crimild::experimental {
 
    // A container of entities.
-   class Group : public Entity { };
-   class Bag : public Entity { };
+   class Group : public AssemblyEntity { };
+
+   // TODO: How to represent a sorted container?
+   // Maybe add a template to AssemblyEntity for storage policy?
+   class SortedGroup : public AssemblyEntity { };
+
+   // Unsorted container for entites (same as group?)
+   class Bag : public AssemblyEntity { };
 
    // Resources
    // An entity that can be consumed by other entities.
@@ -131,6 +162,11 @@ namespace crimild::experimental {
    class Material : public Resource { };
    class Primitive : public Resource { };
 
+   /**
+    * @brief A value that can be shared and/or consumed by many entities
+    *
+    * If something needs to cross system boundaries, it becomes a Value
+    */
    template< typename T >
    class Value : public Resource {
    public:
@@ -146,18 +182,54 @@ namespace crimild::experimental {
    };
 
    class String : public Value< std::string > { };
-   class Int : public Value< uint32_t > { };
-   class Vector3 : public Value< crimild::Vector3f > { };
+   class Int32 : public Value< int32_t > { };
+   class UInt32 : public Value< uint32_t > { };
+   class Float : public Value< float > { };
+   class Vector3 : public Value< crimild::Vector3 > { };
 
    // A node that represents a transformation
    class Node : public AssemblyEntity { };
    class Node3D : public Node { };
    class Node2D : public Node { };
-   class Spatial3D : public Node { };
+}
+
+namespace crimild::experimental {
+
+   /**
+    * @brief An entity representing a 3D object
+    */
+   class Spatial3D : public Node {
+   public:
+      virtual ~Spatial3D( void ) = default;
+
+      std::shared_ptr< Spatial3D > getParent3D( void ) const { return nullptr; }
+
+   private:
+      Transformation m_local = Transformation::Constants::IDENTITY;
+      bool m_localIsCurrent = true;
+      Transformation m_world = Transformation::Constants::IDENTITY;
+      bool m_worldIsCurrent = true;
+   };
+
+   class Geometry3D : public Spatial3D { };
+
+   /**
+    * @brief An entity representing a 2D object
+    */
    class Spatial2D : public Node { };
 
-   // An entity that can be triggered as a response to events.
-   class Event : public Entity { };
+}
+
+TEST( Assembly, spatial )
+{
+   auto parent = std::make_shared< crimild::experimental::Spatial3D >();
+   auto child = std::make_shared< crimild::experimental::Spatial3D >();
+   parent->attach( child );
+   EXPECT_EQ( child->getOwner(), parent );
+   EXPECT_EQ( child->getParent3D(), parent );
+}
+
+namespace crimild::experimental {
 
    // An entity that can be executed by other entities.
    class Behavior : public AssemblyEntity { };
@@ -166,6 +238,9 @@ namespace crimild::experimental {
    class Condition : public Decorator { };
    class Action : public Behavior { };
    class Blackboard : public Resource { };
+
+   // An event occurring during the execution of an Assembly
+   class Event : public Entity { };
 }
 
 TEST( Assembly, test )
