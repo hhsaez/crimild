@@ -106,10 +106,11 @@ namespace crimild::experimental {
          if ( !m_owner.expired() ) {
             m_owner.lock()->ownerChanged.bind( retain( this ), &AssemblyEntity::onOwnerChanged );
          }
-         ownerChanged();
+         onOwnerChanged();
       }
 
-      void onOwnerChanged( void )
+   protected:
+      virtual void onOwnerChanged( void )
       {
          ownerChanged();
       }
@@ -205,17 +206,28 @@ namespace crimild::experimental {
    public:
       virtual ~Spatial3D( void ) = default;
 
+      inline bool hasParent3D( void ) const { return !m_parent3D.expired(); }
+
       std::shared_ptr< Spatial3D > getParent3D( void ) const
       {
-         // TODO: Implement cache for parent 3D
-         auto owner = getOwner();
-         while ( owner != nullptr ) {
-            if ( auto parent = std::dynamic_pointer_cast< Spatial3D >( owner ) ) {
-               return parent;
+         if ( m_parent3D.expired() ) {
+            auto owner = getOwner();
+            while ( owner != nullptr ) {
+               if ( auto parent = std::dynamic_pointer_cast< Spatial3D >( owner ) ) {
+                  m_parent3D = parent;
+                  auto self = retain( const_cast< Spatial3D * >( this ) );
+                  self->invalidateWorld();
+                  parent->worldChanged.bind(
+                     self,
+                     &Spatial3D::invalidateWorld
+                  );
+                  break;
+               }
+               owner = owner->getOwner();
             }
-            owner = owner->getOwner();
          }
-         return nullptr;
+
+         return !m_parent3D.expired() ? m_parent3D.lock() : nullptr;
       }
 
       inline bool isLocalCurrent( void ) const { return m_localIsCurrent; }
@@ -224,12 +236,20 @@ namespace crimild::experimental {
       {
          m_local = local;
          m_localIsCurrent = true;
-         m_worldIsCurrent = false;
-         worldChanged();
+         invalidateWorld();
       }
 
       const Transformation &getLocal( void ) const
       {
+         if ( !m_localIsCurrent ) {
+            if ( auto parent = getParent3D() ) {
+               m_local = inverse( parent->getWorld() )( m_world );
+            } else {
+               // No parent: World and Local are the same transformation
+               m_local = m_world;
+            }
+            m_localIsCurrent = true;
+         }
          return m_local;
       }
 
@@ -245,14 +265,41 @@ namespace crimild::experimental {
 
       const Transformation &getWorld( void ) const
       {
+         if ( !m_worldIsCurrent ) {
+            if ( auto parent = getParent3D() ) {
+               m_world = parent->getWorld()( m_local );
+            } else {
+               m_world = m_local;
+            }
+            m_worldIsCurrent = true;
+         }
          return m_world;
       }
 
+   protected:
+      virtual void onOwnerChanged( void ) override
+      {
+         Node::onOwnerChanged();
+         if ( auto parent = m_parent3D.lock() ) {
+            parent->worldChanged.unbind( retain( this ) );
+         }
+         m_parent3D.reset();
+         invalidateWorld();
+      }
+
    private:
-      Transformation m_local = Transformation::Constants::IDENTITY;
-      bool m_localIsCurrent = true;
-      Transformation m_world = Transformation::Constants::IDENTITY;
-      bool m_worldIsCurrent = true;
+      void invalidateWorld( void )
+      {
+         m_worldIsCurrent = false;
+         worldChanged();
+      }
+
+   private:
+      mutable std::weak_ptr< Spatial3D > m_parent3D;
+      mutable Transformation m_local = Transformation::Constants::IDENTITY;
+      mutable bool m_localIsCurrent = true;
+      mutable Transformation m_world = Transformation::Constants::IDENTITY;
+      mutable bool m_worldIsCurrent = true;
    };
 
    class Geometry3D : public Spatial3D { };
@@ -343,7 +390,36 @@ TEST( Assembly, spatial )
    EXPECT_FALSE( child->isWorldCurrent() ); // remains unchanged
    EXPECT_TRUE( indirectChild->isWorldCurrent() );
 
-   // TODO: changing parents invalidates world
+   // changing parents invalidates world
+   child->getWorld();
+   EXPECT_TRUE( child->isWorldCurrent() );
+   group->attach( child ); // switch parents and invalidate world for child
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_EQ( child->getOwner(), group );
+   EXPECT_EQ( child->getParent3D(), parent );
+
+   // World is invalidated when hierarchy changes
+   child->getWorld();
+   indirectChild->getWorld();
+   EXPECT_TRUE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isWorldCurrent() );
+   group->detachFromOwner();
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+
+   // stops listening for world changes after detachment
+   child->getWorld();
+   parent->getWorld();
+   child->detachFromOwner();
+   EXPECT_FALSE( child->hasParent3D() );
+   EXPECT_FALSE( child->isWorldCurrent() ); // parent changed
+   child->getWorld();
+   EXPECT_TRUE( child->isWorldCurrent() );
+   EXPECT_TRUE( parent->isWorldCurrent() );
+   parent->setLocal( crimild::translation( 1, 2, 3 ) );
+   EXPECT_FALSE( parent->isWorldCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+   EXPECT_TRUE( child->isWorldCurrent() ); // child is not affected
 }
 
 namespace crimild::experimental {
