@@ -200,9 +200,53 @@ namespace crimild::experimental {
     */
    class Spatial3D : public Node {
    public:
+      Signal<> worldChanged;
+
+   public:
       virtual ~Spatial3D( void ) = default;
 
-      std::shared_ptr< Spatial3D > getParent3D( void ) const { return nullptr; }
+      std::shared_ptr< Spatial3D > getParent3D( void ) const
+      {
+         // TODO: Implement cache for parent 3D
+         auto owner = getOwner();
+         while ( owner != nullptr ) {
+            if ( auto parent = std::dynamic_pointer_cast< Spatial3D >( owner ) ) {
+               return parent;
+            }
+            owner = owner->getOwner();
+         }
+         return nullptr;
+      }
+
+      inline bool isLocalCurrent( void ) const { return m_localIsCurrent; }
+
+      void setLocal( const Transformation &local )
+      {
+         m_local = local;
+         m_localIsCurrent = true;
+         m_worldIsCurrent = false;
+         worldChanged();
+      }
+
+      const Transformation &getLocal( void ) const
+      {
+         return m_local;
+      }
+
+      inline bool isWorldCurrent( void ) const { return m_worldIsCurrent; }
+
+      void setWorld( const Transformation &world )
+      {
+         m_world = world;
+         m_localIsCurrent = false;
+         m_worldIsCurrent = true;
+         worldChanged();
+      }
+
+      const Transformation &getWorld( void ) const
+      {
+         return m_world;
+      }
 
    private:
       Transformation m_local = Transformation::Constants::IDENTITY;
@@ -223,10 +267,83 @@ namespace crimild::experimental {
 TEST( Assembly, spatial )
 {
    auto parent = std::make_shared< crimild::experimental::Spatial3D >();
+   bool parentWorldChangedCalled = false;
+   parent->worldChanged.bind(
+      [ &parentWorldChangedCalled ]() {
+         parentWorldChangedCalled = true;
+      }
+   );
    auto child = std::make_shared< crimild::experimental::Spatial3D >();
    parent->attach( child );
    EXPECT_EQ( child->getOwner(), parent );
    EXPECT_EQ( child->getParent3D(), parent );
+
+   auto group = std::make_shared< crimild::experimental::Group >();
+   parent->attach( group );
+   auto indirectChild = std::make_shared< crimild::experimental::Spatial3D >();
+   group->attach( indirectChild );
+   EXPECT_EQ( indirectChild->getOwner(), group );
+   EXPECT_EQ( indirectChild->getParent3D(), parent );
+
+   // Setting parent local transform invalidates children world transform
+   parent->setLocal( crimild::translation( 1, 2, 3 ) );
+   EXPECT_TRUE( parentWorldChangedCalled );
+   parentWorldChangedCalled = false;
+   EXPECT_TRUE( parent->isLocalCurrent() );
+   EXPECT_FALSE( parent->isWorldCurrent() );
+   EXPECT_TRUE( child->isLocalCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isLocalCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+
+   // Update parent world only
+   parent->getWorld();
+   EXPECT_TRUE( parent->isLocalCurrent() );
+   EXPECT_TRUE( parent->isWorldCurrent() );
+   EXPECT_TRUE( child->isLocalCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isLocalCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+
+   // Update children world
+   child->getWorld();
+   indirectChild->getWorld();
+   EXPECT_TRUE( child->isLocalCurrent() );
+   EXPECT_TRUE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isLocalCurrent() );
+   EXPECT_TRUE( indirectChild->isWorldCurrent() );
+
+   // Setting parent world transform invalidates children world transform
+   parent->setWorld( crimild::translation( 1, 2, 3 ) );
+   EXPECT_TRUE( parentWorldChangedCalled );
+   parentWorldChangedCalled = false;
+   EXPECT_FALSE( parent->isLocalCurrent() );
+   EXPECT_TRUE( parent->isWorldCurrent() );
+   EXPECT_TRUE( child->isLocalCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isLocalCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+
+   // Getting parent local transform does not invalidate children world transform
+   parent->getLocal();
+   EXPECT_TRUE( parent->isLocalCurrent() );
+   EXPECT_TRUE( parent->isWorldCurrent() );
+   EXPECT_TRUE( child->isLocalCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_TRUE( indirectChild->isLocalCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+
+   // Auto update parent world after changed when child updates
+   parent->setLocal( crimild::translation( 1, 2, 3 ) );
+   EXPECT_FALSE( parent->isWorldCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() );
+   EXPECT_FALSE( indirectChild->isWorldCurrent() );
+   indirectChild->getWorld(); // also updates parent's world
+   EXPECT_TRUE( parent->isWorldCurrent() );
+   EXPECT_FALSE( child->isWorldCurrent() ); // remains unchanged
+   EXPECT_TRUE( indirectChild->isWorldCurrent() );
+
+   // TODO: changing parents invalidates world
 }
 
 namespace crimild::experimental {

@@ -4,8 +4,14 @@ author: H. Hernan Saez
 ---
 
 # TODO
+- [ ] Cache parent 3D
+- [ ] Bind child Spatial3D to parents
 - [ ] Bind signals to other signals of the same type, allowing a "hierarhcy" of signals
-- [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique. 
+- [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique.
+
+# 2026-01-19
+- Working on assemblies as classes with entities having an owner, which may be different from the scene traversal parent.
+- Using Signal<> as a way to invalidate transformations for children
 
 # 2026-01-15
 - Working on understanding how to represent Assemblies, entities and their relationships
