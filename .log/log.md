@@ -12,6 +12,7 @@ author: H. Hernan Saez
 # 2026-01-19
 - Working on assemblies as classes with entities having an owner, which may be different from the scene traversal parent.
 - Using Signal<> as a way to invalidate transformations for children
+- Got a first implementation working for Spatial3D and children updates for world state. 
 
 # 2026-01-15
 - Working on understanding how to represent Assemblies, entities and their relationships
