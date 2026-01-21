@@ -18,7 +18,11 @@ namespace crimild::experimental {
     * exception being the Assembly itself that is allowed to have no owner.
     * Assembly entities are allowed to own other entities, ultimately representing a DAG.
     *
-    * Ownership has nothing to do with assembly traversal.
+    * Ownership has nothing to do with assembly traversal. For example, by definition, a Group owns
+    * all entities attached to it, regardless if they are nodes, resources, events or any other
+    * entity type. On the other hand, a Geometry usually does not own neither its Primitive
+    * nor its Material, since those are shareable resources. But it's still possible to
+    * attach those resources explicitly to the Geometry if they are needed for some reason.
     *
     * Having an setOwner() function instead of a constructor simplifies the definition for
     * derived classes. Otherwise, we will need to declare special constructors everywhere.
@@ -243,6 +247,8 @@ namespace crimild::experimental {
       {
          if ( !m_localIsCurrent ) {
             if ( auto parent = getParent3D() ) {
+               // When a parent is present, world is computed as W = P * L
+               // so local can be computed as L = inv(P) * W
                m_local = inverse( parent->getWorld() )( m_world );
             } else {
                // No parent: World and Local are the same transformation
@@ -301,8 +307,6 @@ namespace crimild::experimental {
       mutable Transformation m_world = Transformation::Constants::IDENTITY;
       mutable bool m_worldIsCurrent = true;
    };
-
-   class Geometry3D : public Spatial3D { };
 
    /**
     * @brief An entity representing a 2D object
@@ -434,6 +438,17 @@ namespace crimild::experimental {
 
    // An event occurring during the execution of an Assembly
    class Event : public Entity { };
+}
+
+namespace crimild::experimental {
+
+   class Geometry3D : public Spatial3D {
+   private:
+      // TODO: should these be shared or weak ptrs?
+      std::shared_ptr< crimild::Primitive > m_primitive;
+      std::shared_ptr< crimild::Material > m_material;
+   };
+
 }
 
 TEST( Assembly, test )

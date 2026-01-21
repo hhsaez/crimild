@@ -9,6 +9,11 @@ author: H. Hernan Saez
 - [ ] Bind signals to other signals of the same type, allowing a "hierarhcy" of signals
 - [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique.
 
+# 2026-01-21
+- Continue working on Assembly representation
+- I'm not convinced about the who "ownership" concept for entities. How owns a Resource?
+- I think I need a better separation of concerns. A Node has a parent. A resource has consumers.
+
 # 2026-01-19
 - Working on assemblies as classes with entities having an owner, which may be different from the scene traversal parent.
 - Using Signal<> as a way to invalidate transformations for children
