@@ -8,6 +8,13 @@ author: H. Hernan Saez
 - [ ] Bind child Spatial3D to parents
 - [ ] Bind signals to other signals of the same type, allowing a "hierarhcy" of signals
 - [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique.
+- [ ] RTTI as template<"crimild::Foo">
+- [ ] Resources with prototype strategy for clonning (deep, shallow)
+
+# 2026-01-22
+- Continue working on Assembly representation
+- I feel like I'm going deeper into a rabit hole without end.
+- Now I'm trying with a more simpler approach: Node as an entity with parent/children. And then forget about groups
 
 # 2026-01-21
 - Continue working on Assembly representation

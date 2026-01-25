@@ -192,10 +192,118 @@ namespace crimild::experimental {
    class Float : public Value< float > { };
    class Vector3 : public Value< crimild::Vector3 > { };
 
-   // A node that represents a transformation
-   class Node : public AssemblyEntity { };
-   class Node3D : public Node { };
-   class Node2D : public Node { };
+}
+
+namespace crimild::experimental {
+
+   /**
+    * @brief An entity that is part of a hierarchy
+    *
+    * Nodes should have up to one parent and may have any number of children.
+    */
+   class Node : public Entity {
+   public:
+      Signal<> parentChanged;
+
+   public:
+      virtual ~Node( void ) = default;
+
+      inline bool hasParent( void ) const
+      {
+         return !m_parent.expired();
+      }
+
+      std::shared_ptr< AssemblyEntity > getParent( void ) const
+      {
+         return m_parent.lock();
+      }
+
+      void setParent( std::shared_ptr< AssemblyEntity > const &newParent )
+      {
+         if ( auto parent = m_parent.lock() ) {
+            parent->parentChanged.unbind( retain( this ) );
+         }
+         m_parent = parent;
+         if ( auto parent = m_parent.lock() ) {
+            parent->parentChanged.bind(
+               retain( this ),
+               [ this ] {
+                  this->parentChanged();
+               }
+            );
+         }
+      }
+
+      std::shared_ptr< AssemblyEntity > detachFromParent( void )
+      {
+         // Since we're detaching from our owner, keep a retained pointer so we're
+         // not destroyed yet.
+         auto self = retain( this );
+         if ( auto parent = getParent() ) {
+            parent->detach( self );
+         }
+         return self;
+      }
+
+      void attach( std::shared_ptr< Node > const &child )
+      {
+         if ( child == nullptr ) {
+            return;
+         }
+
+         if ( child->getPrent() == this ) {
+            return;
+         }
+
+         child->detachFromParent();
+         m_children.push_back( child );
+         child->setParent( retain( this ) );
+      }
+
+      void detach( std::shared_ptr< Node > const &child )
+      {
+         if ( child == nullptr ) {
+            return;
+         }
+
+         if ( child->getParent() != nullptr ) {
+            return;
+         }
+
+         auto it = std::find( m_children.begin(), m_children.end(), child );
+         m_children->erase( it );
+         child->setParent( nullptr );
+      }
+
+      const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
+      {
+         return m_children;
+      }
+
+   private:
+      std::weak_ptr< Node > m_parent;
+      std::vector< shared_ptr< Node > > m_children;
+   };
+
+}
+
+TEST( Assembly, nodes )
+{
+   using crimild::experimental;
+
+   auto n0 = std::make_shared< Node >();
+   EXPECT_FALSE( n0->hasParent() );
+
+   auto n1 = std::make_shared< Node >();
+   n0->attach( n1 );
+   EXPECT_TRUE( n1->hasParent() );
+   EXPECT_EQ( n1->getParent(), n0 );
+   EXPECT_TRUE( n0->attach( n1 ) );
+
+   auto n2 = std::make_shared< Node >();
+   n0->attach( n2 );
+
+   EXPECT_TRUE( true );
 }
 
 namespace crimild::experimental {
@@ -424,6 +532,13 @@ TEST( Assembly, spatial )
    EXPECT_FALSE( parent->isWorldCurrent() );
    EXPECT_FALSE( indirectChild->isWorldCurrent() );
    EXPECT_TRUE( child->isWorldCurrent() ); // child is not affected
+
+   // TODO: insert a Spatial3D in between existing parent/children and check that
+   // children's world transformations are properly invalidated and updated.
+   auto group2 = std::make_shared< crimild::experimental::Group >();
+   auto group3 = std::make_shared< crimild::experiemntal::Group >();
+   child->getWorld();
+   parent->getWorld();
 }
 
 namespace crimild::experimental {
