@@ -12,6 +12,7 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+   glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
    // Enable forward compatibility to remove deprecated OpenGL features and ensure
    // compatibility across platforms. This is required on macOS for OpenGL 3.3+ contexts
@@ -86,15 +87,15 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
 
    glfwMakeContextCurrent( m_window );
 
-   #ifdef CRIMILD_PLATFORM_WIN32
-      // TODO: Maybe move this to a different system?
-      int version = gladLoadGL( glfwGetProcAddress );
-      if ( version == 0 ) {
-         std::cerr << "Failed to initialize GLAD" << std::endl;
-         // glfwTerminate();
-         exit( EXIT_FAILURE );
-      }
-   #endif
+#if defined( CRIMILD_PLATFORM_WIN32 ) || defined( CRIMILD_PLATFORM_LINUX )
+   // TODO: Maybe move this to a different system?
+   int version = gladLoadGL( glfwGetProcAddress );
+   if ( version == 0 ) {
+      std::cerr << "Failed to initialize GLAD" << std::endl;
+      // glfwTerminate();
+      exit( EXIT_FAILURE );
+   }
+#endif
 
    glfwSwapInterval( 1 );
 }
