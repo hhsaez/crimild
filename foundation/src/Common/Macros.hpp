@@ -31,79 +31,81 @@
 #include <string>
 
 #if !defined( NDEBUG )
-    #define CRIMILD_DEBUG 1
+   #define CRIMILD_DEBUG 1
 #endif
 
 // Identify known platforms
 #if defined( __EMSCRIPTEN__ )
-    #define CRIMILD_PLATFORM_EMSCRIPTEN 1
+   #define CRIMILD_PLATFORM_EMSCRIPTEN 1
 #elif defined( __APPLE__ )
-    #include <TargetConditionals.h>
-    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-        #define CRIMILD_PLATFORM_IOS
-    #else
-        #define CRIMILD_PLATFORM_OSX
-    #endif
+   #include <TargetConditionals.h>
+   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+      #define CRIMILD_PLATFORM_IOS
+   #else
+      #define CRIMILD_PLATFORM_OSX
+   #endif
 #elif defined( __ANDROID__ )
-    #define CRIMILD_PLATFORM_ANDROID
+   #define CRIMILD_PLATFORM_ANDROID
 #elif defined( __CYGWIN__ ) || defined( __MINGW32__ ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( WIN32 )
-    #define CRIMILD_PLATFORM_WIN32
+   #define CRIMILD_PLATFORM_WIN32
+#elif defined( __linux__ )
+   #define CRIMILD_PLATFORM_LINUX
 #endif
 
-#if defined( CRIMILD_PLATFORM_OSX ) || defined( CRIMILD_PLATFORM_WIN32 )
-    #define CRIMILD_PLATFORM_DESKTOP
+#if defined( CRIMILD_PLATFORM_OSX ) || defined( CRIMILD_PLATFORM_WIN32 ) || defined( CRIMILD_PLATFORM_LINUX )
+   #define CRIMILD_PLATFORM_DESKTOP
 #endif
 
 #if defined( CRIMILD_PLATFORM_IOS ) || defined( CRIMILD_PLATFORM_ANDROID )
-    #define CRIMILD_PLATFORM_MOBILE
+   #define CRIMILD_PLATFORM_MOBILE
 #endif
 
 #ifdef __GNUC__
-    #define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
+   #define CRIMILD_CURRENT_FUNCTION __PRETTY_FUNCTION__
 #else
-    #define CRIMILD_CURRENT_FUNCTION __FUNCTION__
+   #define CRIMILD_CURRENT_FUNCTION __FUNCTION__
 #endif
 
 namespace crimild {
 
-    inline std::string getClassName( const std::string &funcName )
-    {
-        auto parentesis = funcName.find( "(" );
-        if ( parentesis == std::string::npos ) {
-            return "::";
-        }
+   inline std::string getClassName( const std::string &funcName )
+   {
+      auto parentesis = funcName.find( "(" );
+      if ( parentesis == std::string::npos ) {
+         return "::";
+      }
 
-        auto colons = funcName.substr( 0, parentesis ).rfind( "::" );
-        if ( colons == std::string::npos ) {
-            return "::";
-        }
+      auto colons = funcName.substr( 0, parentesis ).rfind( "::" );
+      if ( colons == std::string::npos ) {
+         return "::";
+      }
 
-        auto begin = funcName.substr( 0, colons ).rfind( " " ) + 1;
-        auto end = colons - begin;
+      auto begin = funcName.substr( 0, colons ).rfind( " " ) + 1;
+      auto end = colons - begin;
 
-        return funcName.substr( begin, end );
-    }
+      return funcName.substr( begin, end );
+   }
 
-    inline std::string getFunctionName( const std::string &fqn )
-    {
-        auto end = fqn.find( "(" );
-        if ( end == std::string::npos ) {
+   inline std::string getFunctionName( const std::string &fqn )
+   {
+      auto end = fqn.find( "(" );
+      if ( end == std::string::npos ) {
+         return fqn;
+      }
+
+      auto begin = fqn.substr( 0, end ).rfind( "::" );
+      if ( begin == std::string::npos ) {
+         begin = fqn.substr( 0, end ).rfind( ' ' );
+         if ( begin == std::string::npos ) {
             return fqn;
-        }
+         }
+         begin += 1;
+      } else {
+         begin += 2;
+      }
 
-        auto begin = fqn.substr( 0, end ).rfind( "::" );
-        if ( begin == std::string::npos ) {
-            begin = fqn.substr( 0, end ).rfind( ' ' );
-            if ( begin == std::string::npos ) {
-                return fqn;
-            }
-            begin += 1;
-        } else {
-            begin += 2;
-        }
-
-        return fqn.substr( begin, end - begin );
-    }
+      return fqn.substr( begin, end - begin );
+   }
 }
 
 #define CRIMILD_CURRENT_FUNCTION_NAME ::crimild::getFunctionName( CRIMILD_CURRENT_FUNCTION )
@@ -115,10 +117,10 @@ namespace crimild {
 #define CRIMILD_CONCAT( A, B ) CRIMILD_CONCAT_IMPL( A, B )
 
 #define CRIMILD_RANDOM_VARIABLE_NAME( PREFIX ) \
-    CRIMILD_CONCAT( PREFIX, __LINE__ )
+   CRIMILD_CONCAT( PREFIX, __LINE__ )
 
 #ifndef CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE
-    #define CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE 1
+   #define CRIMILD_USE_DEPTH_RANGE_ZERO_TO_ONE 1
 #endif
 
 #endif

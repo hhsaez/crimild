@@ -40,7 +40,7 @@ target_include_directories(
    PRIVATE ${Crimild_SOURCE_DIR}/third-party/glfw/include
 )
 
-if (WIN32)
+if (WIN32 OR LINUX)
    target_include_directories(
       crimild_universal_player
       PRIVATE ${Crimild_SOURCE_DIR}/third-party/glad/include
