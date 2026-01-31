@@ -403,6 +403,11 @@ target_sources(
     Navigation/NavigationMesh.cpp
     Navigation/NavigationMeshContainer.cpp
     Navigation/NavigationMeshOBJ.cpp
+
+    Nodes/Node.hpp
+
+    Nodes/3D/Spatial3D.hpp
+
     ParticleSystem/Generators/AccelerationParticleGenerator.cpp
     ParticleSystem/Generators/BoxPositionParticleGenerator.cpp
     ParticleSystem/Generators/CirclePositionParticleGenerator.cpp

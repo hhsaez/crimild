@@ -10,6 +10,16 @@ author: H. Hernan Saez
 - [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique.
 - [ ] RTTI as template<"crimild::Foo">
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
+- [ ] Move test setup to same CMakeFiles as library
+
+# 2026-01-30
+- I finally feel like I'm moving forward 
+- Creating new classes for nodes (Node, Spatial3D, Geometry3D)
+- Creating new tests
+
+# 2026-01-29
+- I finally decided to go with classes for the new scene hierarchy instead of implementing a graph with views. 
+- Moving forward, I now need to work on how the Spatial3D class works and propagates invalidation across the hierarchy
 
 # 2026-01-22
 - Continue working on Assembly representation
