@@ -1,7 +1,6 @@
 #ifndef CRIMILD_CORE_NODES_NODE
 #define CRIMILD_CORE_NODES_NODE
 
-#include "Common/Signal.hpp"
 #include "Entity/Entity.hpp"
 
 #include <Crimild_Foundation.hpp>
@@ -17,10 +16,6 @@ namespace crimild::nodes {
       : public Entity,
         public Named {
    public:
-   public:
-      Signal<> parentChanged;
-
-   public:
       virtual ~Node( void ) = default;
 
       inline bool hasParent( void ) const
@@ -31,20 +26,6 @@ namespace crimild::nodes {
       std::shared_ptr< Node > getParent( void ) const
       {
          return m_parent.lock();
-      }
-
-      void setParent( std::shared_ptr< Node > const &newParent )
-      {
-         if ( auto parent = m_parent.lock() ) {
-            parent->parentChanged.unbind( retain( this ) );
-         }
-         m_parent = newParent;
-         if ( auto parent = m_parent.lock() ) {
-            parent->parentChanged.bind(
-               retain( this ),
-               &Node::onParentChanged
-            );
-         }
       }
 
       std::shared_ptr< Node > detachFromParent( void )
@@ -79,13 +60,18 @@ namespace crimild::nodes {
             return;
          }
 
-         if ( child->getParent() != nullptr ) {
+         if ( child->getParent().get() != this ) {
             return;
          }
 
          auto it = std::find( m_children.begin(), m_children.end(), child );
          m_children.erase( it );
          child->setParent( nullptr );
+      }
+
+      [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
+      {
+         return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
       }
 
       const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
@@ -96,7 +82,18 @@ namespace crimild::nodes {
    protected:
       virtual void onParentChanged( void )
       {
-         parentChanged();
+         for ( auto &maybeChild : m_children ) {
+            if ( auto child = maybeChild ) {
+               child->onParentChanged();
+            }
+         }
+      }
+
+   private:
+      void setParent( std::shared_ptr< Node > const &newParent )
+      {
+         m_parent = newParent;
+         onParentChanged();
       }
 
    private:

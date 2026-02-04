@@ -1,6 +1,7 @@
 #ifndef CRIMILD_CORE_NODES_3D_SPATIAL_
 #define CRIMILD_CORE_NODES_3D_SPATIAL_
 
+#include "Common/Signal.hpp"
 #include "Nodes/Node.hpp"
 
 namespace crimild::nodes {
