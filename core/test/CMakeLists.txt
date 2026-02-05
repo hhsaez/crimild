@@ -13,6 +13,7 @@ target_sources(
 
     ../src/Nodes/Node.test.cpp
 
+    ../src/Nodes/3D/Geometry3D.test.cpp
     ../src/Nodes/3D/Spatial3D.test.cpp
     
     Behaviors/Actions/MotionApplyTest.cpp

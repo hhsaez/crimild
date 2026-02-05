@@ -406,6 +406,7 @@ target_sources(
 
     Nodes/Node.hpp
 
+    Nodes/3D/Geometry3D.hpp
     Nodes/3D/Spatial3D.hpp
 
     ParticleSystem/Generators/AccelerationParticleGenerator.cpp
