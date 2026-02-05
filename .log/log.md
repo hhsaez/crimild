@@ -12,6 +12,9 @@ author: H. Hernan Saez
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
 - [ ] Move test setup to same CMakeFiles as library
 
+# 2026-02-05
+- Moving forward with implementing Triangle3D as an example using the new assembly classes
+
 # 2026-01-30
 - I finally feel like I'm moving forward 
 - Creating new classes for nodes (Node, Spatial3D, Geometry3D)
