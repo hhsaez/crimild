@@ -24,6 +24,8 @@ target_sources(
    PRIVATE Rendering/OpenGLPrimitiveBindable.hpp
    PRIVATE Rendering/OpenGLSceneRenderPass.cpp
    PUBLIC Rendering/OpenGLSceneRenderPass.hpp
+   PRIVATE Rendering/OpenGLRenderPass.cpp
+   PUBLIC Rendering/OpenGLRenderPass.hpp
    PRIVATE Rendering/OpenGLShader.cpp
    PRIVATE Rendering/OpenGLShader.hpp
    PRIVATE Rendering/OpenGLShaderProgram.cpp

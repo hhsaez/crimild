@@ -5,12 +5,13 @@ author: H. Hernan Saez
 
 # TODO
 - [ ] Cache parent 3D
-- [ ] Bind child Spatial3D to parents
 - [ ] Bind signals to other signals of the same type, allowing a "hierarhcy" of signals
-- [ ] Deprecate crimild::alloc/alloc_unique in favor of std::make_shared and std::make_unique.
 - [ ] RTTI as template<"crimild::Foo">
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
 - [ ] Move test setup to same CMakeFiles as library
+
+# 2026-02-06
+- I finally render a triangle using the new crimild::nodes hierarchy
 
 # 2026-02-05
 - Moving forward with implementing Triangle3D as an example using the new assembly classes

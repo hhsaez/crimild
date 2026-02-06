@@ -3,6 +3,7 @@
 
 #include "Foundation/GLFWOpenGLWindow.hpp"
 #include "Foundation/GLFWSystem.hpp"
+#include "Rendering/OpenGLRenderPass.hpp"
 #include "Rendering/OpenGLSceneRenderPass.hpp"
 
 namespace crimild::universal::player {

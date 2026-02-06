@@ -1,0 +1,20 @@
+#ifndef CRIMILD_CORE_NODES_3D_CAMERA_
+#define CRIMILD_CORE_NODES_3D_CAMERA_
+
+#include "Nodes/3D/Spatial3D.hpp"
+
+namespace crimild::nodes {
+
+   class Camera3D : public Spatial3D {
+   public:
+      virtual ~Camera3D( void ) = default;
+
+      void lookAt( const Point3f &worldPosition );
+
+      Matrix4f getViewMatrix( void ) const { return Matrix4f( inverse( getWorld() ) ); }
+      Matrix4f getProjectionMatrix( void ) const { return perspective( 60.0f, 1.0f, 0.1f, 1000.0f ); }
+   };
+
+}
+
+#endif

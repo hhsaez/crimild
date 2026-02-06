@@ -12,7 +12,7 @@ namespace crimild {
 
 namespace crimild::universal {
 
-   class SceneRenderPass {
+   class [[deprecated]] SceneRenderPass {
    public:
       void operator()(
          uint32_t width,

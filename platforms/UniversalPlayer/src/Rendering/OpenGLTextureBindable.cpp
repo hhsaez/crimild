@@ -29,10 +29,10 @@ void TextureBindable::load( void )
 
    auto texture = getOwner< Texture >();
    auto image = texture->imageView->image;
-   auto width = image->getWidth();
-   auto height = image->getHeight();
+   auto width = image->extent.width;
+   auto height = image->extent.height;
    auto bpp = image->getBpp();
-   auto data = image->getData();
+   auto data = image->getBufferView()->getData();
 
    glGenTextures( 1, &m_texture );
 
