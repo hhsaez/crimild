@@ -20,6 +20,8 @@ void RenderPass::operator()(
    glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
    glClear( GL_COLOR_BUFFER_BIT );
 
+   camera->setProjectionMatrix( perspective( 60.0f, ( float ) width / ( float ) height, 0.1f, 1000.0f ) );
+
    render( node, camera );
 
    auto error = glGetError();

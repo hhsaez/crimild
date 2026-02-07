@@ -12,7 +12,12 @@ namespace crimild::nodes {
       void lookAt( const Point3f &worldPosition );
 
       Matrix4f getViewMatrix( void ) const { return Matrix4f( inverse( getWorld() ) ); }
-      Matrix4f getProjectionMatrix( void ) const { return perspective( 60.0f, 1.0f, 0.1f, 1000.0f ); }
+
+      void setProjectionMatrix( const Matrix4f &projection ) { m_projection = projection; }
+      const Matrix4f &getProjectionMatrix( void ) const { return m_projection; }
+
+   private:
+      Matrix4f m_projection = perspective( 60.0f, 1.0f, 0.1f, 1000.0f );
    };
 
 }
