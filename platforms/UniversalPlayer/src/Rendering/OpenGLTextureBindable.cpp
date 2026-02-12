@@ -37,10 +37,49 @@ void TextureBindable::load( void )
    glGenTextures( 1, &m_texture );
 
    glBindTexture( GL_TEXTURE_2D, m_texture );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+   auto wrapMode = GL_REPEAT;
+   auto minFilter = GL_NEAREST;
+   auto magFilter = GL_NEAREST;
+   if ( auto sampler = texture->sampler ) {
+      wrapMode = [ sampler ] {
+         switch ( sampler->getWrapMode() ) {
+            case Sampler::WrapMode::REPEAT:
+               return GL_REPEAT;
+            case Sampler::WrapMode::CLAMP_TO_EDGE:
+               return GL_CLAMP_TO_EDGE;
+            default:
+               break;
+         }
+      }();
+
+      minFilter = [ sampler ] {
+         switch ( sampler->getMinFilter() ) {
+            case Sampler::Filter::NEAREST:
+               return GL_NEAREST;
+            case Sampler::Filter::LINEAR:
+               return GL_LINEAR;
+            default:
+               break;
+         }
+      }();
+
+      magFilter = [ sampler ] {
+         switch ( sampler->getMagFilter() ) {
+            case Sampler::Filter::NEAREST:
+               return GL_NEAREST;
+            case Sampler::Filter::LINEAR:
+               return GL_LINEAR;
+            default:
+               break;
+         }
+      }();
+   }
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter );
+
    glTexImage2D(
       GL_TEXTURE_2D,
       0,

@@ -37,15 +37,15 @@ auto main( int argc, char *argv[] ) -> int
                      Array< VertexP3TC2 > {
                         {
                            .position = Vector3f { -0.5f, -0.5f, 0.0f },
-                           .texCoord = Vector2f { 0, 1 },
+                           .texCoord = Vector2f { 0, 0 },
                         },
                         {
                            .position = Vector3f { 0.5f, -0.5f, 0.0f },
-                           .texCoord = Vector2f { 1, 1 },
+                           .texCoord = Vector2f { 0, 1 },
                         },
                         {
                            .position = Vector3f { 0.0f, 0.5f, 0.0f },
-                           .texCoord = Vector2f { 0, 0 },
+                           .texCoord = Vector2f { 1, 1 },
                         },
                      }
                   );
@@ -67,7 +67,7 @@ auto main( int argc, char *argv[] ) -> int
          //         material->setColorMap( Texture::ONE );
          material->setColorMap(
             [] {
-               uint8_t colors[] = {
+               auto data = ByteArray {
                   // red
                   0xff,
                   0x00,
@@ -89,19 +89,6 @@ auto main( int argc, char *argv[] ) -> int
                   0xff,
                   0xff,
                };
-               crimild::Int32 width = 2;
-               crimild::Int32 height = 2;
-               crimild::Int32 bpp = 4;
-
-               auto data = ByteArray( width * height * bpp );
-               for ( int y = 0; y < width; y++ ) {
-                  for ( int x = 0; x < width; x++ ) {
-                     auto colorIdx = ( y % 2 + x % 2 ) % 2;
-                     for ( int i = 0; i < bpp; i++ ) {
-                        data[ y * width * bpp + x * bpp + i ] = colors[ colorIdx * bpp + i ];
-                     }
-                  }
-               }
 
                auto image = crimild::alloc< Image >();
                image->extent = {
@@ -123,6 +110,7 @@ auto main( int argc, char *argv[] ) -> int
                   auto sampler = crimild::alloc< Sampler >();
                   sampler->setMinFilter( Sampler::Filter::LINEAR );
                   sampler->setMagFilter( Sampler::Filter::LINEAR );
+                  sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_EDGE );
                   return sampler;
                }();
                return texture;

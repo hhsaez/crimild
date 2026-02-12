@@ -12,7 +12,7 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
-   glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+   // glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
    // Enable forward compatibility to remove deprecated OpenGL features and ensure
    // compatibility across platforms. This is required on macOS for OpenGL 3.3+ contexts

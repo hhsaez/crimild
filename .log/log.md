@@ -4,15 +4,15 @@ author: H. Hernan Saez
 ---
 
 # TODO
-- [ ] Texture filtering
-- [ ] Fix texture coordinates
-- [ ] Triangle example with colors
 - [ ] Handle user interaction (clicks)
 - [ ] Cache parent 3D
 - [ ] Bind signals to other signals of the same type, allowing a "hierarhcy" of signals
 - [ ] RTTI as template<"crimild::Foo">
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
 - [ ] Move test setup to same CMakeFiles as library
+
+# 2026-02-11
+- Fixed triangle example. Now it uses a texture for vertex coloring
 
 # 2026-02-07
 - Continue improving the basic OpenGL-based render pass 

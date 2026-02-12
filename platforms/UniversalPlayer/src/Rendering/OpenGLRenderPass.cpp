@@ -13,11 +13,12 @@ void RenderPass::operator()(
    uint32_t width,
    uint32_t height,
    std::shared_ptr< nodes::Node > const &node,
-   std::shared_ptr< nodes::Camera3D > const &camera
+   std::shared_ptr< nodes::Camera3D > const &camera,
+   ColorRGBA clearColor
 ) const
 {
    glViewport( 0, 0, width, height );
-   glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+   glClearColor( clearColor.r, clearColor.g, clearColor.b, clearColor.a );
    glClear( GL_COLOR_BUFFER_BIT );
 
    camera->setProjectionMatrix( perspective( 60.0f, ( float ) width / ( float ) height, 0.1f, 1000.0f ) );

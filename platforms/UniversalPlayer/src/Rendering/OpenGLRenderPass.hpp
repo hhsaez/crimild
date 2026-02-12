@@ -1,6 +1,7 @@
 #ifndef CRIMILD_OPENGL_RENDERING_RENDER_PASS_
 #define CRIMILD_OPENGL_RENDERING_RENDER_PASS_
 
+#include <Crimild_Mathematics.hpp>
 #include <memory>
 
 namespace crimild::nodes {
@@ -18,7 +19,8 @@ namespace crimild::universal {
          uint32_t width,
          uint32_t height,
          std::shared_ptr< crimild::nodes::Node > const &node,
-         std::shared_ptr< crimild::nodes::Camera3D > const &camera
+         std::shared_ptr< crimild::nodes::Camera3D > const &camera,
+         ColorRGBA clearColor = ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f }
       ) const;
 
    private:
