@@ -31,7 +31,7 @@ void TextureBindable::load( void )
    auto image = texture->imageView->image;
    auto width = image->extent.width;
    auto height = image->extent.height;
-   auto bpp = image->getBpp();
+   auto format = image->format == Format::R8G8B8_UNORM ? GL_RGB : GL_RGBA;
    auto data = image->getBufferView()->getData();
 
    glGenTextures( 1, &m_texture );
@@ -83,11 +83,11 @@ void TextureBindable::load( void )
    glTexImage2D(
       GL_TEXTURE_2D,
       0,
-      bpp == 3 ? GL_RGB : GL_RGBA,
+      format,
       width,
       height,
       0,
-      bpp == 3 ? GL_RGB : GL_RGBA,
+      format,
       GL_UNSIGNED_BYTE,
       data
    );
