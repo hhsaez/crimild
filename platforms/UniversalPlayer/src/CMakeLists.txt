@@ -18,8 +18,12 @@ target_sources(
    PRIVATE Rendering/OpenGLBindable.hpp
    PRIVATE Rendering/OpenGLIndexBufferBindable.cpp
    PRIVATE Rendering/OpenGLIndexBufferBindable.hpp
+
    PRIVATE Rendering/OpenGLMaterialBindable.cpp
    PRIVATE Rendering/OpenGLMaterialBindable.hpp
+   PRIVATE Rendering/OpenGLUnlitMaterialBindable.cpp
+   PRIVATE Rendering/OpenGLUnlitMaterialBindable.hpp
+
    PRIVATE Rendering/OpenGLPrimitiveBindable.cpp
    PRIVATE Rendering/OpenGLPrimitiveBindable.hpp
    PRIVATE Rendering/OpenGLSceneRenderPass.cpp

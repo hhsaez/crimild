@@ -1,9 +1,9 @@
 #include "OpenGLSceneRenderPass.hpp"
 
 #include "Foundation/OpenGLUtils.hpp"
-#include "Rendering/OpenGLMaterialBindable.hpp"
 #include "Rendering/OpenGLPrimitiveBindable.hpp"
 #include "Rendering/OpenGLShaderProgram.hpp"
+#include "Rendering/OpenGLUnlitMaterialBindable.hpp"
 
 #include <Crimild.hpp>
 #include <Crimild_Mathematics.hpp>
@@ -25,7 +25,7 @@ void SceneRenderPass::operator()(
    for ( auto &geometry : geometries ) {
       auto ms = geometry->getComponent< crimild::MaterialComponent >();
       if ( auto material = ms->first() ) {
-         auto bindable = material->getOrCreateExtension< opengl::MaterialBindable >();
+         auto bindable = material->getOrCreateExtension< opengl::UnlitMaterialBindable >();
          bindable->bind();
 
          auto program = bindable->getProgram();

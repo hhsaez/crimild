@@ -36,5 +36,6 @@ endif()
 
 if ( CRIMILD_BUILD_UNIVERSAL_EXAMPLES )
   add_subdirectory( Triangle3D )
+  add_subdirectory( Bounding3D )
 endif() 
 

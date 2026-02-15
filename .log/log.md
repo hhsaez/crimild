@@ -11,6 +11,10 @@ author: H. Hernan Saez
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
 - [ ] Move test setup to same CMakeFiles as library
 
+# 2026-02-12
+- ImageTGA is quite old and it was not using the new way of declaring images with buffer views
+- I feel like I need to deprecate the entire engine and start over :P
+
 # 2026-02-11
 - Fixed triangle example. Now it uses a texture for vertex coloring
 

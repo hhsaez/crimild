@@ -4,10 +4,22 @@
 #include <Crimild_Mathematics.hpp>
 #include <memory>
 
-namespace crimild::nodes {
+namespace crimild {
 
-   class Node;
-   class Camera3D;
+   class Material;
+
+   namespace nodes {
+
+      class Node;
+      class Camera3D;
+
+   }
+
+   namespace opengl {
+
+      class MaterialBindable;
+
+   }
 
 }
 
@@ -28,6 +40,8 @@ namespace crimild::universal {
          std::shared_ptr< crimild::nodes::Node > const &node,
          std::shared_ptr< crimild::nodes::Camera3D > const &camera
       ) const;
+
+      std::shared_ptr< opengl::MaterialBindable > getMaterialBindable( std::shared_ptr< Material > const &material ) const;
    };
 
 }
