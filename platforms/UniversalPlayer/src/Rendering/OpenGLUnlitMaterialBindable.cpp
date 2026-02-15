@@ -12,7 +12,9 @@ void UnlitMaterialBindable::bind( void )
 
    auto material = getOwner< UnlitMaterial >();
 
-   // m_program->setUniform( "uColor", material->getColor() );
+   if ( auto program = getProgram() ) {
+      program->setUniform( "uColor", material->getColor() );
+   }
 
    auto texture = retain( material->getColorMap() );
    if ( texture == nullptr ) {
@@ -69,6 +71,7 @@ std::shared_ptr< ShaderProgram > UnlitMaterialBindable::createProgram( void )
                in vec2 vTexCoord;
 
                uniform sampler2D uColorMap;
+               uniform vec4 uColor;
       
                layout( location = 0 ) out vec4 outFragColor;
       
@@ -76,6 +79,7 @@ std::shared_ptr< ShaderProgram > UnlitMaterialBindable::createProgram( void )
                {
                   outFragColor = texture( uColorMap, vTexCoord );
                   outFragColor.a = 1.0;
+                  outFragColor *= uColor;
                }
             )"
          ),

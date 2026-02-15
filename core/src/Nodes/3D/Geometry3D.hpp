@@ -22,6 +22,13 @@ namespace crimild::nodes {
 
       const std::shared_ptr< Material > &getMaterial( void ) const { return m_material; }
       std::shared_ptr< Material > &getMaterial( void ) { return m_material; }
+
+      template< class MaterialType >
+      std::shared_ptr< MaterialType > getMaterial( void )
+      {
+         return static_pointer_cast< MaterialType >( m_material );
+      }
+
       void setMaterial( std::shared_ptr< Material > const &material ) { m_material = material; }
 
    private:
