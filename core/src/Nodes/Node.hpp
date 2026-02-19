@@ -28,6 +28,12 @@ namespace crimild::nodes {
          return m_parent.lock();
       }
 
+      template< class NodeType >
+      std::shared_ptr< NodeType > getParent( void ) const
+      {
+         return std::static_pointer_cast< NodeType >( m_parent.lock() );
+      }
+
       std::shared_ptr< Node > detachFromParent( void )
       {
          // Since we're detaching from our owner, keep a retained pointer so we're
@@ -72,6 +78,15 @@ namespace crimild::nodes {
       [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
       {
          return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
+      }
+
+      template< class NodeType >
+      std::shared_ptr< NodeType > getChildAt( size_t index ) const
+      {
+         if ( index >= m_children.size() ) {
+            return nullptr;
+         }
+         return std::static_pointer_cast< NodeType >( m_children.at( index ) );
       }
 
       const std::vector< std::shared_ptr< Node > > &getChildren( void ) const

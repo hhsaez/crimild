@@ -16,6 +16,8 @@ namespace crimild::nodes {
       void setProjectionMatrix( const Matrix4f &projection ) { m_projection = projection; }
       const Matrix4f &getProjectionMatrix( void ) const { return m_projection; }
 
+      Ray3 getPickRay( const Point2 &pointer ) const;
+
    private:
       Matrix4f m_projection = perspective( 60.0f, 1.0f, 0.1f, 1000.0f );
    };

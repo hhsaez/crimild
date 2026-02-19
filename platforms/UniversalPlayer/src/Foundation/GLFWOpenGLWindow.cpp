@@ -28,23 +28,33 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
 
    glfwSetWindowUserPointer( m_window, this );
 
-   glfwSetFramebufferSizeCallback(
+   glfwSetWindowSizeCallback(
       m_window,
       []( GLFWwindow *window, int width, int height ) {
          auto windowInstance = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
-            CRIMILD_LOG_DEBUG( "Resizing framebuffer", Vector2i { width, height } );
+            CRIMILD_LOG_DEBUG( "Window resized", Vector2i { width, height } );
             windowInstance->m_width = width;
             windowInstance->m_height = height;
          }
       }
    );
 
+   glfwSetFramebufferSizeCallback(
+      m_window,
+      []( GLFWwindow *window, int width, int height ) {
+         auto windowInstance = static_cast< GLFWOpenGLWindow * >( glfwGetWindowUserPointer( window ) );
+         if ( windowInstance ) {
+            CRIMILD_LOG_DEBUG( "Resizing framebuffer", Vector2i { width, height } );
+            // windowInstance->m_width = width;
+            // windowInstance->m_height = height;
+         }
+      }
+   );
+
    int fbw, fbh;
    glfwGetFramebufferSize( m_window, &fbw, &fbh );
-   m_width = fbw;
-   m_height = fbh;
-   CRIMILD_LOG_INFO( "Created framebuffer ", Vector2ui { m_width, m_height } );
+   CRIMILD_LOG_INFO( "Created framebuffer ", Vector2i { fbw, fbh } );
 
    glfwSetKeyCallback(
       m_window,
@@ -130,4 +140,11 @@ bool GLFWOpenGLWindow::isOpen( void ) const
 void GLFWOpenGLWindow::swapBuffers( void ) const
 {
    glfwSwapBuffers( m_window );
+}
+
+std::pair< uint32_t, uint32_t > GLFWOpenGLWindow::getRenderSize( void ) const
+{
+   int fbw, fbh;
+   glfwGetFramebufferSize( m_window, &fbw, &fbh );
+   return std::make_pair( fbw, fbh );
 }

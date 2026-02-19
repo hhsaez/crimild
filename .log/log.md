@@ -10,6 +10,22 @@ author: H. Hernan Saez
 - [ ] RTTI as template<"crimild::Foo">
 - [ ] Resources with prototype strategy for clonning (deep, shallow)
 - [ ] Move test setup to same CMakeFiles as library
+- [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
+- [ ] Fix window dimensions for different DPI.
+
+# 2026-02-19
+- Trying and fixing selection issues due to ray/bounding intersection not working correctly.
+- Found the problem: window dimensions (getWidth(), getHeight()) are returning sizes multiplied by DPI. A 1024x768 window is being returned as 2048x1536. Then, the ray calculation incorrect produces the wrong value due to invalid NDC coordinates.
+- How should I fix this?
+
+# 2026-02-18
+- Working on boundings and selection.
+- New boundings example.
+- Selectable nodes as decorators.
+- I don't mind overusing dynamic cast. It keeps things simpler and I'm keepining contained to a single algorithm. It should be fine (famous last words). 
+- I implemented clicking by using rays. Simple. 
+- I like that I'm able to reuse all the math tricks I made for ray tracing rendering, specially the inverse ray trick to test intersection with shapes. 
+- Clicking still don't work as expected. I guess there's something wrong in transforming coordinates to NDC. 
 
 # 2026-02-15
 - Improving material workflow and binding

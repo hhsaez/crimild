@@ -39,7 +39,6 @@ void RenderPass::render(
 {
    if ( auto geometry = dynamic_pointer_cast< nodes::Geometry3D >( node ) ) {
       if ( auto material = geometry->getMaterial() ) {
-         // auto bindable = material->getOrCreateExtension< opengl::MaterialBindable >();
          if ( auto bindable = getMaterialBindable( material ) ) {
             bindable->bind();
 
