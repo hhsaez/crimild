@@ -17,6 +17,25 @@ namespace crimild {
          return m_extensions.find( ExtensionType::__CLASS_NAME ) != m_extensions.end();
       }
 
+      void attach( std::shared_ptr< Extension > const &e )
+      {
+         m_extensions[ e->getClassName() ] = e;
+         e->setOwner( retain( this ) );
+      }
+
+      /**
+       * @brief Attach an extension overriding the key name
+       *
+       * This method is useful when attaching extensions that need to be retrieved
+       * using a name other than their class name. This is useful when we need to
+       * attach an extension using a base class name, for example.
+       */
+      void attach( std::string overrideName, std::shared_ptr< Extension > const &e )
+      {
+         m_extensions[ overrideName ] = e;
+         e->setOwner( retain( this ) );
+      }
+
       template< typename ExtensionType, typename... Args >
       std::shared_ptr< ExtensionType > attach( Args &&...args )
       {
@@ -69,13 +88,6 @@ namespace crimild {
             return true;
          }
          return false;
-      }
-
-   private:
-      void attach( std::shared_ptr< Extension > const &e )
-      {
-         m_extensions[ e->getClassName() ] = e;
-         e->setOwner( retain( this ) );
       }
 
    private:

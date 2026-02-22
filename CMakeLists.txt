@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.28)
 
 # Register custom scripts
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -28,6 +28,7 @@ option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_PLAYER "Build crimild player?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_UNIVERSAL_PLAYER "Build crimild universal player?" ${CRIMILD_IS_MAIN_PROJECT})
 option(CRIMILD_BUILD_EXAMPLES "Build examples?" ${CRIMILD_IS_MAIN_PROJECT})
+option(CRIMILD_BUILD_UNIVERSAL_EXAMPLES "Build examples using universal player?" ${CRIMILD_IS_MAIN_PROJECT})
 
 # Global tests setup
 # Individual directories have to enable their tests too.
@@ -78,8 +79,5 @@ if(CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER)
 	add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/tinygltf)
 endif()
 
-if(CRIMILD_BUILD_EXAMPLES)
-	add_subdirectory(examples)
-endif()
-
+add_subdirectory(examples)
 add_subdirectory(platforms)

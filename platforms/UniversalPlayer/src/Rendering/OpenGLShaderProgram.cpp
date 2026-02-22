@@ -52,3 +52,8 @@ void ShaderProgram::setUniform( const char *name, const crimild::Matrix4f &value
 {
    glUniformMatrix4fv( glGetUniformLocation( m_id, name ), 1, GL_FALSE, get_ptr( value ) );
 }
+
+void ShaderProgram::setUniform( const char *name, const crimild::ColorRGBA &value )
+{
+   glUniform4f( glGetUniformLocation( m_id, name ), value.r, value.g, value.b, value.a );
+}

@@ -20,6 +20,7 @@ namespace crimild::opengl {
       void unbind( void ) const;
 
       void setUniform( const char *name, const Matrix4f &value );
+      void setUniform( const char *name, const ColorRGBA &value );
 
    private:
       GLuint m_id = GL_NONE;

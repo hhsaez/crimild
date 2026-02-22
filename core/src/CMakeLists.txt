@@ -576,6 +576,13 @@ target_sources(
     Visitors/UpdateComponents.cpp
     Visitors/UpdateRenderState.cpp
     Visitors/UpdateWorldState.cpp
+
+    PUBLIC Nodes/Node.hpp
+
+    PUBLIC Nodes/3D/Camera3D.hpp
+    PRIVATE Nodes/3D/Camera3D.cpp
+    PUBLIC Nodes/3D/Geometry3D.hpp
+    PUBLIC Nodes/3D/Spatial3D.hpp
 )
 
 target_include_directories( crimild_coding PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )

@@ -29,26 +29,65 @@ void TextureBindable::load( void )
 
    auto texture = getOwner< Texture >();
    auto image = texture->imageView->image;
-   auto width = image->getWidth();
-   auto height = image->getHeight();
-   auto bpp = image->getBpp();
-   auto data = image->getData();
+   auto width = image->extent.width;
+   auto height = image->extent.height;
+   auto format = image->format == Format::R8G8B8_UNORM ? GL_RGB : GL_RGBA;
+   auto data = image->getBufferView()->getData();
 
    glGenTextures( 1, &m_texture );
 
    glBindTexture( GL_TEXTURE_2D, m_texture );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+
+   auto wrapMode = GL_REPEAT;
+   auto minFilter = GL_NEAREST;
+   auto magFilter = GL_NEAREST;
+   if ( auto sampler = texture->sampler ) {
+      wrapMode = [ sampler ] {
+         switch ( sampler->getWrapMode() ) {
+            case Sampler::WrapMode::REPEAT:
+               return GL_REPEAT;
+            case Sampler::WrapMode::CLAMP_TO_EDGE:
+               return GL_CLAMP_TO_EDGE;
+            default:
+               break;
+         }
+      }();
+
+      minFilter = [ sampler ] {
+         switch ( sampler->getMinFilter() ) {
+            case Sampler::Filter::NEAREST:
+               return GL_NEAREST;
+            case Sampler::Filter::LINEAR:
+               return GL_LINEAR;
+            default:
+               break;
+         }
+      }();
+
+      magFilter = [ sampler ] {
+         switch ( sampler->getMagFilter() ) {
+            case Sampler::Filter::NEAREST:
+               return GL_NEAREST;
+            case Sampler::Filter::LINEAR:
+               return GL_LINEAR;
+            default:
+               break;
+         }
+      }();
+   }
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter );
+
    glTexImage2D(
       GL_TEXTURE_2D,
       0,
-      bpp == 3 ? GL_RGB : GL_RGBA,
+      format,
       width,
       height,
       0,
-      bpp == 3 ? GL_RGB : GL_RGBA,
+      format,
       GL_UNSIGNED_BYTE,
       data
    );
