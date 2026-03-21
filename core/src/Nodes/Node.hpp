@@ -34,46 +34,10 @@ namespace crimild::nodes {
          return std::static_pointer_cast< NodeType >( m_parent.lock() );
       }
 
-      std::shared_ptr< Node > detachFromParent( void )
-      {
-         // Since we're detaching from our owner, keep a retained pointer so we're
-         // not destroyed yet.
-         auto self = retain( this );
-         if ( auto parent = getParent() ) {
-            parent->detach( self );
-         }
-         return self;
-      }
+      std::shared_ptr< Node > detachFromParent( void );
 
-      void attach( std::shared_ptr< Node > const &child )
-      {
-         if ( child == nullptr ) {
-            return;
-         }
-
-         if ( child->getParent().get() == this ) {
-            return;
-         }
-
-         child->detachFromParent();
-         m_children.push_back( child );
-         child->setParent( retain( this ) );
-      }
-
-      void detach( std::shared_ptr< Node > const &child )
-      {
-         if ( child == nullptr ) {
-            return;
-         }
-
-         if ( child->getParent().get() != this ) {
-            return;
-         }
-
-         auto it = std::find( m_children.begin(), m_children.end(), child );
-         m_children.erase( it );
-         child->setParent( nullptr );
-      }
+      void attach( std::shared_ptr< Node > const &child );
+      void detach( std::shared_ptr< Node > const &child );
 
       [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
       {
@@ -89,27 +53,18 @@ namespace crimild::nodes {
          return std::static_pointer_cast< NodeType >( m_children.at( index ) );
       }
 
+      /**
+       * @brief Get node children
+       *
+       * Returns a const reference to prevent direct modifications to the children array
+       */
       const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
       {
          return m_children;
       }
 
-   protected:
-      virtual void onParentChanged( void )
-      {
-         for ( auto &maybeChild : m_children ) {
-            if ( auto child = maybeChild ) {
-               child->onParentChanged();
-            }
-         }
-      }
-
    private:
-      void setParent( std::shared_ptr< Node > const &newParent )
-      {
-         m_parent = newParent;
-         onParentChanged();
-      }
+      void setParent( std::shared_ptr< Node > const &newParent );
 
    private:
       std::weak_ptr< Node > m_parent;

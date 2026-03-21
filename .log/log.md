@@ -12,6 +12,18 @@ author: H. Hernan Saez
 - [ ] Move test setup to same CMakeFiles as library
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
+- [ ] CMake presets
+
+# 2026-03-12
+- Still analyzing the benefits/cons of having a base class Node with children
+  1. Uniform tree API everywhere: You can attach/traverse/reparent any gameplay object the same way.
+  2. Simpler engine plumbing: Serialization, editor tooling, scene loading, signals, lifecycle callbacks, and traversal systems target one abstraction.
+  3. Composability: Mixing concerns (render, audio, gameplay, UI helpers) in one tree is easy, including intermediary utility nodes.
+  4. Lower cognitive overhead: Users learn one mental model: "everything is a node in a scene tree"
+  5. Faster prototyping: You can build features quickly without creating a new hierarchy type each time.
+- Switch nodes can be implemented by just enabling/disabling specific children
+- Same for MultiSwitch/LODs/etc
+- `getChildren` vs `getActiveChildren`
 
 # 2026-02-19
 - Trying and fixing selection issues due to ray/bounding intersection not working correctly.
