@@ -14,6 +14,12 @@ author: H. Hernan Saez
 - [ ] Fix window dimensions for different DPI.
 - [ ] CMake presets
 
+# 2026-03-24
+- Continue working on a formal definition for assemblies
+
+# 2026-03-23
+- Considering representing assemblies as ASTs (abstract syntax trees)
+
 # 2026-03-12
 - Still analyzing the benefits/cons of having a base class Node with children
   1. Uniform tree API everywhere: You can attach/traverse/reparent any gameplay object the same way.
