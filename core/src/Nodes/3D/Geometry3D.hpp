@@ -10,7 +10,7 @@ namespace crimild {
 
 }
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    class Geometry3D : public Spatial3D {
    public:

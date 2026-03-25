@@ -1,6 +1,6 @@
 #include "Nodes/3D/Camera3D.hpp"
 
-using namespace crimild::nodes;
+using namespace crimild::experimental;
 
 void Camera3D::lookAt( const Point3f &worldPosition )
 {

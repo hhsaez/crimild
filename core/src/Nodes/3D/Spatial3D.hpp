@@ -4,7 +4,7 @@
 #include "Common/Signal.hpp"
 #include "Nodes/Node.hpp"
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    /**
     * @brief An entity representing a 3D object
@@ -89,15 +89,17 @@ namespace crimild::nodes {
       }
 
    protected:
-      virtual void onParentChanged( void ) override
-      {
-         Node::onParentChanged();
-         if ( auto parent = m_parent3D.lock() ) {
-            parent->worldChanged.unbind( retain( this ) );
-         }
-         m_parent3D.reset();
-         invalidateWorld();
+      /*
+   virtual void onParentChanged( void ) override
+   {
+      Node::onParentChanged();
+      if ( auto parent = m_parent3D.lock() ) {
+         parent->worldChanged.unbind( retain( this ) );
       }
+      m_parent3D.reset();
+      invalidateWorld();
+      }
+      */
 
    private:
       void invalidateWorld( void )

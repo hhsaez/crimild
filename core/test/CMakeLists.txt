@@ -12,6 +12,7 @@ target_sources(
     ../src/Assemblies/Assembly.test.cpp
 
     ../src/Nodes/Node.test.cpp
+    ../src/Nodes/Group.test.cpp
 
     ../src/Nodes/3D/Geometry3D.test.cpp
     ../src/Nodes/3D/Spatial3D.test.cpp

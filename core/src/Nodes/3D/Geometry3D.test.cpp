@@ -4,7 +4,7 @@
 
 TEST( Geometry3D, construction )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
    auto g = std::make_shared< Geometry3D >();
 

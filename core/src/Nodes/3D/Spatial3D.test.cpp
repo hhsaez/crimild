@@ -1,12 +1,15 @@
 #include "Spatial3D.hpp"
 
+#include "Nodes/3D/Group3D.hpp"
+#include "Nodes/Group.hpp"
+
 #include <gtest/gtest.h>
 
 TEST( Spatial3D, direct_child )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Spatial3D >();
+   auto parent = std::make_shared< Group3D >();
    auto child = std::make_shared< Spatial3D >();
    parent->attach( child );
 
@@ -16,10 +19,10 @@ TEST( Spatial3D, direct_child )
 
 TEST( Spatial3D, indirect_child )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Spatial3D >();
-   auto node = std::make_shared< Node >();
+   auto parent = std::make_shared< Group3D >();
+   auto node = std::make_shared< Group >();
    parent->attach( node );
    auto child = std::make_shared< Spatial3D >();
    node->attach( child );
@@ -31,9 +34,9 @@ TEST( Spatial3D, indirect_child )
 
 TEST( Spatial3D, invalidates_world_when_parent_changes )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Spatial3D >();
+   auto parent = std::make_shared< Group3D >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -43,10 +46,10 @@ TEST( Spatial3D, invalidates_world_when_parent_changes )
 
 TEST( Spatial3D, invalidates_world_when_hierarchy_changes )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Spatial3D >();
-   auto node = std::make_shared< Node >();
+   auto parent = std::make_shared< Group3D >();
+   auto node = std::make_shared< Group >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );

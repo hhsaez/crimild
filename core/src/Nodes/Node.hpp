@@ -1,16 +1,23 @@
-#ifndef CRIMILD_CORE_NODES_NODE
-#define CRIMILD_CORE_NODES_NODE
+#ifndef CRIMILD_CORE_NODES_NODE_
+#define CRIMILD_CORE_NODES_NODE_
 
 #include "Entity/Entity.hpp"
 
 #include <Crimild_Foundation.hpp>
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    /**
     * @brief A named entity that is part of a hierarchy
     *
-    * Nodes should have up to one parent and may have any number of children.
+    * Nodes form a hierarchy but the base class only defines the parent relationship.
+    *
+    * Why not including child management in Node?
+    * The reason is that different nodes may handle children in different ways. In the
+    * simplest case, a Group, we have a bunch of child nodes (sorted or not, it doesn't
+    * really matter). But most complex nodes, like a Switch, LOD, Decorators, may have
+    * one, two or any kind of children and some of them might not be active at any
+    * given point in time.
     */
    class Node
       : public Entity,
@@ -36,39 +43,15 @@ namespace crimild::nodes {
 
       std::shared_ptr< Node > detachFromParent( void );
 
-      void attach( std::shared_ptr< Node > const &child );
-      void detach( std::shared_ptr< Node > const &child );
-
-      [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
-      {
-         return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
-      }
-
-      template< class NodeType >
-      std::shared_ptr< NodeType > getChildAt( size_t index ) const
-      {
-         if ( index >= m_children.size() ) {
-            return nullptr;
-         }
-         return std::static_pointer_cast< NodeType >( m_children.at( index ) );
-      }
-
-      /**
-       * @brief Get node children
-       *
-       * Returns a const reference to prevent direct modifications to the children array
-       */
-      const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
-      {
-         return m_children;
-      }
-
-   private:
+      private:
+      // Use friendship to declare which classes have access to internal engine functions.
+      // This list should not change frequently considering we should only need to explicitly
+      // declare the mixins as friends.
+         template< class BaseType, class ChildType > friend class WithChildren;
       void setParent( std::shared_ptr< Node > const &newParent );
 
    private:
       std::weak_ptr< Node > m_parent;
-      std::vector< std::shared_ptr< Node > > m_children;
    };
 
 }

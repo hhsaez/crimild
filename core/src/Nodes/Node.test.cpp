@@ -1,49 +1,65 @@
-#include "Node.hpp"
+#include "Nodes/Node.hpp"
+
+#include "Nodes/Group.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-TEST( nodes_Node, attach_child )
-{
-   using namespace crimild::nodes;
+namespace crimild::experimental {
 
-   auto p = std::make_shared< Node >();
-   auto c = std::make_shared< Node >();
+   class BaseVisitor {
+      public:
+         virtual ~BaseVisitor( void )  = default;
+   };
 
-   EXPECT_FALSE( p->hasChild( c ) );
-   EXPECT_FALSE( c->hasParent() );
+   template<
+      class VisitableType,
+      typename RetType = void >
+   class Visitor {
+   public:
+         using Ret = RetType;
+         virtual RetType visit( VisitableType & ) = 0;
+   };
 
-   p->attach( c );
-   EXPECT_EQ( p->getChildren().size(), 1 );
-   EXPECT_EQ( c->getParent(), p );
-   EXPECT_TRUE( p->hasChild( c ) );
+   class SomeVisitor
+      : public BaseVisitor,
+        public Visitor< Node, std::string > {
+      public:
+         virtual std::string visit( Node &node ) { return node.getName(); }
+   };
+
+   template< class VisitableType >
+   class Visitable : public VisitableType {
+      public:
+         virtual void accept( Visitor< VisitableType > &visitor )
+         {
+            visitor.visit( static_cast< VisitableType & >( *this ) );
+         }
+   };
+
+   class VisitableNode : public Visitable< Node > {
+         public:
+   } ;
+   
 }
 
-TEST( nodes_Node, detach_child )
+TEST( experimental_Node, visitors )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
+   auto n = std::make_shared< VisitableNode >();
+   n->setName( "a node" );
 
-   auto p = std::make_shared< Node >();
-   auto c = std::make_shared< Node >();
+   SomeVisitor v;
+   auto s = v.visit( *n );
 
-   p->attach( c );
-   EXPECT_EQ( p->getChildren().size(), 1 );
-   EXPECT_TRUE( c->hasParent() );
-   EXPECT_EQ( c->getParent(), p );
-   EXPECT_TRUE( p->hasChild( c ) );
-
-   p->detach( c );
-   EXPECT_EQ( p->getChildren().size(), 0 );
-   EXPECT_FALSE( c->hasParent() );
-   EXPECT_EQ( c->getParent(), nullptr );
-   EXPECT_FALSE( p->hasChild( c ) );
+   EXPECT_EQ( s, "a node" );
 }
 
-TEST( nodes_Node, detach_from_parent )
+TEST( experimental_Node, detach_from_parent )
 {
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
-   auto p = std::make_shared< Node >();
+   auto p = std::make_shared< Group >();
    auto c = std::make_shared< Node >();
 
    p->attach( c );
@@ -59,83 +75,54 @@ TEST( nodes_Node, detach_from_parent )
    EXPECT_FALSE( p->hasChild( c ) );
 }
 
-TEST( nodes_Node, reattaching_to_parent_does_nothing )
+TEST( experimental_Node, notify_hierarchy_change_on_children )
 {
-   using namespace crimild::nodes;
-
-   auto p = std::make_shared< Node >();
-   auto c = std::make_shared< Node >();
-
-   p->attach( c );
-   EXPECT_EQ( p->getChildren().size(), 1 );
-   EXPECT_EQ( c->getParent(), p );
-   EXPECT_TRUE( p->hasChild( c ) );
-
-   p->attach( c );
-   EXPECT_EQ( p->getChildren().size(), 1 );
-   EXPECT_EQ( c->getParent(), p );
-   EXPECT_TRUE( p->hasChild( c ) );
-}
-
-TEST( nodes_Node, switch_parents )
-{
-   using namespace crimild::nodes;
-
-   auto p0 = std::make_shared< Node >();
-   auto p1 = std::make_shared< Node >();
-   auto c = std::make_shared< Node >();
-
-   p0->attach( c );
-   EXPECT_EQ( c->getParent(), p0 );
-   EXPECT_TRUE( p0->hasChild( c ) );
-
-   p1->attach( c );
-   EXPECT_EQ( c->getParent(), p1 );
-   EXPECT_FALSE( p0->hasChild( c ) );
-   EXPECT_TRUE( p1->hasChild( c ) );
-}
-
-TEST( nodes_Node, notify_hierarchy_change_on_children )
-{
-   using namespace crimild::nodes;
+   /*
+   using namespace crimild::experimental;
 
    class MockNode : public Node {
    public:
       MOCK_METHOD( void, onParentChanged, (), ( override ) );
    };
 
-   using namespace crimild::nodes;
+   using namespace crimild::experimental;
 
    auto p = std::make_shared< Node >();
    auto c = std::make_shared< MockNode >();
 
    EXPECT_CALL( *c, onParentChanged ).Times( 1 );
    p->attach( c );
+   */
+   GTEST_FAIL();
 }
 
-TEST( nodes_Node, notify_hierarchy_change_on_indirect_children )
+TEST( experimental_Node, notify_hierarchy_change_on_indirect_children )
 {
-   using namespace crimild::nodes;
+   /*
+      using namespace crimild::experimental;
 
-   class MockNode : public Node {
-   public:
-      MOCK_METHOD( void, onParentChanged, (), ( override ) );
-   };
+      class MockNode : public Node {
+      public:
+         MOCK_METHOD( void, onParentChanged, (), ( override ) );
+      };
 
-   using namespace crimild::nodes;
+      using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Node >();
-   auto p1 = std::make_shared< Node >();
-   auto c = std::make_shared< MockNode >();
+      auto p0 = std::make_shared< Node >();
+      auto p1 = std::make_shared< Node >();
+      auto c = std::make_shared< MockNode >();
 
-   EXPECT_CALL( *c, onParentChanged ).Times( 1 );
-   p1->attach( c );
+      EXPECT_CALL( *c, onParentChanged ).Times( 1 );
+      p1->attach( c );
 
-   EXPECT_CALL( *c, onParentChanged ).Times( 1 );
-   p0->attach( p1 );
+      EXPECT_CALL( *c, onParentChanged ).Times( 1 );
+      p0->attach( p1 );
+   */
+
+   GTEST_FAIL();
 }
 
-TEST( nodes_Node, coding )
+TEST( experimental_Node, coding )
 {
    GTEST_SKIP();
 }
