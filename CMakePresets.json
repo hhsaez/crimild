@@ -1,0 +1,62 @@
+{
+    "version": 10,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 31,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "crimild-default",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CRIMILD_BUILD_UNIVERSAL_PLAYER": "OFF",
+                "CRIMILD_BUILD_UNIVERSAL_EXAMPLES": "OFF",
+                "CRIMILD_BUILD_EDITOR": "OFF",
+                "CRIMILD_BUILD_TESTS": "OFF"
+            }
+        },
+        {
+            "name": "crimild-linux-default",
+            "inherits": "crimild-default",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux" 
+            },
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "crimild-linux-dev",
+            "inherits": "crimild-linux-default",
+            "description": "Linux presets using Unix Makefiles for daily development",
+            "displayName": "Dev Linux (Unix Makefiles)",
+            "cacheVariables": {
+                "CRIMILD_BUILD_UNIVERSAL_PLAYER": "ON",
+                "CRIMILD_BUILD_UNIVERSAL_EXAMPLES": "ON",
+                "CRIMILD_BUILD_TESTS": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "crimild-linux-dev",
+            "configurePreset": "crimild-linux-dev"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "crimild-linux-dev",
+            "configurePreset": "crimild-linux-dev",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

@@ -5,6 +5,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(crimild_read_version)
 include(crimild_trace)
+include(crimild_compile_commands)
 
 project(
 	Crimild
@@ -81,3 +82,7 @@ endif()
 
 add_subdirectory(examples)
 add_subdirectory(platforms)
+
+# Expose the compilation database at the project root for clangd
+# Some editors, like Emacs, need this in order for lsp to work correctly.
+crimild_link_compile_commands()

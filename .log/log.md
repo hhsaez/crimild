@@ -12,7 +12,13 @@ author: H. Hernan Saez
 - [ ] Move test setup to same CMakeFiles as library
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
-- [ ] CMake presets
+
+# 2026-03-28
+- [x] CMake presets
+- Learning about cmake presets and how to use them here.
+- I created a prefix for Linux. We'll do the same for windows and mac later
+- Still having isssues with LSP and Emacs on Linux. 
+- Working on Nodes and Visitors
 
 # 2026-03-24
 - Continue working on a formal definition for assemblies
