@@ -43,11 +43,12 @@ namespace crimild::experimental {
 
       std::shared_ptr< Node > detachFromParent( void );
 
-      private:
+   private:
       // Use friendship to declare which classes have access to internal engine functions.
       // This list should not change frequently considering we should only need to explicitly
       // declare the mixins as friends.
-         template< class BaseType, class ChildType > friend class WithChildren;
+      template< class BaseType, class ChildType >
+      friend class WithChildren;
       void setParent( std::shared_ptr< Node > const &newParent );
 
    private:
