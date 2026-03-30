@@ -1,6 +1,9 @@
 #include "Nodes/Node.hpp"
 
 #include "Nodes/Group.hpp"
+#include "Nodes/Visitors/InvalidateHierarchy.hpp"
+#include "Nodes/Visitors/NodeConstVisitor.hpp"
+#include "Nodes/Visitors/NodeVisitor.hpp"
 
 #include <memory>
 
@@ -22,4 +25,15 @@ std::shared_ptr< Node > Node::detachFromParent( void )
 void Node::setParent( std::shared_ptr< Node > const &parent )
 {
    m_parent = parent;
+   perform< InvalidateHierarchy >();
+}
+
+void Node::accept( NodeVisitor &visitor )
+{
+   visitor.visitNode( *this );
+}
+
+void Node::accept( NodeConstVisitor &visitor ) const
+{
+   visitor.visitNode( *this );
 }

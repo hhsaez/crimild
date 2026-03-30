@@ -7,6 +7,9 @@
 
 namespace crimild::experimental {
 
+   class NodeVisitor;
+   class NodeConstVisitor;
+
    /**
     * @brief A named entity that is part of a hierarchy
     *
@@ -42,6 +45,23 @@ namespace crimild::experimental {
       }
 
       std::shared_ptr< Node > detachFromParent( void );
+
+      template< class VisitorType >
+      void perform( void )
+      {
+         VisitorType visitor;
+         visitor.traverse( *this );
+      }
+
+      template< class ConstVisitorType >
+      void perform( void ) const
+      {
+         ConstVisitorType visitor;
+         visitor.traverse( *this );
+      }
+
+      virtual void accept( NodeVisitor &visitor );
+      virtual void accept( NodeConstVisitor &visitor ) const;
 
    private:
       // Use friendship to declare which classes have access to internal engine functions.

@@ -8,6 +8,15 @@ namespace crimild::experimental {
 
    /**
     * @brief An entity representing a 3D object
+    *
+    * When to invalidate world state?
+    * - local changed
+    * - parent/hierarhcy changed
+    * - parent world changed
+    * - world change invalidates child world state (self is current)
+    *
+    * World invalidation appens on explicit hiearchy/local/world mutations,
+    * not on lazy recomputation via getWorld()
     */
    class Spatial3D : public Node {
    public:
@@ -18,77 +27,48 @@ namespace crimild::experimental {
 
       inline bool hasParent3D( void ) const { return !m_parent3D.expired(); }
 
-      std::shared_ptr< Spatial3D > getParent3D( void ) const
-      {
-         if ( m_parent3D.expired() ) {
-            auto owner = getParent();
-            while ( owner != nullptr ) {
-               if ( auto parent = std::dynamic_pointer_cast< Spatial3D >( owner ) ) {
-                  m_parent3D = parent;
-                  auto self = retain( const_cast< Spatial3D * >( this ) );
-                  self->invalidateWorld();
-                  parent->worldChanged.bind(
-                     self,
-                     &Spatial3D::invalidateWorld
-                  );
-                  break;
-               }
-               owner = owner->getParent();
-            }
-         }
-
-         return !m_parent3D.expired() ? m_parent3D.lock() : nullptr;
-      }
+      /**
+       * Returns the closest Spatial3D ancestor, whether direct or
+       * indirect through non-Spatial3D nodes.
+       */
+      std::shared_ptr< Spatial3D > getParent3D( void ) const;
 
       inline bool isLocalCurrent( void ) const { return m_localIsCurrent; }
 
-      void setLocal( const Transformation &local )
-      {
-         m_local = local;
-         m_localIsCurrent = true;
-         invalidateWorld();
-      }
-
-      const Transformation &getLocal( void ) const
-      {
-         if ( !m_localIsCurrent ) {
-            if ( auto parent = getParent3D() ) {
-               // When a parent is present, world is computed as W = P * L
-               // so local can be computed as L = inv(P) * W
-               m_local = inverse( parent->getWorld() )( m_world );
-            } else {
-               // No parent: World and Local are the same transformation
-               m_local = m_world;
-            }
-            m_localIsCurrent = true;
-         }
-         return m_local;
-      }
+      /**
+       * @remarks Invalidates world state
+       */
+      void setLocal( const Transformation &local );
+      const Transformation &getLocal( void ) const;
 
       inline bool isWorldCurrent( void ) const { return m_worldIsCurrent; }
 
-      void setWorld( const Transformation &world )
+      /**
+       * @remarks Invalidates local state
+       */
+      void setWorld( const Transformation &world );
+      const Transformation &getWorld( void ) const;
+
+      /*
+      void invalidateParent3D( void )
       {
-         m_world = world;
-         m_localIsCurrent = false;
-         m_worldIsCurrent = true;
-         worldChanged();
+         m_parent3D.reset();
+         invalidateWorldState();
       }
 
-      const Transformation &getWorld( void ) const
+      void invalidateWorldState( void )
       {
-         if ( !m_worldIsCurrent ) {
-            if ( auto parent = getParent3D() ) {
-               m_world = parent->getWorld()( m_local );
-            } else {
-               m_world = m_local;
-            }
-            m_worldIsCurrent = true;
+         m_worldIsCurrent = false;
+         worldChanged();
          }
-         return m_world;
-      }
+         */
 
    protected:
+      friend class InvalidateHierarchy;
+      inline void invalidateParent3D( void ) const { m_parent3D.reset(); }
+
+      friend class InvalidateWorldState;
+      inline void invalidateWorldState( void ) const { m_worldIsCurrent = false; }
       /*
    virtual void onParentChanged( void ) override
    {
@@ -100,13 +80,6 @@ namespace crimild::experimental {
       invalidateWorld();
       }
       */
-
-   private:
-      void invalidateWorld( void )
-      {
-         m_worldIsCurrent = false;
-         worldChanged();
-      }
 
    private:
       mutable std::weak_ptr< Spatial3D > m_parent3D;

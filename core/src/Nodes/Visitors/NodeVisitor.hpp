@@ -1,15 +1,12 @@
 #ifndef CRIMILD_CORE_NODES_VISITORS_VISITOR_
 #define CRIMILD_CORE_NODES_VISITORS_VISITOR_
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    class Node;
 
    class Spatial3D;
-
-}
-
-namespace crimild::nodes::visitors {
+   class Group3D;
 
    class NodeVisitor {
    protected:
@@ -18,25 +15,12 @@ namespace crimild::nodes::visitors {
    public:
       virtual ~NodeVisitor( void ) = default;
 
-      void traverse( Node & );
+      virtual void traverse( Node & );
 
-      void visitNode( nodes::Node & );
+      virtual void visitNode( Node & );
 
-      void visitSpatial3D( nodes::Spatial3D & );
-   };
-
-   class ConstNodeVisitor {
-   protected:
-      ConstNodeVisitor( void ) = default;
-
-   public:
-      virtual ~ConstNodeVisitor( void ) = default;
-
-      void traverse( const Node & );
-
-      void visitNode( const Node & );
-
-      void visitSpatial3D( const Spatial3D & );
+      virtual void visitSpatial3D( Spatial3D & );
+      virtual void visitGroup3D( Group3D & );
    };
 
 }

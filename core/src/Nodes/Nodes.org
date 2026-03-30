@@ -1,0 +1,31 @@
+#+title: Nodes
+
+* Namespaces
+
+#+BEGIN_SRC cpp
+
+namespace crimild {
+
+   namespace nodes {
+
+      namespace visitors { }
+
+      namespace spatial3D { }
+      namespace spatial2D { }
+
+      namespace behaviors {
+
+         namespace composites { }
+         namespace decorators { }
+         namespace conditions { }
+         namespace actions { }
+
+      }
+      
+   }
+   
+}
+
+#+END_SRC
+
+- Too verbose?
