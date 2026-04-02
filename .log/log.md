@@ -13,6 +13,9 @@ author: H. Hernan Saez
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
 
+# 2026-04-01
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
 # 2026-03-28
 - [x] CMake presets
 - Learning about cmake presets and how to use them here.
