@@ -5,12 +5,14 @@
 
 namespace crimild::experimental {
 
-   template<
-      class Base,
-      class ChildType = Node >
-   class WithChildren : public Base {
+   template< IsNode Base >
+   class WithChildren
+      : public Base,
+        public ParentNode {
+      static_assert( std::is_base_of_v< Node, Base > );
+
    public:
-      void attach( std::shared_ptr< ChildType > const &child )
+      void attach( std::shared_ptr< Node > const &child )
       {
          if ( child == nullptr ) {
             return;
@@ -25,7 +27,7 @@ namespace crimild::experimental {
          child->setParent( retain( this ) );
       }
 
-      void detach( std::shared_ptr< ChildType > const &child )
+      void detach( std::shared_ptr< Node > const &child )
       {
          if ( child == nullptr ) {
             return;
@@ -40,7 +42,7 @@ namespace crimild::experimental {
          child->setParent( nullptr );
       }
 
-      [[nodiscard]] bool hasChild( std::shared_ptr< ChildType > const &child ) const
+      [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
       {
          return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
       }
@@ -59,13 +61,13 @@ namespace crimild::experimental {
        *
        * Returns a const reference to prevent direct modifications to the children array
        */
-      const std::vector< std::shared_ptr< ChildType > > &getChildren( void ) const
+      const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
       {
          return m_children;
       }
 
    private:
-      std::vector< std::shared_ptr< ChildType > > m_children;
+      std::vector< std::shared_ptr< Node > > m_children;
    };
 
 }

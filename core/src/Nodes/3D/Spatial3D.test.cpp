@@ -137,6 +137,7 @@ TEST( Spatial3D, reparenting )
    EXPECT_TRUE( child->hasParent() );
    EXPECT_EQ( child->getParent(), p1 );
    EXPECT_TRUE( child->hasParent3D() );
+   EXPECT_NE( child->getParent3D(), p0 );
    EXPECT_EQ( child->getParent3D(), p1 );
 }
 
@@ -154,7 +155,7 @@ TEST( Spatial3D, reparenting_indirect )
    g0->attach( child );
 
    EXPECT_TRUE( child->hasParent() );
-   EXPECT_EQ( child->getParent(), p0 );
+   EXPECT_EQ( child->getParent(), g0 );
    EXPECT_TRUE( child->hasParent3D() );
    EXPECT_EQ( child->getParent3D(), p0 );
 

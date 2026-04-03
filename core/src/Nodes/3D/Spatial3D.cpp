@@ -1,6 +1,8 @@
 #include "Nodes/3D/Spatial3D.hpp"
 
 #include "Nodes/Visitors/InvalidateWorldState.hpp"
+#include "Nodes/Visitors/NodeConstVisitor.hpp"
+#include "Nodes/Visitors/NodeVisitor.hpp"
 
 using namespace crimild;
 using namespace crimild::experimental;
@@ -64,4 +66,14 @@ const Transformation &Spatial3D::getWorld( void ) const
       m_worldIsCurrent = true;
    }
    return m_world;
+}
+
+void Spatial3D::accept( NodeVisitor &visitor )
+{
+   visitor.visitSpatial3D( *this );
+}
+
+void Spatial3D::accept( NodeConstVisitor &visitor ) const
+{
+   visitor.visitSpatial3D( *this );
 }

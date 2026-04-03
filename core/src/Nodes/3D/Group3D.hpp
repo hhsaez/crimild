@@ -12,6 +12,10 @@ namespace crimild::experimental {
    class Group3D : public WithChildren< Spatial3D > {
    public:
       virtual ~Group3D( void ) = default;
+
+   public:
+      void accept( NodeVisitor &visitor ) override;
+      void accept( NodeConstVisitor &visitor ) const override;
    };
 
 }

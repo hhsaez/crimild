@@ -25,7 +25,7 @@ namespace crimild::experimental {
    public:
       virtual ~Spatial3D( void ) = default;
 
-      inline bool hasParent3D( void ) const { return !m_parent3D.expired(); }
+      inline bool hasParent3D( void ) const { return getParent3D() != nullptr; }
 
       /**
        * Returns the closest Spatial3D ancestor, whether direct or
@@ -87,6 +87,10 @@ namespace crimild::experimental {
       mutable bool m_localIsCurrent = true;
       mutable Transformation m_world = Transformation::Constants::IDENTITY;
       mutable bool m_worldIsCurrent = true;
+
+   public:
+      void accept( NodeVisitor &visitor ) override;
+      void accept( NodeConstVisitor &visitor ) const override;
    };
 
 }

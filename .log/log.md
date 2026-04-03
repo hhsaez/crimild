@@ -13,6 +13,13 @@ author: H. Hernan Saez
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
 
+# 2026-04-02
+- Working on unit tests for `crimild::experimental::Spatial3D`
+- Working on a common interface for `ParentNode` and fixing mixins.
+
+# 2026-04-02
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
 # 2026-04-01
 - Working on unit tests for `crimild::experimental::Spatial3D`
 

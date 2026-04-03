@@ -2,6 +2,7 @@
 
 #include "Nodes/3D/Group3D.hpp"
 #include "Nodes/3D/Spatial3D.hpp"
+#include "Nodes/Group.hpp"
 #include "Nodes/Node.hpp"
 
 using namespace crimild::experimental;
@@ -14,6 +15,14 @@ void NodeConstVisitor::traverse( const Node &node )
 void NodeConstVisitor::visitNode( const Node &node )
 {
    // no-op
+}
+
+void NodeConstVisitor::visitGroup( const Group &group )
+{
+   visitNode( group );
+   for ( auto &c : group.getChildren() ) {
+      c->accept( *this );
+   }
 }
 
 void NodeConstVisitor::visitSpatial3D( const Spatial3D &spatial )

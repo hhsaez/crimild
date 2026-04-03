@@ -4,11 +4,21 @@
 #include "Entity/Entity.hpp"
 
 #include <Crimild_Foundation.hpp>
+#include <type_traits>
 
 namespace crimild::experimental {
 
+   class Node;
    class NodeVisitor;
    class NodeConstVisitor;
+
+   template< class T >
+   concept IsNode = std::is_base_of_v< Node, T >;
+
+   class ParentNode;
+
+   template< class T >
+   concept IsParentNode = IsNode< T > && std::is_base_of_v< ParentNode, T >;
 
    /**
     * @brief A named entity that is part of a hierarchy
@@ -38,10 +48,10 @@ namespace crimild::experimental {
          return m_parent.lock();
       }
 
-      template< class NodeType >
-      std::shared_ptr< NodeType > getParent( void ) const
+      template< IsParentNode ParentNodeType >
+      std::shared_ptr< ParentNodeType > getParent( void ) const
       {
-         return std::static_pointer_cast< NodeType >( m_parent.lock() );
+         return std::static_pointer_cast< ParentNodeType >( m_parent.lock() );
       }
 
       std::shared_ptr< Node > detachFromParent( void );
@@ -67,12 +77,26 @@ namespace crimild::experimental {
       // Use friendship to declare which classes have access to internal engine functions.
       // This list should not change frequently considering we should only need to explicitly
       // declare the mixins as friends.
-      template< class BaseType, class ChildType >
+      template< IsNode BaseType >
       friend class WithChildren;
       void setParent( std::shared_ptr< Node > const &newParent );
 
    private:
       std::weak_ptr< Node > m_parent;
+   };
+
+   /**
+    * @brief Common interface for all nodes with children
+    *
+    * We need this in order to support Node::detachFromParent() in a clear way, without
+    * falling back to dynamic cast.
+    */
+   class ParentNode {
+   public:
+      virtual ~ParentNode( void ) = default;
+
+      virtual void attach( std::shared_ptr< Node > const & ) = 0;
+      virtual void detach( std::shared_ptr< Node > const & ) = 0;
    };
 
 }

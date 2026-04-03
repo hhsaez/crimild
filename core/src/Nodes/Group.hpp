@@ -9,6 +9,10 @@ namespace crimild::experimental {
    class Group : public WithChildren< Node > {
    public:
       virtual ~Group( void ) = default;
+
+   public:
+      void accept( NodeVisitor &visitor ) override;
+      void accept( NodeConstVisitor &visitor ) const override;
    };
 
 }
