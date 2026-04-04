@@ -5,7 +5,7 @@
 
 namespace crimild::experimental {
 
-   class InvalidateWorldState : public NodeConstVisitor {
+   class InvalidateWorldState : public NodeVoidConstVisitor {
    public:
       virtual ~InvalidateWorldState( void ) = default;
 

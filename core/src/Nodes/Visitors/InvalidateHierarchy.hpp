@@ -5,7 +5,7 @@
 
 namespace crimild::experimental {
 
-   class InvalidateHierarchy : public NodeConstVisitor {
+   class InvalidateHierarchy : public NodeVoidConstVisitor {
    public:
       virtual ~InvalidateHierarchy( void ) = default;
 

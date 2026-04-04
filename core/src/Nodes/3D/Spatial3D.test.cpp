@@ -217,8 +217,7 @@ TEST( Spatial3D, get_closest_indirect_parent3D_when_hierarchy_changes )
    EXPECT_TRUE( child->hasParent3D() );
    EXPECT_EQ( child->getParent3D(), p0 );
 }
-
-TEST( Spatial3D, resets_parent3D_when_hierarchy_changes )
+n TEST( Spatial3D, resets_parent3D_when_hierarchy_changes )
 {
    using namespace crimild::experimental;
 

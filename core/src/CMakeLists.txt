@@ -585,6 +585,7 @@ target_sources(
     PUBLIC Nodes/3D/Camera3D.hpp
     PRIVATE Nodes/3D/Camera3D.cpp
     PUBLIC Nodes/3D/Geometry3D.hpp
+    PRIVATE Nodes/3D/Geometry3D.cpp
     PUBLIC Nodes/3D/Group3D.hpp
     PRIVATE Nodes/3D/Group3D.cpp
     PUBLIC Nodes/3D/Spatial3D.hpp

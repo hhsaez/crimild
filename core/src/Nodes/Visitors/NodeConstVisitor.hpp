@@ -7,6 +7,7 @@ namespace crimild::experimental {
    class Group;
 
    class Spatial3D;
+   class Geometry3D;
    class Group3D;
 
    class NodeConstVisitor {
@@ -22,7 +23,30 @@ namespace crimild::experimental {
       virtual void visitGroup( const Group & );
 
       virtual void visitSpatial3D( const Spatial3D & );
+      virtual void visitGeometry3D( const Geometry3D & );
       virtual void visitGroup3D( const Group3D & );
+   };
+
+   class NodeVoidConstVisitor : public NodeConstVisitor {
+   public:
+      using ResultType = void;
+
+      virtual ~NodeVoidConstVisitor( void ) = default;
+   };
+
+   template< typename ReducerResultType >
+   class NodeReducerConstVisitor : public NodeConstVisitor {
+   public:
+      using ResultType = ReducerResultType;
+      ResultType getResult( void ) const { return m_result; }
+
+      virtual ~NodeReducerConstVisitor( void ) = default;
+
+   protected:
+      void setResult( const ResultType &result ) { m_result = result; }
+
+   private:
+      ResultType m_result;
    };
 
 }

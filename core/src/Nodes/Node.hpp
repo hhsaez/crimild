@@ -56,18 +56,24 @@ namespace crimild::experimental {
 
       std::shared_ptr< Node > detachFromParent( void );
 
-      template< class VisitorType >
-      void perform( void )
+      template< class VisitorType, typename... Args >
+      VisitorType::ResultType perform( Args &&...args )
       {
-         VisitorType visitor;
+         VisitorType visitor( std::forward< Args >( args )... );
          visitor.traverse( *this );
+         if constexpr ( !std::is_void_v< typename VisitorType::ResultType > ) {
+            return visitor.getResult();
+         }
       }
 
-      template< class ConstVisitorType >
-      void perform( void ) const
+      template< class ConstVisitorType, typename... Args >
+      ConstVisitorType::ResultType perform( Args &&...args ) const
       {
-         ConstVisitorType visitor;
+         ConstVisitorType visitor( std::forward< Args >( args )... );
          visitor.traverse( *this );
+         if constexpr ( !std::is_void_v< typename ConstVisitorType::ResultType > ) {
+            return visitor.getResult();
+         }
       }
 
       virtual void accept( NodeVisitor &visitor );

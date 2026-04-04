@@ -8,7 +8,7 @@ namespace crimild {
 
    class Material;
 
-   namespace nodes {
+   namespace experimental {
 
       class Node;
       class Camera3D;
@@ -30,18 +30,20 @@ namespace crimild::universal {
       void operator()(
          uint32_t width,
          uint32_t height,
-         std::shared_ptr< crimild::nodes::Node > const &node,
-         std::shared_ptr< crimild::nodes::Camera3D > const &camera,
+         std::shared_ptr< crimild::experimental::Node > const &node,
+         std::shared_ptr< crimild::experimental::Camera3D > const &camera,
          ColorRGBA clearColor = ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f }
       ) const;
 
-   private:
-      void render(
-         std::shared_ptr< crimild::nodes::Node > const &node,
-         std::shared_ptr< crimild::nodes::Camera3D > const &camera
-      ) const;
+      /*
+private:
+   void render(
+      std::shared_ptr< crimild::nodes::Node > const &node,
+      std::shared_ptr< crimild::nodes::Camera3D > const &camera
+   ) const;
 
-      std::shared_ptr< opengl::MaterialBindable > getMaterialBindable( std::shared_ptr< Material > const &material ) const;
+   std::shared_ptr< opengl::MaterialBindable > getMaterialBindable( std::shared_ptr< Material > const &material ) const;
+   */
    };
 
 }

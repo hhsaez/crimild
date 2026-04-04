@@ -34,6 +34,10 @@ namespace crimild::experimental {
    private:
       std::shared_ptr< Primitive > m_primitive;
       std::shared_ptr< Material > m_material;
+
+   public:
+      virtual void accept( NodeVisitor &visitor ) override;
+      virtual void accept( NodeConstVisitor &visitor ) const override;
    };
 
 }
