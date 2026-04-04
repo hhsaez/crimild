@@ -25,7 +25,7 @@ auto main( int argc, char *argv[] ) -> int
       return -1;
    }
 
-   auto geometry = std::make_shared< nodes::Geometry3D >();
+   auto geometry = std::make_shared< experimental::Geometry3D >();
    geometry->setPrimitive(
       [] {
          auto primitive = std::make_shared< Primitive >( Primitive::Type::TRIANGLES );
@@ -120,7 +120,7 @@ auto main( int argc, char *argv[] ) -> int
       }()
    );
 
-   auto camera = std::make_shared< nodes::Camera3D >();
+   auto camera = std::make_shared< experimental::Camera3D >();
    camera->setLocal(
       lookAt(
          Point3f { 0, 0, 2 },
