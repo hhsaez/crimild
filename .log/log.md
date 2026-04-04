@@ -17,6 +17,7 @@ author: H. Hernan Saez
 - Now that I have visitors, I'm working on rendering something again.
 - I'm using the `Bounding3D` example
 - I'm not planning on fixing selection today. I'll leave that for next week.
+- Update: I ended up fixing it :)
 
 # 2026-04-03
 - Working on unit tests for `crimild::experimental::Spatial3D`
