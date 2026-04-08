@@ -4,11 +4,9 @@
 namespace crimild::experimental {
 
    class Node;
-   class Group;
 
    class Spatial3D;
    class Geometry3D;
-   class Group3D;
 
    class NodeVisitor {
    protected:
@@ -20,11 +18,9 @@ namespace crimild::experimental {
       virtual void traverse( Node & );
 
       virtual void visitNode( Node & );
-      virtual void visitGroup( Group & );
 
       virtual void visitSpatial3D( Spatial3D & );
       virtual void visitGeometry3D( Geometry3D & );
-      virtual void visitGroup3D( Group3D & );
    };
 
    class NodeVoidVisitor : public NodeVisitor {

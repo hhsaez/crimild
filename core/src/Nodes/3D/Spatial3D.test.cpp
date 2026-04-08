@@ -1,7 +1,5 @@
 #include "Spatial3D.hpp"
 
-#include "Nodes/3D/Group3D.hpp"
-#include "Nodes/Group.hpp"
 #include "translation.hpp"
 
 #include <gtest/gtest.h>
@@ -21,8 +19,8 @@ TEST( Spatial3D, no_spatial3D_ancestor_in_hierarchy )
    using namespace crimild::experimental;
 
    auto spatial = std::make_shared< Spatial3D >();
-   auto p0 = std::make_shared< Group >();
-   auto p1 = std::make_shared< Group >();
+   auto p0 = std::make_shared< Node >();
+   auto p1 = std::make_shared< Node >();
 
    p1->attach( p0 );
    p0->attach( spatial );
@@ -35,7 +33,7 @@ TEST( Spatial3D, direct_parent3D )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    parent->attach( child );
@@ -50,9 +48,9 @@ TEST( Spatial3D, closest_parent3D )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
-   auto root = std::make_shared< Group3D >();
+   auto root = std::make_shared< Spatial3D >();
 
    root->attach( parent );
    parent->attach( child );
@@ -67,7 +65,7 @@ TEST( Spatial3D, resets_parent3D_when_detached )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    parent->attach( child );
@@ -83,8 +81,8 @@ TEST( Spatial3D, get_closest_parent_indirect )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
-   auto node = std::make_shared< Group >(); // not Spatial3D
+   auto parent = std::make_shared< Spatial3D >();
+   auto node = std::make_shared< Node >(); // not Spatial3D
    auto child = std::make_shared< Spatial3D >();
 
    parent->attach( node );
@@ -101,9 +99,9 @@ TEST( Spatial3D, get_closest_parent_in_hierarchy_indirect )
 {
    using namespace crimild::experimental;
 
-   auto root = std::make_shared< Group3D >();
-   auto parent = std::make_shared< Group3D >();
-   auto node = std::make_shared< Group >(); // Not Spatial3D
+   auto root = std::make_shared< Spatial3D >();
+   auto parent = std::make_shared< Spatial3D >();
+   auto node = std::make_shared< Node >(); // Not Spatial3D
    auto child = std::make_shared< Spatial3D >();
 
    root->attach( parent );
@@ -121,8 +119,8 @@ TEST( Spatial3D, reparenting )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group3D >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    p0->attach( child );
@@ -145,10 +143,10 @@ TEST( Spatial3D, reparenting_indirect )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group3D >();
-   auto g0 = std::make_shared< Group >(); // non spatial
-   auto g1 = std::make_shared< Group >(); // non spatial
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Spatial3D >();
+   auto g0 = std::make_shared< Node >(); // non spatial
+   auto g1 = std::make_shared< Node >(); // non spatial
    auto child = std::make_shared< Spatial3D >();
 
    p0->attach( g0 );
@@ -174,8 +172,8 @@ TEST( Spatial3D, reparenting_non_spatial )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group >(); // Not Spatial3D
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Node >(); // Not Spatial3D
    auto child = std::make_shared< Spatial3D >();
 
    p0->attach( child );
@@ -198,8 +196,8 @@ TEST( Spatial3D, get_closest_indirect_parent3D_when_hierarchy_changes )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto g0 = std::make_shared< Group >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto g0 = std::make_shared< Node >();
    auto child = std::make_shared< Spatial3D >();
 
    g0->attach( child );
@@ -222,8 +220,8 @@ TEST( Spatial3D, resets_parent3D_when_hierarchy_changes )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto g0 = std::make_shared< Group >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto g0 = std::make_shared< Node >();
    auto child = std::make_shared< Spatial3D >();
 
    p0->attach( g0 );
@@ -247,9 +245,9 @@ TEST( Spatial3D, falls_back_to_next_closest_when_removing_closest_ancestor )
 {
    using namespace crimild::experimental;
 
-   auto root = std::make_shared< Group3D >();
-   auto parent = std::make_shared< Group3D >();
-   auto group = std::make_shared< Group >();
+   auto root = std::make_shared< Spatial3D >();
+   auto parent = std::make_shared< Spatial3D >();
+   auto group = std::make_shared< Node >();
    auto child = std::make_shared< Spatial3D >();
 
    root->attach( parent );
@@ -274,9 +272,9 @@ TEST( Spatial3D, falls_back_to_next_closest_when_hierarchy_changes )
 {
    using namespace crimild::experimental;
 
-   auto root = std::make_shared< Group3D >();
-   auto parent = std::make_shared< Group3D >();
-   auto group = std::make_shared< Group >();
+   auto root = std::make_shared< Spatial3D >();
+   auto parent = std::make_shared< Spatial3D >();
+   auto group = std::make_shared< Node >();
    auto child = std::make_shared< Spatial3D >();
 
    root->attach( parent );
@@ -338,7 +336,7 @@ TEST( Spatial3D, invalidates_world_when_attached_to_parent )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -350,7 +348,7 @@ TEST( Spatial3D, invalidates_world_when_direct_parent_local_changes )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );
@@ -370,7 +368,7 @@ TEST( Spatial3D, invalidates_world_when_direct_parent_world_changes )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );
@@ -390,8 +388,8 @@ TEST( Spatial3D, invalidates_world_when_closest_parent_local_changes )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
-   auto g = std::make_shared< Group >();
+   auto p = std::make_shared< Spatial3D >();
+   auto g = std::make_shared< Node >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( g );
@@ -408,8 +406,8 @@ TEST( Spatial3D, invalidates_world_when_closest_parent_world_changes )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
-   auto g = std::make_shared< Group >();
+   auto p = std::make_shared< Spatial3D >();
+   auto g = std::make_shared< Node >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( g );
@@ -426,8 +424,8 @@ TEST( Spatial3D, invalidates_world_when_indirect_ancestor_local_changes )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group3D >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p0->attach( p1 );
@@ -447,8 +445,8 @@ TEST( Spatial3D, invalidates_world_when_indirect_ancestor_world_changes )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group3D >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p0->attach( p1 );
@@ -468,7 +466,7 @@ TEST( Spatial3D, does_not_invalidates_world_when_reattached_to_same_parent )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -485,7 +483,7 @@ TEST( Spatial3D, invalidates_world_when_detached_from_parent )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
+   auto parent = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -503,8 +501,8 @@ TEST( Spatial3D, invalidates_world_when_switching_parents )
 {
    using namespace crimild::experimental;
 
-   auto p0 = std::make_shared< Group3D >();
-   auto p1 = std::make_shared< Group3D >();
+   auto p0 = std::make_shared< Spatial3D >();
+   auto p1 = std::make_shared< Spatial3D >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -523,8 +521,8 @@ TEST( Spatial3D, invalidates_world_when_hierarchy_changes )
 {
    using namespace crimild::experimental;
 
-   auto parent = std::make_shared< Group3D >();
-   auto node = std::make_shared< Group >();
+   auto parent = std::make_shared< Spatial3D >();
+   auto node = std::make_shared< Node >();
    auto child = std::make_shared< Spatial3D >();
 
    EXPECT_TRUE( child->isWorldCurrent() );
@@ -578,7 +576,7 @@ TEST( Spatial3D, does_not_invalidate_world_state_for_unrelated_sibiling_mutation
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c0 = std::make_shared< Spatial3D >();
    auto c1 = std::make_shared< Spatial3D >();
 
@@ -601,7 +599,7 @@ TEST( Spatial3D, does_not_invalidate_parent_when_child_changes )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );
@@ -651,7 +649,7 @@ TEST( Spatial3D, computes_world_from_local_with_parent )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );
@@ -672,7 +670,7 @@ TEST( Spatial3D, computes_world_from_world_with_parent )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );
@@ -697,7 +695,7 @@ TEST( Spatial3D, computes_local_from_world_with_parent )
 {
    using namespace crimild::experimental;
 
-   auto p = std::make_shared< Group3D >();
+   auto p = std::make_shared< Spatial3D >();
    auto c = std::make_shared< Spatial3D >();
 
    p->attach( c );

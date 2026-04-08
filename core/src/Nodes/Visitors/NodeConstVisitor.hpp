@@ -4,11 +4,9 @@
 namespace crimild::experimental {
 
    class Node;
-   class Group;
 
    class Spatial3D;
    class Geometry3D;
-   class Group3D;
 
    class NodeConstVisitor {
    protected:
@@ -20,11 +18,9 @@ namespace crimild::experimental {
       virtual void traverse( const Node & );
 
       virtual void visitNode( const Node & );
-      virtual void visitGroup( const Group & );
 
       virtual void visitSpatial3D( const Spatial3D & );
       virtual void visitGeometry3D( const Geometry3D & );
-      virtual void visitGroup3D( const Group3D & );
    };
 
    class NodeVoidConstVisitor : public NodeConstVisitor {

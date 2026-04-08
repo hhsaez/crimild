@@ -15,22 +15,8 @@ namespace crimild::experimental {
    template< class T >
    concept IsNode = std::is_base_of_v< Node, T >;
 
-   class ParentNode;
-
-   template< class T >
-   concept IsParentNode = IsNode< T > && std::is_base_of_v< ParentNode, T >;
-
    /**
     * @brief A named entity that is part of a hierarchy
-    *
-    * Nodes form a hierarchy but the base class only defines the parent relationship.
-    *
-    * Why not including child management in Node?
-    * The reason is that different nodes may handle children in different ways. In the
-    * simplest case, a Group, we have a bunch of child nodes (sorted or not, it doesn't
-    * really matter). But most complex nodes, like a Switch, LOD, Decorators, may have
-    * one, two or any kind of children and some of them might not be active at any
-    * given point in time.
     */
    class Node
       : public Entity,
@@ -48,7 +34,7 @@ namespace crimild::experimental {
          return m_parent.lock();
       }
 
-      template< IsParentNode ParentNodeType >
+      template< IsNode ParentNodeType >
       std::shared_ptr< ParentNodeType > getParent( void ) const
       {
          return std::static_pointer_cast< ParentNodeType >( m_parent.lock() );
@@ -56,6 +42,44 @@ namespace crimild::experimental {
 
       std::shared_ptr< Node > detachFromParent( void );
 
+   private:
+      void setParent( std::shared_ptr< Node > const &newParent );
+
+   private:
+      std::weak_ptr< Node > m_parent;
+
+   public:
+      void attach( std::shared_ptr< Node > const &child );
+      void detach( std::shared_ptr< Node > const &child );
+
+      [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
+      {
+         return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
+      }
+
+      template< class T >
+      std::shared_ptr< T > getChildAt( size_t index ) const
+      {
+         if ( index >= m_children.size() ) {
+            return nullptr;
+         }
+         return std::static_pointer_cast< T >( m_children.at( index ) );
+      }
+
+      /**
+       * @brief Get node children
+       *
+       * Returns a const reference to prevent direct modifications to the children array
+       */
+      const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
+      {
+         return m_children;
+      }
+
+   private:
+      std::vector< std::shared_ptr< Node > > m_children;
+
+   public:
       template< class VisitorType, typename... Args >
       VisitorType::ResultType perform( Args &&...args )
       {
@@ -78,31 +102,6 @@ namespace crimild::experimental {
 
       virtual void accept( NodeVisitor &visitor );
       virtual void accept( NodeConstVisitor &visitor ) const;
-
-   private:
-      // Use friendship to declare which classes have access to internal engine functions.
-      // This list should not change frequently considering we should only need to explicitly
-      // declare the mixins as friends.
-      template< IsNode BaseType >
-      friend class WithChildren;
-      void setParent( std::shared_ptr< Node > const &newParent );
-
-   private:
-      std::weak_ptr< Node > m_parent;
-   };
-
-   /**
-    * @brief Common interface for all nodes with children
-    *
-    * We need this in order to support Node::detachFromParent() in a clear way, without
-    * falling back to dynamic cast.
-    */
-   class ParentNode {
-   public:
-      virtual ~ParentNode( void ) = default;
-
-      virtual void attach( std::shared_ptr< Node > const & ) = 0;
-      virtual void detach( std::shared_ptr< Node > const & ) = 0;
    };
 
 }

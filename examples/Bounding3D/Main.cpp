@@ -3,7 +3,7 @@
 
 namespace crimild::experimental {
 
-   class Bounding3D : public Group3D {
+   class Bounding3D : public Spatial3D {
    public:
       virtual ~Bounding3D( void ) = default;
 
@@ -16,7 +16,7 @@ namespace crimild::experimental {
       }
    };
 
-   class Selectable : public Group {
+   class Selectable : public Node {
    public:
       Signal< std::shared_ptr< Selectable > > selected;
       Signal< std::shared_ptr< Selectable > > deselected;
@@ -142,10 +142,10 @@ auto main( int argc, char *argv[] ) -> int
       )
    );
 
-   auto scene = std::make_shared< Group3D >();
+   auto scene = std::make_shared< crimild::experimental::Node >();
    for ( float x = -3; x <= 3; x += 1.5f ) {
       for ( float y = -3; y <= 3; y += 1.5f ) {
-         auto group = std::make_shared< Group3D >();
+         auto group = std::make_shared< Spatial3D >();
          auto geometry = std::make_shared< Geometry3D >();
          geometry->setPrimitive( primitive );
          geometry->setMaterial(
@@ -162,7 +162,7 @@ auto main( int argc, char *argv[] ) -> int
          selectable->attach( bounding );
          selectable->selected.bind(
             []( std::shared_ptr< Selectable > selectable ) {
-               auto geometry = selectable->getParent< Group3D >()->getChildAt< Geometry3D >( 0 );
+               auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
                if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
                   material->setColor( ColorRGBA { 0.0f, 1.0f, 0.0f, 1.0f } );
                }
@@ -170,7 +170,7 @@ auto main( int argc, char *argv[] ) -> int
          );
          selectable->deselected.bind(
             []( std::shared_ptr< Selectable > selectable ) {
-               auto geometry = selectable->getParent< Group3D >()->getChildAt< Geometry3D >( 0 );
+               auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
                if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
                   material->setColor( ColorRGBA { 1.0f, 0.5f, 0.0f, 1.0f } );
                }
