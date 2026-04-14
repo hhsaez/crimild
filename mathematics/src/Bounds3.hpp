@@ -32,43 +32,43 @@
 
 namespace crimild {
 
-    /**
-     * \brief An axis aligned 3D bounding box
-     *
-     * By default, a Bounds3 instance is created with an invalid value,
-     * violating the invariant that min <= max. This represents an empty
-     * box, ensuring that any operations on it (i.e. union) yield the
-     * correct result.
-     */
-    template< ArithmeticType T >
-    struct Bounds3Impl {
-        Point3Impl< T > min = Point3Impl< T >::Constants::POSITIVE_INFINITY;
-        Point3Impl< T > max = Point3Impl< T >::Constants::NEGATIVE_INFINITY;
+   /**
+    * \brief An axis aligned 3D bounding box
+    *
+    * By default, a Bounds3 instance is created with an invalid value,
+    * violating the invariant that min <= max. This represents an empty
+    * box, ensuring that any operations on it (i.e. union) yield the
+    * correct result.
+    */
+   template< ArithmeticType T >
+   struct Bounds3Impl {
+      Point3Impl< T > min = Point3Impl< T >::Constants::POSITIVE_INFINITY;
+      Point3Impl< T > max = Point3Impl< T >::Constants::NEGATIVE_INFINITY;
 
-        [[nodiscard]] inline constexpr const auto &operator[]( size_t i ) const noexcept
-        {
-            return i == 0 ? min : max;
-        }
+      [[nodiscard]] inline constexpr const auto &operator[]( std::size_t i ) const noexcept
+      {
+         return i == 0 ? min : max;
+      }
 
-        [[nodiscard]] inline auto &operator[]( size_t i ) noexcept
-        {
-            return i == 0 ? min : max;
-        }
+      [[nodiscard]] inline auto &operator[]( std::size_t i ) noexcept
+      {
+         return i == 0 ? min : max;
+      }
 
-        [[nodiscard]] inline constexpr bool operator==( const Bounds3Impl &other ) const noexcept
-        {
-            return min == other.min && max == other.max;
-        }
+      [[nodiscard]] inline constexpr bool operator==( const Bounds3Impl &other ) const noexcept
+      {
+         return min == other.min && max == other.max;
+      }
 
-        [[nodiscard]] inline constexpr bool operator!=( const Bounds3Impl &other ) const noexcept
-        {
-            return !( *this == other );
-        }
-    };
+      [[nodiscard]] inline constexpr bool operator!=( const Bounds3Impl &other ) const noexcept
+      {
+         return !( *this == other );
+      }
+   };
 
-    using Bounds3 = Bounds3Impl< real_t >;
-    using Bounds3f = Bounds3Impl< float >;
-    using Bounds3d = Bounds3Impl< double >;
+   using Bounds3 = Bounds3Impl< real_t >;
+   using Bounds3f = Bounds3Impl< float >;
+   using Bounds3d = Bounds3Impl< double >;
 
 }
 

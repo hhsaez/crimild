@@ -3,7 +3,7 @@
 
 #include "Nodes/3D/Spatial3D.hpp"
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    class Camera3D : public Spatial3D {
    public:

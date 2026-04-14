@@ -135,6 +135,8 @@
 #include "Nodes/3D/Geometry3D.hpp"
 #include "Nodes/3D/Spatial3D.hpp"
 #include "Nodes/Node.hpp"
+#include "Nodes/Visitors/NodeConstVisitor.hpp"
+#include "Nodes/Visitors/NodeVisitor.hpp"
 #include "ParticleSystem/Generators/AccelerationParticleGenerator.hpp"
 #include "ParticleSystem/Generators/BoxPositionParticleGenerator.hpp"
 #include "ParticleSystem/Generators/ColorParticleGenerator.hpp"

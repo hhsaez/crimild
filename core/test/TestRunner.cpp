@@ -34,10 +34,18 @@ using namespace crimild;
 
 int main( int argc, char **argv )
 {
-    crimild::coding::init();
-    crimild::init();
+   crimild::coding::init();
+   crimild::init();
 
-    ::testing::InitGoogleTest( &argc, argv );
-    ::testing::FLAGS_gmock_verbose = "error";
-    return RUN_ALL_TESTS();
+   CRIMILD_LOG_INFO( crimild::Version().getFullDescription() );
+
+   crimild::Log::setOutputHandlers(
+      {
+         crimild::alloc< crimild::ConsoleOutputHandler >( Log::LOG_LEVEL_ALL, true ),
+      }
+   );
+
+   ::testing::InitGoogleTest( &argc, argv );
+   ::testing::FLAGS_gmock_verbose = "error";
+   return RUN_ALL_TESTS();
 }

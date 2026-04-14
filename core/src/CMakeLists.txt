@@ -578,11 +578,23 @@ target_sources(
     Visitors/UpdateWorldState.cpp
 
     PUBLIC Nodes/Node.hpp
+    PRIVATE Nodes/Node.cpp
 
     PUBLIC Nodes/3D/Camera3D.hpp
     PRIVATE Nodes/3D/Camera3D.cpp
     PUBLIC Nodes/3D/Geometry3D.hpp
+    PRIVATE Nodes/3D/Geometry3D.cpp
     PUBLIC Nodes/3D/Spatial3D.hpp
+    PRIVATE Nodes/3D/Spatial3D.cpp
+
+    PRIVATE Nodes/Visitors/NodeVisitor.hpp
+    PRIVATE Nodes/Visitors/NodeVisitor.cpp
+    PRIVATE Nodes/Visitors/NodeConstVisitor.hpp
+    PRIVATE Nodes/Visitors/NodeConstVisitor.cpp
+    PRIVATE Nodes/Visitors/InvalidateHierarchy.hpp
+    PRIVATE Nodes/Visitors/InvalidateHierarchy.cpp
+    PRIVATE Nodes/Visitors/InvalidateWorldState.hpp
+    PRIVATE Nodes/Visitors/InvalidateWorldState.cpp
 )
 
 target_include_directories( crimild_coding PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )

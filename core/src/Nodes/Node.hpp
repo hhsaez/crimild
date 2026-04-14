@@ -1,16 +1,22 @@
-#ifndef CRIMILD_CORE_NODES_NODE
-#define CRIMILD_CORE_NODES_NODE
+#ifndef CRIMILD_CORE_NODES_NODE_
+#define CRIMILD_CORE_NODES_NODE_
 
 #include "Entity/Entity.hpp"
 
 #include <Crimild_Foundation.hpp>
+#include <type_traits>
 
-namespace crimild::nodes {
+namespace crimild::experimental {
+
+   class Node;
+   class NodeVisitor;
+   class NodeConstVisitor;
+
+   template< class T >
+   concept IsNode = std::is_base_of_v< Node, T >;
 
    /**
     * @brief A named entity that is part of a hierarchy
-    *
-    * Nodes should have up to one parent and may have any number of children.
     */
    class Node
       : public Entity,
@@ -28,92 +34,74 @@ namespace crimild::nodes {
          return m_parent.lock();
       }
 
-      template< class NodeType >
-      std::shared_ptr< NodeType > getParent( void ) const
+      template< IsNode ParentNodeType >
+      std::shared_ptr< ParentNodeType > getParent( void ) const
       {
-         return std::static_pointer_cast< NodeType >( m_parent.lock() );
+         return std::static_pointer_cast< ParentNodeType >( m_parent.lock() );
       }
 
-      std::shared_ptr< Node > detachFromParent( void )
-      {
-         // Since we're detaching from our owner, keep a retained pointer so we're
-         // not destroyed yet.
-         auto self = retain( this );
-         if ( auto parent = getParent() ) {
-            parent->detach( self );
-         }
-         return self;
-      }
+      std::shared_ptr< Node > detachFromParent( void );
 
-      void attach( std::shared_ptr< Node > const &child )
-      {
-         if ( child == nullptr ) {
-            return;
-         }
+   private:
+      void setParent( std::shared_ptr< Node > const &newParent );
 
-         if ( child->getParent().get() == this ) {
-            return;
-         }
+   private:
+      std::weak_ptr< Node > m_parent;
 
-         child->detachFromParent();
-         m_children.push_back( child );
-         child->setParent( retain( this ) );
-      }
-
-      void detach( std::shared_ptr< Node > const &child )
-      {
-         if ( child == nullptr ) {
-            return;
-         }
-
-         if ( child->getParent().get() != this ) {
-            return;
-         }
-
-         auto it = std::find( m_children.begin(), m_children.end(), child );
-         m_children.erase( it );
-         child->setParent( nullptr );
-      }
+   public:
+      void attach( std::shared_ptr< Node > const &child );
+      void detach( std::shared_ptr< Node > const &child );
 
       [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
       {
          return std::find( m_children.begin(), m_children.end(), child ) != m_children.end();
       }
 
-      template< class NodeType >
-      std::shared_ptr< NodeType > getChildAt( size_t index ) const
+      template< class T >
+      std::shared_ptr< T > getChildAt( size_t index ) const
       {
          if ( index >= m_children.size() ) {
             return nullptr;
          }
-         return std::static_pointer_cast< NodeType >( m_children.at( index ) );
+         return std::static_pointer_cast< T >( m_children.at( index ) );
       }
 
+      /**
+       * @brief Get node children
+       *
+       * Returns a const reference to prevent direct modifications to the children array
+       */
       const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
       {
          return m_children;
       }
 
-   protected:
-      virtual void onParentChanged( void )
+   private:
+      std::vector< std::shared_ptr< Node > > m_children;
+
+   public:
+      template< class VisitorType, typename... Args >
+      VisitorType::ResultType perform( Args &&...args )
       {
-         for ( auto &maybeChild : m_children ) {
-            if ( auto child = maybeChild ) {
-               child->onParentChanged();
-            }
+         VisitorType visitor( std::forward< Args >( args )... );
+         visitor.traverse( *this );
+         if constexpr ( !std::is_void_v< typename VisitorType::ResultType > ) {
+            return visitor.getResult();
          }
       }
 
-   private:
-      void setParent( std::shared_ptr< Node > const &newParent )
+      template< class ConstVisitorType, typename... Args >
+      ConstVisitorType::ResultType perform( Args &&...args ) const
       {
-         m_parent = newParent;
-         onParentChanged();
+         ConstVisitorType visitor( std::forward< Args >( args )... );
+         visitor.traverse( *this );
+         if constexpr ( !std::is_void_v< typename ConstVisitorType::ResultType > ) {
+            return visitor.getResult();
+         }
       }
 
-   private:
-      std::weak_ptr< Node > m_parent;
-      std::vector< std::shared_ptr< Node > > m_children;
+      virtual void accept( NodeVisitor &visitor );
+      virtual void accept( NodeConstVisitor &visitor ) const;
    };
 
 }

@@ -32,37 +32,37 @@
 
 namespace crimild {
 
-    class Node;
-    class Group;
-    class Geometry;
-    class Camera;
-    class Light;
-    class Text;
-    class CSGNode;
+   class Node;
+   class Group;
+   class Geometry;
+   class Camera;
+   class Light;
+   class Text;
+   class CSGNode;
 
-    class NodeVisitor {
-    protected:
-        NodeVisitor( void );
+   class [[deprecated]] NodeVisitor {
+   protected:
+      NodeVisitor( void );
 
-    public:
-        virtual ~NodeVisitor( void );
+   public:
+      virtual ~NodeVisitor( void );
 
-        virtual void reset( void );
+      virtual void reset( void );
 
-        virtual void traverse( Node *node );
+      virtual void traverse( Node *node );
 
-        virtual void visitNode( Node *node );
-        virtual void visitGroup( Group *group );
-        virtual void visitGeometry( Geometry *geometry );
-        virtual void visitText( Text *text );
-        virtual void visitCamera( Camera *camera );
-        virtual void visitLight( Light *light );
-        virtual void visitCSGNode( CSGNode *csgNode );
+      virtual void visitNode( Node *node );
+      virtual void visitGroup( Group *group );
+      virtual void visitGeometry( Geometry *geometry );
+      virtual void visitText( Text *text );
+      virtual void visitCamera( Camera *camera );
+      virtual void visitLight( Light *light );
+      virtual void visitCSGNode( CSGNode *csgNode );
 
-    private:
-        NodeVisitor( const NodeVisitor & ) { }
-        NodeVisitor &operator=( const NodeVisitor & ) { return *this; }
-    };
+   private:
+      NodeVisitor( const NodeVisitor & ) { }
+      NodeVisitor &operator=( const NodeVisitor & ) { return *this; }
+   };
 
 }
 

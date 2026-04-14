@@ -13,6 +13,46 @@ author: H. Hernan Saez
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
 
+# 2026-04-04
+- Now that I have visitors, I'm working on rendering something again.
+- I'm using the `Bounding3D` example
+- I'm not planning on fixing selection today. I'll leave that for next week.
+- Update: I ended up fixing it :)
+
+# 2026-04-03
+- Working on unit tests for `crimild::experimental::Spatial3D`
+- Working on a common interface for `ParentNode` and fixing mixins.
+
+# 2026-04-02
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
+# 2026-04-01
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
+# 2026-03-28
+- [x] CMake presets
+- Learning about cmake presets and how to use them here.
+- I created a prefix for Linux. We'll do the same for windows and mac later
+- Still having isssues with LSP and Emacs on Linux. 
+- Working on Nodes and Visitors
+
+# 2026-03-24
+- Continue working on a formal definition for assemblies
+
+# 2026-03-23
+- Considering representing assemblies as ASTs (abstract syntax trees)
+
+# 2026-03-12
+- Still analyzing the benefits/cons of having a base class Node with children
+  1. Uniform tree API everywhere: You can attach/traverse/reparent any gameplay object the same way.
+  2. Simpler engine plumbing: Serialization, editor tooling, scene loading, signals, lifecycle callbacks, and traversal systems target one abstraction.
+  3. Composability: Mixing concerns (render, audio, gameplay, UI helpers) in one tree is easy, including intermediary utility nodes.
+  4. Lower cognitive overhead: Users learn one mental model: "everything is a node in a scene tree"
+  5. Faster prototyping: You can build features quickly without creating a new hierarchy type each time.
+- Switch nodes can be implemented by just enabling/disabling specific children
+- Same for MultiSwitch/LODs/etc
+- `getChildren` vs `getActiveChildren`
+
 # 2026-02-19
 - Trying and fixing selection issues due to ray/bounding intersection not working correctly.
 - Found the problem: window dimensions (getWidth(), getHeight()) are returning sizes multiplied by DPI. A 1024x768 window is being returned as 2048x1536. Then, the ray calculation incorrect produces the wrong value due to invalid NDC coordinates.

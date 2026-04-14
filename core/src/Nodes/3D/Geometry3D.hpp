@@ -10,7 +10,7 @@ namespace crimild {
 
 }
 
-namespace crimild::nodes {
+namespace crimild::experimental {
 
    class Geometry3D : public Spatial3D {
    public:
@@ -34,6 +34,10 @@ namespace crimild::nodes {
    private:
       std::shared_ptr< Primitive > m_primitive;
       std::shared_ptr< Material > m_material;
+
+   public:
+      virtual void accept( NodeVisitor &visitor ) override;
+      virtual void accept( NodeConstVisitor &visitor ) const override;
    };
 
 }
