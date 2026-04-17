@@ -50,6 +50,15 @@ namespace crimild::experimental {
 
    public:
       void attach( std::shared_ptr< Node > const &child );
+
+      template< IsNode NodeType, typename... Args >
+      std::shared_ptr< NodeType > attach( Args &&...args )
+      {
+         auto child = std::make_shared< NodeType >( std::forward< Args >( args )... );
+         attach( child );
+         return child;
+      }
+
       void detach( std::shared_ptr< Node > const &child );
 
       [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const

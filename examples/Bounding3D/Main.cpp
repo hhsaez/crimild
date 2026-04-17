@@ -23,6 +23,16 @@ namespace crimild::experimental {
 
    public:
       virtual ~Selectable( void ) = default;
+
+      void select( void )
+      {
+         selected( retain( this ) );
+      }
+
+      void deselect( void )
+      {
+         deselected( retain( this ) );
+      }
    };
 
    class Select : public NodeReducerVisitor< std::shared_ptr< Selectable > > {
@@ -63,32 +73,78 @@ using namespace crimild;
 using namespace crimild::universal;
 using namespace crimild::experimental;
 
-/*
-std::shared_ptr< Selectable > findSelectable( std::shared_ptr< experimental::Node > const &node )
+std::shared_ptr< experimental::Node > createTriangle( float x, float y )
 {
-   if ( auto selectable = std::dynamic_pointer_cast< Selectable >( node ) ) {
-      return selectable;
-   }
-   return findSelectable( node->getParent() );
-}
+   static auto sharedPrimitive = [] {
+      auto primitive = std::make_shared< Primitive >( Primitive::Type::TRIANGLES );
+      primitive->setVertexData(
+         {
+            [] {
+               return std::make_shared< VertexBuffer >(
+                  VertexP3TC2::getLayout(),
+                  Array< VertexP3TC2 > {
+                     {
+                        .position = Vector3f { -0.5f, -0.5f, 0.0f },
+                        .texCoord = Vector2f { 0, 0 },
+                     },
+                     {
+                        .position = Vector3f { 0.5f, -0.5f, 0.0f },
+                        .texCoord = Vector2f { 0, 1 },
+                     },
+                     {
+                        .position = Vector3f { 0.0f, 0.5f, 0.0f },
+                        .texCoord = Vector2f { 1, 1 },
+                     },
+                  }
+               );
+            }(),
+         }
+      );
+      primitive->setIndices(
+         std::make_shared< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< UInt32 > { 0, 1, 2 }
+         )
+      );
+      return primitive;
+   }();
 
-std::shared_ptr< Selectable > select( std::shared_ptr< experimental::Node > const &node, const crimild::Ray3 &ray )
-{
-   if ( auto bounding = std::dynamic_pointer_cast< Bounding3D >( node ) ) {
-      if ( bounding->intersects( ray ) ) {
-         if ( auto selectable = findSelectable( bounding ) ) {
-            return selectable;
+   auto group = std::make_shared< Spatial3D >();
+   auto geometry = std::make_shared< Geometry3D >();
+   geometry->setPrimitive( sharedPrimitive );
+   geometry->setMaterial(
+      [] {
+         auto material = std::make_shared< UnlitMaterial >();
+         material->setColor( ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
+         return material;
+      }()
+   );
+   group->attach( geometry );
+
+   auto selectable = std::make_shared< Selectable >();
+   selectable->attach< Bounding3D >();
+   selectable->selected.bind(
+      []( std::shared_ptr< Selectable > selectable ) {
+         auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
+         if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
+            material->setColor( ColorRGBA { 0.0f, 1.0f, 0.0f, 1.0f } );
          }
       }
-   }
-   for ( auto c : node->getChildren() ) {
-      if ( auto selectable = select( c, ray ) ) {
-         return selectable;
+   );
+   selectable->deselected.bind(
+      []( std::shared_ptr< Selectable > selectable ) {
+         auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
+         if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
+            material->setColor( ColorRGBA { 1.0f, 0.5f, 0.0f, 1.0f } );
+         }
       }
-   }
-   return nullptr;
-   }
-   */
+   );
+   group->attach( selectable );
+
+   group->setLocal( translation( x, y, 0 ) );
+
+   return group;
+}
 
 auto main( int argc, char *argv[] ) -> int
 {
@@ -111,75 +167,10 @@ auto main( int argc, char *argv[] ) -> int
       return -1;
    }
 
-   auto primitive = std::make_shared< Primitive >( Primitive::Type::TRIANGLES );
-   primitive->setVertexData(
-      {
-         [] {
-            return std::make_shared< VertexBuffer >(
-               VertexP3TC2::getLayout(),
-               Array< VertexP3TC2 > {
-                  {
-                     .position = Vector3f { -0.5f, -0.5f, 0.0f },
-                     .texCoord = Vector2f { 0, 0 },
-                  },
-                  {
-                     .position = Vector3f { 0.5f, -0.5f, 0.0f },
-                     .texCoord = Vector2f { 0, 1 },
-                  },
-                  {
-                     .position = Vector3f { 0.0f, 0.5f, 0.0f },
-                     .texCoord = Vector2f { 1, 1 },
-                  },
-               }
-            );
-         }(),
-      }
-   );
-   primitive->setIndices(
-      std::make_shared< IndexBuffer >(
-         Format::INDEX_32_UINT,
-         Array< UInt32 > { 0, 1, 2 }
-      )
-   );
-
    auto scene = std::make_shared< crimild::experimental::Node >();
    for ( float x = -3; x <= 3; x += 1.5f ) {
       for ( float y = -3; y <= 3; y += 1.5f ) {
-         auto group = std::make_shared< Spatial3D >();
-         auto geometry = std::make_shared< Geometry3D >();
-         geometry->setPrimitive( primitive );
-         geometry->setMaterial(
-            [] {
-               auto material = std::make_shared< UnlitMaterial >();
-               material->setColor( ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
-               return material;
-            }()
-         );
-         group->attach( geometry );
-
-         auto selectable = std::make_shared< Selectable >();
-         auto bounding = std::make_shared< Bounding3D >();
-         selectable->attach( bounding );
-         selectable->selected.bind(
-            []( std::shared_ptr< Selectable > selectable ) {
-               auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
-               if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
-                  material->setColor( ColorRGBA { 0.0f, 1.0f, 0.0f, 1.0f } );
-               }
-            }
-         );
-         selectable->deselected.bind(
-            []( std::shared_ptr< Selectable > selectable ) {
-               auto geometry = selectable->getParent< Spatial3D >()->getChildAt< Geometry3D >( 0 );
-               if ( auto material = geometry->getMaterial< UnlitMaterial >() ) {
-                  material->setColor( ColorRGBA { 1.0f, 0.5f, 0.0f, 1.0f } );
-               }
-            }
-         );
-
-         group->attach( selectable );
-         group->setLocal( translation( x, y, 0 ) );
-         scene->attach( group );
+         scene->attach( createTriangle( x, y ) );
       }
    }
 
@@ -201,13 +192,13 @@ auto main( int argc, char *argv[] ) -> int
          static std::weak_ptr< Selectable > prev;
          if ( button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
             if ( auto prevSelected = prev.lock() ) {
-               prevSelected->deselected( prevSelected );
+               prevSelected->deselect();
             }
             if ( auto camera = maybeCamera.lock() ) {
                auto ray = camera->getPickRay( { float( x ) / width, float( y ) / height } );
                if ( auto scene = maybeScene.lock() ) {
                   if ( auto selectable = scene->perform< Select >( ray ) ) {
-                     selectable->selected( selectable );
+                     selectable->select();
                      prev = selectable;
                   }
                }
