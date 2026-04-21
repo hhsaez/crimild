@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_POINT_3_
 #define CRIMILD_MATHEMATICS_POINT_3_
 
+#include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
 #include "Vector3.hpp"
@@ -37,133 +38,137 @@
 
 namespace crimild {
 
-    template< ArithmeticType T >
-    class Point3Impl : public Tuple3< Point3Impl, T > {
-    public:
-        struct Constants {
-            static constexpr Point3Impl ZERO = { 0, 0, 0 };
-            static constexpr Point3Impl ONE = { 1, 1, 1 };
-            static constexpr Point3Impl POSITIVE_INFINITY = {
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity()
-            };
-            static constexpr Point3Impl NEGATIVE_INFINITY = {
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity()
-            };
-        };
+   template< ArithmeticType T >
+   class Point3Impl : public Tuple3< Point3Impl, T > {
+   public:
+      struct Constants {
+         static constexpr Point3Impl ZERO = { 0, 0, 0 };
+         static constexpr Point3Impl ONE = { 1, 1, 1 };
+         static constexpr Point3Impl POSITIVE_INFINITY = {
+            std::numeric_limits< T >::infinity(),
+            std::numeric_limits< T >::infinity(),
+            std::numeric_limits< T >::infinity()
+         };
+         static constexpr Point3Impl NEGATIVE_INFINITY = {
+            -std::numeric_limits< T >::infinity(),
+            -std::numeric_limits< T >::infinity(),
+            -std::numeric_limits< T >::infinity()
+         };
+      };
 
-    public:
-        using Tuple3< Point3Impl, T >::x;
-        using Tuple3< Point3Impl, T >::y;
-        using Tuple3< Point3Impl, T >::z;
+   public:
+      using Tuple3< Point3Impl, T >::x;
+      using Tuple3< Point3Impl, T >::y;
+      using Tuple3< Point3Impl, T >::z;
 
-        constexpr Point3Impl( void ) noexcept = default;
+      constexpr Point3Impl( void ) noexcept = default;
 
-        constexpr Point3Impl( T x, T y, T z ) noexcept
-            : Tuple3< Point3Impl, T >( x, y, z )
-        {
-        }
+      constexpr Point3Impl( T x, T y, T z ) noexcept
+         : Tuple3< Point3Impl, T >( x, y, z )
+      {
+      }
 
-        template< ArithmeticType U >
-        constexpr explicit Point3Impl( U value ) noexcept
-            : Tuple3< Point3Impl, T >( value ) { }
+      template< ArithmeticType U >
+      constexpr explicit Point3Impl( U value ) noexcept
+         : Tuple3< Point3Impl, T >( value ) { }
 
-        template< ArithmeticType U >
-        constexpr Point3Impl( const Point3Impl< U > &other ) noexcept
-            : Tuple3< Point3Impl, T >( other ) { }
+      template< ArithmeticType U >
+      constexpr Point3Impl( const Point3Impl< U > &other ) noexcept
+         : Tuple3< Point3Impl, T >( other ) { }
 
-        template< template< typename > class OtherDerived, ArithmeticType U >
-        constexpr explicit Point3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
-            : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr explicit Point3Impl( const Tuple2< OtherDerived, U > &other ) noexcept
+         : Tuple3< Point3Impl, T >( other.x, other.y, 0 ) { }
 
-        template< template< typename > class OtherDerived, ArithmeticType U >
-        constexpr Point3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
-            : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr explicit Point3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
+         : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
 
-        ~Point3Impl( void ) noexcept = default;
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr Point3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
+         : Tuple3< Point3Impl, T >( other.x, other.y, other.z ) { }
 
-        template< ArithmeticType U >
-        inline constexpr Point3Impl< T > &operator=( const Point3Impl< U > &other ) noexcept
-        {
-            x = other.x;
-            y = other.y;
-            z = other.z;
-            return *this;
-        }
+      ~Point3Impl( void ) noexcept = default;
 
-        template< ArithmeticType U >
-        [[nodiscard]] inline constexpr auto operator+( const Point3Impl< U > &v ) const noexcept
-        {
-            return Tuple3< Point3Impl, T >::operator+( v );
-        }
+      template< ArithmeticType U >
+      inline constexpr Point3Impl< T > &operator=( const Point3Impl< U > &other ) noexcept
+      {
+         x = other.x;
+         y = other.y;
+         z = other.z;
+         return *this;
+      }
 
-        template< ArithmeticType U >
-        [[nodiscard]] inline constexpr auto operator+( const Vector3Impl< U > &v ) const noexcept
-        {
-            return Point3Impl< decltype( T {} + U {} ) > {
-                x + v.x,
-                y + v.y,
-                z + v.z,
-            };
-        }
+      template< ArithmeticType U >
+      [[nodiscard]] inline constexpr auto operator+( const Point3Impl< U > &v ) const noexcept
+      {
+         return Tuple3< Point3Impl, T >::operator+( v );
+      }
 
-        template< ArithmeticType U >
-        inline constexpr auto &operator+=( const Vector3Impl< U > &other ) noexcept
-        {
-            x += other.x;
-            y += other.y;
-            z += other.z;
-            return *this;
-        }
+      template< ArithmeticType U >
+      [[nodiscard]] inline constexpr auto operator+( const Vector3Impl< U > &v ) const noexcept
+      {
+         return Point3Impl< decltype( T {} + U {} ) > {
+            x + v.x,
+            y + v.y,
+            z + v.z,
+         };
+      }
 
-        // Special case: Subtracting two points always results in a vector.
-        template< ArithmeticType U >
-        [[nodiscard]] inline constexpr auto operator-( const Point3Impl< U > &p ) const noexcept
-        {
-            return Vector3Impl< decltype( T {} - U {} ) > {
-                x - p.x,
-                y - p.y,
-                z - p.z,
-            };
-        }
+      template< ArithmeticType U >
+      inline constexpr auto &operator+=( const Vector3Impl< U > &other ) noexcept
+      {
+         x += other.x;
+         y += other.y;
+         z += other.z;
+         return *this;
+      }
 
-        template< ArithmeticType U >
-        [[nodiscard]] inline constexpr auto operator-( const Vector3Impl< U > &v ) const noexcept
-        {
-            return Point3Impl< decltype( T {} - U {} ) > {
-                x - v.x,
-                y - v.y,
-                z - v.z,
-            };
-        }
+      // Special case: Subtracting two points always results in a vector.
+      template< ArithmeticType U >
+      [[nodiscard]] inline constexpr auto operator-( const Point3Impl< U > &p ) const noexcept
+      {
+         return Vector3Impl< decltype( T {} - U {} ) > {
+            x - p.x,
+            y - p.y,
+            z - p.z,
+         };
+      }
 
-        template< ArithmeticType U >
-        inline constexpr auto &operator-=( const Vector3Impl< U > &other ) noexcept
-        {
-            x -= other.x;
-            y -= other.y;
-            z -= other.z;
-            return *this;
-        }
+      template< ArithmeticType U >
+      [[nodiscard]] inline constexpr auto operator-( const Vector3Impl< U > &v ) const noexcept
+      {
+         return Point3Impl< decltype( T {} - U {} ) > {
+            x - v.x,
+            y - v.y,
+            z - v.z,
+         };
+      }
 
-        [[nodiscard]] inline constexpr auto operator-( void ) const noexcept
-        {
-            return Point3Impl< T > {
-                -x,
-                -y,
-                -z
-            };
-        }
-    };
+      template< ArithmeticType U >
+      inline constexpr auto &operator-=( const Vector3Impl< U > &other ) noexcept
+      {
+         x -= other.x;
+         y -= other.y;
+         z -= other.z;
+         return *this;
+      }
 
-    using Point3 = Point3Impl< real_t >;
-    using Point3f = Point3Impl< float >;
-    using Point3d = Point3Impl< double >;
-    using Point3i = Point3Impl< int32_t >;
-    using Point3ui = Point3Impl< uint32_t >;
+      [[nodiscard]] inline constexpr auto operator-( void ) const noexcept
+      {
+         return Point3Impl< T > {
+            -x,
+            -y,
+            -z
+         };
+      }
+   };
+
+   using Point3 = Point3Impl< real_t >;
+   using Point3f = Point3Impl< float >;
+   using Point3d = Point3Impl< double >;
+   using Point3i = Point3Impl< int32_t >;
+   using Point3ui = Point3Impl< uint32_t >;
 
 }
 

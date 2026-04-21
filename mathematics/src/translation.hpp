@@ -32,19 +32,26 @@
 
 namespace crimild {
 
-    [[nodiscard]] static constexpr auto translation( const Vector3 &delta ) noexcept
-    {
-        return Transformation {
-            .translate = Point3( delta ),
-        };
-    }
+   [[nodiscard]] static constexpr auto translation( const Vector3 &delta ) noexcept
+   {
+      return Transformation {
+         .translate = Point3( delta ),
+      };
+   }
 
-    [[nodiscard]] inline constexpr auto translation( real_t x, real_t y, real_t z ) noexcept
-    {
-        return Transformation {
-            .translate = { x, y, z }
-        };
-    }
+   [[nodiscard]] static constexpr auto translation( const Point3 &p ) noexcept
+   {
+      return Transformation {
+         .translate = p,
+      };
+   }
+
+   [[nodiscard]] inline constexpr auto translation( real_t x, real_t y, real_t z ) noexcept
+   {
+      return Transformation {
+         .translate = { x, y, z }
+      };
+   }
 
 }
 

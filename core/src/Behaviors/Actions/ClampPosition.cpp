@@ -32,45 +32,36 @@
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Simulation.hpp"
 
-namespace crimild {
-
-    [[nodiscard]] inline constexpr Transformation translation( const Point3f &P ) noexcept
-    {
-        return translation( Vector3 { P.x, P.y, P.z } );
-    }
-
-}
-
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
 Behavior::State ClampPosition::step( BehaviorContext *context )
 {
-    auto agent = context->getAgent();
-    if ( agent == nullptr ) {
-        return Behavior::State::FAILURE;
-    }
+   auto agent = context->getAgent();
+   if ( agent == nullptr ) {
+      return Behavior::State::FAILURE;
+   }
 
-    auto P = origin( agent->getLocal() );
-    P = clamp( P, m_limits.min, m_limits.max );
-    agent->setLocal( translation( P ) );
+   auto P = origin( agent->getLocal() );
+   P = clamp( P, m_limits.min, m_limits.max );
+   agent->setLocal( translation( P ) );
 
-    return Behavior::State::SUCCESS;
+   return Behavior::State::SUCCESS;
 }
 
 void ClampPosition::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "limits_min", m_limits.min );
-    encoder.encode( "limits_max", m_limits.max );
+   encoder.encode( "limits_min", m_limits.min );
+   encoder.encode( "limits_max", m_limits.max );
 }
 
 void ClampPosition::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "limits_min", m_limits.min );
-    decoder.decode( "limits_max", m_limits.max );
+   decoder.decode( "limits_min", m_limits.min );
+   decoder.decode( "limits_max", m_limits.max );
 }
