@@ -211,6 +211,7 @@ auto main( int argc, char *argv[] ) -> int
 
    while ( window.isOpen() ) {
       const auto [ w, h ] = window.getRenderSize();
+      camera->setProjectionMatrix( perspective( 60.0f, ( float ) w / ( float ) h, 0.1f, 1000.0f ) );
       render( w, h, scene, camera );
       window.swapBuffers();
       glfwSystem.update();

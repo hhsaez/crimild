@@ -74,10 +74,6 @@ void RenderPass::operator()(
    glClearColor( clearColor.r, clearColor.g, clearColor.b, clearColor.a );
    glClear( GL_COLOR_BUFFER_BIT );
 
-   camera->setProjectionMatrix( perspective( 60.0f, ( float ) width / ( float ) height, 0.1f, 1000.0f ) );
-
-   //   render( node, camera );
-
    node->perform< crimild::experimental::RenderScene >( camera );
 
    auto error = glGetError();
@@ -85,52 +81,3 @@ void RenderPass::operator()(
       CRIMILD_LOG_ERROR( "GL Error (", ( int ) error, ")" );
    }
 }
-
-/*
-void RenderPass::render(
-   std::shared_ptr< nodes::Node > const &node,
-   std::shared_ptr< nodes::Camera3D > const &camera
-) const
-{
-   if ( auto geometry = dynamic_pointer_cast< nodes::Geometry3D >( node ) ) {
-      if ( auto material = geometry->getMaterial() ) {
-         if ( auto bindable = getMaterialBindable( material ) ) {
-            bindable->bind();
-
-            auto program = bindable->getProgram();
-            program->setUniform( "uProjMatrix", camera->getProjectionMatrix() );
-            program->setUniform( "uViewMatrix", camera->getViewMatrix() );
-            program->setUniform( "uModelMatrix", crimild::Matrix4f( geometry->getWorld() ) );
-
-            if ( auto primitive = geometry->getPrimitive() ) {
-               auto bindable = primitive->template getOrCreateExtension< opengl::PrimitiveBindable >();
-               bindable->bind();
-               bindable->render();
-               bindable->unbind();
-            }
-
-            bindable->unbind();
-         }
-      }
-   }
-
-   for ( auto child : node->getChildren() ) {
-      render( child, camera );
-   }
-}
-
-std::shared_ptr< crimild::opengl::MaterialBindable > RenderPass::getMaterialBindable( std::shared_ptr< Material > const &material ) const
-{
-   if ( auto bindable = material->getExtension< crimild::opengl::MaterialBindable >() ) {
-      return bindable;
-   }
-
-   if ( auto unlit = std::dynamic_pointer_cast< crimild::UnlitMaterial >( material ) ) {
-      auto bindable = std::make_shared< crimild::opengl::UnlitMaterialBindable >();
-      material->attach( crimild::opengl::MaterialBindable::__CLASS_NAME, bindable );
-      return bindable;
-   }
-
-   return nullptr;
-}
-*/
