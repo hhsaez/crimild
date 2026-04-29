@@ -29,8 +29,8 @@
 #define CRIMILD_CORE_CODING_ENCODED_DATA_
 
 #include "Codable.hpp"
-#include "Crimild_Foundation.hpp"
 
+#include <crimild/foundation.hpp>
 #include <cstring>
 
 namespace crimild {

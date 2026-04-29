@@ -28,19 +28,20 @@
 #ifndef CRIMILD_CORE_RENDERING_SCENE_PASS_
 #define CRIMILD_CORE_RENDERING_SCENE_PASS_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class [[deprecated]] ScenePass : public FrameGraphOperation {
-    public:
-        virtual ~ScenePass( void ) = default;
+   class [[deprecated]] ScenePass : public FrameGraphOperation {
+   public:
+      virtual ~ScenePass( void ) = default;
 
-        inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::SCENE_PASS; }
-    };
+      inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::SCENE_PASS; }
+   };
 
 }
 

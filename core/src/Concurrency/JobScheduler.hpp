@@ -28,10 +28,10 @@
 #ifndef CRIMILD_CORE_CONCURRENCY_JOB_SCHEDULER_
 #define CRIMILD_CORE_CONCURRENCY_JOB_SCHEDULER_
 
-#include "Crimild_Foundation.hpp"
 #include "Job.hpp"
 #include "WorkStealingDeque.hpp"
 
+#include <crimild/foundation.hpp>
 #include <map>
 #include <mutex>
 #include <thread>
@@ -39,125 +39,125 @@
 
 namespace crimild {
 
-    namespace concurrency {
+   namespace concurrency {
 
-        /**
-            \brief A scheduler for asynchronous jobs
-         */
-        class [[deprecated]] JobScheduler : public DynamicSingleton< JobScheduler > {
-        public:
-            /**
-                \brief Default constructor
+      /**
+          \brief A scheduler for asynchronous jobs
+       */
+      class [[deprecated]] JobScheduler : public DynamicSingleton< JobScheduler > {
+      public:
+         /**
+             \brief Default constructor
 
-                \remarks The constructor does not automatically start workers. You
-                need to call the start() method for doing that.
-             */
-            JobScheduler( void );
+             \remarks The constructor does not automatically start workers. You
+             need to call the start() method for doing that.
+          */
+         JobScheduler( void );
 
-            /**
-                \brief Destructor
+         /**
+             \brief Destructor
 
-                \remarks The destructor does not stop workers.  Invoke
-                the stop() method manually in order join worker threads.
-             */
-            virtual ~JobScheduler( void );
+             \remarks The destructor does not stop workers.  Invoke
+             the stop() method manually in order join worker threads.
+          */
+         virtual ~JobScheduler( void );
 
-            void configure( int numWorkers = -1 );
+         void configure( int numWorkers = -1 );
 
-            /**
-    \brief Start all worker threads
+         /**
+ \brief Start all worker threads
 
-    \remarks This method must be invoked from the main thread.
-             */
-            bool start( void );
+ \remarks This method must be invoked from the main thread.
+          */
+         bool start( void );
 
-            /**
-                \brief Stop all worker threads and wait for them to complete
+         /**
+             \brief Stop all worker threads and wait for them to complete
 
-                \remarks Invoke this method from the main thread
-             */
-            void stop( void );
+             \remarks Invoke this method from the main thread
+          */
+         void stop( void );
 
-        public:
-            enum class State {
-                INITIALIZING,
-                RUNNING,
-                STOPPING,
-                STOPPED
-            };
+      public:
+         enum class State {
+            INITIALIZING,
+            RUNNING,
+            STOPPING,
+            STOPPED
+         };
 
-            bool isRunning( void ) const { return _state == State::RUNNING; }
+         bool isRunning( void ) const { return _state == State::RUNNING; }
 
-            State getState( void ) const { return _state; }
+         State getState( void ) const { return _state; }
 
-        private:
-            State _state = State::INITIALIZING;
+      private:
+         State _state = State::INITIALIZING;
 
-        public:
-            using WorkerId = std::thread::id;
+      public:
+         using WorkerId = std::thread::id;
 
-            WorkerId getWorkerId( void ) const;
+         WorkerId getWorkerId( void ) const;
 
-            int getNumWorkers( void ) const { return _numWorkers; }
+         int getNumWorkers( void ) const { return _numWorkers; }
 
-            bool isMainWorker( void ) const { return getWorkerId() == _mainWorkerId; }
+         bool isMainWorker( void ) const { return getWorkerId() == _mainWorkerId; }
 
-        private:
-            int _numWorkers;
-            std::vector< std::thread > _workers;
-            WorkerId _mainWorkerId;
+      private:
+         int _numWorkers;
+         std::vector< std::thread > _workers;
+         WorkerId _mainWorkerId;
 
-        private:
-            using WorkerJobQueue = WorkStealingQueue< JobPtr >;
+      private:
+         using WorkerJobQueue = WorkStealingQueue< JobPtr >;
 
-            void initWorker( bool mainWorker = false );
-            WorkerJobQueue *getWorkerJobQueue( void );
-            WorkerJobQueue *getRandomJobQueue( void );
+         void initWorker( bool mainWorker = false );
+         WorkerJobQueue *getWorkerJobQueue( void );
+         WorkerJobQueue *getRandomJobQueue( void );
 
-            void worker( void );
+         void worker( void );
 
-        private:
-            std::map< WorkerId, SharedPointer< WorkerJobQueue > > _workerJobQueues;
+      private:
+         std::map< WorkerId, SharedPointer< WorkerJobQueue > > _workerJobQueues;
 
-        public:
-            void schedule( JobPtr const &job );
-            void wait( JobPtr const &job );
+      public:
+         void schedule( JobPtr const &job );
+         void wait( JobPtr const &job );
 
-            void yield( void );
+         void yield( void );
 
-        private:
-            JobPtr getJob( void );
+      private:
+         JobPtr getJob( void );
 
-            bool executeNextJob( void );
-            void execute( JobPtr const &job );
+         bool executeNextJob( void );
+         void execute( JobPtr const &job );
 
-        public:
-            struct WorkerStat {
-                size_t jobCount = 0;
-            };
+      public:
+         struct WorkerStat {
+            size_t jobCount = 0;
+         };
 
-            void eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const;
+         void eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const;
 
-            void clearWorkerStats( void );
+         void clearWorkerStats( void );
 
-        private:
-            std::map< WorkerId, WorkerStat > _workerStats;
+      private:
+         std::map< WorkerId, WorkerStat > _workerStats;
 
-        private:
-            std::mutex _mutex;
+      private:
+         std::mutex _mutex;
 
-        public:
-            void delaySync( JobPtr const &job );
-            void delayAsync( JobPtr const &job );
+      public:
+         void delaySync( JobPtr const &job );
+         void delayAsync( JobPtr const &job );
 
-            void executeDelayedJobs( void );
+         void executeDelayedJobs( void );
 
-        private:
-            ThreadSafeList< JobPtr > _delayedSyncJobs;
-            ThreadSafeList< JobPtr > _delayedAsyncJobs;
-        };
+      private:
+         ThreadSafeList< JobPtr > _delayedSyncJobs;
+         ThreadSafeList< JobPtr > _delayedAsyncJobs;
+      };
 
-    }
+   }
 
 }
 

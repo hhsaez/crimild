@@ -28,85 +28,86 @@
 #ifndef CRIMILD_ANIMATION_ACCUMULATOR_
 #define CRIMILD_ANIMATION_ACCUMULATOR_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Accumulator : public SharedObject {
-        protected:
-            Accumulator( void ) { }
+      class Accumulator : public SharedObject {
+      protected:
+         Accumulator( void ) { }
 
-        public:
-            virtual ~Accumulator( void ) { }
+      public:
+         virtual ~Accumulator( void ) { }
 
-            virtual void lerp( Accumulator *other, crimild::Real32 factor ) = 0;
-            virtual void add( Accumulator *other, crimild::Real32 strength ) = 0;
-        };
+         virtual void lerp( Accumulator *other, crimild::Real32 factor ) = 0;
+         virtual void add( Accumulator *other, crimild::Real32 strength ) = 0;
+      };
 
-        template< typename T >
-        class AccumulatorImpl : public Accumulator {
-        public:
-            AccumulatorImpl( void ) { }
+      template< typename T >
+      class AccumulatorImpl : public Accumulator {
+      public:
+         AccumulatorImpl( void ) { }
 
-            virtual ~AccumulatorImpl( void ) { }
+         virtual ~AccumulatorImpl( void ) { }
 
-            void set( const T &v ) { _value = v; }
+         void set( const T &v ) { _value = v; }
 
-            T get( void ) const { return _value; }
+         T get( void ) const { return _value; }
 
-        private:
-            T _value;
+      private:
+         T _value;
 
-        public:
-            virtual void lerp( Accumulator *other, crimild::Real32 factor ) override
-            {
-                auto otherAcc = static_cast< AccumulatorImpl< T > * >( other );
+      public:
+         virtual void lerp( Accumulator *other, crimild::Real32 factor ) override
+         {
+            auto otherAcc = static_cast< AccumulatorImpl< T > * >( other );
 
-                Interpolation::linear( _value, otherAcc->_value, factor, _value );
-            }
+            Interpolation::linear( _value, otherAcc->_value, factor, _value );
+         }
 
-            virtual void add( Accumulator *other, crimild::Real32 strength ) override
-            {
-                auto otherAcc = static_cast< AccumulatorImpl< T > * >( other );
+         virtual void add( Accumulator *other, crimild::Real32 strength ) override
+         {
+            auto otherAcc = static_cast< AccumulatorImpl< T > * >( other );
 
-                _value = _value + otherAcc->_value;
-            }
-        };
+            _value = _value + otherAcc->_value;
+         }
+      };
 
-        template<>
-        class AccumulatorImpl< Quaternion > : public Accumulator {
-        public:
-            AccumulatorImpl( void ) { }
+      template<>
+      class AccumulatorImpl< Quaternion > : public Accumulator {
+      public:
+         AccumulatorImpl( void ) { }
 
-            virtual ~AccumulatorImpl( void ) { }
+         virtual ~AccumulatorImpl( void ) { }
 
-            void set( const Quaternion &v ) { _value = v; }
+         void set( const Quaternion &v ) { _value = v; }
 
-            Quaternion get( void ) const { return _value; }
+         Quaternion get( void ) const { return _value; }
 
-        private:
-            Quaternion _value;
+      private:
+         Quaternion _value;
 
-        public:
-            virtual void lerp( Accumulator *other, crimild::Real32 factor ) override
-            {
-                auto otherAcc = static_cast< AccumulatorImpl< Quaternion > * >( other );
+      public:
+         virtual void lerp( Accumulator *other, crimild::Real32 factor ) override
+         {
+            auto otherAcc = static_cast< AccumulatorImpl< Quaternion > * >( other );
 
-                _value = slerp( _value, otherAcc->_value, factor );
-            }
+            _value = slerp( _value, otherAcc->_value, factor );
+         }
 
-            virtual void add( Accumulator *other, crimild::Real32 strength ) override
-            {
-                auto otherAcc = static_cast< AccumulatorImpl< Quaternion > * >( other );
+         virtual void add( Accumulator *other, crimild::Real32 strength ) override
+         {
+            auto otherAcc = static_cast< AccumulatorImpl< Quaternion > * >( other );
 
-                _value = _value * otherAcc->_value;
-            }
-        };
+            _value = _value * otherAcc->_value;
+         }
+      };
 
-    }
+   }
 
 }
 

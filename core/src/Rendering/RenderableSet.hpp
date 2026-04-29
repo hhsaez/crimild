@@ -28,51 +28,52 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDERABLE_SET_
 #define CRIMILD_CORE_RENDERING_RENDERABLE_SET_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/FrameGraphResource.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class Camera;
-    class Geometry;
+   class Camera;
+   class Geometry;
 
-    class RenderableSet
-        : public SharedObject,
-          public NamedObject,
-          public FrameGraphResource {
+   class RenderableSet
+      : public SharedObject,
+        public NamedObject,
+        public FrameGraphResource {
 
-    public:
-        FrameGraphResource::Type getType( void ) const noexcept { return FrameGraphResource::Type::RENDERABLE_SET; }
+   public:
+      FrameGraphResource::Type getType( void ) const noexcept { return FrameGraphResource::Type::RENDERABLE_SET; }
 
-        void reset( void ) noexcept
-        {
-            m_camera = nullptr;
-            m_geometries.clear();
-        }
+      void reset( void ) noexcept
+      {
+         m_camera = nullptr;
+         m_geometries.clear();
+      }
 
-        inline void setCamera( Camera *camera ) noexcept { m_camera = camera; }
-        inline Camera *getCamera( void ) noexcept { return m_camera; }
+      inline void setCamera( Camera *camera ) noexcept { m_camera = camera; }
+      inline Camera *getCamera( void ) noexcept { return m_camera; }
 
-        inline void addGeometry( Geometry *geometry ) noexcept { m_geometries.add( geometry ); }
+      inline void addGeometry( Geometry *geometry ) noexcept { m_geometries.add( geometry ); }
 
-        Bool hasGeometries( void ) const noexcept { return !m_geometries.empty(); }
+      Bool hasGeometries( void ) const noexcept { return !m_geometries.empty(); }
 
-        template< typename Fn >
-        inline void eachGeometry( Fn fn )
-        {
-            m_geometries.each( fn );
-        }
+      template< typename Fn >
+      inline void eachGeometry( Fn fn )
+      {
+         m_geometries.each( fn );
+      }
 
-        template< typename Fn >
-        inline void eachGeometry( Fn fn ) const
-        {
-            m_geometries.each( fn );
-        }
+      template< typename Fn >
+      inline void eachGeometry( Fn fn ) const
+      {
+         m_geometries.each( fn );
+      }
 
-    private:
-        Camera *m_camera = nullptr;
-        Array< Geometry * > m_geometries;
-    };
+   private:
+      Camera *m_camera = nullptr;
+      Array< Geometry * > m_geometries;
+   };
 
 }
 

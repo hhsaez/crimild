@@ -28,62 +28,62 @@
 #ifndef CRIMILD_COMPONENTS_MATERIAL_
 #define CRIMILD_COMPONENTS_MATERIAL_
 
-#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
 #include "Rendering/Material.hpp"
 
+#include <crimild/foundation.hpp>
 #include <functional>
 
 namespace crimild {
 
-    class MaterialComponent : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::MaterialComponent )
+   class MaterialComponent : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::MaterialComponent )
 
-    public:
-        MaterialComponent( void ) = default;
+   public:
+      MaterialComponent( void ) = default;
 
-        template< typename MaterialType >
-        explicit MaterialComponent( MaterialType material ) noexcept
-        {
-            attachMaterial( material );
-        }
+      template< typename MaterialType >
+      explicit MaterialComponent( MaterialType material ) noexcept
+      {
+         attachMaterial( material );
+      }
 
-        virtual ~MaterialComponent( void );
+      virtual ~MaterialComponent( void );
 
-        bool hasMaterials( void ) const { return _materials.size() > 0; }
+      bool hasMaterials( void ) const { return _materials.size() > 0; }
 
-        void attachMaterial( Material *material ) { attachMaterial( crimild::retain( material ) ); }
-        void attachMaterial( SharedPointer< Material > const &material );
+      void attachMaterial( Material *material ) { attachMaterial( crimild::retain( material ) ); }
+      void attachMaterial( SharedPointer< Material > const &material );
 
-        void detachAllMaterials( void );
+      void detachAllMaterials( void );
 
-        Material *first( void ) { return crimild::get_ptr( _materials[ 0 ] ); }
+      Material *first( void ) { return crimild::get_ptr( _materials[ 0 ] ); }
 
-        void forEachMaterial( std::function< void( Material * ) > callback );
+      void forEachMaterial( std::function< void( Material * ) > callback );
 
-    private:
-        Array< SharedPointer< Material > > _materials;
+   private:
+      Array< SharedPointer< Material > > _materials;
 
-        /**
-            \name Clonning
-         */
-        //@{
-    public:
-        virtual SharedPointer< NodeComponent > clone( void ) override;
+      /**
+          \name Clonning
+       */
+      //@{
+   public:
+      virtual SharedPointer< NodeComponent > clone( void ) override;
 
-        //@}
+      //@}
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

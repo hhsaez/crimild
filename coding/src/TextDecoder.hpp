@@ -31,7 +31,7 @@
 #include "Decoder.hpp"
 #include "EncodedData.hpp"
 
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

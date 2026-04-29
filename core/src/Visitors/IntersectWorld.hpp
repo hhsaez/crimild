@@ -28,60 +28,61 @@
 #ifndef CRIMILD_CORE_VISITORS_INTERSECT_WORLD_
 #define CRIMILD_CORE_VISITORS_INTERSECT_WORLD_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class Geometry;
-    class Primitive;
+   class Geometry;
+   class Primitive;
 
-    /**
-     * Collects geometries that intersect with a given ray
-     *
-     * \todo Test intersection with groups to speed things up
-     */
-    class IntersectWorld : public NodeVisitor {
-    public:
-        struct Result {
-            Geometry *geometry = nullptr;
-            Real t = numbers::POSITIVE_INFINITY;
-            Point3f point;
-            Normal3 normal;
-            Bool frontFace;
+   /**
+    * Collects geometries that intersect with a given ray
+    *
+    * \todo Test intersection with groups to speed things up
+    */
+   class IntersectWorld : public NodeVisitor {
+   public:
+      struct Result {
+         Geometry *geometry = nullptr;
+         Real t = numbers::POSITIVE_INFINITY;
+         Point3f point;
+         Normal3 normal;
+         Bool frontFace;
 
-            inline void setFaceNormal( const Ray3 &R, const Normal3 &N ) noexcept
-            {
-                frontFace = dot( direction( R ), N ) < 0;
-                normal = frontFace ? N : -N;
-            }
-        };
+         inline void setFaceNormal( const Ray3 &R, const Normal3 &N ) noexcept
+         {
+            frontFace = dot( direction( R ), N ) < 0;
+            normal = frontFace ? N : -N;
+         }
+      };
 
-        using Results = Array< Result >;
+      using Results = Array< Result >;
 
-    public:
-        IntersectWorld( const Ray3 &ray, Results &results ) noexcept
-            : m_ray( ray ),
-              m_results( results )
-        {
-            // no-op
-        }
+   public:
+      IntersectWorld( const Ray3 &ray, Results &results ) noexcept
+         : m_ray( ray ),
+           m_results( results )
+      {
+         // no-op
+      }
 
-        ~IntersectWorld( void ) = default;
+      ~IntersectWorld( void ) = default;
 
-        virtual void traverse( Node *node ) noexcept override;
-        virtual void visitGroup( Group *group ) noexcept override;
-        virtual void visitGeometry( Geometry *geometry ) noexcept override;
-        virtual void visitCSGNode( CSGNode *csg ) noexcept override;
+      virtual void traverse( Node *node ) noexcept override;
+      virtual void visitGroup( Group *group ) noexcept override;
+      virtual void visitGeometry( Geometry *geometry ) noexcept override;
+      virtual void visitCSGNode( CSGNode *csg ) noexcept override;
 
-    private:
-        void intersect( Geometry *geometry, Primitive *primitive, Bool isInVolume ) noexcept;
+   private:
+      void intersect( Geometry *geometry, Primitive *primitive, Bool isInVolume ) noexcept;
 
-    private:
-        Ray3 m_ray;
-        Results &m_results;
-    };
+   private:
+      Ray3 m_ray;
+      Results &m_results;
+   };
 
 }
 

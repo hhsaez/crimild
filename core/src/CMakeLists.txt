@@ -603,7 +603,7 @@ target_compile_features( crimild_core PUBLIC cxx_std_20 )
 
 target_link_libraries(
     crimild_core
-    PRIVATE Crimild::Foundation
+    PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
     PRIVATE Crimild::Coding
 )

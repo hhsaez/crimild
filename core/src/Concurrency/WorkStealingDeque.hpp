@@ -28,99 +28,98 @@
 #ifndef CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
 #define CRIMILD_CORE_CONCURRENCY_WORK_STEALING_QUEUE_
 
-#include "Crimild_Foundation.hpp"
-
+#include <crimild/foundation.hpp>
 #include <list>
 #include <mutex>
 #include <vector>
 
 namespace crimild {
 
-    /**
-       \brief A double-ended queue implemeting the work stealing pattern
-     */
-    template< class T >
-    class WorkStealingQueue : public SharedObject {
-        using Mutex = std::mutex;
-        using Lock = std::lock_guard< Mutex >;
+   /**
+      \brief A double-ended queue implemeting the work stealing pattern
+    */
+   template< class T >
+   class WorkStealingQueue : public SharedObject {
+      using Mutex = std::mutex;
+      using Lock = std::lock_guard< Mutex >;
 
-    public:
-        WorkStealingQueue( void )
-        {
-        }
+   public:
+      WorkStealingQueue( void )
+      {
+      }
 
-        ~WorkStealingQueue( void )
-        {
-        }
+      ~WorkStealingQueue( void )
+      {
+      }
 
-        size_t size( void )
-        {
-            Lock lock( _mutex );
-            return _elems.size();
-        }
+      size_t size( void )
+      {
+         Lock lock( _mutex );
+         return _elems.size();
+      }
 
-        bool empty( void )
-        {
-            return size() == 0;
-        }
+      bool empty( void )
+      {
+         return size() == 0;
+      }
 
-        void clear( void )
-        {
-            Lock lock( _mutex );
+      void clear( void )
+      {
+         Lock lock( _mutex );
 
-            _elems.clear();
-        }
+         _elems.clear();
+      }
 
-        /**
-           \brief Adds an element to the private end of the queue (LIFO)
+      /**
+         \brief Adds an element to the private end of the queue (LIFO)
 
-         */
-        void push( T const &elem )
-        {
-            Lock lock( _mutex );
-            _elems.push_back( elem );
-        }
+       */
+      void push( T const &elem )
+      {
+         Lock lock( _mutex );
+         _elems.push_back( elem );
+      }
 
-        /**
-           \brief Retrieves an element from the private end of the queue (LIFO)
+      /**
+         \brief Retrieves an element from the private end of the queue (LIFO)
 
-           \warning You should check if the collection is empty before calling this method.
-         */
-        T pop( void )
-        {
-            Lock lock( _mutex );
+         \warning You should check if the collection is empty before calling this method.
+       */
+      T pop( void )
+      {
+         Lock lock( _mutex );
 
-            if ( _elems.size() == 0 ) {
-                return nullptr;
-            }
+         if ( _elems.size() == 0 ) {
+            return nullptr;
+         }
 
-            auto e = _elems.back();
-            _elems.pop_back();
-            return e;
-        }
+         auto e = _elems.back();
+         _elems.pop_back();
+         return e;
+      }
 
-        /**
-           \brief Retrieves an element from the public end of the queue (FIFO)
+      /**
+         \brief Retrieves an element from the public end of the queue (FIFO)
 
-           \warning You should check if the collection is empty before calling this method
-         */
-        T steal( void )
-        {
-            Lock lock( _mutex );
+         \warning You should check if the collection is empty before calling this method
+       */
+      T steal( void )
+      {
+         Lock lock( _mutex );
 
-            if ( _elems.size() == 0 ) {
-                return nullptr;
-            }
+         if ( _elems.size() == 0 ) {
+            return nullptr;
+         }
 
-            auto e = _elems.front();
-            _elems.pop_front();
-            return e;
-        }
+         auto e = _elems.front();
+         _elems.pop_front();
+         return e;
+      }
 
-    private:
-        std::list< T > _elems;
-        std::mutex _mutex;
-    };
+   private:
+      std::list< T > _elems;
+      std::mutex _mutex;
+   };
 
 }
 

@@ -28,61 +28,62 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_RENDER_
 #define CRIMILD_SIMULATION_SYSTEMS_RENDER_
 
-#include "Crimild_Foundation.hpp"
 #include "Simulation/Systems/System.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
-    class CommandBuffer;
-    class RenderPass;
-    class ComputePass;
-    class ScenePass;
+   class FrameGraphOperation;
+   class CommandBuffer;
+   class RenderPass;
+   class ComputePass;
+   class ScenePass;
 
-    namespace messaging {
+   namespace messaging {
 
-        struct FrameGraphDidChange {
-            // no data
-        };
+      struct FrameGraphDidChange {
+         // no data
+      };
 
-    }
+   }
 
-    class RenderSystem
-        : public System,
-          public DynamicSingleton< RenderSystem > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::RenderSystem )
+   class RenderSystem
+      : public System,
+        public DynamicSingleton< RenderSystem > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::RenderSystem )
 
-    public:
-        void start( void ) noexcept override;
+   public:
+      void start( void ) noexcept override;
 
-        void onPreRender( void ) noexcept override;
+      void onPreRender( void ) noexcept override;
 
-        void setFrameGraph( SharedPointer< FrameGraphOperation > const &frameGraph ) noexcept;
-        inline SharedPointer< FrameGraphOperation > &getFrameGraph( void ) noexcept { return m_frameGraph; }
+      void setFrameGraph( SharedPointer< FrameGraphOperation > const &frameGraph ) noexcept;
+      inline SharedPointer< FrameGraphOperation > &getFrameGraph( void ) noexcept { return m_frameGraph; }
 
-        using CommandBufferArray = Array< CommandBuffer * >;
+      using CommandBufferArray = Array< CommandBuffer * >;
 
-        CommandBufferArray &getGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
-        CommandBufferArray &getComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
+      CommandBufferArray &getGraphicsCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
+      CommandBufferArray &getComputeCommands( Size imageIndex, Bool includeConditionalPasses ) noexcept;
 
-        void useDefaultRenderPath( Bool debug = false ) noexcept;
-        void useRTSoftRenderPath( Bool debug = false ) noexcept;
-        void useRTComputeRenderPath( Bool debug = false ) noexcept;
+      void useDefaultRenderPath( Bool debug = false ) noexcept;
+      void useRTSoftRenderPath( Bool debug = false ) noexcept;
+      void useRTComputeRenderPath( Bool debug = false ) noexcept;
 
-    private:
-        void sort( SharedPointer< FrameGraphOperation > const &root ) noexcept;
+   private:
+      void sort( SharedPointer< FrameGraphOperation > const &root ) noexcept;
 
-    private:
-        SharedPointer< FrameGraphOperation > m_frameGraph;
-        Array< SharedPointer< FrameGraphOperation > > m_sortedOperations;
+   private:
+      SharedPointer< FrameGraphOperation > m_frameGraph;
+      Array< SharedPointer< FrameGraphOperation > > m_sortedOperations;
 
-        Array< SharedPointer< ScenePass > > m_scenePasses;
-        Array< SharedPointer< RenderPass > > m_renderPasses;
-        Array< SharedPointer< ComputePass > > m_computePasses;
+      Array< SharedPointer< ScenePass > > m_scenePasses;
+      Array< SharedPointer< RenderPass > > m_renderPasses;
+      Array< SharedPointer< ComputePass > > m_computePasses;
 
-        CommandBufferArray m_graphicsCommands;
-        CommandBufferArray m_computeCommands;
-    };
+      CommandBufferArray m_graphicsCommands;
+      CommandBufferArray m_computeCommands;
+   };
 
 }
 

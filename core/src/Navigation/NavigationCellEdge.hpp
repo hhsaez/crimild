@@ -29,38 +29,39 @@
 #define CRIMILD_NAVIGATION_CELL_EDGE_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace navigation {
+   namespace navigation {
 
-        class NavigationCell;
+      class NavigationCell;
 
-        class NavigationCellEdge : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
+      class NavigationCellEdge : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCellEdge )
 
-        public:
-            NavigationCellEdge( const LineSegment3 &line );
-            virtual ~NavigationCellEdge( void );
+      public:
+         NavigationCellEdge( const LineSegment3 &line );
+         virtual ~NavigationCellEdge( void );
 
-            inline LineSegment3 &getLine( void ) { return _line; }
-            inline const LineSegment3 &getLine( void ) const { return _line; }
+         inline LineSegment3 &getLine( void ) { return _line; }
+         inline const LineSegment3 &getLine( void ) const { return _line; }
 
-            inline NavigationCell *getNeighbor( void ) { return _neighbor; }
-            void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
+         inline NavigationCell *getNeighbor( void ) { return _neighbor; }
+         void setNeighbor( NavigationCell *neighbor ) { _neighbor = neighbor; }
 
-            LineSegment3 projectPath( const LineSegment3 &path ) const;
+         LineSegment3 projectPath( const LineSegment3 &path ) const;
 
-        private:
-            LineSegment3 _line;
-            NavigationCell *_neighbor = nullptr;
-        };
+      private:
+         LineSegment3 _line;
+         NavigationCell *_neighbor = nullptr;
+      };
 
-        using NavigationCellEdgePtr = SharedPointer< NavigationCellEdge >;
+      using NavigationCellEdgePtr = SharedPointer< NavigationCellEdge >;
 
-    }
+   }
 
 }
 

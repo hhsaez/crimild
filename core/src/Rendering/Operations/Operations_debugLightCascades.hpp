@@ -28,25 +28,25 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_LIGHT_CASCADES_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
-    class FrameGraphResource;
+   class FrameGraphOperation;
+   class FrameGraphResource;
 
-    namespace framegraph {
+   namespace framegraph {
 
-        [[deprecated]] [[deprecated]] SharedPointer< FrameGraphOperation > debugLightCascades(
-            SharedPointer< FrameGraphResource > const &albedo,
-            SharedPointer< FrameGraphResource > const &positions,
-            SharedPointer< FrameGraphResource > const &normals,
-            SharedPointer< FrameGraphResource > const &materials,
-            SharedPointer< FrameGraphResource > const &depth,
-            SharedPointer< FrameGraphResource > const &shadowAtlas
-        ) noexcept;
+      [[deprecated]] [[deprecated]] SharedPointer< FrameGraphOperation > debugLightCascades(
+         SharedPointer< FrameGraphResource > const &albedo,
+         SharedPointer< FrameGraphResource > const &positions,
+         SharedPointer< FrameGraphResource > const &normals,
+         SharedPointer< FrameGraphResource > const &materials,
+         SharedPointer< FrameGraphResource > const &depth,
+         SharedPointer< FrameGraphResource > const &shadowAtlas
+      ) noexcept;
 
-    }
+   }
 
 }
 

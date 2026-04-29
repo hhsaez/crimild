@@ -27,67 +27,68 @@
 
 #include "Rendering/STBImageManager.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Foundation/STBUtils.hpp"
 #include "Rendering/Image.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 
 SharedPointer< Image > editor::ImageManager::loadImage( ImageDescriptor const &descriptor ) const noexcept
 {
-    int width, height, channels;
+   int width, height, channels;
 
-    // Fix image orientation if needed
-    stbi_set_flip_vertically_on_load( 0 );
+   // Fix image orientation if needed
+   stbi_set_flip_vertically_on_load( 0 );
 
-    void *pixels = nullptr;
+   void *pixels = nullptr;
 
-    if ( descriptor.hdr ) {
-        pixels = stbi_loadf(
-            descriptor.filePath.getAbsolutePath().c_str(),
-            &width,
-            &height,
-            &channels,
-            STBI_rgb_alpha // Force loaded image to be RGBA
-        );
-    } else {
-        pixels = stbi_load(
-            descriptor.filePath.getAbsolutePath().c_str(),
-            &width,
-            &height,
-            &channels,
-            STBI_rgb_alpha // Force loaded image to be RGBA
-        );
-    }
+   if ( descriptor.hdr ) {
+      pixels = stbi_loadf(
+         descriptor.filePath.getAbsolutePath().c_str(),
+         &width,
+         &height,
+         &channels,
+         STBI_rgb_alpha // Force loaded image to be RGBA
+      );
+   } else {
+      pixels = stbi_load(
+         descriptor.filePath.getAbsolutePath().c_str(),
+         &width,
+         &height,
+         &channels,
+         STBI_rgb_alpha // Force loaded image to be RGBA
+      );
+   }
 
-    if ( pixels == nullptr ) {
-        CRIMILD_LOG_WARNING( "Failed to load image", descriptor.filePath.getAbsolutePath() );
-        return nullptr;
-    }
+   if ( pixels == nullptr ) {
+      CRIMILD_LOG_WARNING( "Failed to load image", descriptor.filePath.getAbsolutePath() );
+      return nullptr;
+   }
 
-    auto image = crimild::alloc< Image >();
-    image->format = descriptor.hdr ? Format::R32G32B32A32_SFLOAT : Format::R8G8B8A8_UNORM;
-    image->extent = {
-        .width = crimild::Real32( width ),
-        .height = crimild::Real32( height ),
-        .depth = 1.0f,
-    };
+   auto image = crimild::alloc< Image >();
+   image->format = descriptor.hdr ? Format::R32G32B32A32_SFLOAT : Format::R8G8B8A8_UNORM;
+   image->extent = {
+      .width = crimild::Real32( width ),
+      .height = crimild::Real32( height ),
+      .depth = 1.0f,
+   };
 
-    auto size = width * height * 4 * ( descriptor.hdr ? sizeof( Real32 ) : sizeof( UInt8 ) );
-    image->setBufferView(
-        crimild::alloc< BufferView >(
-            BufferView::Target::IMAGE,
-            crimild::alloc< Buffer >(
-                [ & ] {
-                    auto data = ByteArray( size );
-                    memcpy( data.getData(), pixels, data.size() );
-                    return data;
-                }()
-            )
-        )
-    );
+   auto size = width * height * 4 * ( descriptor.hdr ? sizeof( Real32 ) : sizeof( UInt8 ) );
+   image->setBufferView(
+      crimild::alloc< BufferView >(
+         BufferView::Target::IMAGE,
+         crimild::alloc< Buffer >(
+            [ & ] {
+               auto data = ByteArray( size );
+               memcpy( data.getData(), pixels, data.size() );
+               return data;
+            }()
+         )
+      )
+   );
 
-    stbi_image_free( pixels );
+   stbi_image_free( pixels );
 
-    return image;
+   return image;
 }

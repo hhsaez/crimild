@@ -29,7 +29,7 @@
 #define CRIMILD_EDITOR_VIEWS_VIEW_
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 #include <memory>
 
 namespace crimild::editor {

@@ -28,159 +28,160 @@
 #ifndef CRIMILD_RENDERING_COMMAND_BUFFER_
 #define CRIMILD_RENDERING_COMMAND_BUFFER_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/RenderResource.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class DescriptorSet;
-    class Framebuffer;
-    class IndexBuffer;
-    class GraphicsPipeline;
-    class ComputePipeline;
-    class Primitive;
-    class RenderPass;
-    class UniformBuffer;
-    class VertexBuffer;
+   class DescriptorSet;
+   class Framebuffer;
+   class IndexBuffer;
+   class GraphicsPipeline;
+   class ComputePipeline;
+   class Primitive;
+   class RenderPass;
+   class UniformBuffer;
+   class VertexBuffer;
 
-    struct DrawIndexedInfo {
-        UInt32 indexCount = 0;
-        UInt32 instanceCount = 1;
-        UInt32 firstIndex = 0;
-        Int32 vertexOffset = 0;
-        UInt32 firstInstance = 0;
-    };
+   struct DrawIndexedInfo {
+      UInt32 indexCount = 0;
+      UInt32 instanceCount = 1;
+      UInt32 firstIndex = 0;
+      Int32 vertexOffset = 0;
+      UInt32 firstInstance = 0;
+   };
 
-    struct BindVertexBufferInfo {
-        SharedPointer< VertexBuffer > vertexBuffer;
-        UInt32 index = 0;
-    };
+   struct BindVertexBufferInfo {
+      SharedPointer< VertexBuffer > vertexBuffer;
+      UInt32 index = 0;
+   };
 
-    struct DispatchWorkgroup {
-        static constexpr UInt32 DEFAULT_WORGROUP_SIZE = 32;
+   struct DispatchWorkgroup {
+      static constexpr UInt32 DEFAULT_WORGROUP_SIZE = 32;
 
-        UInt32 x;
-        UInt32 y;
-        UInt32 z;
-    };
+      UInt32 x;
+      UInt32 y;
+      UInt32 z;
+   };
 
-    class [[deprecated]] CommandBuffer
-        : public SharedObject,
-          public NamedObject,
-          public RenderResourceImpl< CommandBuffer > {
-    public:
-        enum class Usage {
-            DEFAULT,
-            ONE_TIME_SUBMIT,
-            RENDER_PASS_CONTINUE,
-            SIMULTANEOUS_USE,
-        };
+   class [[deprecated]] CommandBuffer
+      : public SharedObject,
+        public NamedObject,
+        public RenderResourceImpl< CommandBuffer > {
+   public:
+      enum class Usage {
+         DEFAULT,
+         ONE_TIME_SUBMIT,
+         RENDER_PASS_CONTINUE,
+         SIMULTANEOUS_USE,
+      };
 
-        struct Command {
-            Command( void ) noexcept;
-            Command( const Command &other ) noexcept;
-            ~Command( void ) noexcept;
+      struct Command {
+         Command( void ) noexcept;
+         Command( const Command &other ) noexcept;
+         ~Command( void ) noexcept;
 
-            enum class Type {
-                BEGIN,
-                RESET,
-                BEGIN_RENDER_PASS,
-                END_RENDER_PASS,
-                BIND_GRAPHICS_PIPELINE,
-                BIND_COMPUTE_PIPELINE,
-                BIND_PRIMITIVE,
-                BIND_INDEX_BUFFER,
-                BIND_UNIFORM_BUFFER,
-                BIND_VERTEX_BUFFER,
-                BIND_COMMAND_BUFFER,
-                BIND_DESCRIPTOR_SET,
-                DRAW,
-                DRAW_INDEXED,
-                DISPATCH,
-                SET_FRAMEBUFFER,
-                SET_SCISSOR,
-                SET_VIEWPORT,
-                END,
-            };
+         enum class Type {
+            BEGIN,
+            RESET,
+            BEGIN_RENDER_PASS,
+            END_RENDER_PASS,
+            BIND_GRAPHICS_PIPELINE,
+            BIND_COMPUTE_PIPELINE,
+            BIND_PRIMITIVE,
+            BIND_INDEX_BUFFER,
+            BIND_UNIFORM_BUFFER,
+            BIND_VERTEX_BUFFER,
+            BIND_COMMAND_BUFFER,
+            BIND_DESCRIPTOR_SET,
+            DRAW,
+            DRAW_INDEXED,
+            DISPATCH,
+            SET_FRAMEBUFFER,
+            SET_SCISSOR,
+            SET_VIEWPORT,
+            END,
+         };
 
-            Type type;
+         Type type;
 
-            union {
-                Usage usage;
-                CommandBuffer *commandBuffer;
-                ViewportDimensions viewportDimensions;
-                Primitive *primitive;
-                UniformBuffer *uniformBuffer;
-                SharedPointer< SharedObject > obj;
-                crimild::UInt32 count;
-                crimild::Size size;
-                DispatchWorkgroup workgroup;
-                DrawIndexedInfo drawIndexedInfo;
-                BindVertexBufferInfo bindVertexBufferInfo;
-            };
+         union {
+            Usage usage;
+            CommandBuffer *commandBuffer;
+            ViewportDimensions viewportDimensions;
+            Primitive *primitive;
+            UniformBuffer *uniformBuffer;
+            SharedPointer< SharedObject > obj;
+            crimild::UInt32 count;
+            crimild::Size size;
+            DispatchWorkgroup workgroup;
+            DrawIndexedInfo drawIndexedInfo;
+            BindVertexBufferInfo bindVertexBufferInfo;
+         };
 
-            template< typename T >
-            inline T *get( void ) noexcept
-            {
-                return static_cast< T * >( crimild::get_ptr( obj ) );
-            }
+         template< typename T >
+         inline T *get( void ) noexcept
+         {
+            return static_cast< T * >( crimild::get_ptr( obj ) );
+         }
 
-            template< typename T >
-            inline const T *get( void ) const noexcept
-            {
-                return static_cast< T * >( crimild::get_ptr( obj ) );
-            }
-        };
+         template< typename T >
+         inline const T *get( void ) const noexcept
+         {
+            return static_cast< T * >( crimild::get_ptr( obj ) );
+         }
+      };
 
-    public:
-        inline void setFrameIndex( Size frameIndex ) noexcept { m_frameIndex = frameIndex; }
-        inline Size getFrameIndex( void ) const noexcept { return m_frameIndex; }
+   public:
+      inline void setFrameIndex( Size frameIndex ) noexcept { m_frameIndex = frameIndex; }
+      inline Size getFrameIndex( void ) const noexcept { return m_frameIndex; }
 
-        void begin( Usage usage ) noexcept;
-        void end( void ) noexcept;
+      void begin( Usage usage ) noexcept;
+      void end( void ) noexcept;
 
-        void beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept;
-        void endRenderPass( RenderPass *renderPass ) noexcept;
+      void beginRenderPass( RenderPass *renderPass, Framebuffer *framebuffer ) noexcept;
+      void endRenderPass( RenderPass *renderPass ) noexcept;
 
-        void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
-        void bindGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept;
-        void bindComputePipeline( ComputePipeline *pipeline ) noexcept;
-        void bindPrimitive( Primitive *primitive ) noexcept;
-        void bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept;
-        void bindVertexBuffer( VertexBuffer *vertexBuffer, UInt32 index = 0 ) noexcept;
-        void bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept;
-        void bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept;
+      void bindCommandBuffer( CommandBuffer *commandBuffer ) noexcept;
+      void bindGraphicsPipeline( GraphicsPipeline *pipeline ) noexcept;
+      void bindComputePipeline( ComputePipeline *pipeline ) noexcept;
+      void bindPrimitive( Primitive *primitive ) noexcept;
+      void bindIndexBuffer( IndexBuffer *indexBuffer ) noexcept;
+      void bindVertexBuffer( VertexBuffer *vertexBuffer, UInt32 index = 0 ) noexcept;
+      void bindUniformBuffer( UniformBuffer *uniformBuffer ) noexcept;
+      void bindDescriptorSet( DescriptorSet *descriptorSet ) noexcept;
 
-        void setScissor( const ViewportDimensions &scissor ) noexcept;
-        void setViewport( const ViewportDimensions &viewport ) noexcept;
+      void setScissor( const ViewportDimensions &scissor ) noexcept;
+      void setViewport( const ViewportDimensions &viewport ) noexcept;
 
-        void draw( crimild::UInt32 count ) noexcept;
-        void drawIndexed( const DrawIndexedInfo &info ) noexcept;
-        void drawPrimitive( Primitive *primitive, SharedPointer< VertexBuffer > const &instanceData = nullptr ) noexcept;
+      void draw( crimild::UInt32 count ) noexcept;
+      void drawIndexed( const DrawIndexedInfo &info ) noexcept;
+      void drawPrimitive( Primitive *primitive, SharedPointer< VertexBuffer > const &instanceData = nullptr ) noexcept;
 
-        void dispatch( const DispatchWorkgroup &workgroup ) noexcept;
+      void dispatch( const DispatchWorkgroup &workgroup ) noexcept;
 
-        void clear( void ) noexcept;
+      void clear( void ) noexcept;
 
-        inline Bool cleared( void ) const noexcept { return m_cleared; }
-        inline void resetCleared( void ) noexcept { m_cleared = false; }
+      inline Bool cleared( void ) const noexcept { return m_cleared; }
+      inline void resetCleared( void ) noexcept { m_cleared = false; }
 
-        template< typename CallbackType >
-        void each( CallbackType &&callback ) noexcept
-        {
-            for ( auto &cmd : m_commands ) {
-                callback( cmd );
-            }
-        }
+      template< typename CallbackType >
+      void each( CallbackType &&callback ) noexcept
+      {
+         for ( auto &cmd : m_commands ) {
+            callback( cmd );
+         }
+      }
 
-    private:
-        Size m_frameIndex = 0;
-        std::vector< Command > m_commands;
-        Bool m_cleared = false;
-    };
+   private:
+      Size m_frameIndex = 0;
+      std::vector< Command > m_commands;
+      Bool m_cleared = false;
+   };
 
-    using CommandRecorder = std::function< CommandBuffer *( Size ) >;
+   using CommandRecorder = std::function< CommandBuffer *( Size ) >;
 
 }
 

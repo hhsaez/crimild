@@ -29,117 +29,118 @@
 #define CRIMILD_ANIMATION_SKELETON_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Clip;
-        class Animation;
+      class Clip;
+      class Animation;
 
-        class Joint : public NamedObject,
-                      public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Joint )
+      class Joint : public NamedObject,
+                    public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::animation::Joint )
 
-        public:
-            Joint( void );
-            explicit Joint( std::string, crimild::UInt32 id );
-            virtual ~Joint( void );
+      public:
+         Joint( void );
+         explicit Joint( std::string, crimild::UInt32 id );
+         virtual ~Joint( void );
 
-            crimild::UInt32 getId( void ) const { return _id; }
+         crimild::UInt32 getId( void ) const { return _id; }
 
-            void setOffset( const Transformation &transform ) { _offset = transform; }
-            const Transformation &getOffset( void ) const { return _offset; }
+         void setOffset( const Transformation &transform ) { _offset = transform; }
+         const Transformation &getOffset( void ) const { return _offset; }
 
-            void setPoseMatrix( const Matrix4f &matrix ) { _poseMatrix = matrix; }
-            const Matrix4f &getPoseMatrix( void ) const { return _poseMatrix; }
+         void setPoseMatrix( const Matrix4f &matrix ) { _poseMatrix = matrix; }
+         const Matrix4f &getPoseMatrix( void ) const { return _poseMatrix; }
 
-        private:
-            crimild::UInt32 _id;
-            Transformation _offset;
-            Matrix4f _poseMatrix;
+      private:
+         crimild::UInt32 _id;
+         Transformation _offset;
+         Matrix4f _poseMatrix;
 
-            /**
-                           \name Cloning
-                        */
-            //@{
+         /**
+                        \name Cloning
+                     */
+         //@{
 
-        public:
-            virtual SharedPointer< NodeComponent > clone( void ) override;
+      public:
+         virtual SharedPointer< NodeComponent > clone( void ) override;
 
-            //@}
+         //@}
 
-            /**
-                           \name Coding
-                        */
-            //@{
+         /**
+                        \name Coding
+                     */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
-        };
+         //@}
+      };
 
-        class Skeleton : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Skeleton )
+      class Skeleton : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::animation::Skeleton )
 
-        private:
-            using JointCatalog = Map< std::string, SharedPointer< Joint > >;
-            using ClipCatalog = Map< std::string, SharedPointer< Clip > >;
+      private:
+         using JointCatalog = Map< std::string, SharedPointer< Joint > >;
+         using ClipCatalog = Map< std::string, SharedPointer< Clip > >;
 
-        public:
-            Skeleton( void );
-            virtual ~Skeleton( void );
+      public:
+         Skeleton( void );
+         virtual ~Skeleton( void );
 
-            void setJoints( const JointCatalog &joints ) { _joints = joints; }
-            JointCatalog &getJoints( void ) { return _joints; }
+         void setJoints( const JointCatalog &joints ) { _joints = joints; }
+         JointCatalog &getJoints( void ) { return _joints; }
 
-            void setGlobalInverseTransform( const Transformation &transform ) { _globalInverseTransform = transform; }
-            const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
+         void setGlobalInverseTransform( const Transformation &transform ) { _globalInverseTransform = transform; }
+         const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
 
-            void setClips( const ClipCatalog &clips ) { _clips = clips; }
-            ClipCatalog &getClips( void ) { return _clips; }
+         void setClips( const ClipCatalog &clips ) { _clips = clips; }
+         ClipCatalog &getClips( void ) { return _clips; }
 
-            virtual void start( void ) override;
+         virtual void start( void ) override;
 
-        private:
-            JointCatalog _joints;
-            ClipCatalog _clips;
-            Transformation _globalInverseTransform;
+      private:
+         JointCatalog _joints;
+         ClipCatalog _clips;
+         Transformation _globalInverseTransform;
 
-        public:
-            void animate( SharedPointer< Animation > const &animation ) { animate( crimild::get_ptr( animation ) ); }
-            void animate( Animation *animation );
+      public:
+         void animate( SharedPointer< Animation > const &animation ) { animate( crimild::get_ptr( animation ) ); }
+         void animate( Animation *animation );
 
-            /**
-                           \name Cloning
-                        */
-            //@{
+         /**
+                        \name Cloning
+                     */
+         //@{
 
-        public:
-            virtual SharedPointer< NodeComponent > clone( void ) override;
+      public:
+         virtual SharedPointer< NodeComponent > clone( void ) override;
 
-            //@}
+         //@}
 
-            /**
-                           \name Coding
-                        */
-            //@{
+         /**
+                        \name Coding
+                     */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
+         //@}
 
-        public:
-            void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
-        };
+      public:
+         void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+      };
 
-    }
+   }
 
 }
 

@@ -27,12 +27,12 @@
 
 #include "NavigationController.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "NavigationMeshContainer.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 
+#include <crimild/foundation.hpp>
 #include <list>
 
 using namespace crimild;
@@ -43,7 +43,7 @@ NavigationController::NavigationController( void )
 }
 
 NavigationController::NavigationController( NavigationMeshPtr const &mesh )
-    : _navigationMesh( mesh )
+   : _navigationMesh( mesh )
 {
 }
 
@@ -53,70 +53,70 @@ NavigationController::~NavigationController( void )
 
 void NavigationController::start( void )
 {
-    if ( _navigationMesh == nullptr ) {
-        // No navigation mesh assigned. Find the first one in the scene
-        getNode()->getRootParent()->perform( Apply( [ this ]( Node *node ) {
-            auto nav = node->getComponent< NavigationMeshContainer >();
-            if ( nav != nullptr ) {
-                _navigationMesh = crimild::retain( nav->getNavigationMesh() );
-            }
-        } ) );
-    }
+   if ( _navigationMesh == nullptr ) {
+      // No navigation mesh assigned. Find the first one in the scene
+      getNode()->getRootParent()->perform( Apply( [ this ]( Node *node ) {
+         auto nav = node->getComponent< NavigationMeshContainer >();
+         if ( nav != nullptr ) {
+            _navigationMesh = crimild::retain( nav->getNavigationMesh() );
+         }
+      } ) );
+   }
 }
 
 Vector3f NavigationController::move( const Vector3f &from, const Vector3f &to )
 {
-    /*
-    if ( _navigationMesh == nullptr ) {
-        Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No navigation mesh found" );
-        return from;
-    }
+   /*
+   if ( _navigationMesh == nullptr ) {
+       Log::warning( CRIMILD_CURRENT_CLASS_NAME, "No navigation mesh found" );
+       return from;
+   }
 
-    NavigationCell *cell = nullptr;
-    getNavigationMesh()->foreachCell( [ &cell, to ]( NavigationCellPtr const &c ) {
-        if ( c->containsPoint( to ) ) {
-            cell = crimild::get_ptr( c );
-        }
-    } );
+   NavigationCell *cell = nullptr;
+   getNavigationMesh()->foreachCell( [ &cell, to ]( NavigationCellPtr const &c ) {
+       if ( c->containsPoint( to ) ) {
+           cell = crimild::get_ptr( c );
+       }
+   } );
 
-    if ( cell == nullptr ) {
-        return from;
-    }
+   if ( cell == nullptr ) {
+       return from;
+   }
 
-    auto r = Ray3( Point3( to ), -Vector3f::Constants::UNIT_Y );
-    const auto p = cell->getPlane();
+   auto r = Ray3( Point3( to ), -Vector3f::Constants::UNIT_Y );
+   const auto p = cell->getPlane();
 
-    float t = Intersection::find( p, r );
-    if ( t < 0 ) {
-        r = Ray3f( to, Vector3f::UNIT_Y );
-        t = Intersection::find( p, r );
-        if ( t < 0 ) {
-            return from;
-        }
-    }
+   float t = Intersection::find( p, r );
+   if ( t < 0 ) {
+       r = Ray3f( to, Vector3f::UNIT_Y );
+       t = Intersection::find( p, r );
+       if ( t < 0 ) {
+           return from;
+       }
+   }
 
-    return r.getPointAt( t );
-    */
-    assert( true );
-    return Vector3f {};
+   return r.getPointAt( t );
+   */
+   assert( true );
+   return Vector3f {};
 }
 
 bool NavigationController::snap( void )
 {
-    // TODO: project current position into current cell and update position
+   // TODO: project current position into current cell and update position
 
-    return true;
+   return true;
 }
 
 bool NavigationController::teleport( const Vector3f &target )
 {
-    auto cell = findCellForPoint( target );
+   auto cell = findCellForPoint( target );
 
-    setCurrentCell( cell );
-    assert( false );
-    // getNode()->local().setTranslate( target );
+   setCurrentCell( cell );
+   assert( false );
+   // getNode()->local().setTranslate( target );
 
-    return cell != nullptr;
+   return cell != nullptr;
 }
 
 bool NavigationController::move( const Vector3f &target )
@@ -197,35 +197,35 @@ bool NavigationController::move( const Vector3f &target )
 
     getNode()->local().setTranslate( motionPath.getDestination() );
 #endif
-    return true;
+   return true;
 }
 
 bool NavigationController::findCurrentCell( void )
 {
-    assert( false );
-    // auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
-    // if ( cell != nullptr ) {
-    // setCurrentCell( cell );
-    //}
+   assert( false );
+   // auto cell = NavigationController::findCellForPoint( getNode()->getLocal().getTranslate() );
+   // if ( cell != nullptr ) {
+   // setCurrentCell( cell );
+   //}
 
-    return getCurrentCell();
+   return getCurrentCell();
 }
 
 NavigationCell *NavigationController::findCellForPoint( const Vector3f &point )
 {
-    NavigationCell *cell = nullptr;
-    getNavigationMesh()->foreachCell( [ &cell, point ]( NavigationCellPtr const &c ) {
-        if ( c->containsPoint( point ) ) {
-            cell = crimild::get_ptr( c );
-        }
-    } );
+   NavigationCell *cell = nullptr;
+   getNavigationMesh()->foreachCell( [ &cell, point ]( NavigationCellPtr const &c ) {
+      if ( c->containsPoint( point ) ) {
+         cell = crimild::get_ptr( c );
+      }
+   } );
 
-    return cell;
+   return cell;
 }
 
 std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3f &target )
 {
-    std::vector< Vector3f > result;
+   std::vector< Vector3f > result;
 
 #if 0
     auto start = getCurrentCell();
@@ -305,5 +305,5 @@ std::vector< Vector3f > NavigationController::computePathToTarget( const Vector3
     }
 #endif
 
-    return result;
+   return result;
 }

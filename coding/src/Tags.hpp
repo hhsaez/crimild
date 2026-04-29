@@ -28,26 +28,26 @@
 #ifndef CRIMILD_CORE_CODING_TAGS_
 #define CRIMILD_CORE_CODING_TAGS_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace coding {
+   namespace coding {
 
-        class Tags {
-        public:
-            static const crimild::Int8 TAG_DATA_START;
-            static const crimild::Int8 TAG_DATA_VERSION;
-            static const crimild::Int8 TAG_OBJECT_BEGIN;
-            static const crimild::Int8 TAG_OBJECT_END;
-            static const crimild::Int8 TAG_LINK_BEGIN;
-            static const crimild::Int8 TAG_LINK_END;
-            static const crimild::Int8 TAG_ROOT_OBJECT_BEGIN;
-            static const crimild::Int8 TAG_ROOT_OBJECT_END;
-            static const crimild::Int8 TAG_DATA_END;
-        };
+      class Tags {
+      public:
+         static const crimild::Int8 TAG_DATA_START;
+         static const crimild::Int8 TAG_DATA_VERSION;
+         static const crimild::Int8 TAG_OBJECT_BEGIN;
+         static const crimild::Int8 TAG_OBJECT_END;
+         static const crimild::Int8 TAG_LINK_BEGIN;
+         static const crimild::Int8 TAG_LINK_END;
+         static const crimild::Int8 TAG_ROOT_OBJECT_BEGIN;
+         static const crimild::Int8 TAG_ROOT_OBJECT_END;
+         static const crimild::Int8 TAG_DATA_END;
+      };
 
-    }
+   }
 
 }
 

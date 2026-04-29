@@ -29,29 +29,29 @@
 #define CRIMILD_ANIMATION_CHANNEL_
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Animation;
+      class Animation;
 
-        class Channel : public coding::Codable,
-                        public NamedObject {
+      class Channel : public coding::Codable,
+                      public NamedObject {
 
-        protected:
-            explicit Channel( std::string name = "" );
+      protected:
+         explicit Channel( std::string name = "" );
 
-        public:
-            virtual ~Channel( void );
+      public:
+         virtual ~Channel( void );
 
-            virtual crimild::Real32 getDuration( void ) const = 0;
+         virtual crimild::Real32 getDuration( void ) const = 0;
 
-            virtual void evaluate( crimild::Real32 t, Animation *animation ) = 0;
-        };
+         virtual void evaluate( crimild::Real32 t, Animation *animation ) = 0;
+      };
 
-    }
+   }
 
 }
 

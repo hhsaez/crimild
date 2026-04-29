@@ -28,71 +28,71 @@
 #ifndef CRIMILD_SCENE_GRAPH_GROUP_
 #define CRIMILD_SCENE_GRAPH_GROUP_
 
-#include "Crimild_Foundation.hpp"
 #include "Node.hpp"
 
+#include <crimild/foundation.hpp>
 #include <functional>
 #include <thread>
 
 namespace crimild {
 
-    class Group : public Node {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Group )
+   class Group : public Node {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Group )
 
-    public:
-        explicit Group( std::string name = "" );
-        virtual ~Group( void );
+   public:
+      explicit Group( std::string name = "" );
+      virtual ~Group( void );
 
-        bool hasNodes( void ) const { return !_nodes.empty(); }
-        unsigned int getNodeCount( void ) const { return _nodes.size(); }
+      bool hasNodes( void ) const { return !_nodes.empty(); }
+      unsigned int getNodeCount( void ) const { return _nodes.size(); }
 
-        void attachNode( Node *node );
-        void attachNode( SharedPointer< Node > const &node );
-        void attachNodeBefore( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
-        void attachNodeAfter( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
+      void attachNode( Node *node );
+      void attachNode( SharedPointer< Node > const &node );
+      void attachNodeBefore( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
+      void attachNodeAfter( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept;
 
-        void detachNode( Node *node );
-        void detachNode( SharedPointer< Node > const &node );
+      void detachNode( Node *node );
+      void detachNode( SharedPointer< Node > const &node );
 
-        void detachAllNodes( void );
+      void detachAllNodes( void );
 
-        /**
-            \brief Gets a node at a given position
-        */
-        Node *getNodeAt( unsigned int index );
+      /**
+          \brief Gets a node at a given position
+      */
+      Node *getNodeAt( unsigned int index );
 
-        template< typename T >
-        T *getNodeAt( unsigned int index )
-        {
-            return static_cast< T * >( getNodeAt( index ) );
-        }
+      template< typename T >
+      T *getNodeAt( unsigned int index )
+      {
+         return static_cast< T * >( getNodeAt( index ) );
+      }
 
-        Node *getNode( std::string name );
+      Node *getNode( std::string name );
 
-        template< typename T >
-        T *getNode( std::string name )
-        {
-            return static_cast< T * >( getNode( name ) );
-        }
+      template< typename T >
+      T *getNode( std::string name )
+      {
+         return static_cast< T * >( getNode( name ) );
+      }
 
-        virtual void forEachNode( std::function< void( Node * ) > callback, bool skipDisabledNodes = true );
+      virtual void forEachNode( std::function< void( Node * ) > callback, bool skipDisabledNodes = true );
 
-    protected:
-        Array< SharedPointer< Node > > _nodes;
+   protected:
+      Array< SharedPointer< Node > > _nodes;
 
-    public:
-        virtual void accept( NodeVisitor &visitor ) override;
+   public:
+      virtual void accept( NodeVisitor &visitor ) override;
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

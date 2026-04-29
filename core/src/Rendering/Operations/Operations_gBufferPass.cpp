@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -40,43 +39,45 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 
+#include <crimild/foundation.hpp>
+
 using namespace crimild;
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPointer< FrameGraphResource > const renderables ) noexcept
 {
-    auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( "gBufferPass" );
+   auto renderPass = crimild::alloc< RenderPass >();
+   renderPass->setName( "gBufferPass" );
 
-    auto albedo = useColorAttachment( "gBuffer/albedo" );
-    auto position = useColorAttachment( "gBuffer/position", Format::R32G32B32A32_SFLOAT );
-    auto normal = useColorAttachment( "gBuffer/normal", Format::R32G32B32A32_SFLOAT );
-    auto material = useColorAttachment( "gBuffer/material", Format::R32G32B32A32_SFLOAT );
-    auto depth = useDepthAttachment( "gBuffer/depth" );
+   auto albedo = useColorAttachment( "gBuffer/albedo" );
+   auto position = useColorAttachment( "gBuffer/position", Format::R32G32B32A32_SFLOAT );
+   auto normal = useColorAttachment( "gBuffer/normal", Format::R32G32B32A32_SFLOAT );
+   auto material = useColorAttachment( "gBuffer/material", Format::R32G32B32A32_SFLOAT );
+   auto depth = useDepthAttachment( "gBuffer/depth" );
 
-    renderPass->attachments = { albedo, position, normal, material, depth };
+   renderPass->attachments = { albedo, position, normal, material, depth };
 
-    auto descriptors = [ & ] {
-        auto descriptorSet = crimild::alloc< DescriptorSet >();
-        // descriptorSet->descriptors = {
-        //     Descriptor {
-        //         .descriptorType = DescriptorType::UNIFORM_BUFFER,
-        //         .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
-        //     },
-        // };
-        return descriptorSet;
-    }();
+   auto descriptors = [ & ] {
+      auto descriptorSet = crimild::alloc< DescriptorSet >();
+      // descriptorSet->descriptors = {
+      //     Descriptor {
+      //         .descriptorType = DescriptorType::UNIFORM_BUFFER,
+      //         .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
+      //     },
+      // };
+      return descriptorSet;
+   }();
 
-    // TODO: move this to a material
-    auto pipeline = [ & ] {
-        auto pipeline = crimild::alloc< GraphicsPipeline >();
-        pipeline->setProgram(
-            [ & ] {
-                auto program = crimild::alloc< ShaderProgram >();
-                program->setShaders(
-                    Array< SharedPointer< Shader > > {
-                        crimild::alloc< Shader >(
-                            Shader::Stage::VERTEX,
-                            R"(
+   // TODO: move this to a material
+   auto pipeline = [ & ] {
+      auto pipeline = crimild::alloc< GraphicsPipeline >();
+      pipeline->setProgram(
+         [ & ] {
+            auto program = crimild::alloc< ShaderProgram >();
+            program->setShaders(
+               Array< SharedPointer< Shader > > {
+                  crimild::alloc< Shader >(
+                     Shader::Stage::VERTEX,
+                     R"(
                                 layout( location = 0 ) in vec3 inPosition;
                                 layout( location = 1 ) in vec3 inNormal;
                                 layout( location = 2 ) in vec2 inTexCoord;
@@ -110,10 +111,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     outTexCoord = inTexCoord;
                                 }
                             )"
-                        ),
-                        crimild::alloc< Shader >(
-                            Shader::Stage::FRAGMENT,
-                            R"(
+                  ),
+                  crimild::alloc< Shader >(
+                     Shader::Stage::FRAGMENT,
+                     R"(
                                 layout( location = 0 ) in vec3 inNormal;
                                 layout( location = 1 ) in vec3 inPosition;
                                 layout( location = 2 ) in vec3 inViewPosition;
@@ -195,236 +196,236 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::gBufferPass( SharedPoi
                                     outMaterial = vec4( metallic, roughness, ambientOcclusion, 1.0 );
                                 }
                             )"
-                        ),
-                    }
-                );
-                program->vertexLayouts = { VertexP3N3TC2::getLayout() };
-                // program->instanceLayouts = {
-                //     VertexLayout {
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
-                //     },
-                // };
-                program->descriptorSetLayouts = {
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::VERTEX,
-                            },
-                        };
-                        return layout;
-                    }(),
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                // Material properties
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Albedo Map
-                                .descriptorType = DescriptorType::ALBEDO_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Metallic Map
-                                .descriptorType = DescriptorType::METALLIC_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Roughness Map
-                                .descriptorType = DescriptorType::ROUGHNESS_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Ambient Occlusion Map
-                                .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Ambient Occlusion Map
-                                .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // Normal Map
-                                .descriptorType = DescriptorType::NORMAL_MAP,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                        };
-                        return layout;
-                    }(),
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::VERTEX,
-                            },
-                        };
-                        return layout;
-                    }(),
-                };
-                return program;
-            }()
-        );
-        return pipeline;
-    }();
-
-    auto viewport = ViewportDimensions {
-        .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-        .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
-    };
-
-    renderPass->reads( { renderables } );
-    renderPass->writes( { albedo, position, normal, material, depth } );
-    renderPass->produces( { albedo, position, normal, material, depth } );
-
-    struct InstanceData {
-        std::vector< Geometry * > geometries;
-        SharedPointer< VertexBuffer > data;
-        Size instanceCount = 0;
-
-        void reset( void ) noexcept
-        {
-            instanceCount = 0;
-        }
-
-        void push( Geometry *geometry ) noexcept
-        {
-            if ( geometries.size() <= instanceCount ) {
-                const auto N = 1 + geometries.size(); // Size( 1.5 * crimild::max( Size( 1 ), Size( geometries.size() ) ) );
-                geometries.resize( N );
-            }
-
-            geometries[ instanceCount++ ] = geometry;
-        }
-
-        SharedPointer< VertexBuffer > &updateInstancedData( void ) noexcept
-        {
-            if ( this->data == nullptr || this->data->getVertexCount() < instanceCount ) {
-                // this->data = crimild::alloc< VertexBuffer >(
-                //     VertexLayout {
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
-                //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
-                //     },
-                //     instanceCount
-                // );
-                this->data->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
-            }
-
-            auto accessor0 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_0 );
-            auto accessor1 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_1 );
-            auto accessor2 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_2 );
-            auto accessor3 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_3 );
-
-            /*
-                        for ( auto i = 0; i < instanceCount; ++i ) {
-                            const auto &M = geometries[ i ]->getWorld().mat;
-
-                            accessor0->set( i, M[ 0 ] );
-                            accessor1->set( i, M[ 1 ] );
-                            accessor2->set( i, M[ 2 ] );
-                            accessor3->set( i, M[ 3 ] );
-                        }
-            */
-
-            return data;
-        }
-    };
-
-    using Instances = std::unordered_map< Material *, std::unordered_map< Primitive *, InstanceData > >;
-
-    return withDynamicGraphicsCommands(
-        renderPass,
-        [ pipeline,
-          descriptors,
-          viewport,
-          renderables = crimild::cast_ptr< RenderableSet >( renderables ),
-          instances = Instances() ]( auto commandBuffer ) mutable {
-            commandBuffer->setViewport( viewport );
-            commandBuffer->setScissor( viewport );
-
-            for ( auto &perMaterial : instances ) {
-                for ( auto &perPrimitive : perMaterial.second ) {
-                    instances[ perMaterial.first ][ perPrimitive.first ].reset();
-                }
-            }
-
-            renderables->eachGeometry(
-                [ & ]( Geometry *geometry ) {
-                    if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
-                        if ( auto material = ms->first() ) {
-                            auto primitive = geometry->anyPrimitive();
-                            instances[ material ][ primitive ].push( geometry );
-                        }
-                    }
-                }
+                  ),
+               }
             );
+            program->vertexLayouts = { VertexP3N3TC2::getLayout() };
+            // program->instanceLayouts = {
+            //     VertexLayout {
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
+            //     },
+            // };
+            program->descriptorSetLayouts = {
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::VERTEX,
+                     },
+                  };
+                  return layout;
+               }(),
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        // Material properties
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Albedo Map
+                        .descriptorType = DescriptorType::ALBEDO_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Metallic Map
+                        .descriptorType = DescriptorType::METALLIC_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Roughness Map
+                        .descriptorType = DescriptorType::ROUGHNESS_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Ambient Occlusion Map
+                        .descriptorType = DescriptorType::AMBIENT_OCCLUSION_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Ambient Occlusion Map
+                        .descriptorType = DescriptorType::COMBINED_ROUGHNESS_METALLIC_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // Normal Map
+                        .descriptorType = DescriptorType::NORMAL_MAP,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                  };
+                  return layout;
+               }(),
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::VERTEX,
+                     },
+                  };
+                  return layout;
+               }(),
+            };
+            return program;
+         }()
+      );
+      return pipeline;
+   }();
 
-            for ( auto &perMaterial : instances ) {
-                auto material = perMaterial.first;
-                for ( auto &perPrimitive : perMaterial.second ) {
-                    auto primitive = perPrimitive.first;
+   auto viewport = ViewportDimensions {
+      .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+      .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
+   };
 
-                    auto &instanceData = instances[ material ][ primitive ].updateInstancedData();
+   renderPass->reads( { renderables } );
+   renderPass->writes( { albedo, position, normal, material, depth } );
+   renderPass->produces( { albedo, position, normal, material, depth } );
 
-                    commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-                    commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-                    commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                    commandBuffer->drawPrimitive( primitive, instanceData );
-                }
+   struct InstanceData {
+      std::vector< Geometry * > geometries;
+      SharedPointer< VertexBuffer > data;
+      Size instanceCount = 0;
+
+      void reset( void ) noexcept
+      {
+         instanceCount = 0;
+      }
+
+      void push( Geometry *geometry ) noexcept
+      {
+         if ( geometries.size() <= instanceCount ) {
+            const auto N = 1 + geometries.size(); // Size( 1.5 * crimild::max( Size( 1 ), Size( geometries.size() ) ) );
+            geometries.resize( N );
+         }
+
+         geometries[ instanceCount++ ] = geometry;
+      }
+
+      SharedPointer< VertexBuffer > &updateInstancedData( void ) noexcept
+      {
+         if ( this->data == nullptr || this->data->getVertexCount() < instanceCount ) {
+            // this->data = crimild::alloc< VertexBuffer >(
+            //     VertexLayout {
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4f >() },
+            //         { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4f >() },
+            //     },
+            //     instanceCount
+            // );
+            this->data->getBufferView()->setUsage( BufferView::Usage::DYNAMIC );
+         }
+
+         auto accessor0 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_0 );
+         auto accessor1 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_1 );
+         auto accessor2 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_2 );
+         auto accessor3 = this->data->get( VertexAttribute::Name::USER_ATTRIBUTE_3 );
+
+         /*
+                     for ( auto i = 0; i < instanceCount; ++i ) {
+                         const auto &M = geometries[ i ]->getWorld().mat;
+
+                         accessor0->set( i, M[ 0 ] );
+                         accessor1->set( i, M[ 1 ] );
+                         accessor2->set( i, M[ 2 ] );
+                         accessor3->set( i, M[ 3 ] );
+                     }
+         */
+
+         return data;
+      }
+   };
+
+   using Instances = std::unordered_map< Material *, std::unordered_map< Primitive *, InstanceData > >;
+
+   return withDynamicGraphicsCommands(
+      renderPass,
+      [ pipeline,
+        descriptors,
+        viewport,
+        renderables = crimild::cast_ptr< RenderableSet >( renderables ),
+        instances = Instances() ]( auto commandBuffer ) mutable {
+         commandBuffer->setViewport( viewport );
+         commandBuffer->setScissor( viewport );
+
+         for ( auto &perMaterial : instances ) {
+            for ( auto &perPrimitive : perMaterial.second ) {
+               instances[ perMaterial.first ][ perPrimitive.first ].reset();
             }
+         }
 
-            // if ( instances.size() == 0 ) {
-            // for ( auto perMaterial : sorted ) {
-            //     auto material = perMaterial.first;
+         renderables->eachGeometry(
+            [ & ]( Geometry *geometry ) {
+               if ( auto ms = geometry->getComponent< MaterialComponent >() ) {
+                  if ( auto material = ms->first() ) {
+                     auto primitive = geometry->anyPrimitive();
+                     instances[ material ][ primitive ].push( geometry );
+                  }
+               }
+            }
+         );
 
-            //     for ( auto perPrimitive : perMaterial.second ) {
-            //         auto primitive = perPrimitive.first;
+         for ( auto &perMaterial : instances ) {
+            auto material = perMaterial.first;
+            for ( auto &perPrimitive : perMaterial.second ) {
+               auto primitive = perPrimitive.first;
 
-            //         auto data = Array< Vector4 >( 4 * perPrimitive.second.size() );
-            //         auto instanceCount = Index( 0 );
-            //         for ( auto geometry : perPrimitive.second ) {
-            //             for ( auto i = 0; i < 4; ++i ) {
-            //                 data[ 4 * instanceCount + i ] = geometry->getWorld().mat[ i ];
-            //             }
+               auto &instanceData = instances[ material ][ primitive ].updateInstancedData();
 
-            //             instanceCount++;
-            //         }
+               commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+               commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+               commandBuffer->bindDescriptorSet( material->getDescriptors() );
+               commandBuffer->drawPrimitive( primitive, instanceData );
+            }
+         }
 
-            //         auto instance = InstanceData {
-            //             .material = material,
-            //             .primitive = primitive,
-            //             .data = crimild::alloc< VertexBuffer >(
-            //                 VertexLayout {
-            //                     { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4 >() },
-            //                     { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4 >() },
-            //                     { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4 >() },
-            //                     { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4 >() },
-            //                 },
-            //                 data ),
-            //             .count = instanceCount,
-            //         };
+         // if ( instances.size() == 0 ) {
+         // for ( auto perMaterial : sorted ) {
+         //     auto material = perMaterial.first;
 
-            //         instances.push_back( instance );
-            //     }
-            // }
-            // // }
+         //     for ( auto perPrimitive : perMaterial.second ) {
+         //         auto primitive = perPrimitive.first;
 
-            // for ( auto &instance : instances ) {
-            //     commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-            //     commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-            //     commandBuffer->bindDescriptorSet( instance.material->getDescriptors() );
-            //     commandBuffer->drawPrimitive( instance.primitive, instance.data );
-            // }
-        }
-    );
+         //         auto data = Array< Vector4 >( 4 * perPrimitive.second.size() );
+         //         auto instanceCount = Index( 0 );
+         //         for ( auto geometry : perPrimitive.second ) {
+         //             for ( auto i = 0; i < 4; ++i ) {
+         //                 data[ 4 * instanceCount + i ] = geometry->getWorld().mat[ i ];
+         //             }
+
+         //             instanceCount++;
+         //         }
+
+         //         auto instance = InstanceData {
+         //             .material = material,
+         //             .primitive = primitive,
+         //             .data = crimild::alloc< VertexBuffer >(
+         //                 VertexLayout {
+         //                     { VertexAttribute::Name::USER_ATTRIBUTE_0, utils::getFormat< Vector4 >() },
+         //                     { VertexAttribute::Name::USER_ATTRIBUTE_1, utils::getFormat< Vector4 >() },
+         //                     { VertexAttribute::Name::USER_ATTRIBUTE_2, utils::getFormat< Vector4 >() },
+         //                     { VertexAttribute::Name::USER_ATTRIBUTE_3, utils::getFormat< Vector4 >() },
+         //                 },
+         //                 data ),
+         //             .count = instanceCount,
+         //         };
+
+         //         instances.push_back( instance );
+         //     }
+         // }
+         // // }
+
+         // for ( auto &instance : instances ) {
+         //     commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+         //     commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+         //     commandBuffer->bindDescriptorSet( instance.material->getDescriptors() );
+         //     commandBuffer->drawPrimitive( instance.primitive, instance.data );
+         // }
+      }
+   );
 }

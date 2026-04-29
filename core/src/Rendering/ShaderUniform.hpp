@@ -28,27 +28,28 @@
 #ifndef CRIMILD_RENDERING_SHADER_UNIFORM_
 #define CRIMILD_RENDERING_SHADER_UNIFORM_
 
-#include "Crimild_Foundation.hpp"
 #include "ShaderLocation.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class Renderer;
+   class Renderer;
 
-    class [[deprecated]] ShaderUniform : public NamedObject, public SharedObject {
-    public:
-        ShaderUniform( std::string name );
-        virtual ~ShaderUniform( void );
+   class [[deprecated]] ShaderUniform : public NamedObject, public SharedObject {
+   public:
+      ShaderUniform( std::string name );
+      virtual ~ShaderUniform( void );
 
-        void setLocation( SharedPointer< ShaderLocation > const &location ) { _location = location; }
-        ShaderLocation *getLocation( void ) { return crimild::get_ptr( _location ); }
+      void setLocation( SharedPointer< ShaderLocation > const &location ) { _location = location; }
+      ShaderLocation *getLocation( void ) { return crimild::get_ptr( _location ); }
 
-        virtual void onBind( Renderer *renderer ) = 0;
-        virtual void onUnbind( Renderer *renderer ) = 0;
+      virtual void onBind( Renderer *renderer ) = 0;
+      virtual void onUnbind( Renderer *renderer ) = 0;
 
-    private:
-        SharedPointer< ShaderLocation > _location;
-    };
+   private:
+      SharedPointer< ShaderLocation > _location;
+   };
 
 }
 

@@ -28,100 +28,100 @@
 #ifndef CRIMILD_CORE_DEBUG_DRAW_MANAGER_
 #define CRIMILD_CORE_DEBUG_DRAW_MANAGER_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 
+#include <crimild/foundation.hpp>
 #include <string>
 #include <vector>
 
 namespace crimild {
 
-    class Primitive;
+   class Primitive;
 
-    class DebugDrawManager {
-    public:
-        /**
-         * @brief Adds a line segment to the debug drawing queue.
-         */
-        static void addLine(
-            const Point3f &from,
-            const Point3f &to,
-            const ColorRGB &color,
-            float width = 1.0f,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+   class DebugDrawManager {
+   public:
+      /**
+       * @brief Adds a line segment to the debug drawing queue.
+       */
+      static void addLine(
+         const Point3f &from,
+         const Point3f &to,
+         const ColorRGB &color,
+         float width = 1.0f,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-        static void addCross(
-            const Point3f &position,
-            const ColorRGB &color,
-            float size,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+      static void addCross(
+         const Point3f &position,
+         const ColorRGB &color,
+         float size,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-        static void addSphere(
-            const Point3f &center,
-            float radius,
-            const ColorRGB &color,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+      static void addSphere(
+         const Point3f &center,
+         float radius,
+         const ColorRGB &color,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-        static void addCircle(
-            const Point3f &center,
-            const Vector3f &normal,
-            float radius,
-            const ColorRGB &color,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+      static void addCircle(
+         const Point3f &center,
+         const Vector3f &normal,
+         float radius,
+         const ColorRGB &color,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-        static void addAxes(
-            const Transformation &transformation,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+      static void addAxes(
+         const Transformation &transformation,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-        static void addText(
-            const Point3f &position,
-            std::string_view text,
-            const ColorRGB &color,
-            float duration = 0.0f,
-            bool depthEnabled = true
-        ) noexcept;
+      static void addText(
+         const Point3f &position,
+         std::string_view text,
+         const ColorRGB &color,
+         float duration = 0.0f,
+         bool depthEnabled = true
+      ) noexcept;
 
-    public:
-        static void tick( void ) noexcept;
+   public:
+      static void tick( void ) noexcept;
 
-        template< typename Fn >
-        static void eachRenderable( Fn fn ) noexcept
-        {
-            for ( auto &r : s_renderables ) {
-                fn( r );
+      template< typename Fn >
+      static void eachRenderable( Fn fn ) noexcept
+      {
+         for ( auto &r : s_renderables ) {
+            fn( r );
+         }
+
+         for ( auto &r : s_persistentRenderables ) {
+            if ( r.duration > 0 ) {
+               fn( r );
             }
+         }
+      }
 
-            for ( auto &r : s_persistentRenderables ) {
-                if ( r.duration > 0 ) {
-                    fn( r );
-                }
-            }
-        }
+      static void reset( bool clearAll = false ) noexcept;
 
-        static void reset( bool clearAll = false ) noexcept;
+   private:
+      struct Renderable {
+         SharedPointer< Primitive > primitive;
+         Transformation world;
+         ColorRGB color;
+         float duration;
+         bool depthEnabled;
+      };
 
-    private:
-        struct Renderable {
-            SharedPointer< Primitive > primitive;
-            Transformation world;
-            ColorRGB color;
-            float duration;
-            bool depthEnabled;
-        };
-
-        static std::vector< Renderable > s_renderables;
-        static std::vector< Renderable > s_persistentRenderables;
-    };
+      static std::vector< Renderable > s_renderables;
+      static std::vector< Renderable > s_persistentRenderables;
+   };
 
 }
 

@@ -28,11 +28,12 @@
 #include "SkinnedMeshComponent.hpp"
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Rendering/SkinnedMesh.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 

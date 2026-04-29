@@ -29,99 +29,100 @@
 #define CRIMILD_AUDIO_SOURCE_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace audio {
+   namespace audio {
 
-        /**
-           \brief Abstract interface for audio sources
+      /**
+         \brief Abstract interface for audio sources
+       */
+      class AudioSource : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
+
+      public:
+         enum class Status {
+            STOPPED,
+            PLAYING,
+            PAUSED
+         };
+
+         struct Chunk {
+            const crimild::Int16 *samples;
+            crimild::Size sampleCount;
+         };
+
+      protected:
+         AudioSource( void );
+
+      public:
+         virtual ~AudioSource( void );
+
+      public:
+         virtual void play( void ) = 0;
+         virtual void pause( void ) = 0;
+         virtual void stop( void ) = 0;
+
+         virtual crimild::Real32 getDuration( void ) const = 0;
+
+         virtual void setLoop( crimild::Bool loop ) = 0;
+         virtual crimild::Bool shouldLoop( void ) const = 0;
+
+         virtual void setAutoplay( crimild::Bool autoplay ) = 0;
+         virtual crimild::Bool shouldAutoplay( void ) const = 0;
+
+         virtual Status getStatus( void ) const = 0;
+
+         virtual void setPlayingOffset( crimild::Real32 offset ) = 0;
+         virtual crimild::Real32 getPlayingOffset( void ) const = 0;
+
+         virtual void setVolume( crimild::Real32 volume ) = 0;
+         virtual crimild::Real32 getVolume( void ) const = 0;
+
+         virtual void enableSpatialization( crimild::Bool enabled ) { _spatializationEnabled = enabled; }
+         virtual crimild::Bool isSpatializationEnabled( void ) const { return _spatializationEnabled; }
+
+         virtual void setTransformation( const Transformation &t ) { _transformation = t; }
+         virtual const Transformation &getTransformation( void ) const { return _transformation; }
+
+         virtual void setRelativeToListener( crimild::Bool relative ) = 0;
+         virtual crimild::Bool isRelativeToListener( void ) const = 0;
+
+         virtual void setMinDistance( crimild::Real32 distance ) = 0;
+         virtual crimild::Real32 getMinDistance( void ) const = 0;
+
+         virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
+         virtual crimild::Real32 getAttenuation( void ) const = 0;
+
+         using GetDataCallback = std::function< void( Chunk const & ) >;
+         virtual void onGetData( GetDataCallback const &callback ) = 0;
+
+         virtual crimild::UInt32 getChannelCount( void ) const = 0;
+
+         virtual crimild::UInt32 getSampleRate( void ) const = 0;
+
+      private:
+         crimild::Bool _spatializationEnabled = false;
+         Transformation _transformation;
+
+         /**
+            \name Coding support
          */
-        class AudioSource : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::audo::AudioSource )
+         //@{
 
-        public:
-            enum class Status {
-                STOPPED,
-                PLAYING,
-                PAUSED
-            };
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            struct Chunk {
-                const crimild::Int16 *samples;
-                crimild::Size sampleCount;
-            };
+         //@}
+      };
 
-        protected:
-            AudioSource( void );
+      using AudioSourcePtr = SharedPointer< AudioSource >;
 
-        public:
-            virtual ~AudioSource( void );
-
-        public:
-            virtual void play( void ) = 0;
-            virtual void pause( void ) = 0;
-            virtual void stop( void ) = 0;
-
-            virtual crimild::Real32 getDuration( void ) const = 0;
-
-            virtual void setLoop( crimild::Bool loop ) = 0;
-            virtual crimild::Bool shouldLoop( void ) const = 0;
-
-            virtual void setAutoplay( crimild::Bool autoplay ) = 0;
-            virtual crimild::Bool shouldAutoplay( void ) const = 0;
-
-            virtual Status getStatus( void ) const = 0;
-
-            virtual void setPlayingOffset( crimild::Real32 offset ) = 0;
-            virtual crimild::Real32 getPlayingOffset( void ) const = 0;
-
-            virtual void setVolume( crimild::Real32 volume ) = 0;
-            virtual crimild::Real32 getVolume( void ) const = 0;
-
-            virtual void enableSpatialization( crimild::Bool enabled ) { _spatializationEnabled = enabled; }
-            virtual crimild::Bool isSpatializationEnabled( void ) const { return _spatializationEnabled; }
-
-            virtual void setTransformation( const Transformation &t ) { _transformation = t; }
-            virtual const Transformation &getTransformation( void ) const { return _transformation; }
-
-            virtual void setRelativeToListener( crimild::Bool relative ) = 0;
-            virtual crimild::Bool isRelativeToListener( void ) const = 0;
-
-            virtual void setMinDistance( crimild::Real32 distance ) = 0;
-            virtual crimild::Real32 getMinDistance( void ) const = 0;
-
-            virtual void setAttenuation( crimild::Real32 attenuation ) = 0;
-            virtual crimild::Real32 getAttenuation( void ) const = 0;
-
-            using GetDataCallback = std::function< void( Chunk const & ) >;
-            virtual void onGetData( GetDataCallback const &callback ) = 0;
-
-            virtual crimild::UInt32 getChannelCount( void ) const = 0;
-
-            virtual crimild::UInt32 getSampleRate( void ) const = 0;
-
-        private:
-            crimild::Bool _spatializationEnabled = false;
-            Transformation _transformation;
-
-            /**
-               \name Coding support
-            */
-            //@{
-
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
-
-            //@}
-        };
-
-        using AudioSourcePtr = SharedPointer< AudioSource >;
-
-    }
+   }
 
 }
 

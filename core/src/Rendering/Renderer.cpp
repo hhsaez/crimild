@@ -30,7 +30,6 @@
 #include "Animation/Skeleton.hpp"
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderQueue.hpp"
@@ -39,87 +38,89 @@
 #include "SceneGraph/Light.hpp"
 #include "Simulation/AssetManager.hpp"
 
+#include <crimild/foundation.hpp>
+
 using namespace crimild;
 
 Renderer::Renderer( void )
-    : //_screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexP3N3TC2::getLayout() ) ),
-      _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram > >() ),
-      _textureCatalog( crimild::alloc< Catalog< Texture > >() ),
-      _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject > >() ),
-      _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject > >() ),
-      _instancedBufferObjectCatalog( crimild::alloc< Catalog< InstancedBufferObject > >() ),
-      _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject > >() ),
-      //   _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget > >() ),
-      _primitiveCatalog( crimild::alloc< Catalog< Primitive > >() ),
-      _lightCatalog( crimild::alloc< Catalog< Light > >() )
+   : //_screenPrimitive( crimild::alloc< QuadPrimitive >( 2.0f, 2.0f, VertexP3N3TC2::getLayout() ) ),
+     _shaderProgramCatalog( crimild::alloc< Catalog< ShaderProgram > >() ),
+     _textureCatalog( crimild::alloc< Catalog< Texture > >() ),
+     _vertexBufferObjectCatalog( crimild::alloc< Catalog< VertexBufferObject > >() ),
+     _indexBufferObjectCatalog( crimild::alloc< Catalog< IndexBufferObject > >() ),
+     _instancedBufferObjectCatalog( crimild::alloc< Catalog< InstancedBufferObject > >() ),
+     _frameBufferObjectCatalog( crimild::alloc< Catalog< FrameBufferObject > >() ),
+     //   _renderTargetCatalog( crimild::alloc< Catalog< RenderTarget > >() ),
+     _primitiveCatalog( crimild::alloc< Catalog< Primitive > >() ),
+     _lightCatalog( crimild::alloc< Catalog< Light > >() )
 {
-    //_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
+   //_screenBuffer = crimild::alloc< FrameBufferObject >( 800, 600 );
 }
 
 Renderer::~Renderer( void )
 {
-    _screenBuffer = nullptr;
-    _screenPrimitive = nullptr;
+   _screenBuffer = nullptr;
+   _screenPrimitive = nullptr;
 
-    getShaderProgramCatalog()->unloadAll();
-    getTextureCatalog()->unloadAll();
-    getLightCatalog()->unloadAll();
-    getVertexBufferObjectCatalog()->unloadAll();
-    getIndexBufferObjectCatalog()->unloadAll();
-    getInstancedBufferObjectCatalog()->unloadAll();
-    getPrimitiveCatalog()->unloadAll();
-    // getRenderTargetCatalog()->unloadAll();
-    getFrameBufferObjectCatalog()->unloadAll();
+   getShaderProgramCatalog()->unloadAll();
+   getTextureCatalog()->unloadAll();
+   getLightCatalog()->unloadAll();
+   getVertexBufferObjectCatalog()->unloadAll();
+   getIndexBufferObjectCatalog()->unloadAll();
+   getInstancedBufferObjectCatalog()->unloadAll();
+   getPrimitiveCatalog()->unloadAll();
+   // getRenderTargetCatalog()->unloadAll();
+   getFrameBufferObjectCatalog()->unloadAll();
 }
 
 void Renderer::configure( void )
 {
-    getShaderProgramCatalog()->configure();
-    getTextureCatalog()->configure();
-    getLightCatalog()->configure();
-    getVertexBufferObjectCatalog()->configure();
-    getIndexBufferObjectCatalog()->configure();
-    getInstancedBufferObjectCatalog()->configure();
-    getPrimitiveCatalog()->configure();
-    // getRenderTargetCatalog()->configure();
-    getFrameBufferObjectCatalog()->configure();
+   getShaderProgramCatalog()->configure();
+   getTextureCatalog()->configure();
+   getLightCatalog()->configure();
+   getVertexBufferObjectCatalog()->configure();
+   getIndexBufferObjectCatalog()->configure();
+   getInstancedBufferObjectCatalog()->configure();
+   getPrimitiveCatalog()->configure();
+   // getRenderTargetCatalog()->configure();
+   getFrameBufferObjectCatalog()->configure();
 }
 
 void Renderer::setScreenViewport( const Rectf &viewport )
 {
-    /*
-    auto screen = getScreenBuffer();
-    auto w = screen->getWidth();
-    auto h = screen->getHeight();
+   /*
+   auto screen = getScreenBuffer();
+   auto w = screen->getWidth();
+   auto h = screen->getHeight();
 
-    setViewport(
-        Rectf(
-            w * viewport.getX(),
-            h * viewport.getY(),
-            w * viewport.getWidth(),
-            h * viewport.getHeight()
-        )
-    );
-    */
+   setViewport(
+       Rectf(
+           w * viewport.getX(),
+           h * viewport.getY(),
+           w * viewport.getWidth(),
+           h * viewport.getHeight()
+       )
+   );
+   */
 }
 
 void Renderer::beginRender( void )
 {
-    static const Rectf VIEWPORT { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
-    setScreenViewport( VIEWPORT );
+   static const Rectf VIEWPORT { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+   setScreenViewport( VIEWPORT );
 }
 
 void Renderer::endRender( void )
 {
-    getShaderProgramCatalog()->cleanup();
-    getTextureCatalog()->cleanup();
-    getLightCatalog()->cleanup();
-    getVertexBufferObjectCatalog()->cleanup();
-    getIndexBufferObjectCatalog()->cleanup();
-    getInstancedBufferObjectCatalog()->cleanup();
-    getPrimitiveCatalog()->cleanup();
-    // getRenderTargetCatalog()->cleanup();
-    getFrameBufferObjectCatalog()->cleanup();
+   getShaderProgramCatalog()->cleanup();
+   getTextureCatalog()->cleanup();
+   getLightCatalog()->cleanup();
+   getVertexBufferObjectCatalog()->cleanup();
+   getIndexBufferObjectCatalog()->cleanup();
+   getInstancedBufferObjectCatalog()->cleanup();
+   getPrimitiveCatalog()->cleanup();
+   // getRenderTargetCatalog()->cleanup();
+   getFrameBufferObjectCatalog()->cleanup();
 }
 
 void Renderer::presentFrame( void )
@@ -128,35 +129,35 @@ void Renderer::presentFrame( void )
 
 void Renderer::render( RenderQueue *renderQueue, rendergraph::RenderGraph *renderGraph )
 {
-    /*
-        auto lightCatalog = getLightCatalog();
-        renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
-            lightCatalog->bind( light );
-        });
+   /*
+       auto lightCatalog = getLightCatalog();
+       renderQueue->each( [ lightCatalog ]( Light *light, crimild::Size ) {
+           lightCatalog->bind( light );
+       });
 
-        renderGraph->execute( this, renderQueue );
+       renderGraph->execute( this, renderQueue );
 
-        auto output = renderGraph->getOutput();
-        if ( output == nullptr ) {
-            CRIMILD_LOG_ERROR( "No output provided for render graph" );
-            return;
-        }
+       auto output = renderGraph->getOutput();
+       if ( output == nullptr ) {
+           CRIMILD_LOG_ERROR( "No output provided for render graph" );
+           return;
+       }
 
-        auto texture = output->getTexture();
-        if ( texture == nullptr ) {
-            CRIMILD_LOG_ERROR( "No valid texture for render graph output" );
-            return;
-        }
+       auto texture = output->getTexture();
+       if ( texture == nullptr ) {
+           CRIMILD_LOG_ERROR( "No valid texture for render graph output" );
+           return;
+       }
 
-        auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
-        assert( program && "No valid program to render texture" );
+       auto program = AssetManager::getInstance()->get< ScreenTextureShaderProgram >();
+       assert( program && "No valid program to render texture" );
 
-        program->bindUniform( COLOR_MAP_UNIFORM, texture );
+       program->bindUniform( COLOR_MAP_UNIFORM, texture );
 
-        bindProgram( program );
-        drawScreenPrimitive( program );
-        unbindProgram( program );
-    */
+       bindProgram( program );
+       drawScreenPrimitive( program );
+       unbindProgram( program );
+   */
 }
 
 // void Renderer::bindRenderTarget( RenderTarget *target )
@@ -171,30 +172,30 @@ void Renderer::render( RenderQueue *renderQueue, rendergraph::RenderGraph *rende
 
 void Renderer::bindFrameBuffer( FrameBufferObject *fbo )
 {
-    getFrameBufferObjectCatalog()->bind( fbo );
+   getFrameBufferObjectCatalog()->bind( fbo );
 }
 
 void Renderer::unbindFrameBuffer( FrameBufferObject *fbo )
 {
-    getFrameBufferObjectCatalog()->unbind( fbo );
+   getFrameBufferObjectCatalog()->unbind( fbo );
 }
 
 void Renderer::bindProgram( ShaderProgram *program )
 {
-    /*
-    program->willBind( this );
-    getShaderProgramCatalog()->bind( program );
-    program->didBind( this );
-    */
+   /*
+   program->willBind( this );
+   getShaderProgramCatalog()->bind( program );
+   program->didBind( this );
+   */
 }
 
 void Renderer::unbindProgram( ShaderProgram *program )
 {
-    /*
-    program->willUnbind( this );
-    getShaderProgramCatalog()->unbind( program );
-    program->didUnbind( this );
-    */
+   /*
+   program->willUnbind( this );
+   getShaderProgramCatalog()->unbind( program );
+   program->didUnbind( this );
+   */
 }
 
 void Renderer::bindMaterial( ShaderProgram *program, Material *material )
@@ -255,66 +256,66 @@ void Renderer::unbindMaterial( ShaderProgram *program, Material *material )
 
 void Renderer::bindTexture( ShaderLocation *location, Texture *texture )
 {
-    getTextureCatalog()->bind( location, texture );
+   getTextureCatalog()->bind( location, texture );
 }
 
 void Renderer::unbindTexture( ShaderLocation *location, Texture *texture )
 {
-    getTextureCatalog()->unbind( location, texture );
+   getTextureCatalog()->unbind( location, texture );
 }
 
 void Renderer::bindLight( Light *light )
 {
-    getLightCatalog()->bind( light );
+   getLightCatalog()->bind( light );
 }
 
 void Renderer::unbindLight( Light *light )
 {
-    // no-op
+   // no-op
 }
 
 void Renderer::bindPrimitive( ShaderProgram *, Primitive *primitive )
 {
-    getPrimitiveCatalog()->bind( primitive );
+   getPrimitiveCatalog()->bind( primitive );
 }
 
 void Renderer::unbindPrimitive( ShaderProgram *, Primitive *primitive )
 {
-    getPrimitiveCatalog()->unbind( primitive );
+   getPrimitiveCatalog()->unbind( primitive );
 }
 
 void Renderer::bindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
 {
-    if ( vbo == nullptr ) {
-        return;
-    }
+   if ( vbo == nullptr ) {
+      return;
+   }
 
-    getVertexBufferObjectCatalog()->bind( program, vbo );
+   getVertexBufferObjectCatalog()->bind( program, vbo );
 }
 
 void Renderer::unbindVertexBuffer( ShaderProgram *program, VertexBufferObject *vbo )
 {
-    getVertexBufferObjectCatalog()->unbind( program, vbo );
+   getVertexBufferObjectCatalog()->unbind( program, vbo );
 }
 
 void Renderer::bindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
 {
-    getIndexBufferObjectCatalog()->bind( program, ibo );
+   getIndexBufferObjectCatalog()->bind( program, ibo );
 }
 
 void Renderer::unbindIndexBuffer( ShaderProgram *program, IndexBufferObject *ibo )
 {
-    getIndexBufferObjectCatalog()->unbind( program, ibo );
+   getIndexBufferObjectCatalog()->unbind( program, ibo );
 }
 
 void Renderer::bindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *ibo )
 {
-    getInstancedBufferObjectCatalog()->bind( program, ibo );
+   getInstancedBufferObjectCatalog()->bind( program, ibo );
 }
 
 void Renderer::unbindInstancedBuffer( ShaderProgram *program, InstancedBufferObject *ibo )
 {
-    getInstancedBufferObjectCatalog()->unbind( program, ibo );
+   getInstancedBufferObjectCatalog()->unbind( program, ibo );
 }
 
 void Renderer::applyTransformations( ShaderProgram *program, Geometry *geometry, Camera *camera )
@@ -381,9 +382,9 @@ void Renderer::drawGeometry( Geometry *geometry, ShaderProgram *program, const M
 
 void Renderer::drawScreenPrimitive( ShaderProgram *program )
 {
-    auto primitive = crimild::get_ptr( _screenPrimitive );
+   auto primitive = crimild::get_ptr( _screenPrimitive );
 
-    bindPrimitive( program, primitive );
-    drawPrimitive( program, crimild::get_ptr( _screenPrimitive ) );
-    unbindPrimitive( program, primitive );
+   bindPrimitive( program, primitive );
+   drawPrimitive( program, crimild::get_ptr( _screenPrimitive ) );
+   unbindPrimitive( program, primitive );
 }

@@ -28,36 +28,37 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_IMAGE_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_IMAGE_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class FrameGraphOperation;
-    class FrameGraphResource;
-    class Shader;
-    class StorageBuffer;
-    class DescriptorSet;
-    struct DispatchWorkgroup;
+   class FrameGraphOperation;
+   class FrameGraphResource;
+   class Shader;
+   class StorageBuffer;
+   class DescriptorSet;
+   struct DispatchWorkgroup;
 
-    namespace framegraph {
+   namespace framegraph {
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
-            Extent2D extent,
-            SharedPointer< Shader > shader,
-            Format format = Format::R8G8B8A8_UNORM,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
-        ) noexcept;
+      [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
+         Extent2D extent,
+         SharedPointer< Shader > shader,
+         Format format = Format::R8G8B8A8_UNORM,
+         Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+      ) noexcept;
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
-            Extent2D extent,
-            SharedPointer< Shader > shader,
-            Format format,
-            const DispatchWorkgroup &workgroup,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
-        ) noexcept;
-    }
+      [[deprecated]] SharedPointer< FrameGraphOperation > computeImage(
+         Extent2D extent,
+         SharedPointer< Shader > shader,
+         Format format,
+         const DispatchWorkgroup &workgroup,
+         Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+      ) noexcept;
+   }
 
 }
 

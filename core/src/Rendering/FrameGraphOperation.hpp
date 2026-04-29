@@ -28,93 +28,93 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_OPERATION_
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_OPERATION_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphResource;
+   class FrameGraphResource;
 
-    /**
-     * \brief Executes a single frame operation
-     */
-    class [[deprecated]] FrameGraphOperation
-        : public SharedObject,
-          public NamedObject {
-    public:
-        enum class Type {
-            SCENE_PASS,
-            RENDER_PASS,
-            COMPUTE_PASS,
-        };
+   /**
+    * \brief Executes a single frame operation
+    */
+   class [[deprecated]] FrameGraphOperation
+      : public SharedObject,
+        public NamedObject {
+   public:
+      enum class Type {
+         SCENE_PASS,
+         RENDER_PASS,
+         COMPUTE_PASS,
+      };
 
-    public:
-        virtual ~FrameGraphOperation( void ) = default;
+   public:
+      virtual ~FrameGraphOperation( void ) = default;
 
-        virtual Type getType( void ) const noexcept = 0;
+      virtual Type getType( void ) const noexcept = 0;
 
-        /**
-            \brief Executes the operation
-         */
-        std::function< Bool( Size imageIndex, Bool force ) > apply = []( auto, auto ) {
-            return true;
-        };
+      /**
+          \brief Executes the operation
+       */
+      std::function< Bool( Size imageIndex, Bool force ) > apply = []( auto, auto ) {
+         return true;
+      };
 
-        void reads( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+      void reads( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
-        template< typename Fn >
-        void eachRead( Fn fn ) noexcept
-        {
-            m_reads.each( fn );
-        }
+      template< typename Fn >
+      void eachRead( Fn fn ) noexcept
+      {
+         m_reads.each( fn );
+      }
 
-        void writes( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+      void writes( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
-        template< typename Fn >
-        void eachWritten( Fn fn ) noexcept
-        {
-            m_writes.each( fn );
-        }
+      template< typename Fn >
+      void eachWritten( Fn fn ) noexcept
+      {
+         m_writes.each( fn );
+      }
 
-        void produces( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
+      void produces( Array< SharedPointer< FrameGraphResource > > const &resources ) noexcept;
 
-        template< typename Fn >
-        void eachProduct( Fn fn ) noexcept
-        {
-            m_products.each( fn );
-        }
+      template< typename Fn >
+      void eachProduct( Fn fn ) noexcept
+      {
+         m_products.each( fn );
+      }
 
-        inline SharedPointer< FrameGraphResource > getProduct( Size index ) noexcept { return !m_products.empty() ? m_products[ index ] : nullptr; }
+      inline SharedPointer< FrameGraphResource > getProduct( Size index ) noexcept { return !m_products.empty() ? m_products[ index ] : nullptr; }
 
-        inline SharedPointer< FrameGraphResource > getMainProduct( void ) noexcept { return !m_products.empty() ? m_products.first() : nullptr; }
+      inline SharedPointer< FrameGraphResource > getMainProduct( void ) noexcept { return !m_products.empty() ? m_products.first() : nullptr; }
 
-        inline Size getBlockCount( void ) const noexcept { return m_blocks.size(); }
+      inline Size getBlockCount( void ) const noexcept { return m_blocks.size(); }
 
-        template< typename Fn >
-        void eachBlocks( Fn fn ) noexcept
-        {
-            m_blocks.each( fn );
-        }
+      template< typename Fn >
+      void eachBlocks( Fn fn ) noexcept
+      {
+         m_blocks.each( fn );
+      }
 
-        template< typename Fn >
-        void eachBlockedBy( Fn fn ) noexcept
-        {
-            m_blockedBy.each( fn );
-        }
+      template< typename Fn >
+      void eachBlockedBy( Fn fn ) noexcept
+      {
+         m_blockedBy.each( fn );
+      }
 
-        using Priority = Size;
-        inline void setPriority( Priority priority ) noexcept { m_priority = priority; }
-        inline Priority getPriority( void ) const noexcept { return m_priority; }
+      using Priority = Size;
+      inline void setPriority( Priority priority ) noexcept { m_priority = priority; }
+      inline Priority getPriority( void ) const noexcept { return m_priority; }
 
-    private:
-        Array< SharedPointer< FrameGraphResource > > m_reads;
-        Array< SharedPointer< FrameGraphResource > > m_writes;
-        Array< SharedPointer< FrameGraphResource > > m_products;
+   private:
+      Array< SharedPointer< FrameGraphResource > > m_reads;
+      Array< SharedPointer< FrameGraphResource > > m_writes;
+      Array< SharedPointer< FrameGraphResource > > m_products;
 
-        Array< FrameGraphOperation * > m_blocks;
-        Array< SharedPointer< FrameGraphOperation > > m_blockedBy;
+      Array< FrameGraphOperation * > m_blocks;
+      Array< SharedPointer< FrameGraphOperation > > m_blockedBy;
 
-        Priority m_priority = 0;
-    };
+      Priority m_priority = 0;
+   };
 
 }
 

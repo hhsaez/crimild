@@ -28,72 +28,73 @@
 #ifndef CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 #define CRIMILD_CORE_COMPONENTS_SKINNED_MESH_
 
-#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class SkinnedMesh;
+   class SkinnedMesh;
 
-    class SkinnedMeshComponent : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshComponent )
+   class SkinnedMeshComponent : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshComponent )
 
-    public:
-        using AnimationProgressCallback = std::function< void( float ) >;
+   public:
+      using AnimationProgressCallback = std::function< void( float ) >;
 
-    public:
-        SkinnedMeshComponent( void );
-        SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh );
-        virtual ~SkinnedMeshComponent( void );
+   public:
+      SkinnedMeshComponent( void );
+      SkinnedMeshComponent( SharedPointer< SkinnedMesh > const &skinnedMesh );
+      virtual ~SkinnedMeshComponent( void );
 
-        virtual void start( void ) override;
-        virtual void update( const Clock &c ) override;
-        virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+      virtual void start( void ) override;
+      virtual void update( const Clock &c ) override;
+      virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 
-        void setSkinnedMesh( SharedPointer< SkinnedMesh > const &mesh ) { _skinnedMesh = mesh; }
-        SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
+      void setSkinnedMesh( SharedPointer< SkinnedMesh > const &mesh ) { _skinnedMesh = mesh; }
+      SkinnedMesh *getSkinnedMesh( void ) { return crimild::get_ptr( _skinnedMesh ); }
 
-        void setAnimationParams(
-            float firstFrame,
-            float lastFrame,
-            bool loop,
-            float timeScale = 1.0f,
-            float timeOffset = 0.0f,
-            AnimationProgressCallback const &animationProgressCallack = nullptr
-        );
+      void setAnimationParams(
+         float firstFrame,
+         float lastFrame,
+         bool loop,
+         float timeScale = 1.0f,
+         float timeOffset = 0.0f,
+         AnimationProgressCallback const &animationProgressCallack = nullptr
+      );
 
-    private:
-        float _time = 0.0f;
-        unsigned int _currentAnimation = 0;
+   private:
+      float _time = 0.0f;
+      unsigned int _currentAnimation = 0;
 
-        SharedPointer< SkinnedMesh > _skinnedMesh;
+      SharedPointer< SkinnedMesh > _skinnedMesh;
 
-        float _firstFrame;
-        float _lastFrame;
-        bool _loop;
-        float _timeScale;
-        AnimationProgressCallback _animationProgressCallback;
+      float _firstFrame;
+      float _lastFrame;
+      bool _loop;
+      float _timeScale;
+      AnimationProgressCallback _animationProgressCallback;
 
-        /**
-            \name Clonning
-         */
-        //@{
-    public:
-        virtual SharedPointer< NodeComponent > clone( void ) override;
+      /**
+          \name Clonning
+       */
+      //@{
+   public:
+      virtual SharedPointer< NodeComponent > clone( void ) override;
 
-        //@}
+      //@}
 
-        /**
-                         \name Coding support
-                */
-        //@{
+      /**
+                       \name Coding support
+              */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

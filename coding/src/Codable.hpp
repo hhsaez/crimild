@@ -28,37 +28,37 @@
 #ifndef CRIMILD_CORE_CODING_CODABLE_
 #define CRIMILD_CORE_CODING_CODABLE_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace coding {
+   namespace coding {
 
-        class Encoder;
-        class Decoder;
+      class Encoder;
+      class Decoder;
 
-        class Codable : public SharedObject,
-                        public RTTI {
-        public:
-            using UniqueID = crimild::Size;
+      class Codable : public SharedObject,
+                      public RTTI {
+      public:
+         using UniqueID = crimild::Size;
 
-        protected:
-            Codable( void ) = default;
+      protected:
+         Codable( void ) = default;
 
-        public:
-            virtual ~Codable( void ) = default;
+      public:
+         virtual ~Codable( void ) = default;
 
-            inline UniqueID getUniqueID( void ) const
-            {
-                return ( UniqueID ) this;
-            }
+         inline UniqueID getUniqueID( void ) const
+         {
+            return ( UniqueID ) this;
+         }
 
-            virtual void encode( Encoder &encoder ) { }
+         virtual void encode( Encoder &encoder ) { }
 
-            virtual void decode( Decoder &decoder ) { }
-        };
+         virtual void decode( Decoder &decoder ) { }
+      };
 
-    }
+   }
 
 }
 

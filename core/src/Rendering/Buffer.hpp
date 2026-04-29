@@ -29,95 +29,95 @@
 #define CRIMILD_RENDERING_BUFFER_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/foundation.hpp>
 #include <cstring>
 
 namespace crimild {
 
-    /**
-       \brief A buffer of linear data
-     */
-    class Buffer
-        : public coding::Codable,
-          public RenderResourceImpl< Buffer >,
-          public FrameGraphResource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
+   /**
+      \brief A buffer of linear data
+    */
+   class Buffer
+      : public coding::Codable,
+        public RenderResourceImpl< Buffer >,
+        public FrameGraphResource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Buffer )
 
-    public:
-        /**
-         * \brief Default constructor
-         *
-         * \remarks This is only used in order to comply with the Codable interface.
-         */
-        Buffer( void ) = default;
+   public:
+      /**
+       * \brief Default constructor
+       *
+       * \remarks This is only used in order to comply with the Codable interface.
+       */
+      Buffer( void ) = default;
 
-        /**
-           \brief Initialize buffer with array of data
+      /**
+         \brief Initialize buffer with array of data
 
-           This is usually used for vertex or index buffers
-         */
-        template< typename DATA_TYPE >
-        explicit Buffer( Array< DATA_TYPE > const &data )
-            : m_data( sizeof( DATA_TYPE ) * data.size() )
-        {
-            memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
-        }
+         This is usually used for vertex or index buffers
+       */
+      template< typename DATA_TYPE >
+      explicit Buffer( Array< DATA_TYPE > const &data )
+         : m_data( sizeof( DATA_TYPE ) * data.size() )
+      {
+         memcpy( &m_data[ 0 ], &data[ 0 ], m_data.size() );
+      }
 
-        /**
-           \brief Initialize buffer for a single value
+      /**
+         \brief Initialize buffer for a single value
 
-           This is usually used with uniform buffers
-         */
-        template< typename DATA_TYPE >
-        explicit Buffer( DATA_TYPE const &data )
-            : m_data( sizeof( DATA_TYPE ) )
-        {
-            memcpy( &m_data[ 0 ], &data, m_data.size() );
-        }
+         This is usually used with uniform buffers
+       */
+      template< typename DATA_TYPE >
+      explicit Buffer( DATA_TYPE const &data )
+         : m_data( sizeof( DATA_TYPE ) )
+      {
+         memcpy( &m_data[ 0 ], &data, m_data.size() );
+      }
 
-        virtual ~Buffer( void ) = default;
+      virtual ~Buffer( void ) = default;
 
-        /**
-           \brief Get size of buffer in bytes
-         */
-        inline crimild::Size getSize( void ) const noexcept { return m_data.size(); }
+      /**
+         \brief Get size of buffer in bytes
+       */
+      inline crimild::Size getSize( void ) const noexcept { return m_data.size(); }
 
-        /**
-           \brief Get raw data
-         */
-        inline crimild::Byte *getData( void ) noexcept { return m_data.getData(); }
+      /**
+         \brief Get raw data
+       */
+      inline crimild::Byte *getData( void ) noexcept { return m_data.getData(); }
 
-        /**
-           \brief Get raw data
-         */
-        inline const crimild::Byte *getData( void ) const noexcept { return m_data.getData(); }
+      /**
+         \brief Get raw data
+       */
+      inline const crimild::Byte *getData( void ) const noexcept { return m_data.getData(); }
 
-    private:
-        ByteArray m_data;
+   private:
+      ByteArray m_data;
 
-        /**
-         * \name FrameGraphResource impl
-         */
-        //@{
+      /**
+       * \name FrameGraphResource impl
+       */
+      //@{
 
-    public:
-        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER; }
+   public:
+      inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER; }
 
-        //@}
+      //@}
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

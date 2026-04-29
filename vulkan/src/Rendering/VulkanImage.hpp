@@ -28,122 +28,123 @@
 #ifndef CRIMILD_VULKAN_RENDERING_IMAGE_
 #define CRIMILD_VULKAN_RENDERING_IMAGE_
 
-#include "Crimild_Foundation.hpp"
 #include "Foundation/VulkanUtils.hpp"
 #include "Rendering/VulkanWithRenderDeviceDEPRECATED.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    namespace vulkan {
+   namespace vulkan {
 
-        class Image
-            : public SharedObject,
-              public Named,
-              public WithConstRenderDevice {
-        public:
-            static auto createInfo( void ) noexcept
-            {
-                return VkImageCreateInfo {
-                    .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-                    .flags = 0,
-                    .imageType = VK_IMAGE_TYPE_2D,
-                    .mipLevels = 1,
-                    .arrayLayers = 1,
-                    .samples = VK_SAMPLE_COUNT_1_BIT,
-                    .tiling = VK_IMAGE_TILING_OPTIMAL,
-                    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                    .initialLayout = VK_IMAGE_LAYOUT_GENERAL,
-                };
-            }
+      class Image
+         : public SharedObject,
+           public Named,
+           public WithConstRenderDevice {
+      public:
+         static auto createInfo( void ) noexcept
+         {
+            return VkImageCreateInfo {
+               .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+               .flags = 0,
+               .imageType = VK_IMAGE_TYPE_2D,
+               .mipLevels = 1,
+               .arrayLayers = 1,
+               .samples = VK_SAMPLE_COUNT_1_BIT,
+               .tiling = VK_IMAGE_TILING_OPTIMAL,
+               .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+               .initialLayout = VK_IMAGE_LAYOUT_GENERAL,
+            };
+         }
 
-        public:
-            Image(
-                const RenderDevice *device,
-                const VkImageCreateInfo &createInfo,
-                std::string name = "Image"
-            ) noexcept;
+      public:
+         Image(
+            const RenderDevice *device,
+            const VkImageCreateInfo &createInfo,
+            std::string name = "Image"
+         ) noexcept;
 
-            Image(
-                const RenderDevice *device,
-                const crimild::Image *source
-            ) noexcept;
+         Image(
+            const RenderDevice *device,
+            const crimild::Image *source
+         ) noexcept;
 
-            Image(
-                const RenderDevice *device,
-                const VkExtent2D &extent,
-                VkFormat format,
-                VkImageUsageFlags usage,
-                std::string name = "Image"
-            ) noexcept;
+         Image(
+            const RenderDevice *device,
+            const VkExtent2D &extent,
+            VkFormat format,
+            VkImageUsageFlags usage,
+            std::string name = "Image"
+         ) noexcept;
 
-            /**
-             * \brief Constructs an image from an existing handle
-             *
-             * Special case for images created by the device, like swapchain images
-             * \remarks Sets m_readonly to true
-             * \remarks Internal use only
-             */
-            Image(
-                const RenderDevice *device,
-                VkImage handle,
-                const VkExtent2D &extent,
-                VkFormat format,
-                VkImageUsageFlags usage,
-                std::string name = "Image"
-            ) noexcept;
+         /**
+          * \brief Constructs an image from an existing handle
+          *
+          * Special case for images created by the device, like swapchain images
+          * \remarks Sets m_readonly to true
+          * \remarks Internal use only
+          */
+         Image(
+            const RenderDevice *device,
+            VkImage handle,
+            const VkExtent2D &extent,
+            VkFormat format,
+            VkImageUsageFlags usage,
+            std::string name = "Image"
+         ) noexcept;
 
-            /**
-                \brief Constructs an image from an already allocated resource
+         /**
+             \brief Constructs an image from an already allocated resource
 
-                \remarks Sets m_readonly to true
+             \remarks Sets m_readonly to true
 
-                \remarks Internal use only
-            */
-            [[deprecated]] Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name = "Image" ) noexcept;
+             \remarks Internal use only
+         */
+         [[deprecated]] Image( const RenderDevice *rd, VkImage image, const VkExtent3D &extent, std::string name = "Image" ) noexcept;
 
-            virtual ~Image( void ) noexcept;
+         virtual ~Image( void ) noexcept;
 
-            inline VkImage getHandle( void ) const noexcept { return m_handle; }
+         inline VkImage getHandle( void ) const noexcept { return m_handle; }
 
-            inline const VkExtent3D &getExtent( void ) const noexcept { return m_extent; }
-            inline VkFormat getFormat( void ) const noexcept { return m_format; }
+         inline const VkExtent3D &getExtent( void ) const noexcept { return m_extent; }
+         inline VkFormat getFormat( void ) const noexcept { return m_format; }
 
-            inline uint32_t getMipLevels( void ) const noexcept { return m_mipLevels; }
-            inline uint32_t getArrayLayers( void ) const noexcept { return m_arrayLayers; }
+         inline uint32_t getMipLevels( void ) const noexcept { return m_mipLevels; }
+         inline uint32_t getArrayLayers( void ) const noexcept { return m_arrayLayers; }
 
-            inline VkImageAspectFlags getAspectFlags( void ) const noexcept { return m_aspectFlags; }
+         inline VkImageAspectFlags getAspectFlags( void ) const noexcept { return m_aspectFlags; }
 
-            void allocateMemory( void ) noexcept;
-            void allocateMemory( const VkMemoryAllocateInfo &allocateInfo ) noexcept;
+         void allocateMemory( void ) noexcept;
+         void allocateMemory( const VkMemoryAllocateInfo &allocateInfo ) noexcept;
 
-            void transitionLayout( VkImageLayout newLayout ) const noexcept;
-            void transitionLayout( VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
-            void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout newLayout ) const noexcept;
-            void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
+         void transitionLayout( VkImageLayout newLayout ) const noexcept;
+         void transitionLayout( VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
+         void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout newLayout ) const noexcept;
+         void transitionLayout( VkCommandBuffer commandBuffer, VkImageLayout oldLayout, VkImageLayout newLayout ) const noexcept;
 
-            void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src ) noexcept;
-            void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src, const VkImageCopy &copyRegion ) noexcept;
+         void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src ) noexcept;
+         void copy( VkCommandBuffer commandBuffer, SharedPointer< Image > const &src, const VkImageCopy &copyRegion ) noexcept;
 
-            inline void setLayout( VkImageLayout layout ) noexcept { m_layout = layout; }
-            inline VkImageLayout getLayout( void ) const noexcept { return m_layout; }
+         inline void setLayout( VkImageLayout layout ) noexcept { m_layout = layout; }
+         inline VkImageLayout getLayout( void ) const noexcept { return m_layout; }
 
-        private:
-            VkImage m_handle = VK_NULL_HANDLE;
-            VkDeviceMemory m_memory = VK_NULL_HANDLE;
+      private:
+         VkImage m_handle = VK_NULL_HANDLE;
+         VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
-            VkFormat m_format = VK_FORMAT_UNDEFINED;
-            VkExtent3D m_extent = { 1, 1, 1 };
-            uint32_t m_mipLevels = 1;
-            uint32_t m_arrayLayers = 1;
-            VkImageAspectFlags m_aspectFlags;
+         VkFormat m_format = VK_FORMAT_UNDEFINED;
+         VkExtent3D m_extent = { 1, 1, 1 };
+         uint32_t m_mipLevels = 1;
+         uint32_t m_arrayLayers = 1;
+         VkImageAspectFlags m_aspectFlags;
 
-            mutable VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+         mutable VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            // Read-only images cannot be destroyed (i.e. swapchain images).
-            bool m_readonly = false;
-        };
+         // Read-only images cannot be destroyed (i.e. swapchain images).
+         bool m_readonly = false;
+      };
 
-    }
+   }
 
 }
 

@@ -29,73 +29,74 @@
 #define CRIMILD_UI_FRAME_CONSTRAINT_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class Node;
+   class Node;
 
-    namespace ui {
+   namespace ui {
 
-        class UIFrame;
+      class UIFrame;
 
-        class UIFrameConstraint : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrameConstraint )
+      class UIFrameConstraint : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrameConstraint )
 
-        public:
-            enum class Type {
-                WIDTH,
-                WIDTH_TO_PARENT,
-                HEIGHT,
-                HEIGHT_TO_PARENT,
-                LEFT,
-                RIGHT,
-                TOP,
-                BOTTOM,
-                CENTER,
-                CENTER_X,
-                CENTER_Y,
-                EDGES,
-                AFTER,
-                BEFORE,
-                ABOVE,
-                BELOW,
-                MARGIN,
-                MARGIN_TOP,
-                MARGIN_RIGHT,
-                MARGIN_BOTTOM,
-                MARGIN_LEFT,
-                BEHIND,
-                INFRONT,
-            };
+      public:
+         enum class Type {
+            WIDTH,
+            WIDTH_TO_PARENT,
+            HEIGHT,
+            HEIGHT_TO_PARENT,
+            LEFT,
+            RIGHT,
+            TOP,
+            BOTTOM,
+            CENTER,
+            CENTER_X,
+            CENTER_Y,
+            EDGES,
+            AFTER,
+            BEFORE,
+            ABOVE,
+            BELOW,
+            MARGIN,
+            MARGIN_TOP,
+            MARGIN_RIGHT,
+            MARGIN_BOTTOM,
+            MARGIN_LEFT,
+            BEHIND,
+            INFRONT,
+         };
 
-        public:
-            UIFrameConstraint( void ) = default;
-            UIFrameConstraint( Type type, crimild::Real32 value );
-            UIFrameConstraint( Type type, UIFrame *referenceFrame );
-            ~UIFrameConstraint( void ) = default;
+      public:
+         UIFrameConstraint( void ) = default;
+         UIFrameConstraint( Type type, crimild::Real32 value );
+         UIFrameConstraint( Type type, UIFrame *referenceFrame );
+         ~UIFrameConstraint( void ) = default;
 
-            Type getType( void ) const { return _type; }
+         Type getType( void ) const { return _type; }
 
-            void setValue( crimild::Real32 value ) { _value = value; }
-            crimild::Real32 getValue( void ) const { return _value; }
+         void setValue( crimild::Real32 value ) { _value = value; }
+         crimild::Real32 getValue( void ) const { return _value; }
 
-        private:
-            Type _type;
+      private:
+         Type _type;
 
-        public:
-            void apply( UIFrame *frame, UIFrame *parentFrame );
+      public:
+         void apply( UIFrame *frame, UIFrame *parentFrame );
 
-        private:
-            crimild::Real32 _value = 0;
-            UIFrame *_referenceFrame = nullptr;
-            std::string _referenceFrameName;
+      private:
+         crimild::Real32 _value = 0;
+         UIFrame *_referenceFrame = nullptr;
+         std::string _referenceFrameName;
 
-        public:
-            void decode( coding::Decoder &decoder ) override;
-        };
+      public:
+         void decode( coding::Decoder &decoder ) override;
+      };
 
-    }
+   }
 
 }
 

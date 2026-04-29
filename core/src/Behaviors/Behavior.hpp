@@ -30,71 +30,72 @@
 
 #include "BehaviorContext.hpp"
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Messaging/MessageQueue.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace messaging {
+   namespace messaging {
 
-        /**
-           \brief A simple struct for sending messages between behaviors
+      /**
+         \brief A simple struct for sending messages between behaviors
+       */
+      struct BehaviorEvent {
+         std::string name;
+      };
+
+   }
+
+   namespace behaviors {
+
+      class Behavior;
+
+      /**
+         \brief Base class for behaviors
+      */
+      class Behavior : public coding::Codable,
+                       public crimild::Messenger {
+      public:
+         enum class State {
+            SUCCESS,
+            FAILURE,
+            RUNNING
+         };
+
+      protected:
+         Behavior( void );
+
+      public:
+         virtual ~Behavior( void );
+
+         /**
+            \brief Invoked the first time a behavior is invoked by its parent
+
+            It may be invoked multiple times if the parent behavior is
+            reset or restarted
          */
-        struct BehaviorEvent {
-            std::string name;
-        };
+         virtual void init( BehaviorContext *context );
 
-    }
+         /**
+            \brief Invoked every update of the behavior tree
+         */
+         virtual State step( BehaviorContext *context ) = 0;
 
-    namespace behaviors {
+         /**
+            \name Coding support
+         */
+         //@{
 
-        class Behavior;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-        /**
-           \brief Base class for behaviors
-        */
-        class Behavior : public coding::Codable,
-                         public crimild::Messenger {
-        public:
-            enum class State {
-                SUCCESS,
-                FAILURE,
-                RUNNING
-            };
+         //@}
+      };
 
-        protected:
-            Behavior( void );
-
-        public:
-            virtual ~Behavior( void );
-
-            /**
-               \brief Invoked the first time a behavior is invoked by its parent
-
-               It may be invoked multiple times if the parent behavior is
-               reset or restarted
-            */
-            virtual void init( BehaviorContext *context );
-
-            /**
-               \brief Invoked every update of the behavior tree
-            */
-            virtual State step( BehaviorContext *context ) = 0;
-
-            /**
-               \name Coding support
-            */
-            //@{
-
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
-
-            //@}
-        };
-
-        using BehaviorPtr = crimild::SharedPointer< Behavior >;
-    }
+      using BehaviorPtr = crimild::SharedPointer< Behavior >;
+   }
 
 }
 

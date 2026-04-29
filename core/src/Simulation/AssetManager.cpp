@@ -27,7 +27,6 @@
 
 #include "AssetManager.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "FileSystem.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
@@ -36,63 +35,65 @@
 #include "Settings.hpp"
 #include "Simulation.hpp"
 
+#include <crimild/foundation.hpp>
+
 using namespace crimild;
 
 AssetManager::AssetManager( void )
 {
-    if ( auto sim = Simulation::getInstance() ) {
-        if ( auto settings = sim->getSettings() ) {
-            auto systemFont = settings->get< std::string >( "fonts.system", "" );
-            if ( systemFont != "" ) {
-                loadFont( FONT_SYSTEM, systemFont );
-            } else {
-                set( FONT_SYSTEM, crimild::alloc< SystemFont >(), true );
-            }
+   if ( auto sim = Simulation::getInstance() ) {
+      if ( auto settings = sim->getSettings() ) {
+         auto systemFont = settings->get< std::string >( "fonts.system", "" );
+         if ( systemFont != "" ) {
+            loadFont( FONT_SYSTEM, systemFont );
+         } else {
+            set( FONT_SYSTEM, crimild::alloc< SystemFont >(), true );
+         }
 
-            auto defaultFont = settings->get< std::string >( "fonts.default", "" );
-            if ( defaultFont != "" ) {
-                loadFont( FONT_DEFAULT, defaultFont );
-            } else {
-                set( FONT_DEFAULT, crimild::retain( get< Font >( FONT_SYSTEM ) ), true );
-            }
-        }
-    }
+         auto defaultFont = settings->get< std::string >( "fonts.default", "" );
+         if ( defaultFont != "" ) {
+            loadFont( FONT_DEFAULT, defaultFont );
+         } else {
+            set( FONT_DEFAULT, crimild::retain( get< Font >( FONT_SYSTEM ) ), true );
+         }
+      }
+   }
 }
 
 AssetManager::~AssetManager( void )
 {
-    clear();
+   clear();
 }
 
 namespace crimild {
 
-    template<>
-    Texture *AssetManager::get< Texture >( std::string name )
-    {
-        Texture *texture = nullptr;
+   template<>
+   Texture *AssetManager::get< Texture >( std::string name )
+   {
+      Texture *texture = nullptr;
 
-        {
-            ScopedLock lock( _mutex );
-            texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
-        }
+      {
+         ScopedLock lock( _mutex );
+         texture = static_cast< Texture * >( crimild::get_ptr( _assets[ name ] ) );
+      }
 
-        if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == "tga" ) ) {
-            auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
-            if ( image != nullptr ) {
-                auto tmp = crimild::alloc< Texture >( image );
-                set( name, tmp );
-                texture = crimild::get_ptr( tmp );
-            }
-        }
+      if ( texture == nullptr && ( StringUtils::getFileExtension( name ) == "tga" ) ) {
+         auto image = crimild::alloc< ImageTGA >( FileSystem::getInstance().pathForResource( name ) );
+         if ( image != nullptr ) {
+            auto tmp = crimild::alloc< Texture >( image );
+            set( name, tmp );
+            texture = crimild::get_ptr( tmp );
+         }
+      }
 
-        return texture;
-    }
+      return texture;
+   }
 
 }
 
 void AssetManager::loadFont( std::string name, std::string fileName )
 {
-    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
-    auto font = crimild::alloc< Font >( fontDefFileName );
-    set( name, font, true );
+   std::string fontDefFileName = FileSystem::getInstance().pathForResource( fileName );
+   auto font = crimild::alloc< Font >( fontDefFileName );
+   set( name, font, true );
 }

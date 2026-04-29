@@ -28,24 +28,25 @@
 #ifndef CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
 #define CRIMILD_EDITOR_VIEWS_WINDOWS_TIMELINE_
 
-#include "Crimild_Foundation.hpp"
 #include "Views/Windows/Window.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild::editor {
 
-    class TimelineWindow
-        : public Window {
-        CRIMILD_IMPLEMENT_RTTI( crimild::editor::TimelineWindow )
+   class TimelineWindow
+      : public Window {
+      CRIMILD_IMPLEMENT_RTTI( crimild::editor::TimelineWindow )
 
-    public:
-        static constexpr const char *TITLE = "Timeline";
+   public:
+      static constexpr const char *TITLE = "Timeline";
 
-    public:
-        TimelineWindow( void ) noexcept;
-        ~TimelineWindow( void ) noexcept = default;
+   public:
+      TimelineWindow( void ) noexcept;
+      ~TimelineWindow( void ) noexcept = default;
 
-        void drawContent( void ) noexcept final;
-    };
+      void drawContent( void ) noexcept final;
+   };
 
 }
 

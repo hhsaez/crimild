@@ -28,7 +28,6 @@
 #ifndef CRIMILD_RENDERING_PIPELINE_
 #define CRIMILD_RENDERING_PIPELINE_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ColorBlendState.hpp"
@@ -38,48 +37,50 @@
 #include "Rendering/VertexBuffer.hpp"
 #include "Rendering/ViewportDimensions.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class DescriptorSetLayout;
-    class RenderPass;
-    class ShaderProgram;
+   class DescriptorSetLayout;
+   class RenderPass;
+   class ShaderProgram;
 
-    class [[deprecated]] PipelineBase
-        : public SharedObject,
-          public NamedObject {
-    protected:
-        virtual ~PipelineBase( void ) noexcept = default;
+   class [[deprecated]] PipelineBase
+      : public SharedObject,
+        public NamedObject {
+   protected:
+      virtual ~PipelineBase( void ) noexcept = default;
 
-    public:
-        void setProgram( SharedPointer< ShaderProgram > const &program ) noexcept { m_program = program; }
-        ShaderProgram *getProgram( void ) noexcept { return crimild::get_ptr( m_program ); }
+   public:
+      void setProgram( SharedPointer< ShaderProgram > const &program ) noexcept { m_program = program; }
+      ShaderProgram *getProgram( void ) noexcept { return crimild::get_ptr( m_program ); }
 
-    private:
-        SharedPointer< ShaderProgram > m_program;
-    };
+   private:
+      SharedPointer< ShaderProgram > m_program;
+   };
 
-    class [[deprecated]] GraphicsPipeline
-        : public PipelineBase,
-          public RenderResourceImpl< GraphicsPipeline > {
+   class [[deprecated]] GraphicsPipeline
+      : public PipelineBase,
+        public RenderResourceImpl< GraphicsPipeline > {
 
-    public:
-        virtual ~GraphicsPipeline( void ) noexcept = default;
+   public:
+      virtual ~GraphicsPipeline( void ) noexcept = default;
 
-        RenderPass *renderPass = nullptr;
-        Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
-        ViewportDimensions viewport;
-        ViewportDimensions scissor;
-        DepthStencilState depthStencilState;
-        RasterizationState rasterizationState;
-        ColorBlendState colorBlendState;
-    };
+      RenderPass *renderPass = nullptr;
+      Primitive::Type primitiveType = Primitive::Type::TRIANGLES;
+      ViewportDimensions viewport;
+      ViewportDimensions scissor;
+      DepthStencilState depthStencilState;
+      RasterizationState rasterizationState;
+      ColorBlendState colorBlendState;
+   };
 
-    class [[deprecated]] ComputePipeline
-        : public PipelineBase,
-          public RenderResourceImpl< ComputePipeline > {
-    public:
-        virtual ~ComputePipeline( void ) noexcept = default;
-    };
+   class [[deprecated]] ComputePipeline
+      : public PipelineBase,
+        public RenderResourceImpl< ComputePipeline > {
+   public:
+      virtual ~ComputePipeline( void ) noexcept = default;
+   };
 
 }
 

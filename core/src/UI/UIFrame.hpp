@@ -29,60 +29,61 @@
 #define CRIMILD_UI_FRAME_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "UIFrameConstraint.hpp"
 #include "UIFrameConstraintMaker.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    namespace ui {
+   namespace ui {
 
-        class UIFrame : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
+      class UIFrame : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIFrame )
 
-        public:
-            UIFrame( void );
-            UIFrame( const Rectf &extensions );
-            ~UIFrame( void ) = default;
+      public:
+         UIFrame( void );
+         UIFrame( const Rectf &extensions );
+         ~UIFrame( void ) = default;
 
-            UIFrame *setExtensions( const Rectf &extensions )
-            {
-                _extensions = extensions;
-                return this;
-            }
-            const Rectf &getExtensions( void ) const { return _extensions; }
+         UIFrame *setExtensions( const Rectf &extensions )
+         {
+            _extensions = extensions;
+            return this;
+         }
+         const Rectf &getExtensions( void ) const { return _extensions; }
 
-            UIFrame *setZIndex( crimild::Real32 z )
-            {
-                _zIndex = z;
-                return this;
-            }
-            crimild::Real32 getZIndex( void ) const { return _zIndex; }
+         UIFrame *setZIndex( crimild::Real32 z )
+         {
+            _zIndex = z;
+            return this;
+         }
+         crimild::Real32 getZIndex( void ) const { return _zIndex; }
 
-            void start( void ) override;
-            virtual void update( const Clock & ) override;
+         void start( void ) override;
+         virtual void update( const Clock & ) override;
 
-        private:
-            Rectf _extensions;
-            crimild::Real32 _zIndex = 0;
+      private:
+         Rectf _extensions;
+         crimild::Real32 _zIndex = 0;
 
-        public:
-            UIFrame *clearConstraints( void );
-            UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
-            UIFrameConstraint *getConstraint( UIFrameConstraint::Type type );
+      public:
+         UIFrame *clearConstraints( void );
+         UIFrame *addConstraint( SharedPointer< UIFrameConstraint > const &constraint );
+         UIFrameConstraint *getConstraint( UIFrameConstraint::Type type );
 
-            UIFrameConstraintMaker *pin( void );
+         UIFrameConstraintMaker *pin( void );
 
-        private:
-            UIFrameConstraintMaker _constraintMaker;
-            Array< SharedPointer< UIFrameConstraint > > _constraints;
+      private:
+         UIFrameConstraintMaker _constraintMaker;
+         Array< SharedPointer< UIFrameConstraint > > _constraints;
 
-        public:
-            void decode( coding::Decoder & ) override;
-        };
+      public:
+         void decode( coding::Decoder & ) override;
+      };
 
-    }
+   }
 
 }
 

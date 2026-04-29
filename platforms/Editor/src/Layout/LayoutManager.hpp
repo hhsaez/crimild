@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_LAYOUT_MANAGER_
 #define CRIMILD_EDITOR_LAYOUT_MANAGER_
 
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 #include <memory>
 
 namespace crimild::editor {

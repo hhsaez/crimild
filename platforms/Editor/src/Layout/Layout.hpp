@@ -31,7 +31,7 @@
 #include "Rendering/Extent.hpp"
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 #include <memory>
 #include <string>
 #include <vector>

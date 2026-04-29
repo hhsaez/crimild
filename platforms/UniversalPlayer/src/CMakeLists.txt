@@ -56,7 +56,7 @@ endif()
 target_link_libraries(
    crimild_universal_player
 
-   PRIVATE Crimild::Foundation
+   PRIVATE crimild::foundation
    PRIVATE Crimild::Mathematics
    PRIVATE Crimild::Coding
    PRIVATE Crimild::Core

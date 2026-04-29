@@ -28,129 +28,129 @@
 #ifndef CRIMILD_SIMULATION_SYSTEM_
 #define CRIMILD_SIMULATION_SYSTEM_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Simulation/Event.hpp"
 
+#include <crimild/foundation.hpp>
 #include <string>
 #include <vector>
 
 namespace crimild {
 
-    class System : public RTTI {
-    public:
-        virtual ~System( void ) = default;
+   class System : public RTTI {
+   public:
+      virtual ~System( void ) = default;
 
-        void attachSystem( std::unique_ptr< System > &&other ) noexcept;
+      void attachSystem( std::unique_ptr< System > &&other ) noexcept;
 
-        template< class SystemType, typename... Args >
-        SystemType *attachSystem( Args &&...args ) noexcept
-        {
-            m_systems.push_back( std::make_unique< SystemType >( std::forward< Args >( args )... ) );
-            return static_cast< SystemType * >( m_systems.back().get() );
-        }
+      template< class SystemType, typename... Args >
+      SystemType *attachSystem( Args &&...args ) noexcept
+      {
+         m_systems.push_back( std::make_unique< SystemType >( std::forward< Args >( args )... ) );
+         return static_cast< SystemType * >( m_systems.back().get() );
+      }
 
-        Event dispatch( const Event &e ) noexcept;
+      Event dispatch( const Event &e ) noexcept;
 
-        virtual Event handle( const Event & ) noexcept;
+      virtual Event handle( const Event & ) noexcept;
 
-    private:
-        std::vector< std::unique_ptr< System > > m_systems;
+   private:
+      std::vector< std::unique_ptr< System > > m_systems;
 
-    public:
-        /**
-           \brief Executed when the system is attached to the simulation
-         */
-        [[deprecated]] virtual void onAttach( void ) noexcept { }
+   public:
+      /**
+         \brief Executed when the system is attached to the simulation
+       */
+      [[deprecated]] virtual void onAttach( void ) noexcept { }
 
-        /**
-           \brief Executed when the system is detached from the simulation
-         */
-        [[deprecated]] virtual void onDetach( void ) noexcept { }
+      /**
+         \brief Executed when the system is detached from the simulation
+       */
+      [[deprecated]] virtual void onDetach( void ) noexcept { }
 
-        /**
-           \brief Executed after simulation has started but before starting individual systems
-         */
-        [[deprecated]] virtual void onInit( void ) noexcept { }
+      /**
+         \brief Executed after simulation has started but before starting individual systems
+       */
+      [[deprecated]] virtual void onInit( void ) noexcept { }
 
-        /**
-           \brief Starts this system
+      /**
+         \brief Starts this system
 
-           Keep in mind that this method might be called before any scene has been loaded.
-         */
-        [[deprecated]] virtual void start( void ) noexcept { }
+         Keep in mind that this method might be called before any scene has been loaded.
+       */
+      [[deprecated]] virtual void start( void ) noexcept { }
 
-        /**
-           \brief Executed after all systems have been started
+      /**
+         \brief Executed after all systems have been started
 
-           This methods is called after the initial scene has been loaded
-         */
-        [[deprecated]] virtual void lateStart( void ) noexcept { }
+         This methods is called after the initial scene has been loaded
+       */
+      [[deprecated]] virtual void lateStart( void ) noexcept { }
 
-        /**
-           \brief Executed once per frame before all systems are updated
-         */
-        [[deprecated]] virtual void earlyUpdate( void ) noexcept { }
+      /**
+         \brief Executed once per frame before all systems are updated
+       */
+      [[deprecated]] virtual void earlyUpdate( void ) noexcept { }
 
-        /**
-           \brief Executed at least once per frame before updating all systems
-         */
-        [[deprecated]] virtual void fixedUpdate( void ) noexcept { }
+      /**
+         \brief Executed at least once per frame before updating all systems
+       */
+      [[deprecated]] virtual void fixedUpdate( void ) noexcept { }
 
-        /**
-           \brief Updates this system once per frame
-        */
-        [[deprecated]] virtual void update( void ) noexcept { }
+      /**
+         \brief Updates this system once per frame
+      */
+      [[deprecated]] virtual void update( void ) noexcept { }
 
-        /**
-           \brief Executed after all systems have been updated
-         */
-        [[deprecated]] virtual void lateUpdate( void ) noexcept { }
+      /**
+         \brief Executed after all systems have been updated
+       */
+      [[deprecated]] virtual void lateUpdate( void ) noexcept { }
 
-        /**
-           \brief Executed before rendering systems
-         */
-        [[deprecated]] virtual void onPreRender( void ) noexcept { }
+      /**
+         \brief Executed before rendering systems
+       */
+      [[deprecated]] virtual void onPreRender( void ) noexcept { }
 
-        /**
-           \brief Executed during rendering
-         */
-        [[deprecated]] virtual void onRender( void ) noexcept { }
+      /**
+         \brief Executed during rendering
+       */
+      [[deprecated]] virtual void onRender( void ) noexcept { }
 
-        /**
-           \brief Executed after rendering
-         */
-        [[deprecated]] virtual void onPostRender( void ) noexcept { }
+      /**
+         \brief Executed after rendering
+       */
+      [[deprecated]] virtual void onPostRender( void ) noexcept { }
 
-        /**
-           \brief Executed when simulation is paused
-         */
-        [[deprecated]] virtual void onPause( void ) noexcept { }
+      /**
+         \brief Executed when simulation is paused
+       */
+      [[deprecated]] virtual void onPause( void ) noexcept { }
 
-        /**
-           \brief Executed when simulation is resumed after being paused
-         */
-        [[deprecated]] virtual void onResume( void ) noexcept { }
+      /**
+         \brief Executed when simulation is resumed after being paused
+       */
+      [[deprecated]] virtual void onResume( void ) noexcept { }
 
-        /**
-           \brief Executed when the simulation is about to stop
+      /**
+         \brief Executed when the simulation is about to stop
 
-           This function is called before all systems are stopped, giving you the opportunity to
-           do some extra process. For example, the capture system might take a screenshot at this
-           point, since the rendering system is still valid.
-         */
-        [[deprecated]] virtual void onBeforeStop( void ) noexcept { }
+         This function is called before all systems are stopped, giving you the opportunity to
+         do some extra process. For example, the capture system might take a screenshot at this
+         point, since the rendering system is still valid.
+       */
+      [[deprecated]] virtual void onBeforeStop( void ) noexcept { }
 
-        /**
-           \brief Stops this system
-         */
-        [[deprecated]] virtual void stop( void ) noexcept { }
+      /**
+         \brief Stops this system
+       */
+      [[deprecated]] virtual void stop( void ) noexcept { }
 
-        /**
-           \brief Executed after all systems have been stopped and the simulation is about to quit
-         */
-        [[deprecated]] virtual void onTerminate( void ) noexcept { }
-    };
+      /**
+         \brief Executed after all systems have been stopped and the simulation is about to quit
+       */
+      [[deprecated]] virtual void onTerminate( void ) noexcept { }
+   };
 
 }
 

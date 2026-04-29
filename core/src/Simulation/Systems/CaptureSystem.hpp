@@ -28,23 +28,24 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_CAPTURE_
 #define CRIMILD_SIMULATION_SYSTEMS_CAPTURE_
 
-#include "Crimild_Foundation.hpp"
 #include "System.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class CaptureSystem : public System, public DynamicSingleton< CaptureSystem > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::CaptureSystem )
+   class CaptureSystem : public System, public DynamicSingleton< CaptureSystem > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::CaptureSystem )
 
-    public:
-        virtual void start( void ) noexcept override;
-        virtual void onBeforeStop( void ) noexcept override;
+   public:
+      virtual void start( void ) noexcept override;
+      virtual void onBeforeStop( void ) noexcept override;
 
-        /**
-         * \brief Takes a screenshot of the image currently displayed on screen
-         */
-        virtual bool takeScreenshot( void ) noexcept { return false; }
-    };
+      /**
+       * \brief Takes a screenshot of the image currently displayed on screen
+       */
+      virtual bool takeScreenshot( void ) noexcept { return false; }
+   };
 
 }
 

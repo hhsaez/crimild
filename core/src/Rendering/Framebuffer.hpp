@@ -28,23 +28,24 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAMEBUFFER_
 #define CRIMILD_CORE_RENDERING_FRAMEBUFFER_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class ImageView;
+   class ImageView;
 
-    class [[deprecated]] Framebuffer : public RenderResourceImpl< Framebuffer >,
-                                       public SharedObject,
-                                       public RTTI {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Framebuffer )
+   class [[deprecated]] Framebuffer : public RenderResourceImpl< Framebuffer >,
+                                      public SharedObject,
+                                      public RTTI {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Framebuffer )
 
-    public:
-        Extent2D extent = { .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE };
-        Array< SharedPointer< ImageView > > attachments;
-    };
+   public:
+      Extent2D extent = { .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE };
+      Array< SharedPointer< ImageView > > attachments;
+   };
 
 }
 

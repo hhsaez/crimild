@@ -28,23 +28,24 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_SSAO_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_SSAO_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/DescriptorSet.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
-    class FrameGraphResource;
-    class Shader;
+   class FrameGraphOperation;
+   class FrameGraphResource;
+   class Shader;
 
-    namespace framegraph {
+   namespace framegraph {
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > ssao(
-            SharedPointer< FrameGraphResource > positions,
-            SharedPointer< FrameGraphResource > normals
-        ) noexcept;
+      [[deprecated]] SharedPointer< FrameGraphOperation > ssao(
+         SharedPointer< FrameGraphResource > positions,
+         SharedPointer< FrameGraphResource > normals
+      ) noexcept;
 
-    }
+   }
 
 }
 

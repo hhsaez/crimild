@@ -28,9 +28,9 @@
 #ifndef CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 #define CRIMILD_CORE_SIMULATION_ASSET_MANAGER_
 
-#include "Crimild_Foundation.hpp"
 #include "Visitors/ShallowCopy.hpp"
 
+#include <crimild/foundation.hpp>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -38,96 +38,96 @@
 
 namespace crimild {
 
-    class Texture;
+   class Texture;
 
-    class AssetManager : public NonCopyable, public DynamicSingleton< AssetManager > {
-    private:
-        using Mutex = std::mutex;
-        using ScopedLock = std::lock_guard< Mutex >;
+   class AssetManager : public NonCopyable, public DynamicSingleton< AssetManager > {
+   private:
+      using Mutex = std::mutex;
+      using ScopedLock = std::lock_guard< Mutex >;
 
-    public:
-        static constexpr const char *FONT_DEFAULT = "fonts/default";
-        static constexpr const char *FONT_SYSTEM = "fonts/system";
+   public:
+      static constexpr const char *FONT_DEFAULT = "fonts/default";
+      static constexpr const char *FONT_SYSTEM = "fonts/system";
 
-    public:
-        AssetManager( void );
-        virtual ~AssetManager( void );
+   public:
+      AssetManager( void );
+      virtual ~AssetManager( void );
 
-        void set( std::string name, SharedPointer< SharedObject > const &asset, bool isPersistent = false )
-        {
-            ScopedLock lock( _mutex );
+      void set( std::string name, SharedPointer< SharedObject > const &asset, bool isPersistent = false )
+      {
+         ScopedLock lock( _mutex );
 
-            if ( isPersistent ) {
-                _persistentAssets[ name ] = asset;
-            } else {
-                _assets[ name ] = asset;
-            }
-        }
+         if ( isPersistent ) {
+            _persistentAssets[ name ] = asset;
+         } else {
+            _assets[ name ] = asset;
+         }
+      }
 
-        template< class T >
-        T *get( std::string name )
-        {
-            ScopedLock lock( _mutex );
+      template< class T >
+      T *get( std::string name )
+      {
+         ScopedLock lock( _mutex );
 
-            auto &asset = _assets[ name ];
-            if ( asset == nullptr ) {
-                asset = _persistentAssets[ name ];
-            }
+         auto &asset = _assets[ name ];
+         if ( asset == nullptr ) {
+            asset = _persistentAssets[ name ];
+         }
 
-            return static_cast< T * >( crimild::get_ptr( asset ) );
-        }
+         return static_cast< T * >( crimild::get_ptr( asset ) );
+      }
 
-        /**
-            \brief Get or create an asset
+      /**
+          \brief Get or create an asset
 
-            Uses RTTI to create a new instance if needed
-         */
-        template< class T >
-        T *get( void )
-        {
-            ScopedLock lock( _mutex );
+          Uses RTTI to create a new instance if needed
+       */
+      template< class T >
+      T *get( void )
+      {
+         ScopedLock lock( _mutex );
 
-            auto name = T::__CLASS_NAME;
-            if ( _assets[ name ] == nullptr ) {
-                _assets[ name ] = crimild::alloc< T >();
-            }
+         auto name = T::__CLASS_NAME;
+         if ( _assets[ name ] == nullptr ) {
+            _assets[ name ] = crimild::alloc< T >();
+         }
 
-            return static_cast< T * >( crimild::get_ptr( _assets[ name ] ) );
-        }
+         return static_cast< T * >( crimild::get_ptr( _assets[ name ] ) );
+      }
 
-        template< class T >
-        SharedPointer< T > clone( std::string filename )
-        {
-            // No need for lock once we get the prototype
-            auto asset = get< T >( filename );
-            assert( asset != nullptr && ( filename + " does not exist in Asset Manager cache" ).c_str() );
-            return cast_ptr< T >( asset->template perform< ShallowCopy >() );
-        }
+      template< class T >
+      SharedPointer< T > clone( std::string filename )
+      {
+         // No need for lock once we get the prototype
+         auto asset = get< T >( filename );
+         assert( asset != nullptr && ( filename + " does not exist in Asset Manager cache" ).c_str() );
+         return cast_ptr< T >( asset->template perform< ShallowCopy >() );
+      }
 
-        void clear( bool clearAll = false )
-        {
-            ScopedLock lock( _mutex );
+      void clear( bool clearAll = false )
+      {
+         ScopedLock lock( _mutex );
 
-            _assets.clear();
+         _assets.clear();
 
-            if ( clearAll ) {
-                _persistentAssets.clear();
-            }
-        }
+         if ( clearAll ) {
+            _persistentAssets.clear();
+         }
+      }
 
-    private:
-        // TODO: replace with containers
-        std::map< std::string, SharedPointer< SharedObject > > _assets;
-        std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
+   private:
+      // TODO: replace with containers
+      std::map< std::string, SharedPointer< SharedObject > > _assets;
+      std::map< std::string, SharedPointer< SharedObject > > _persistentAssets;
 
-        Mutex _mutex;
+      Mutex _mutex;
 
-    public:
-        void loadFont( std::string name, std::string fileName );
-    };
+   public:
+      void loadFont( std::string name, std::string fileName );
+   };
 
-    template<>
-    Texture *AssetManager::get< Texture >( std::string name );
+   template<>
+   Texture *AssetManager::get< Texture >( std::string name );
 
 }
 

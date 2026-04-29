@@ -25,11 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRIMILD_CORE_FOUNDATION_PROFILER_
-#define CRIMILD_CORE_FOUNDATION_PROFILER_
+#ifndef CRIMILD_CORE_COMMON_PROFILER_
+#define CRIMILD_CORE_COMMON_PROFILER_
 
-#include "Crimild_Foundation.hpp"
-
+#include <crimild/foundation.hpp>
 #include <deque>
 #include <map>
 #include <sstream>
@@ -37,127 +36,127 @@
 #include <thread>
 
 #ifndef CRIMILD_PROFILER_ENABLED
-    #define CRIMILD_PROFILER_ENABLED 1
+   #define CRIMILD_PROFILER_ENABLED 1
 #endif
 
 namespace crimild {
 
-    class ProfilerSample {
-    public:
-        explicit ProfilerSample( std::string name );
-        ~ProfilerSample( void );
+   class ProfilerSample {
+   public:
+      explicit ProfilerSample( std::string name );
+      ~ProfilerSample( void );
 
-    private:
-        int _sampleIndex;
-    };
+   private:
+      int _sampleIndex;
+   };
 
-    class ProfilerOutputHandler : public SharedObject {
-    public:
-        virtual ~ProfilerOutputHandler( void );
+   class ProfilerOutputHandler : public SharedObject {
+   public:
+      virtual ~ProfilerOutputHandler( void );
 
-        virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime );
-        virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount );
-        virtual void endOutput( void );
+      virtual void beginOutput( crimild::Size fps, crimild::Real64 avgFrameTime, crimild::Real64 minFrameTime, crimild::Real64 maxFrameTime );
+      virtual void sample( float minPc, float avgPc, float maxPc, unsigned int totalTime, unsigned int callCount, std::string name, unsigned int parentCount );
+      virtual void endOutput( void );
 
-    protected:
-        inline std::string getOutput( void ) { return _output.str(); }
+   protected:
+      inline std::string getOutput( void ) { return _output.str(); }
 
-    private:
-        std::stringstream _output;
-    };
+   private:
+      std::stringstream _output;
+   };
 
-    using ProfilerOutputHandlerPtr = SharedPointer< ProfilerOutputHandler >;
+   using ProfilerOutputHandlerPtr = SharedPointer< ProfilerOutputHandler >;
 
-    class ProfilerConsoleOutputHandler : public ProfilerOutputHandler {
-    public:
-        ProfilerConsoleOutputHandler( void );
-        virtual ~ProfilerConsoleOutputHandler( void );
+   class ProfilerConsoleOutputHandler : public ProfilerOutputHandler {
+   public:
+      ProfilerConsoleOutputHandler( void );
+      virtual ~ProfilerConsoleOutputHandler( void );
 
-        virtual void endOutput( void ) override;
-    };
+      virtual void endOutput( void ) override;
+   };
 
-    class ProfilerScreenOutputHandler : public ProfilerOutputHandler {
-    public:
-        ProfilerScreenOutputHandler( void );
-        virtual ~ProfilerScreenOutputHandler( void );
+   class ProfilerScreenOutputHandler : public ProfilerOutputHandler {
+   public:
+      ProfilerScreenOutputHandler( void );
+      virtual ~ProfilerScreenOutputHandler( void );
 
-        virtual void endOutput( void ) override;
-    };
+      virtual void endOutput( void ) override;
+   };
 
-    class Profiler : public DynamicSingleton< Profiler > {
-    private:
-        static constexpr int MAX_SAMPLES = 50;
+   class Profiler : public DynamicSingleton< Profiler > {
+   private:
+      static constexpr int MAX_SAMPLES = 50;
 
-    public:
-        Profiler( void );
-        ~Profiler( void );
+   public:
+      Profiler( void );
+      ~Profiler( void );
 
-        void step( void );
+      void step( void );
 
-        void dump( void );
+      void dump( void );
 
-        void resetAll( void );
-        void reset( std::string name );
+      void resetAll( void );
+      void reset( std::string name );
 
-        void setOutputHandler( ProfilerOutputHandlerPtr const &handler ) { _outputHandler = handler; }
-        ProfilerOutputHandlerPtr &getOutputHandler( void ) { return _outputHandler; }
+      void setOutputHandler( ProfilerOutputHandlerPtr const &handler ) { _outputHandler = handler; }
+      ProfilerOutputHandlerPtr &getOutputHandler( void ) { return _outputHandler; }
 
-        // internal use only
-    public:
-        int onSampleCreated( std::string name );
-        void onSampleDestroyed( int index );
+      // internal use only
+   public:
+      int onSampleCreated( std::string name );
+      void onSampleDestroyed( int index );
 
-    private:
-        crimild::Real64 getTime( void );
+   private:
+      crimild::Real64 getTime( void );
 
-    private:
-        struct ProfilerSampleInfo {
-            bool isValid = false;
-            bool isOpened = false;
+   private:
+      struct ProfilerSampleInfo {
+         bool isValid = false;
+         bool isOpened = false;
 
-            std::string name;
-            unsigned int callCount = 0;
+         std::string name;
+         unsigned int callCount = 0;
 
-            crimild::Real64 startTime = 0;
-            crimild::Real64 totalTime = 0;
-            crimild::Real64 childTime = 0;
+         crimild::Real64 startTime = 0;
+         crimild::Real64 totalTime = 0;
+         crimild::Real64 childTime = 0;
 
-            crimild::Real64 avgTime = 0.0f;
-            crimild::Real64 minTime = 0.0f;
-            crimild::Real64 maxTime = 0.0f;
+         crimild::Real64 avgTime = 0.0f;
+         crimild::Real64 minTime = 0.0f;
+         crimild::Real64 maxTime = 0.0f;
 
-            unsigned int dataCount = 0;
+         unsigned int dataCount = 0;
 
-            int parentCount = 0;
-            int parentIndex = -1;
-        };
+         int parentCount = 0;
+         int parentIndex = -1;
+      };
 
-        ProfilerSampleInfo _samples[ MAX_SAMPLES ];
+      ProfilerSampleInfo _samples[ MAX_SAMPLES ];
 
-        int _lastOpenedSample = -1;
-        int _openSampleCount = 0;
-        float _rootBegin = 0.0f;
-        float _rootEnd = 0.0f;
+      int _lastOpenedSample = -1;
+      int _openSampleCount = 0;
+      float _rootBegin = 0.0f;
+      float _rootEnd = 0.0f;
 
-        ProfilerOutputHandlerPtr _outputHandler;
+      ProfilerOutputHandlerPtr _outputHandler;
 
-        crimild::Real64 _minFrameTime = 0;
-        crimild::Real64 _maxFrameTime = 0;
-        crimild::Size _frameCount = 0;
-        crimild::Real64 _totalFrameTime = 0;
-        crimild::Real64 _lastFrameTime = 0;
-        std::deque< crimild::Real64 > _frameTimeHistory;
+      crimild::Real64 _minFrameTime = 0;
+      crimild::Real64 _maxFrameTime = 0;
+      crimild::Size _frameCount = 0;
+      crimild::Real64 _totalFrameTime = 0;
+      crimild::Real64 _lastFrameTime = 0;
+      std::deque< crimild::Real64 > _frameTimeHistory;
 
-        crimild::Size _fps = 0;
-        crimild::Real64 _avgFrameTime = 0;
-    };
+      crimild::Size _fps = 0;
+      crimild::Real64 _avgFrameTime = 0;
+   };
 
 }
 
 #if CRIMILD_PROFILER_ENABLED
-    #define CRIMILD_PROFILE( X ) crimild::ProfilerSample __crimild__profile__sample__instance__( X );
+   #define CRIMILD_PROFILE( X ) crimild::ProfilerSample __crimild__profile__sample__instance__( X );
 #else
-    #define CRIMILD_PROFILE( X )
+   #define CRIMILD_PROFILE( X )
 #endif
 
 #endif

@@ -29,253 +29,254 @@
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class SkinnedMeshJoint : public coding::Codable, public NamedObject {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJoint )
+   class SkinnedMeshJoint : public coding::Codable, public NamedObject {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJoint )
 
-    public:
-        SkinnedMeshJoint( void );
-        SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name );
-        virtual ~SkinnedMeshJoint( void );
+   public:
+      SkinnedMeshJoint( void );
+      SkinnedMeshJoint( unsigned int id, const Transformation &offset, std::string name );
+      virtual ~SkinnedMeshJoint( void );
 
-        unsigned char getId( void ) const { return _id; }
+      unsigned char getId( void ) const { return _id; }
 
-        void setOffset( const Transformation &t ) { _offset = t; }
-        const Transformation &getOffset( void ) const { return _offset; }
+      void setOffset( const Transformation &t ) { _offset = t; }
+      const Transformation &getOffset( void ) const { return _offset; }
 
-    private:
-        crimild::UInt8 _id;
-        Transformation _offset;
+   private:
+      crimild::UInt8 _id;
+      Transformation _offset;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMeshJointCatalog : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJointCatalog )
+   class SkinnedMeshJointCatalog : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshJointCatalog )
 
-    public:
-        SkinnedMeshJointCatalog( void );
-        virtual ~SkinnedMeshJointCatalog( void );
+   public:
+      SkinnedMeshJointCatalog( void );
+      virtual ~SkinnedMeshJointCatalog( void );
 
-        unsigned int getJointCount( void ) const { return _joints.size(); }
+      unsigned int getJointCount( void ) const { return _joints.size(); }
 
-        SkinnedMeshJoint *find( std::string name );
+      SkinnedMeshJoint *find( std::string name );
 
-        SkinnedMeshJoint *updateOrCreateJoint( std::string name, const Transformation &offset );
+      SkinnedMeshJoint *updateOrCreateJoint( std::string name, const Transformation &offset );
 
-    private:
-        Map< std::string, SharedPointer< SkinnedMeshJoint > > _joints;
+   private:
+      Map< std::string, SharedPointer< SkinnedMeshJoint > > _joints;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMeshAnimationChannel : public coding::Codable, public NamedObject {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationChannel )
+   class SkinnedMeshAnimationChannel : public coding::Codable, public NamedObject {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationChannel )
 
-    public:
-        template< typename T >
-        struct AnimationKey {
-            float time;
-            T value;
-        };
+   public:
+      template< typename T >
+      struct AnimationKey {
+         float time;
+         T value;
+      };
 
-        using PositionKey = AnimationKey< Vector3f >;
-        using PositionKeyArray = Array< PositionKey >;
+      using PositionKey = AnimationKey< Vector3f >;
+      using PositionKeyArray = Array< PositionKey >;
 
-        using RotationKey = AnimationKey< Quaternion >;
-        using RotationKeyArray = Array< RotationKey >;
+      using RotationKey = AnimationKey< Quaternion >;
+      using RotationKeyArray = Array< RotationKey >;
 
-        using ScaleKey = AnimationKey< float >;
-        using ScaleKeyArray = Array< ScaleKey >;
+      using ScaleKey = AnimationKey< float >;
+      using ScaleKeyArray = Array< ScaleKey >;
 
-    public:
-        SkinnedMeshAnimationChannel( void );
-        virtual ~SkinnedMeshAnimationChannel( void );
+   public:
+      SkinnedMeshAnimationChannel( void );
+      virtual ~SkinnedMeshAnimationChannel( void );
 
-        void setPositionKeys( PositionKeyArray const &keys ) { _positionKeys = keys; }
-        PositionKeyArray &getPositionKeys( void ) { return _positionKeys; }
-        const PositionKeyArray &getPositionKeys( void ) const { return _positionKeys; }
+      void setPositionKeys( PositionKeyArray const &keys ) { _positionKeys = keys; }
+      PositionKeyArray &getPositionKeys( void ) { return _positionKeys; }
+      const PositionKeyArray &getPositionKeys( void ) const { return _positionKeys; }
 
-        void setRotationKeys( RotationKeyArray const &keys ) { _rotationKeys = keys; }
-        RotationKeyArray &getRotationKeys( void ) { return _rotationKeys; }
-        const RotationKeyArray &getRotationKeys( void ) const { return _rotationKeys; }
+      void setRotationKeys( RotationKeyArray const &keys ) { _rotationKeys = keys; }
+      RotationKeyArray &getRotationKeys( void ) { return _rotationKeys; }
+      const RotationKeyArray &getRotationKeys( void ) const { return _rotationKeys; }
 
-        void setScaleKeys( ScaleKeyArray const &keys ) { _scaleKeys = keys; }
-        ScaleKeyArray &getScaleKeys( void ) { return _scaleKeys; }
-        const ScaleKeyArray &getScaleKeys( void ) const { return _scaleKeys; }
+      void setScaleKeys( ScaleKeyArray const &keys ) { _scaleKeys = keys; }
+      ScaleKeyArray &getScaleKeys( void ) { return _scaleKeys; }
+      const ScaleKeyArray &getScaleKeys( void ) const { return _scaleKeys; }
 
-        bool computePosition( float animationTime, Vector3f &result );
-        bool computeRotation( float animationTime, Quaternion &result );
-        bool computeScale( float animationTime, float &result );
+      bool computePosition( float animationTime, Vector3f &result );
+      bool computeRotation( float animationTime, Quaternion &result );
+      bool computeScale( float animationTime, float &result );
 
-    private:
-        PositionKeyArray _positionKeys;
-        RotationKeyArray _rotationKeys;
-        ScaleKeyArray _scaleKeys;
+   private:
+      PositionKeyArray _positionKeys;
+      RotationKeyArray _rotationKeys;
+      ScaleKeyArray _scaleKeys;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMeshAnimationClip : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationClip )
+   class SkinnedMeshAnimationClip : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationClip )
 
-    private:
-        using SkinnedMeshAnimationChannelMap = Map< std::string, SharedPointer< SkinnedMeshAnimationChannel > >;
+   private:
+      using SkinnedMeshAnimationChannelMap = Map< std::string, SharedPointer< SkinnedMeshAnimationChannel > >;
 
-    public:
-        SkinnedMeshAnimationClip( void );
-        virtual ~SkinnedMeshAnimationClip( void );
+   public:
+      SkinnedMeshAnimationClip( void );
+      virtual ~SkinnedMeshAnimationClip( void );
 
-        float getDuration( void ) const { return _duration; }
-        void setDuration( float duration ) { _duration = duration; }
+      float getDuration( void ) const { return _duration; }
+      void setDuration( float duration ) { _duration = duration; }
 
-        float getFrameRate( void ) const { return _frameRate; }
-        void setFrameRate( float frameRate ) { _frameRate = frameRate; }
+      float getFrameRate( void ) const { return _frameRate; }
+      void setFrameRate( float frameRate ) { _frameRate = frameRate; }
 
-        SkinnedMeshAnimationChannelMap &getChannels( void ) { return _channels; }
+      SkinnedMeshAnimationChannelMap &getChannels( void ) { return _channels; }
 
-    private:
-        float _duration;
-        float _frameRate;
-        SkinnedMeshAnimationChannelMap _channels;
+   private:
+      float _duration;
+      float _frameRate;
+      SkinnedMeshAnimationChannelMap _channels;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMeshSkeleton : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshSkeleton )
+   class SkinnedMeshSkeleton : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshSkeleton )
 
-    private:
-        using SkinnedMeshAnimationClipArray = Array< SharedPointer< SkinnedMeshAnimationClip > >;
+   private:
+      using SkinnedMeshAnimationClipArray = Array< SharedPointer< SkinnedMeshAnimationClip > >;
 
-    public:
-        SkinnedMeshSkeleton( void );
-        virtual ~SkinnedMeshSkeleton( void );
+   public:
+      SkinnedMeshSkeleton( void );
+      virtual ~SkinnedMeshSkeleton( void );
 
-        SkinnedMeshAnimationClipArray &getClips( void ) { return _clips; }
-        SkinnedMeshJointCatalog *getJoints( void ) { return crimild::get_ptr( _joints ); }
+      SkinnedMeshAnimationClipArray &getClips( void ) { return _clips; }
+      SkinnedMeshJointCatalog *getJoints( void ) { return crimild::get_ptr( _joints ); }
 
-        void setGlobalInverseTransform( const Transformation &value ) { _globalInverseTransform = value; }
-        const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
+      void setGlobalInverseTransform( const Transformation &value ) { _globalInverseTransform = value; }
+      const Transformation &getGlobalInverseTransform( void ) const { return _globalInverseTransform; }
 
-    private:
-        SkinnedMeshAnimationClipArray _clips;
-        SharedPointer< SkinnedMeshJointCatalog > _joints;
+   private:
+      SkinnedMeshAnimationClipArray _clips;
+      SharedPointer< SkinnedMeshJointCatalog > _joints;
 
-        Transformation _globalInverseTransform;
+      Transformation _globalInverseTransform;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMeshAnimationState : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationState )
+   class SkinnedMeshAnimationState : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMeshAnimationState )
 
-    private:
-        using JointPoseArray = Array< Matrix4f >;
+   private:
+      using JointPoseArray = Array< Matrix4f >;
 
-    public:
-        SkinnedMeshAnimationState( void );
-        virtual ~SkinnedMeshAnimationState( void );
+   public:
+      SkinnedMeshAnimationState( void );
+      virtual ~SkinnedMeshAnimationState( void );
 
-        JointPoseArray &getJointPoses( void ) { return _jointPoses; }
-        const JointPoseArray &getJointPoses( void ) const { return _jointPoses; }
+      JointPoseArray &getJointPoses( void ) { return _jointPoses; }
+      const JointPoseArray &getJointPoses( void ) const { return _jointPoses; }
 
-    private:
-        JointPoseArray _jointPoses;
+   private:
+      JointPoseArray _jointPoses;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    class SkinnedMesh : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMesh )
+   class SkinnedMesh : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::SkinnedMesh )
 
-    public:
-        SkinnedMesh( void );
-        virtual ~SkinnedMesh( void );
+   public:
+      SkinnedMesh( void );
+      virtual ~SkinnedMesh( void );
 
-        SharedPointer< SkinnedMesh > clone( void );
+      SharedPointer< SkinnedMesh > clone( void );
 
-        SkinnedMeshSkeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
-        void setSkeleton( SharedPointer< SkinnedMeshSkeleton > const &skeleton ) { _skeleton = skeleton; }
+      SkinnedMeshSkeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
+      void setSkeleton( SharedPointer< SkinnedMeshSkeleton > const &skeleton ) { _skeleton = skeleton; }
 
-        SkinnedMeshAnimationState *getAnimationState( void ) { return crimild::get_ptr( _animationState ); }
+      SkinnedMeshAnimationState *getAnimationState( void ) { return crimild::get_ptr( _animationState ); }
 
-    private:
-        SharedPointer< SkinnedMeshSkeleton > _skeleton;
-        SharedPointer< SkinnedMeshAnimationState > _animationState;
+   private:
+      SharedPointer< SkinnedMeshSkeleton > _skeleton;
+      SharedPointer< SkinnedMeshAnimationState > _animationState;
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
+      //@}
 
-    public:
-        void debugDump( void );
-    };
+   public:
+      void debugDump( void );
+   };
 
 }
 

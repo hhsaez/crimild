@@ -28,183 +28,183 @@
 #ifndef CRIMILD_CORE_SIMULATION_EVENT_
 #define CRIMILD_CORE_SIMULATION_EVENT_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Extent.hpp"
 #include "Simulation/Input.hpp"
 
+#include <crimild/foundation.hpp>
 #include <iostream>
 
 namespace crimild {
 
-    class Node;
+   class Node;
 
-    /**
-     * \brief Keyboard button event information
-     */
-    struct Keyboard {
-        enum class State {
-            PRESSED,
-            REPEAT,
-            RELEASED,
-        };
+   /**
+    * \brief Keyboard button event information
+    */
+   struct Keyboard {
+      enum class State {
+         PRESSED,
+         REPEAT,
+         RELEASED,
+      };
 
-        State state = State::PRESSED;
-        UInt32 key = CRIMILD_INPUT_KEY_UNKNOWN;
-        UInt32 scancode = 0;
-        UInt32 mod = 0;
-    };
+      State state = State::PRESSED;
+      UInt32 key = CRIMILD_INPUT_KEY_UNKNOWN;
+      UInt32 scancode = 0;
+      UInt32 mod = 0;
+   };
 
-    struct MouseButton {
-        enum class State {
-            PRESSED,
-            RELEASED,
-        };
+   struct MouseButton {
+      enum class State {
+         PRESSED,
+         RELEASED,
+      };
 
-        UInt8 button = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
-        State state = State::PRESSED;
-        Vector2i pos = Vector2i { 0, 0 };
+      UInt8 button = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
+      State state = State::PRESSED;
+      Vector2i pos = Vector2i { 0, 0 };
 
-        // Normalized mouse position in range [0, 1]
-        Vector2f npos = Vector2f { 0, 0 };
-    };
+      // Normalized mouse position in range [0, 1]
+      Vector2f npos = Vector2f { 0, 0 };
+   };
 
-    struct MouseMotion {
-        Vector2i pos = Vector2i { 0, 0 };
+   struct MouseMotion {
+      Vector2i pos = Vector2i { 0, 0 };
 
-        // Normalized mouse position in range [0, 1]
-        Vector2f npos = Vector2f { 0, 0 };
-    };
+      // Normalized mouse position in range [0, 1]
+      Vector2f npos = Vector2f { 0, 0 };
+   };
 
-    /**
-     * \brief Mouse wheel event information
-     */
-    struct MouseWheel {
-        // Horizontal scroll offset
-        Int32 x;
-        // Vertical scroll offset
-        Int32 y;
-    };
+   /**
+    * \brief Mouse wheel event information
+    */
+   struct MouseWheel {
+      // Horizontal scroll offset
+      Int32 x;
+      // Vertical scroll offset
+      Int32 y;
+   };
 
-    /**
-     * \brief Text input event information
-     */
-    struct TextInput {
-        UInt32 codepoint;
-    };
+   /**
+    * \brief Text input event information
+    */
+   struct TextInput {
+      UInt32 codepoint;
+   };
 
-    struct Event {
-        enum class Type {
-            NONE,
+   struct Event {
+      enum class Type {
+         NONE,
 
-            START,
-            TICK,
-            RENDER,
-            TERMINATE,
-            STOP,
+         START,
+         TICK,
+         RENDER,
+         TERMINATE,
+         STOP,
 
-            WINDOW_RESIZE,
-            WINDOW_CLOSED,
+         WINDOW_RESIZE,
+         WINDOW_CLOSED,
 
-            KEY_DOWN,
-            KEY_REPEAT,
-            KEY_UP,
+         KEY_DOWN,
+         KEY_REPEAT,
+         KEY_UP,
 
-            MOUSE_MOTION,
-            MOUSE_BUTTON_DOWN,
-            MOUSE_BUTTON_UP,
-            MOUSE_CLICK,
-            MOUSE_WHEEL,
+         MOUSE_MOTION,
+         MOUSE_BUTTON_DOWN,
+         MOUSE_BUTTON_UP,
+         MOUSE_CLICK,
+         MOUSE_WHEEL,
 
-            TEXT,
+         TEXT,
 
-            NODE_SELECTED,
+         NODE_SELECTED,
 
-            SCENE_CHANGED,
+         SCENE_CHANGED,
 
-            SIMULATION_START,
-            SIMULATION_UPDATE,
-            SIMULATION_RENDER,
-            SIMULATION_STOP,
-        };
+         SIMULATION_START,
+         SIMULATION_UPDATE,
+         SIMULATION_RENDER,
+         SIMULATION_STOP,
+      };
 
-        Type type = Type::NONE;
-        UInt64 timestamp = 0;
+      Type type = Type::NONE;
+      UInt64 timestamp = 0;
 
-        union {
-            Extent2D extent = Extent2D {};
-            Keyboard keyboard;
-            MouseButton button;
-            MouseMotion motion;
-            MouseWheel wheel;
-            TextInput text;
-            Node *node;
-        };
-    };
+      union {
+         Extent2D extent = Extent2D {};
+         Keyboard keyboard;
+         MouseButton button;
+         MouseMotion motion;
+         MouseWheel wheel;
+         TextInput text;
+         Node *node;
+      };
+   };
 
-    static std::ostream &operator<<( std::ostream &out, const Event &e )
-    {
-        switch ( e.type ) {
-            case Event::Type::NONE:
-                out << "NONE";
-                break;
-            case Event::Type::START:
-                out << "START";
-                break;
-            case Event::Type::TICK:
-                out << "TICK";
-                break;
-            case Event::Type::STOP:
-                out << "STOP";
-                break;
-            case Event::Type::WINDOW_RESIZE:
-                out << "WINDOW_RESIZE";
-                break;
-            case Event::Type::KEY_DOWN:
-                out << "KEY_DOWN";
-                break;
-            case Event::Type::KEY_REPEAT:
-                out << "KEY_REPEAT";
-                break;
-            case Event::Type::KEY_UP:
-                out << "KEY_UP";
-                break;
-            case Event::Type::MOUSE_MOTION:
-                out << "MOUSE_MOTION";
-                break;
-            case Event::Type::MOUSE_BUTTON_DOWN:
-                out << "MOUSE_BUTTON_DOWN";
-                break;
-            case Event::Type::MOUSE_BUTTON_UP:
-                out << "MOUSE_BUTTON_UP";
-                break;
-            case Event::Type::MOUSE_CLICK:
-                out << "MOUSE_CLICK";
-                break;
-            case Event::Type::MOUSE_WHEEL:
-                out << "MOUSE_WHEEL";
-                break;
-            case Event::Type::TEXT:
-                out << "TEXT";
-                break;
-            case Event::Type::NODE_SELECTED:
-                out << "NODE_SELECTED";
-                break;
-            case Event::Type::SIMULATION_START:
-                out << "SIMULATION_START";
-                break;
-            case Event::Type::SIMULATION_UPDATE:
-                out << "SIMULATION_UPDATE";
-                break;
-            case Event::Type::SIMULATION_RENDER:
-                out << "SIMULATION_RENDER";
-                break;
-            case Event::Type::SIMULATION_STOP:
-                out << "SIMULATION_STOP";
-                break;
-        }
+   static std::ostream &operator<<( std::ostream &out, const Event &e )
+   {
+      switch ( e.type ) {
+         case Event::Type::NONE:
+            out << "NONE";
+            break;
+         case Event::Type::START:
+            out << "START";
+            break;
+         case Event::Type::TICK:
+            out << "TICK";
+            break;
+         case Event::Type::STOP:
+            out << "STOP";
+            break;
+         case Event::Type::WINDOW_RESIZE:
+            out << "WINDOW_RESIZE";
+            break;
+         case Event::Type::KEY_DOWN:
+            out << "KEY_DOWN";
+            break;
+         case Event::Type::KEY_REPEAT:
+            out << "KEY_REPEAT";
+            break;
+         case Event::Type::KEY_UP:
+            out << "KEY_UP";
+            break;
+         case Event::Type::MOUSE_MOTION:
+            out << "MOUSE_MOTION";
+            break;
+         case Event::Type::MOUSE_BUTTON_DOWN:
+            out << "MOUSE_BUTTON_DOWN";
+            break;
+         case Event::Type::MOUSE_BUTTON_UP:
+            out << "MOUSE_BUTTON_UP";
+            break;
+         case Event::Type::MOUSE_CLICK:
+            out << "MOUSE_CLICK";
+            break;
+         case Event::Type::MOUSE_WHEEL:
+            out << "MOUSE_WHEEL";
+            break;
+         case Event::Type::TEXT:
+            out << "TEXT";
+            break;
+         case Event::Type::NODE_SELECTED:
+            out << "NODE_SELECTED";
+            break;
+         case Event::Type::SIMULATION_START:
+            out << "SIMULATION_START";
+            break;
+         case Event::Type::SIMULATION_UPDATE:
+            out << "SIMULATION_UPDATE";
+            break;
+         case Event::Type::SIMULATION_RENDER:
+            out << "SIMULATION_RENDER";
+            break;
+         case Event::Type::SIMULATION_STOP:
+            out << "SIMULATION_STOP";
+            break;
+      }
 
-        return out;
-    }
+      return out;
+   }
 
 }
 

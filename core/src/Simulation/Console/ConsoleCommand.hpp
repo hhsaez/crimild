@@ -28,49 +28,49 @@
 #ifndef CRIMILD_SIMULATION_CONSOLE_COMMAND_
 #define CRIMILD_SIMULATION_CONSOLE_COMMAND_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class Console;
+   class Console;
 
-    class ConsoleCommand : public NamedObject, public SharedObject {
-    public:
-        using ConsoleCommandArgs = std::vector< std::string >;
+   class ConsoleCommand : public NamedObject, public SharedObject {
+   public:
+      using ConsoleCommandArgs = std::vector< std::string >;
 
-    public:
-        ConsoleCommand( std::string name )
-            : NamedObject( name ) { }
-        virtual ~ConsoleCommand( void ) { }
+   public:
+      ConsoleCommand( std::string name )
+         : NamedObject( name ) { }
+      virtual ~ConsoleCommand( void ) { }
 
-        virtual void execute( Console *, ConsoleCommandArgs const &args ) = 0;
-    };
+      virtual void execute( Console *, ConsoleCommandArgs const &args ) = 0;
+   };
 
-    using ConsoleCommandPtr = SharedPointer< ConsoleCommand >;
+   using ConsoleCommandPtr = SharedPointer< ConsoleCommand >;
 
-    class SimpleConsoleCommand : public ConsoleCommand {
-    public:
-        using ConsoleCommandCallback = std::function< void( Console *, ConsoleCommand::ConsoleCommandArgs const & ) >;
+   class SimpleConsoleCommand : public ConsoleCommand {
+   public:
+      using ConsoleCommandCallback = std::function< void( Console *, ConsoleCommand::ConsoleCommandArgs const & ) >;
 
-    public:
-        SimpleConsoleCommand( std::string name, ConsoleCommandCallback const &callback )
-            : ConsoleCommand( name ),
-              _callback( callback )
-        {
-        }
+   public:
+      SimpleConsoleCommand( std::string name, ConsoleCommandCallback const &callback )
+         : ConsoleCommand( name ),
+           _callback( callback )
+      {
+      }
 
-        virtual ~SimpleConsoleCommand( void )
-        {
-        }
+      virtual ~SimpleConsoleCommand( void )
+      {
+      }
 
-        virtual void execute( Console *console, ConsoleCommand::ConsoleCommandArgs const &args ) override
-        {
-            _callback( console, args );
-        }
+      virtual void execute( Console *console, ConsoleCommand::ConsoleCommandArgs const &args ) override
+      {
+         _callback( console, args );
+      }
 
-    private:
-        ConsoleCommandCallback _callback;
-    };
+   private:
+      ConsoleCommandCallback _callback;
+   };
 
 }
 

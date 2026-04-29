@@ -29,56 +29,56 @@
 #define CRIMILD_ANIMATION_CLIP_
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Animation;
-        class Channel;
+      class Animation;
+      class Channel;
 
-        class Clip : public coding::Codable,
-                     public NamedObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Clip )
+      class Clip : public coding::Codable,
+                   public NamedObject {
+         CRIMILD_IMPLEMENT_RTTI( crimild::animation::Clip )
 
-        public:
-            explicit Clip( std::string name = "" );
-            explicit Clip( std::string name, SharedPointer< Channel > const &channel );
-            virtual ~Clip( void );
+      public:
+         explicit Clip( std::string name = "" );
+         explicit Clip( std::string name, SharedPointer< Channel > const &channel );
+         virtual ~Clip( void );
 
-            void setDuration( crimild::Real32 duration ) { _duration = duration; }
-            crimild::Real32 getDuration( void ) const { return _duration; }
+         void setDuration( crimild::Real32 duration ) { _duration = duration; }
+         crimild::Real32 getDuration( void ) const { return _duration; }
 
-            void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
-            crimild::Real32 getFrameRate( void ) const { return _frameRate; }
+         void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
+         crimild::Real32 getFrameRate( void ) const { return _frameRate; }
 
-        private:
-            crimild::Real32 _duration = 0.0f;
-            crimild::Real32 _frameRate = 1.0f;
+      private:
+         crimild::Real32 _duration = 0.0f;
+         crimild::Real32 _frameRate = 1.0f;
 
-        public:
-            void addChannel( SharedPointer< Channel > const &channel );
+      public:
+         void addChannel( SharedPointer< Channel > const &channel );
 
-        private:
-            Array< SharedPointer< Channel > > _channels;
+      private:
+         Array< SharedPointer< Channel > > _channels;
 
-        public:
-            void evaluate( crimild::Real32 t, Animation *animation );
+      public:
+         void evaluate( crimild::Real32 t, Animation *animation );
 
-            /**
-               \name Coding
-            */
-            //@{
+         /**
+            \name Coding
+         */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
-        };
+         //@}
+      };
 
-    }
+   }
 
 }
 

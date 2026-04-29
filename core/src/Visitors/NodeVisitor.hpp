@@ -28,7 +28,7 @@
 #ifndef CRIMILD_VISITORS_NODE_VISITOR_
 #define CRIMILD_VISITORS_NODE_VISITOR_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

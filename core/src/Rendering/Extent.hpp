@@ -28,32 +28,33 @@
 #ifndef CRIMILD_CORE_RENDERING_EXTENT_
 #define CRIMILD_CORE_RENDERING_EXTENT_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/ScalingMode.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    struct Extent2D {
-        static Extent2D fromSwapchain( Real32 scale = 1.0f ) noexcept
-        {
-            return {
-                .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-                .width = scale,
-                .height = scale,
-            };
-        }
+   struct Extent2D {
+      static Extent2D fromSwapchain( Real32 scale = 1.0f ) noexcept
+      {
+         return {
+            .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+            .width = scale,
+            .height = scale,
+         };
+      }
 
-        ScalingMode scalingMode = { ScalingMode::FIXED };
-        crimild::Real32 width = 1.0f;
-        crimild::Real32 height = 1.0f;
-    };
+      ScalingMode scalingMode = { ScalingMode::FIXED };
+      crimild::Real32 width = 1.0f;
+      crimild::Real32 height = 1.0f;
+   };
 
-    struct Extent3D {
-        ScalingMode scalingMode = { ScalingMode::FIXED };
-        crimild::Real32 width = 1.0f;
-        crimild::Real32 height = 1.0f;
-        crimild::Real32 depth = 1.0f;
-    };
+   struct Extent3D {
+      ScalingMode scalingMode = { ScalingMode::FIXED };
+      crimild::Real32 width = 1.0f;
+      crimild::Real32 height = 1.0f;
+      crimild::Real32 depth = 1.0f;
+   };
 
 }
 

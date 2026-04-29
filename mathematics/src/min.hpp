@@ -39,171 +39,171 @@
 
 namespace crimild {
 
-    template< ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto min( T x, U y ) noexcept
-    {
-        return x < y ? x : y;
-    }
+   template< ArithmeticType T, ArithmeticType U >
+   [[nodiscard]] inline constexpr auto min( T x, U y ) noexcept
+   {
+      return x < y ? x : y;
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &v ) noexcept
-    {
-        return min( v.x, v.y );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &v ) noexcept
+   {
+      return min( v.x, v.y );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
-    {
-        return Derived< decltype( min( T {}, U {} ) ) > {
-            min( u.x, v.x ),
-            min( u.y, v.y ),
-        };
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+   [[nodiscard]] inline constexpr auto min( const Tuple2< Derived, T > &u, const Tuple2< Derived, U > &v ) noexcept
+   {
+      return Derived< decltype( min( T {}, U {} ) ) > {
+         min( u.x, v.x ),
+         min( u.y, v.y ),
+      };
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto minDimension( const Tuple2< Derived, T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
-        return ret;
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto minDimension( const Tuple2< Derived, T > &t ) noexcept
+   {
+      std::size_t ret = 0;
+      ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+      return ret;
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &v ) noexcept
-    {
-        return min( v.x, min( v.y, v.z ) );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &v ) noexcept
+   {
+      return min( v.x, min( v.y, v.z ) );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const Tuple3< Derived, U > &v ) noexcept
-    {
-        return Derived< decltype( min( T {}, U {} ) ) > {
-            min( u.x, v.x ),
-            min( u.y, v.y ),
-            min( u.z, v.z ),
-        };
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+   [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const Tuple3< Derived, U > &v ) noexcept
+   {
+      return Derived< decltype( min( T {}, U {} ) ) > {
+         min( u.x, v.x ),
+         min( u.y, v.y ),
+         min( u.z, v.z ),
+      };
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const U &s ) noexcept
-    {
-        return Derived< decltype( min( T {}, U {} ) ) > {
-            min( u.x, s ),
-            min( u.y, s ),
-            min( u.z, s ),
-        };
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+   [[nodiscard]] inline constexpr auto min( const Tuple3< Derived, T > &u, const U &s ) noexcept
+   {
+      return Derived< decltype( min( T {}, U {} ) ) > {
+         min( u.x, s ),
+         min( u.y, s ),
+         min( u.z, s ),
+      };
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto minDimension( const Tuple3< Derived, T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
-        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
-        return ret;
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto minDimension( const Tuple3< Derived, T > &t ) noexcept
+   {
+      std::size_t ret = 0;
+      ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+      ret = t[ 2 ] < t[ ret ] ? 2 : ret;
+      return ret;
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &v ) noexcept
-    {
-        return min( v.x, min( v.y, min( v.z, v.w ) ) );
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &v ) noexcept
+   {
+      return min( v.x, min( v.y, min( v.z, v.w ) ) );
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
-    [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &u, const Tuple4< Derived, U > &v ) noexcept
-    {
-        return Derived< decltype( min( T {}, U {} ) ) > {
-            min( u.x, v.x ),
-            min( u.y, v.y ),
-            min( u.z, v.z ),
-            min( u.w, v.w ),
-        };
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T, ArithmeticType U >
+   [[nodiscard]] inline constexpr auto min( const Tuple4< Derived, T > &u, const Tuple4< Derived, U > &v ) noexcept
+   {
+      return Derived< decltype( min( T {}, U {} ) ) > {
+         min( u.x, v.x ),
+         min( u.y, v.y ),
+         min( u.z, v.z ),
+         min( u.w, v.w ),
+      };
+   }
 
-    template< template< ArithmeticType > class Derived, ArithmeticType T >
-    [[nodiscard]] inline constexpr auto minDimension( const Tuple4< Derived, T > &t ) noexcept
-    {
-        size_t ret = 0;
-        ret = t[ 1 ] < t[ ret ] ? 1 : ret;
-        ret = t[ 2 ] < t[ ret ] ? 2 : ret;
-        ret = t[ 3 ] < t[ ret ] ? 3 : ret;
-        return ret;
-    }
+   template< template< ArithmeticType > class Derived, ArithmeticType T >
+   [[nodiscard]] inline constexpr auto minDimension( const Tuple4< Derived, T > &t ) noexcept
+   {
+      std::size_t ret = 0;
+      ret = t[ 1 ] < t[ ret ] ? 1 : ret;
+      ret = t[ 2 ] < t[ ret ] ? 2 : ret;
+      ret = t[ 3 ] < t[ ret ] ? 3 : ret;
+      return ret;
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr T min( const ColorRGBImpl< T > &c ) noexcept
-    {
-        return min( c.r, min( c.g, c.b ) );
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr T min( const ColorRGBImpl< T > &c ) noexcept
+   {
+      return min( c.r, min( c.g, c.b ) );
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBImpl< T > min( const ColorRGBImpl< T > &a, const ColorRGBImpl< T > &b ) noexcept
-    {
-        return ColorRGBImpl< T > {
-            min( a.r, b.r ),
-            min( a.g, b.g ),
-            min( a.b, b.b ),
-        };
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr ColorRGBImpl< T > min( const ColorRGBImpl< T > &a, const ColorRGBImpl< T > &b ) noexcept
+   {
+      return ColorRGBImpl< T > {
+         min( a.r, b.r ),
+         min( a.g, b.g ),
+         min( a.b, b.b ),
+      };
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr size_t minDimension( const ColorRGBImpl< T > &c ) noexcept
-    {
-        auto ret = size_t( 0 );
-        for ( auto i = 1l; i < 3; ++i ) {
-            if ( c[ i ] < c[ ret ] ) {
-                ret = i;
-            }
-        }
-        return ret;
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr std::size_t minDimension( const ColorRGBImpl< T > &c ) noexcept
+   {
+      auto ret = std::size_t( 0 );
+      for ( auto i = 1l; i < 3; ++i ) {
+         if ( c[ i ] < c[ ret ] ) {
+            ret = i;
+         }
+      }
+      return ret;
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr T min( const ColorRGBAImpl< T > &c ) noexcept
-    {
-        return min( c.r, min( c.g, min( c.b, c.a ) ) );
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr T min( const ColorRGBAImpl< T > &c ) noexcept
+   {
+      return min( c.r, min( c.g, min( c.b, c.a ) ) );
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr ColorRGBAImpl< T > min( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< T > &b ) noexcept
-    {
-        return ColorRGBAImpl< T > {
-            min( a.r, b.r ),
-            min( a.g, b.g ),
-            min( a.b, b.b ),
-            min( a.a, b.a ),
-        };
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr ColorRGBAImpl< T > min( const ColorRGBAImpl< T > &a, const ColorRGBAImpl< T > &b ) noexcept
+   {
+      return ColorRGBAImpl< T > {
+         min( a.r, b.r ),
+         min( a.g, b.g ),
+         min( a.b, b.b ),
+         min( a.a, b.a ),
+      };
+   }
 
-    template< typename T >
-    [[nodiscard]] inline constexpr size_t minDimension( const ColorRGBAImpl< T > &c ) noexcept
-    {
-        auto ret = size_t( 0 );
-        for ( auto i = 1l; i < 4; ++i ) {
-            if ( c[ i ] < c[ ret ] ) {
-                ret = i;
-            }
-        }
-        return ret;
-    }
+   template< typename T >
+   [[nodiscard]] inline constexpr std::size_t minDimension( const ColorRGBAImpl< T > &c ) noexcept
+   {
+      auto ret = std::size_t( 0 );
+      for ( auto i = 1l; i < 4; ++i ) {
+         if ( c[ i ] < c[ ret ] ) {
+            ret = i;
+         }
+      }
+      return ret;
+   }
 
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr const auto &min( const Bounds3Impl< T > &B ) noexcept
-    {
-        return B.min;
-    }
+   template< ArithmeticType T >
+   [[nodiscard]] inline constexpr const auto &min( const Bounds3Impl< T > &B ) noexcept
+   {
+      return B.min;
+   }
 
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr auto min( const Bounds3Impl< T > &B0, const Bounds3Impl< T > &B1 ) noexcept
-    {
-        return min( min( B0 ), min( B1 ) );
-    }
+   template< ArithmeticType T >
+   [[nodiscard]] inline constexpr auto min( const Bounds3Impl< T > &B0, const Bounds3Impl< T > &B1 ) noexcept
+   {
+      return min( min( B0 ), min( B1 ) );
+   }
 
-    template< ArithmeticType T >
-    [[nodiscard]] inline constexpr size_t minDimension( const Bounds3Impl< T > &B ) noexcept
-    {
-        return minDimension( abs( diagonal( B ) ) );
-    }
+   template< ArithmeticType T >
+   [[nodiscard]] inline constexpr std::size_t minDimension( const Bounds3Impl< T > &B ) noexcept
+   {
+      return minDimension( abs( diagonal( B ) ) );
+   }
 
 }
 

@@ -28,7 +28,8 @@
 #include "SkinnedMesh.hpp"
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 

@@ -28,23 +28,23 @@
 #ifndef CRIMILD_RENDERER_RENDER_STATE_
 #define CRIMILD_RENDERER_RENDER_STATE_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class [[deprecated]] RenderState : public SharedObject {
-    protected:
-        RenderState( bool enabled );
+   class [[deprecated]] RenderState : public SharedObject {
+   protected:
+      RenderState( bool enabled );
 
-    public:
-        virtual ~RenderState( void );
+   public:
+      virtual ~RenderState( void );
 
-        void setEnabled( bool value ) { _enabled = value; }
-        bool isEnabled( void ) const { return _enabled; }
+      void setEnabled( bool value ) { _enabled = value; }
+      bool isEnabled( void ) const { return _enabled; }
 
-    private:
-        bool _enabled;
-    };
+   private:
+      bool _enabled;
+   };
 
 }
 
