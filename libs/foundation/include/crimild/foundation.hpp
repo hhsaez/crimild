@@ -44,7 +44,7 @@
 #include "crimild/foundation/containers/Queue.hpp"
 #include "crimild/foundation/containers/Set.hpp"
 #include "crimild/foundation/containers/Stack.hpp"
-#include "crimild/foundation/fileSystem/FilePath.hpp"
+#include "crimild/foundation/filesystem/FilePath.hpp"
 #include "crimild/foundation/log/Log.hpp"
 #include "crimild/foundation/log/LogOutputHandler.hpp"
 #include "crimild/foundation/memory/Memory.hpp"
