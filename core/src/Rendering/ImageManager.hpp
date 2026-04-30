@@ -28,37 +28,37 @@
 #ifndef CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
 #define CRIMILD_CORE_RENDERING_IMAGE_MANAGER_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class Image;
+   class Image;
 
-    /**
-            \todo Enable cache using CachePolicy
- */
-    class ImageManager : public SharedObject,
-                         public DynamicSingleton< ImageManager > {
+   /**
+           \todo Enable cache using CachePolicy
+*/
+   class ImageManager : public SharedObject,
+                        public DynamicSingleton< ImageManager > {
 
-    public:
-        struct ImageDescriptor {
-            FilePath filePath;
-            CachePolicy cachePolicy;
-            Bool hdr = false;
-        };
+   public:
+      struct ImageDescriptor {
+         FilePath filePath;
+         CachePolicy cachePolicy;
+         Bool hdr = false;
+      };
 
-        struct CubemapDescriptor {
-            Array< FilePath > filePaths;
-        };
+      struct CubemapDescriptor {
+         Array< FilePath > filePaths;
+      };
 
-    public:
-        ImageManager( void ) = default;
-        virtual ~ImageManager( void ) = default;
+   public:
+      ImageManager( void ) = default;
+      virtual ~ImageManager( void ) = default;
 
-    public:
-        virtual SharedPointer< Image > loadImage( ImageDescriptor const &descriptor ) const noexcept;
-        virtual SharedPointer< Image > loadCubemap( CubemapDescriptor const &descriptor ) const noexcept;
-    };
+   public:
+      virtual SharedPointer< Image > loadImage( ImageDescriptor const &descriptor ) const noexcept;
+      virtual SharedPointer< Image > loadCubemap( CubemapDescriptor const &descriptor ) const noexcept;
+   };
 
 }
 

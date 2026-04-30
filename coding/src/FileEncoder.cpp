@@ -27,35 +27,35 @@
 
 #include "FileEncoder.hpp"
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
 
 crimild::Bool FileEncoder::write( std::string filePath )
 {
-    return write( std::filesystem::path { filePath } );
+   return write( std::filesystem::path { filePath } );
 }
 
 crimild::Bool FileEncoder::write( const std::filesystem::path &path ) noexcept
 {
-    auto bytes = getBytes();
-    crimild::Size size = bytes.size();
-    if ( size == 0 ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Not enough data to write" );
-        return false;
-    }
+   auto bytes = getBytes();
+   crimild::Size size = bytes.size();
+   if ( size == 0 ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Not enough data to write" );
+      return false;
+   }
 
-    FILE *file = fopen( path.string().c_str(), "wb" );
-    if ( file == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
-        return false;
-    }
+   FILE *file = fopen( path.string().c_str(), "wb" );
+   if ( file == nullptr ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
+      return false;
+   }
 
-    fwrite( &size, 1, sizeof( crimild::Size ), file );
-    fwrite( bytes.getData(), 1, size, file );
+   fwrite( &size, 1, sizeof( crimild::Size ), file );
+   fwrite( bytes.getData(), 1, size, file );
 
-    fclose( file );
+   fclose( file );
 
-    return true;
+   return true;
 }

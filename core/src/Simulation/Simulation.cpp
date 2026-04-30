@@ -28,7 +28,6 @@
 #include "Simulation.hpp"
 
 #include "Concurrency/Async.hpp"
-#include "Crimild_Foundation.hpp"
 #include "FileSystem.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "SceneGraph/Camera.hpp"
@@ -47,169 +46,171 @@
 #include "Visitors/UpdateRenderState.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
+#include <crimild/foundation.hpp>
+
 using namespace crimild;
 
 #ifndef CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
-    #define CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE 1
+   #define CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE 1
 #endif
 
 void Simulation::start( void ) noexcept
 {
-    CRIMILD_LOG_INFO( "Initializing simulation ", getName() );
+   CRIMILD_LOG_INFO( "Initializing simulation ", getName() );
 
-    Version version;
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
+   Version version;
+   Log::info( CRIMILD_CURRENT_CLASS_NAME, version.getDescription() );
 
-    const auto ret = handle( Event { .type = Event::Type::SIMULATION_START } );
-    if ( ret.type == Event::Type::TERMINATE ) {
-        return;
-    }
+   const auto ret = handle( Event { .type = Event::Type::SIMULATION_START } );
+   if ( ret.type == Event::Type::TERMINATE ) {
+      return;
+   }
 
-    m_running = true;
+   m_running = true;
 }
 
 bool Simulation::step( void ) noexcept
 {
-    if ( !m_running ) {
-        return true;
-    }
+   if ( !m_running ) {
+      return true;
+   }
 
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
-    constexpr auto MIN_FRAME_TIME = std::chrono::milliseconds( 16 );
-    using clock = std::chrono::high_resolution_clock;
-    auto frameStartTime = clock::now();
+   constexpr auto MIN_FRAME_TIME = std::chrono::milliseconds( 16 );
+   using clock = std::chrono::high_resolution_clock;
+   auto frameStartTime = clock::now();
 #endif
 
-    auto scene = getScene();
+   auto scene = getScene();
 
-    _simulationClock.tick();
+   _simulationClock.tick();
 
-    if ( handle( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
-        return false;
-    }
+   if ( handle( Event { .type = Event::Type::SIMULATION_UPDATE } ).type == Event::Type::TERMINATE ) {
+      return false;
+   }
 
-    if ( handle( Event { .type = Event::Type::SIMULATION_RENDER } ).type == Event::Type::TERMINATE ) {
-        return false;
-    }
+   if ( handle( Event { .type = Event::Type::SIMULATION_RENDER } ).type == Event::Type::TERMINATE ) {
+      return false;
+   }
 
-    if ( scene != nullptr ) {
-        scene->perform( UpdateComponents( _simulationClock ) );
-        scene->perform( UpdateWorldState() );
-    }
+   if ( scene != nullptr ) {
+      scene->perform( UpdateComponents( _simulationClock ) );
+      scene->perform( UpdateWorldState() );
+   }
 
 #if CRIMILD_SIMULATION_FORCE_SLEEP_ON_UPDATE
-    auto frameEndTime = clock::now();
-    auto delta = frameEndTime - frameStartTime;
-    auto t = std::max(
-        Int64( 1 ),
-        Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() )
-    );
-    std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
+   auto frameEndTime = clock::now();
+   auto delta = frameEndTime - frameStartTime;
+   auto t = std::max(
+      Int64( 1 ),
+      Int64( ( MIN_FRAME_TIME - std::chrono::duration_cast< std::chrono::nanoseconds >( delta ) ).count() )
+   );
+   std::this_thread::sleep_for( std::chrono::nanoseconds( t ) );
 #endif
 
-    return true;
+   return true;
 }
 
 void Simulation::stop( void ) noexcept
 {
-    setScene( nullptr );
+   setScene( nullptr );
 
-    _assetManager.clear( true );
+   _assetManager.clear( true );
 
 #ifdef CRIMILD_PLATFORM_EMSCRIPTEN
-    emscripten_cancel_main_loop();
+   emscripten_cancel_main_loop();
 #endif
 
-    handle( Event { .type = Event::Type::SIMULATION_STOP } );
+   handle( Event { .type = Event::Type::SIMULATION_STOP } );
 
-    m_running = false;
+   m_running = false;
 }
 
 Event Simulation::handle( const Event &e ) noexcept
 {
-    _input.handle( e );
+   _input.handle( e );
 
-    switch ( e.type ) {
-        case Event::Type::WINDOW_RESIZE: {
-            // Real aspect = e.extent.width / e.extent.height;
-            // if ( getMainCamera() != nullptr ) {
-            //     getMainCamera()->setAspectRatio( aspect );
-            // }
-            break;
-        }
+   switch ( e.type ) {
+      case Event::Type::WINDOW_RESIZE: {
+         // Real aspect = e.extent.width / e.extent.height;
+         // if ( getMainCamera() != nullptr ) {
+         //     getMainCamera()->setAspectRatio( aspect );
+         // }
+         break;
+      }
 
-        case Event::Type::TICK: {
-            if ( !step() ) {
-                return Event { .type = Event::Type::TERMINATE };
-            }
-            break;
-        }
+      case Event::Type::TICK: {
+         if ( !step() ) {
+            return Event { .type = Event::Type::TERMINATE };
+         }
+         break;
+      }
 
-        case Event::Type::MOUSE_CLICK: {
-            // if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
-            //     if ( auto scene = getScene() ) {
-            //         if ( auto camera = Camera::getMainCamera() ) {
-            //             auto x = e.button.npos.x;
-            //             auto y = e.button.npos.y;
-            //             Ray3 R;
-            //             if ( camera->getPickRay( x, y, R ) ) {
-            //                 Picking::Results res;
-            //                 scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
-            //                 if ( res.hasResults() ) {
-            //                     auto node = res.getBestCandidate();
-            //                     return Event {
-            //                         .type = Event::Type::NODE_SELECTED,
-            //                         .node = node,
-            //                     };
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     return Event {
-            //         .type = Event::Type::NODE_SELECTED,
-            //         .node = nullptr,
-            //     };
-            // }
-            break;
-        }
+      case Event::Type::MOUSE_CLICK: {
+         // if ( e.button.button == CRIMILD_INPUT_MOUSE_BUTTON_LEFT ) {
+         //     if ( auto scene = getScene() ) {
+         //         if ( auto camera = Camera::getMainCamera() ) {
+         //             auto x = e.button.npos.x;
+         //             auto y = e.button.npos.y;
+         //             Ray3 R;
+         //             if ( camera->getPickRay( x, y, R ) ) {
+         //                 Picking::Results res;
+         //                 scene->perform( Picking( R, res, []( auto node ) { return node->getClassName() == Geometry::__CLASS_NAME; } ) );
+         //                 if ( res.hasResults() ) {
+         //                     auto node = res.getBestCandidate();
+         //                     return Event {
+         //                         .type = Event::Type::NODE_SELECTED,
+         //                         .node = node,
+         //                     };
+         //                 }
+         //             }
+         //         }
+         //     }
+         //     return Event {
+         //         .type = Event::Type::NODE_SELECTED,
+         //         .node = nullptr,
+         //     };
+         // }
+         break;
+      }
 
-        default:
-            break;
-    }
+      default:
+         break;
+   }
 
-    return e;
+   return e;
 }
 
 void Simulation::setScene( SharedPointer< Node > const &scene )
 {
-    // TODO: Ensure that we always have a valid scene
-    // If input scene is null, create a NullNode
-    // This way we avoid a lot of checks of wheter the scene is valid or not
-    // (same for main camera?)
-    _scene = scene;
+   // TODO: Ensure that we always have a valid scene
+   // If input scene is null, create a NullNode
+   // This way we avoid a lot of checks of wheter the scene is valid or not
+   // (same for main camera?)
+   _scene = scene;
 
-    m_cameras.clear();
-    m_mainCamera = nullptr;
+   m_cameras.clear();
+   m_mainCamera = nullptr;
 
-    if ( _scene != nullptr ) {
-        // fetch all cameras from the scene
-        FetchCameras fetchCameras;
-        _scene->perform( fetchCameras );
-        fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
-            if ( m_mainCamera == nullptr || camera->isMainCamera() ) {
-                m_mainCamera = camera;
-            }
-            m_cameras.push_back( camera );
-        } );
+   if ( _scene != nullptr ) {
+      // fetch all cameras from the scene
+      FetchCameras fetchCameras;
+      _scene->perform( fetchCameras );
+      fetchCameras.forEachCamera( [ & ]( Camera *camera ) {
+         if ( m_mainCamera == nullptr || camera->isMainCamera() ) {
+            m_mainCamera = camera;
+         }
+         m_cameras.push_back( camera );
+      } );
 
-        _scene->perform( UpdateWorldState() );
-        _scene->perform( StartComponents() );
-    }
+      _scene->perform( UpdateWorldState() );
+      _scene->perform( StartComponents() );
+   }
 }
 
 void Simulation::forEachCamera( std::function< void( Camera * ) > callback )
 {
-    for ( auto camera : m_cameras ) {
-        callback( camera );
-    }
+   for ( auto camera : m_cameras ) {
+      callback( camera );
+   }
 }

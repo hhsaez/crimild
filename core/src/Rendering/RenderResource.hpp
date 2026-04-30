@@ -28,103 +28,103 @@
 #ifndef CRIMILD_RENDERING_RENDER_RESOURCE_
 #define CRIMILD_RENDERING_RENDER_RESOURCE_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    template< typename RenderResourceType >
-    class [[deprecated]] RenderResourceManager {
-    public:
-        virtual ~RenderResourceManager( void ) noexcept
-        {
-            clear();
-        }
+   template< typename RenderResourceType >
+   class [[deprecated]] RenderResourceManager {
+   public:
+      virtual ~RenderResourceManager( void ) noexcept
+      {
+         clear();
+      }
 
-        virtual crimild::Bool bind( RenderResourceType *resource ) noexcept
-        {
-            m_resources.insert( resource );
-            return true;
-        }
+      virtual crimild::Bool bind( RenderResourceType *resource ) noexcept
+      {
+         m_resources.insert( resource );
+         return true;
+      }
 
-        virtual crimild::Bool unbind( RenderResourceType *resource ) noexcept
-        {
-            m_resources.remove( resource );
-            return true;
-        }
+      virtual crimild::Bool unbind( RenderResourceType *resource ) noexcept
+      {
+         m_resources.remove( resource );
+         return true;
+      }
 
-        virtual void clear( void ) noexcept
-        {
-            m_resources.each(
-                [ this ]( RenderResourceType *resource ) {
-                    unbind( resource );
-                }
-            );
-            m_resources.clear();
-        }
-
-        inline RenderResourceType *first( void ) noexcept
-        {
-            return m_resources.first();
-        }
-
-    private:
-        Set< RenderResourceType * > m_resources;
-    };
-
-    // TODO: deprecate this in favor of keeping track of renderables in managers and
-    // using messaging for bind/update/unbind
-    template< typename T >
-    class [[deprecated]] RenderResourceImpl {
-    public:
-        virtual ~RenderResourceImpl( void ) noexcept
-        {
-            if ( manager != nullptr ) {
-                manager->unbind( static_cast< T * >( this ) );
+      virtual void clear( void ) noexcept
+      {
+         m_resources.each(
+            [ this ]( RenderResourceType *resource ) {
+               unbind( resource );
             }
-        }
+         );
+         m_resources.clear();
+      }
 
-        RenderResourceManager< T > *manager = nullptr;
-    };
+      inline RenderResourceType *first( void ) noexcept
+      {
+         return m_resources.first();
+      }
 
-    template< typename RenderResourceType >
-    class [[deprecated]] RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType > > {
-    private:
-        using Builder = std::function< SharedPointer< RenderResourceType >( void ) >;
+   private:
+      Set< RenderResourceType * > m_resources;
+   };
 
-    public:
-        RenderResourceLibrary( void ) noexcept { }
-        virtual ~RenderResourceLibrary( void ) = default;
+   // TODO: deprecate this in favor of keeping track of renderables in managers and
+   // using messaging for bind/update/unbind
+   template< typename T >
+   class [[deprecated]] RenderResourceImpl {
+   public:
+      virtual ~RenderResourceImpl( void ) noexcept
+      {
+         if ( manager != nullptr ) {
+            manager->unbind( static_cast< T * >( this ) );
+         }
+      }
 
-        void add( std::string name, SharedPointer< RenderResourceType > const &shader )
-        {
-            m_resources[ name ] = shader;
-        }
+      RenderResourceManager< T > *manager = nullptr;
+   };
 
-        void add( std::string name, Builder const &builder )
-        {
-            m_builders[ name ] = builder;
-        }
+   template< typename RenderResourceType >
+   class [[deprecated]] RenderResourceLibrary : public StaticSingleton< RenderResourceLibrary< RenderResourceType > > {
+   private:
+      using Builder = std::function< SharedPointer< RenderResourceType >( void ) >;
 
-        RenderResourceType *get( std::string name )
-        {
-            if ( !m_resources.contains( name ) && m_builders.contains( name ) ) {
-                // Lazy create and add a new resource instance
-                // if the resource does not exist but there's a builder registered
-                add( name, m_builders[ name ]() );
-            }
+   public:
+      RenderResourceLibrary( void ) noexcept { }
+      virtual ~RenderResourceLibrary( void ) = default;
 
-            // Check again, because we may have just added the resource
-            if ( !m_resources.contains( name ) ) {
-                return nullptr;
-            }
+      void add( std::string name, SharedPointer< RenderResourceType > const &shader )
+      {
+         m_resources[ name ] = shader;
+      }
 
-            return crimild::get_ptr( m_resources[ name ] );
-        }
+      void add( std::string name, Builder const &builder )
+      {
+         m_builders[ name ] = builder;
+      }
 
-    private:
-        Map< std::string, SharedPointer< RenderResourceType > > m_resources;
-        Map< std::string, Builder > m_builders;
-    };
+      RenderResourceType *get( std::string name )
+      {
+         if ( !m_resources.contains( name ) && m_builders.contains( name ) ) {
+            // Lazy create and add a new resource instance
+            // if the resource does not exist but there's a builder registered
+            add( name, m_builders[ name ]() );
+         }
+
+         // Check again, because we may have just added the resource
+         if ( !m_resources.contains( name ) ) {
+            return nullptr;
+         }
+
+         return crimild::get_ptr( m_resources[ name ] );
+      }
+
+   private:
+      Map< std::string, SharedPointer< RenderResourceType > > m_resources;
+      Map< std::string, Builder > m_builders;
+   };
 
 }
 

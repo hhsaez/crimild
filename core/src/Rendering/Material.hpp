@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_MATERIAL_
 
 #include "ColorMaskState.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Entity/Entity.hpp"
 #include "ShaderProgram.hpp"
 #include "Texture.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

@@ -53,7 +53,7 @@ if(WIN32)
 endif()
 
 # Add subdirectories
-add_subdirectory(foundation)
+add_subdirectory(libs/foundation)
 add_subdirectory(mathematics)
 add_subdirectory(coding)
 add_subdirectory(core)

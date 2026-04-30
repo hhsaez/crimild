@@ -2,8 +2,8 @@
 #include "TextDecoder.hpp"
 #include "TextEncoder.hpp"
 
-#include <Crimild_Foundation.hpp>
 #include <Crimild_Mathematics.hpp>
+#include <crimild/foundation.hpp>
 #include <gtest/gtest.h>
 
 namespace crimild {

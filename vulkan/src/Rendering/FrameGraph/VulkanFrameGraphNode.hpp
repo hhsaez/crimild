@@ -28,25 +28,25 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_NODE
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild::vulkan::framegraph {
 
-    class Node
-        : public SharedObject,
-          public Named {
-    protected:
-        Node( std::string name )
-            : Named( name )
-        {
-            // no-op
-        }
+   class Node
+      : public SharedObject,
+        public Named {
+   protected:
+      Node( std::string name )
+         : Named( name )
+      {
+         // no-op
+      }
 
-    public:
-        virtual ~Node( void ) = default;
+   public:
+      virtual ~Node( void ) = default;
 
-        virtual void execute( void ) noexcept = 0;
-    };
+      virtual void execute( void ) noexcept = 0;
+   };
 
 }
 

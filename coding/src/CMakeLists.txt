@@ -40,7 +40,7 @@ target_compile_features( crimild_coding PUBLIC cxx_std_20 )
 
 target_link_libraries(
     crimild_coding
-    PUBLIC Crimild::Foundation
+    PUBLIC crimild::foundation
     PUBLIC Crimild::Mathematics
 )
 

@@ -29,177 +29,178 @@
 #define CRIMILD_CORE_CODING_DECODER_
 
 #include "Codable.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
-//#include "Rendering/Extent.hpp"
-//#include "Rendering/Format.hpp"
-//#include "Rendering/VertexAttribute.hpp"
+
+#include <crimild/foundation.hpp>
+// #include "Rendering/Extent.hpp"
+// #include "Rendering/Format.hpp"
+// #include "Rendering/VertexAttribute.hpp"
 
 namespace crimild {
 
-    namespace coding {
+   namespace coding {
 
-        class Decoder : public SharedObject {
-        protected:
-            Decoder( void ) = default;
+      class Decoder : public SharedObject {
+      protected:
+         Decoder( void ) = default;
 
-        public:
-            virtual ~Decoder( void ) = default;
+      public:
+         virtual ~Decoder( void ) = default;
 
-            const Version &getVersion( void ) const { return _version; }
-            void setVersion( const Version &version ) { _version = version; }
+         const Version &getVersion( void ) const { return _version; }
+         void setVersion( const Version &version ) { _version = version; }
 
-        private:
-            Version _version;
+      private:
+         Version _version;
 
-        public:
-            virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
+      public:
+         virtual crimild::Bool decode( std::string key, SharedPointer< coding::Codable > &codable ) = 0;
 
-            Bool decode( std::string key, Version &version ) noexcept
-            {
-                uint32_t major, minor, patch;
-                decode( key + "_major", major );
-                decode( key + "_minor", minor );
-                decode( key + "_patch", patch );
-                version = Version( major, minor, patch );
-                return true;
+         Bool decode( std::string key, Version &version ) noexcept
+         {
+            uint32_t major, minor, patch;
+            decode( key + "_major", major );
+            decode( key + "_minor", minor );
+            decode( key + "_patch", patch );
+            version = Version( major, minor, patch );
+            return true;
+         }
+
+         template< class T >
+         crimild::Bool decode( std::string key, SharedPointer< T > &obj )
+         {
+            auto codable = crimild::cast_ptr< coding::Codable >( obj );
+            decode( key, codable );
+            if ( codable == nullptr ) {
+               return false;
             }
 
-            template< class T >
-            crimild::Bool decode( std::string key, SharedPointer< T > &obj )
-            {
-                auto codable = crimild::cast_ptr< coding::Codable >( obj );
-                decode( key, codable );
-                if ( codable == nullptr ) {
-                    return false;
-                }
+            obj = crimild::cast_ptr< T >( codable );
+            return true;
+         }
 
-                obj = crimild::cast_ptr< T >( codable );
-                return true;
+         virtual crimild::Bool decode( std::string key, std::string &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Size &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Int16 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Int32 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::UInt32 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Bool &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Real32 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::ColorRGB &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::ColorRGBA &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Point2f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Point3f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
+         virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
+         // virtual crimild::Bool decode( std::string key, Format &value ) = 0;
+         // virtual crimild::Bool decode( std::string key, Extent2D &value ) = 0;
+         // virtual crimild::Bool decode( std::string key, Extent3D &value ) = 0;
+
+         // virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
+         // {
+         //     Int32 name;
+         //     decode( key + "_name", name );
+         //     attr.name = VertexAttribute::Name( name );
+
+         //     decode( key + "_format", attr.format );
+         //     decode( key + "_offset", attr.offset );
+         //     return true;
+         // }
+
+         virtual bool decode( std::string_view key, std::vector< std::byte > & ) = 0;
+
+         virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) = 0;
+         virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) = 0;
+
+         template< typename T >
+         crimild::Bool decode( std::string key, Array< SharedPointer< T > > &value )
+         {
+            auto count = beginDecodingArray( key );
+
+            value.clear();
+            for ( crimild::Size i = 0; i < count; i++ ) {
+               auto v = SharedPointer< Codable >();
+               auto itemKey = beginDecodingArrayElement( key, i );
+               if ( decode( itemKey, v ) ) {
+                  value.add( crimild::cast_ptr< T >( v ) );
+               }
+               endDecodingArrayElement( key, i );
             }
 
-            virtual crimild::Bool decode( std::string key, std::string &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Size &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::UInt8 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::UInt16 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Int16 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Int32 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::UInt32 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Bool &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Real32 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Real64 &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::ColorRGB &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::ColorRGBA &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Point2f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Point3f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Vector2f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Vector3f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Vector4f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Matrix3f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Matrix4f &value ) = 0;
-            virtual crimild::Bool decode( std::string key, crimild::Quaternion &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Transformation &value ) = 0;
-            // virtual crimild::Bool decode( std::string key, Format &value ) = 0;
-            // virtual crimild::Bool decode( std::string key, Extent2D &value ) = 0;
-            // virtual crimild::Bool decode( std::string key, Extent3D &value ) = 0;
+            endDecodingArray( key );
 
-            // virtual crimild::Bool decode( std::string key, VertexAttribute &attr )
-            // {
-            //     Int32 name;
-            //     decode( key + "_name", name );
-            //     attr.name = VertexAttribute::Name( name );
+            return true;
+         }
 
-            //     decode( key + "_format", attr.format );
-            //     decode( key + "_offset", attr.offset );
-            //     return true;
-            // }
+         template< typename T >
+         crimild::Bool decode( std::string key, Array< T > &value )
+         {
+            auto count = beginDecodingArray( key );
 
-            virtual bool decode( std::string_view key, std::vector< std::byte > & ) = 0;
-
-            virtual crimild::Bool decode( std::string key, ByteArray &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< crimild::Real32 > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< Vector3f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< Vector4f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< Matrix3f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< Matrix4f > &value ) = 0;
-            virtual crimild::Bool decode( std::string key, Array< Quaternion > &value ) = 0;
-
-            template< typename T >
-            crimild::Bool decode( std::string key, Array< SharedPointer< T > > &value )
-            {
-                auto count = beginDecodingArray( key );
-
-                value.clear();
-                for ( crimild::Size i = 0; i < count; i++ ) {
-                    auto v = SharedPointer< Codable >();
-                    auto itemKey = beginDecodingArrayElement( key, i );
-                    if ( decode( itemKey, v ) ) {
-                        value.add( crimild::cast_ptr< T >( v ) );
-                    }
-                    endDecodingArrayElement( key, i );
-                }
-
-                endDecodingArray( key );
-
-                return true;
+            value.resize( count );
+            for ( crimild::Size i = 0; i < count; i++ ) {
+               auto v = T();
+               auto itemKey = beginDecodingArrayElement( key, i );
+               decode( itemKey, v );
+               endDecodingArrayElement( key, i );
+               value[ i ] = v;
             }
 
-            template< typename T >
-            crimild::Bool decode( std::string key, Array< T > &value )
-            {
-                auto count = beginDecodingArray( key );
+            endDecodingArray( key );
 
-                value.resize( count );
-                for ( crimild::Size i = 0; i < count; i++ ) {
-                    auto v = T();
-                    auto itemKey = beginDecodingArrayElement( key, i );
-                    decode( itemKey, v );
-                    endDecodingArrayElement( key, i );
-                    value[ i ] = v;
-                }
+            return true;
+         }
 
-                endDecodingArray( key );
+         template< typename EnumType >
+         crimild::Bool decodeEnum( std::string key, EnumType &value )
+         {
+            Int32 encoded;
+            decode( key, encoded );
+            value = EnumType( encoded );
+            return true;
+         }
 
-                return true;
-            }
+         inline crimild::Size getObjectCount( void ) const
+         {
+            return _roots.size();
+         }
 
-            template< typename EnumType >
-            crimild::Bool decodeEnum( std::string key, EnumType &value )
-            {
-                Int32 encoded;
-                decode( key, encoded );
-                value = EnumType( encoded );
-                return true;
-            }
+         template< class T >
+         inline SharedPointer< T > getObjectAt( crimild::Size index )
+         {
+            return crimild::dynamic_cast_ptr< T >( _roots[ index ] );
+         }
 
-            inline crimild::Size getObjectCount( void ) const
-            {
-                return _roots.size();
-            }
+      protected:
+         virtual crimild::Size beginDecodingArray( std::string key ) = 0;
+         virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) = 0;
+         virtual void endDecodingArrayElement( std::string key, crimild::Size index ) = 0;
+         virtual void endDecodingArray( std::string key ) = 0;
 
-            template< class T >
-            inline SharedPointer< T > getObjectAt( crimild::Size index )
-            {
-                return crimild::dynamic_cast_ptr< T >( _roots[ index ] );
-            }
+      protected:
+         inline void addRootObject( SharedPointer< SharedObject > const &obj ) noexcept
+         {
+            _roots.add( obj );
+         }
 
-        protected:
-            virtual crimild::Size beginDecodingArray( std::string key ) = 0;
-            virtual std::string beginDecodingArrayElement( std::string key, crimild::Size index ) = 0;
-            virtual void endDecodingArrayElement( std::string key, crimild::Size index ) = 0;
-            virtual void endDecodingArray( std::string key ) = 0;
+      private:
+         Array< SharedPointer< SharedObject > > _roots;
+      };
 
-        protected:
-            inline void addRootObject( SharedPointer< SharedObject > const &obj ) noexcept
-            {
-                _roots.add( obj );
-            }
-
-        private:
-            Array< SharedPointer< SharedObject > > _roots;
-        };
-
-    }
+   }
 
 }
 

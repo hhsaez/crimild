@@ -27,8 +27,7 @@
 
 #include "NavigationMeshOBJ.hpp"
 
-#include "Crimild_Foundation.hpp"
-
+#include <crimild/foundation.hpp>
 #include <fstream>
 #include <map>
 #include <sstream>

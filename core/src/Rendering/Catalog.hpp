@@ -28,229 +28,228 @@
 #ifndef CRIMILD_RENDERING_CATALOG_
 #define CRIMILD_RENDERING_CATALOG_
 
-#include "Crimild_Foundation.hpp"
-
+#include <crimild/foundation.hpp>
 #include <functional>
 #include <list>
 #include <memory>
 
 namespace crimild {
 
-    class ShaderProgram;
-    class ShaderLocation;
+   class ShaderProgram;
+   class ShaderLocation;
 
-    /*
-      \brief Usage hint
-      \todo Move to policy?
-    */
-    enum class ResourceUsage {
-        Static, //< Data is modified once and never changed
-        Dynamic //< Data can be modified multiple times
-    };
+   /*
+     \brief Usage hint
+     \todo Move to policy?
+   */
+   enum class ResourceUsage {
+      Static, //< Data is modified once and never changed
+      Dynamic //< Data can be modified multiple times
+   };
 
-    template< class RESOURCE_TYPE >
-    class [[deprecated]] Catalog : public SharedObject {
-    public:
-        /**
-                RESOURCE_TYPE must be derived from SharedObject
+   template< class RESOURCE_TYPE >
+   class [[deprecated]] Catalog : public SharedObject {
+   public:
+      /**
+              RESOURCE_TYPE must be derived from SharedObject
 
-    \deprecated
-        */
-        class Resource : public NonCopyable {
-        public:
-            Resource( void )
-                : _catalog( nullptr ),
-                  _catalogId( -1 )
-            {
+  \deprecated
+      */
+      class Resource : public NonCopyable {
+      public:
+         Resource( void )
+            : _catalog( nullptr ),
+              _catalogId( -1 )
+         {
+         }
+
+         virtual ~Resource( void )
+         {
+            unload();
+         }
+
+         Catalog< RESOURCE_TYPE > *getCatalog( void ) { return _catalog; }
+
+         int getCatalogId( void ) const { return _catalogId; }
+
+         void setCatalogInfo( Catalog< RESOURCE_TYPE > *catalog, int id )
+         {
+            _catalog = catalog;
+            _catalogId = id;
+         }
+
+         void unload( void )
+         {
+            if ( _catalog != nullptr ) {
+               _catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
+               _catalog = nullptr;
             }
+         }
 
-            virtual ~Resource( void )
-            {
-                unload();
-            }
+         virtual void onBind( void ) { }
 
-            Catalog< RESOURCE_TYPE > *getCatalog( void ) { return _catalog; }
+         virtual void onUnbind( void ) { }
 
-            int getCatalogId( void ) const { return _catalogId; }
+      private:
+         Catalog< RESOURCE_TYPE > *_catalog = nullptr;
+         int _catalogId;
 
-            void setCatalogInfo( Catalog< RESOURCE_TYPE > *catalog, int id )
-            {
-                _catalog = catalog;
-                _catalogId = id;
-            }
+         /**
+            \name Usage
+         */
+         //@{
 
-            void unload( void )
-            {
-                if ( _catalog != nullptr ) {
-                    _catalog->unload( static_cast< RESOURCE_TYPE * >( this ) );
-                    _catalog = nullptr;
-                }
-            }
+      public:
+         inline void setUsage( ResourceUsage value ) { m_usage = value; }
+         inline ResourceUsage getUsage( void ) const { return m_usage; }
 
-            virtual void onBind( void ) { }
+      private:
+         ResourceUsage m_usage = ResourceUsage::Static;
 
-            virtual void onUnbind( void ) { }
+         //@}
+      };
 
-        private:
-            Catalog< RESOURCE_TYPE > *_catalog = nullptr;
-            int _catalogId;
+   public:
+      Catalog( void )
+      {
+      }
 
-            /**
-               \name Usage
-            */
-            //@{
+      virtual ~Catalog( void )
+      {
+         unloadAll();
+         cleanup();
+      }
 
-        public:
-            inline void setUsage( ResourceUsage value ) { m_usage = value; }
-            inline ResourceUsage getUsage( void ) const { return m_usage; }
+      crimild::Bool hasResources( void ) const
+      {
+         return _resources.size() > 0;
+      }
 
-        private:
-            ResourceUsage m_usage = ResourceUsage::Static;
+      inline crimild::Size getResourceCount( void ) const
+      {
+         return _resources.size();
+      }
 
-            //@}
-        };
+      inline crimild::Size getActiveResourceCount( void ) const
+      {
+         return _activeResourceCount;
+      }
 
-    public:
-        Catalog( void )
-        {
-        }
+      virtual int getNextResourceId( RESOURCE_TYPE *resource )
+      {
+         return _resources.size();
+      }
 
-        virtual ~Catalog( void )
-        {
-            unloadAll();
-            cleanup();
-        }
+      virtual int getDefaultIdValue( void )
+      {
+         return -1;
+      }
 
-        crimild::Bool hasResources( void ) const
-        {
-            return _resources.size() > 0;
-        }
+      virtual void bind( RESOURCE_TYPE *resource )
+      {
+         bindResource( resource );
+      }
 
-        inline crimild::Size getResourceCount( void ) const
-        {
-            return _resources.size();
-        }
+      virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
+      {
+         bindResource( resource );
+      }
 
-        inline crimild::Size getActiveResourceCount( void ) const
-        {
-            return _activeResourceCount;
-        }
+      virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
+      {
+         bindResource( resource );
+      }
 
-        virtual int getNextResourceId( RESOURCE_TYPE *resource )
-        {
-            return _resources.size();
-        }
+      virtual void unbind( RESOURCE_TYPE *resource )
+      {
+         unbindResource( resource );
+      }
 
-        virtual int getDefaultIdValue( void )
-        {
-            return -1;
-        }
+      virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
+      {
+         unbindResource( resource );
+      }
 
-        virtual void bind( RESOURCE_TYPE *resource )
-        {
-            bindResource( resource );
-        }
+      virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
+      {
+         unbindResource( resource );
+      }
 
-        virtual void bind( ShaderProgram *program, RESOURCE_TYPE *resource )
-        {
-            bindResource( resource );
-        }
+      virtual void update( RESOURCE_TYPE *resource )
+      {
+      }
 
-        virtual void bind( ShaderLocation *location, RESOURCE_TYPE *resource )
-        {
-            bindResource( resource );
-        }
+      virtual void load( RESOURCE_TYPE *resource )
+      {
+         /*
+                     resource->setCatalogInfo( this, getNextResourceId( resource ) );
+                     _resources.push_back( resource );
+         */
+      }
 
-        virtual void unbind( RESOURCE_TYPE *resource )
-        {
-            unbindResource( resource );
-        }
+      virtual void unload( RESOURCE_TYPE *resource )
+      {
+         /*
+                     resource->setCatalogInfo( nullptr, getDefaultIdValue() );
+         _resources.remove( resource );
+         */
+      }
 
-        virtual void unbind( ShaderProgram *program, RESOURCE_TYPE *resource )
-        {
-            unbindResource( resource );
-        }
+      virtual void unloadAll( void )
+      {
+         /*
+         auto rs = _resources;
+                     for ( auto resource : rs ) {
+             unload( resource );
+                     }
 
-        virtual void unbind( ShaderLocation *location, RESOURCE_TYPE *resource )
-        {
-            unbindResource( resource );
-        }
+         cleanup();
 
-        virtual void update( RESOURCE_TYPE *resource )
-        {
-        }
+         _resources.clear();
+         */
+      }
 
-        virtual void load( RESOURCE_TYPE *resource )
-        {
-            /*
-                        resource->setCatalogInfo( this, getNextResourceId( resource ) );
-                        _resources.push_back( resource );
-            */
-        }
+      virtual void cleanup( void )
+      {
+         // no-op
+      }
 
-        virtual void unload( RESOURCE_TYPE *resource )
-        {
-            /*
-                        resource->setCatalogInfo( nullptr, getDefaultIdValue() );
-            _resources.remove( resource );
-            */
-        }
+      virtual void configure( void )
+      {
+         // no-op
+      }
 
-        virtual void unloadAll( void )
-        {
-            /*
-            auto rs = _resources;
-                        for ( auto resource : rs ) {
-                unload( resource );
-                        }
+   private:
+      void bindResource( RESOURCE_TYPE *resource )
+      {
+         /*
+         if ( resource->getCatalog() == nullptr ) {
+             load( resource );
+         }
 
-            cleanup();
+         resource->onBind();
 
-            _resources.clear();
-            */
-        }
+         _activeResourceCount++;
+         */
+      }
 
-        virtual void cleanup( void )
-        {
-            // no-op
-        }
+      void unbindResource( RESOURCE_TYPE *resource )
+      {
+         /*
+         if ( resource != nullptr ) {
+             resource->onUnbind();
+             if ( _activeResourceCount > 0 ) {
+                 _activeResourceCount--;
+             }
+         }
+         */
+      }
 
-        virtual void configure( void )
-        {
-            // no-op
-        }
-
-    private:
-        void bindResource( RESOURCE_TYPE *resource )
-        {
-            /*
-            if ( resource->getCatalog() == nullptr ) {
-                load( resource );
-            }
-
-            resource->onBind();
-
-            _activeResourceCount++;
-            */
-        }
-
-        void unbindResource( RESOURCE_TYPE *resource )
-        {
-            /*
-            if ( resource != nullptr ) {
-                resource->onUnbind();
-                if ( _activeResourceCount > 0 ) {
-                    _activeResourceCount--;
-                }
-            }
-            */
-        }
-
-    private:
-        std::list< RESOURCE_TYPE * > _resources;
-        std::list< int > _cleanupList;
-        crimild::Size _activeResourceCount = 0;
-    };
+   private:
+      std::list< RESOURCE_TYPE * > _resources;
+      std::list< int > _cleanupList;
+      crimild::Size _activeResourceCount = 0;
+   };
 
 }
 

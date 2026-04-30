@@ -78,7 +78,7 @@ target_include_directories( crimild_core_test PRIVATE . )
 
 target_link_libraries(
     crimild_core_test
-    PRIVATE Crimild::Foundation
+    PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
     PRIVATE Crimild::Coding
     PRIVATE Crimild::Core

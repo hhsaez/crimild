@@ -28,43 +28,43 @@
 #ifndef CRIMILD_VISITORS_UPDATE_RENDER_STATE_
 #define CRIMILD_VISITORS_UPDATE_RENDER_STATE_
 
-#include "Crimild_Foundation.hpp"
 #include "NodeVisitor.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Light.hpp"
 #include "SceneGraph/Node.hpp"
 
+#include <crimild/foundation.hpp>
 #include <functional>
 #include <list>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Skeleton;
+      class Skeleton;
 
-    }
+   }
 
-    class UpdateRenderState : public NodeVisitor {
-    public:
-        UpdateRenderState( void );
-        virtual ~UpdateRenderState( void );
+   class UpdateRenderState : public NodeVisitor {
+   public:
+      UpdateRenderState( void );
+      virtual ~UpdateRenderState( void );
 
-        void setDefaultMaterial( SharedPointer< Material > const &material ) { _defaultMaterial = material; }
-        Material *getDefaultMaterial( void ) { return crimild::get_ptr( _defaultMaterial ); }
+      void setDefaultMaterial( SharedPointer< Material > const &material ) { _defaultMaterial = material; }
+      Material *getDefaultMaterial( void ) { return crimild::get_ptr( _defaultMaterial ); }
 
-        virtual void traverse( Node *node ) override;
+      virtual void traverse( Node *node ) override;
 
-        virtual void visitGroup( Group *group ) override;
-        virtual void visitGeometry( Geometry *geometry ) override;
-        virtual void visitCSGNode( CSGNode *csg ) override;
+      virtual void visitGroup( Group *group ) override;
+      virtual void visitGeometry( Geometry *geometry ) override;
+      virtual void visitCSGNode( CSGNode *csg ) override;
 
-    private:
-        std::list< Light * > _lights;
-        SharedPointer< Material > _defaultMaterial;
-        animation::Skeleton *_skeleton = nullptr;
-    };
+   private:
+      std::list< Light * > _lights;
+      SharedPointer< Material > _defaultMaterial;
+      animation::Skeleton *_skeleton = nullptr;
+   };
 
 }
 

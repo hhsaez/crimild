@@ -29,77 +29,78 @@
 #define CRIMILD_RENDERING_VERTEX_ATTRIBUTE_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Format.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class VertexAttribute : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::VertexAttribute )
+   class VertexAttribute : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::VertexAttribute )
 
-    public:
-        enum Name {
-            UNDEFINED,
-            POSITION,
-            NORMAL,
-            TANGENT,
-            COLOR,
-            TEX_COORD,
-            TEX_COORD_1,
-            TEX_COORD_2,
-            TEX_COORD_3,
-            BLEND_INDICES,
-            BLEND_WEIGHT,
-            SIZE,
+   public:
+      enum Name {
+         UNDEFINED,
+         POSITION,
+         NORMAL,
+         TANGENT,
+         COLOR,
+         TEX_COORD,
+         TEX_COORD_1,
+         TEX_COORD_2,
+         TEX_COORD_3,
+         BLEND_INDICES,
+         BLEND_WEIGHT,
+         SIZE,
 
-            USER_ATTRIBUTE = 100,
-            USER_ATTRIBUTE_0 = USER_ATTRIBUTE + 0,
-            USER_ATTRIBUTE_1 = USER_ATTRIBUTE + 1,
-            USER_ATTRIBUTE_2 = USER_ATTRIBUTE + 2,
-            USER_ATTRIBUTE_3 = USER_ATTRIBUTE + 3,
-            USER_ATTRIBUTE_4 = USER_ATTRIBUTE + 4,
-            USER_ATTRIBUTE_5 = USER_ATTRIBUTE + 5,
-            USER_ATTRIBUTE_6 = USER_ATTRIBUTE + 6,
-            USER_ATTRIBUTE_7 = USER_ATTRIBUTE + 7,
-            USER_ATTRIBUTE_8 = USER_ATTRIBUTE + 8,
-            USER_ATTRIBUTE_9 = USER_ATTRIBUTE + 9,
-            USER_ATTRIBUTE_10 = USER_ATTRIBUTE + 10,
-            USER_ATTRIBUTE_11 = USER_ATTRIBUTE + 11,
-            USER_ATTRIBUTE_12 = USER_ATTRIBUTE + 12,
-            USER_ATTRIBUTE_13 = USER_ATTRIBUTE + 13,
-            USER_ATTRIBUTE_14 = USER_ATTRIBUTE + 14,
-            USER_ATTRIBUTE_15 = USER_ATTRIBUTE + 15,
-            USER_ATTRIBUTE_16 = USER_ATTRIBUTE + 16,
-            USER_ATTRIBUTE_17 = USER_ATTRIBUTE + 17,
-            USER_ATTRIBUTE_18 = USER_ATTRIBUTE + 18,
-            USER_ATTRIBUTE_19 = USER_ATTRIBUTE + 19,
-            USER_ATTRIBUTE_20 = USER_ATTRIBUTE + 20,
-        };
+         USER_ATTRIBUTE = 100,
+         USER_ATTRIBUTE_0 = USER_ATTRIBUTE + 0,
+         USER_ATTRIBUTE_1 = USER_ATTRIBUTE + 1,
+         USER_ATTRIBUTE_2 = USER_ATTRIBUTE + 2,
+         USER_ATTRIBUTE_3 = USER_ATTRIBUTE + 3,
+         USER_ATTRIBUTE_4 = USER_ATTRIBUTE + 4,
+         USER_ATTRIBUTE_5 = USER_ATTRIBUTE + 5,
+         USER_ATTRIBUTE_6 = USER_ATTRIBUTE + 6,
+         USER_ATTRIBUTE_7 = USER_ATTRIBUTE + 7,
+         USER_ATTRIBUTE_8 = USER_ATTRIBUTE + 8,
+         USER_ATTRIBUTE_9 = USER_ATTRIBUTE + 9,
+         USER_ATTRIBUTE_10 = USER_ATTRIBUTE + 10,
+         USER_ATTRIBUTE_11 = USER_ATTRIBUTE + 11,
+         USER_ATTRIBUTE_12 = USER_ATTRIBUTE + 12,
+         USER_ATTRIBUTE_13 = USER_ATTRIBUTE + 13,
+         USER_ATTRIBUTE_14 = USER_ATTRIBUTE + 14,
+         USER_ATTRIBUTE_15 = USER_ATTRIBUTE + 15,
+         USER_ATTRIBUTE_16 = USER_ATTRIBUTE + 16,
+         USER_ATTRIBUTE_17 = USER_ATTRIBUTE + 17,
+         USER_ATTRIBUTE_18 = USER_ATTRIBUTE + 18,
+         USER_ATTRIBUTE_19 = USER_ATTRIBUTE + 19,
+         USER_ATTRIBUTE_20 = USER_ATTRIBUTE + 20,
+      };
 
-        VertexAttribute() = default;
-        VertexAttribute( Name name, Format format, crimild::UInt32 offset = 0 ) noexcept;
-        ~VertexAttribute( void ) = default;
+      VertexAttribute() = default;
+      VertexAttribute( Name name, Format format, crimild::UInt32 offset = 0 ) noexcept;
+      ~VertexAttribute( void ) = default;
 
-        inline Name getName() const noexcept { return m_name; }
-        inline void setName( Name name ) noexcept { m_name = name; }
+      inline Name getName() const noexcept { return m_name; }
+      inline void setName( Name name ) noexcept { m_name = name; }
 
-        inline Format getFormat() const noexcept { return m_format; }
-        inline void setFormat( Format format ) noexcept { m_format = format; }
+      inline Format getFormat() const noexcept { return m_format; }
+      inline void setFormat( Format format ) noexcept { m_format = format; }
 
-        inline crimild::UInt32 getOffset() const noexcept { return m_offset; }
-        inline void setOffset( crimild::UInt32 o ) noexcept { m_offset = o; }
+      inline crimild::UInt32 getOffset() const noexcept { return m_offset; }
+      inline void setOffset( crimild::UInt32 o ) noexcept { m_offset = o; }
 
-        bool operator==( const VertexAttribute &other ) const noexcept;
+      bool operator==( const VertexAttribute &other ) const noexcept;
 
-    private:
-        Name m_name = Name::UNDEFINED;
-        Format m_format = Format::UNDEFINED;
-        crimild::UInt32 m_offset = 0;
+   private:
+      Name m_name = Name::UNDEFINED;
+      Format m_format = Format::UNDEFINED;
+      crimild::UInt32 m_offset = 0;
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
-    };
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
+   };
 
 }
 

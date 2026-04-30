@@ -28,10 +28,10 @@
 #ifndef CRIMILD_SIMULATION_INPUT_
 #define CRIMILD_SIMULATION_INPUT_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 
 #include <array>
+#include <crimild/foundation.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -182,66 +182,66 @@
 
 namespace crimild {
 
-    struct Event;
+   struct Event;
 
-    class Input : public DynamicSingleton< Input > {
-    public:
-        enum class MouseCursorMode {
-            NORMAL, // default
-            HIDDEN,
-            GRAB,
-        };
+   class Input : public DynamicSingleton< Input > {
+   public:
+      enum class MouseCursorMode {
+         NORMAL, // default
+         HIDDEN,
+         GRAB,
+      };
 
-    public:
-        void handle( const Event & ) noexcept;
+   public:
+      void handle( const Event & ) noexcept;
 
-        bool isKeyDown( int key ) { return _keys[ key ]; }
-        bool isKeyUp( int key ) { return !_keys[ key ]; }
+      bool isKeyDown( int key ) { return _keys[ key ]; }
+      bool isKeyUp( int key ) { return !_keys[ key ]; }
 
-        bool isMouseButtonDown( int button ) { return _mouseButtons[ button ]; }
-        bool isMouseButtonUp( int button ) { return !_mouseButtons[ button ]; }
+      bool isMouseButtonDown( int button ) { return _mouseButtons[ button ]; }
+      bool isMouseButtonUp( int button ) { return !_mouseButtons[ button ]; }
 
-        const Vector2f &getMousePosition( void ) const { return _mousePos; }
-        const Vector2f &getMouseDelta( void ) const { return _mouseDelta; }
-        const Vector2f &getNormalizedMousePosition( void ) const { return _normalizedMousePos; }
-        const Vector2f &getNormalizedMouseDelta( void ) const { return _normalizedMouseDelta; }
-        const Vector2f &getMouseScrollDelta( void ) const { return _mouseScrollDelta; }
+      const Vector2f &getMousePosition( void ) const { return _mousePos; }
+      const Vector2f &getMouseDelta( void ) const { return _mouseDelta; }
+      const Vector2f &getNormalizedMousePosition( void ) const { return _normalizedMousePos; }
+      const Vector2f &getNormalizedMouseDelta( void ) const { return _normalizedMouseDelta; }
+      const Vector2f &getMouseScrollDelta( void ) const { return _mouseScrollDelta; }
 
-        MouseCursorMode getMouseCursorMode( void ) const { return _mouseCursorMode; }
-        void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
+      MouseCursorMode getMouseCursorMode( void ) const { return _mouseCursorMode; }
+      void setMouseCursorMode( MouseCursorMode mode ) { _mouseCursorMode = mode; }
 
-    private:
-        std::array< Int8, CRIMILD_INPUT_KEY_LAST > _keys = { 0 };
-        std::array< Int8, CRIMILD_INPUT_MOUSE_BUTTON_LAST > _mouseButtons = { 0 };
+   private:
+      std::array< Int8, CRIMILD_INPUT_KEY_LAST > _keys = { 0 };
+      std::array< Int8, CRIMILD_INPUT_MOUSE_BUTTON_LAST > _mouseButtons = { 0 };
 
-        Vector2f _mousePos;
-        Vector2f _mouseDelta;
-        Vector2f _normalizedMousePos;
-        Vector2f _normalizedMouseDelta;
-        Vector2f _mouseScrollDelta;
+      Vector2f _mousePos;
+      Vector2f _mouseDelta;
+      Vector2f _normalizedMousePos;
+      Vector2f _normalizedMouseDelta;
+      Vector2f _mouseScrollDelta;
 
-        MouseCursorMode _mouseCursorMode;
+      MouseCursorMode _mouseCursorMode;
 
-    public:
-        static constexpr const char *AXIS_HORIZONTAL = "Horizontal";
-        static constexpr const char *AXIS_VERTICAL = "Vertical";
+   public:
+      static constexpr const char *AXIS_HORIZONTAL = "Horizontal";
+      static constexpr const char *AXIS_VERTICAL = "Vertical";
 
-        void setAxis( std::string key, float value ) { _axes[ key ] = value; }
-        float getAxis( std::string key ) { return _axes[ key ]; }
+      void setAxis( std::string key, float value ) { _axes[ key ] = value; }
+      float getAxis( std::string key ) { return _axes[ key ]; }
 
-    private:
-        std::unordered_map< std::string, float > _axes;
+   private:
+      std::unordered_map< std::string, float > _axes;
 
-    public:
-        bool joystickIsPresent( void ) const { return _joystickAxes.size(); }
+   public:
+      bool joystickIsPresent( void ) const { return _joystickAxes.size(); }
 
-        void resetJoystickAxes( std::vector< float > const &axes ) { _joystickAxes = axes; }
+      void resetJoystickAxes( std::vector< float > const &axes ) { _joystickAxes = axes; }
 
-        float getJoystickAxis( int axis ) { return _joystickAxes[ axis ]; }
+      float getJoystickAxis( int axis ) { return _joystickAxes[ axis ]; }
 
-    private:
-        std::vector< float > _joystickAxes;
-    };
+   private:
+      std::vector< float > _joystickAxes;
+   };
 
 }
 

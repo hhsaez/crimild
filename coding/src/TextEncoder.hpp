@@ -32,8 +32,8 @@
 #include "EncodedData.hpp"
 #include "Encoder.hpp"
 
-#include <Crimild_Foundation.hpp>
 #include <Crimild_Mathematics.hpp>
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

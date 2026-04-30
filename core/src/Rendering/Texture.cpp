@@ -28,10 +28,11 @@
 #include "Rendering/Texture.hpp"
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Image.hpp"
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 

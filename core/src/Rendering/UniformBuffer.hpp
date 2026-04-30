@@ -28,11 +28,12 @@
 #ifndef CRIMILD_RENDERING_UNIFORM_BUFFER_
 #define CRIMILD_RENDERING_UNIFORM_BUFFER_
 
-#include "Common/Observable.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Entity/Entity.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferView.hpp"
+
+#include <crimild/foundation.hpp>
+#include <crimild/foundation/common/Observable.hpp>
 
 namespace crimild {
 

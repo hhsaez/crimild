@@ -29,7 +29,6 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
@@ -37,23 +36,24 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 
+#include <crimild/foundation.hpp>
 #include <fstream>
 
 using namespace crimild;
 
 Text::Text( void )
 {
-    _geometry = crimild::alloc< Geometry >();
-    _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
-    _material = crimild::alloc< Material >();
+   _geometry = crimild::alloc< Geometry >();
+   _primitive = crimild::alloc< Primitive >( Primitive::Type::TRIANGLES );
+   _material = crimild::alloc< Material >();
 
-    _text = "";
-    _size = 1.0f;
-    _geometry->attachPrimitive( _primitive );
-    _geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
-    attachNode( _geometry );
+   _text = "";
+   _size = 1.0f;
+   _geometry->attachPrimitive( _primitive );
+   _geometry->getComponent< MaterialComponent >()->attachMaterial( _material );
+   attachNode( _geometry );
 
-    setFont( AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM ) );
+   setFont( AssetManager::getInstance()->get< Font >( AssetManager::FONT_SYSTEM ) );
 }
 
 Text::~Text( void )
@@ -62,235 +62,235 @@ Text::~Text( void )
 
 void Text::accept( NodeVisitor &visitor )
 {
-    visitor.visitText( this );
+   visitor.visitText( this );
 }
 
 void Text::setFont( Font *font )
 {
-    setFont( crimild::retain( font ) );
+   setFont( crimild::retain( font ) );
 }
 
 void Text::setText( std::string text )
 {
-    _text = text;
-    if ( _text == "" ) {
-        _text = " ";
-    }
-    updatePrimitive();
+   _text = text;
+   if ( _text == "" ) {
+      _text = " ";
+   }
+   updatePrimitive();
 }
 
 void Text::setSize( float size )
 {
-    _size = size;
-    updatePrimitive();
+   _size = size;
+   updatePrimitive();
 }
 
 void Text::setFont( SharedPointer< Font > const &font )
 {
-    if ( _font == font ) {
-        return;
-    }
+   if ( _font == font ) {
+      return;
+   }
 
-    _font = font;
+   _font = font;
 
-    //    auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
-    //    if ( false && sdfProgram != nullptr ) {
-    //        // SDF Supported
-    //        _material->setColorMap( _font->getSDFTexture() );
-    //        _material->setProgram( sdfProgram );
-    //    }
-    //    else {
-    //        // SDF not supported by renderer
-    //        _material->setColorMap( _font->getSDFTexture() );
-    //        _material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
-    //    }
+   //    auto sdfProgram = AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_SDF );
+   //    if ( false && sdfProgram != nullptr ) {
+   //        // SDF Supported
+   //        _material->setColorMap( _font->getSDFTexture() );
+   //        _material->setProgram( sdfProgram );
+   //    }
+   //    else {
+   //        // SDF not supported by renderer
+   //        _material->setColorMap( _font->getSDFTexture() );
+   //        _material->setProgram( AssetManager::getInstance()->get< ShaderProgram >( Renderer::SHADER_PROGRAM_TEXT_BASIC ) );
+   //    }
 
-    _material->setColorMap( _font->getTexture() );
-    //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
+   _material->setColorMap( _font->getTexture() );
+   //_material->setProgram( crimild::alloc< UnlitShaderProgram >() );
 
-    //_material->getAlphaState()->setEnabled( true );
+   //_material->getAlphaState()->setEnabled( true );
 
-    updatePrimitive();
+   updatePrimitive();
 }
 
 void Text::setHorizontalAlignment( Text::HorizontalAlignment alignment )
 {
-    _horizontalAlignment = alignment;
-    updatePrimitive();
+   _horizontalAlignment = alignment;
+   updatePrimitive();
 }
 
 void Text::updatePrimitive( void )
 {
-    /*
-        std::vector< VertexPrecision > vertices;
-        std::vector< IndexPrecision > indices;
+   /*
+       std::vector< VertexPrecision > vertices;
+       std::vector< IndexPrecision > indices;
 
-        float horiAdvance = 0.0f;
-        float vertAdvance = 0.0f;
-        const auto textLength = _text.length();
-        for ( int i = 0; i < textLength; i++ ) {
-                auto c = ( unsigned char ) _text[ i ];
-                if ( c > 127 ) {
-                        // handle extended-ascii
-                        if ( i < textLength - 1 ) {
-                                auto nextChar = ( unsigned char ) _text[ ++i ];
-                                if ( c == 195 ) {
-                                        c = ( unsigned char )( 195 + ( int ) nextChar - 131 );
-                                }
-                                else {
-                                        c = nextChar;
-                                }
-                        }
-                }
+       float horiAdvance = 0.0f;
+       float vertAdvance = 0.0f;
+       const auto textLength = _text.length();
+       for ( int i = 0; i < textLength; i++ ) {
+               auto c = ( unsigned char ) _text[ i ];
+               if ( c > 127 ) {
+                       // handle extended-ascii
+                       if ( i < textLength - 1 ) {
+                               auto nextChar = ( unsigned char ) _text[ ++i ];
+                               if ( c == 195 ) {
+                                       c = ( unsigned char )( 195 + ( int ) nextChar - 131 );
+                               }
+                               else {
+                                       c = nextChar;
+                               }
+                       }
+               }
 
-                if ( c == '\n' ) {
-                        vertAdvance -= _size;
-                        horiAdvance = 0.0f;
-                        continue;
-                }
+               if ( c == '\n' ) {
+                       vertAdvance -= _size;
+                       horiAdvance = 0.0f;
+                       continue;
+               }
 
-                Font::Glyph glyph = _font->getGlyph( c );
+               Font::Glyph glyph = _font->getGlyph( c );
 
-                float minX = _size * ( horiAdvance + glyph.bearingX );
-                float maxX = minX + _size * glyph.width;
-                float minY = vertAdvance + _size * ( glyph.bearingY - glyph.height );
-                float maxY = minY + _size * glyph.height;
-                float s0 = glyph.uOffset;
-                float s1 = s0 + glyph.u;
-                float t0 = glyph.vOffset;
-                float t1 = t0 + glyph.v;
+               float minX = _size * ( horiAdvance + glyph.bearingX );
+               float maxX = minX + _size * glyph.width;
+               float minY = vertAdvance + _size * ( glyph.bearingY - glyph.height );
+               float maxY = minY + _size * glyph.height;
+               float s0 = glyph.uOffset;
+               float s1 = s0 + glyph.u;
+               float t0 = glyph.vOffset;
+               float t1 = t0 + glyph.v;
 
-                vertices.push_back( minX );
-                vertices.push_back( maxY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s0 );
-                vertices.push_back( 1.0f - t0 );
-                indices.push_back( indices.size() );
+               vertices.push_back( minX );
+               vertices.push_back( maxY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s0 );
+               vertices.push_back( 1.0f - t0 );
+               indices.push_back( indices.size() );
 
-                vertices.push_back( minX );
-                vertices.push_back( minY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s0 );
-                vertices.push_back( 1.0f - t1 );
-                indices.push_back( indices.size() );
+               vertices.push_back( minX );
+               vertices.push_back( minY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s0 );
+               vertices.push_back( 1.0f - t1 );
+               indices.push_back( indices.size() );
 
-                vertices.push_back( maxX );
-                vertices.push_back( minY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s1 );
-                vertices.push_back( 1.0f - t1 );
-                indices.push_back( indices.size() );
+               vertices.push_back( maxX );
+               vertices.push_back( minY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s1 );
+               vertices.push_back( 1.0f - t1 );
+               indices.push_back( indices.size() );
 
-                vertices.push_back( minX );
-                vertices.push_back( maxY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s0 );
-                vertices.push_back( 1.0f - t0 );
-                indices.push_back( indices.size() );
+               vertices.push_back( minX );
+               vertices.push_back( maxY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s0 );
+               vertices.push_back( 1.0f - t0 );
+               indices.push_back( indices.size() );
 
-                vertices.push_back( maxX );
-                vertices.push_back( minY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s1 );
-                vertices.push_back( 1.0f - t1 );
-                indices.push_back( indices.size() );
+               vertices.push_back( maxX );
+               vertices.push_back( minY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s1 );
+               vertices.push_back( 1.0f - t1 );
+               indices.push_back( indices.size() );
 
-                vertices.push_back( maxX );
-                vertices.push_back( maxY );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 0.0f );
-                vertices.push_back( 1.0f );
-                vertices.push_back( s1 );
-                vertices.push_back( 1.0f - t0 );
-                indices.push_back( indices.size() );
+               vertices.push_back( maxX );
+               vertices.push_back( maxY );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 0.0f );
+               vertices.push_back( 1.0f );
+               vertices.push_back( s1 );
+               vertices.push_back( 1.0f - t0 );
+               indices.push_back( indices.size() );
 
-                horiAdvance += glyph.advance;
-        }
+               horiAdvance += glyph.advance;
+       }
 
-        if ( vertices.size() == 0 ) {
-                return;
-        }
+       if ( vertices.size() == 0 ) {
+               return;
+       }
 
-    auto format = VertexFormat::VF_P3_N3_UV2;
-    auto vbo = crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] );
-    _primitive->setVertexBuffer( vbo );
+   auto format = VertexFormat::VF_P3_N3_UV2;
+   auto vbo = crimild::alloc< VertexBufferObject >( format, vertices.size() / format.getVertexSize(), &vertices[ 0 ] );
+   _primitive->setVertexBuffer( vbo );
 
-    auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );
-        _primitive->setIndexBuffer( ibo );
+   auto ibo = crimild::alloc< IndexBufferObject >( indices.size(), &indices[ 0 ] );
+       _primitive->setIndexBuffer( ibo );
 
-        _geometry->updateModelBounds();
+       _geometry->updateModelBounds();
 
-    if ( _horizontalAlignment != HorizontalAlignment::LEFT ) {
-        auto bounds = _geometry->getLocalBound();
-        auto min = bounds->getMin();
-        auto max = bounds->getMax();
-        auto diff = max - min;
+   if ( _horizontalAlignment != HorizontalAlignment::LEFT ) {
+       auto bounds = _geometry->getLocalBound();
+       auto min = bounds->getMin();
+       auto max = bounds->getMax();
+       auto diff = max - min;
 
-        if ( _horizontalAlignment == HorizontalAlignment::CENTER ) {
-            _geometry->local().setTranslate( -0.5f * diff[ 0 ], 0.0f, 0.0f );
-        }
-        else if ( _horizontalAlignment != HorizontalAlignment::RIGHT ) {
-            _geometry->local().setTranslate( -diff[ 0 ], 0.0f, 0.0f );
-        }
-    }
-    else {
-        _geometry->local().setTranslate( Vector3f::ZERO );
-    }
-    */
+       if ( _horizontalAlignment == HorizontalAlignment::CENTER ) {
+           _geometry->local().setTranslate( -0.5f * diff[ 0 ], 0.0f, 0.0f );
+       }
+       else if ( _horizontalAlignment != HorizontalAlignment::RIGHT ) {
+           _geometry->local().setTranslate( -diff[ 0 ], 0.0f, 0.0f );
+       }
+   }
+   else {
+       _geometry->local().setTranslate( Vector3f::ZERO );
+   }
+   */
 }
 
 void Text::encode( coding::Encoder &encoder )
 {
-    Group::encode( encoder );
+   Group::encode( encoder );
 
-    // TODO
+   // TODO
 }
 
 void Text::decode( coding::Decoder &decoder )
 {
-    Group::decode( decoder );
+   Group::decode( decoder );
 
-    std::string fontFileName;
-    decoder.decode( "font", fontFileName );
+   std::string fontFileName;
+   decoder.decode( "font", fontFileName );
 
-    std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontFileName + ".txt" );
-    auto font = crimild::alloc< Font >( fontDefFileName );
-    setFont( font );
+   std::string fontDefFileName = FileSystem::getInstance().pathForResource( fontFileName + ".txt" );
+   auto font = crimild::alloc< Font >( fontDefFileName );
+   setFont( font );
 
-    decoder.decode( "textSize", _size );
-    decoder.decode( "text", _text );
+   decoder.decode( "textSize", _size );
+   decoder.decode( "text", _text );
 
-    ColorRGBA textColor;
-    decoder.decode( "textColor", textColor );
-    setTextColor( textColor );
+   ColorRGBA textColor;
+   decoder.decode( "textColor", textColor );
+   setTextColor( textColor );
 
-    crimild::Bool enableDepthTest;
-    decoder.decode( "enableDepthTest", enableDepthTest );
-    // setDepthTestEnabled( enableDepthTest );
+   crimild::Bool enableDepthTest;
+   decoder.decode( "enableDepthTest", enableDepthTest );
+   // setDepthTestEnabled( enableDepthTest );
 
-    std::string anchor;
-    decoder.decode( "anchor", anchor );
-    if ( anchor == "left" ) {
-        setHorizontalAlignment( HorizontalAlignment::LEFT );
-    } else if ( anchor == "center" ) {
-        setHorizontalAlignment( HorizontalAlignment::CENTER );
-    } else if ( anchor == "right" ) {
-        setHorizontalAlignment( HorizontalAlignment::RIGHT );
-    }
+   std::string anchor;
+   decoder.decode( "anchor", anchor );
+   if ( anchor == "left" ) {
+      setHorizontalAlignment( HorizontalAlignment::LEFT );
+   } else if ( anchor == "center" ) {
+      setHorizontalAlignment( HorizontalAlignment::CENTER );
+   } else if ( anchor == "right" ) {
+      setHorizontalAlignment( HorizontalAlignment::RIGHT );
+   }
 }

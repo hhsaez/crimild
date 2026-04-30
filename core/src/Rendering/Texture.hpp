@@ -29,11 +29,12 @@
 #define CRIMILD_RENDERING_TEXTURE_
 
 #include "Catalog.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Entity/Entity.hpp"
 #include "Image.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

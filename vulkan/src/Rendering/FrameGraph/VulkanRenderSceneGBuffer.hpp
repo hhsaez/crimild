@@ -28,97 +28,98 @@
 #ifndef CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
 #define CRIMILD_VULKAN_RENDERING_FRAME_GRAPH_RENDER_SCENE_GBUFFER
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
 #include "Rendering/VulkanSceneRenderState.hpp"
 #include "Rendering/VulkanSynchronization.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class UniformBuffer;
+   class UniformBuffer;
 
-    namespace materials {
+   namespace materials {
 
-        class PrincipledBSDF;
+      class PrincipledBSDF;
 
-    }
+   }
 
-    namespace vulkan {
+   namespace vulkan {
 
-        class CommandBuffer;
-        class DescriptorSet;
-        class Framebuffer;
-        class GraphicsPipeline;
-        class Image;
-        class RenderPass;
-        class RenderTarget;
+      class CommandBuffer;
+      class DescriptorSet;
+      class Framebuffer;
+      class GraphicsPipeline;
+      class Image;
+      class RenderPass;
+      class RenderTarget;
 
-        namespace framegraph {
+      namespace framegraph {
 
-            class RenderSceneGBuffer : public RenderBase {
-            public:
-                RenderSceneGBuffer(
-                    RenderDevice *device,
-                    const VkExtent2D &extent,
-                    const std::vector< std::shared_ptr< RenderTarget > > &renderTargets
-                ) noexcept;
+         class RenderSceneGBuffer : public RenderBase {
+         public:
+            RenderSceneGBuffer(
+               RenderDevice *device,
+               const VkExtent2D &extent,
+               const std::vector< std::shared_ptr< RenderTarget > > &renderTargets
+            ) noexcept;
 
-                virtual ~RenderSceneGBuffer( void ) noexcept;
+            virtual ~RenderSceneGBuffer( void ) noexcept;
 
-                inline std::vector< std::shared_ptr< RenderTarget > > &getRenderTargets( void ) noexcept { return m_renderTargets; }
+            inline std::vector< std::shared_ptr< RenderTarget > > &getRenderTargets( void ) noexcept { return m_renderTargets; }
 
-                void render(
-                    const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables,
-                    const Camera *camera,
-                    const SyncOptions &sync = {}
-                ) noexcept;
+            void render(
+               const SceneRenderState::RenderableSet< materials::PrincipledBSDF > &sceneRenderables,
+               const Camera *camera,
+               const SyncOptions &sync = {}
+            ) noexcept;
 
-            protected:
-                virtual void onResize( void ) noexcept override;
+         protected:
+            virtual void onResize( void ) noexcept override;
 
-            private:
-                void createRenderPassResources( void ) noexcept;
-                void destroyRenderPassResources( void ) noexcept;
+         private:
+            void createRenderPassResources( void ) noexcept;
+            void destroyRenderPassResources( void ) noexcept;
 
-                void createMaterialResources( void ) noexcept;
-                void bindMaterial( const materials::PrincipledBSDF *material ) noexcept;
-                void destroyMaterialResources( void ) noexcept;
+            void createMaterialResources( void ) noexcept;
+            void bindMaterial( const materials::PrincipledBSDF *material ) noexcept;
+            void destroyMaterialResources( void ) noexcept;
 
-                std::shared_ptr< CommandBuffer > &getCommandBuffer( void ) noexcept { return m_commandBuffer; }
+            std::shared_ptr< CommandBuffer > &getCommandBuffer( void ) noexcept { return m_commandBuffer; }
 
-            private:
-                std::vector< std::shared_ptr< RenderTarget > > m_renderTargets;
+         private:
+            std::vector< std::shared_ptr< RenderTarget > > m_renderTargets;
 
-                struct Resources {
-                    struct RenderPassResources {
-                        std::shared_ptr< RenderPass > renderPass;
-                        std::shared_ptr< Framebuffer > framebuffer;
+            struct Resources {
+               struct RenderPassResources {
+                  std::shared_ptr< RenderPass > renderPass;
+                  std::shared_ptr< Framebuffer > framebuffer;
 
-                        struct UniformData {
-                            alignas( 16 ) Matrix4 view = Matrix4::Constants::IDENTITY;
-                            alignas( 16 ) Matrix4 proj = Matrix4::Constants::IDENTITY;
-                        };
-                        std::shared_ptr< UniformBuffer > uniforms;
-                        std::shared_ptr< DescriptorSet > descriptorSet;
-                    };
+                  struct UniformData {
+                     alignas( 16 ) Matrix4 view = Matrix4::Constants::IDENTITY;
+                     alignas( 16 ) Matrix4 proj = Matrix4::Constants::IDENTITY;
+                  };
+                  std::shared_ptr< UniformBuffer > uniforms;
+                  std::shared_ptr< DescriptorSet > descriptorSet;
+               };
 
-                    struct MaterialResources {
-                        std::shared_ptr< DescriptorSet > descriptorSet;
-                        std::shared_ptr< GraphicsPipeline > pipeline;
-                        std::shared_ptr< UniformBuffer > uniforms;
-                    };
+               struct MaterialResources {
+                  std::shared_ptr< DescriptorSet > descriptorSet;
+                  std::shared_ptr< GraphicsPipeline > pipeline;
+                  std::shared_ptr< UniformBuffer > uniforms;
+               };
 
-                    RenderPassResources renderPass;
-                    std::unordered_map< const materials::PrincipledBSDF *, MaterialResources > materials;
-                } m_resources;
+               RenderPassResources renderPass;
+               std::unordered_map< const materials::PrincipledBSDF *, MaterialResources > materials;
+            } m_resources;
 
-                std::shared_ptr< CommandBuffer > m_commandBuffer;
-            };
+            std::shared_ptr< CommandBuffer > m_commandBuffer;
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

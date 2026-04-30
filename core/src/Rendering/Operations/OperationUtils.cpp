@@ -27,95 +27,96 @@
 
 #include "Rendering/Operations/OperationUtils.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 
 Format crimild::framegraph::useFormat( SharedPointer< FrameGraphResource > const &resource ) noexcept
 {
-    switch ( resource->getType() ) {
-        case FrameGraphResource::Type::IMAGE_VIEW: {
-            return crimild::cast_ptr< ImageView >( resource )->format;
-        }
-        case FrameGraphResource::Type::IMAGE: {
-            return crimild::cast_ptr< Image >( resource )->format;
-        }
-        case FrameGraphResource::Type::ATTACHMENT: {
-            return crimild::cast_ptr< Attachment >( resource )->format;
-        }
-        case FrameGraphResource::Type::TEXTURE: {
-            return crimild::cast_ptr< Texture >( resource )->imageView->format;
-        }
-        default: {
-            return Format::R8G8B8A8_UNORM;
-        }
-    }
+   switch ( resource->getType() ) {
+      case FrameGraphResource::Type::IMAGE_VIEW: {
+         return crimild::cast_ptr< ImageView >( resource )->format;
+      }
+      case FrameGraphResource::Type::IMAGE: {
+         return crimild::cast_ptr< Image >( resource )->format;
+      }
+      case FrameGraphResource::Type::ATTACHMENT: {
+         return crimild::cast_ptr< Attachment >( resource )->format;
+      }
+      case FrameGraphResource::Type::TEXTURE: {
+         return crimild::cast_ptr< Texture >( resource )->imageView->format;
+      }
+      default: {
+         return Format::R8G8B8A8_UNORM;
+      }
+   }
 }
 
 SharedPointer< Attachment > crimild::framegraph::useColorAttachment( std::string name, Format format ) noexcept
 {
-    name = name != "" ? name : "color";
+   name = name != "" ? name : "color";
 
-    auto att = crimild::alloc< Attachment >();
-    att->setName( name + "/attachment" );
-    att->usage = Attachment::Usage::COLOR_ATTACHMENT;
-    att->format = format;
-    att->imageView->setName( att->getName() + "/imageView" );
-    att->imageView->image->setName( att->getName() + "/image" );
-    return att;
+   auto att = crimild::alloc< Attachment >();
+   att->setName( name + "/attachment" );
+   att->usage = Attachment::Usage::COLOR_ATTACHMENT;
+   att->format = format;
+   att->imageView->setName( att->getName() + "/imageView" );
+   att->imageView->image->setName( att->getName() + "/image" );
+   return att;
 }
 
 SharedPointer< Attachment > crimild::framegraph::useDepthAttachment( std::string name ) noexcept
 {
-    name = name != "" ? name : "color";
+   name = name != "" ? name : "color";
 
-    auto att = crimild::alloc< Attachment >();
-    att->setName( name + "/attachment" );
-    att->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
-    att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
-    att->imageView->setName( att->getName() + "/imageView" );
-    att->imageView->image->setName( att->getName() + "/image" );
-    return att;
+   auto att = crimild::alloc< Attachment >();
+   att->setName( name + "/attachment" );
+   att->usage = Attachment::Usage::DEPTH_STENCIL_ATTACHMENT;
+   att->format = Format::DEPTH_STENCIL_DEVICE_OPTIMAL;
+   att->imageView->setName( att->getName() + "/imageView" );
+   att->imageView->image->setName( att->getName() + "/image" );
+   return att;
 }
 
 SharedPointer< FrameGraphResource > crimild::framegraph::useResource( SharedPointer< FrameGraphOperation > const &op, Size index ) noexcept
 {
-    return op->getProduct( index );
+   return op->getProduct( index );
 }
 
 SharedPointer< Texture > crimild::framegraph::withResource( SharedPointer< Texture > const &texture, SharedPointer< FrameGraphResource > const &resource ) noexcept
 {
-    switch ( resource->getType() ) {
-        case FrameGraphResource::Type::IMAGE_VIEW: {
-            texture->imageView = crimild::cast_ptr< ImageView >( resource );
-            break;
-        }
-        case FrameGraphResource::Type::IMAGE: {
-            texture->imageView = crimild::alloc< ImageView >();
-            texture->imageView->image = crimild::cast_ptr< Image >( resource );
-            break;
-        }
-        case FrameGraphResource::Type::ATTACHMENT: {
-            auto att = crimild::cast_ptr< Attachment >( resource );
-            texture->imageView = att->imageView;
-            break;
-        }
-        case FrameGraphResource::Type::TEXTURE: {
-            return crimild::cast_ptr< Texture >( resource );
-        }
-        default: {
-            CRIMILD_LOG_FATAL( "Invalid resource type" );
-            exit( -1 );
-        }
-    }
-    texture->sampler = [] {
-        auto sampler = crimild::alloc< Sampler >();
-        sampler->setMinFilter( Sampler::Filter::NEAREST );
-        sampler->setMagFilter( Sampler::Filter::NEAREST );
-        return sampler;
-    }();
+   switch ( resource->getType() ) {
+      case FrameGraphResource::Type::IMAGE_VIEW: {
+         texture->imageView = crimild::cast_ptr< ImageView >( resource );
+         break;
+      }
+      case FrameGraphResource::Type::IMAGE: {
+         texture->imageView = crimild::alloc< ImageView >();
+         texture->imageView->image = crimild::cast_ptr< Image >( resource );
+         break;
+      }
+      case FrameGraphResource::Type::ATTACHMENT: {
+         auto att = crimild::cast_ptr< Attachment >( resource );
+         texture->imageView = att->imageView;
+         break;
+      }
+      case FrameGraphResource::Type::TEXTURE: {
+         return crimild::cast_ptr< Texture >( resource );
+      }
+      default: {
+         CRIMILD_LOG_FATAL( "Invalid resource type" );
+         exit( -1 );
+      }
+   }
+   texture->sampler = [] {
+      auto sampler = crimild::alloc< Sampler >();
+      sampler->setMinFilter( Sampler::Filter::NEAREST );
+      sampler->setMagFilter( Sampler::Filter::NEAREST );
+      return sampler;
+   }();
 
-    return texture;
+   return texture;
 }

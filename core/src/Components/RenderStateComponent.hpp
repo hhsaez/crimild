@@ -28,84 +28,84 @@
 #ifndef CRIMILD_COMPONENTS_RENDER_STATE_
 #define CRIMILD_COMPONENTS_RENDER_STATE_
 
-#include "Crimild_Foundation.hpp"
 #include "NodeComponent.hpp"
 #include "Rendering/Material.hpp"
 #include "SceneGraph/Light.hpp"
 
+#include <crimild/foundation.hpp>
 #include <functional>
 #include <list>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Skeleton;
+      class Skeleton;
 
-    }
+   }
 
-    class CommandBuffer;
-    class DescriptorPool;
-    class DescriptorSet;
-    class DescriptorSetLayout;
-    class IndexBuffer;
-    class Pipeline;
-    class Texture;
-    class UniformBuffer;
-    class VertexBuffer;
+   class CommandBuffer;
+   class DescriptorPool;
+   class DescriptorSet;
+   class DescriptorSetLayout;
+   class IndexBuffer;
+   class Pipeline;
+   class Texture;
+   class UniformBuffer;
+   class VertexBuffer;
 
-    class [[deprecated]] RenderStateComponent : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
+   class [[deprecated]] RenderStateComponent : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::RenderStateComponent )
 
-    public:
-        RenderStateComponent( void );
-        virtual ~RenderStateComponent( void );
+   public:
+      RenderStateComponent( void );
+      virtual ~RenderStateComponent( void );
 
-        SharedPointer< Pipeline > pipeline;
-        SharedPointer< VertexBuffer > vbo;
-        SharedPointer< IndexBuffer > ibo;
-        Array< SharedPointer< UniformBuffer > > uniforms;
-        Array< SharedPointer< Texture > > textures;
-        SharedPointer< DescriptorSetLayout > descriptorSetLayout;
-        SharedPointer< DescriptorPool > descriptorPool;
-        SharedPointer< DescriptorSet > descriptorSet;
+      SharedPointer< Pipeline > pipeline;
+      SharedPointer< VertexBuffer > vbo;
+      SharedPointer< IndexBuffer > ibo;
+      Array< SharedPointer< UniformBuffer > > uniforms;
+      Array< SharedPointer< Texture > > textures;
+      SharedPointer< DescriptorSetLayout > descriptorSetLayout;
+      SharedPointer< DescriptorPool > descriptorPool;
+      SharedPointer< DescriptorSet > descriptorSet;
 
-        std::function< void( CommandBuffer * ) > commandRecorder;
+      std::function< void( CommandBuffer * ) > commandRecorder;
 
-        void prepare( void ) noexcept;
+      void prepare( void ) noexcept;
 
-        SharedPointer< DescriptorSet > createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept;
+      SharedPointer< DescriptorSet > createDescriptorSet( DescriptorSetLayout *descriptorSetLayout ) noexcept;
 
-        // Deprecated
-    public:
-        void reset( void );
+      // Deprecated
+   public:
+      void reset( void );
 
-        bool hasMaterials( void ) const { return _materials.size() > 0; }
-        void attachMaterial( Material *material ) { _materials.add( crimild::retain( material ) ); }
-        void attachMaterial( SharedPointer< Material > const &material ) { _materials.add( material ); }
-        void detachAllMaterials( void ) { _materials.clear(); }
-        void forEachMaterial( std::function< void( Material * ) > callback );
+      bool hasMaterials( void ) const { return _materials.size() > 0; }
+      void attachMaterial( Material *material ) { _materials.add( crimild::retain( material ) ); }
+      void attachMaterial( SharedPointer< Material > const &material ) { _materials.add( material ); }
+      void detachAllMaterials( void ) { _materials.clear(); }
+      void forEachMaterial( std::function< void( Material * ) > callback );
 
-        bool hasLights( void ) const { return _lights.size() > 0; }
-        void attachLight( Light *light ) { _lights.add( crimild::retain( light ) ); }
-        void attachLight( SharedPointer< Light > const &light ) { _lights.add( light ); }
-        void detachAllLights( void ) { _lights.clear(); }
-        void forEachLight( std::function< void( Light * ) > callback );
+      bool hasLights( void ) const { return _lights.size() > 0; }
+      void attachLight( Light *light ) { _lights.add( crimild::retain( light ) ); }
+      void attachLight( SharedPointer< Light > const &light ) { _lights.add( light ); }
+      void detachAllLights( void ) { _lights.clear(); }
+      void forEachLight( std::function< void( Light * ) > callback );
 
-        void setSkeleton( SharedPointer< animation::Skeleton > const &skeleton ) { _skeleton = skeleton; }
-        animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
+      void setSkeleton( SharedPointer< animation::Skeleton > const &skeleton ) { _skeleton = skeleton; }
+      animation::Skeleton *getSkeleton( void ) { return crimild::get_ptr( _skeleton ); }
 
-        bool renderOnScreen( void ) const { return _renderOnScreen; }
-        void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
+      bool renderOnScreen( void ) const { return _renderOnScreen; }
+      void setRenderOnScreen( bool value ) { _renderOnScreen = value; }
 
-    private:
-        Array< SharedPointer< Material > > _materials;
-        Array< SharedPointer< Light > > _lights;
+   private:
+      Array< SharedPointer< Material > > _materials;
+      Array< SharedPointer< Light > > _lights;
 
-        SharedPointer< animation::Skeleton > _skeleton;
+      SharedPointer< animation::Skeleton > _skeleton;
 
-        bool _renderOnScreen;
-    };
+      bool _renderOnScreen;
+   };
 
 }
 

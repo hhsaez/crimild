@@ -27,13 +27,13 @@
 
 #include "JobScheduler.hpp"
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 using namespace crimild::concurrency;
 
 JobScheduler::JobScheduler( void )
-    : _numWorkers( std::thread::hardware_concurrency() )
+   : _numWorkers( std::thread::hardware_concurrency() )
 {
 }
 
@@ -43,222 +43,222 @@ JobScheduler::~JobScheduler( void )
 
 void JobScheduler::configure( int numWorkers )
 {
-    _numWorkers = numWorkers;
-    if ( _numWorkers < 0 ) {
-        _numWorkers = std::thread::hardware_concurrency();
-    }
+   _numWorkers = numWorkers;
+   if ( _numWorkers < 0 ) {
+      _numWorkers = std::thread::hardware_concurrency();
+   }
 }
 
 bool JobScheduler::start( void )
 {
-    _state = JobScheduler::State::INITIALIZING;
+   _state = JobScheduler::State::INITIALIZING;
 
-    // initialize the main thread as another worker
-    initWorker( true );
+   // initialize the main thread as another worker
+   initWorker( true );
 
-    Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initializing job scheduler with ", getNumWorkers(), " workers" );
+   Log::info( CRIMILD_CURRENT_CLASS_NAME, "Initializing job scheduler with ", getNumWorkers(), " workers" );
 
-    for ( int i = 0; i < getNumWorkers(); i++ ) {
-        _workers.push_back( std::thread( std::bind( &JobScheduler::worker, this ) ) );
-    }
+   for ( int i = 0; i < getNumWorkers(); i++ ) {
+      _workers.push_back( std::thread( std::bind( &JobScheduler::worker, this ) ) );
+   }
 
-    _state = JobScheduler::State::RUNNING;
+   _state = JobScheduler::State::RUNNING;
 
-    return true;
+   return true;
 }
 
 void JobScheduler::stop( void )
 {
-    _state = JobScheduler::State::STOPPING;
+   _state = JobScheduler::State::STOPPING;
 
-    for ( auto &w : _workers ) {
-        if ( w.joinable() ) {
-            w.join();
-        }
-    }
+   for ( auto &w : _workers ) {
+      if ( w.joinable() ) {
+         w.join();
+      }
+   }
 
-    _workers.clear();
-    _workerJobQueues.clear();
+   _workers.clear();
+   _workerJobQueues.clear();
 
-    _state = JobScheduler::State::STOPPED;
+   _state = JobScheduler::State::STOPPED;
 }
 
 void JobScheduler::worker( void )
 {
-    initWorker();
+   initWorker();
 
-    while ( getState() == JobScheduler::State::INITIALIZING ) {
-        // wait for startup to complete
-        yield();
-    }
+   while ( getState() == JobScheduler::State::INITIALIZING ) {
+      // wait for startup to complete
+      yield();
+   }
 
-    while ( getState() == JobScheduler::State::RUNNING ) {
-        executeNextJob();
-    }
+   while ( getState() == JobScheduler::State::RUNNING ) {
+      executeNextJob();
+   }
 }
 
 void JobScheduler::initWorker( bool mainWorker )
 {
-    std::lock_guard< std::mutex > lock( _mutex );
+   std::lock_guard< std::mutex > lock( _mutex );
 
-    if ( mainWorker ) {
-        _mainWorkerId = getWorkerId();
-    }
+   if ( mainWorker ) {
+      _mainWorkerId = getWorkerId();
+   }
 
-    _workerStats[ getWorkerId() ].jobCount = 0;
-    _workerJobQueues[ getWorkerId() ] = crimild::alloc< WorkerJobQueue >();
+   _workerStats[ getWorkerId() ].jobCount = 0;
+   _workerJobQueues[ getWorkerId() ] = crimild::alloc< WorkerJobQueue >();
 }
 
 JobScheduler::WorkerId JobScheduler::getWorkerId( void ) const
 {
-    return std::this_thread::get_id();
+   return std::this_thread::get_id();
 }
 
 JobScheduler::WorkerJobQueue *JobScheduler::getWorkerJobQueue( void )
 {
-    return crimild::get_ptr( _workerJobQueues[ getWorkerId() ] );
+   return crimild::get_ptr( _workerJobQueues[ getWorkerId() ] );
 }
 
 JobScheduler::WorkerJobQueue *JobScheduler::getRandomJobQueue( void )
 {
-    if ( _workerJobQueues.size() == 0 ) {
-        return nullptr;
-    }
+   if ( _workerJobQueues.size() == 0 ) {
+      return nullptr;
+   }
 
-    for ( auto &it : _workerJobQueues ) {
-        if ( it.second != nullptr && !it.second->empty() ) {
-            return crimild::get_ptr( it.second );
-        }
-    }
+   for ( auto &it : _workerJobQueues ) {
+      if ( it.second != nullptr && !it.second->empty() ) {
+         return crimild::get_ptr( it.second );
+      }
+   }
 
-    return nullptr;
+   return nullptr;
 }
 
 void JobScheduler::schedule( JobPtr const &job )
 {
-    if ( job == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule null job" );
-        return;
-    }
+   if ( job == nullptr ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule null job" );
+      return;
+   }
 
-    if ( getState() == JobScheduler::State::STOPPING || getState() == JobScheduler::State::STOPPED ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule new jobs since the scheduler is not running" );
-        return;
-    }
+   if ( getState() == JobScheduler::State::STOPPING || getState() == JobScheduler::State::STOPPED ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot schedule new jobs since the scheduler is not running" );
+      return;
+   }
 
-    if ( getNumWorkers() == 0 ) {
-        // no workers. execute it
-        execute( job );
-        return;
-    }
+   if ( getNumWorkers() == 0 ) {
+      // no workers. execute it
+      execute( job );
+      return;
+   }
 
-    auto queue = getWorkerJobQueue();
-    queue->push( job );
+   auto queue = getWorkerJobQueue();
+   queue->push( job );
 }
 
 JobPtr JobScheduler::getJob( void )
 {
-    auto queue = getWorkerJobQueue();
+   auto queue = getWorkerJobQueue();
 
-    if ( queue != nullptr && !queue->empty() ) {
-        auto job = queue->pop();
-        if ( job != nullptr ) {
-            return job;
-        }
-    }
+   if ( queue != nullptr && !queue->empty() ) {
+      auto job = queue->pop();
+      if ( job != nullptr ) {
+         return job;
+      }
+   }
 
-    auto stealQueue = getRandomJobQueue();
-    if ( stealQueue == nullptr || stealQueue == queue ) {
-        // do not steal from ourselves
-        return nullptr;
-    }
+   auto stealQueue = getRandomJobQueue();
+   if ( stealQueue == nullptr || stealQueue == queue ) {
+      // do not steal from ourselves
+      return nullptr;
+   }
 
-    if ( !stealQueue->empty() ) {
-        return stealQueue->steal();
-    }
+   if ( !stealQueue->empty() ) {
+      return stealQueue->steal();
+   }
 
-    return nullptr;
+   return nullptr;
 }
 
 bool JobScheduler::executeNextJob( void )
 {
-    auto job = getJob();
-    if ( job != nullptr ) {
-        execute( job );
-        _workerStats[ getWorkerId() ].jobCount++;
-        return true;
-    }
+   auto job = getJob();
+   if ( job != nullptr ) {
+      execute( job );
+      _workerStats[ getWorkerId() ].jobCount++;
+      return true;
+   }
 
-    yield();
-    return false;
+   yield();
+   return false;
 }
 
 void JobScheduler::execute( JobPtr const &job )
 {
-    job->execute();
+   job->execute();
 }
 
 void JobScheduler::wait( JobPtr const &job )
 {
-    while ( !job->isCompleted() ) {
-        executeNextJob();
-    }
+   while ( !job->isCompleted() ) {
+      executeNextJob();
+   }
 }
 
 void JobScheduler::yield( void )
 {
-    //    if ( isMainWorker() ) {
-    //        // main worker does not yield
-    //        return;
-    //    }
-    //
-    std::this_thread::yield();
+   //    if ( isMainWorker() ) {
+   //        // main worker does not yield
+   //        return;
+   //    }
+   //
+   std::this_thread::yield();
 }
 
 void JobScheduler::delaySync( JobPtr const &job )
 {
-    _delayedSyncJobs.add( job );
+   _delayedSyncJobs.add( job );
 }
 
 void JobScheduler::delayAsync( JobPtr const &job )
 {
-    _delayedAsyncJobs.add( job );
+   _delayedAsyncJobs.add( job );
 }
 
 void JobScheduler::executeDelayedJobs( void )
 {
-    // Schedule async jobs first since we don't need to wait for them
-    // Copy lists before executing, just in case something schedules new
-    // jobs.
-    // Flush lists afterwards
+   // Schedule async jobs first since we don't need to wait for them
+   // Copy lists before executing, just in case something schedules new
+   // jobs.
+   // Flush lists afterwards
 
-    auto asyncJobs = _delayedAsyncJobs;
-    asyncJobs.each(
-        [ & ]( JobPtr const &j ) {
-            schedule( j );
-        }
-    );
+   auto asyncJobs = _delayedAsyncJobs;
+   asyncJobs.each(
+      [ & ]( JobPtr const &j ) {
+         schedule( j );
+      }
+   );
 
-    auto syncJobs = _delayedSyncJobs;
-    syncJobs.each(
-        [ & ]( JobPtr const &j ) {
-            execute( j );
-        }
-    );
+   auto syncJobs = _delayedSyncJobs;
+   syncJobs.each(
+      [ & ]( JobPtr const &j ) {
+         execute( j );
+      }
+   );
 }
 
 void JobScheduler::eachWorkerStat( std::function< void( WorkerId, const WorkerStat & ) > const &callback ) const
 {
-    for ( const auto &it : _workerStats ) {
-        callback( it.first, it.second );
-    }
+   for ( const auto &it : _workerStats ) {
+      callback( it.first, it.second );
+   }
 }
 
 void JobScheduler::clearWorkerStats( void )
 {
-    std::lock_guard< std::mutex > lock( _mutex );
+   std::lock_guard< std::mutex > lock( _mutex );
 
-    for ( auto &it : _workerStats ) {
-        it.second.jobCount = 0;
-    }
+   for ( auto &it : _workerStats ) {
+      it.second.jobCount = 0;
+   }
 }

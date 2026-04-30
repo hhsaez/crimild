@@ -28,45 +28,46 @@
 #ifndef CRIMILD_SIMULATION_SYSTEMS_AUDIO_
 #define CRIMILD_SIMULATION_SYSTEMS_AUDIO_
 
-#include "Crimild_Foundation.hpp"
 #include "Simulation/Systems/System.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace audio {
+   namespace audio {
 
-        class AudioListener;
-        class AudioSource;
+      class AudioListener;
+      class AudioSource;
 
-    }
+   }
 
-    class AudioSystem
-        : public System,
-          public DynamicSingleton< AudioSystem > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::AudioSystem )
+   class AudioSystem
+      : public System,
+        public DynamicSingleton< AudioSystem > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::AudioSystem )
 
-    public:
-        virtual ~AudioSystem( void ) = default;
+   public:
+      virtual ~AudioSystem( void ) = default;
 
-    public:
-        /**
-           \brief Get the shared audio listener
-        */
-        virtual audio::AudioListener *getAudioListener( void ) noexcept = 0;
+   public:
+      /**
+         \brief Get the shared audio listener
+      */
+      virtual audio::AudioListener *getAudioListener( void ) noexcept = 0;
 
-    public:
-        /**
-           \brief Creates a new audio source from a file
+   public:
+      /**
+         \brief Creates a new audio source from a file
 
-           \param asStream Indicates if the audio file should be streamed
-           instead of loaded completely into memory. Some implementations
-           may ignore this flag.
+         \param asStream Indicates if the audio file should be streamed
+         instead of loaded completely into memory. Some implementations
+         may ignore this flag.
 
-           The actual implementation must be performed by subclasses
-           based on each platform requirements.
-        */
-        virtual SharedPointer< audio::AudioSource > createAudioSource( std::string filename, bool asStream ) noexcept = 0;
-    };
+         The actual implementation must be performed by subclasses
+         based on each platform requirements.
+      */
+      virtual SharedPointer< audio::AudioSource > createAudioSource( std::string filename, bool asStream ) noexcept = 0;
+   };
 
 }
 

@@ -29,101 +29,102 @@
 #define CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
 
 #include "Common/Profiler.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Renderer.hpp"
 #include "ShaderUniform.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class Texture;
-    class Light;
+   class Texture;
+   class Light;
 
-    template< typename T >
-    class [[deprecated]] ShaderUniformImpl : public ShaderUniform {
-    public:
-        ShaderUniformImpl( std::string name, T const &value )
-            : ShaderUniform( name )
-        {
-            setValue( value );
-        }
+   template< typename T >
+   class [[deprecated]] ShaderUniformImpl : public ShaderUniform {
+   public:
+      ShaderUniformImpl( std::string name, T const &value )
+         : ShaderUniform( name )
+      {
+         setValue( value );
+      }
 
-        virtual ~ShaderUniformImpl( void )
-        {
-        }
+      virtual ~ShaderUniformImpl( void )
+      {
+      }
 
-        void setValue( const T &value )
-        {
-            if ( _value != value ) {
-                _value = value;
-                _needsBinding = true;
-            }
-        }
+      void setValue( const T &value )
+      {
+         if ( _value != value ) {
+            _value = value;
+            _needsBinding = true;
+         }
+      }
 
-        const T &getValue( void ) const { return _value; }
+      const T &getValue( void ) const { return _value; }
 
-        virtual void onBind( Renderer *renderer ) override
-        {
-            if ( _needsBinding ) {
-                CRIMILD_PROFILE( "Bind uniform" );
-                renderer->bindUniform( getLocation(), getValue() );
-                _needsBinding = false;
-            }
-        }
+      virtual void onBind( Renderer *renderer ) override
+      {
+         if ( _needsBinding ) {
+            CRIMILD_PROFILE( "Bind uniform" );
+            renderer->bindUniform( getLocation(), getValue() );
+            _needsBinding = false;
+         }
+      }
 
-        virtual void onUnbind( Renderer *renderer ) override
-        {
-            // no-op
-        }
+      virtual void onUnbind( Renderer *renderer ) override
+      {
+         // no-op
+      }
 
-    private:
-        T _value;
-        crimild::Bool _needsBinding = true;
-    };
+   private:
+      T _value;
+      crimild::Bool _needsBinding = true;
+   };
 
-    /*
-    typedef ShaderUniformImpl< bool > BoolUniform;
-    typedef ShaderUniformImpl< int > IntUniform;
-    typedef ShaderUniformImpl< crimild::Int32 > Int32Uniform;
-    typedef ShaderUniformImpl< Array< crimild::Int32 > > Int32ArrayUniform;
-    typedef ShaderUniformImpl< float > FloatUniform;
-    typedef ShaderUniformImpl< Vector4f > Vector4fUniform;
-    typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
-    typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
-    typedef ShaderUniformImpl< ColorRGBA > ColorRGBAUniform;
-    typedef ShaderUniformImpl< ColorRGB > ColorRGBUniform;
-    typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
-    typedef ShaderUniformImpl< Matrix4f > Matrix4fUniform;
+   /*
+   typedef ShaderUniformImpl< bool > BoolUniform;
+   typedef ShaderUniformImpl< int > IntUniform;
+   typedef ShaderUniformImpl< crimild::Int32 > Int32Uniform;
+   typedef ShaderUniformImpl< Array< crimild::Int32 > > Int32ArrayUniform;
+   typedef ShaderUniformImpl< float > FloatUniform;
+   typedef ShaderUniformImpl< Vector4f > Vector4fUniform;
+   typedef ShaderUniformImpl< Vector3f > Vector3fUniform;
+   typedef ShaderUniformImpl< Vector2f > Vector2fUniform;
+   typedef ShaderUniformImpl< ColorRGBA > ColorRGBAUniform;
+   typedef ShaderUniformImpl< ColorRGB > ColorRGBUniform;
+   typedef ShaderUniformImpl< Matrix3f > Matrix3fUniform;
+   typedef ShaderUniformImpl< Matrix4f > Matrix4fUniform;
 
-    class TextureUniform : public ShaderUniform {
-    public:
-        TextureUniform( std::string name, Texture *value );
-        TextureUniform( std::string name, SharedPointer< Texture > const &value );
-        virtual ~TextureUniform( void );
+   class TextureUniform : public ShaderUniform {
+   public:
+       TextureUniform( std::string name, Texture *value );
+       TextureUniform( std::string name, SharedPointer< Texture > const &value );
+       virtual ~TextureUniform( void );
 
-        void setValue( Texture *texture );
-        Texture *getValue( void );
+       void setValue( Texture *texture );
+       Texture *getValue( void );
 
-    private:
-        SharedPointer< Texture > _texture;
-        crimild::Bool _needsBinding = true;
+   private:
+       SharedPointer< Texture > _texture;
+       crimild::Bool _needsBinding = true;
 
-    public:
-        virtual void onBind( Renderer *renderer );
-        virtual void onUnbind( Renderer *renderer );
-    };
+   public:
+       virtual void onBind( Renderer *renderer );
+       virtual void onUnbind( Renderer *renderer );
+   };
 
-    class BlockUniform : public ShaderUniform {
-    public:
-        BlockUniform( std::string name, crimild::UInt32 blockId );
+   class BlockUniform : public ShaderUniform {
+   public:
+       BlockUniform( std::string name, crimild::UInt32 blockId );
 
-        virtual void onBind( Renderer *renderer ) override;
-        virtual void onUnbind( Renderer * ) override;
+       virtual void onBind( Renderer *renderer ) override;
+       virtual void onUnbind( Renderer * ) override;
 
-    private:
-        crimild::UInt32 _blockId;
-    };
-    */
+   private:
+       crimild::UInt32 _blockId;
+   };
+   */
 
 }
 

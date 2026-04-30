@@ -3,7 +3,7 @@
 
 #include "Entity/Entity.hpp"
 
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 #include <type_traits>
 
 namespace crimild::experimental {

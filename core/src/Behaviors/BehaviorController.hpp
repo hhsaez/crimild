@@ -29,84 +29,85 @@
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTROLLER_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Messaging/MessageQueue.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        class Behavior;
-        class BehaviorContext;
+      class Behavior;
+      class BehaviorContext;
 
-        class BehaviorController
-            : public crimild::NodeComponent,
-              public crimild::Messenger {
-            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
+      class BehaviorController
+         : public crimild::NodeComponent,
+           public crimild::Messenger {
+         CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
 
-        public:
-            static constexpr const crimild::Char *DEFAULT_BEHAVIOR_NAME = "__default__";
-            static constexpr const crimild::Char *SCENE_STARTED_BEHAVIOR_NAME = "__scene_started__";
+      public:
+         static constexpr const crimild::Char *DEFAULT_BEHAVIOR_NAME = "__default__";
+         static constexpr const crimild::Char *SCENE_STARTED_BEHAVIOR_NAME = "__scene_started__";
 
-        public:
-            BehaviorController( void );
-            virtual ~BehaviorController( void ) = default;
+      public:
+         BehaviorController( void );
+         virtual ~BehaviorController( void ) = default;
 
-            virtual void onAttach( void ) override;
+         virtual void onAttach( void ) override;
 
-            virtual void start( void ) override;
-            virtual void update( const crimild::Clock & ) override;
+         virtual void start( void ) override;
+         virtual void update( const crimild::Clock & ) override;
 
-        public:
-            crimild::behaviors::BehaviorContext *getContext( void ) { return crimild::get_ptr( _context ); }
+      public:
+         crimild::behaviors::BehaviorContext *getContext( void ) { return crimild::get_ptr( _context ); }
 
-            inline SharedPointer< Behavior > &getCurrentBehavior( void ) noexcept { return m_currentBehavior; }
+         inline SharedPointer< Behavior > &getCurrentBehavior( void ) noexcept { return m_currentBehavior; }
 
-            Behavior *getBehavior( std::string_view eventName ) noexcept;
-            void attachBehavior( std::string_view eventName, SharedPointer< Behavior > const &behavior ) noexcept;
+         Behavior *getBehavior( std::string_view eventName ) noexcept;
+         void attachBehavior( std::string_view eventName, SharedPointer< Behavior > const &behavior ) noexcept;
 
-            /**
-             * \brief Executes a behavior
-             *
-             * If the behavior is not already active, this method will automatically call Behavior::init()
-             * and set it as active. Behavior::step() will be delayed until the call to update() in this
-             * component.
-             *
-             * If forced, the behavior will be executed anyways regardless of whether it is active or not.
-             * This is used internally.
-             */
-            void execute( SharedPointer< Behavior > const &behavior, bool force = false ) noexcept;
+         /**
+          * \brief Executes a behavior
+          *
+          * If the behavior is not already active, this method will automatically call Behavior::init()
+          * and set it as active. Behavior::step() will be delayed until the call to update() in this
+          * component.
+          *
+          * If forced, the behavior will be executed anyways regardless of whether it is active or not.
+          * This is used internally.
+          */
+         void execute( SharedPointer< Behavior > const &behavior, bool force = false ) noexcept;
 
-        private:
-            inline void setCurrentBehavior( SharedPointer< Behavior > const &behavior ) noexcept { m_currentBehavior = behavior; }
+      private:
+         inline void setCurrentBehavior( SharedPointer< Behavior > const &behavior ) noexcept { m_currentBehavior = behavior; }
 
-        private:
-            SharedPointer< crimild::behaviors::BehaviorContext > _context;
-            std::map< std::string, SharedPointer< Behavior > > m_behaviors;
-            SharedPointer< Behavior > m_currentBehavior;
+      private:
+         SharedPointer< crimild::behaviors::BehaviorContext > _context;
+         std::map< std::string, SharedPointer< Behavior > > m_behaviors;
+         SharedPointer< Behavior > m_currentBehavior;
 
-            /**
-                \name Clonning
-            */
-            //@{
-        public:
-            virtual SharedPointer< NodeComponent > clone( void ) override;
+         /**
+             \name Clonning
+         */
+         //@{
+      public:
+         virtual SharedPointer< NodeComponent > clone( void ) override;
 
-            //@}
+         //@}
 
-            /**
-                \name Coding support
-            */
-            //@{
+         /**
+             \name Coding support
+         */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
-        };
+         //@}
+      };
 
-    }
+   }
 
 }
 

@@ -28,48 +28,47 @@
 #ifndef CRIMILD_CORE_RENDERING_FONT_
 #define CRIMILD_CORE_RENDERING_FONT_
 
-#include "Crimild_Foundation.hpp"
-
+#include <crimild/foundation.hpp>
 #include <map>
 
 namespace crimild {
 
-    class Texture;
+   class Texture;
 
-    class Font : public SharedObject {
-    public:
-        struct Glyph {
-            unsigned char symbol;
-            float width;
-            float height;
-            float bearingX;
-            float bearingY;
-            float advance;
-            float uOffset;
-            float vOffset;
-            float u;
-            float v;
-        };
+   class Font : public SharedObject {
+   public:
+      struct Glyph {
+         unsigned char symbol;
+         float width;
+         float height;
+         float bearingX;
+         float bearingY;
+         float advance;
+         float uOffset;
+         float vOffset;
+         float u;
+         float v;
+      };
 
-    public:
-        Font( void );
-        explicit Font( std::string defFileName );
-        virtual ~Font( void );
+   public:
+      Font( void );
+      explicit Font( std::string defFileName );
+      virtual ~Font( void );
 
-        Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
-        Texture *getSDFTexture( void ) { return crimild::get_ptr( _sdfTexture ); }
+      Texture *getTexture( void ) { return crimild::get_ptr( _texture ); }
+      Texture *getSDFTexture( void ) { return crimild::get_ptr( _sdfTexture ); }
 
-        Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
+      Glyph getGlyph( unsigned char c ) { return _glyphs[ c ]; }
 
-    private:
-        void loadGlyphs( std::string file );
+   private:
+      void loadGlyphs( std::string file );
 
-    protected:
-        SharedPointer< Texture > _texture;
-        SharedPointer< Texture > _sdfTexture;
+   protected:
+      SharedPointer< Texture > _texture;
+      SharedPointer< Texture > _sdfTexture;
 
-        std::map< unsigned char, Glyph > _glyphs;
-    };
+      std::map< unsigned char, Glyph > _glyphs;
+   };
 
 }
 

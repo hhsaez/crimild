@@ -32,7 +32,7 @@
 #include "Visitors/UpdateWorldState.hpp"
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 
@@ -40,120 +40,120 @@ std::unordered_map< std::string, std::unordered_set< PrefabNode * > > PrefabNode
 std::unordered_map< std::string, std::shared_ptr< Node > > PrefabNode::s_instances;
 
 PrefabNode::PrefabNode( const std::filesystem::path &path ) noexcept
-    : m_path( path )
+   : m_path( path )
 {
-    load();
+   load();
 }
 
 PrefabNode::~PrefabNode( void ) noexcept
 {
-    s_prefabs[ m_path.string() ].erase( this );
+   s_prefabs[ m_path.string() ].erase( this );
 }
 
 void PrefabNode::overrideInstance( void ) noexcept
 {
-    const auto key = m_path.string();
+   const auto key = m_path.string();
 
-    // Update file
-    coding::FileEncoder encoder;
-    encoder.encode( retain( getNodeAt( 0 ) ) );
-    encoder.write( m_path );
+   // Update file
+   coding::FileEncoder encoder;
+   encoder.encode( retain( getNodeAt( 0 ) ) );
+   encoder.write( m_path );
 
-    // Update shared instance
-    s_instances[ key ] = getNodeAt( 0 )->perform< ShallowCopy >();
+   // Update shared instance
+   s_instances[ key ] = getNodeAt( 0 )->perform< ShallowCopy >();
 
-    // Update all other prefabs using this instance
-    auto others = s_prefabs[ key ];
-    for ( auto other : others ) {
-        if ( other != this ) {
-            if ( other->isLinked() && !other->isEditable() ) {
-                other->reloadInstance();
-            }
-        }
-    }
+   // Update all other prefabs using this instance
+   auto others = s_prefabs[ key ];
+   for ( auto other : others ) {
+      if ( other != this ) {
+         if ( other->isLinked() && !other->isEditable() ) {
+            other->reloadInstance();
+         }
+      }
+   }
 
-    m_editable = false;
+   m_editable = false;
 }
 
 void PrefabNode::reloadInstance( void ) noexcept
 {
-    load();
+   load();
 
-    if ( hasNodes() ) {
-        auto node = getNodeAt( 0 );
-        node->perform( StartComponents() );
-        node->perform( UpdateWorldState() );
-    }
+   if ( hasNodes() ) {
+      auto node = getNodeAt( 0 );
+      node->perform( StartComponents() );
+      node->perform( UpdateWorldState() );
+   }
 }
 
 void PrefabNode::encode( coding::Encoder &encoder )
 {
-    Node::encode( encoder );
+   Node::encode( encoder );
 
-    encoder.encode( "path", m_path.string() );
-    encoder.encode( "linked", m_linked );
+   encoder.encode( "path", m_path.string() );
+   encoder.encode( "linked", m_linked );
 
-    if ( !m_linked ) {
-        Array< SharedPointer< Node > > nodes;
-        for ( int i = 0; i < getNodeCount(); ++i ) {
-            nodes.add( retain( getNodeAt( i ) ) );
-        }
-        encoder.encode( "nodes", nodes );
-    }
+   if ( !m_linked ) {
+      Array< SharedPointer< Node > > nodes;
+      for ( int i = 0; i < getNodeCount(); ++i ) {
+         nodes.add( retain( getNodeAt( i ) ) );
+      }
+      encoder.encode( "nodes", nodes );
+   }
 }
 
 void PrefabNode::decode( coding::Decoder &decoder )
 {
-    Node::decode( decoder );
+   Node::decode( decoder );
 
-    std::string pathStr;
-    decoder.decode( "path", pathStr );
-    m_path = { pathStr };
-    decoder.decode( "linked", m_linked );
+   std::string pathStr;
+   decoder.decode( "path", pathStr );
+   m_path = { pathStr };
+   decoder.decode( "linked", m_linked );
 
-    if ( m_linked ) {
-        load();
-    } else {
-        Array< SharedPointer< Node > > nodes;
-        decoder.decode( "nodes", nodes );
-        nodes.each(
-            [ this ]( auto &node ) {
-                attachNode( node );
-            }
-        );
-    }
+   if ( m_linked ) {
+      load();
+   } else {
+      Array< SharedPointer< Node > > nodes;
+      decoder.decode( "nodes", nodes );
+      nodes.each(
+         [ this ]( auto &node ) {
+            attachNode( node );
+         }
+      );
+   }
 }
 
 void PrefabNode::load( void ) noexcept
 {
-    const auto key = m_path.string();
+   const auto key = m_path.string();
 
-    s_prefabs[ key ].erase( this );
+   s_prefabs[ key ].erase( this );
 
-    detachAllNodes();
+   detachAllNodes();
 
-    if ( !s_instances.contains( key ) ) {
-        coding::FileDecoder decoder;
-        decoder.read( key );
-        if ( decoder.getObjectCount() == 0 ) {
-            CRIMILD_LOG_ERROR( "Decoded file is empty: ", key );
-            return;
-        }
-        if ( std::shared_ptr< Node > instance = decoder.getObjectAt< Node >( 0 ) ) {
-            s_instances[ key ] = instance;
-        } else {
-            CRIMILD_LOG_ERROR( "File does not contains nodes: ", key );
-        }
-    }
+   if ( !s_instances.contains( key ) ) {
+      coding::FileDecoder decoder;
+      decoder.read( key );
+      if ( decoder.getObjectCount() == 0 ) {
+         CRIMILD_LOG_ERROR( "Decoded file is empty: ", key );
+         return;
+      }
+      if ( std::shared_ptr< Node > instance = decoder.getObjectAt< Node >( 0 ) ) {
+         s_instances[ key ] = instance;
+      } else {
+         CRIMILD_LOG_ERROR( "File does not contains nodes: ", key );
+      }
+   }
 
-    auto instance = s_instances[ key ];
-    auto node = instance->perform< ShallowCopy >();
-    attachNode( node );
+   auto instance = s_instances[ key ];
+   auto node = instance->perform< ShallowCopy >();
+   attachNode( node );
 
-    s_prefabs[ key ].insert( this );
+   s_prefabs[ key ].insert( this );
 
-    setName( m_path.filename().stem().string() );
+   setName( m_path.filename().stem().string() );
 
-    m_linked = true;
-    m_editable = false;
+   m_linked = true;
+   m_editable = false;
 }

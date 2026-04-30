@@ -29,49 +29,50 @@
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/VertexLayout.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class DescriptorSetLayout;
+   class DescriptorSetLayout;
 
-    class ShaderProgram : public coding::Codable,
-                          public Catalog< ShaderProgram >::Resource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
+   class ShaderProgram : public coding::Codable,
+                         public Catalog< ShaderProgram >::Resource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::ShaderProgram )
 
-    public:
-        using ShaderArray = Array< SharedPointer< Shader > >;
+   public:
+      using ShaderArray = Array< SharedPointer< Shader > >;
 
-    public:
-        ShaderProgram( void ) = default;
-        explicit ShaderProgram( const ShaderArray &shaders ) noexcept;
-        virtual ~ShaderProgram( void ) = default;
+   public:
+      ShaderProgram( void ) = default;
+      explicit ShaderProgram( const ShaderArray &shaders ) noexcept;
+      virtual ~ShaderProgram( void ) = default;
 
-        inline void setShaders( ShaderArray const &shaders ) noexcept { m_shaders = shaders; }
-        const ShaderArray &getShaders( void ) const noexcept { return m_shaders; }
-        ShaderArray &getShaders( void ) noexcept { return m_shaders; }
+      inline void setShaders( ShaderArray const &shaders ) noexcept { m_shaders = shaders; }
+      const ShaderArray &getShaders( void ) const noexcept { return m_shaders; }
+      ShaderArray &getShaders( void ) noexcept { return m_shaders; }
 
-        Array< VertexLayout > vertexLayouts;
-        Array< VertexLayout > instanceLayouts;
-        Array< SharedPointer< DescriptorSetLayout > > descriptorSetLayouts;
+      Array< VertexLayout > vertexLayouts;
+      Array< VertexLayout > instanceLayouts;
+      Array< SharedPointer< DescriptorSetLayout > > descriptorSetLayouts;
 
-    private:
-        ShaderArray m_shaders;
+   private:
+      ShaderArray m_shaders;
 
-        /**
-            \name Coding support
-        */
-        //@{
+      /**
+          \name Coding support
+      */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

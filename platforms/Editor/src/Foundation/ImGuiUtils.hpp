@@ -45,7 +45,7 @@
 #include "GraphEditor.h"
 // clang-format on
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

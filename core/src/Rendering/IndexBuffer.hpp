@@ -28,13 +28,13 @@
 #ifndef CRIMILD_RENDERING_INDEX_BUFFER_
 #define CRIMILD_RENDERING_INDEX_BUFFER_
 
-#include "Common/Observable.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Entity/Entity.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/BufferAccessor.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Format.hpp"
+
+#include <crimild/foundation/common/Observable.hpp>
 
 namespace crimild {
 

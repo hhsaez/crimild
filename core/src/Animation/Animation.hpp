@@ -32,118 +32,118 @@
 #include "Simulation/Clock.hpp"
 
 #include <Crimild_Coding.hpp>
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    namespace animation {
+   namespace animation {
 
-        class Clip;
+      class Clip;
 
-        class Animation : public coding::Codable,
-                          public NamedObject {
-            CRIMILD_IMPLEMENT_RTTI( crimild::animation::Animation )
+      class Animation : public coding::Codable,
+                        public NamedObject {
+         CRIMILD_IMPLEMENT_RTTI( crimild::animation::Animation )
 
-        public:
-            enum class PlaybackMode {
-                ONCE,
-                REPEAT,
-                MIRROR_REPEAT
-            };
+      public:
+         enum class PlaybackMode {
+            ONCE,
+            REPEAT,
+            MIRROR_REPEAT
+         };
 
-        public:
-            explicit Animation( std::string name = "" );
-            explicit Animation( SharedPointer< Clip > const &clip, crimild::Real32 offset = 0.0f, crimild::Real32 duration = -1 );
-            virtual ~Animation( void );
+      public:
+         explicit Animation( std::string name = "" );
+         explicit Animation( SharedPointer< Clip > const &clip, crimild::Real32 offset = 0.0f, crimild::Real32 duration = -1 );
+         virtual ~Animation( void );
 
-            Clip *getClip( void ) { return crimild::get_ptr( _clip ); }
-            void setClip( SharedPointer< Clip > &clip, crimild::Real64 offset = 0.0, crimild::Real64 duration = -1.0 );
+         Clip *getClip( void ) { return crimild::get_ptr( _clip ); }
+         void setClip( SharedPointer< Clip > &clip, crimild::Real64 offset = 0.0, crimild::Real64 duration = -1.0 );
 
-            const Clock &getClock( void ) const { return _clock; }
+         const Clock &getClock( void ) const { return _clock; }
 
-            void setPlaybackMode( PlaybackMode playbackMode ) { _playbackMode = playbackMode; }
-            PlaybackMode getPlaybackMode( void ) const { return _playbackMode; }
+         void setPlaybackMode( PlaybackMode playbackMode ) { _playbackMode = playbackMode; }
+         PlaybackMode getPlaybackMode( void ) const { return _playbackMode; }
 
-            void setDuration( crimild::Real32 duration ) { _duration = duration; }
-            crimild::Real32 getDuration( void ) const { return _duration; }
+         void setDuration( crimild::Real32 duration ) { _duration = duration; }
+         crimild::Real32 getDuration( void ) const { return _duration; }
 
-            void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
-            crimild::Real32 getFrameRate( void ) const { return _frameRate; }
+         void setFrameRate( crimild::Real32 frameRate ) { _frameRate = frameRate; }
+         crimild::Real32 getFrameRate( void ) const { return _frameRate; }
 
-            void setOffset( crimild::Real32 offset ) { _offset = offset; }
-            crimild::Real32 getOffset( void ) const { return _offset; }
+         void setOffset( crimild::Real32 offset ) { _offset = offset; }
+         crimild::Real32 getOffset( void ) const { return _offset; }
 
-            void setTimeScale( crimild::Real32 timeScale ) { _clock.setTimeScale( timeScale ); }
-            crimild::Real32 getTimeScale( void ) const { return _clock.getTimeScale(); }
+         void setTimeScale( crimild::Real32 timeScale ) { _clock.setTimeScale( timeScale ); }
+         crimild::Real32 getTimeScale( void ) const { return _clock.getTimeScale(); }
 
-        private:
-            crimild::Clock _clock;
-            crimild::Real32 _duration = 0.0;
-            crimild::Real32 _frameRate = 1.0f;
-            crimild::Real32 _offset = 0.0;
-            PlaybackMode _playbackMode = PlaybackMode::REPEAT;
-            SharedPointer< Clip > _clip;
+      private:
+         crimild::Clock _clock;
+         crimild::Real32 _duration = 0.0;
+         crimild::Real32 _frameRate = 1.0f;
+         crimild::Real32 _offset = 0.0;
+         PlaybackMode _playbackMode = PlaybackMode::REPEAT;
+         SharedPointer< Clip > _clip;
 
-        public:
-            Animation *update( const Clock &c );
+      public:
+         Animation *update( const Clock &c );
 
-            Animation *sync( SharedPointer< Animation > const &other );
-            Animation *sync( Animation *other );
+         Animation *sync( SharedPointer< Animation > const &other );
+         Animation *sync( Animation *other );
 
-            Animation *lerp( SharedPointer< Animation > const &other, crimild::Real32 factor, crimild::Bool sync = true );
-            Animation *lerp( Animation *other, crimild::Real32 factor, crimild::Bool sync = true );
+         Animation *lerp( SharedPointer< Animation > const &other, crimild::Real32 factor, crimild::Bool sync = true );
+         Animation *lerp( Animation *other, crimild::Real32 factor, crimild::Bool sync = true );
 
-            Animation *add( SharedPointer< Animation > const &other, crimild::Real32 strength );
-            Animation *add( Animation *other, crimild::Real32 strength );
+         Animation *add( SharedPointer< Animation > const &other, crimild::Real32 strength );
+         Animation *add( Animation *other, crimild::Real32 strength );
 
-        private:
-            void evaluate( void );
+      private:
+         void evaluate( void );
 
-        public:
-            template< typename T >
-            Animation *setValue( const std::string &channelName, const T &value )
-            {
-                if ( !_accumulators.contains( channelName ) ) {
-                    _accumulators[ channelName ] = crimild::alloc< AccumulatorImpl< T > >();
-                }
-
-                auto acc = crimild::get_ptr( _accumulators[ channelName ] );
-                if ( acc != nullptr ) {
-                    static_cast< AccumulatorImpl< T > * >( acc )->set( value );
-                }
-
-                return this;
+      public:
+         template< typename T >
+         Animation *setValue( const std::string &channelName, const T &value )
+         {
+            if ( !_accumulators.contains( channelName ) ) {
+               _accumulators[ channelName ] = crimild::alloc< AccumulatorImpl< T > >();
             }
 
-            template< typename T >
-            Animation *getValue( const std::string &channelName, T &value )
-            {
-                if ( _accumulators.contains( channelName ) ) {
-                    auto acc = crimild::get_ptr( _accumulators[ channelName ] );
-                    if ( acc != nullptr ) {
-                        value = static_cast< AccumulatorImpl< T > * >( acc )->get();
-                    }
-                }
-
-                return this;
+            auto acc = crimild::get_ptr( _accumulators[ channelName ] );
+            if ( acc != nullptr ) {
+               static_cast< AccumulatorImpl< T > * >( acc )->set( value );
             }
 
-        private:
-            Map< std::string, SharedPointer< Accumulator > > _accumulators;
+            return this;
+         }
 
-            /**
-               \name Coding
-            */
-            //@{
+         template< typename T >
+         Animation *getValue( const std::string &channelName, T &value )
+         {
+            if ( _accumulators.contains( channelName ) ) {
+               auto acc = crimild::get_ptr( _accumulators[ channelName ] );
+               if ( acc != nullptr ) {
+                  value = static_cast< AccumulatorImpl< T > * >( acc )->get();
+               }
+            }
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+            return this;
+         }
 
-            //@}
-        };
+      private:
+         Map< std::string, SharedPointer< Accumulator > > _accumulators;
 
-    }
+         /**
+            \name Coding
+         */
+         //@{
+
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
+
+         //@}
+      };
+
+   }
 
 }
 

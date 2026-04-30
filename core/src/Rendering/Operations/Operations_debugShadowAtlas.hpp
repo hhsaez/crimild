@@ -28,18 +28,18 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_SHADOW_ATLAS_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_DEBUG_SHADOW_ATLAS_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
-    class FrameGraphResource;
+   class FrameGraphOperation;
+   class FrameGraphResource;
 
-    namespace framegraph {
+   namespace framegraph {
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > debugShadowAtlas( SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
+      [[deprecated]] SharedPointer< FrameGraphOperation > debugShadowAtlas( SharedPointer< FrameGraphResource > const &shadowAtlas ) noexcept;
 
-    }
+   }
 
 }
 

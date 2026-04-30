@@ -28,42 +28,42 @@
 #ifndef CRIMILD_RENDERING_SHADER_LOCATION_
 #define CRIMILD_RENDERING_SHADER_LOCATION_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class ShaderProgram;
+   class ShaderProgram;
 
-    class [[deprecated]] ShaderLocation : public NamedObject, public SharedObject {
-    public:
-        enum class Type {
-            ATTRIBUTE,
-            UNIFORM,
-            UNIFORM_BLOCK,
-            MAX
-        };
+   class [[deprecated]] ShaderLocation : public NamedObject, public SharedObject {
+   public:
+      enum class Type {
+         ATTRIBUTE,
+         UNIFORM,
+         UNIFORM_BLOCK,
+         MAX
+      };
 
-    public:
-        explicit ShaderLocation( Type type, std::string name );
-        virtual ~ShaderLocation( void );
+   public:
+      explicit ShaderLocation( Type type, std::string name );
+      virtual ~ShaderLocation( void );
 
-        Type getType( void ) const { return _type; }
+      Type getType( void ) const { return _type; }
 
-        void reset( void ) { _location = -1; }
+      void reset( void ) { _location = -1; }
 
-        bool isValid( void ) const { return _location >= 0; }
+      bool isValid( void ) const { return _location >= 0; }
 
-        int getLocation( void ) const { return _location; }
-        void setLocation( int location ) { _location = location; }
+      int getLocation( void ) const { return _location; }
+      void setLocation( int location ) { _location = location; }
 
-        void setProgram( ShaderProgram *program ) { _program = program; }
-        ShaderProgram *getProgram( void ) { return _program; }
+      void setProgram( ShaderProgram *program ) { _program = program; }
+      ShaderProgram *getProgram( void ) { return _program; }
 
-    private:
-        Type _type;
-        int _location;
-        ShaderProgram *_program = nullptr;
-    };
+   private:
+      Type _type;
+      int _location;
+      ShaderProgram *_program = nullptr;
+   };
 
 }
 

@@ -28,32 +28,32 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_BUFFER_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_COMPUTE_BUFFER_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
-    class FrameGraphResource;
-    class Shader;
-    class StorageBuffer;
-    class DescriptorSet;
-    struct DispatchWorkgroup;
+   class FrameGraphOperation;
+   class FrameGraphResource;
+   class Shader;
+   class StorageBuffer;
+   class DescriptorSet;
+   struct DispatchWorkgroup;
 
-    namespace framegraph {
+   namespace framegraph {
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
-            SharedPointer< StorageBuffer > const &storageBuffer,
-            SharedPointer< Shader > shader,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
-        ) noexcept;
+      [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
+         SharedPointer< StorageBuffer > const &storageBuffer,
+         SharedPointer< Shader > shader,
+         Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+      ) noexcept;
 
-        [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
-            SharedPointer< StorageBuffer > const &storageBuffer,
-            SharedPointer< Shader > shader,
-            const DispatchWorkgroup &workgroup,
-            Array< SharedPointer< DescriptorSet > > descriptorSets = {}
-        ) noexcept;
-    }
+      [[deprecated]] SharedPointer< FrameGraphOperation > computeBuffer(
+         SharedPointer< StorageBuffer > const &storageBuffer,
+         SharedPointer< Shader > shader,
+         const DispatchWorkgroup &workgroup,
+         Array< SharedPointer< DescriptorSet > > descriptorSets = {}
+      ) noexcept;
+   }
 
 }
 

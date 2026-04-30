@@ -28,8 +28,9 @@
 #ifndef CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 

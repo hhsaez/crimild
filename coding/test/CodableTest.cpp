@@ -32,8 +32,8 @@
 #include "MemoryDecoder.hpp"
 #include "MemoryEncoder.hpp"
 
-#include <Crimild_Foundation.hpp>
 #include <Crimild_Mathematics.hpp>
+#include <crimild/foundation.hpp>
 #include <gtest/gtest.h>
 
 namespace crimild {

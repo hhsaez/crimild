@@ -28,59 +28,59 @@
 #ifndef CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
 #define CRIMILD_CORE_RENDERING_FRAME_GRAPH_RESOURCE_
 
-#include "Crimild_Foundation.hpp"
+#include <crimild/foundation.hpp>
 
 namespace crimild {
 
-    class FrameGraphOperation;
+   class FrameGraphOperation;
 
-    /**
-     * \brief A resource to be used by frame graph operations
-     */
-    class [[deprecated]] FrameGraphResource {
-    public:
-        enum class Type {
-            BUFFER,
-            BUFFER_VIEW,
-            IMAGE,
-            IMAGE_VIEW,
-            TEXTURE,
-            ATTACHMENT,
-            RENDERABLE_SET,
-            STORAGE_BUFFER,
-        };
+   /**
+    * \brief A resource to be used by frame graph operations
+    */
+   class [[deprecated]] FrameGraphResource {
+   public:
+      enum class Type {
+         BUFFER,
+         BUFFER_VIEW,
+         IMAGE,
+         IMAGE_VIEW,
+         TEXTURE,
+         ATTACHMENT,
+         RENDERABLE_SET,
+         STORAGE_BUFFER,
+      };
 
-    public:
-        virtual ~FrameGraphResource( void ) = default;
+   public:
+      virtual ~FrameGraphResource( void ) = default;
 
-        virtual Type getType( void ) const noexcept = 0;
+      virtual Type getType( void ) const noexcept = 0;
 
-        virtual void setReadBy( FrameGraphOperation *op ) noexcept { m_readBy.add( op ); }
+      virtual void setReadBy( FrameGraphOperation *op ) noexcept { m_readBy.add( op ); }
 
-        inline Bool isRead( void ) const noexcept { return !m_readBy.empty(); }
+      inline Bool isRead( void ) const noexcept { return !m_readBy.empty(); }
 
-        template< typename Fn >
-        void eachReadBy( Fn fn ) noexcept
-        {
-            m_readBy.each( fn );
-        }
+      template< typename Fn >
+      void eachReadBy( Fn fn ) noexcept
+      {
+         m_readBy.each( fn );
+      }
 
-        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept { m_writtenBy.add( op ); }
+      virtual void setWrittenBy( FrameGraphOperation *op ) noexcept { m_writtenBy.add( op ); }
 
-        inline Bool isWritten( void ) const noexcept { return !m_writtenBy.empty(); }
+      inline Bool isWritten( void ) const noexcept { return !m_writtenBy.empty(); }
 
-        Bool isWrittenBefore( FrameGraphOperation *op ) noexcept;
+      Bool isWrittenBefore( FrameGraphOperation *op ) noexcept;
 
-        template< typename Fn >
-        void eachWrittenBy( Fn fn ) noexcept
-        {
-            m_writtenBy.each( fn );
-        }
+      template< typename Fn >
+      void eachWrittenBy( Fn fn ) noexcept
+      {
+         m_writtenBy.each( fn );
+      }
 
-    private:
-        Array< FrameGraphOperation * > m_readBy;
-        Array< FrameGraphOperation * > m_writtenBy;
-    };
+   private:
+      Array< FrameGraphOperation * > m_readBy;
+      Array< FrameGraphOperation * > m_writtenBy;
+   };
 
 }
 

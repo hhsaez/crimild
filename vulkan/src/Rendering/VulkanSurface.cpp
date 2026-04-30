@@ -27,25 +27,26 @@
 
 #include "VulkanSurface.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "VulkanInstance.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild::vulkan;
 
 VulkanSurface::VulkanSurface( VulkanInstance *instance, VkSurfaceKHR handle ) noexcept
-    : m_instance( instance ),
-      m_handle( handle )
+   : m_instance( instance ),
+     m_handle( handle )
 {
-    // no-op
+   // no-op
 }
 
 VulkanSurface::~VulkanSurface( void ) noexcept
 {
-    CRIMILD_LOG_TRACE();
+   CRIMILD_LOG_TRACE();
 
-    if ( m_handle != VK_NULL_HANDLE ) {
-        vkDestroySurfaceKHR( m_instance->getHandle(), m_handle, nullptr );
-        m_instance = nullptr;
-        m_handle = VK_NULL_HANDLE;
-    }
+   if ( m_handle != VK_NULL_HANDLE ) {
+      vkDestroySurfaceKHR( m_instance->getHandle(), m_handle, nullptr );
+      m_instance = nullptr;
+      m_handle = VK_NULL_HANDLE;
+   }
 }

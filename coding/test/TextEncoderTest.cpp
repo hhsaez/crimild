@@ -1,6 +1,6 @@
 #include "TextEncoder.hpp"
 
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 #include <format>
 #include <gtest/gtest.h>
 #include <sstream>

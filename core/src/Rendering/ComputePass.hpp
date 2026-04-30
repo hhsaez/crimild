@@ -28,48 +28,49 @@
 #ifndef CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 #define CRIMILD_CORE_RENDERING_COMPUTE_PASS_
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/FrameGraphOperation.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    class [[deprecated]] ComputePass
-        : public FrameGraphOperation,
-          public RenderResourceImpl< ComputePass > {
+   class [[deprecated]] ComputePass
+      : public FrameGraphOperation,
+        public RenderResourceImpl< ComputePass > {
 
-    public:
-        virtual ~ComputePass( void ) = default;
+   public:
+      virtual ~ComputePass( void ) = default;
 
-        inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::COMPUTE_PASS; }
+      inline FrameGraphOperation::Type getType( void ) const noexcept override { return FrameGraphOperation::Type::COMPUTE_PASS; }
 
-        inline void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &commands ) noexcept { m_commands = commands; }
-        inline Array< SharedPointer< CommandBuffer > > &getCommandBuffers( void ) noexcept { return m_commands; }
+      inline void setCommandBuffers( Array< SharedPointer< CommandBuffer > > const &commands ) noexcept { m_commands = commands; }
+      inline Array< SharedPointer< CommandBuffer > > &getCommandBuffers( void ) noexcept { return m_commands; }
 
-    private:
-        Array< SharedPointer< CommandBuffer > > m_commands;
+   private:
+      Array< SharedPointer< CommandBuffer > > m_commands;
 
-        // DEPRECATED FROM HERE
+      // DEPRECATED FROM HERE
 
-    public:
-        inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
+   public:
+      inline void setCommandRecorder( CommandRecorder commandRecorder ) noexcept { m_commandRecorder = commandRecorder; }
 
-        inline CommandBuffer *execute( Size imageIndex ) noexcept
-        {
-            return m_commandRecorder != nullptr ? m_commandRecorder( imageIndex ) : nullptr;
-        }
+      inline CommandBuffer *execute( Size imageIndex ) noexcept
+      {
+         return m_commandRecorder != nullptr ? m_commandRecorder( imageIndex ) : nullptr;
+      }
 
-    private:
-        CommandRecorder m_commandRecorder;
+   private:
+      CommandRecorder m_commandRecorder;
 
-    public:
-        void setConditional( Bool conditional ) noexcept { m_conditional = conditional; }
-        Bool isConditional( void ) const noexcept { return m_conditional; }
+   public:
+      void setConditional( Bool conditional ) noexcept { m_conditional = conditional; }
+      Bool isConditional( void ) const noexcept { return m_conditional; }
 
-    private:
-        Bool m_conditional = false;
-    };
+   private:
+      Bool m_conditional = false;
+   };
 
 }
 

@@ -27,10 +27,10 @@
 
 #include "Font.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 
+#include <crimild/foundation.hpp>
 #include <fstream>
 
 using namespace crimild;
@@ -41,7 +41,7 @@ Font::Font( void )
 
 Font::Font( std::string fontDefFile )
 {
-    loadGlyphs( fontDefFile );
+   loadGlyphs( fontDefFile );
 }
 
 Font::~Font( void )
@@ -50,47 +50,47 @@ Font::~Font( void )
 
 void Font::loadGlyphs( std::string file )
 {
-    _glyphs.clear();
+   _glyphs.clear();
 
-    auto fontNamePrefix = file.substr( 0, file.find_last_of( "." ) );
-    fontNamePrefix = FileSystem::getInstance().getRelativePath( fontNamePrefix );
+   auto fontNamePrefix = file.substr( 0, file.find_last_of( "." ) );
+   fontNamePrefix = FileSystem::getInstance().getRelativePath( fontNamePrefix );
 
-    auto textureFileName = fontNamePrefix + ".tga";
-    if ( auto texture = AssetManager::getInstance()->get< Texture >( textureFileName ) ) {
-        _texture = crimild::retain( texture );
-    }
+   auto textureFileName = fontNamePrefix + ".tga";
+   if ( auto texture = AssetManager::getInstance()->get< Texture >( textureFileName ) ) {
+      _texture = crimild::retain( texture );
+   }
 
-    auto sdfTextureFileName = fontNamePrefix + "_sdf.tga";
-    if ( auto sdfTexture = AssetManager::getInstance()->get< Texture >( sdfTextureFileName ) ) {
-        _sdfTexture = crimild::retain( sdfTexture );
-    }
+   auto sdfTextureFileName = fontNamePrefix + "_sdf.tga";
+   if ( auto sdfTexture = AssetManager::getInstance()->get< Texture >( sdfTextureFileName ) ) {
+      _sdfTexture = crimild::retain( sdfTexture );
+   }
 
-    std::ifstream input;
-    input.open( file );
-    if ( !input.is_open() ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open glyph file ", file );
-        return;
-    }
+   std::ifstream input;
+   input.open( file );
+   if ( !input.is_open() ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open glyph file ", file );
+      return;
+   }
 
-    char buffer[ 1024 ];
-    while ( !input.eof() ) {
-        input.getline( buffer, 1024 );
-        std::stringstream line;
-        line << buffer;
+   char buffer[ 1024 ];
+   while ( !input.eof() ) {
+      input.getline( buffer, 1024 );
+      std::stringstream line;
+      line << buffer;
 
-        Font::Glyph glyph;
-        int symbol;
-        line >> symbol
-            >> glyph.width
-            >> glyph.height
-            >> glyph.bearingX
-            >> glyph.bearingY
-            >> glyph.advance
-            >> glyph.uOffset
-            >> glyph.vOffset
-            >> glyph.u
-            >> glyph.v;
-        glyph.symbol = ( unsigned char ) symbol;
-        _glyphs[ glyph.symbol ] = glyph;
-    }
+      Font::Glyph glyph;
+      int symbol;
+      line >> symbol
+         >> glyph.width
+         >> glyph.height
+         >> glyph.bearingX
+         >> glyph.bearingY
+         >> glyph.advance
+         >> glyph.uOffset
+         >> glyph.vOffset
+         >> glyph.u
+         >> glyph.v;
+      glyph.symbol = ( unsigned char ) symbol;
+      _glyphs[ glyph.symbol ] = glyph;
+   }
 }

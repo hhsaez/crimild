@@ -12,7 +12,7 @@ target_include_directories(
 
 target_link_libraries(
     Triangle3D
-    PRIVATE Crimild::Foundation
+    PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
     PRIVATE Crimild::Coding
     PRIVATE Crimild::Core

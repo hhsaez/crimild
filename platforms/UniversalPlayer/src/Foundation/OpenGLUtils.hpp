@@ -1,7 +1,7 @@
 #ifndef CRIMILD_OPENGL_UTILS_
 #define CRIMILD_OPENGL_UTILS_
 
-#include <Crimild_Foundation.hpp>
+#include <crimild/foundation.hpp>
 
 // clang-format off
 #ifdef CRIMILD_PLATFORM_DESKTOP

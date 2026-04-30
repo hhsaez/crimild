@@ -28,97 +28,97 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 #define CRIMILD_CORE_RENDERING_RENDER_QUEUE_
 
-#include "Crimild_Foundation.hpp"
 #include "Material.hpp"
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Light.hpp"
 
 #include <chrono>
+#include <crimild/foundation.hpp>
 #include <functional>
 #include <vector>
 
 namespace crimild {
 
-    class RenderQueue;
+   class RenderQueue;
 
-    using RenderQueuePtr = SharedPointer< RenderQueue >;
+   using RenderQueuePtr = SharedPointer< RenderQueue >;
 
-    class [[deprecated]] RenderQueue : public SharedObject {
-    public:
-        struct Renderable {
-            SharedPointer< Geometry > geometry;
-            SharedPointer< Material > material;
-            Matrix4f modelTransform;
-            double distanceFromCamera;
-        };
+   class [[deprecated]] RenderQueue : public SharedObject {
+   public:
+      struct Renderable {
+         SharedPointer< Geometry > geometry;
+         SharedPointer< Material > material;
+         Matrix4f modelTransform;
+         double distanceFromCamera;
+      };
 
-        enum class RenderableType {
-            BACKGROUND,
-            OCCLUDER,
-            SHADOW_CASTER,
-            SHADOW_CASTER_INSTANCED,
-            OPAQUE,
-            OPAQUE_CUSTOM,
-            OPAQUE_INSTANCED,
-            TRANSLUCENT,
-            TRANSLUCENT_CUSTOM,
-            TRANSLUCENT_INSTANCED,
-            SKYBOX,
-            SCREEN,
-            //            DEBUG,
-        };
+      enum class RenderableType {
+         BACKGROUND,
+         OCCLUDER,
+         SHADOW_CASTER,
+         SHADOW_CASTER_INSTANCED,
+         OPAQUE,
+         OPAQUE_CUSTOM,
+         OPAQUE_INSTANCED,
+         TRANSLUCENT,
+         TRANSLUCENT_CUSTOM,
+         TRANSLUCENT_INSTANCED,
+         SKYBOX,
+         SCREEN,
+         //            DEBUG,
+      };
 
-        using Renderables = std::list< Renderable >;
+      using Renderables = std::list< Renderable >;
 
-    public:
-        explicit RenderQueue( void );
-        virtual ~RenderQueue( void );
+   public:
+      explicit RenderQueue( void );
+      virtual ~RenderQueue( void );
 
-    public:
-        void reset( void );
+   public:
+      void reset( void );
 
-        void setCamera( Camera *camera );
-        Camera *getCamera( void ) { return crimild::get_ptr( _camera ); }
+      void setCamera( Camera *camera );
+      Camera *getCamera( void ) { return crimild::get_ptr( _camera ); }
 
-        const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
-        const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
+      const Matrix4f &getViewMatrix( void ) const { return _viewMatrix; }
+      const Matrix4f &getProjectionMatrix( void ) const { return _projectionMatrix; }
 
-        void push( Geometry *geometry );
-        void push( Light *light );
+      void push( Geometry *geometry );
+      void push( Light *light );
 
-        Renderables *getRenderables( RenderableType type ) { return &_renderables[ type ]; }
+      Renderables *getRenderables( RenderableType type ) { return &_renderables[ type ]; }
 
-        void each( Renderables *renderables, std::function< void( Renderable * ) > callback );
+      void each( Renderables *renderables, std::function< void( Renderable * ) > callback );
 
-        crimild::Size getLightCount( void ) const { return _lights.size(); }
-        void each( std::function< void( Light *, int ) > callback );
+      crimild::Size getLightCount( void ) const { return _lights.size(); }
+      void each( std::function< void( Light *, int ) > callback );
 
-    private:
-        SharedPointer< Camera > _camera;
+   private:
+      SharedPointer< Camera > _camera;
 
-        Matrix4f _viewMatrix;
-        Matrix4f _projectionMatrix;
+      Matrix4f _viewMatrix;
+      Matrix4f _projectionMatrix;
 
-        std::vector< SharedPointer< Light > > _lights;
+      std::vector< SharedPointer< Light > > _lights;
 
-        std::map< RenderableType, Renderables > _renderables;
+      std::map< RenderableType, Renderables > _renderables;
 
-    public:
-        unsigned long getTimestamp( void ) const { return _timestamp; }
-        void setTimestamp( unsigned long value ) { _timestamp = value; }
+   public:
+      unsigned long getTimestamp( void ) const { return _timestamp; }
+      void setTimestamp( unsigned long value ) { _timestamp = value; }
 
-    private:
-        std::chrono::microseconds::rep _timestamp;
-    };
+   private:
+      std::chrono::microseconds::rep _timestamp;
+   };
 
-    namespace messaging {
+   namespace messaging {
 
-        struct RenderQueueAvailable {
-            Array< SharedPointer< RenderQueue > > renderQueues;
-        };
+      struct RenderQueueAvailable {
+         Array< SharedPointer< RenderQueue > > renderQueues;
+      };
 
-    }
+   }
 
 }
 

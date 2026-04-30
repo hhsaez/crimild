@@ -28,155 +28,155 @@
 #include "Group.hpp"
 
 #include "Crimild_Coding.hpp"
-#include "Crimild_Foundation.hpp"
 #include "Exceptions/HasParentException.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <crimild/foundation.hpp>
 #include <thread>
 
 using namespace crimild;
 
 Group::Group( std::string name )
-    : Node( name )
+   : Node( name )
 {
 }
 
 Group::~Group( void )
 {
-    detachAllNodes();
+   detachAllNodes();
 }
 
 void Group::attachNode( Node *node )
 {
-    attachNode( crimild::retain( node ) );
+   attachNode( crimild::retain( node ) );
 }
 
 void Group::attachNode( SharedPointer< Node > const &node )
 {
-    if ( node->getParent() == this ) {
-        // the node is already attach to this group
-        return;
-    }
+   if ( node->getParent() == this ) {
+      // the node is already attach to this group
+      return;
+   }
 
-    if ( node->getParent() != nullptr ) {
-        throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
-    }
+   if ( node->getParent() != nullptr ) {
+      throw HasParentException( node->getName(), this->getName(), node->getParent()->getName() );
+   }
 
-    node->setParent( this );
+   node->setParent( this );
 
-    _nodes.add( node );
+   _nodes.add( node );
 }
 
 void Group::attachNodeAfter( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept
 {
-    if ( node->hasParent() ) {
-        node->detachFromParent();
-    }
+   if ( node->hasParent() ) {
+      node->detachFromParent();
+   }
 
-    size_t index;
-    if ( _nodes.indexOf( before, index ) ) {
-        _nodes.addAt( node, index + 1 );
-    } else {
-        _nodes.add( node );
-    }
-    node->setParent( this );
+   size_t index;
+   if ( _nodes.indexOf( before, index ) ) {
+      _nodes.addAt( node, index + 1 );
+   } else {
+      _nodes.add( node );
+   }
+   node->setParent( this );
 }
 
 void Group::attachNodeBefore( SharedPointer< Node > const &node, SharedPointer< Node > const &before ) noexcept
 {
-    if ( node->hasParent() ) {
-        node->detachFromParent();
-    }
+   if ( node->hasParent() ) {
+      node->detachFromParent();
+   }
 
-    size_t index;
-    if ( _nodes.indexOf( before, index ) ) {
-        _nodes.addAt( node, index );
-    } else {
-        _nodes.add( node );
-    }
+   size_t index;
+   if ( _nodes.indexOf( before, index ) ) {
+      _nodes.addAt( node, index );
+   } else {
+      _nodes.add( node );
+   }
 
-    node->setParent( this );
+   node->setParent( this );
 }
 
 void Group::detachNode( Node *node )
 {
-    if ( node->getParent() == this ) {
-        node->setParent( nullptr );
-        _nodes.remove( crimild::retain( node ) );
-    }
+   if ( node->getParent() == this ) {
+      node->setParent( nullptr );
+      _nodes.remove( crimild::retain( node ) );
+   }
 }
 
 void Group::detachNode( SharedPointer< Node > const &node )
 {
-    detachNode( crimild::get_ptr( node ) );
+   detachNode( crimild::get_ptr( node ) );
 }
 
 void Group::detachAllNodes( void )
 {
-    _nodes.each( []( SharedPointer< Node > &node ) { node->setParent( nullptr ); } );
-    _nodes.clear();
+   _nodes.each( []( SharedPointer< Node > &node ) { node->setParent( nullptr ); } );
+   _nodes.clear();
 }
 
 Node *Group::getNodeAt( unsigned int index )
 {
-    return crimild::get_ptr( _nodes[ index ] );
+   return crimild::get_ptr( _nodes[ index ] );
 }
 
 Node *Group::getNode( std::string name )
 {
-    Node *result = nullptr;
-    bool found = false;
-    _nodes.each( [ &result, &found, name ]( SharedPointer< Node > &node ) {
-        if ( !found && node->getName() == name ) {
-            result = crimild::get_ptr( node );
-            found = true;
-        }
-    } );
+   Node *result = nullptr;
+   bool found = false;
+   _nodes.each( [ &result, &found, name ]( SharedPointer< Node > &node ) {
+      if ( !found && node->getName() == name ) {
+         result = crimild::get_ptr( node );
+         found = true;
+      }
+   } );
 
-    return result;
+   return result;
 }
 
 void Group::forEachNode( std::function< void( Node * ) > callback, bool skipDisabledNodes )
 {
-    if ( skipDisabledNodes ) {
-        _nodes.each(
-            [ &callback ]( SharedPointer< Node > &node ) {
-                if ( node != nullptr && node->isEnabled() ) {
-                    callback( crimild::get_ptr( node ) );
-                }
+   if ( skipDisabledNodes ) {
+      _nodes.each(
+         [ &callback ]( SharedPointer< Node > &node ) {
+            if ( node != nullptr && node->isEnabled() ) {
+               callback( crimild::get_ptr( node ) );
             }
-        );
-    } else {
-        _nodes.each(
-            [ &callback ]( SharedPointer< Node > &node ) {
-                if ( node != nullptr ) {
-                    callback( crimild::get_ptr( node ) );
-                }
+         }
+      );
+   } else {
+      _nodes.each(
+         [ &callback ]( SharedPointer< Node > &node ) {
+            if ( node != nullptr ) {
+               callback( crimild::get_ptr( node ) );
             }
-        );
-    }
+         }
+      );
+   }
 }
 
 void Group::accept( NodeVisitor &visitor )
 {
-    visitor.visitGroup( this );
+   visitor.visitGroup( this );
 }
 
 void Group::encode( coding::Encoder &encoder )
 {
-    Node::encode( encoder );
+   Node::encode( encoder );
 
-    encoder.encode( "nodes", _nodes );
+   encoder.encode( "nodes", _nodes );
 }
 
 void Group::decode( coding::Decoder &decoder )
 {
-    Node::decode( decoder );
+   Node::decode( decoder );
 
-    Array< SharedPointer< Node > > nodes;
-    decoder.decode( "nodes", nodes );
-    nodes.each( [ this ]( SharedPointer< Node > &n ) {
-        attachNode( n );
-    } );
+   Array< SharedPointer< Node > > nodes;
+   decoder.decode( "nodes", nodes );
+   nodes.each( [ this ]( SharedPointer< Node > &n ) {
+      attachNode( n );
+   } );
 }

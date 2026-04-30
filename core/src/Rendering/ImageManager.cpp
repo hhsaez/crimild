@@ -27,74 +27,75 @@
 
 #include "Rendering/ImageManager.hpp"
 
-#include "Crimild_Foundation.hpp"
 #include "Rendering/ImageTGA.hpp"
+
+#include <crimild/foundation.hpp>
 
 using namespace crimild;
 
 SharedPointer< Image > ImageManager::loadImage( ImageDescriptor const &descriptor ) const noexcept
 {
-    if ( descriptor.filePath.getExtension() != "tga" ) {
-        CRIMILD_LOG_WARNING( "Invalid image file ", descriptor.filePath.path );
-        return nullptr;
-    }
+   if ( descriptor.filePath.getExtension() != "tga" ) {
+      CRIMILD_LOG_WARNING( "Invalid image file ", descriptor.filePath.path );
+      return nullptr;
+   }
 
-    return crimild::alloc< ImageTGA >( descriptor.filePath.getAbsolutePath() );
+   return crimild::alloc< ImageTGA >( descriptor.filePath.getAbsolutePath() );
 }
 
 SharedPointer< Image > ImageManager::loadCubemap( CubemapDescriptor const &descriptor ) const noexcept
 {
-    // This is not ideal. We create several images just to delete them later and
-    // create a new one with the whole data... Maybe derived classes can handle
-    // this one in a better way
+   // This is not ideal. We create several images just to delete them later and
+   // create a new one with the whole data... Maybe derived classes can handle
+   // this one in a better way
 
-    auto images = descriptor.filePaths.map(
-        [ & ]( auto &path ) {
-            return loadImage(
-                ImageDescriptor {
-                    .filePath = path,
-                }
-            );
-        }
-    );
+   auto images = descriptor.filePaths.map(
+      [ & ]( auto &path ) {
+         return loadImage(
+            ImageDescriptor {
+               .filePath = path,
+            }
+         );
+      }
+   );
 
-    if ( images.empty() ) {
-        return nullptr;
-    }
+   if ( images.empty() ) {
+      return nullptr;
+   }
 
-    auto layerCount = images.size();
-    auto firstImage = images[ 0 ];
-    auto format = firstImage->format;
-    auto w = firstImage->extent.width;
-    auto h = firstImage->extent.height;
+   auto layerCount = images.size();
+   auto firstImage = images[ 0 ];
+   auto format = firstImage->format;
+   auto w = firstImage->extent.width;
+   auto h = firstImage->extent.height;
 
-    auto image = crimild::alloc< Image >();
-    image->type = Image::Type::IMAGE_2D_CUBEMAP;
-    image->format = format;
-    image->setLayerCount( layerCount );
-    image->extent = {
-        .width = w,
-        .height = h,
-        .depth = 1,
-    };
-    image->setBufferView(
-        crimild::alloc< BufferView >(
-            BufferView::Target::IMAGE,
-            crimild::alloc< Buffer >(
-                [ & ] {
-                    auto data = ByteArray( layerCount * firstImage->getBufferView()->getLength() );
-                    Size offset = 0;
-                    images.each(
-                        [ &, i = 0 ]( auto &img ) mutable {
-                            memcpy( &data[ offset ], img->getBufferView()->getData(), img->getBufferView()->getLength() );
-                            offset += img->getBufferView()->getLength();
-                        }
-                    );
-                    return data;
-                }()
-            )
-        )
-    );
+   auto image = crimild::alloc< Image >();
+   image->type = Image::Type::IMAGE_2D_CUBEMAP;
+   image->format = format;
+   image->setLayerCount( layerCount );
+   image->extent = {
+      .width = w,
+      .height = h,
+      .depth = 1,
+   };
+   image->setBufferView(
+      crimild::alloc< BufferView >(
+         BufferView::Target::IMAGE,
+         crimild::alloc< Buffer >(
+            [ & ] {
+               auto data = ByteArray( layerCount * firstImage->getBufferView()->getLength() );
+               Size offset = 0;
+               images.each(
+                  [ &, i = 0 ]( auto &img ) mutable {
+                     memcpy( &data[ offset ], img->getBufferView()->getData(), img->getBufferView()->getLength() );
+                     offset += img->getBufferView()->getLength();
+                  }
+               );
+               return data;
+            }()
+         )
+      )
+   );
 
-    return image;
+   return image;
 }

@@ -28,87 +28,88 @@
 #ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 #define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 
-#include "Crimild_Foundation.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/ScalingMode.hpp"
 
+#include <crimild/foundation.hpp>
+
 namespace crimild {
 
-    struct ViewportDimensions {
+   struct ViewportDimensions {
 
-        ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
-        Rectf dimensions = Rectf { { 0, 0 }, { 1, 1 } };
-        Vector2f depthRange = Vector2f { 0.0f, 1.0f };
+      ScalingMode scalingMode = ScalingMode::SWAPCHAIN_RELATIVE;
+      Rectf dimensions = Rectf { { 0, 0 }, { 1, 1 } };
+      Vector2f depthRange = Vector2f { 0.0f, 1.0f };
 
-        static ViewportDimensions fromExtent( Real width, Real height ) noexcept
-        {
-            return ViewportDimensions {
-                .scalingMode = ScalingMode::FIXED,
-                .dimensions = Rectf { { 0, 0 }, { width, height } },
-            };
-        }
+      static ViewportDimensions fromExtent( Real width, Real height ) noexcept
+      {
+         return ViewportDimensions {
+            .scalingMode = ScalingMode::FIXED,
+            .dimensions = Rectf { { 0, 0 }, { width, height } },
+         };
+      }
 
-        static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
-        {
-            const auto &pd = parent.dimensions;
-            const auto &cd = child.dimensions;
-            return ViewportDimensions {
-                .scalingMode = ScalingMode::RELATIVE,
-                .dimensions = Rectf {
-                    {
-                        pd.origin.x + cd.origin.x * pd.size.width,
-                        pd.origin.y + cd.origin.y * pd.size.height,
-                    },
-                    {
-                        pd.size.width * cd.size.width,
-                        pd.size.height * cd.size.height,
-                    },
-                },
-            };
-        }
+      static ViewportDimensions viewportFrom( const ViewportDimensions &parent, const ViewportDimensions &child ) noexcept
+      {
+         const auto &pd = parent.dimensions;
+         const auto &cd = child.dimensions;
+         return ViewportDimensions {
+            .scalingMode = ScalingMode::RELATIVE,
+            .dimensions = Rectf {
+               {
+                  pd.origin.x + cd.origin.x * pd.size.width,
+                  pd.origin.y + cd.origin.y * pd.size.height,
+               },
+               {
+                  pd.size.width * cd.size.width,
+                  pd.size.height * cd.size.height,
+               },
+            },
+         };
+      }
 
-        static Array< ViewportDimensions > cubeViewportsFrom( const ViewportDimensions &parent ) noexcept
-        {
-            return Array< ViewportDimensions > {
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.0f, 0.5f }, { 0.25f, 0.25f } },
-                    }
-                ),
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.5f, 0.5f }, { 0.25f, 0.25f } },
-                    }
-                ),
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.5f, 0.25f }, { 0.25f, 0.25f } },
-                    }
-                ),
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.5f, 0.75f }, { 0.25f, 0.25f } },
-                    }
-                ),
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.25f, 0.5f }, { 0.25f, 0.25f } },
-                    }
-                ),
-                viewportFrom(
-                    parent,
-                    {
-                        .dimensions = Rectf { { 0.75f, 0.5f }, { 0.25f, 0.25f } },
-                    }
-                ),
-            };
-        }
-    };
+      static Array< ViewportDimensions > cubeViewportsFrom( const ViewportDimensions &parent ) noexcept
+      {
+         return Array< ViewportDimensions > {
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.0f, 0.5f }, { 0.25f, 0.25f } },
+               }
+            ),
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.5f, 0.5f }, { 0.25f, 0.25f } },
+               }
+            ),
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.5f, 0.25f }, { 0.25f, 0.25f } },
+               }
+            ),
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.5f, 0.75f }, { 0.25f, 0.25f } },
+               }
+            ),
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.25f, 0.5f }, { 0.25f, 0.25f } },
+               }
+            ),
+            viewportFrom(
+               parent,
+               {
+                  .dimensions = Rectf { { 0.75f, 0.5f }, { 0.25f, 0.25f } },
+               }
+            ),
+         };
+      }
+   };
 
 }
 

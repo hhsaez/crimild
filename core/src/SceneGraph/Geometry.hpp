@@ -28,85 +28,85 @@
 #ifndef CRIMILD_SCENE_GRAPH_GEOMETRY_
 #define CRIMILD_SCENE_GRAPH_GEOMETRY_
 
-#include "Crimild_Foundation.hpp"
 #include "Node.hpp"
 
+#include <crimild/foundation.hpp>
 #include <functional>
 
 namespace crimild {
 
-    class DescriptorSet;
-    class Primitive;
+   class DescriptorSet;
+   class Primitive;
 
-    class Geometry : public Node {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Geometry )
+   class Geometry : public Node {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Geometry )
 
-    public:
-        explicit Geometry( std::string name = "" );
-        virtual ~Geometry( void );
+   public:
+      explicit Geometry( std::string name = "" );
+      virtual ~Geometry( void );
 
-        bool hasPrimitives( void ) const { return _primitives.size(); }
+      bool hasPrimitives( void ) const { return _primitives.size(); }
 
-        void attachPrimitive( Primitive *primitive );
-        void attachPrimitive( SharedPointer< Primitive > const &primitive );
+      void attachPrimitive( Primitive *primitive );
+      void attachPrimitive( SharedPointer< Primitive > const &primitive );
 
-        void detachPrimitive( Primitive *primitive );
-        void detachPrimitive( SharedPointer< Primitive > const &primitive );
+      void detachPrimitive( Primitive *primitive );
+      void detachPrimitive( SharedPointer< Primitive > const &primitive );
 
-        void detachAllPrimitives( void );
+      void detachAllPrimitives( void );
 
-        Primitive *anyPrimitive( void ) noexcept { return crimild::get_ptr( _primitives.first() ); }
+      Primitive *anyPrimitive( void ) noexcept { return crimild::get_ptr( _primitives.first() ); }
 
-        void forEachPrimitive( std::function< void( Primitive * ) > callback );
+      void forEachPrimitive( std::function< void( Primitive * ) > callback );
 
-        void updateModelBounds( void );
+      void updateModelBounds( void );
 
-    private:
-        Array< SharedPointer< Primitive > > _primitives;
+   private:
+      Array< SharedPointer< Primitive > > _primitives;
 
-    public:
-        virtual void accept( NodeVisitor &visitor ) override;
+   public:
+      virtual void accept( NodeVisitor &visitor ) override;
 
-        /**
-                   \name Instancing
-                 */
-        //@{
+      /**
+                 \name Instancing
+               */
+      //@{
 
-    public:
-        void setInstancingEnabled( crimild::Bool enabled ) { _instancingEnabled = enabled; }
-        crimild::Bool isInstancingEnabled( void ) const { return _instancingEnabled; }
+   public:
+      void setInstancingEnabled( crimild::Bool enabled ) { _instancingEnabled = enabled; }
+      crimild::Bool isInstancingEnabled( void ) const { return _instancingEnabled; }
 
-    private:
-        crimild::Bool _instancingEnabled = false;
+   private:
+      crimild::Bool _instancingEnabled = false;
 
-        //@}
+      //@}
 
-        /**
-                   \name Descriptors
-                */
-        //@{
+      /**
+                 \name Descriptors
+              */
+      //@{
 
-    public:
-        DescriptorSet *getDescriptors( void ) noexcept;
+   public:
+      DescriptorSet *getDescriptors( void ) noexcept;
 
-    private:
-        SharedPointer< DescriptorSet > m_descriptors;
+   private:
+      SharedPointer< DescriptorSet > m_descriptors;
 
-        //@}
+      //@}
 
-        /**
-            \name Coding
-         */
-        //@{
+      /**
+          \name Coding
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
-    using GeometryPtr = SharedPointer< Geometry >;
+   using GeometryPtr = SharedPointer< Geometry >;
 
 }
 
