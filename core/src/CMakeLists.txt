@@ -605,7 +605,7 @@ target_link_libraries(
     crimild_core
     PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
-    PRIVATE Crimild::Coding
+    PRIVATE crimild::coding
 )
 
 add_library( Crimild::Core ALIAS crimild_core )

@@ -131,7 +131,7 @@ target_link_libraries(
     crimild_vulkan
     PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
-    PRIVATE Crimild::Coding
+    PRIVATE crimild::coding
     PRIVATE Crimild::Core
 
     # Vulkan libraries are made public so they can be used in other projects, like

@@ -8,7 +8,7 @@ function( CRIMILD_ADD_EXAMPLE EXAMPLE_NAME EXAMPLE_SOURCES )
         ${EXAMPLE_NAME}
         PRIVATE crimild::foundation
         PRIVATE Crimild::Mathematics
-        PRIVATE Crimild::Coding
+        PRIVATE crimild::coding
         PRIVATE Crimild::Core
         PRIVATE Crimild::Vulkan
         PRIVATE Crimild::Player

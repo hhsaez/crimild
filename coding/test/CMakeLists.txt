@@ -23,7 +23,7 @@ target_compile_features( crimild_coding_test PUBLIC cxx_std_20 )
 target_link_libraries(
     crimild_coding_test
     PRIVATE crimild::foundation
-    PRIVATE Crimild::Coding
+    PRIVATE crimild::coding
     PRIVATE gtest gmock
 )
 

@@ -55,7 +55,7 @@ endif()
 # Add subdirectories
 add_subdirectory(libs/foundation)
 add_subdirectory(mathematics)
-add_subdirectory(coding)
+add_subdirectory(libs/coding)
 add_subdirectory(core)
 
 # Configure Vulkan
