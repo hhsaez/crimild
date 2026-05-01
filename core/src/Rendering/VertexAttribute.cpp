@@ -27,35 +27,38 @@
 
 #include "Rendering/VertexAttribute.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild;
 
 VertexAttribute::VertexAttribute( VertexAttribute::Name name, Format format, crimild::UInt32 offset ) noexcept
-    : m_name( name ),
-      m_format( format ),
-      m_offset( offset )
+   : m_name( name ),
+     m_format( format ),
+     m_offset( offset )
 {
-    // no-op
+   // no-op
 }
 
 bool VertexAttribute::operator==( const VertexAttribute &other ) const noexcept
 {
-    return m_name == other.m_name && m_format == other.m_format && m_offset == other.m_offset;
+   return m_name == other.m_name && m_format == other.m_format && m_offset == other.m_offset;
 }
 
 void VertexAttribute::encode( coding::Encoder &encoder )
 {
-    coding::Codable::encode( encoder );
+   coding::Codable::encode( encoder );
 
-    encoder.encodeEnum( "name", m_name );
-    encoder.encodeEnum( "format", m_format );
-    encoder.encode( "offset", m_offset );
+   encoder.encodeEnum( "name", m_name );
+   encoder.encodeEnum( "format", m_format );
+   encoder.encode( "offset", m_offset );
 }
 
 void VertexAttribute::decode( coding::Decoder &decoder )
 {
-    coding::Codable::decode( decoder );
+   coding::Codable::decode( decoder );
 
-    decoder.decodeEnum( "name", m_name );
-    decoder.decodeEnum( "format", m_format );
-    decoder.decode( "offset", m_offset );
+   decoder.decodeEnum( "name", m_name );
+   decoder.decodeEnum( "format", m_format );
+   decoder.decode( "offset", m_offset );
 }

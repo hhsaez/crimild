@@ -27,36 +27,37 @@
 
 #include "Rendering/BufferView.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void BufferView::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "target", Int32( m_target ) );
-    encoder.encode( "buffer", m_buffer );
-    encoder.encode( "offset", m_offset );
-    encoder.encode( "stride", m_stride );
-    encoder.encode( "length", m_length );
-    encoder.encode( "usage", Int32( m_usage ) );
+   encoder.encode( "target", Int32( m_target ) );
+   encoder.encode( "buffer", m_buffer );
+   encoder.encode( "offset", m_offset );
+   encoder.encode( "stride", m_stride );
+   encoder.encode( "length", m_length );
+   encoder.encode( "usage", Int32( m_usage ) );
 }
 
 void BufferView::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    Int32 target;
-    decoder.decode( "target", target );
-    m_target = Target( target );
+   Int32 target;
+   decoder.decode( "target", target );
+   m_target = Target( target );
 
-    decoder.decode( "buffer", m_buffer );
-    decoder.decode( "offset", m_offset );
-    decoder.decode( "stride", m_stride );
-    decoder.decode( "length", m_length );
+   decoder.decode( "buffer", m_buffer );
+   decoder.decode( "offset", m_offset );
+   decoder.decode( "stride", m_stride );
+   decoder.decode( "length", m_length );
 
-    Int32 usage;
-    decoder.decode( "usage", usage );
-    m_usage = Usage( usage );
+   Int32 usage;
+   decoder.decode( "usage", usage );
+   m_usage = Usage( usage );
 }

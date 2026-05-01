@@ -1,6 +1,7 @@
 #include "Wait.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -11,7 +12,7 @@ Wait::Wait( void )
 }
 
 Wait::Wait( crimild::Real32 duration )
-    : _duration( duration )
+   : _duration( duration )
 {
 }
 
@@ -21,31 +22,31 @@ Wait::~Wait( void )
 
 void Wait::init( BehaviorContext *context )
 {
-    Behavior::init( context );
+   Behavior::init( context );
 
-    _clock.reset();
+   _clock.reset();
 }
 
 Behavior::State Wait::step( BehaviorContext *context )
 {
-    _clock += context->getClock();
-    if ( _duration >= 0 && _clock.getAccumTime() >= _duration ) {
-        return Behavior::State::SUCCESS;
-    }
+   _clock += context->getClock();
+   if ( _duration >= 0 && _clock.getAccumTime() >= _duration ) {
+      return Behavior::State::SUCCESS;
+   }
 
-    return Behavior::State::RUNNING;
+   return Behavior::State::RUNNING;
 }
 
 void Wait::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "duration", _duration );
+   encoder.encode( "duration", _duration );
 }
 
 void Wait::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "duration", _duration );
+   decoder.decode( "duration", _duration );
 }

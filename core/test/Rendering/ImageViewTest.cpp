@@ -28,42 +28,43 @@
 #include "Rendering/ImageView.hpp"
 
 #include "Rendering/Image.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( ImageView, construction )
 {
-    auto imageView = crimild::alloc< ImageView >();
+   auto imageView = crimild::alloc< ImageView >();
 
-    EXPECT_EQ( FrameGraphResource::Type::IMAGE_VIEW, imageView->getType() );
+   EXPECT_EQ( FrameGraphResource::Type::IMAGE_VIEW, imageView->getType() );
 }
 
 TEST( ImageView, coding )
 {
-    auto image = Image::CHECKERBOARD_4;
-    auto imageView = crimild::alloc< ImageView >();
-    imageView->image = image;
-    imageView->format = image->format;
-    imageView->type = ImageView::Type( Int32( image->type ) );
-    imageView->mipLevels = image->getMipLevels();
-    imageView->layerCount = image->getLayerCount();
+   auto image = Image::CHECKERBOARD_4;
+   auto imageView = crimild::alloc< ImageView >();
+   imageView->image = image;
+   imageView->format = image->format;
+   imageView->type = ImageView::Type( Int32( image->type ) );
+   imageView->mipLevels = image->getMipLevels();
+   imageView->layerCount = image->getLayerCount();
 
-    coding::MemoryEncoder encoder;
-    ASSERT_TRUE( encoder.encode( imageView ) );
-    const auto bytes = encoder.getBytes();
+   coding::MemoryEncoder encoder;
+   ASSERT_TRUE( encoder.encode( imageView ) );
+   const auto bytes = encoder.getBytes();
 
-    coding::MemoryDecoder decoder;
-    ASSERT_TRUE( decoder.fromBytes( bytes ) );
-    ASSERT_EQ( 1, decoder.getObjectCount() );
-    auto decoded = decoder.getObjectAt< ImageView >( 0 );
+   coding::MemoryDecoder decoder;
+   ASSERT_TRUE( decoder.fromBytes( bytes ) );
+   ASSERT_EQ( 1, decoder.getObjectCount() );
+   auto decoded = decoder.getObjectAt< ImageView >( 0 );
 
-    ASSERT_NE( nullptr, decoded );
-    ASSERT_EQ( imageView->format, decoded->format );
-    ASSERT_EQ( imageView->type, decoded->type );
-    ASSERT_NE( nullptr, decoded->image );
-    ASSERT_EQ( imageView->mipLevels, decoded->mipLevels );
-    ASSERT_EQ( imageView->layerCount, decoded->layerCount );
+   ASSERT_NE( nullptr, decoded );
+   ASSERT_EQ( imageView->format, decoded->format );
+   ASSERT_EQ( imageView->type, decoded->type );
+   ASSERT_NE( nullptr, decoded->image );
+   ASSERT_EQ( imageView->mipLevels, decoded->mipLevels );
+   ASSERT_EQ( imageView->layerCount, decoded->layerCount );
 }

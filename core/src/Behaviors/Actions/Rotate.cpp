@@ -27,48 +27,50 @@
 
 #include "Behaviors/Actions/Rotate.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::actions;
 
 Rotate::Rotate( const Vector3f &axis, Radians angle ) noexcept
-    : m_axis( axis ),
-      m_angle( angle )
+   : m_axis( axis ),
+     m_angle( angle )
 {
 }
 
 void Rotate::init( BehaviorContext *context ) noexcept
 {
-    Behavior::init( context );
+   Behavior::init( context );
 }
 
 Behavior::State Rotate::step( BehaviorContext *context ) noexcept
 {
-    m_clock.tick();
-    const auto dt = m_clock.getDeltaTime();
+   m_clock.tick();
+   const auto dt = m_clock.getDeltaTime();
 
-    auto agent = context->getAgent();
-    agent->setLocal( agent->getLocal()( rotation( m_axis, dt * m_angle ) ) );
+   auto agent = context->getAgent();
+   agent->setLocal( agent->getLocal()( rotation( m_axis, dt * m_angle ) ) );
 
-    return Behavior::State::RUNNING;
+   return Behavior::State::RUNNING;
 }
 
 void Rotate::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "axis", m_axis );
-    encoder.encode( "angle", m_angle );
+   encoder.encode( "axis", m_axis );
+   encoder.encode( "angle", m_angle );
 }
 
 void Rotate::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "axis", m_axis );
-    decoder.decode( "angle", m_angle );
+   decoder.decode( "axis", m_axis );
+   decoder.decode( "angle", m_angle );
 }

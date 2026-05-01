@@ -27,7 +27,6 @@
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Pipeline.hpp"
 #include "Rendering/Programs/UnlitShaderProgram.hpp"
@@ -35,82 +34,85 @@
 #include "Rendering/UniformBuffer.hpp"
 #include "Simulation/AssetManager.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild;
 
 UnlitMaterial::UnlitMaterial( void ) noexcept
 {
-    setGraphicsPipeline(
-        [] {
-            auto pipeline = crimild::alloc< GraphicsPipeline >();
-            if ( auto assets = AssetManager::getInstance() ) {
-                pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
-            }
-            return pipeline;
-        }()
-    );
+   setGraphicsPipeline(
+      [] {
+         auto pipeline = crimild::alloc< GraphicsPipeline >();
+         if ( auto assets = AssetManager::getInstance() ) {
+            pipeline->setProgram( crimild::retain( AssetManager::getInstance()->get< UnlitShaderProgram >() ) );
+         }
+         return pipeline;
+      }()
+   );
 
-    setDescriptors(
-        [ & ] {
-            auto descriptors = crimild::alloc< DescriptorSet >();
-            descriptors->descriptors = {
-                {
-                    .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                    .obj = crimild::alloc< UniformBuffer >( ColorRGBA::Constants::WHITE ),
-                },
-                {
-                    .descriptorType = DescriptorType::TEXTURE,
-                    .obj = Texture::ONE,
-                },
-            };
-            return descriptors;
-        }()
-    );
+   setDescriptors(
+      [ & ] {
+         auto descriptors = crimild::alloc< DescriptorSet >();
+         descriptors->descriptors = {
+            {
+               .descriptorType = DescriptorType::UNIFORM_BUFFER,
+               .obj = crimild::alloc< UniformBuffer >( ColorRGBA::Constants::WHITE ),
+            },
+            {
+               .descriptorType = DescriptorType::TEXTURE,
+               .obj = Texture::ONE,
+            },
+         };
+         return descriptors;
+      }()
+   );
 }
 
 void UnlitMaterial::setColor( const ColorRGBA &color ) noexcept
 {
-    getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->setValue( color );
+   getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->setValue( color );
 }
 
 ColorRGBA UnlitMaterial::getColor( void ) const noexcept
 {
-    return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< ColorRGBA >();
+   return getDescriptors()->descriptors[ 0 ].get< UniformBuffer >()->getValue< ColorRGBA >();
 }
 
 void UnlitMaterial::setTexture( SharedPointer< Texture > const &texture ) noexcept
 {
-    getDescriptors()->descriptors[ 1 ].obj = texture;
+   getDescriptors()->descriptors[ 1 ].obj = texture;
 }
 
 const Texture *UnlitMaterial::getTexture( void ) const noexcept
 {
-    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+   return getDescriptors()->descriptors[ 1 ].get< Texture >();
 }
 
 Texture *UnlitMaterial::getTexture( void ) noexcept
 {
-    return getDescriptors()->descriptors[ 1 ].get< Texture >();
+   return getDescriptors()->descriptors[ 1 ].get< Texture >();
 }
 
 void UnlitMaterial::encode( coding::Encoder &encoder )
 {
-    Material::encode( encoder );
+   Material::encode( encoder );
 
-    encoder.encode( "color", getColor() );
-    encoder.encode( "colorMap", getTexture() );
+   encoder.encode( "color", getColor() );
+   encoder.encode( "colorMap", getTexture() );
 }
 
 void UnlitMaterial::decode( coding::Decoder &decoder )
 {
-    Material::decode( decoder );
+   Material::decode( decoder );
 
-    ColorRGBA color;
-    decoder.decode( "color", color );
-    setColor( color );
+   ColorRGBA color;
+   decoder.decode( "color", color );
+   setColor( color );
 
-    SharedPointer< Texture > colorMap;
-    decoder.decode( "colorMap", colorMap );
-    if ( colorMap != nullptr ) {
-        setTexture( colorMap );
-    }
+   SharedPointer< Texture > colorMap;
+   decoder.decode( "colorMap", colorMap );
+   if ( colorMap != nullptr ) {
+      setTexture( colorMap );
+   }
 }

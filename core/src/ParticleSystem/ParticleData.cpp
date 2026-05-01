@@ -27,7 +27,8 @@
 
 #include "ParticleData.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
@@ -36,7 +37,7 @@ ParticleData::ParticleData( void )
 }
 
 ParticleData::ParticleData( crimild::Size count )
-    : _count( count )
+   : _count( count )
 {
 }
 
@@ -46,71 +47,71 @@ ParticleData::~ParticleData( void )
 
 void ParticleData::generate( void )
 {
-    _aliveCount = 0;
+   _aliveCount = 0;
 
-    // reset all particle attributes
-    const auto count = getParticleCount();
-    _attribs.each( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
-        if ( attr != nullptr ) {
-            attr->reset( count );
-        }
-    } );
+   // reset all particle attributes
+   const auto count = getParticleCount();
+   _attribs.each( [ count ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
+      if ( attr != nullptr ) {
+         attr->reset( count );
+      }
+   } );
 
-    // reset alive flags for all particles (all dead)
-    _alive.resize( count );
-    for ( auto i = 0; i < count; i++ ) {
-        _alive[ i ] = false;
-    }
+   // reset alive flags for all particles (all dead)
+   _alive.resize( count );
+   for ( auto i = 0; i < count; i++ ) {
+      _alive[ i ] = false;
+   }
 }
 
 void ParticleData::kill( ParticleId pid )
 {
-    if ( !_alive[ pid ] ) {
-        // particle is already dead. do nothing
-        return;
-    }
+   if ( !_alive[ pid ] ) {
+      // particle is already dead. do nothing
+      return;
+   }
 
-    assert( _aliveCount > 0 );
+   assert( _aliveCount > 0 );
 
-    _alive[ pid ] = false;
-    swap( pid, --_aliveCount );
+   _alive[ pid ] = false;
+   swap( pid, --_aliveCount );
 }
 
 void ParticleData::wake( ParticleId pid )
 {
-    assert( _aliveCount < _count );
+   assert( _aliveCount < _count );
 
-    _alive[ pid ] = true;
-    swap( pid, _aliveCount++ );
+   _alive[ pid ] = true;
+   swap( pid, _aliveCount++ );
 }
 
 void ParticleData::swap( ParticleId a, ParticleId b )
 {
-    if ( a != b ) {
-        _attribs.each( [ a, b ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
-            attr->swap( a, b );
-        } );
+   if ( a != b ) {
+      _attribs.each( [ a, b ]( const ParticleAttribType &type, ParticleAttribArrayPtr &attr ) {
+         attr->swap( a, b );
+      } );
 
-        // Swap alive flag.
-        // std::swap does not work correctly with std::vector< bool >, so swap them manually.
-        const auto temp = _alive[ a ];
-        _alive[ a ] = _alive[ b ];
-        _alive[ b ] = temp;
-    }
+      // Swap alive flag.
+      // std::swap does not work correctly with std::vector< bool >, so swap them manually.
+      const auto temp = _alive[ a ];
+      _alive[ a ] = _alive[ b ];
+      _alive[ b ] = temp;
+   }
 }
 
 void ParticleData::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "maxParticles", _count );
-    encoder.encode( "computeInWorldSpace", _computeInWorldSpace );
+   encoder.encode( "maxParticles", _count );
+   encoder.encode( "computeInWorldSpace", _computeInWorldSpace );
 }
 
 void ParticleData::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "maxParticles", _count );
-    decoder.decode( "computeInWorldSpace", _computeInWorldSpace );
+   decoder.decode( "maxParticles", _count );
+   decoder.decode( "computeInWorldSpace", _computeInWorldSpace );
 }

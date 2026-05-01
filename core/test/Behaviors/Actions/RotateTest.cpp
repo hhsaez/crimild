@@ -30,7 +30,8 @@
 #include "Behaviors/withBehavior.hpp"
 #include "SceneGraph/Node.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
@@ -38,16 +39,16 @@ using namespace crimild::behaviors;
 
 TEST( Rotate, coding )
 {
-    auto rotate = crimild::alloc< behaviors::actions::Rotate >( Vector3 { 0, 1, 0 }, 0.5f );
+   auto rotate = crimild::alloc< behaviors::actions::Rotate >( Vector3 { 0, 1, 0 }, 0.5f );
 
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( rotate );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   encoder->encode( rotate );
+   auto bytes = encoder->getBytes();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   decoder->fromBytes( bytes );
 
-    auto decoded = decoder->getObjectAt< behaviors::actions::Rotate >( 0 );
-    ASSERT_TRUE( decoded != nullptr );
-    EXPECT_EQ( rotate->getAxis(), decoded->getAxis() );
-    EXPECT_EQ( rotate->getAngle(), decoded->getAngle() );
+   auto decoded = decoder->getObjectAt< behaviors::actions::Rotate >( 0 );
+   ASSERT_TRUE( decoded != nullptr );
+   EXPECT_EQ( rotate->getAxis(), decoded->getAxis() );
+   EXPECT_EQ( rotate->getAngle(), decoded->getAngle() );
 }

@@ -27,9 +27,11 @@
 
 #include "TimeParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
@@ -43,34 +45,34 @@ TimeParticleGenerator::~TimeParticleGenerator( void )
 
 void TimeParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-    _lifeTimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
+   _times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
+   _lifeTimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
 }
 
 void TimeParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    auto ts = _times->getData< crimild::Real32 >();
-    auto lts = _lifeTimes->getData< crimild::Real32 >();
+   auto ts = _times->getData< crimild::Real32 >();
+   auto lts = _lifeTimes->getData< crimild::Real32 >();
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        auto t = Random::generate< crimild::Real32 >( _minTime, _maxTime );
-        ts[ i ] = t;
-        lts[ i ] = t;
-    }
+   for ( ParticleId i = startId; i < endId; i++ ) {
+      auto t = Random::generate< crimild::Real32 >( _minTime, _maxTime );
+      ts[ i ] = t;
+      lts[ i ] = t;
+   }
 }
 
 void TimeParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "minTime", _minTime );
-    encoder.encode( "maxTime", _maxTime );
+   encoder.encode( "minTime", _minTime );
+   encoder.encode( "maxTime", _maxTime );
 }
 
 void TimeParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "minTime", _minTime );
-    decoder.decode( "maxTime", _maxTime );
+   decoder.decode( "minTime", _minTime );
+   decoder.decode( "maxTime", _maxTime );
 }

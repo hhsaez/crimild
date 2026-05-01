@@ -32,94 +32,93 @@
 #include "Primitives/QuadPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( GeometryTest, construction )
 {
-    auto geometry = crimild::alloc< Geometry >( "a geometry" );
+   auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
-    EXPECT_EQ( geometry->getName(), "a geometry" );
+   EXPECT_EQ( geometry->getName(), "a geometry" );
 
-    auto materials = geometry->getComponent< MaterialComponent >();
-    ASSERT_NE( nullptr, materials );
-    EXPECT_FALSE( materials->hasMaterials() );
+   auto materials = geometry->getComponent< MaterialComponent >();
+   ASSERT_NE( nullptr, materials );
+   EXPECT_FALSE( materials->hasMaterials() );
 }
 
 TEST( GeometryTest, attachPrimitive )
 {
-    auto geometry = crimild::alloc< Geometry >( "a geometry" );
+   auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
-    auto primitive = crimild::alloc< Primitive >();
+   auto primitive = crimild::alloc< Primitive >();
 
-    EXPECT_FALSE( geometry->hasPrimitives() );
+   EXPECT_FALSE( geometry->hasPrimitives() );
 
-    geometry->attachPrimitive( primitive );
+   geometry->attachPrimitive( primitive );
 
-    EXPECT_TRUE( geometry->hasPrimitives() );
+   EXPECT_TRUE( geometry->hasPrimitives() );
 
-    bool found = false;
-    int count = 0;
-    geometry->forEachPrimitive( [ &count, primitive, &found ]( Primitive *p ) {
-        ++count;
-        if ( p == crimild::get_ptr( primitive ) ) {
-            found = true;
-        }
-    } );
+   bool found = false;
+   int count = 0;
+   geometry->forEachPrimitive( [ &count, primitive, &found ]( Primitive *p ) {
+      ++count;
+      if ( p == crimild::get_ptr( primitive ) ) {
+         found = true;
+      }
+   } );
 
-    EXPECT_EQ( count, 1 );
-    EXPECT_TRUE( found );
+   EXPECT_EQ( count, 1 );
+   EXPECT_TRUE( found );
 }
 
 TEST( GeometryTest, detachPrimitive )
 {
-    auto geometry = crimild::alloc< Geometry >( "a geometry" );
+   auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
-    auto primitive = crimild::alloc< Primitive >();
+   auto primitive = crimild::alloc< Primitive >();
 
-    EXPECT_FALSE( geometry->hasPrimitives() );
+   EXPECT_FALSE( geometry->hasPrimitives() );
 
-    geometry->attachPrimitive( primitive );
+   geometry->attachPrimitive( primitive );
 
-    EXPECT_TRUE( geometry->hasPrimitives() );
+   EXPECT_TRUE( geometry->hasPrimitives() );
 
-    geometry->detachPrimitive( primitive );
+   geometry->detachPrimitive( primitive );
 
-    EXPECT_FALSE( geometry->hasPrimitives() );
+   EXPECT_FALSE( geometry->hasPrimitives() );
 
-    int count = 0;
-    geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
-        ++count;
-    } );
+   int count = 0;
+   geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
+      ++count;
+   } );
 
-    EXPECT_EQ( count, 0 );
+   EXPECT_EQ( count, 0 );
 }
 
 TEST( GeometryTest, detachAllPrimitives )
 {
-    auto geometry = crimild::alloc< Geometry >( "a geometry" );
+   auto geometry = crimild::alloc< Geometry >( "a geometry" );
 
-    auto primitive1 = crimild::alloc< Primitive >();
-    auto primitive2 = crimild::alloc< Primitive >();
+   auto primitive1 = crimild::alloc< Primitive >();
+   auto primitive2 = crimild::alloc< Primitive >();
 
-    geometry->attachPrimitive( primitive1 );
-    geometry->attachPrimitive( primitive2 );
+   geometry->attachPrimitive( primitive1 );
+   geometry->attachPrimitive( primitive2 );
 
-    int count = 0;
-    geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
-        ++count;
-    } );
-    EXPECT_EQ( count, 2 );
+   int count = 0;
+   geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
+      ++count;
+   } );
+   EXPECT_EQ( count, 2 );
 
-    geometry->detachAllPrimitives();
+   geometry->detachAllPrimitives();
 
-    count = 0;
-    geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
-        ++count;
-    } );
-    EXPECT_EQ( count, 0 );
+   count = 0;
+   geometry->forEachPrimitive( [ &count ]( Primitive *p ) {
+      ++count;
+   } );
+   EXPECT_EQ( count, 0 );
 }
 
 // TEST( GeometryTest, geometryStream )
@@ -153,42 +152,42 @@ TEST( GeometryTest, detachAllPrimitives )
 
 TEST( Geometry, getDescriptors )
 {
-    auto geometry = crimild::alloc< Geometry >();
+   auto geometry = crimild::alloc< Geometry >();
 
-    auto ds = geometry->getDescriptors();
+   auto ds = geometry->getDescriptors();
 
-    EXPECT_NE( nullptr, ds );
-    EXPECT_EQ( 1, ds->descriptors.size() );
-    EXPECT_EQ( DescriptorType::UNIFORM_BUFFER, ds->descriptors[ 0 ].descriptorType );
-    EXPECT_NE( nullptr, ds->descriptors[ 0 ].obj );
+   EXPECT_NE( nullptr, ds );
+   EXPECT_EQ( 1, ds->descriptors.size() );
+   EXPECT_EQ( DescriptorType::UNIFORM_BUFFER, ds->descriptors[ 0 ].descriptorType );
+   EXPECT_NE( nullptr, ds->descriptors[ 0 ].obj );
 }
 
 TEST( GeometryTest, coding )
 {
-    /*
-        auto geometry = crimild::alloc< Geometry >( "a geometry" );
-        geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
+   /*
+       auto geometry = crimild::alloc< Geometry >( "a geometry" );
+       geometry->attachPrimitive( crimild::alloc< QuadPrimitive >( 100.0f, 200.0f, VertexFormat::VF_P3_N3 ) );
 
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-        encoder->encode( geometry );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-        decoder->fromBytes( bytes );
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+       encoder->encode( geometry );
+   auto bytes = encoder->getBytes();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
+       decoder->fromBytes( bytes );
 
-        auto g = decoder->getObjectAt< Geometry >( 0 );
-        EXPECT_TRUE( g != nullptr );
-        EXPECT_EQ( geometry->getName(), geometry->getName() );
+       auto g = decoder->getObjectAt< Geometry >( 0 );
+       EXPECT_TRUE( g != nullptr );
+       EXPECT_EQ( geometry->getName(), geometry->getName() );
 
-        crimild::Int16 count = 0;
-        g->forEachPrimitive( [ &count ]( Primitive *p ) {
-                ++count;
-                EXPECT_TRUE( p->getVertexBuffer() != nullptr );
-                EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
+       crimild::Int16 count = 0;
+       g->forEachPrimitive( [ &count ]( Primitive *p ) {
+               ++count;
+               EXPECT_TRUE( p->getVertexBuffer() != nullptr );
+               EXPECT_EQ( 4, p->getVertexBuffer()->getVertexCount() );
 
-                EXPECT_TRUE( p->getIndexBuffer() != nullptr );
-                EXPECT_EQ( 4, p->getIndexBuffer()->getIndexCount() );
-        });
+               EXPECT_TRUE( p->getIndexBuffer() != nullptr );
+               EXPECT_EQ( 4, p->getIndexBuffer()->getIndexCount() );
+       });
 
-        EXPECT_EQ( 1, count );
-    */
+       EXPECT_EQ( 1, count );
+   */
 }

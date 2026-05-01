@@ -27,13 +27,15 @@
 
 #include "EulerParticleUpdater.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 EulerParticleUpdater::EulerParticleUpdater( void )
-    : _globalAcceleration( Vector3f::Constants::ZERO )
+   : _globalAcceleration( Vector3f::Constants::ZERO )
 {
 }
 
@@ -43,61 +45,61 @@ EulerParticleUpdater::~EulerParticleUpdater( void )
 
 void EulerParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
-    _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
-    _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
+   _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+   _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
+   _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
 }
 
 void EulerParticleUpdater::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-    /*
-        const auto count = particles->getAliveCount();
+   /*
+       const auto count = particles->getAliveCount();
 
-        const auto g = dt * _globalAcceleration;
+       const auto g = dt * _globalAcceleration;
 
-        auto as = _accelerations->getData< Vector3f >();
-        auto vs = _velocities->getData< Vector3f >();
-        auto ps = _positions->getData< Vector3f >();
+       auto as = _accelerations->getData< Vector3f >();
+       auto vs = _velocities->getData< Vector3f >();
+       auto ps = _positions->getData< Vector3f >();
 
-    crimild::Size itemsPerCacheLine = 64 / sizeof( crimild::Real32 );
+   crimild::Size itemsPerCacheLine = 64 / sizeof( crimild::Real32 );
 
-        // TODO: all the accelerations are the same value
-        // I think this could be optimized, but other
-        // updaters may need separated values
-        // Also, accelerations are handled in the same way
-        // regardless of the computation space (world or local)
-    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
-        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
-            as[ j ] += g;
-        }
-        }
+       // TODO: all the accelerations are the same value
+       // I think this could be optimized, but other
+       // updaters may need separated values
+       // Also, accelerations are handled in the same way
+       // regardless of the computation space (world or local)
+   for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+       for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+           as[ j ] += g;
+       }
+       }
 
-        // Velocities are handled in the same way
-        // regardless of the computation space (world or local)
-    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
-        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
-            vs[ j ] += dt * as[ j ];
-        }
-        }
+       // Velocities are handled in the same way
+       // regardless of the computation space (world or local)
+   for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+       for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+           vs[ j ] += dt * as[ j ];
+       }
+       }
 
-    for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
-        for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
-            ps[ j ] += dt * vs[ j ];
-        }
-        }
-    */
+   for ( crimild::Size i = 0; i < count; i += itemsPerCacheLine ) {
+       for ( crimild::Size j = i; j < std::min( count, i + itemsPerCacheLine ); j++ ) {
+           ps[ j ] += dt * vs[ j ];
+       }
+       }
+   */
 }
 
 void EulerParticleUpdater::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleUpdater::encode( encoder );
+   ParticleSystemComponent::ParticleUpdater::encode( encoder );
 
-    encoder.encode( "globalAcceleration", _globalAcceleration );
+   encoder.encode( "globalAcceleration", _globalAcceleration );
 }
 
 void EulerParticleUpdater::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleUpdater::decode( decoder );
+   ParticleSystemComponent::ParticleUpdater::decode( decoder );
 
-    decoder.decode( "globalAcceleration", _globalAcceleration );
+   decoder.decode( "globalAcceleration", _globalAcceleration );
 }

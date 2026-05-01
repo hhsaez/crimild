@@ -28,9 +28,9 @@
 #ifndef CRIMILD_NAVIGATION_CELL_EDGE_
 #define CRIMILD_NAVIGATION_CELL_EDGE_
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

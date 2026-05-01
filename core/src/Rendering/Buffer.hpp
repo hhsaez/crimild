@@ -28,10 +28,10 @@
 #ifndef CRIMILD_RENDERING_BUFFER_
 #define CRIMILD_RENDERING_BUFFER_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 #include <cstring>
 

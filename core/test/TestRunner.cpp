@@ -29,6 +29,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include <crimild/coding/init.hpp>
 
 using namespace crimild;
 

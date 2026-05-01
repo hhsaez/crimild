@@ -1,5 +1,8 @@
 #include "Entity/Entity.hpp"
 
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
+
 #include <gtest/gtest.h>
 
 namespace crimild::test {

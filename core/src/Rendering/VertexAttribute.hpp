@@ -28,9 +28,9 @@
 #ifndef CRIMILD_RENDERING_VERTEX_ATTRIBUTE_
 #define CRIMILD_RENDERING_VERTEX_ATTRIBUTE_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/Format.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

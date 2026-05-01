@@ -27,9 +27,11 @@
 
 #include "VelocityParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
@@ -43,33 +45,33 @@ VelocityParticleGenerator::~VelocityParticleGenerator( void )
 
 void VelocityParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
+   _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
 }
 
 void VelocityParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    auto vs = _velocities->getData< Vector3f >();
+   auto vs = _velocities->getData< Vector3f >();
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        auto x = Random::generate< Real32 >( _minVelocity.x, _maxVelocity.x );
-        auto y = Random::generate< Real32 >( _minVelocity.y, _maxVelocity.y );
-        auto z = Random::generate< Real32 >( _minVelocity.z, _maxVelocity.z );
-        vs[ i ] = Vector3f { x, y, z };
-    }
+   for ( ParticleId i = startId; i < endId; i++ ) {
+      auto x = Random::generate< Real32 >( _minVelocity.x, _maxVelocity.x );
+      auto y = Random::generate< Real32 >( _minVelocity.y, _maxVelocity.y );
+      auto z = Random::generate< Real32 >( _minVelocity.z, _maxVelocity.z );
+      vs[ i ] = Vector3f { x, y, z };
+   }
 }
 
 void VelocityParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "minVelocity", _minVelocity );
-    encoder.encode( "maxVelocity", _maxVelocity );
+   encoder.encode( "minVelocity", _minVelocity );
+   encoder.encode( "maxVelocity", _maxVelocity );
 }
 
 void VelocityParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "minVelocity", _minVelocity );
-    decoder.decode( "maxVelocity", _maxVelocity );
+   decoder.decode( "minVelocity", _minVelocity );
+   decoder.decode( "maxVelocity", _maxVelocity );
 }

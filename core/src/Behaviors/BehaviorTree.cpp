@@ -28,14 +28,16 @@
 #include "BehaviorTree.hpp"
 
 #include "Behavior.hpp"
-#include "Crimild_Coding.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
 
 BehaviorTree::BehaviorTree( std::string name, SharedPointer< Behavior > const &rootBehavior )
-    : _name( name ),
-      _rootBehavior( rootBehavior )
+   : _name( name ),
+     _rootBehavior( rootBehavior )
 {
 }
 
@@ -49,16 +51,16 @@ BehaviorTree::~BehaviorTree( void )
 
 void BehaviorTree::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "name", _name );
-    encoder.encode( "rootBehavior", _rootBehavior );
+   encoder.encode( "name", _name );
+   encoder.encode( "rootBehavior", _rootBehavior );
 }
 
 void BehaviorTree::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "name", _name );
-    decoder.decode( "rootBehavior", _rootBehavior );
+   decoder.decode( "name", _name );
+   decoder.decode( "rootBehavior", _rootBehavior );
 }

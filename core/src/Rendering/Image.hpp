@@ -28,190 +28,190 @@
 #ifndef CRIMILD_RENDERING_IMAGE_
 #define CRIMILD_RENDERING_IMAGE_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Extent.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <vector>
 
 namespace crimild {
 
-    class Image;
+   class Image;
 
-    namespace messaging {
+   namespace messaging {
 
-        struct ImageCreated {
-            Image *image;
-        };
+      struct ImageCreated {
+         Image *image;
+      };
 
-        struct ImageContentsChanged {
-            Image *image;
-        };
+      struct ImageContentsChanged {
+         Image *image;
+      };
 
-        struct ImageDestroyed {
-            Image *image;
-        };
+      struct ImageDestroyed {
+         Image *image;
+      };
 
-    }
+   }
 
-    class Image
-        : public coding::Codable,
-          public NamedObject,
-          public RenderResourceImpl< Image >,
-          public FrameGraphResource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Image )
+   class Image
+      : public coding::Codable,
+        public NamedObject,
+        public RenderResourceImpl< Image >,
+        public FrameGraphResource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Image )
 
-    public:
-        static SharedPointer< Image > ONE;
-        static SharedPointer< Image > CUBE_ONE;
-        static SharedPointer< Image > ZERO;
-        static SharedPointer< Image > CHECKERBOARD;
-        static SharedPointer< Image > CHECKERBOARD_4;
-        static SharedPointer< Image > CHECKERBOARD_8;
-        static SharedPointer< Image > CHECKERBOARD_16;
-        static SharedPointer< Image > CHECKERBOARD_32;
-        static SharedPointer< Image > CHECKERBOARD_64;
-        static SharedPointer< Image > CHECKERBOARD_128;
-        static SharedPointer< Image > CHECKERBOARD_256;
-        static SharedPointer< Image > CHECKERBOARD_512;
-        static SharedPointer< Image > INVALID;
+   public:
+      static SharedPointer< Image > ONE;
+      static SharedPointer< Image > CUBE_ONE;
+      static SharedPointer< Image > ZERO;
+      static SharedPointer< Image > CHECKERBOARD;
+      static SharedPointer< Image > CHECKERBOARD_4;
+      static SharedPointer< Image > CHECKERBOARD_8;
+      static SharedPointer< Image > CHECKERBOARD_16;
+      static SharedPointer< Image > CHECKERBOARD_32;
+      static SharedPointer< Image > CHECKERBOARD_64;
+      static SharedPointer< Image > CHECKERBOARD_128;
+      static SharedPointer< Image > CHECKERBOARD_256;
+      static SharedPointer< Image > CHECKERBOARD_512;
+      static SharedPointer< Image > INVALID;
 
-        static SharedPointer< Image > fromRGBANoise( UInt32 size = 256 ) noexcept;
+      static SharedPointer< Image > fromRGBANoise( UInt32 size = 256 ) noexcept;
 
-    public:
-        enum class Type {
-            IMAGE_1D,
-            IMAGE_2D,
-            IMAGE_2D_CUBEMAP,
-            IMAGE_3D,
-        };
+   public:
+      enum class Type {
+         IMAGE_1D,
+         IMAGE_2D,
+         IMAGE_2D_CUBEMAP,
+         IMAGE_3D,
+      };
 
-    public:
-        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::IMAGE; }
+   public:
+      inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::IMAGE; }
 
-        Format format = Format::UNDEFINED;
-        Type type = Type::IMAGE_2D;
+      Format format = Format::UNDEFINED;
+      Type type = Type::IMAGE_2D;
 
-        /**
-                   \brief image size
+      /**
+                 \brief image size
 
-                   For 1D image, height and depth must be 1
-                   For 2D image, depth must be 1
-                 */
-        Extent3D extent;
+                 For 1D image, height and depth must be 1
+                 For 2D image, depth must be 1
+               */
+      Extent3D extent;
 
-        /**
-         * \name Buffer View
-         */
-        //@{
-    public:
-        inline void setBufferView( SharedPointer< BufferView > const &bufferView ) noexcept { m_bufferView = bufferView; }
-        inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
-        inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
+      /**
+       * \name Buffer View
+       */
+      //@{
+   public:
+      inline void setBufferView( SharedPointer< BufferView > const &bufferView ) noexcept { m_bufferView = bufferView; }
+      inline BufferView *getBufferView( void ) noexcept { return crimild::get_ptr( m_bufferView ); }
+      inline const BufferView *getBufferView( void ) const noexcept { return crimild::get_ptr( m_bufferView ); }
 
-    private:
-        SharedPointer< BufferView > m_bufferView;
+   private:
+      SharedPointer< BufferView > m_bufferView;
 
-        //@}
+      //@}
 
-        /**
-           \name Layer count
-         */
-        //@{
+      /**
+         \name Layer count
+       */
+      //@{
 
-    public:
-        inline void setLayerCount( UInt32 layerCount ) noexcept { m_layerCount = layerCount; }
-        inline UInt32 getLayerCount( void ) const noexcept { return m_layerCount; }
+   public:
+      inline void setLayerCount( UInt32 layerCount ) noexcept { m_layerCount = layerCount; }
+      inline UInt32 getLayerCount( void ) const noexcept { return m_layerCount; }
 
-    private:
-        UInt32 m_layerCount = 1; //< at least 1 layer
+   private:
+      UInt32 m_layerCount = 1; //< at least 1 layer
 
-        //@}
+      //@}
 
-        /**
-                \name Mipmapping
+      /**
+              \name Mipmapping
 
-                Auto generated mipmapping is enabled by default (mipLevels = 0)
-         */
-        //@{
+              Auto generated mipmapping is enabled by default (mipLevels = 0)
+       */
+      //@{
 
-    public:
-        void setMipLevels( crimild::UInt32 mipLevels ) noexcept;
-        crimild::UInt32 getMipLevels( void ) const noexcept;
+   public:
+      void setMipLevels( crimild::UInt32 mipLevels ) noexcept;
+      crimild::UInt32 getMipLevels( void ) const noexcept;
 
-    private:
-        crimild::UInt32 m_mipLevels = 0;
+   private:
+      crimild::UInt32 m_mipLevels = 0;
 
-        //@}
+      //@}
 
-        /**
-            \name Coding support
-        */
-        //@{
+      /**
+          \name Coding support
+      */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
+      //@}
 
-        /**
-                \name Deprecated
-    */
-        //@{
+      /**
+              \name Deprecated
+  */
+      //@{
 
-    public:
-        enum class PixelFormat {
-            RGB,
-            RGBA,
-            BGR,
-            BGRA,
-            RED,
-            DEPTH_16,
-            DEPTH_24,
-            DEPTH_32,
-        };
+   public:
+      enum class PixelFormat {
+         RGB,
+         RGBA,
+         BGR,
+         BGRA,
+         RED,
+         DEPTH_16,
+         DEPTH_24,
+         DEPTH_32,
+      };
 
-        enum class PixelType {
-            UNSIGNED_BYTE,
-            FLOAT,
-        };
+      enum class PixelType {
+         UNSIGNED_BYTE,
+         FLOAT,
+      };
 
-    public:
-        Image( void );
-        Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
-        Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
-        Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format = PixelFormat::RGBA );
-        virtual ~Image( void );
+   public:
+      Image( void );
+      Image( int width, int height, int bpp, PixelFormat format, PixelType pixelType );
+      Image( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA );
+      Image( int width, int height, int bpp, const ByteArray &data, PixelFormat format = PixelFormat::RGBA );
+      virtual ~Image( void );
 
-        int getWidth( void ) const { return _width; }
-        int getHeight( void ) const { return _height; }
-        int getBpp( void ) const { return _bpp; }
-        PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
-        PixelType getPixelType( void ) const { return _pixelType; }
+      int getWidth( void ) const { return _width; }
+      int getHeight( void ) const { return _height; }
+      int getBpp( void ) const { return _bpp; }
+      PixelFormat getPixelFormat( void ) const { return _pixelFormat; }
+      PixelType getPixelType( void ) const { return _pixelType; }
 
-        crimild::Bool hasData( void ) const { return _data.size(); }
-        unsigned char *getData( void ) { return _data.getData(); }
-        const unsigned char *getData( void ) const { return _data.getData(); }
-        void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
+      crimild::Bool hasData( void ) const { return _data.size(); }
+      unsigned char *getData( void ) { return _data.getData(); }
+      const unsigned char *getData( void ) const { return _data.getData(); }
+      void setData( int width, int height, int bpp, const unsigned char *data, PixelFormat format = PixelFormat::RGBA, PixelType pixelType = PixelType::UNSIGNED_BYTE );
 
-        bool isLoaded( void ) const { return _data.size() > 0; }
-        virtual void load( void );
-        virtual void unload( void );
+      bool isLoaded( void ) const { return _data.size() > 0; }
+      virtual void load( void );
+      virtual void unload( void );
 
-    private:
-        int _width;
-        int _height;
-        int _bpp;
-        PixelFormat _pixelFormat;
-        PixelType _pixelType;
-        ByteArray _data;
+   private:
+      int _width;
+      int _height;
+      int _bpp;
+      PixelFormat _pixelFormat;
+      PixelType _pixelType;
+      ByteArray _data;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

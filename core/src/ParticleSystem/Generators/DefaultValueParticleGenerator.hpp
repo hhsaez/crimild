@@ -29,141 +29,140 @@
 #define CRIMILD_PARTICLE_GENERATOR_DEFAULT_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 
-    template< typename T >
-    class DefaultValueParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
-    public:
-        DefaultValueParticleGenerator( void )
-        {
-        }
+   template< typename T >
+   class DefaultValueParticleGenerator : public ParticleSystemComponent::ParticleGenerator {
+   public:
+      DefaultValueParticleGenerator( void )
+      {
+      }
 
-        explicit DefaultValueParticleGenerator( const ParticleAttribType &type, const T &value )
-            : _attribType( type ),
-              _value( value )
-        {
-        }
+      explicit DefaultValueParticleGenerator( const ParticleAttribType &type, const T &value )
+         : _attribType( type ),
+           _value( value )
+      {
+      }
 
-        virtual ~DefaultValueParticleGenerator( void )
-        {
-        }
+      virtual ~DefaultValueParticleGenerator( void )
+      {
+      }
 
-        inline void setParticleAttribType( const ParticleAttribType &type ) { _attribType = type; }
-        inline ParticleAttribType getParticleAttribType( void ) const { return _attribType; }
+      inline void setParticleAttribType( const ParticleAttribType &type ) { _attribType = type; }
+      inline ParticleAttribType getParticleAttribType( void ) const { return _attribType; }
 
-        inline void setValue( const T &value ) { _value = value; }
-        inline const T &getValue( void ) { return _value; }
+      inline void setValue( const T &value ) { _value = value; }
+      inline const T &getValue( void ) { return _value; }
 
-        virtual void configure( Node *node, ParticleData *particles ) override
-        {
-            _attribs = particles->createAttribArray< T >( _attribType );
-        }
+      virtual void configure( Node *node, ParticleData *particles ) override
+      {
+         _attribs = particles->createAttribArray< T >( _attribType );
+      }
 
-        virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override
-        {
-            auto as = _attribs->getData< T >();
+      virtual void generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId ) override
+      {
+         auto as = _attribs->getData< T >();
 
-            const auto v = _value;
+         const auto v = _value;
 
-            for ( ParticleId i = startId; i < endId; i++ ) {
-                as[ i ] = v;
-            }
-        }
+         for ( ParticleId i = startId; i < endId; i++ ) {
+            as[ i ] = v;
+         }
+      }
 
-    private:
-        crimild::ParticleAttribType _attribType;
-        T _value;
+   private:
+      crimild::ParticleAttribType _attribType;
+      T _value;
 
-        ParticleAttribArray *_attribs;
+      ParticleAttribArray *_attribs;
 
-        /**
-                        \name Coding support
-                */
-        //@{
+      /**
+                      \name Coding support
+              */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override
-        {
-            ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   public:
+      virtual void encode( coding::Encoder &encoder ) override
+      {
+         ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-            std::string attribType;
-            switch ( _attribType ) {
-                case ParticleAttrib::UNIFORM_SCALE:
-                    attribType = "uniformScale";
-                    break;
+         std::string attribType;
+         switch ( _attribType ) {
+            case ParticleAttrib::UNIFORM_SCALE:
+               attribType = "uniformScale";
+               break;
 
-                case ParticleAttrib::POSITION:
-                    attribType = "position";
-                    break;
+            case ParticleAttrib::POSITION:
+               attribType = "position";
+               break;
 
-                case ParticleAttrib::VELOCITY:
-                    attribType = "velocity";
-                    break;
+            case ParticleAttrib::VELOCITY:
+               attribType = "velocity";
+               break;
 
-                case ParticleAttrib::ACCELERATION:
-                    attribType = "acceleration";
-                    break;
+            case ParticleAttrib::ACCELERATION:
+               attribType = "acceleration";
+               break;
 
-                default:
-                    break;
-            }
-            encoder.encode( "attrib", attribType );
+            default:
+               break;
+         }
+         encoder.encode( "attrib", attribType );
 
-            // encoder.encode( "value", _value );
-        }
+         // encoder.encode( "value", _value );
+      }
 
-        virtual void decode( coding::Decoder &decoder ) override
-        {
-            ParticleSystemComponent::ParticleGenerator::decode( decoder );
+      virtual void decode( coding::Decoder &decoder ) override
+      {
+         ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-            std::string attribType;
-            decoder.decode( "attrib", attribType );
-            if ( attribType == "uniformScale" ) {
-                _attribType = ParticleAttrib::UNIFORM_SCALE;
-            } else if ( attribType == "position" ) {
-                setParticleAttribType( ParticleAttrib::POSITION );
-            } else if ( attribType == "velocity" ) {
-                setParticleAttribType( ParticleAttrib::VELOCITY );
-            } else if ( attribType == "acceleration" ) {
-                setParticleAttribType( ParticleAttrib::ACCELERATION );
-            }
+         std::string attribType;
+         decoder.decode( "attrib", attribType );
+         if ( attribType == "uniformScale" ) {
+            _attribType = ParticleAttrib::UNIFORM_SCALE;
+         } else if ( attribType == "position" ) {
+            setParticleAttribType( ParticleAttrib::POSITION );
+         } else if ( attribType == "velocity" ) {
+            setParticleAttribType( ParticleAttrib::VELOCITY );
+         } else if ( attribType == "acceleration" ) {
+            setParticleAttribType( ParticleAttrib::ACCELERATION );
+         }
 
-            // decoder.decode( "value", _value );
-        }
+         // decoder.decode( "value", _value );
+      }
 
-        //@}
-    };
+      //@}
+   };
 
-    class DefaultVector3fParticleGenerator : public DefaultValueParticleGenerator< Vector3f > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::DefaultVector3fParticleGenerator )
+   class DefaultVector3fParticleGenerator : public DefaultValueParticleGenerator< Vector3f > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::DefaultVector3fParticleGenerator )
 
-    public:
-        DefaultVector3fParticleGenerator( void ) { }
-        virtual ~DefaultVector3fParticleGenerator( void ) { }
-    };
+   public:
+      DefaultVector3fParticleGenerator( void ) { }
+      virtual ~DefaultVector3fParticleGenerator( void ) { }
+   };
 
-    class DefaultColorRGBAParticleGenerator : public DefaultValueParticleGenerator< ColorRGBA > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::DefaultColorRGBAParticleGenerator )
+   class DefaultColorRGBAParticleGenerator : public DefaultValueParticleGenerator< ColorRGBA > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::DefaultColorRGBAParticleGenerator )
 
-    public:
-        DefaultColorRGBAParticleGenerator( void ) { }
-        virtual ~DefaultColorRGBAParticleGenerator( void ) { }
-    };
+   public:
+      DefaultColorRGBAParticleGenerator( void ) { }
+      virtual ~DefaultColorRGBAParticleGenerator( void ) { }
+   };
 
-    class DefaultColorRGBParticleGenerator : public DefaultValueParticleGenerator< ColorRGB > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::DefaultColorRGBAParticleGenerator )
-    };
+   class DefaultColorRGBParticleGenerator : public DefaultValueParticleGenerator< ColorRGB > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::DefaultColorRGBAParticleGenerator )
+   };
 
-    class DefaultReal32ParticleGenerator : public DefaultValueParticleGenerator< crimild::Real32 > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::DefaultReal32ParticleGenerator )
+   class DefaultReal32ParticleGenerator : public DefaultValueParticleGenerator< crimild::Real32 > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::DefaultReal32ParticleGenerator )
 
-    public:
-        DefaultReal32ParticleGenerator( void ) { }
-        virtual ~DefaultReal32ParticleGenerator( void ) { }
-    };
+   public:
+      DefaultReal32ParticleGenerator( void ) { }
+      virtual ~DefaultReal32ParticleGenerator( void ) { }
+   };
 
 }
 

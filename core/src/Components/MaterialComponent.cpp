@@ -27,59 +27,60 @@
 
 #include "MaterialComponent.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 MaterialComponent::~MaterialComponent( void )
 {
-    detachAllMaterials();
+   detachAllMaterials();
 }
 
 void MaterialComponent::attachMaterial( SharedPointer< Material > const &material )
 {
-    _materials.add( material );
+   _materials.add( material );
 }
 
 void MaterialComponent::detachAllMaterials( void )
 {
-    _materials.clear();
+   _materials.clear();
 }
 
 void MaterialComponent::forEachMaterial( std::function< void( Material * ) > callback )
 {
-    _materials.each( [ callback ]( SharedPointer< Material > &m ) {
-        callback( crimild::get_ptr( m ) );
-    } );
+   _materials.each( [ callback ]( SharedPointer< Material > &m ) {
+      callback( crimild::get_ptr( m ) );
+   } );
 }
 
 SharedPointer< NodeComponent > MaterialComponent::clone( void )
 {
-    auto other = crimild::alloc< MaterialComponent >();
-    forEachMaterial( [ other ]( Material *material ) {
-        other->attachMaterial( material );
-    } );
-    return other;
+   auto other = crimild::alloc< MaterialComponent >();
+   forEachMaterial( [ other ]( Material *material ) {
+      other->attachMaterial( material );
+   } );
+   return other;
 }
 
 void MaterialComponent::encode( coding::Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    Array< SharedPointer< Material > > ms;
-    forEachMaterial( [ &ms ]( Material *m ) {
-        ms.add( crimild::retain( m ) );
-    } );
-    encoder.encode( "materials", ms );
+   Array< SharedPointer< Material > > ms;
+   forEachMaterial( [ &ms ]( Material *m ) {
+      ms.add( crimild::retain( m ) );
+   } );
+   encoder.encode( "materials", ms );
 }
 
 void MaterialComponent::decode( coding::Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    Array< SharedPointer< Material > > ms;
-    decoder.decode( "materials", ms );
-    ms.each( [ this ]( SharedPointer< Material > &m ) {
-        attachMaterial( m );
-    } );
+   Array< SharedPointer< Material > > ms;
+   decoder.decode( "materials", ms );
+   ms.each( [ this ]( SharedPointer< Material > &m ) {
+      attachMaterial( m );
+   } );
 }

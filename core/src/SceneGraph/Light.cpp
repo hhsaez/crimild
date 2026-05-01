@@ -27,7 +27,6 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/ShadowMap.hpp"
@@ -36,6 +35,8 @@
 #include "Rendering/Uniforms/LightUniform.hpp"
 #include "SceneGraph/Camera.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <crimild/foundation.hpp>
 
 using namespace crimild;

@@ -28,45 +28,45 @@
 #ifndef CRIMILD_CORE_COMPONENTS_BEHAVIOR_TREE_
 #define CRIMILD_CORE_COMPONENTS_BEHAVIOR_TREE_
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Codable.hpp>
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        class Behavior;
+      class Behavior;
 
-        class [[deprecated]] BehaviorTree : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorTree )
+      class [[deprecated]] BehaviorTree : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorTree )
 
-        public:
-            BehaviorTree( void );
-            explicit BehaviorTree( std::string name, SharedPointer< Behavior > const &rootBehavior );
-            virtual ~BehaviorTree( void );
+      public:
+         BehaviorTree( void );
+         explicit BehaviorTree( std::string name, SharedPointer< Behavior > const &rootBehavior );
+         virtual ~BehaviorTree( void );
 
-            const std::string &getName( void ) const { return _name; }
-            void setName( std::string name ) { _name = name; }
+         const std::string &getName( void ) const { return _name; }
+         void setName( std::string name ) { _name = name; }
 
-            Behavior *getRootBehavior( void ) { return crimild::get_ptr( _rootBehavior ); }
-            void setRootBehavior( SharedPointer< Behavior > const &behavior ) { _rootBehavior = behavior; }
+         Behavior *getRootBehavior( void ) { return crimild::get_ptr( _rootBehavior ); }
+         void setRootBehavior( SharedPointer< Behavior > const &behavior ) { _rootBehavior = behavior; }
 
-        private:
-            std::string _name;
-            SharedPointer< Behavior > _rootBehavior;
+      private:
+         std::string _name;
+         SharedPointer< Behavior > _rootBehavior;
 
-            /**
-                \name Coding support
-             */
-            //@{
+         /**
+             \name Coding support
+          */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
-        };
+         //@}
+      };
 
-    }
+   }
 
 }
 

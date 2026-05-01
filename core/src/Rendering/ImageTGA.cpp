@@ -27,12 +27,13 @@
 
 #include "ImageTGA.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 #include "Exceptions/InvalidFileFormatException.hpp"
 #include "Simulation/FileSystem.hpp"
 
 #include <algorithm>
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <vector>
 
 #define TGA_RGB 2

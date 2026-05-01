@@ -28,62 +28,63 @@
 #ifndef CRIMILD_NAVIGATION_CELL
 #define CRIMILD_NAVIGATION_CELL
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "NavigationCellEdge.hpp"
 
+#include <crimild/coding/Codable.hpp>
+
 namespace crimild {
 
-    namespace navigation {
+   namespace navigation {
 
-        class NavigationCell : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCell )
+      class NavigationCell : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::navigation::NavigationCell )
 
-        public:
-            explicit NavigationCell( const Vector3f &v0, const Vector3f &v1, const Vector3f &v2 );
-            virtual ~NavigationCell( void );
+      public:
+         explicit NavigationCell( const Vector3f &v0, const Vector3f &v1, const Vector3f &v2 );
+         virtual ~NavigationCell( void );
 
-            inline Vector3f getVertex( crimild::Size index ) { return _vertices[ index ]; }
+         inline Vector3f getVertex( crimild::Size index ) { return _vertices[ index ]; }
 
-            inline const Vector3f getCenter( void ) const { return _center; }
+         inline const Vector3f getCenter( void ) const { return _center; }
 
-            inline const Vector3f getNormal( void ) const { return _normal; }
+         inline const Vector3f getNormal( void ) const { return _normal; }
 
-            inline const Plane3 getPlane( void ) const { return _plane; }
+         inline const Plane3 getPlane( void ) const { return _plane; }
 
-            void addEdge( NavigationCellEdgePtr const &e ) { _edges.push_back( e ); }
+         void addEdge( NavigationCellEdgePtr const &e ) { _edges.push_back( e ); }
 
-            void foreachEdge( std::function< void( NavigationCellEdgePtr const &e ) > const &callback )
-            {
-                for ( auto &e : _edges )
-                    callback( e );
-            }
+         void foreachEdge( std::function< void( NavigationCellEdgePtr const &e ) > const &callback )
+         {
+            for ( auto &e : _edges )
+               callback( e );
+         }
 
-            bool containsPoint( const Vector3f &p ) const;
+         bool containsPoint( const Vector3f &p ) const;
 
-        private:
-            Vector3f _vertices[ 3 ];
-            Vector3f _normal;
-            Vector3f _center;
-            Plane3 _plane;
+      private:
+         Vector3f _vertices[ 3 ];
+         Vector3f _normal;
+         Vector3f _center;
+         Plane3 _plane;
 
-            std::vector< NavigationCellEdgePtr > _edges;
+         std::vector< NavigationCellEdgePtr > _edges;
 
-        public:
-            enum class ClassificationResult {
-                INSIDE,
-                OUTSIDE,
-                NONE
-            };
+      public:
+         enum class ClassificationResult {
+            INSIDE,
+            OUTSIDE,
+            NONE
+         };
 
-            ClassificationResult classifyPath( const LineSegment3 &motionPath, Vector3f &intersectionPoint, NavigationCellEdge **intersectionEdge );
+         ClassificationResult classifyPath( const LineSegment3 &motionPath, Vector3f &intersectionPoint, NavigationCellEdge **intersectionEdge );
 
-            Vector3f snapPoint( const Vector3f &point );
-        };
+         Vector3f snapPoint( const Vector3f &point );
+      };
 
-        using NavigationCellPtr = SharedPointer< NavigationCell >;
+      using NavigationCellPtr = SharedPointer< NavigationCell >;
 
-    }
+   }
 
 }
 

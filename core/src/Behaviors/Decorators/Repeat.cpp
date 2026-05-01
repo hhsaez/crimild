@@ -1,50 +1,51 @@
 #include "Repeat.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
 using namespace crimild::behaviors::decorators;
 
 Repeat::Repeat( crimild::Int16 times ) noexcept
-    : _times( times )
+   : _times( times )
 {
 }
 
 void Repeat::init( BehaviorContext *context )
 {
-    Decorator::init( context );
+   Decorator::init( context );
 
-    _loopCount = 0;
+   _loopCount = 0;
 }
 
 Behavior::State Repeat::step( BehaviorContext *context )
 {
-    auto result = Decorator::step( context );
-    if ( result == Behavior::State::RUNNING ) {
-        return Behavior::State::RUNNING;
-    } else if ( result == Behavior::State::SUCCESS ) {
-        if ( _times < 0 || ++_loopCount < _times ) {
-            getBehavior()->init( context );
-            return Behavior::State::RUNNING;
-        } else {
-            return Behavior::State::SUCCESS;
-        }
-    }
+   auto result = Decorator::step( context );
+   if ( result == Behavior::State::RUNNING ) {
+      return Behavior::State::RUNNING;
+   } else if ( result == Behavior::State::SUCCESS ) {
+      if ( _times < 0 || ++_loopCount < _times ) {
+         getBehavior()->init( context );
+         return Behavior::State::RUNNING;
+      } else {
+         return Behavior::State::SUCCESS;
+      }
+   }
 
-    return Behavior::State::FAILURE;
+   return Behavior::State::FAILURE;
 }
 
 void Repeat::encode( coding::Encoder &encoder )
 {
-    Decorator::encode( encoder );
+   Decorator::encode( encoder );
 
-    encoder.encode( "times", _times );
+   encoder.encode( "times", _times );
 }
 
 void Repeat::decode( coding::Decoder &decoder )
 {
-    Decorator::decode( decoder );
+   Decorator::decode( decoder );
 
-    decoder.decode( "times", _times );
+   decoder.decode( "times", _times );
 }

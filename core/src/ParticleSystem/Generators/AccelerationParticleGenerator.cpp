@@ -27,14 +27,16 @@
 
 #include "AccelerationParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 AccelerationParticleGenerator::AccelerationParticleGenerator( void )
-    : _minAcceleration( Vector3f::Constants::ZERO ),
-      _maxAcceleration( Vector3f::Constants::ZERO )
+   : _minAcceleration( Vector3f::Constants::ZERO ),
+     _maxAcceleration( Vector3f::Constants::ZERO )
 {
 }
 
@@ -44,30 +46,30 @@ AccelerationParticleGenerator::~AccelerationParticleGenerator( void )
 
 void AccelerationParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
+   _accelerations = particles->createAttribArray< Vector3f >( ParticleAttrib::ACCELERATION );
 }
 
 void AccelerationParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    auto as = _accelerations->getData< Vector3f >();
+   auto as = _accelerations->getData< Vector3f >();
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        as[ i ] = Random::generate< Vector3f >( _minAcceleration, _maxAcceleration );
-    }
+   for ( ParticleId i = startId; i < endId; i++ ) {
+      as[ i ] = Random::generate< Vector3f >( _minAcceleration, _maxAcceleration );
+   }
 }
 
 void AccelerationParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "minAcceleration", _minAcceleration );
-    encoder.encode( "maxAcceleration", _maxAcceleration );
+   encoder.encode( "minAcceleration", _minAcceleration );
+   encoder.encode( "maxAcceleration", _maxAcceleration );
 }
 
 void AccelerationParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "minAcceleration", _minAcceleration );
-    decoder.decode( "maxAcceleration", _maxAcceleration );
+   decoder.decode( "minAcceleration", _minAcceleration );
+   decoder.decode( "maxAcceleration", _maxAcceleration );
 }

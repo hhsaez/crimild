@@ -1,8 +1,10 @@
 #include "AnimateParticleSystem.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "ParticleSystem/ParticleSystemComponent.hpp"
 #include "SceneGraph/Group.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -13,7 +15,7 @@ AnimateParticleSystem::AnimateParticleSystem( void )
 }
 
 AnimateParticleSystem::AnimateParticleSystem( crimild::Bool animate )
-    : _animate( animate )
+   : _animate( animate )
 {
 }
 
@@ -23,29 +25,29 @@ AnimateParticleSystem::~AnimateParticleSystem( void )
 
 Behavior::State AnimateParticleSystem::step( BehaviorContext *context )
 {
-    auto agent = static_cast< Group * >( context->getAgent() );
+   auto agent = static_cast< Group * >( context->getAgent() );
 
-    auto ps = agent->getComponent< ParticleSystemComponent >();
-    if ( ps == nullptr ) {
-        Log::error( CRIMILD_CURRENT_CLASS_NAME, "Behavior is not attached to particle system" );
-        return Behavior::State::FAILURE;
-    }
+   auto ps = agent->getComponent< ParticleSystemComponent >();
+   if ( ps == nullptr ) {
+      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Behavior is not attached to particle system" );
+      return Behavior::State::FAILURE;
+   }
 
-    ps->setAnimationEnabled( _animate );
+   ps->setAnimationEnabled( _animate );
 
-    return Behavior::State::SUCCESS;
+   return Behavior::State::SUCCESS;
 }
 
 void AnimateParticleSystem::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "animate", _animate );
+   encoder.encode( "animate", _animate );
 }
 
 void AnimateParticleSystem::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "animate", _animate );
+   decoder.decode( "animate", _animate );
 }

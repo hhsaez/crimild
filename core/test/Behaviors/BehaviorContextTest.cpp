@@ -29,7 +29,8 @@
 
 #include "SceneGraph/Node.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
@@ -37,92 +38,92 @@ using namespace crimild::behaviors;
 
 TEST( BehaviorContext, can_set_values )
 {
-    auto context = crimild::alloc< BehaviorContext >();
+   auto context = crimild::alloc< BehaviorContext >();
 
-    EXPECT_FALSE( context->has( "value" ) );
+   EXPECT_FALSE( context->has( "value" ) );
 
-    context->set( "value", Int32( 20 ) );
-    EXPECT_TRUE( context->has( "value" ) );
-    EXPECT_TRUE( context->get( "value" )->isValid() );
-    EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
+   context->set( "value", Int32( 20 ) );
+   EXPECT_TRUE( context->has( "value" ) );
+   EXPECT_TRUE( context->get( "value" )->isValid() );
+   EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
 }
 
 TEST( BehaviorContext, works_with_variants )
 {
-    auto context = crimild::alloc< BehaviorContext >();
+   auto context = crimild::alloc< BehaviorContext >();
 
-    EXPECT_FALSE( context->has( "value" ) );
+   EXPECT_FALSE( context->has( "value" ) );
 
-    context->set( "value", crimild::alloc< Variant >( Int32( 20 ) ) );
-    EXPECT_TRUE( context->has( "value" ) );
-    EXPECT_TRUE( context->get( "value" )->isValid() );
-    EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
+   context->set( "value", crimild::alloc< Variant >( Int32( 20 ) ) );
+   EXPECT_TRUE( context->has( "value" ) );
+   EXPECT_TRUE( context->get( "value" )->isValid() );
+   EXPECT_EQ( 20, context->get( "value" )->get< Int32 >() );
 }
 
 TEST( BehaviorContext, get_or_default )
 {
-    auto context = crimild::alloc< BehaviorContext >();
+   auto context = crimild::alloc< BehaviorContext >();
 
-    auto var = context->getOrCreate( "value", Int32( 42 ) );
-    EXPECT_TRUE( context->has( "value" ) );
-    EXPECT_TRUE( context->get( "value" )->isValid() );
-    EXPECT_EQ( 42, context->get( "value" )->get< Int32 >() );
-    EXPECT_EQ( 42, var->get< Int32 >() );
+   auto var = context->getOrCreate( "value", Int32( 42 ) );
+   EXPECT_TRUE( context->has( "value" ) );
+   EXPECT_TRUE( context->get( "value" )->isValid() );
+   EXPECT_EQ( 42, context->get( "value" )->get< Int32 >() );
+   EXPECT_EQ( 42, var->get< Int32 >() );
 }
 
 TEST( BehaviorContext, target_cannot_be_equalt_to_agent )
 {
-    auto node = crimild::alloc< Node >();
+   auto node = crimild::alloc< Node >();
 
-    auto context = crimild::alloc< BehaviorContext >();
-    context->setAgent( get_ptr( node ) );
-    context->addTarget( get_ptr( node ) );
+   auto context = crimild::alloc< BehaviorContext >();
+   context->setAgent( get_ptr( node ) );
+   context->addTarget( get_ptr( node ) );
 
-    ASSERT_EQ( 0, context->getTargetCount() );
+   ASSERT_EQ( 0, context->getTargetCount() );
 }
 
 TEST( BehaviorContext, coding )
 {
-    auto context = crimild::alloc< BehaviorContext >();
-    context->set( "input.x", crimild::alloc< Variant >( Int32( 10 ) ) );
-    context->set( "input.y", crimild::alloc< Variant >( Int32( 20 ) ) );
+   auto context = crimild::alloc< BehaviorContext >();
+   context->set( "input.x", crimild::alloc< Variant >( Int32( 10 ) ) );
+   context->set( "input.y", crimild::alloc< Variant >( Int32( 20 ) ) );
 
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( context );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   encoder->encode( context );
+   auto bytes = encoder->getBytes();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   decoder->fromBytes( bytes );
 
-    auto decodedContext = decoder->getObjectAt< BehaviorContext >( 0 );
-    EXPECT_TRUE( decodedContext != nullptr );
-    EXPECT_EQ( 10, decodedContext->get( "input.x" )->get< crimild::Int32 >() );
-    EXPECT_EQ( 20, decodedContext->get( "input.y" )->get< crimild::Int32 >() );
+   auto decodedContext = decoder->getObjectAt< BehaviorContext >( 0 );
+   EXPECT_TRUE( decodedContext != nullptr );
+   EXPECT_EQ( 10, decodedContext->get( "input.x" )->get< crimild::Int32 >() );
+   EXPECT_EQ( 20, decodedContext->get( "input.y" )->get< crimild::Int32 >() );
 }
 
 TEST( BehaviorContext, coding_with_target )
 {
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
 
-    {
-        auto context = crimild::alloc< BehaviorContext >();
+   {
+      auto context = crimild::alloc< BehaviorContext >();
 
-        auto target = crimild::alloc< Node >();
-        target->setName( "some target" );
-        context->addTarget( get_ptr( target ) );
+      auto target = crimild::alloc< Node >();
+      target->setName( "some target" );
+      context->addTarget( get_ptr( target ) );
 
-        encoder->encode( context );
-    }
+      encoder->encode( context );
+   }
 
-    {
-        auto bytes = encoder->getBytes();
-        decoder->fromBytes( bytes );
+   {
+      auto bytes = encoder->getBytes();
+      decoder->fromBytes( bytes );
 
-        auto decoded = decoder->getObjectAt< BehaviorContext >( 0 );
-        ASSERT_TRUE( decoded != nullptr );
+      auto decoded = decoder->getObjectAt< BehaviorContext >( 0 );
+      ASSERT_TRUE( decoded != nullptr );
 
-        ASSERT_TRUE( decoded->hasTargets() );
-        ASSERT_EQ( 1, decoded->getTargetCount() );
-        EXPECT_EQ( "some target", decoded->getTargetAt( 0 )->getName() );
-    }
+      ASSERT_TRUE( decoded->hasTargets() );
+      ASSERT_EQ( 1, decoded->getTargetCount() );
+      EXPECT_EQ( "some target", decoded->getTargetAt( 0 )->getName() );
+   }
 }

@@ -28,103 +28,103 @@
 #ifndef CRIMILD_CORE_VARIANT_
 #define CRIMILD_CORE_VARIANT_
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Codable.hpp>
 
 namespace crimild {
 
-    /**
-     * \brief A type that can hold any value
-     *
-     * This is a helper class that can be used to store any kind of value. It's
-     * specially useful for settings or other context values that are usually
-     * stored in a map and retrieved by key.
-     *
-     * \warning This is an unsafe type and you should be careful when working with it
-     * since it can lead to some degenarate cases (see unit tests).
-     *
-     * \code {.cpp}
-     *  Variant var( 10 ); // this is an int by default
-     *  assert( var.get< float >() == 10 ); // fails
-     * \endcode
-     *
-     * \warning Use only with native types and trivial types. Do not use with
-     * containers (std::vector, std::string, etc.) or complex types (i.e. Node).
-     */
-    class Variant : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Variant );
+   /**
+    * \brief A type that can hold any value
+    *
+    * This is a helper class that can be used to store any kind of value. It's
+    * specially useful for settings or other context values that are usually
+    * stored in a map and retrieved by key.
+    *
+    * \warning This is an unsafe type and you should be careful when working with it
+    * since it can lead to some degenarate cases (see unit tests).
+    *
+    * \code {.cpp}
+    *  Variant var( 10 ); // this is an int by default
+    *  assert( var.get< float >() == 10 ); // fails
+    * \endcode
+    *
+    * \warning Use only with native types and trivial types. Do not use with
+    * containers (std::vector, std::string, etc.) or complex types (i.e. Node).
+    */
+   class Variant : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Variant );
 
-    public:
-        Variant( void ) = default;
+   public:
+      Variant( void ) = default;
 
-        template< typename T >
-        explicit Variant( const T &value ) noexcept
-            : m_data( sizeof( value ) )
-        {
-            if ( m_data.size() > 0 ) {
-                memcpy( m_data.data(), &value, m_data.size() );
-            }
-        }
+      template< typename T >
+      explicit Variant( const T &value ) noexcept
+         : m_data( sizeof( value ) )
+      {
+         if ( m_data.size() > 0 ) {
+            memcpy( m_data.data(), &value, m_data.size() );
+         }
+      }
 
-        Variant( const Variant &other ) noexcept
-            : m_data( other.m_data )
-        {
-        }
+      Variant( const Variant &other ) noexcept
+         : m_data( other.m_data )
+      {
+      }
 
-        Variant( Variant &&other ) noexcept
-            : m_data( std::move( other.m_data ) )
-        {
-        }
+      Variant( Variant &&other ) noexcept
+         : m_data( std::move( other.m_data ) )
+      {
+      }
 
-        ~Variant( void ) = default;
+      ~Variant( void ) = default;
 
-        Variant &operator=( const Variant &other ) noexcept
-        {
-            m_data = other.m_data;
-            return *this;
-        }
+      Variant &operator=( const Variant &other ) noexcept
+      {
+         m_data = other.m_data;
+         return *this;
+      }
 
-        Variant &operator=( Variant &&other ) noexcept
-        {
-            m_data = std::move( other.m_data );
-            return *this;
-        }
+      Variant &operator=( Variant &&other ) noexcept
+      {
+         m_data = std::move( other.m_data );
+         return *this;
+      }
 
-        inline bool isValid( void ) const noexcept { return m_data.size() > 0; }
+      inline bool isValid( void ) const noexcept { return m_data.size() > 0; }
 
-        template< typename T >
-        T &get( void ) noexcept
-        {
-            assert( m_data.size() == sizeof( T ) );
-            return *reinterpret_cast< T * >( m_data.data() );
-        }
+      template< typename T >
+      T &get( void ) noexcept
+      {
+         assert( m_data.size() == sizeof( T ) );
+         return *reinterpret_cast< T * >( m_data.data() );
+      }
 
-        template< typename T >
-        const T &get( void ) const noexcept
-        {
-            assert( m_data.size() == sizeof( T ) );
-            return *reinterpret_cast< const T * >( m_data.data() );
-        }
+      template< typename T >
+      const T &get( void ) const noexcept
+      {
+         assert( m_data.size() == sizeof( T ) );
+         return *reinterpret_cast< const T * >( m_data.data() );
+      }
 
-    private:
-        /**
-         * \brief Raw bytes
-         *
-         * Probably not the most efficient way to store the data, but variants
-         * are supposed to be helpful, not efficient.
-         */
-        std::vector< std::byte > m_data;
+   private:
+      /**
+       * \brief Raw bytes
+       *
+       * Probably not the most efficient way to store the data, but variants
+       * are supposed to be helpful, not efficient.
+       */
+      std::vector< std::byte > m_data;
 
-        /**
-           \name Coding support
-        */
-        //@{
+      /**
+         \name Coding support
+      */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

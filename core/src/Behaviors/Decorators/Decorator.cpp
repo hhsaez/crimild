@@ -1,6 +1,7 @@
 #include "Decorator.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -16,32 +17,32 @@ Decorator::~Decorator( void )
 
 void Decorator::init( BehaviorContext *context )
 {
-    Behavior::init( context );
+   Behavior::init( context );
 
-    if ( getBehavior() != nullptr ) {
-        getBehavior()->init( context );
-    }
+   if ( getBehavior() != nullptr ) {
+      getBehavior()->init( context );
+   }
 }
 
 Behavior::State Decorator::step( BehaviorContext *context )
 {
-    if ( getBehavior() == nullptr ) {
-        return Behavior::State::FAILURE;
-    }
+   if ( getBehavior() == nullptr ) {
+      return Behavior::State::FAILURE;
+   }
 
-    return getBehavior()->step( context );
+   return getBehavior()->step( context );
 }
 
 void Decorator::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "behavior", _decoratedBehavior );
+   encoder.encode( "behavior", _decoratedBehavior );
 }
 
 void Decorator::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "behavior", _decoratedBehavior );
+   decoder.decode( "behavior", _decoratedBehavior );
 }

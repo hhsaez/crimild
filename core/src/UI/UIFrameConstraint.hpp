@@ -28,8 +28,7 @@
 #ifndef CRIMILD_UI_FRAME_CONSTRAINT_
 #define CRIMILD_UI_FRAME_CONSTRAINT_
 
-#include "Crimild_Coding.hpp"
-
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

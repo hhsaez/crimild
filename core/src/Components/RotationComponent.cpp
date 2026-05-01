@@ -27,41 +27,43 @@
 
 #include "RotationComponent.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild;
 
 RotationComponent::RotationComponent( const Vector3f &axis, float speed )
-    : _axis( normalize( axis ) ),
-      _speed( speed ),
-      _time( 0 )
+   : _axis( normalize( axis ) ),
+     _speed( speed ),
+     _time( 0 )
 {
 }
 
 void RotationComponent::update( const Clock &c )
 {
-    /*
-    getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
-    _time += _speed * c.getDeltaTime();
-    */
-    assert( false );
+   /*
+   getNode()->local().rotate().fromAxisAngle( _axis, _time * 2.0f * Numericf::PI );
+   _time += _speed * c.getDeltaTime();
+   */
+   assert( false );
 }
 
 void RotationComponent::encode( coding::Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    encoder.encode( "axis", _axis );
-    encoder.encode( "speed", _speed );
+   encoder.encode( "axis", _axis );
+   encoder.encode( "speed", _speed );
 }
 
 void RotationComponent::decode( coding::Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    decoder.decode( "axis", _axis );
-    decoder.decode( "speed", _speed );
+   decoder.decode( "axis", _axis );
+   decoder.decode( "speed", _speed );
 }

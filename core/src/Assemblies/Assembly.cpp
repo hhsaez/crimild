@@ -1,5 +1,8 @@
 #include "Assemblies/Assembly.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild;
 
 Assembly::Assembly( std::string_view name ) noexcept

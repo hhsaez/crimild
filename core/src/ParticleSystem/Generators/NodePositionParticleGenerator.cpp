@@ -27,10 +27,12 @@
 
 #include "NodePositionParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
@@ -44,59 +46,59 @@ NodePositionParticleGenerator::~NodePositionParticleGenerator( void )
 
 void NodePositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+   _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
 
-    if ( _targetNode == nullptr && !_targetNodeName.empty() ) {
-        node->getParent()->perform( Apply( [ this ]( Node *node ) {
-            if ( node->getName() == _targetNodeName ) {
-                _targetNode = node;
-            }
-        } ) );
-    }
+   if ( _targetNode == nullptr && !_targetNodeName.empty() ) {
+      node->getParent()->perform( Apply( [ this ]( Node *node ) {
+         if ( node->getName() == _targetNodeName ) {
+            _targetNode = node;
+         }
+      } ) );
+   }
 }
 
 void NodePositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    /*
-        assert( _targetNode != nullptr );
+   /*
+       assert( _targetNode != nullptr );
 
-        auto ps = _positions->getData< Vector3f >();
+       auto ps = _positions->getData< Vector3f >();
 
-        auto origin = _targetNode->getWorld().getTranslate();
-        node->getWorld().applyInverseToPoint( origin, origin );
+       auto origin = _targetNode->getWorld().getTranslate();
+       node->getWorld().applyInverseToPoint( origin, origin );
 
-    const auto posMin = origin - _size;
-    const auto posMax = origin + _size;
+   const auto posMin = origin - _size;
+   const auto posMax = origin + _size;
 
-        // TODO: use random vectors
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        auto x = Random::generate< Real32 >( posMin.x(), posMax.x() );
-        auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
-        auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
-                if ( particles->shouldComputeInWorldSpace() ) {
-                        auto p = Vector3f( x, y, z );
-                        node->getWorld().applyToPoint( p, p );
-                        ps[ i ] = p;
-                }
-                else {
-                        ps[ i ] = Vector3f( x, y, z );
-                }
-    }
-    */
+       // TODO: use random vectors
+   for ( ParticleId i = startId; i < endId; i++ ) {
+       auto x = Random::generate< Real32 >( posMin.x(), posMax.x() );
+       auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
+       auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
+               if ( particles->shouldComputeInWorldSpace() ) {
+                       auto p = Vector3f( x, y, z );
+                       node->getWorld().applyToPoint( p, p );
+                       ps[ i ] = p;
+               }
+               else {
+                       ps[ i ] = Vector3f( x, y, z );
+               }
+   }
+   */
 }
 
 void NodePositionParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "node", _targetNodeName );
-    encoder.encode( "size", _size );
+   encoder.encode( "node", _targetNodeName );
+   encoder.encode( "size", _size );
 }
 
 void NodePositionParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "node", _targetNodeName );
-    decoder.decode( "size", _size );
+   decoder.decode( "node", _targetNodeName );
+   decoder.decode( "size", _size );
 }

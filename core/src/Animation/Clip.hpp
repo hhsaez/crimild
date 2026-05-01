@@ -28,7 +28,7 @@
 #ifndef CRIMILD_ANIMATION_CLIP_
 #define CRIMILD_ANIMATION_CLIP_
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

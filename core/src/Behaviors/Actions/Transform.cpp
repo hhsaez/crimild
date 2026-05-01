@@ -1,8 +1,10 @@
 #include "Transform.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -13,19 +15,19 @@ Transform::Transform( void )
 }
 
 Transform::Transform(
-    const crimild::Transformation &targetTransformation,
-    crimild::Real32 duration,
-    crimild::Bool computeInTargetSpace,
-    crimild::Bool computeFromTargetPosition,
-    crimild::Bool applyTranslation,
-    crimild::Bool applyRotation
+   const crimild::Transformation &targetTransformation,
+   crimild::Real32 duration,
+   crimild::Bool computeInTargetSpace,
+   crimild::Bool computeFromTargetPosition,
+   crimild::Bool applyTranslation,
+   crimild::Bool applyRotation
 )
-    : _targetTransformation( targetTransformation ),
-      _duration( duration ),
-      _computeInTargetSpace( computeInTargetSpace ),
-      _computeFromTargetPosition( computeFromTargetPosition ),
-      _applyTranslation( applyTranslation ),
-      _applyRotation( applyRotation )
+   : _targetTransformation( targetTransformation ),
+     _duration( duration ),
+     _computeInTargetSpace( computeInTargetSpace ),
+     _computeFromTargetPosition( computeFromTargetPosition ),
+     _applyTranslation( applyTranslation ),
+     _applyRotation( applyRotation )
 {
 }
 
@@ -35,7 +37,7 @@ Transform::~Transform( void )
 
 void Transform::init( BehaviorContext *context )
 {
-    Behavior::init( context );
+   Behavior::init( context );
 
 #if 0
 
@@ -62,7 +64,7 @@ void Transform::init( BehaviorContext *context )
 
 Behavior::State Transform::step( BehaviorContext *context )
 {
-    assert( false && "TODO" );
+   assert( false && "TODO" );
 
 #if 0
 	if ( _duration <= 0 ) {
@@ -93,29 +95,29 @@ Behavior::State Transform::step( BehaviorContext *context )
 	}
 #endif
 
-    return Behavior::State::RUNNING;
+   return Behavior::State::RUNNING;
 }
 
 void Transform::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "transformation", _targetTransformation );
-    encoder.encode( "duration", _duration );
-    encoder.encode( "computeInTargetSpace", _computeInTargetSpace );
-    encoder.encode( "computeFromTargetPosition", _computeFromTargetPosition );
-    encoder.encode( "applyTranslation", _applyTranslation );
-    encoder.encode( "applyRotation", _applyRotation );
+   encoder.encode( "transformation", _targetTransformation );
+   encoder.encode( "duration", _duration );
+   encoder.encode( "computeInTargetSpace", _computeInTargetSpace );
+   encoder.encode( "computeFromTargetPosition", _computeFromTargetPosition );
+   encoder.encode( "applyTranslation", _applyTranslation );
+   encoder.encode( "applyRotation", _applyRotation );
 }
 
 void Transform::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "transformation", _targetTransformation );
-    decoder.decode( "duration", _duration );
-    decoder.decode( "computeInTargetSpace", _computeInTargetSpace );
-    decoder.decode( "computeFromTargetPosition", _computeFromTargetPosition );
-    decoder.decode( "applyTranslation", _applyTranslation );
-    decoder.decode( "applyRotation", _applyRotation );
+   decoder.decode( "transformation", _targetTransformation );
+   decoder.decode( "duration", _duration );
+   decoder.decode( "computeInTargetSpace", _computeInTargetSpace );
+   decoder.decode( "computeFromTargetPosition", _computeFromTargetPosition );
+   decoder.decode( "applyTranslation", _applyTranslation );
+   decoder.decode( "applyRotation", _applyRotation );
 }

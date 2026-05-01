@@ -29,53 +29,54 @@
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <Crimild_Mathematics.hpp>
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( MaterialComponent, attachMaterial )
 {
-    auto materials = crimild::alloc< MaterialComponent >();
+   auto materials = crimild::alloc< MaterialComponent >();
 
-    EXPECT_FALSE( materials->hasMaterials() );
+   EXPECT_FALSE( materials->hasMaterials() );
 
-    auto material = crimild::alloc< Material >();
-    materials->attachMaterial( material );
+   auto material = crimild::alloc< Material >();
+   materials->attachMaterial( material );
 
-    EXPECT_TRUE( materials->hasMaterials() );
+   EXPECT_TRUE( materials->hasMaterials() );
 
-    int i = 0;
-    materials->forEachMaterial( [ &i, material ]( Material *m ) {
-        i++;
-        EXPECT_EQ( m, crimild::get_ptr( material ) );
-    } );
-    EXPECT_EQ( 1, i );
+   int i = 0;
+   materials->forEachMaterial( [ &i, material ]( Material *m ) {
+      i++;
+      EXPECT_EQ( m, crimild::get_ptr( material ) );
+   } );
+   EXPECT_EQ( 1, i );
 }
 
 TEST( MaterialComponent, coding )
 {
-    auto material = crimild::alloc< UnlitMaterial >();
-    material->setColor( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f } );
-    material->setTexture( crimild::alloc< Texture >() );
+   auto material = crimild::alloc< UnlitMaterial >();
+   material->setColor( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f } );
+   material->setTexture( crimild::alloc< Texture >() );
 
-    auto materials = crimild::alloc< MaterialComponent >();
-    materials->attachMaterial( material );
+   auto materials = crimild::alloc< MaterialComponent >();
+   materials->attachMaterial( material );
 
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( materials );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   encoder->encode( materials );
+   auto bytes = encoder->getBytes();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   decoder->fromBytes( bytes );
 
-    ASSERT_NE( 0, decoder->getObjectCount() );
+   ASSERT_NE( 0, decoder->getObjectCount() );
 
-    auto ms = decoder->getObjectAt< MaterialComponent >( 0 );
-    ASSERT_TRUE( ms != nullptr );
+   auto ms = decoder->getObjectAt< MaterialComponent >( 0 );
+   ASSERT_TRUE( ms != nullptr );
 
-    ASSERT_TRUE( ms->hasMaterials() );
+   ASSERT_TRUE( ms->hasMaterials() );
 
-    ASSERT_NE( nullptr, ms->first() );
-    EXPECT_TRUE( isEqual( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f }, static_cast< UnlitMaterial * >( ms->first() )->getColor() ) );
+   ASSERT_NE( nullptr, ms->first() );
+   EXPECT_TRUE( isEqual( ColorRGBA { 0.7f, 0.7f, 0.7f, 1.0f }, static_cast< UnlitMaterial * >( ms->first() )->getColor() ) );
 }

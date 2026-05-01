@@ -31,8 +31,6 @@ void crimild::init( void )
 {
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Variant );
 
-   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::EncodedData );
-
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Assembly );
 
    CRIMILD_REGISTER_OBJECT_BUILDER( crimild::Node );

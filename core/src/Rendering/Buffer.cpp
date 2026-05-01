@@ -27,20 +27,21 @@
 
 #include "Rendering/Buffer.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void Buffer::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "data", m_data );
+   encoder.encode( "data", m_data );
 }
 
 void Buffer::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "data", m_data );
+   decoder.decode( "data", m_data );
 }

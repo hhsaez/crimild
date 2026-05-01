@@ -28,7 +28,6 @@
 #ifndef CRIMILD_PRIMITIVES_PRIMITIVE_
 #define CRIMILD_PRIMITIVES_PRIMITIVE_
 
-#include "Crimild_Coding.hpp"
 #include "Entity/Entity.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/IndexBuffer.hpp"

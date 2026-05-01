@@ -28,56 +28,57 @@
 #ifndef CRIMILD_AUDIO_LISTENER_
 #define CRIMILD_AUDIO_LISTENER_
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
+
+#include <crimild/coding/Codable.hpp>
 
 namespace crimild {
 
-    namespace audio {
+   namespace audio {
 
-        /**
-           \brief Represents a microphone in the virtual world
+      /**
+         \brief Represents a microphone in the virtual world
 
-           \warning There should be only one active listener at
-           any time in any given scene.
+         \warning There should be only one active listener at
+         any time in any given scene.
+       */
+      class AudioListener : public coding::Codable {
+         CRIMILD_IMPLEMENT_RTTI( crimild::audio::AudioListener )
+
+      protected:
+         AudioListener( void );
+
+      public:
+         virtual ~AudioListener( void );
+
+         /**
+                 \brief Updates the listener transformation
+
+                 Different platform may need to override this function
+                 in order to update specific APIs parameters, like
+                 position, direction and other vectors
          */
-        class AudioListener : public coding::Codable {
-            CRIMILD_IMPLEMENT_RTTI( crimild::audio::AudioListener )
+         virtual void setTransformation( const Transformation &t ) { _transformation = t; }
+         virtual const Transformation &getTransformation( void ) const { return _transformation; }
 
-        protected:
-            AudioListener( void );
+      private:
+         Transformation _transformation;
 
-        public:
-            virtual ~AudioListener( void );
+         /**
+            \name Coding support
+         */
+         //@{
 
-            /**
-                    \brief Updates the listener transformation
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-                    Different platform may need to override this function
-                    in order to update specific APIs parameters, like
-                    position, direction and other vectors
-            */
-            virtual void setTransformation( const Transformation &t ) { _transformation = t; }
-            virtual const Transformation &getTransformation( void ) const { return _transformation; }
+         //@}
+      };
 
-        private:
-            Transformation _transformation;
+      using AudioListenerPtr = SharedPointer< AudioListener >;
 
-            /**
-               \name Coding support
-            */
-            //@{
-
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
-
-            //@}
-        };
-
-        using AudioListenerPtr = SharedPointer< AudioListener >;
-
-    }
+   }
 
 }
 

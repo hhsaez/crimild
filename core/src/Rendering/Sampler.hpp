@@ -28,115 +28,116 @@
 #ifndef CRIMILD_RENDERING_SAMPLER_
 #define CRIMILD_RENDERING_SAMPLER_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/CompareOp.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/coding/Codable.hpp>
+
 namespace crimild {
 
-    class Sampler : public coding::Codable,
-                    public RenderResourceImpl< Sampler > {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Sampler )
+   class Sampler : public coding::Codable,
+                   public RenderResourceImpl< Sampler > {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Sampler )
 
-    public:
-        enum class WrapMode : uint8_t {
-            REPEAT, //< Default
-            MIRRORED_REPEAT,
-            CLAMP_TO_EDGE,
-            CLAMP_TO_BORDER,
-        };
+   public:
+      enum class WrapMode : uint8_t {
+         REPEAT, //< Default
+         MIRRORED_REPEAT,
+         CLAMP_TO_EDGE,
+         CLAMP_TO_BORDER,
+      };
 
-        WrapMode getWrapMode( void ) const { return m_wrapMode; }
-        void setWrapMode( const WrapMode &mode ) { m_wrapMode = mode; }
+      WrapMode getWrapMode( void ) const { return m_wrapMode; }
+      void setWrapMode( const WrapMode &mode ) { m_wrapMode = mode; }
 
-    private:
-        WrapMode m_wrapMode = WrapMode::REPEAT;
+   private:
+      WrapMode m_wrapMode = WrapMode::REPEAT;
 
-    public:
-        enum class Filter : uint8_t {
-            NEAREST,
-            LINEAR, //< Default
-            NEAREST_MIPMAP_NEAREST,
-            NEAREST_MIPMAP_LINEAR,
-            LINEAR_MIPMAP_NEAREST,
-            LINEAR_MIPMAP_LINEAR
-        };
+   public:
+      enum class Filter : uint8_t {
+         NEAREST,
+         LINEAR, //< Default
+         NEAREST_MIPMAP_NEAREST,
+         NEAREST_MIPMAP_LINEAR,
+         LINEAR_MIPMAP_NEAREST,
+         LINEAR_MIPMAP_LINEAR
+      };
 
-        void setMinFilter( Filter filter ) { m_minFilter = filter; }
-        Filter getMinFilter( void ) const { return m_minFilter; }
+      void setMinFilter( Filter filter ) { m_minFilter = filter; }
+      Filter getMinFilter( void ) const { return m_minFilter; }
 
-        void setMagFilter( Filter filter ) { m_magFilter = filter; }
-        Filter getMagFilter( void ) const { return m_magFilter; }
+      void setMagFilter( Filter filter ) { m_magFilter = filter; }
+      Filter getMagFilter( void ) const { return m_magFilter; }
 
-    private:
-        Filter m_minFilter = Filter::LINEAR;
-        Filter m_magFilter = Filter::LINEAR;
+   private:
+      Filter m_minFilter = Filter::LINEAR;
+      Filter m_magFilter = Filter::LINEAR;
 
-        /**
-            \name Border color
-         */
-        //@{
+      /**
+          \name Border color
+       */
+      //@{
 
-    public:
-        enum class BorderColor {
-            FLOAT_TRANSPARENT_BLACK,
-            INT_TRANSPARENT_BLACK,
-            FLOAT_OPAQUE_BLACK,
-            INT_OPAQUE_BLACK,
-            FLOAT_OPAQUE_WHITE,
-            INT_OPAQUE_WHITE,
-        };
-        void setBorderColor( BorderColor color ) { m_borderColor = color; }
-        BorderColor getBorderColor( void ) const { return m_borderColor; }
+   public:
+      enum class BorderColor {
+         FLOAT_TRANSPARENT_BLACK,
+         INT_TRANSPARENT_BLACK,
+         FLOAT_OPAQUE_BLACK,
+         INT_OPAQUE_BLACK,
+         FLOAT_OPAQUE_WHITE,
+         INT_OPAQUE_WHITE,
+      };
+      void setBorderColor( BorderColor color ) { m_borderColor = color; }
+      BorderColor getBorderColor( void ) const { return m_borderColor; }
 
-    private:
-        BorderColor m_borderColor = BorderColor::INT_OPAQUE_BLACK;
+   private:
+      BorderColor m_borderColor = BorderColor::INT_OPAQUE_BLACK;
 
-        /**
-                   \name Level of detail
+      /**
+                 \name Level of detail
 
-                   Usually, set minLod to 0 and maxLod to image->getMipLevels()
-         */
-        //@{
+                 Usually, set minLod to 0 and maxLod to image->getMipLevels()
+       */
+      //@{
 
-    public:
-        void setMinLod( crimild::Real32 minLod ) noexcept { m_minLod = minLod; }
-        crimild::Real32 getMinLod( void ) const noexcept { return m_minLod; }
+   public:
+      void setMinLod( crimild::Real32 minLod ) noexcept { m_minLod = minLod; }
+      crimild::Real32 getMinLod( void ) const noexcept { return m_minLod; }
 
-        void setMaxLod( crimild::Real32 maxLod ) noexcept { m_maxLod = maxLod; }
-        crimild::Real32 getMaxLod( void ) const noexcept { return m_maxLod; }
+      void setMaxLod( crimild::Real32 maxLod ) noexcept { m_maxLod = maxLod; }
+      crimild::Real32 getMaxLod( void ) const noexcept { return m_maxLod; }
 
-    private:
-        crimild::Real32 m_minLod = 0.0f;
-        crimild::Real32 m_maxLod = 1.0f;
+   private:
+      crimild::Real32 m_minLod = 0.0f;
+      crimild::Real32 m_maxLod = 1.0f;
 
-        //@}
+      //@}
 
-        /**
-           \name Compare
-         */
-        //@{
+      /**
+         \name Compare
+       */
+      //@{
 
-    public:
-        inline void setCompareOp( CompareOp compare ) noexcept { m_compareOp = compare; }
-        inline CompareOp getCompareOp( void ) const noexcept { return m_compareOp; }
+   public:
+      inline void setCompareOp( CompareOp compare ) noexcept { m_compareOp = compare; }
+      inline CompareOp getCompareOp( void ) const noexcept { return m_compareOp; }
 
-    private:
-        CompareOp m_compareOp = CompareOp::ALWAYS;
+   private:
+      CompareOp m_compareOp = CompareOp::ALWAYS;
 
-        //@}
+      //@}
 
-        /**
-            \name Coding support
-         */
-        //@{
+      /**
+          \name Coding support
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

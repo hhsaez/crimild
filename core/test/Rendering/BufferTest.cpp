@@ -27,7 +27,9 @@
 
 #include "Rendering/Buffer.hpp"
 
-#include <Crimild_Coding.hpp>
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
+
 #include <Crimild_Mathematics.hpp>
 #include <gtest/gtest.h>
 
@@ -35,98 +37,98 @@ using namespace crimild;
 
 TEST( Buffer, constructionWithValueArray )
 {
-    auto data = Array< crimild::Real32 > {
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.5f,
-        -0.5f,
-        0.0f,
-        0.0f,
-        0.5f,
-        0.0f,
-    };
+   auto data = Array< crimild::Real32 > {
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      0.5f,
+      0.0f,
+   };
 
-    auto buffer = crimild::alloc< Buffer >( data );
+   auto buffer = crimild::alloc< Buffer >( data );
 
-    ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
-    ASSERT_NE( nullptr, buffer->getData() );
+   ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
+   ASSERT_NE( nullptr, buffer->getData() );
 }
 
 TEST( Buffer, withEmptyData )
 {
-    auto buffer = crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) );
+   auto buffer = crimild::alloc< Buffer >( Array< crimild::Real32 >( 3 ) );
 
-    ASSERT_EQ( 3 * sizeof( crimild::Real32 ), buffer->getSize() );
+   ASSERT_EQ( 3 * sizeof( crimild::Real32 ), buffer->getSize() );
 }
 
 TEST( Buffer, constructionWithStructArray )
 {
-    struct Vertex {
-        Vector3f position;
-    };
+   struct Vertex {
+      Vector3f position;
+   };
 
-    auto data = Array< Vertex > {
-        { .position = { -0.5f, -0.5f, 0.0f } },
-        { .position = { 0.5f, -0.5f, 0.0f } },
-        { .position = { 0.0f, 0.5f, 0.0f } },
-    };
+   auto data = Array< Vertex > {
+      { .position = { -0.5f, -0.5f, 0.0f } },
+      { .position = { 0.5f, -0.5f, 0.0f } },
+      { .position = { 0.0f, 0.5f, 0.0f } },
+   };
 
-    auto buffer = crimild::alloc< Buffer >( data );
+   auto buffer = crimild::alloc< Buffer >( data );
 
-    ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
-    ASSERT_NE( nullptr, buffer->getData() );
+   ASSERT_EQ( 9 * sizeof( crimild::Real32 ), buffer->getSize() );
+   ASSERT_NE( nullptr, buffer->getData() );
 
-    ASSERT_TRUE( true );
+   ASSERT_TRUE( true );
 }
 
 TEST( Buffer, constructionWithStruct )
 {
-    struct Uniform {
-        Matrix4f proj;
-        Matrix4f view;
-        Matrix4f model;
-        ColorRGBA color;
-        crimild::Real32 metalness;
-    };
+   struct Uniform {
+      Matrix4f proj;
+      Matrix4f view;
+      Matrix4f model;
+      ColorRGBA color;
+      crimild::Real32 metalness;
+   };
 
-    auto buffer = crimild::alloc< Buffer >(
-        Uniform {
-            .color = ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f },
-            .metalness = 0.5f,
-        }
-    );
+   auto buffer = crimild::alloc< Buffer >(
+      Uniform {
+         .color = ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f },
+         .metalness = 0.5f,
+      }
+   );
 
-    ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
-    ASSERT_NE( nullptr, buffer->getData() );
-    ASSERT_EQ( ( ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f } ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
-    ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
+   ASSERT_EQ( sizeof( Uniform ), buffer->getSize() );
+   ASSERT_NE( nullptr, buffer->getData() );
+   ASSERT_EQ( ( ColorRGBA { 0.5f, 0.75f, 0.95f, 1.0f } ), static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->color );
+   ASSERT_EQ( 0.5f, static_cast< Uniform * >( static_cast< void * >( buffer->getData() ) )->metalness );
 }
 
 TEST( Buffer, coding )
 {
-    auto data = Array< crimild::Real32 > {
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.5f,
-        -0.5f,
-        0.0f,
-        0.0f,
-        0.5f,
-        0.0f,
-    };
+   auto data = Array< crimild::Real32 > {
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      0.5f,
+      0.0f,
+   };
 
-    auto buffer = crimild::alloc< Buffer >( data );
-    coding::MemoryEncoder encoder;
-    ASSERT_TRUE( encoder.encode( buffer ) );
-    const auto bytes = encoder.getBytes();
+   auto buffer = crimild::alloc< Buffer >( data );
+   coding::MemoryEncoder encoder;
+   ASSERT_TRUE( encoder.encode( buffer ) );
+   const auto bytes = encoder.getBytes();
 
-    coding::MemoryDecoder decoder;
-    ASSERT_TRUE( decoder.fromBytes( bytes ) );
-    ASSERT_EQ( 1, decoder.getObjectCount() );
-    auto decoded = decoder.getObjectAt< Buffer >( 0 );
+   coding::MemoryDecoder decoder;
+   ASSERT_TRUE( decoder.fromBytes( bytes ) );
+   ASSERT_EQ( 1, decoder.getObjectCount() );
+   auto decoded = decoder.getObjectAt< Buffer >( 0 );
 
-    EXPECT_EQ( buffer->getSize(), decoded->getSize() );
-    EXPECT_EQ( 0, memcmp( buffer->getData(), decoded->getData(), decoded->getSize() ) );
+   EXPECT_EQ( buffer->getSize(), decoded->getSize() );
+   EXPECT_EQ( 0, memcmp( buffer->getData(), decoded->getData(), decoded->getSize() ) );
 }
