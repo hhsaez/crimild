@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MemoryEncoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
 #include "Tags.hpp"
 

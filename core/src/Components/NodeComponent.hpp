@@ -28,102 +28,103 @@
 #ifndef CRIMILD_COMPONENTS_NODE_COMPONENT_
 #define CRIMILD_COMPONENTS_NODE_COMPONENT_
 
-#include "Crimild_Coding.hpp"
 #include "Simulation/Clock.hpp"
+
+#include <crimild/coding/Codable.hpp>
 
 namespace crimild {
 
-    class Node;
-    class Renderer;
-    class Camera;
+   class Node;
+   class Renderer;
+   class Camera;
 
-    class NodeComponent : public coding::Codable {
-        CRIMILD_IMPLEMENT_RTTI( crimild::NodeComponent )
+   class NodeComponent : public coding::Codable {
+      CRIMILD_IMPLEMENT_RTTI( crimild::NodeComponent )
 
-    protected:
-        NodeComponent( void );
+   protected:
+      NodeComponent( void );
 
-    public:
-        virtual ~NodeComponent( void );
+   public:
+      virtual ~NodeComponent( void );
 
-    public:
-        // internal use only
-        void setNode( Node *node ) { _node = node; }
+   public:
+      // internal use only
+      void setNode( Node *node ) { _node = node; }
 
-        // internal use only
-        Node *getNodePointer( void ) { return _node; }
+      // internal use only
+      Node *getNodePointer( void ) { return _node; }
 
-    public:
-        virtual const char *getComponentName( void ) const { return getClassName(); }
+   public:
+      virtual const char *getComponentName( void ) const { return getClassName(); }
 
-        Node *getNode( void ) { return _node; }
+      Node *getNode( void ) { return _node; }
 
-        const Node *getNode( void ) const { return _node; }
+      const Node *getNode( void ) const { return _node; }
 
-        template< class NodeClass >
-        NodeClass *getNode( void ) { return static_cast< NodeClass * >( getNode() ); }
+      template< class NodeClass >
+      NodeClass *getNode( void ) { return static_cast< NodeClass * >( getNode() ); }
 
-        bool isEnabled( void ) const { return _enabled; }
-        void setEnabled( bool value ) { _enabled = value; }
+      bool isEnabled( void ) const { return _enabled; }
+      void setEnabled( bool value ) { _enabled = value; }
 
-    private:
-        Node *_node = nullptr;
-        bool _enabled = true;
+   private:
+      Node *_node = nullptr;
+      bool _enabled = true;
 
-    public:
-        NodeComponent *getComponentWithName( std::string name );
+   public:
+      NodeComponent *getComponentWithName( std::string name );
 
-        template< class NODE_COMPONENT_CLASS >
-        NODE_COMPONENT_CLASS *getComponent( void )
-        {
-            return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::__CLASS_NAME ) );
-        }
+      template< class NODE_COMPONENT_CLASS >
+      NODE_COMPONENT_CLASS *getComponent( void )
+      {
+         return static_cast< NODE_COMPONENT_CLASS * >( getComponentWithName( NODE_COMPONENT_CLASS::__CLASS_NAME ) );
+      }
 
-    public:
-        /**
-                   \brief Invoked once when component is attached to a node
-                */
-        virtual void onAttach( void );
+   public:
+      /**
+                 \brief Invoked once when component is attached to a node
+              */
+      virtual void onAttach( void );
 
-        /**
-                   \brief Invoked once when scene is loaded
-                */
-        virtual void start( void );
+      /**
+                 \brief Invoked once when scene is loaded
+              */
+      virtual void start( void );
 
-        /**
-                        \brief Invoked once per scene update
-                */
-        virtual void update( const Clock & );
+      /**
+                      \brief Invoked once per scene update
+              */
+      virtual void update( const Clock & );
 
-        /**
-                        \brief Invoked only if debug rendering is enabled
-                */
-        virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
+      /**
+                      \brief Invoked only if debug rendering is enabled
+              */
+      virtual void renderDebugInfo( Renderer *renderer, Camera *camera );
 
-        /**
-                   \brief Invoked once when component is detached from a node
-                */
-        virtual void onDetach( void );
+      /**
+                 \brief Invoked once when component is detached from a node
+              */
+      virtual void onDetach( void );
 
-        /**
-            \name Cloning
-         */
-        //@{
-    public:
-        virtual SharedPointer< NodeComponent > clone( void ) { return nullptr; }
+      /**
+          \name Cloning
+       */
+      //@{
+   public:
+      virtual SharedPointer< NodeComponent > clone( void ) { return nullptr; }
 
-        //@}
+      //@}
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

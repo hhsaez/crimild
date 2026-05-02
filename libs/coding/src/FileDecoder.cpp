@@ -25,35 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FileEncoder.hpp"
+#include "crimild/coding/FileDecoder.hpp"
 
 #include <crimild/foundation.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
 
-crimild::Bool FileEncoder::write( std::string filePath )
+crimild::Bool FileDecoder::read( std::string filePath )
 {
-   return write( std::filesystem::path { filePath } );
+   return read( std::filesystem::path { filePath } );
 }
 
-crimild::Bool FileEncoder::write( const std::filesystem::path &path ) noexcept
+crimild::Bool FileDecoder::read( const std::filesystem::path &path ) noexcept
 {
-   auto bytes = getBytes();
-   crimild::Size size = bytes.size();
-   if ( size == 0 ) {
-      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Not enough data to write" );
-      return false;
-   }
-
-   FILE *file = fopen( path.string().c_str(), "wb" );
+   FILE *file = fopen( path.string().c_str(), "rb" );
    if ( file == nullptr ) {
       Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
       return false;
    }
 
-   fwrite( &size, 1, sizeof( crimild::Size ), file );
-   fwrite( bytes.getData(), 1, size, file );
+   crimild::Size size;
+   fread( &size, 1, sizeof( crimild::Size ), file );
+
+   if ( size > 0 ) {
+      ByteArray bytes( size );
+      fread( &bytes[ 0 ], 1, size, file );
+      fromBytes( bytes );
+   }
 
    fclose( file );
 

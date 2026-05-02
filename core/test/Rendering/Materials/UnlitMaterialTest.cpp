@@ -32,77 +32,78 @@
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( UnlitMaterial, construction )
 {
-    auto material = crimild::alloc< UnlitMaterial >();
+   auto material = crimild::alloc< UnlitMaterial >();
 
-    EXPECT_EQ( ( ColorRGBA { 1, 1, 1, 1 } ), material->getColor() );
-    EXPECT_NE( nullptr, material->getTexture() );
+   EXPECT_EQ( ( ColorRGBA { 1, 1, 1, 1 } ), material->getColor() );
+   EXPECT_NE( nullptr, material->getTexture() );
 }
 
 TEST( UnlitMaterial, coding )
 {
-    auto material = crimild::alloc< UnlitMaterial >();
+   auto material = crimild::alloc< UnlitMaterial >();
 
-    material->setColor( ColorRGBA { 1, 0, 1, 1 } );
-    material->setTexture( [] {
-        auto texture = crimild::alloc< Texture >();
-        texture->setName( "colorMap" );
-        texture->imageView = [ & ] {
-            auto imageView = crimild::alloc< ImageView >();
-            imageView->image = Image::CHECKERBOARD_16;
-            return imageView;
-        }();
-        texture->sampler = [ & ] {
-            auto sampler = crimild::alloc< Sampler >();
-            sampler->setMinFilter( Sampler::Filter::NEAREST );
-            sampler->setMagFilter( Sampler::Filter::NEAREST );
-            return sampler;
-        }();
-        return texture;
-    }() );
+   material->setColor( ColorRGBA { 1, 0, 1, 1 } );
+   material->setTexture( [] {
+      auto texture = crimild::alloc< Texture >();
+      texture->setName( "colorMap" );
+      texture->imageView = [ & ] {
+         auto imageView = crimild::alloc< ImageView >();
+         imageView->image = Image::CHECKERBOARD_16;
+         return imageView;
+      }();
+      texture->sampler = [ & ] {
+         auto sampler = crimild::alloc< Sampler >();
+         sampler->setMinFilter( Sampler::Filter::NEAREST );
+         sampler->setMagFilter( Sampler::Filter::NEAREST );
+         return sampler;
+      }();
+      return texture;
+   }() );
 
-    coding::MemoryEncoder encoder;
-    ASSERT_TRUE( encoder.encode( material ) );
-    const auto bytes = encoder.getBytes();
+   coding::MemoryEncoder encoder;
+   ASSERT_TRUE( encoder.encode( material ) );
+   const auto bytes = encoder.getBytes();
 
-    coding::MemoryDecoder decoder;
-    ASSERT_TRUE( decoder.fromBytes( bytes ) );
-    ASSERT_EQ( 1, decoder.getObjectCount() );
-    auto decoded = decoder.getObjectAt< UnlitMaterial >( 0 );
+   coding::MemoryDecoder decoder;
+   ASSERT_TRUE( decoder.fromBytes( bytes ) );
+   ASSERT_EQ( 1, decoder.getObjectCount() );
+   auto decoded = decoder.getObjectAt< UnlitMaterial >( 0 );
 
-    ASSERT_EQ( "colorMap", decoded->getTexture()->getName() );
+   ASSERT_EQ( "colorMap", decoded->getTexture()->getName() );
 
-#define ASSERT_TEXTURE( name, expected, decoded )                         \
-    {                                                                     \
-        ASSERT_NE( nullptr, decoded );                                    \
-        EXPECT_EQ( name, decoded->getName() );                            \
-        ASSERT_NE( nullptr, decoded->sampler );                           \
-        ASSERT_NE( nullptr, decoded->imageView );                         \
-        ASSERT_NE( nullptr, decoded->imageView->image );                  \
-        ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() ); \
-        ASSERT_EQ(                                                        \
-            expected->imageView->image->getBufferView()->getLength(),     \
-            decoded->imageView->image->getBufferView()->getLength()       \
-        );                                                                \
-        ASSERT_EQ(                                                        \
-            0,                                                            \
-            memcmp(                                                       \
-                expected->imageView->image->getBufferView()->getData(),   \
-                decoded->imageView->image->getBufferView()->getData(),    \
-                decoded->imageView->image->getBufferView()->getLength()   \
-            )                                                             \
-        );                                                                \
-    }
+#define ASSERT_TEXTURE( name, expected, decoded )                       \
+   {                                                                    \
+      ASSERT_NE( nullptr, decoded );                                    \
+      EXPECT_EQ( name, decoded->getName() );                            \
+      ASSERT_NE( nullptr, decoded->sampler );                           \
+      ASSERT_NE( nullptr, decoded->imageView );                         \
+      ASSERT_NE( nullptr, decoded->imageView->image );                  \
+      ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() ); \
+      ASSERT_EQ(                                                        \
+         expected->imageView->image->getBufferView()->getLength(),      \
+         decoded->imageView->image->getBufferView()->getLength()        \
+      );                                                                \
+      ASSERT_EQ(                                                        \
+         0,                                                             \
+         memcmp(                                                        \
+            expected->imageView->image->getBufferView()->getData(),     \
+            decoded->imageView->image->getBufferView()->getData(),      \
+            decoded->imageView->image->getBufferView()->getLength()     \
+         )                                                              \
+      );                                                                \
+   }
 
-    ASSERT_NE( nullptr, decoded );
-    EXPECT_EQ( material->getColor(), decoded->getColor() );
+   ASSERT_NE( nullptr, decoded );
+   EXPECT_EQ( material->getColor(), decoded->getColor() );
 
-    ASSERT_TEXTURE( "colorMap", material->getTexture(), decoded->getTexture() );
+   ASSERT_TEXTURE( "colorMap", material->getTexture(), decoded->getTexture() );
 }

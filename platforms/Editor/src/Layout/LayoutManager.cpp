@@ -39,7 +39,8 @@
 #include "Views/Windows/SimulationWindow.hpp"
 #include "Views/Workspaces/WorkspaceManager.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <filesystem>
 
 using namespace crimild::editor;

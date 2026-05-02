@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Codable.hpp"
+#include "crimild/coding/Codable.hpp"
 
-#include "Decoder.hpp"
-#include "Encoder.hpp"
-#include "MemoryDecoder.hpp"
-#include "MemoryEncoder.hpp"
+#include "crimild/coding/Decoder.hpp"
+#include "crimild/coding/Encoder.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
 #include <Crimild_Mathematics.hpp>
 #include <crimild/foundation.hpp>

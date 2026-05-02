@@ -28,7 +28,7 @@
 #ifndef CRIMILD_CORE_CODING_ENCODED_DATA_
 #define CRIMILD_CORE_CODING_ENCODED_DATA_
 
-#include "Codable.hpp"
+#include "crimild/coding/Codable.hpp"
 
 #include <crimild/foundation.hpp>
 #include <cstring>

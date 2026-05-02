@@ -1,4 +1,4 @@
-#include "MemoryEncoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
 #include "Tags.hpp"
 

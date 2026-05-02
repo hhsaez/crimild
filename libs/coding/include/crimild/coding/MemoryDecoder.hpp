@@ -28,8 +28,8 @@
 #ifndef CRIMILD_CORE_CODING_MEMORY_DECODER_
 #define CRIMILD_CORE_CODING_MEMORY_DECODER_
 
-#include "Decoder.hpp"
-#include "EncodedData.hpp"
+#include "crimild/coding/Decoder.hpp"
+#include "crimild/coding/EncodedData.hpp"
 
 #include <crimild/foundation.hpp>
 

@@ -1,7 +1,9 @@
 #include "IsAtTarget.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -12,7 +14,7 @@ IsAtTarget::IsAtTarget( void )
 }
 
 IsAtTarget::IsAtTarget( crimild::Real32 minDistance )
-    : _minDistance( minDistance )
+   : _minDistance( minDistance )
 {
 }
 
@@ -34,19 +36,19 @@ Behavior::State IsAtTarget::step( BehaviorContext *context )
     auto d = Distance::compute( agent->getLocal().getTranslate(), target->getLocal().getTranslate() );
     return d <= _minDistance ? Behavior::State::SUCCESS : Behavior::State::FAILURE;
 #endif
-    return Behavior::State::FAILURE;
+   return Behavior::State::FAILURE;
 }
 
 void IsAtTarget::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "minDistance", _minDistance );
+   encoder.encode( "minDistance", _minDistance );
 }
 
 void IsAtTarget::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "minDistance", _minDistance );
+   decoder.decode( "minDistance", _minDistance );
 }

@@ -28,9 +28,11 @@
 #include "Behaviors/Actions/MotionFromInput.hpp"
 
 #include "Components/MotionStateComponent.hpp"
-#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Input.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -38,53 +40,53 @@ using namespace crimild::behaviors::actions;
 
 void MotionFromInput::init( BehaviorContext *context )
 {
-    auto agent = context->getAgent();
-    if ( agent == nullptr ) {
-        return;
-    }
+   auto agent = context->getAgent();
+   if ( agent == nullptr ) {
+      return;
+   }
 
-    m_motion = agent->getComponent< MotionState >();
-    if ( m_motion == nullptr ) {
-        m_motion = agent->attachComponent< MotionState >();
-    }
+   m_motion = agent->getComponent< MotionState >();
+   if ( m_motion == nullptr ) {
+      m_motion = agent->attachComponent< MotionState >();
+   }
 }
 
 Behavior::State MotionFromInput::step( BehaviorContext *context )
 {
-    auto agent = context->getAgent();
-    if ( agent == nullptr ) {
-        CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
-        return Behavior::State::FAILURE;
-    }
+   auto agent = context->getAgent();
+   if ( agent == nullptr ) {
+      CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
+      return Behavior::State::FAILURE;
+   }
 
-    if ( m_motion == nullptr ) {
-        CRIMILD_LOG_WARNING( "MotionState not initialized" );
-        return Behavior::State::FAILURE;
-    }
+   if ( m_motion == nullptr ) {
+      CRIMILD_LOG_WARNING( "MotionState not initialized" );
+      return Behavior::State::FAILURE;
+   }
 
-    // Use a reference to make code simpler
-    auto &steering = m_motion->steering;
+   // Use a reference to make code simpler
+   auto &steering = m_motion->steering;
 
-    if ( auto input = Input::getInstance() ) {
-        steering.x = m_speed * input->getAxis( Input::AXIS_HORIZONTAL );
-        steering.y = m_speed * input->getAxis( Input::AXIS_VERTICAL );
-    }
+   if ( auto input = Input::getInstance() ) {
+      steering.x = m_speed * input->getAxis( Input::AXIS_HORIZONTAL );
+      steering.y = m_speed * input->getAxis( Input::AXIS_VERTICAL );
+   }
 
-    m_motion->maxForce = m_speed;
+   m_motion->maxForce = m_speed;
 
-    return Behavior::State::SUCCESS;
+   return Behavior::State::SUCCESS;
 }
 
 void MotionFromInput::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 
-    encoder.encode( "speed", m_speed );
+   encoder.encode( "speed", m_speed );
 }
 
 void MotionFromInput::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 
-    decoder.decode( "speed", m_speed );
+   decoder.decode( "speed", m_speed );
 }

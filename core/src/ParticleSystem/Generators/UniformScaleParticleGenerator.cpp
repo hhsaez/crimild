@@ -27,15 +27,17 @@
 
 #include "UniformScaleParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 UniformScaleParticleGenerator::UniformScaleParticleGenerator( crimild::Real32 minScale, crimild::Real32 maxScale )
-    : _minScale( minScale ),
-      _maxScale( maxScale )
+   : _minScale( minScale ),
+     _maxScale( maxScale )
 {
 }
 
@@ -45,30 +47,30 @@ UniformScaleParticleGenerator::~UniformScaleParticleGenerator( void )
 
 void UniformScaleParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _scales = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::UNIFORM_SCALE );
+   _scales = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::UNIFORM_SCALE );
 }
 
 void UniformScaleParticleGenerator::generate( Node *node, double dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    auto ss = _scales->getData< crimild::Real32 >();
+   auto ss = _scales->getData< crimild::Real32 >();
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        ss[ i ] = Random::generate< crimild::Real32 >( _minScale, _maxScale );
-    }
+   for ( ParticleId i = startId; i < endId; i++ ) {
+      ss[ i ] = Random::generate< crimild::Real32 >( _minScale, _maxScale );
+   }
 }
 
 void UniformScaleParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "minScale", _minScale );
-    encoder.encode( "maxScale", _maxScale );
+   encoder.encode( "minScale", _minScale );
+   encoder.encode( "maxScale", _maxScale );
 }
 
 void UniformScaleParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "minScale", _minScale );
-    decoder.decode( "maxScale", _maxScale );
+   decoder.decode( "minScale", _minScale );
+   decoder.decode( "maxScale", _maxScale );
 }

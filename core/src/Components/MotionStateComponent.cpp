@@ -27,24 +27,25 @@
 
 #include "Components/MotionStateComponent.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void MotionState::encode( coding::Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    encoder.encode( "velocity", velocity );
-    encoder.encode( "position", position );
-    encoder.encode( "steering", steering );
+   encoder.encode( "velocity", velocity );
+   encoder.encode( "position", position );
+   encoder.encode( "steering", steering );
 }
 
 void MotionState::decode( coding::Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    decoder.decode( "velocity", velocity );
-    decoder.decode( "position", position );
-    decoder.decode( "steering", steering );
+   decoder.decode( "velocity", velocity );
+   decoder.decode( "position", position );
+   decoder.decode( "steering", steering );
 }

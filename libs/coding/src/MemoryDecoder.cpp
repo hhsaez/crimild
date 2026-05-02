@@ -25,10 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MemoryDecoder.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
 
-#include "EncodedData.hpp"
 #include "Tags.hpp"
+#include "crimild/coding/EncodedData.hpp"
 
 #include <crimild/foundation.hpp>
 #include <sstream>

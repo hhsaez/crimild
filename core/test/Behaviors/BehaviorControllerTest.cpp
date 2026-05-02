@@ -34,8 +34,9 @@
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Settings.hpp"
 #include "Simulation/Simulation.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <crimild/foundation.hpp>
 #include <gtest/gtest.h>
 

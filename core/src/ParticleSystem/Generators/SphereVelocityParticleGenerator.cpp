@@ -27,9 +27,11 @@
 
 #include "SphereVelocityParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
@@ -43,33 +45,33 @@ SphereVelocityParticleGenerator::~SphereVelocityParticleGenerator( void )
 
 void SphereVelocityParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
+   _velocities = particles->createAttribArray< Vector3f >( ParticleAttrib::VELOCITY );
 }
 
 void SphereVelocityParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    /*
-    auto vs = _velocities->getData< Vector3f >();
+   /*
+   auto vs = _velocities->getData< Vector3f >();
 
-    const auto posMin = -Vector3f::Constants::ONE;
-    const auto posMax = Vector3f::Constants::ONE;
+   const auto posMin = -Vector3f::Constants::ONE;
+   const auto posMax = Vector3f::Constants::ONE;
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        vs[ i ] = Random::generate< Vector3f >( posMin, posMax ).getNormalized().times( _magnitude );
-    }
-    */
+   for ( ParticleId i = startId; i < endId; i++ ) {
+       vs[ i ] = Random::generate< Vector3f >( posMin, posMax ).getNormalized().times( _magnitude );
+   }
+   */
 }
 
 void SphereVelocityParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "magnitude", _magnitude );
+   encoder.encode( "magnitude", _magnitude );
 }
 
 void SphereVelocityParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "magnitude", _magnitude );
+   decoder.decode( "magnitude", _magnitude );
 }

@@ -29,10 +29,12 @@
 
 #include "Animation.hpp"
 #include "Clip.hpp"
-#include "Crimild_Coding.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::animation;
@@ -42,8 +44,8 @@ Joint::Joint( void )
 }
 
 Joint::Joint( std::string name, crimild::UInt32 id )
-    : NamedObject( name ),
-      _id( id )
+   : NamedObject( name ),
+     _id( id )
 {
 }
 
@@ -53,31 +55,31 @@ Joint::~Joint( void )
 
 void Joint::encode( coding::Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    encoder.encode( "name", getName() );
-    encoder.encode( "id", _id );
-    encoder.encode( "offset", _offset );
+   encoder.encode( "name", getName() );
+   encoder.encode( "id", _id );
+   encoder.encode( "offset", _offset );
 }
 
 void Joint::decode( coding::Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    std::string name;
-    decoder.decode( "name", name );
-    setName( name );
+   std::string name;
+   decoder.decode( "name", name );
+   setName( name );
 
-    decoder.decode( "id", _id );
-    decoder.decode( "offset", _offset );
+   decoder.decode( "id", _id );
+   decoder.decode( "offset", _offset );
 }
 
 SharedPointer< NodeComponent > Joint::clone( void )
 {
-    auto other = crimild::alloc< Joint >( getName(), getId() );
-    other->setOffset( getOffset() );
-    other->setPoseMatrix( getPoseMatrix() );
-    return other;
+   auto other = crimild::alloc< Joint >( getName(), getId() );
+   other->setOffset( getOffset() );
+   other->setPoseMatrix( getPoseMatrix() );
+   return other;
 }
 
 Skeleton::Skeleton( void )
@@ -90,74 +92,74 @@ Skeleton::~Skeleton( void )
 
 void Skeleton::start( void )
 {
-    NodeComponent::start();
+   NodeComponent::start();
 
-    getNode()->perform( Apply( [ this ]( Node *node ) {
-        if ( auto joint = node->getComponent< Joint >() ) {
-            getJoints().insert( joint->getName(), crimild::retain( joint ) );
-        }
-    } ) );
+   getNode()->perform( Apply( [ this ]( Node *node ) {
+      if ( auto joint = node->getComponent< Joint >() ) {
+         getJoints().insert( joint->getName(), crimild::retain( joint ) );
+      }
+   } ) );
 }
 
 void Skeleton::animate( Animation *animation )
 {
-    getJoints().each( [ animation ]( const std::string &, SharedPointer< Joint > const &joint ) {
-        auto name = joint->getName();
-        auto node = joint->getNode();
+   getJoints().each( [ animation ]( const std::string &, SharedPointer< Joint > const &joint ) {
+      auto name = joint->getName();
+      auto node = joint->getNode();
 
-        // TODO
-        // animation->getValue( name + "[p]", node->local().translate() );
-        // animation->getValue( name + "[r]", node->local().rotate() );
-        // animation->getValue( name + "[s]", node->local().scale() );
+      // TODO
+      // animation->getValue( name + "[p]", node->local().translate() );
+      // animation->getValue( name + "[r]", node->local().rotate() );
+      // animation->getValue( name + "[s]", node->local().scale() );
 
-        // Transformation pose;
-        // pose.computeFrom( node->getParent()->getWorld(), node->getLocal() );
-        // pose.computeFrom( pose, joint->getOffset() );
-        // joint->setPoseMatrix( pose.computeModelMatrix() );
-    } );
+      // Transformation pose;
+      // pose.computeFrom( node->getParent()->getWorld(), node->getLocal() );
+      // pose.computeFrom( pose, joint->getOffset() );
+      // joint->setPoseMatrix( pose.computeModelMatrix() );
+   } );
 }
 
 void Skeleton::encode( coding::Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    auto clips = getClips().values();
-    encoder.encode( "clips", clips );
-    encoder.encode( "globalInverseTransform", _globalInverseTransform );
+   auto clips = getClips().values();
+   encoder.encode( "clips", clips );
+   encoder.encode( "globalInverseTransform", _globalInverseTransform );
 }
 
 void Skeleton::decode( coding::Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    Array< SharedPointer< Clip > > clips;
-    decoder.decode( "clips", clips );
-    clips.each( [ this ]( SharedPointer< Clip > const &clip ) {
-        getClips()[ clip->getName() ] = clip;
-    } );
+   Array< SharedPointer< Clip > > clips;
+   decoder.decode( "clips", clips );
+   clips.each( [ this ]( SharedPointer< Clip > const &clip ) {
+      getClips()[ clip->getName() ] = clip;
+   } );
 
-    decoder.decode( "globalInverseTransform", _globalInverseTransform );
+   decoder.decode( "globalInverseTransform", _globalInverseTransform );
 }
 
 SharedPointer< NodeComponent > Skeleton::clone( void )
 {
-    auto other = crimild::alloc< Skeleton >();
-    other->setClips( getClips() );
-    other->setGlobalInverseTransform( getGlobalInverseTransform() );
+   auto other = crimild::alloc< Skeleton >();
+   other->setClips( getClips() );
+   other->setGlobalInverseTransform( getGlobalInverseTransform() );
 
-    return other;
+   return other;
 }
 
 void Skeleton::renderDebugInfo( Renderer *renderer, Camera *camera )
 {
-    std::vector< Vector3f > lines;
-    auto parent = getNode();
-    parent->perform( Apply( [ &lines, parent ]( Node *node ) {
-        if ( node != parent && node->hasParent() ) {
-            // lines.push_back( node->getParent()->getWorld().getTranslate() );
-            // lines.push_back( node->getWorld().getTranslate() );
-        }
-    } ) );
+   std::vector< Vector3f > lines;
+   auto parent = getNode();
+   parent->perform( Apply( [ &lines, parent ]( Node *node ) {
+      if ( node != parent && node->hasParent() ) {
+         // lines.push_back( node->getParent()->getWorld().getTranslate() );
+         // lines.push_back( node->getWorld().getTranslate() );
+      }
+   } ) );
 
-    DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
+   DebugRenderHelper::renderLines( renderer, camera, &lines[ 0 ], lines.size(), ColorRGBA { 1.0f, 0.0f, 0.0f, 1.0f } );
 }

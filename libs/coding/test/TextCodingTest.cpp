@@ -1,6 +1,6 @@
-#include "Codable.hpp"
-#include "TextDecoder.hpp"
-#include "TextEncoder.hpp"
+#include "crimild/coding/Codable.hpp"
+#include "crimild/coding/TextDecoder.hpp"
+#include "crimild/coding/TextEncoder.hpp"
 
 #include <Crimild_Mathematics.hpp>
 #include <crimild/foundation.hpp>

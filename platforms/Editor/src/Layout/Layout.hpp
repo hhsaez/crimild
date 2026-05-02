@@ -30,7 +30,7 @@
 
 #include "Rendering/Extent.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 #include <memory>
 #include <string>

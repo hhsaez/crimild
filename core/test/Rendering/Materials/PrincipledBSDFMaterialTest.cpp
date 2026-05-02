@@ -30,76 +30,77 @@
 #include "Rendering/ImageView.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Texture.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( PrincipledBSDFMaterial, construction )
 {
-    auto material = crimild::alloc< materials::PrincipledBSDF >();
+   auto material = crimild::alloc< materials::PrincipledBSDF >();
 
-    EXPECT_EQ( ( ColorRGB { 1, 1, 1 } ), material->getAlbedo() );
-    EXPECT_NE( nullptr, material->getAlbedoMap() );
+   EXPECT_EQ( ( ColorRGB { 1, 1, 1 } ), material->getAlbedo() );
+   EXPECT_NE( nullptr, material->getAlbedoMap() );
 }
 
 TEST( PrincipledBSDFMaterial, coding )
 {
-    auto material = crimild::alloc< materials::PrincipledBSDF >();
-    auto getTexture = []( std::string name ) {
-        auto texture = crimild::alloc< Texture >();
-        texture->setName( name );
-        texture->imageView = [ & ] {
-            auto imageView = crimild::alloc< ImageView >();
-            imageView->image = Image::CHECKERBOARD_16;
-            return imageView;
-        }();
-        texture->sampler = [ & ] {
-            auto sampler = crimild::alloc< Sampler >();
-            sampler->setMinFilter( Sampler::Filter::NEAREST );
-            sampler->setMagFilter( Sampler::Filter::NEAREST );
-            return sampler;
-        }();
-        return texture;
-    };
-    material->setAlbedoMap( getTexture( "albedo" ) );
-    material->setMetallicMap( getTexture( "metallic" ) );
+   auto material = crimild::alloc< materials::PrincipledBSDF >();
+   auto getTexture = []( std::string name ) {
+      auto texture = crimild::alloc< Texture >();
+      texture->setName( name );
+      texture->imageView = [ & ] {
+         auto imageView = crimild::alloc< ImageView >();
+         imageView->image = Image::CHECKERBOARD_16;
+         return imageView;
+      }();
+      texture->sampler = [ & ] {
+         auto sampler = crimild::alloc< Sampler >();
+         sampler->setMinFilter( Sampler::Filter::NEAREST );
+         sampler->setMagFilter( Sampler::Filter::NEAREST );
+         return sampler;
+      }();
+      return texture;
+   };
+   material->setAlbedoMap( getTexture( "albedo" ) );
+   material->setMetallicMap( getTexture( "metallic" ) );
 
-    coding::MemoryEncoder encoder;
-    ASSERT_TRUE( encoder.encode( material ) );
-    const auto bytes = encoder.getBytes();
+   coding::MemoryEncoder encoder;
+   ASSERT_TRUE( encoder.encode( material ) );
+   const auto bytes = encoder.getBytes();
 
-    coding::MemoryDecoder decoder;
-    ASSERT_TRUE( decoder.fromBytes( bytes ) );
-    ASSERT_EQ( 1, decoder.getObjectCount() );
-    auto decoded = decoder.getObjectAt< materials::PrincipledBSDF >( 0 );
+   coding::MemoryDecoder decoder;
+   ASSERT_TRUE( decoder.fromBytes( bytes ) );
+   ASSERT_EQ( 1, decoder.getObjectCount() );
+   auto decoded = decoder.getObjectAt< materials::PrincipledBSDF >( 0 );
 
-    ASSERT_NE( nullptr, decoded );
-    EXPECT_EQ( material->getAlbedo(), decoded->getAlbedo() );
+   ASSERT_NE( nullptr, decoded );
+   EXPECT_EQ( material->getAlbedo(), decoded->getAlbedo() );
 
-#define ASSERT_TEXTURE( name, expected, decoded )                         \
-    {                                                                     \
-        ASSERT_NE( nullptr, decoded );                                    \
-        EXPECT_EQ( name, decoded->getName() );                            \
-        ASSERT_NE( nullptr, decoded->sampler );                           \
-        ASSERT_NE( nullptr, decoded->imageView );                         \
-        ASSERT_NE( nullptr, decoded->imageView->image );                  \
-        ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() ); \
-        ASSERT_EQ(                                                        \
-            expected->imageView->image->getBufferView()->getLength(),     \
-            decoded->imageView->image->getBufferView()->getLength()       \
-        );                                                                \
-        ASSERT_EQ(                                                        \
-            0,                                                            \
-            memcmp(                                                       \
-                expected->imageView->image->getBufferView()->getData(),   \
-                decoded->imageView->image->getBufferView()->getData(),    \
-                decoded->imageView->image->getBufferView()->getLength()   \
-            )                                                             \
-        );                                                                \
-    }
+#define ASSERT_TEXTURE( name, expected, decoded )                       \
+   {                                                                    \
+      ASSERT_NE( nullptr, decoded );                                    \
+      EXPECT_EQ( name, decoded->getName() );                            \
+      ASSERT_NE( nullptr, decoded->sampler );                           \
+      ASSERT_NE( nullptr, decoded->imageView );                         \
+      ASSERT_NE( nullptr, decoded->imageView->image );                  \
+      ASSERT_NE( nullptr, decoded->imageView->image->getBufferView() ); \
+      ASSERT_EQ(                                                        \
+         expected->imageView->image->getBufferView()->getLength(),      \
+         decoded->imageView->image->getBufferView()->getLength()        \
+      );                                                                \
+      ASSERT_EQ(                                                        \
+         0,                                                             \
+         memcmp(                                                        \
+            expected->imageView->image->getBufferView()->getData(),     \
+            decoded->imageView->image->getBufferView()->getData(),      \
+            decoded->imageView->image->getBufferView()->getLength()     \
+         )                                                              \
+      );                                                                \
+   }
 
-    ASSERT_TEXTURE( "albedo", material->getAlbedoMap(), decoded->getAlbedoMap() );
-    ASSERT_TEXTURE( "metallic", material->getMetallicMap(), decoded->getMetallicMap() );
+   ASSERT_TEXTURE( "albedo", material->getAlbedoMap(), decoded->getAlbedoMap() );
+   ASSERT_TEXTURE( "metallic", material->getMetallicMap(), decoded->getMetallicMap() );
 }

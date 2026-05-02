@@ -30,7 +30,8 @@
 #include "Foundation/ImGuiUtils.hpp"
 #include "Views/View.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild::editor;
 

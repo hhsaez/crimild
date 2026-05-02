@@ -27,7 +27,8 @@
 
 #include "Rendering/VertexBuffer.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 

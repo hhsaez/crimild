@@ -31,7 +31,7 @@
 #include "Accumulator.hpp"
 #include "Simulation/Clock.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

@@ -28,7 +28,6 @@
 #include "Text.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Coding.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Font.hpp"
 #include "Rendering/ImageTGA.hpp"
@@ -36,6 +35,8 @@
 #include "Simulation/AssetManager.hpp"
 #include "Simulation/FileSystem.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <crimild/foundation.hpp>
 #include <fstream>
 

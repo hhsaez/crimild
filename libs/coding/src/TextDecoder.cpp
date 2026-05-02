@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "TextEncoder.hpp"
+#include "crimild/coding/TextDecoder.hpp"
 
 #include "Tags.hpp"
 
@@ -34,52 +34,42 @@
 using namespace crimild;
 using namespace crimild::coding;
 
-std::string TextEncoder::getString( void ) const
+void TextDecoder::fromString( std::string str )
 {
-   return "Some string";
+   // TODO
+   assert( false );
 }
 
-crimild::Bool TextEncoder::encode( SharedPointer< Codable > const &obj )
+crimild::Bool TextDecoder::decode( std::string key, SharedPointer< coding::Codable > &codable )
 {
    assert( false );
    return false;
 }
 
-crimild::Bool TextEncoder::encode( std::string key, SharedPointer< Codable > const &obj )
+crimild::Bool TextDecoder::decode( std::string key, std::string &value )
 {
    assert( false );
    return false;
 }
 
-crimild::Bool TextEncoder::encode( std::string key, std::string value )
+crimild::Size TextDecoder::beginDecodingArray( std::string key )
 {
    assert( false );
-   return false;
+   return 0;
 }
 
-void TextEncoder::encodeArrayBegin( std::string key, crimild::Size count )
-{
-   assert( false );
-}
-
-std::string TextEncoder::beginEncodingArrayElement( std::string key, crimild::Size index )
+std::string TextDecoder::beginDecodingArrayElement( std::string key, crimild::Size index )
 {
    assert( false );
    return "";
 }
 
-void TextEncoder::endEncodingArrayElement( std::string key, crimild::Size index )
+void TextDecoder::endDecodingArrayElement( std::string key, crimild::Size index )
 {
    assert( false );
 }
 
-void TextEncoder::encodeArrayEnd( std::string key )
+void TextDecoder::endDecodingArray( std::string key )
 {
    assert( false );
-}
-
-std::string TextEncoder::dump( void )
-{
-   assert( false );
-   return "";
 }

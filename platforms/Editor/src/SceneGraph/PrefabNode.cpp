@@ -31,7 +31,6 @@
 #include "Visitors/StartComponents.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <crimild/foundation.hpp>
 
 using namespace crimild;

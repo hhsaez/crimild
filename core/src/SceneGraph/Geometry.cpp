@@ -29,140 +29,141 @@
 
 #include "Components/MaterialComponent.hpp"
 #include "Components/RenderStateComponent.hpp"
-#include "Crimild_Coding.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Uniforms/ModelUniformBuffer.hpp"
 
 #include <algorithm>
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 Geometry::Geometry( std::string name )
-    : Node( name )
+   : Node( name )
 {
-    attachComponent( crimild::alloc< MaterialComponent >() );
-    attachComponent( crimild::alloc< RenderStateComponent >() );
+   attachComponent( crimild::alloc< MaterialComponent >() );
+   attachComponent( crimild::alloc< RenderStateComponent >() );
 }
 
 Geometry::~Geometry( void )
 {
-    detachAllPrimitives();
+   detachAllPrimitives();
 }
 
 void Geometry::attachPrimitive( Primitive *primitive )
 {
-    attachPrimitive( crimild::retain( primitive ) );
+   attachPrimitive( crimild::retain( primitive ) );
 }
 
 void Geometry::attachPrimitive( SharedPointer< Primitive > const &primitive )
 {
-    _primitives.add( primitive );
-    updateModelBounds();
+   _primitives.add( primitive );
+   updateModelBounds();
 }
 
 void Geometry::detachPrimitive( Primitive *primitive )
 {
-    _primitives.remove( crimild::retain( primitive ) );
+   _primitives.remove( crimild::retain( primitive ) );
 }
 
 void Geometry::detachPrimitive( SharedPointer< Primitive > const &primitive )
 {
-    _primitives.remove( primitive );
+   _primitives.remove( primitive );
 }
 
 void Geometry::forEachPrimitive( std::function< void( Primitive * ) > callback )
 {
-    _primitives.each( [ callback ]( SharedPointer< Primitive > &p ) {
-        callback( crimild::get_ptr( p ) );
-    } );
+   _primitives.each( [ callback ]( SharedPointer< Primitive > &p ) {
+      callback( crimild::get_ptr( p ) );
+   } );
 }
 
 void Geometry::detachAllPrimitives( void )
 {
-    _primitives.clear();
+   _primitives.clear();
 }
 
 void Geometry::accept( NodeVisitor &visitor )
 {
-    visitor.visitGeometry( this );
+   visitor.visitGeometry( this );
 }
 
 void Geometry::updateModelBounds( void )
 {
-    forEachPrimitive(
-        [ first = true,
-          bound = localBound() ]( Primitive *primitive ) mutable {
-            switch ( primitive->getType() ) {
-                case Primitive::Type::SPHERE:
-                case Primitive::Type::BOX:
-                case Primitive::Type::OPEN_CYLINDER:
-                case Primitive::Type::CYLINDER: {
-                    if ( first ) {
-                        bound->computeFrom( Point3f { -1, -1, -1 }, Point3f { 1, 1, 1 } );
-                        first = false;
-                    } else {
-                        bound->expandToContain( Point3f { -1, -1, -1 } );
-                        bound->expandToContain( Point3f { 1, 1, 1 } );
-                    }
-                    break;
-                }
-
-                default: {
-                    primitive->getVertexData().each(
-                        [ & ]( auto vbo ) {
-                            auto positions = vbo->get( VertexAttribute::Name::POSITION );
-                            if ( positions != nullptr ) {
-                                if ( first ) {
-                                    bound->computeFrom( crimild::get_ptr( vbo ) );
-                                    first = false;
-                                } else {
-                                    bound->expandToContain( crimild::get_ptr( vbo ) );
-                                }
-                            }
-                        }
-                    );
-                    break;
-                }
+   forEachPrimitive(
+      [ first = true,
+        bound = localBound() ]( Primitive *primitive ) mutable {
+         switch ( primitive->getType() ) {
+            case Primitive::Type::SPHERE:
+            case Primitive::Type::BOX:
+            case Primitive::Type::OPEN_CYLINDER:
+            case Primitive::Type::CYLINDER: {
+               if ( first ) {
+                  bound->computeFrom( Point3f { -1, -1, -1 }, Point3f { 1, 1, 1 } );
+                  first = false;
+               } else {
+                  bound->expandToContain( Point3f { -1, -1, -1 } );
+                  bound->expandToContain( Point3f { 1, 1, 1 } );
+               }
+               break;
             }
-        }
-    );
+
+            default: {
+               primitive->getVertexData().each(
+                  [ & ]( auto vbo ) {
+                     auto positions = vbo->get( VertexAttribute::Name::POSITION );
+                     if ( positions != nullptr ) {
+                        if ( first ) {
+                           bound->computeFrom( crimild::get_ptr( vbo ) );
+                           first = false;
+                        } else {
+                           bound->expandToContain( crimild::get_ptr( vbo ) );
+                        }
+                     }
+                  }
+               );
+               break;
+            }
+         }
+      }
+   );
 }
 
 DescriptorSet *Geometry::getDescriptors( void ) noexcept
 {
-    if ( auto ds = crimild::get_ptr( m_descriptors ) ) {
-        return ds;
-    }
+   if ( auto ds = crimild::get_ptr( m_descriptors ) ) {
+      return ds;
+   }
 
-    m_descriptors = [ & ] {
-        auto descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptors = {
-            Descriptor {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = crimild::alloc< ModelUniform >( this ),
-            },
-        };
-        return descriptorSet;
-    }();
+   m_descriptors = [ & ] {
+      auto descriptorSet = crimild::alloc< DescriptorSet >();
+      descriptorSet->descriptors = {
+         Descriptor {
+            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            .obj = crimild::alloc< ModelUniform >( this ),
+         },
+      };
+      return descriptorSet;
+   }();
 
-    return crimild::get_ptr( m_descriptors );
+   return crimild::get_ptr( m_descriptors );
 }
 
 void Geometry::encode( coding::Encoder &encoder )
 {
-    Node::encode( encoder );
+   Node::encode( encoder );
 
-    encoder.encode( "primitives", _primitives );
+   encoder.encode( "primitives", _primitives );
 }
 
 void Geometry::decode( coding::Decoder &decoder )
 {
-    Node::decode( decoder );
+   Node::decode( decoder );
 
-    Array< SharedPointer< Primitive > > ps;
-    decoder.decode( "primitives", ps );
-    ps.each( [ this ]( SharedPointer< Primitive > &p ) {
-        attachPrimitive( p );
-    } );
+   Array< SharedPointer< Primitive > > ps;
+   decoder.decode( "primitives", ps );
+   ps.each( [ this ]( SharedPointer< Primitive > &p ) {
+      attachPrimitive( p );
+   } );
 }

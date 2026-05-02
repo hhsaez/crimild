@@ -27,32 +27,33 @@
 
 #include "Sampler.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void Sampler::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encodeEnum< WrapMode >( "wrapMode", m_wrapMode );
-    encoder.encodeEnum< Filter >( "minFilter", m_minFilter );
-    encoder.encodeEnum< Filter >( "magFilter", m_magFilter );
-    encoder.encodeEnum< BorderColor >( "borderColor", m_borderColor );
-    encoder.encode( "minLod", m_minLod );
-    encoder.encode( "maxLod", m_maxLod );
-    encoder.encodeEnum< CompareOp >( "compareOp", m_compareOp );
+   encoder.encodeEnum< WrapMode >( "wrapMode", m_wrapMode );
+   encoder.encodeEnum< Filter >( "minFilter", m_minFilter );
+   encoder.encodeEnum< Filter >( "magFilter", m_magFilter );
+   encoder.encodeEnum< BorderColor >( "borderColor", m_borderColor );
+   encoder.encode( "minLod", m_minLod );
+   encoder.encode( "maxLod", m_maxLod );
+   encoder.encodeEnum< CompareOp >( "compareOp", m_compareOp );
 }
 
 void Sampler::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decodeEnum< WrapMode >( "wrapMode", m_wrapMode );
-    decoder.decodeEnum< Filter >( "minFilter", m_minFilter );
-    decoder.decodeEnum< Filter >( "magFilter", m_magFilter );
-    decoder.decodeEnum< BorderColor >( "borderColor", m_borderColor );
-    decoder.decode( "minLod", m_minLod );
-    decoder.decode( "maxLod", m_maxLod );
-    decoder.decodeEnum< CompareOp >( "compareOp", m_compareOp );
+   decoder.decodeEnum< WrapMode >( "wrapMode", m_wrapMode );
+   decoder.decodeEnum< Filter >( "minFilter", m_minFilter );
+   decoder.decodeEnum< Filter >( "magFilter", m_magFilter );
+   decoder.decodeEnum< BorderColor >( "borderColor", m_borderColor );
+   decoder.decode( "minLod", m_minLod );
+   decoder.decode( "maxLod", m_maxLod );
+   decoder.decodeEnum< CompareOp >( "compareOp", m_compareOp );
 }

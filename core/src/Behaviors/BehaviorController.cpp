@@ -5,9 +5,10 @@
 #include "BehaviorTree.hpp"
 #include "Behaviors/Actions/Success.hpp"
 #include "Concurrency/Async.hpp"
-#include "Crimild_Coding.hpp"
 #include "Simulation/Simulation.hpp"
 
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <crimild/foundation.hpp>
 
 using namespace crimild;

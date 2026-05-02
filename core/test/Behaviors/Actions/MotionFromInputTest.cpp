@@ -33,61 +33,62 @@
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Input.hpp"
 
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <gtest/gtest.h>
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            auto motionReset( void ) noexcept
-            {
-                return crimild::alloc< MotionReset >();
+         auto motionReset( void ) noexcept
+         {
+            return crimild::alloc< MotionReset >();
+         }
+
+         auto motionFromInput( void ) noexcept
+         {
+            return crimild::alloc< MotionFromInput >();
+         }
+
+         auto motionApply( void ) noexcept
+         {
+            return crimild::alloc< MotionApply >();
+         }
+
+      }
+
+      namespace composites {
+
+         auto sequence( std::initializer_list< SharedPointer< Behavior > > bs ) noexcept
+         {
+            auto ret = crimild::alloc< Sequence >();
+            for ( auto &b : bs ) {
+               ret->attachBehavior( b );
             }
+            return ret;
+         }
 
-            auto motionFromInput( void ) noexcept
-            {
-                return crimild::alloc< MotionFromInput >();
-            }
+      }
 
-            auto motionApply( void ) noexcept
-            {
-                return crimild::alloc< MotionApply >();
-            }
+      namespace decorators {
 
-        }
+         auto repeat( auto behavior ) noexcept
+         {
+            auto ret = crimild::alloc< Repeat >();
+            ret->setBehavior( behavior );
+            return ret;
+         }
+      }
 
-        namespace composites {
-
-            auto sequence( std::initializer_list< SharedPointer< Behavior > > bs ) noexcept
-            {
-                auto ret = crimild::alloc< Sequence >();
-                for ( auto &b : bs ) {
-                    ret->attachBehavior( b );
-                }
-                return ret;
-            }
-
-        }
-
-        namespace decorators {
-
-            auto repeat( auto behavior ) noexcept
-            {
-                auto ret = crimild::alloc< Repeat >();
-                ret->setBehavior( behavior );
-                return ret;
-            }
-        }
-
-    }
+   }
 
 }
 
@@ -101,211 +102,211 @@ using namespace crimild::behaviors::decorators;
 
 TEST( MotionFromInput, integration )
 {
-    auto node = behaviors::withBehavior(
-        crimild::alloc< Node >(),
-        repeat(
-            sequence(
-                {
-                    motionReset(),
-                    motionFromInput(),
-                    motionApply(),
-                }
-            )
-        )
-    );
+   auto node = behaviors::withBehavior(
+      crimild::alloc< Node >(),
+      repeat(
+         sequence(
+            {
+               motionReset(),
+               motionFromInput(),
+               motionApply(),
+            }
+         )
+      )
+   );
 
-    Input input;
+   Input input;
 
-    auto controller = node->getComponent< BehaviorController >();
-    auto motion = node->getComponent< MotionState >();
+   auto controller = node->getComponent< BehaviorController >();
+   auto motion = node->getComponent< MotionState >();
 
-    // Helper functions
-    auto keyEvent = []( auto type, auto key ) {
-        return [ type, key ] {
-            Input::getInstance()->handle(
-                Event {
-                    .type = type,
-                    .keyboard {
-                        .key = uint32_t( key ),
-                    },
-                }
-            );
-        };
-    };
-    auto pressW = keyEvent( Event::Type::KEY_DOWN, CRIMILD_INPUT_KEY_W );
-    auto releaseW = keyEvent( Event::Type::KEY_UP, CRIMILD_INPUT_KEY_W );
+   // Helper functions
+   auto keyEvent = []( auto type, auto key ) {
+      return [ type, key ] {
+         Input::getInstance()->handle(
+            Event {
+               .type = type,
+               .keyboard {
+                  .key = uint32_t( key ),
+               },
+            }
+         );
+      };
+   };
+   auto pressW = keyEvent( Event::Type::KEY_DOWN, CRIMILD_INPUT_KEY_W );
+   auto releaseW = keyEvent( Event::Type::KEY_UP, CRIMILD_INPUT_KEY_W );
 
-    {
-        // No input.
+   {
+      // No input.
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        // Motion remains the same
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      // Motion remains the same
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 
-    {
-        node->setLocal( translation( 0, 0, 0 ) );
+   {
+      node->setLocal( translation( 0, 0, 0 ) );
 
-        // Press once and release
-        pressW();
-        controller->update( Clock( 1 ) );
+      // Press once and release
+      pressW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        releaseW();
-        controller->update( Clock( 1 ) );
+      releaseW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 
-    {
-        node->setLocal( translation( 0, 0, 0 ) );
+   {
+      node->setLocal( translation( 0, 0, 0 ) );
 
-        // Keep pressing W for several updates
-        pressW();
-        controller->update( Clock( 1 ) );
+      // Keep pressing W for several updates
+      pressW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        releaseW();
-        controller->update( Clock( 1 ) );
+      releaseW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 }
 
 TEST( MotionFromInput, coding_integration )
 {
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
 
-    {
-        auto node = behaviors::withBehavior(
-            crimild::alloc< Node >(),
-            repeat(
-                sequence(
-                    {
-                        motionReset(),
-                        motionFromInput(),
-                        motionApply(),
-                    }
-                )
+   {
+      auto node = behaviors::withBehavior(
+         crimild::alloc< Node >(),
+         repeat(
+            sequence(
+               {
+                  motionReset(),
+                  motionFromInput(),
+                  motionApply(),
+               }
             )
-        );
+         )
+      );
 
-        encoder->encode( node );
-    }
+      encoder->encode( node );
+   }
 
-    auto bytes = encoder->getBytes();
-    decoder->fromBytes( bytes );
+   auto bytes = encoder->getBytes();
+   decoder->fromBytes( bytes );
 
-    auto node = decoder->getObjectAt< Node >( 0 );
+   auto node = decoder->getObjectAt< Node >( 0 );
 
-    Input input;
+   Input input;
 
-    auto controller = node->getComponent< BehaviorController >();
-    auto motion = node->getComponent< MotionState >();
+   auto controller = node->getComponent< BehaviorController >();
+   auto motion = node->getComponent< MotionState >();
 
-    // Don't forget to start controller
-    controller->start();
+   // Don't forget to start controller
+   controller->start();
 
-    // Helper functions
-    auto keyEvent = []( auto type, auto key ) {
-        return [ type, key ] {
-            Input::getInstance()->handle(
-                Event {
-                    .type = type,
-                    .keyboard {
-                        .key = uint32_t( key ),
-                    },
-                }
-            );
-        };
-    };
-    auto pressW = keyEvent( Event::Type::KEY_DOWN, CRIMILD_INPUT_KEY_W );
-    auto releaseW = keyEvent( Event::Type::KEY_UP, CRIMILD_INPUT_KEY_W );
+   // Helper functions
+   auto keyEvent = []( auto type, auto key ) {
+      return [ type, key ] {
+         Input::getInstance()->handle(
+            Event {
+               .type = type,
+               .keyboard {
+                  .key = uint32_t( key ),
+               },
+            }
+         );
+      };
+   };
+   auto pressW = keyEvent( Event::Type::KEY_DOWN, CRIMILD_INPUT_KEY_W );
+   auto releaseW = keyEvent( Event::Type::KEY_UP, CRIMILD_INPUT_KEY_W );
 
-    {
-        // No input.
+   {
+      // No input.
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        // Motion remains the same
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      // Motion remains the same
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 
-    {
-        node->setLocal( translation( 0, 0, 0 ) );
+   {
+      node->setLocal( translation( 0, 0, 0 ) );
 
-        // Press once and release
-        pressW();
-        controller->update( Clock( 1 ) );
+      // Press once and release
+      pressW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        releaseW();
-        controller->update( Clock( 1 ) );
+      releaseW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 
-    {
-        node->setLocal( translation( 0, 0, 0 ) );
+   {
+      node->setLocal( translation( 0, 0, 0 ) );
 
-        // Keep pressing W for several updates
-        pressW();
-        controller->update( Clock( 1 ) );
+      // Keep pressing W for several updates
+      pressW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 1, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 2, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        controller->update( Clock( 1 ) );
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 1, 0 } ), motion->steering );
 
-        releaseW();
-        controller->update( Clock( 1 ) );
+      releaseW();
+      controller->update( Clock( 1 ) );
 
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
-    }
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 0, 3, 0 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   }
 }

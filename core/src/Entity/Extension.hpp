@@ -1,7 +1,7 @@
 #ifndef CRIMILD_CORE_ENTITY_EXTENSION_
 #define CRIMILD_CORE_ENTITY_EXTENSION_
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/Codable.hpp>
 
 namespace crimild {
 

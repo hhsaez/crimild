@@ -25,36 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "FileDecoder.hpp"
+#include "crimild/coding/init.hpp"
 
-#include <crimild/foundation.hpp>
+#include "crimild/coding/EncodedData.hpp"
 
-using namespace crimild;
-using namespace crimild::coding;
-
-crimild::Bool FileDecoder::read( std::string filePath )
+void crimild::coding::init( void ) noexcept
 {
-   return read( std::filesystem::path { filePath } );
-}
-
-crimild::Bool FileDecoder::read( const std::filesystem::path &path ) noexcept
-{
-   FILE *file = fopen( path.string().c_str(), "rb" );
-   if ( file == nullptr ) {
-      Log::error( CRIMILD_CURRENT_CLASS_NAME, "Cannot open file ", path.string() );
-      return false;
-   }
-
-   crimild::Size size;
-   fread( &size, 1, sizeof( crimild::Size ), file );
-
-   if ( size > 0 ) {
-      ByteArray bytes( size );
-      fread( &bytes[ 0 ], 1, size, file );
-      fromBytes( bytes );
-   }
-
-   fclose( file );
-
-   return true;
+   CRIMILD_REGISTER_OBJECT_BUILDER( crimild::coding::EncodedData );
 }

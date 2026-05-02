@@ -28,9 +28,9 @@
 #ifndef CRIMILD_AUDIO_SOURCE_
 #define CRIMILD_AUDIO_SOURCE_
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

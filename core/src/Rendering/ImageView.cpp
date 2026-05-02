@@ -27,48 +27,50 @@
 
 #include "Rendering/ImageView.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/Image.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void ImageView::setWrittenBy( FrameGraphOperation *op ) noexcept
 {
-    FrameGraphResource::setWrittenBy( op );
-    if ( image != nullptr ) {
-        image->setWrittenBy( op );
-    }
+   FrameGraphResource::setWrittenBy( op );
+   if ( image != nullptr ) {
+      image->setWrittenBy( op );
+   }
 }
 
 void ImageView::setReadBy( FrameGraphOperation *op ) noexcept
 {
-    FrameGraphResource::setReadBy( op );
-    if ( image != nullptr ) {
-        image->setReadBy( op );
-    }
+   FrameGraphResource::setReadBy( op );
+   if ( image != nullptr ) {
+      image->setReadBy( op );
+   }
 }
 
 void ImageView::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "type", Int32( type ) );
-    encoder.encode( "image", image );
-    encoder.encodeEnum( "format", format );
-    encoder.encode( "mipLevels", mipLevels );
-    encoder.encode( "layerCount", layerCount );
+   encoder.encode( "type", Int32( type ) );
+   encoder.encode( "image", image );
+   encoder.encodeEnum( "format", format );
+   encoder.encode( "mipLevels", mipLevels );
+   encoder.encode( "layerCount", layerCount );
 }
 
 void ImageView::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    Int32 type;
-    decoder.decode( "type", type );
-    this->type = Type( type );
+   Int32 type;
+   decoder.decode( "type", type );
+   this->type = Type( type );
 
-    decoder.decode( "image", image );
-    decoder.decodeEnum( "format", format );
-    decoder.decode( "mipLevels", mipLevels );
-    decoder.decode( "layerCount", layerCount );
+   decoder.decode( "image", image );
+   decoder.decodeEnum( "format", format );
+   decoder.decode( "mipLevels", mipLevels );
+   decoder.decode( "layerCount", layerCount );
 }

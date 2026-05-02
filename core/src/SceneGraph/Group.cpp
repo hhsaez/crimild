@@ -27,11 +27,12 @@
 
 #include "Group.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Exceptions/HasParentException.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <crimild/foundation.hpp>
 #include <thread>
 

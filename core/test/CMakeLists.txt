@@ -80,7 +80,7 @@ target_link_libraries(
     crimild_core_test
     PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
-    PRIVATE Crimild::Coding
+    PRIVATE crimild::coding
     PRIVATE Crimild::Core
     PRIVATE gtest gmock
 )

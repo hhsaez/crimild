@@ -27,26 +27,28 @@
 
 #include "ShaderProgram.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Shader.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 ShaderProgram::ShaderProgram( const ShaderArray &shaders ) noexcept
-    : m_shaders( shaders )
+   : m_shaders( shaders )
 {
 }
 
 void ShaderProgram::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "shaders", m_shaders );
+   encoder.encode( "shaders", m_shaders );
 }
 
 void ShaderProgram::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "shaders", m_shaders );
+   decoder.decode( "shaders", m_shaders );
 }

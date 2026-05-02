@@ -27,50 +27,51 @@
 
 #include "Components/MotionStateComponent.hpp"
 
-#include <Crimild_Coding.hpp>
+#include <crimild/coding/MemoryDecoder.hpp>
+#include <crimild/coding/MemoryEncoder.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( MotionState, rtti )
 {
-    ASSERT_STREQ( "crimild::MotionState", MotionState::__CLASS_NAME );
+   ASSERT_STREQ( "crimild::MotionState", MotionState::__CLASS_NAME );
 
-    auto motion = crimild::alloc< MotionState >();
-    ASSERT_STREQ( "crimild::MotionState", motion->getClassName() );
+   auto motion = crimild::alloc< MotionState >();
+   ASSERT_STREQ( "crimild::MotionState", motion->getClassName() );
 }
 
 TEST( MotionState, default_values )
 {
-    auto motion = crimild::alloc< MotionState >();
+   auto motion = crimild::alloc< MotionState >();
 
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+   EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
+   EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
 }
 
 TEST( MotionState, coding )
 {
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
 
-    {
-        auto motion = crimild::alloc< MotionState >();
-        motion->velocity = Vector3 { 1, 2, 3 };
-        motion->position = Point3f { 4, 5, 6 };
-        motion->steering = Vector3 { 7, 8, 9 };
+   {
+      auto motion = crimild::alloc< MotionState >();
+      motion->velocity = Vector3 { 1, 2, 3 };
+      motion->position = Point3f { 4, 5, 6 };
+      motion->steering = Vector3 { 7, 8, 9 };
 
-        encoder->encode( motion );
-    }
+      encoder->encode( motion );
+   }
 
-    {
-        auto bytes = encoder->getBytes();
-        decoder->fromBytes( bytes );
+   {
+      auto bytes = encoder->getBytes();
+      decoder->fromBytes( bytes );
 
-        auto motion = decoder->getObjectAt< MotionState >( 0 );
-        ASSERT_NE( nullptr, motion );
-        EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
-        EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
-        EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
-    }
+      auto motion = decoder->getObjectAt< MotionState >( 0 );
+      ASSERT_NE( nullptr, motion );
+      EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
+      EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
+      EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
+   }
 }

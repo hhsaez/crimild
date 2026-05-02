@@ -27,24 +27,25 @@
 
 #include "Rendering/BufferAccessor.hpp"
 
-#include "Crimild_Coding.hpp"
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void BufferAccessor::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "offset", m_offset );
-    encoder.encode( "size", m_size );
-    encoder.encode( "bufferView", m_bufferView );
+   encoder.encode( "offset", m_offset );
+   encoder.encode( "size", m_size );
+   encoder.encode( "bufferView", m_bufferView );
 }
 
 void BufferAccessor::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "offset", m_offset );
-    decoder.decode( "size", m_size );
-    decoder.decode( "bufferView", m_bufferView );
+   decoder.decode( "offset", m_offset );
+   decoder.decode( "size", m_size );
+   decoder.decode( "bufferView", m_bufferView );
 }

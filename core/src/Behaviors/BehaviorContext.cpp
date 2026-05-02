@@ -26,8 +26,10 @@
  */
 
 #include "Behavior.hpp"
-#include "Crimild_Coding.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -37,8 +39,8 @@ BehaviorContextValue::BehaviorContextValue( void )
 }
 
 BehaviorContextValue::BehaviorContextValue( std::string key, std::string value )
-    : _key( key ),
-      _value( value )
+   : _key( key ),
+     _value( value )
 {
 }
 
@@ -48,18 +50,18 @@ BehaviorContextValue::~BehaviorContextValue( void )
 
 void BehaviorContextValue::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    encoder.encode( "key", _key );
-    encoder.encode( "value", _value );
+   encoder.encode( "key", _key );
+   encoder.encode( "value", _value );
 }
 
 void BehaviorContextValue::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "key", _key );
-    decoder.decode( "value", _value );
+   decoder.decode( "key", _key );
+   decoder.decode( "value", _value );
 }
 
 BehaviorContext::BehaviorContext( void )
@@ -68,116 +70,116 @@ BehaviorContext::BehaviorContext( void )
 
 BehaviorContext::~BehaviorContext( void )
 {
-    removeAllTargets();
+   removeAllTargets();
 }
 
 void BehaviorContext::reset( void )
 {
-    _agent = nullptr;
-    _clock.reset();
-    removeAllTargets();
+   _agent = nullptr;
+   _clock.reset();
+   removeAllTargets();
 }
 
 void BehaviorContext::update( const crimild::Clock &c )
 {
-    _clock += c;
+   _clock += c;
 }
 
 void BehaviorContext::addTarget( crimild::Node *target )
 {
-    if ( target == getAgent() ) {
-        CRIMILD_LOG_WARNING( "Target cannot be equal to agent" );
-        return;
-    }
+   if ( target == getAgent() ) {
+      CRIMILD_LOG_WARNING( "Target cannot be equal to agent" );
+      return;
+   }
 
-    // TODO: check repetitions? use set?
-    _targets.add( target );
+   // TODO: check repetitions? use set?
+   _targets.add( target );
 }
 
 crimild::Size BehaviorContext::getTargetCount( void ) const
 {
-    return _targets.size();
+   return _targets.size();
 }
 
 crimild::Node *BehaviorContext::getTargetAt( crimild::Size index )
 {
-    if ( getTargetCount() <= index ) {
-        return nullptr;
-    }
+   if ( getTargetCount() <= index ) {
+      return nullptr;
+   }
 
-    return _targets[ index ];
+   return _targets[ index ];
 }
 
 void BehaviorContext::removeAllTargets( void )
 {
-    _targets.clear();
+   _targets.clear();
 }
 
 void BehaviorContext::foreachTarget( BehaviorContext::TargetCallback const &callback )
 {
-    _targets.each(
-        [ & ]( auto target ) {
-            if ( target != nullptr ) {
-                callback( target );
-            }
-        }
-    );
+   _targets.each(
+      [ & ]( auto target ) {
+         if ( target != nullptr ) {
+            callback( target );
+         }
+      }
+   );
 }
 
 void BehaviorContext::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    crimild::Array< std::string > keys;
-    crimild::Array< SharedPointer< Variant > > values;
-    for ( auto &it : m_values ) {
-        keys.add( it.first );
-        values.add( it.second );
-    }
-    encoder.encode( "keys", keys );
-    encoder.encode( "values", values );
+   crimild::Array< std::string > keys;
+   crimild::Array< SharedPointer< Variant > > values;
+   for ( auto &it : m_values ) {
+      keys.add( it.first );
+      values.add( it.second );
+   }
+   encoder.encode( "keys", keys );
+   encoder.encode( "values", values );
 
-    auto targetsToEncode = _targets.map(
-        []( auto target ) {
-            return retain( target );
-        }
-    );
-    encoder.encode( "targets", targetsToEncode );
+   auto targetsToEncode = _targets.map(
+      []( auto target ) {
+         return retain( target );
+      }
+   );
+   encoder.encode( "targets", targetsToEncode );
 }
 
 void BehaviorContext::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    crimild::Array< std::string > keys;
-    decoder.decode( "keys", keys );
+   crimild::Array< std::string > keys;
+   decoder.decode( "keys", keys );
 
-    crimild::Array< SharedPointer< Variant > > values;
-    decoder.decode( "values", values );
+   crimild::Array< SharedPointer< Variant > > values;
+   decoder.decode( "values", values );
 
-    m_values.clear();
-    for ( size_t i = 0; i < keys.size(); ++i ) {
-        auto key = keys[ i ];
-        auto value = values[ i ];
-        m_values[ key ] = value;
-    }
+   m_values.clear();
+   for ( size_t i = 0; i < keys.size(); ++i ) {
+      auto key = keys[ i ];
+      auto value = values[ i ];
+      m_values[ key ] = value;
+   }
 
-    Array< SharedPointer< Node > > decodedTargets;
-    decoder.decode( "targets", decodedTargets );
-    _targets = decodedTargets.map(
-        []( auto target ) {
-            return get_ptr( target );
-        }
-    );
+   Array< SharedPointer< Node > > decodedTargets;
+   decoder.decode( "targets", decodedTargets );
+   _targets = decodedTargets.map(
+      []( auto target ) {
+         return get_ptr( target );
+      }
+   );
 }
 
 void BehaviorContext::dump( void ) const
 {
-    std::stringstream ss;
+   std::stringstream ss;
 
-    _values.each( [ &ss ]( std::string, const SharedPointer< BehaviorContextValue > &value ) {
-        ss << "\n\t\"" << value->getKey() << "\" = \"" << value->getValue() << "\"";
-    } );
+   _values.each( [ &ss ]( std::string, const SharedPointer< BehaviorContextValue > &value ) {
+      ss << "\n\t\"" << value->getKey() << "\" = \"" << value->getValue() << "\"";
+   } );
 
-    Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Behavior context dump: ", ss.str() );
+   Log::debug( CRIMILD_CURRENT_CLASS_NAME, "Behavior context dump: ", ss.str() );
 }

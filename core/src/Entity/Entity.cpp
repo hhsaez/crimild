@@ -1,5 +1,8 @@
 #include "Entity/Entity.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild;
 
 void Entity::encode( coding::Encoder &encoder )

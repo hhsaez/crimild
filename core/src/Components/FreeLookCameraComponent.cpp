@@ -27,85 +27,87 @@
 
 #include "FreeLookCameraComponent.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void FreeLookCameraComponent::start( void )
 {
-    _lastMousePos = Vector2f::Constants::ZERO;
+   _lastMousePos = Vector2f::Constants::ZERO;
 
-    m_position = origin( getNode()->getLocal() );
+   m_position = origin( getNode()->getLocal() );
 
-    // extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
+   // extractYawPitchRoll( getNode()->getLocal(), m_yaw, m_pitch, m_roll );
 }
 
 void FreeLookCameraComponent::update( const Clock &c )
 {
-    if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
-        Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
-    } else {
-        Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
-    }
+   if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
+      Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::GRAB );
+   } else {
+      Input::getInstance()->setMouseCursorMode( Input::MouseCursorMode::NORMAL );
+   }
 
-    auto speedCoeff = 1.0f;
-    if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
-        speedCoeff = 20.0f;
-    }
+   auto speedCoeff = 1.0f;
+   if ( Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_LEFT_SHIFT ) || Input::getInstance()->isKeyDown( CRIMILD_INPUT_KEY_RIGHT_SHIFT ) ) {
+      speedCoeff = 20.0f;
+   }
 
-    float dSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
-    float rSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
+   float dSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_VERTICAL );
+   float rSpeed = speedCoeff * getSpeed() * Input::getInstance()->getAxis( Input::AXIS_HORIZONTAL );
 
-    float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
-    m_roll += 0.005f * zSpeed;
+   float zSpeed = getSpeed() * Input::getInstance()->getAxis( "CameraAxisRoll" );
+   m_roll += 0.005f * zSpeed;
 
-    auto root = getNode();
+   auto root = getNode();
 
-    const auto mousePos = Input::getInstance()->getMousePosition();
-    const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::Constants::ZERO;
-    _initialized = true;
-    _lastMousePos = mousePos;
+   const auto mousePos = Input::getInstance()->getMousePosition();
+   const auto mouseDelta = _initialized ? ( mousePos - _lastMousePos ) : Vector2f::Constants::ZERO;
+   _initialized = true;
+   _lastMousePos = mousePos;
 
-    if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
-        m_pitch -= 0.005f * mouseDelta[ 1 ];
-        m_yaw -= 0.005f * mouseDelta[ 0 ];
-    }
+   if ( Input::getInstance()->isMouseButtonDown( getMouseLookButton() ) ) {
+      m_pitch -= 0.005f * mouseDelta[ 1 ];
+      m_yaw -= 0.005f * mouseDelta[ 0 ];
+   }
 
-    /*
-        const auto E = euler( m_yaw, m_pitch, m_roll );
+   /*
+       const auto E = euler( m_yaw, m_pitch, m_roll );
 
-        const auto F = forward( E );
-        const auto R = right( E );
+       const auto F = forward( E );
+       const auto R = right( E );
 
-        m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
-        const auto T = translation( Vector3ff( m_position ) );
+       m_position = m_position + c.getDeltaTime() * ( dSpeed * F + rSpeed * R );
+       const auto T = translation( Vector3ff( m_position ) );
 
-        root->setLocal( T * E );
-    */
+       root->setLocal( T * E );
+   */
 }
 
 void FreeLookCameraComponent::encode( coding::Encoder &encoder )
 {
-    Codable::encode( encoder );
+   Codable::encode( encoder );
 
-    // TODO: This should be a stateless component. It should correctly
-    // initialize with the position and orientation of the camera in which
-    // this component is attached.
-    encoder.encode( "position", m_position );
-    encoder.encode( "pitch", m_pitch );
-    encoder.encode( "yaw", m_yaw );
-    encoder.encode( "roll", m_roll );
+   // TODO: This should be a stateless component. It should correctly
+   // initialize with the position and orientation of the camera in which
+   // this component is attached.
+   encoder.encode( "position", m_position );
+   encoder.encode( "pitch", m_pitch );
+   encoder.encode( "yaw", m_yaw );
+   encoder.encode( "roll", m_roll );
 }
 
 void FreeLookCameraComponent::decode( coding::Decoder &decoder )
 {
-    Codable::decode( decoder );
+   Codable::decode( decoder );
 
-    decoder.decode( "position", m_position );
-    decoder.decode( "pitch", m_pitch );
-    decoder.decode( "yaw", m_yaw );
-    decoder.decode( "roll", m_roll );
+   decoder.decode( "position", m_position );
+   decoder.decode( "pitch", m_pitch );
+   decoder.decode( "yaw", m_yaw );
+   decoder.decode( "roll", m_roll );
 }

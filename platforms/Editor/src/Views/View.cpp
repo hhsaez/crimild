@@ -27,6 +27,9 @@
 
 #include "Views/View.hpp"
 
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
+
 using namespace crimild::editor;
 
 View::View( std::string_view name ) noexcept

@@ -18,7 +18,7 @@ jobs:
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'
             build_type: Release
-            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=ON -DCRIMILD_BUILD_PLAYER=ON -DCRIMILD_BUILD_EXAMPLES=ON -DCRIMILD_BUILD_UNIVERSAL_PLAYER=OFF -DCRIMILD_BUILD_UNIVERSAL_EXAMPLES=OFF'
+            crimild_build_flags: '-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF -DCRIMILD_BUILD_UNIVERSAL_PLAYER=OFF -DCRIMILD_BUILD_UNIVERSAL_EXAMPLES=OFF'
           - name: "Windows (Debug)"
             os: windows-latest
             cmake_args: '-G "Visual Studio 17 2022" -A x64'

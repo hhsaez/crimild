@@ -28,8 +28,9 @@
 #include "Behaviors/BehaviorTree.hpp"
 
 #include "Behaviors/Actions/SetContextValue.hpp"
+#include "crimild/coding/MemoryDecoder.hpp"
+#include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
@@ -38,18 +39,18 @@ using namespace crimild::behaviors::actions;
 
 TEST( BehaviorTreeTest, coding )
 {
-    auto tree = crimild::alloc< BehaviorTree >();
-    tree->setName( "behavior" );
-    tree->setRootBehavior( crimild::alloc< SetContextValue >( "input.x", "20" ) );
+   auto tree = crimild::alloc< BehaviorTree >();
+   tree->setName( "behavior" );
+   tree->setRootBehavior( crimild::alloc< SetContextValue >( "input.x", "20" ) );
 
-    auto encoder = crimild::alloc< coding::MemoryEncoder >();
-    encoder->encode( tree );
-    auto bytes = encoder->getBytes();
-    auto decoder = crimild::alloc< coding::MemoryDecoder >();
-    decoder->fromBytes( bytes );
+   auto encoder = crimild::alloc< coding::MemoryEncoder >();
+   encoder->encode( tree );
+   auto bytes = encoder->getBytes();
+   auto decoder = crimild::alloc< coding::MemoryDecoder >();
+   decoder->fromBytes( bytes );
 
-    auto decodedTree = decoder->getObjectAt< BehaviorTree >( 0 );
-    EXPECT_TRUE( decodedTree != nullptr );
-    EXPECT_EQ( tree->getName(), decodedTree->getName() );
-    EXPECT_TRUE( decodedTree->getRootBehavior() );
+   auto decodedTree = decoder->getObjectAt< BehaviorTree >( 0 );
+   EXPECT_TRUE( decodedTree != nullptr );
+   EXPECT_EQ( tree->getName(), decodedTree->getName() );
+   EXPECT_TRUE( decodedTree->getRootBehavior() );
 }

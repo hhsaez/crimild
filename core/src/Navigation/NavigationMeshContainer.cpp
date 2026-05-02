@@ -27,12 +27,14 @@
 
 #include "NavigationMeshContainer.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Navigation/NavigationMeshOBJ.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/FileSystem.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 using namespace crimild::coding;
@@ -43,7 +45,7 @@ NavigationMeshContainer::NavigationMeshContainer( void )
 }
 
 NavigationMeshContainer::NavigationMeshContainer( NavigationMeshPtr const &mesh )
-    : _navigationMesh( mesh )
+   : _navigationMesh( mesh )
 {
 }
 
@@ -136,17 +138,17 @@ void NavigationMeshContainer::renderDebugInfo( Renderer *renderer, Camera *camer
 
 void NavigationMeshContainer::encode( Encoder &encoder )
 {
-    NodeComponent::encode( encoder );
+   NodeComponent::encode( encoder );
 
-    // TODO
+   // TODO
 }
 
 void NavigationMeshContainer::decode( Decoder &decoder )
 {
-    NodeComponent::decode( decoder );
+   NodeComponent::decode( decoder );
 
-    std::string navMeshFile;
-    decoder.decode( "navMeshFile", navMeshFile );
+   std::string navMeshFile;
+   decoder.decode( "navMeshFile", navMeshFile );
 
-    _navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );
+   _navigationMesh = crimild::alloc< NavigationMeshOBJ >( FileSystem::getInstance().pathForResource( navMeshFile ) );
 }

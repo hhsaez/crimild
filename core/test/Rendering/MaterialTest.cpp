@@ -27,41 +27,40 @@
 
 #include "Rendering/Material.hpp"
 
-#include <Crimild_Coding.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( MaterialTest, construction )
 {
-    auto material = crimild::alloc< Material >();
+   auto material = crimild::alloc< Material >();
 
-    EXPECT_EQ( ( ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f } ), material->getAmbient() );
-    EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getDiffuse() );
-    EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getSpecular() );
-    EXPECT_EQ( 50.0f, material->getShininess() );
+   EXPECT_EQ( ( ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f } ), material->getAmbient() );
+   EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getDiffuse() );
+   EXPECT_EQ( ( ColorRGBA { 1.0f, 1.0f, 1.0f, 1.0f } ), material->getSpecular() );
+   EXPECT_EQ( 50.0f, material->getShininess() );
 
-    EXPECT_EQ( nullptr, material->getColorMap() );
-    EXPECT_EQ( nullptr, material->getProgram() );
+   EXPECT_EQ( nullptr, material->getColorMap() );
+   EXPECT_EQ( nullptr, material->getProgram() );
 }
 
 TEST( MaterialTest, setProgram )
 {
-    auto material = crimild::alloc< Material >();
+   auto material = crimild::alloc< Material >();
 
-    auto program = crimild::alloc< ShaderProgram >();
-    material->setProgram( program );
+   auto program = crimild::alloc< ShaderProgram >();
+   material->setProgram( program );
 
-    ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
+   ASSERT_EQ( crimild::get_ptr( program ), material->getProgram() );
 }
 
 TEST( MaterialTest, setColorMap )
 {
-    auto material = crimild::alloc< Material >();
+   auto material = crimild::alloc< Material >();
 
-    auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
-    auto texture = crimild::alloc< Texture >( image );
-    material->setColorMap( texture );
+   auto image = crimild::alloc< Image >( 0, 0, 0, nullptr );
+   auto texture = crimild::alloc< Texture >( image );
+   material->setColorMap( texture );
 
-    ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
+   ASSERT_EQ( crimild::get_ptr( texture ), material->getColorMap() );
 }

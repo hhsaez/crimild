@@ -29,10 +29,10 @@
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 
 #include "Common/Variant.hpp"
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "Simulation/Clock.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 #include <functional>
 #include <string>

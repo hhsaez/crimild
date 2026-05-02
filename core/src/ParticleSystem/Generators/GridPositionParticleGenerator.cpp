@@ -27,15 +27,17 @@
 
 #include "GridPositionParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 GridPositionParticleGenerator::GridPositionParticleGenerator( void )
-    : _origin( Vector3f::Constants::ZERO ),
-      _size( Vector3f::Constants::ONE )
+   : _origin( Vector3f::Constants::ZERO ),
+     _size( Vector3f::Constants::ONE )
 {
 }
 
@@ -45,53 +47,53 @@ GridPositionParticleGenerator::~GridPositionParticleGenerator( void )
 
 void GridPositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
-    assert( _positions != nullptr );
+   _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+   assert( _positions != nullptr );
 }
 
 void GridPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    /*
-        auto ps = _positions->getData< Vector3f >();
+   /*
+       auto ps = _positions->getData< Vector3f >();
 
-    const auto posMin = _origin - _size;
-    const auto posMax = _origin + _size;
+   const auto posMin = _origin - _size;
+   const auto posMax = _origin + _size;
 
-    const auto halfSize = 0.5f * _size;
+   const auto halfSize = 0.5f * _size;
 
-    auto i = startId;
-    const auto pCount = endId - startId;
-    if ( pCount == 0 ) {
-        return;
-    }
+   auto i = startId;
+   const auto pCount = endId - startId;
+   if ( pCount == 0 ) {
+       return;
+   }
 
-    for ( auto z = -halfSize.z(); z <= halfSize.z(); z += 1.0f ) {
-        for ( auto x = -halfSize.x(); x <= halfSize.x(); x += 1.0f ) {
-                        auto p = Vector3f( 2 * x, 0.0f, 2 * z );
-                if ( particles->shouldComputeInWorldSpace() ) {
-                        node->getWorld().applyToPoint( p, p );
-                }
-                ps[ i ] = p;
-                if ( ++i >= pCount ) {
-                        return;
-                }
-        }
-    }
-    */
+   for ( auto z = -halfSize.z(); z <= halfSize.z(); z += 1.0f ) {
+       for ( auto x = -halfSize.x(); x <= halfSize.x(); x += 1.0f ) {
+                       auto p = Vector3f( 2 * x, 0.0f, 2 * z );
+               if ( particles->shouldComputeInWorldSpace() ) {
+                       node->getWorld().applyToPoint( p, p );
+               }
+               ps[ i ] = p;
+               if ( ++i >= pCount ) {
+                       return;
+               }
+       }
+   }
+   */
 }
 
 void GridPositionParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "origin", _origin );
-    encoder.encode( "size", _size );
+   encoder.encode( "origin", _origin );
+   encoder.encode( "size", _size );
 }
 
 void GridPositionParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "origin", _origin );
-    decoder.decode( "size", _size );
+   decoder.decode( "origin", _origin );
+   decoder.decode( "size", _size );
 }

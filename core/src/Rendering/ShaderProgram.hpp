@@ -28,11 +28,11 @@
 #ifndef CRIMILD_RENDERING_SHADER_PROGRAM_
 #define CRIMILD_RENDERING_SHADER_PROGRAM_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/Catalog.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/VertexLayout.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {

@@ -27,53 +27,55 @@
 
 #include "BoxPositionParticleGenerator.hpp"
 
-#include "Crimild_Coding.hpp"
 #include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 
 using namespace crimild;
 
 void BoxPositionParticleGenerator::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
-    assert( _positions != nullptr );
+   _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+   assert( _positions != nullptr );
 }
 
 void BoxPositionParticleGenerator::generate( Node *node, crimild::Real64 dt, ParticleData *particles, ParticleId startId, ParticleId endId )
 {
-    /*
-    auto ps = _positions->getData< Vector3f >();
+   /*
+   auto ps = _positions->getData< Vector3f >();
 
-    const auto posMin = _origin - _size;
-    const auto posMax = _origin + _size;
+   const auto posMin = _origin - _size;
+   const auto posMax = _origin + _size;
 
-    for ( ParticleId i = startId; i < endId; i++ ) {
-        auto x = Random::generate< Real32 >( posMin.x(), posMax.x() );
-        auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
-        auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
-        if ( particles->shouldComputeInWorldSpace() ) {
-            auto p = Vector3f( x, y, z );
-            node->getWorld().applyToPoint( p, p );
-            ps[ i ] = p;
-        } else {
-            ps[ i ] = Vector3f( x, y, z );
-        }
-    }
-    */
+   for ( ParticleId i = startId; i < endId; i++ ) {
+       auto x = Random::generate< Real32 >( posMin.x(), posMax.x() );
+       auto y = Random::generate< Real32 >( posMin.y(), posMax.y() );
+       auto z = Random::generate< Real32 >( posMin.z(), posMax.z() );
+       if ( particles->shouldComputeInWorldSpace() ) {
+           auto p = Vector3f( x, y, z );
+           node->getWorld().applyToPoint( p, p );
+           ps[ i ] = p;
+       } else {
+           ps[ i ] = Vector3f( x, y, z );
+       }
+   }
+   */
 }
 
 void BoxPositionParticleGenerator::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleGenerator::encode( encoder );
+   ParticleSystemComponent::ParticleGenerator::encode( encoder );
 
-    encoder.encode( "origin", _origin );
-    encoder.encode( "size", _size );
+   encoder.encode( "origin", _origin );
+   encoder.encode( "size", _size );
 }
 
 void BoxPositionParticleGenerator::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleGenerator::decode( decoder );
+   ParticleSystemComponent::ParticleGenerator::decode( decoder );
 
-    decoder.decode( "origin", _origin );
-    decoder.decode( "size", _size );
+   decoder.decode( "origin", _origin );
+   decoder.decode( "size", _size );
 }

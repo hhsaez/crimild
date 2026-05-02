@@ -28,11 +28,11 @@
 #ifndef CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 #define CRIMILD_CORE_RENDERING_IMAGE_VIEW_
 
-#include "Crimild_Coding.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 #include "Rendering/RenderResource.hpp"
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
 
 namespace crimild {
