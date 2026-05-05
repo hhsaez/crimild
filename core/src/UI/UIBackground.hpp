@@ -29,38 +29,40 @@
 #define CRIMILD_UI_BACKGROUND_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+#include "crimild/math/ColorRGBA.hpp"
+
+#include <crimild/math/Rect.hpp>
 
 namespace crimild {
 
-    class Geometry;
-    class Material;
-    class Texture;
+   class Geometry;
+   class Material;
+   class Texture;
 
-    namespace ui {
+   namespace ui {
 
-        class UIBackground : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
-        public:
-            UIBackground( const ColorRGBA &color = ColorRGBA::Constants::WHITE );
-            ~UIBackground( void ) = default;
+      class UIBackground : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::ui::UIBackground )
+      public:
+         UIBackground( const ColorRGBA &color = ColorRGBA::Constants::WHITE );
+         ~UIBackground( void ) = default;
 
-            void onAttach( void ) override;
+         void onAttach( void ) override;
 
-            void update( const Clock & ) override;
+         void update( const Clock & ) override;
 
-            void setBackgroundImage( SharedPointer< Texture > const &texture );
+         void setBackgroundImage( SharedPointer< Texture > const &texture );
 
-        private:
-            SharedPointer< Geometry > _geometry;
-            SharedPointer< Material > _material;
-            Rectf _knownExtensions;
+      private:
+         SharedPointer< Geometry > _geometry;
+         SharedPointer< Material > _material;
+         Rectf _knownExtensions;
 
-        public:
-            void decode( coding::Decoder &decoder ) override;
-        };
+      public:
+         void decode( coding::Decoder &decoder ) override;
+      };
 
-    }
+   }
 
 }
 

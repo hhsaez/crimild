@@ -30,11 +30,9 @@
 
 #include "Boundings/BoundingVolume.hpp"
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Entity/Entity.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
-#include <crimild/foundation.hpp>
 #include <map>
 
 namespace crimild {

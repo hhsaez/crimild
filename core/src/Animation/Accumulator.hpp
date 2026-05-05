@@ -28,9 +28,10 @@
 #ifndef CRIMILD_ANIMATION_ACCUMULATOR_
 #define CRIMILD_ANIMATION_ACCUMULATOR_
 
-#include "Crimild_Mathematics.hpp"
-
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/common/SharedObject.hpp>
+#include <crimild/foundation/common/Types.hpp>
+#include <crimild/math/Interpolation.hpp>
+#include <crimild/math/easing.hpp>
 
 namespace crimild {
 

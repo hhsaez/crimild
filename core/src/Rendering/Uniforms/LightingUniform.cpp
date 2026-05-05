@@ -27,76 +27,75 @@
 
 #include "Rendering/Uniforms/LightingUniform.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
 
 using namespace crimild;
 
 LightingUniform::LightingUniform( const Array< Light * > &lights ) noexcept
-    : UniformBuffer( Lighting {} )
+   : UniformBuffer( Lighting {} )
 {
-    lights.each(
-        [ & ]( auto light ) {
-            switch ( light->getType() ) {
-                case Light::Type::AMBIENT:
-                    m_ambientLights.add( light );
-                    break;
+   lights.each(
+      [ & ]( auto light ) {
+         switch ( light->getType() ) {
+            case Light::Type::AMBIENT:
+               m_ambientLights.add( light );
+               break;
 
-                case Light::Type::POINT:
-                    m_pointLights.add( light );
-                    break;
+            case Light::Type::POINT:
+               m_pointLights.add( light );
+               break;
 
-                case Light::Type::DIRECTIONAL:
-                    m_directionalLights.add( light );
-                    break;
+            case Light::Type::DIRECTIONAL:
+               m_directionalLights.add( light );
+               break;
 
-                case Light::Type::SPOT:
-                    m_spotlights.add( light );
-                    break;
+            case Light::Type::SPOT:
+               m_spotlights.add( light );
+               break;
 
-                default:
-                    break;
-            }
-        }
-    );
+            default:
+               break;
+         }
+      }
+   );
 }
 
 void LightingUniform::onPreRender( void ) noexcept
 {
-    auto &lighting = getValue< Lighting >();
+   auto &lighting = getValue< Lighting >();
 
-    auto copyLightInfo = []( auto &lights, auto &dst, auto max ) {
-        auto count = Numerici::min( max, lights.size() );
-        for ( auto i = 0l; i < count; ++i ) {
-            auto &light = lights[ i ];
-            dst[ i ].type = static_cast< UInt32 >( light->getType() );
-            dst[ i ].position = Vector4( light->getPosition() );
-            dst[ i ].direction = Vector4( light->getDirection() );
-            // dst[ i ].color = light->getColor();
-            dst[ i ].attenuation = Vector4( light->getAttenuation() );
-            // dst[ i ].ambient = light->getAmbient();
-            dst[ i ].cutoff = Vector4f {
-                Numericf::cos( light->getInnerCutoff() ),
-                Numericf::cos( light->getOuterCutoff() ),
-                0.0f,
-                0.0f,
-            };
-            dst[ i ].castShadows = light->castShadows();
-            if ( light->castShadows() ) {
-                dst[ i ].shadowBias = light->getShadowMap()->getBias();
-                dst[ i ].cascadeSplits = light->getShadowMap()->getCascadeSplits();
-                for ( auto split = 0; split < 4; ++split ) {
-                    dst[ i ].lightSpaceMatrix[ split ] = light->getShadowMap()->getLightProjectionMatrix( split );
-                }
-                dst[ i ].viewport = light->getShadowMap()->getViewport();
+   auto copyLightInfo = []( auto &lights, auto &dst, auto max ) {
+      auto count = Numerici::min( max, lights.size() );
+      for ( auto i = 0l; i < count; ++i ) {
+         auto &light = lights[ i ];
+         dst[ i ].type = static_cast< UInt32 >( light->getType() );
+         dst[ i ].position = Vector4( light->getPosition() );
+         dst[ i ].direction = Vector4( light->getDirection() );
+         // dst[ i ].color = light->getColor();
+         dst[ i ].attenuation = Vector4( light->getAttenuation() );
+         // dst[ i ].ambient = light->getAmbient();
+         dst[ i ].cutoff = Vector4f {
+            Numericf::cos( light->getInnerCutoff() ),
+            Numericf::cos( light->getOuterCutoff() ),
+            0.0f,
+            0.0f,
+         };
+         dst[ i ].castShadows = light->castShadows();
+         if ( light->castShadows() ) {
+            dst[ i ].shadowBias = light->getShadowMap()->getBias();
+            dst[ i ].cascadeSplits = light->getShadowMap()->getCascadeSplits();
+            for ( auto split = 0; split < 4; ++split ) {
+               dst[ i ].lightSpaceMatrix[ split ] = light->getShadowMap()->getLightProjectionMatrix( split );
             }
-        }
-        return count;
-    };
+            dst[ i ].viewport = light->getShadowMap()->getViewport();
+         }
+      }
+      return count;
+   };
 
-    lighting.ambientLightCount = copyLightInfo( m_ambientLights, lighting.ambientLights, MAX_AMBIENT_LIGHTS );
-    lighting.directionalLightCount = copyLightInfo( m_directionalLights, lighting.directionalLights, MAX_DIRECTIONAL_LIGHTS );
-    lighting.pointLightCount = copyLightInfo( m_pointLights, lighting.pointLights, MAX_POINT_LIGHTS );
-    lighting.spotlightCount = copyLightInfo( m_spotlights, lighting.spotlights, MAX_SPOTLIGHTS );
+   lighting.ambientLightCount = copyLightInfo( m_ambientLights, lighting.ambientLights, MAX_AMBIENT_LIGHTS );
+   lighting.directionalLightCount = copyLightInfo( m_directionalLights, lighting.directionalLights, MAX_DIRECTIONAL_LIGHTS );
+   lighting.pointLightCount = copyLightInfo( m_pointLights, lighting.pointLights, MAX_POINT_LIGHTS );
+   lighting.spotlightCount = copyLightInfo( m_spotlights, lighting.spotlights, MAX_SPOTLIGHTS );
 }

@@ -28,9 +28,11 @@
 #ifndef CRIMILD_CORE_DEBUG_DRAW_MANAGER_
 #define CRIMILD_CORE_DEBUG_DRAW_MANAGER_
 
-#include "Crimild_Mathematics.hpp"
+#include "crimild/foundation/memory/Memory.hpp"
+#include "crimild/math/ColorRGB.hpp"
+#include "crimild/math/Point3.hpp"
+#include "crimild/math/Transformation.hpp"
 
-#include <crimild/foundation.hpp>
 #include <string>
 #include <vector>
 

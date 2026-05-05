@@ -29,43 +29,43 @@
 #define CRIMILD_UI_CANVAS_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+#include "crimild/math/Vector2.hpp"
 
 namespace crimild {
 
-    namespace ui {
+   namespace ui {
 
-        class UICanvas : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UICanvas )
+      class UICanvas : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::ui::UICanvas )
 
-        public:
-            enum class RenderSpace {
-                WORLD,
-                CAMERA,
-            };
+      public:
+         enum class RenderSpace {
+            WORLD,
+            CAMERA,
+         };
 
-        public:
-            UICanvas( void ) = default;
-            UICanvas( crimild::Int32 width, crimild::Int32 height );
-            ~UICanvas( void ) = default;
+      public:
+         UICanvas( void ) = default;
+         UICanvas( crimild::Int32 width, crimild::Int32 height );
+         ~UICanvas( void ) = default;
 
-            virtual void onAttach( void ) override;
+         virtual void onAttach( void ) override;
 
-            virtual void update( const Clock & ) override;
+         virtual void update( const Clock & ) override;
 
-            void setRenderSpace( RenderSpace value ) { _renderSpace = value; }
-            RenderSpace getRenderSpace( void ) const { return _renderSpace; }
+         void setRenderSpace( RenderSpace value ) { _renderSpace = value; }
+         RenderSpace getRenderSpace( void ) const { return _renderSpace; }
 
-        private:
-            Vector2i _size;
-            Vector2i _safeArea;
-            RenderSpace _renderSpace = RenderSpace::CAMERA;
+      private:
+         Vector2i _size;
+         Vector2i _safeArea;
+         RenderSpace _renderSpace = RenderSpace::CAMERA;
 
-        public:
-            void decode( coding::Decoder &decoder ) override;
-        };
+      public:
+         void decode( coding::Decoder &decoder ) override;
+      };
 
-    }
+   }
 
 }
 

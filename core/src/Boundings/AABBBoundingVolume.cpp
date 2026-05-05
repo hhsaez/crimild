@@ -27,227 +27,233 @@
 
 #include "AABBBoundingVolume.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/VertexBuffer.hpp"
+
+#include <crimild/math/distance.hpp>
+#include <crimild/math/intersect.hpp>
+#include <crimild/math/max.hpp>
+#include <crimild/math/min.hpp>
+#include <crimild/math/numbers.hpp>
+#include <crimild/math/whichSide.hpp>
 
 using namespace crimild;
 
 AABBBoundingVolume::AABBBoundingVolume( void ) noexcept
-    : m_box( Box {} ),
-      m_sphere( Sphere { { 0, 0, 0 }, numbers::SQRT_3 } )
+   : m_box( Box {} ),
+     m_sphere( Sphere { { 0, 0, 0 }, numbers::SQRT_3 } )
 {
-    computeFrom( -Point3f( size( m_box ) ), Point3f( size( m_box ) ) );
+   computeFrom( -Point3f( size( m_box ) ), Point3f( size( m_box ) ) );
 }
 
 SharedPointer< BoundingVolume > AABBBoundingVolume::clone( void ) const
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
-    bb->m_sphere = m_sphere;
-    bb->m_box = m_box;
-    bb->setMin( getMin() );
-    bb->setMax( getMax() );
-    return bb;
+   auto bb = crimild::alloc< AABBBoundingVolume >();
+   bb->m_sphere = m_sphere;
+   bb->m_box = m_box;
+   bb->setMin( getMin() );
+   bb->setMax( getMax() );
+   return bb;
 }
 
 void AABBBoundingVolume::computeFrom( const BoundingVolume *volume )
 {
-    computeFrom( volume->getMin(), volume->getMax() );
+   computeFrom( volume->getMin(), volume->getMax() );
 }
 
 void AABBBoundingVolume::computeFrom( const BoundingVolume *volume, const Transformation &transformation )
 {
-    const auto p0 = transformation( volume->getMin() );
-    const auto p1 = transformation( volume->getMax() );
+   const auto p0 = transformation( volume->getMin() );
+   const auto p1 = transformation( volume->getMax() );
 
-    const auto min = crimild::min( p0, p1 );
-    const auto max = crimild::max( p0, p1 );
+   const auto min = crimild::min( p0, p1 );
+   const auto max = crimild::max( p0, p1 );
 
-    computeFrom( min, max );
+   computeFrom( min, max );
 }
 
 void AABBBoundingVolume::computeFrom( const Point3f *positions, unsigned int positionCount )
 {
-    if ( positionCount == 0 || positions == NULL ) {
-        return;
-    }
+   if ( positionCount == 0 || positions == NULL ) {
+      return;
+   }
 
-    Point3f max = positions[ 0 ];
-    Point3f min = positions[ 0 ];
+   Point3f max = positions[ 0 ];
+   Point3f min = positions[ 0 ];
 
-    for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Point3f &pos = Point3f( positions[ i ] );
-        min = crimild::min( min, pos );
-        max = crimild::max( max, pos );
-    }
+   for ( unsigned int i = 1; i < positionCount; i++ ) {
+      const Point3f &pos = Point3f( positions[ i ] );
+      min = crimild::min( min, pos );
+      max = crimild::max( max, pos );
+   }
 
-    computeFrom( min, max );
+   computeFrom( min, max );
 }
 
 void AABBBoundingVolume::computeFrom( const VertexBuffer *vbo )
 {
-    if ( vbo->getVertexCount() == 0 ) {
-        return;
-    }
+   if ( vbo->getVertexCount() == 0 ) {
+      return;
+   }
 
-    auto positions = vbo->get( VertexAttribute::Name::POSITION );
-    if ( positions == nullptr ) {
-        return;
-    }
+   auto positions = vbo->get( VertexAttribute::Name::POSITION );
+   if ( positions == nullptr ) {
+      return;
+   }
 
-    Point3f max;
-    Point3f min;
+   Point3f max;
+   Point3f min;
 
-    positions->each< Point3f >(
-        [ & ]( auto &pos, auto i ) {
-            if ( i == 0 ) {
-                max = pos;
-                min = pos;
-            } else {
-                max = crimild::max( max, pos );
-                min = crimild::min( min, pos );
-            }
-        }
-    );
+   positions->each< Point3f >(
+      [ & ]( auto &pos, auto i ) {
+         if ( i == 0 ) {
+            max = pos;
+            min = pos;
+         } else {
+            max = crimild::max( max, pos );
+            min = crimild::min( min, pos );
+         }
+      }
+   );
 
-    computeFrom( min, max );
+   computeFrom( min, max );
 }
 
 void AABBBoundingVolume::computeFrom( const Point3f &min, const Point3f &max )
 {
-    const auto center = real_t( 0.5 ) * ( max + min );
-    const auto size = max - center;
+   const auto center = real_t( 0.5 ) * ( max + min );
+   const auto size = max - center;
 
-    m_box = Box { center, size };
+   m_box = Box { center, size };
 
-    const auto radius = crimild::max( Real( numbers::EPSILON ), distance( max, center ) );
-    m_sphere = Sphere { center, radius };
+   const auto radius = crimild::max( Real( numbers::EPSILON ), distance( max, center ) );
+   m_sphere = Sphere { center, radius };
 
-    setMin( min );
-    setMax( max );
+   setMin( min );
+   setMax( max );
 }
 
 void AABBBoundingVolume::expandToContain( const Point3f &p )
 {
-    const auto min = crimild::min( getMin(), p );
-    const auto max = crimild::max( getMax(), p );
+   const auto min = crimild::min( getMin(), p );
+   const auto max = crimild::max( getMax(), p );
 
-    computeFrom( min, max );
+   computeFrom( min, max );
 }
 
 void AABBBoundingVolume::expandToContain( const Point3f *positions, unsigned int positionCount )
 {
-    if ( positionCount == 0 || positions == NULL ) {
-        return;
-    }
+   if ( positionCount == 0 || positions == NULL ) {
+      return;
+   }
 
-    Point3f max = positions[ 0 ];
-    Point3f min = positions[ 0 ];
+   Point3f max = positions[ 0 ];
+   Point3f min = positions[ 0 ];
 
-    for ( unsigned int i = 1; i < positionCount; i++ ) {
-        const Point3f &pos = positions[ i ];
+   for ( unsigned int i = 1; i < positionCount; i++ ) {
+      const Point3f &pos = positions[ i ];
 
-        max = crimild::max( max, pos );
-        min = crimild::min( min, pos );
-    }
+      max = crimild::max( max, pos );
+      min = crimild::min( min, pos );
+   }
 
-    expandToContain( max );
-    expandToContain( min );
+   expandToContain( max );
+   expandToContain( min );
 }
 
 void AABBBoundingVolume::expandToContain( const VertexBuffer *vbo )
 {
-    if ( vbo->getVertexCount() == 0 ) {
-        return;
-    }
+   if ( vbo->getVertexCount() == 0 ) {
+      return;
+   }
 
-    auto positions = vbo->get( VertexAttribute::Name::POSITION );
-    if ( positions == nullptr ) {
-        return;
-    }
+   auto positions = vbo->get( VertexAttribute::Name::POSITION );
+   if ( positions == nullptr ) {
+      return;
+   }
 
-    Point3f max;
-    Point3f min;
+   Point3f max;
+   Point3f min;
 
-    positions->each< Vector3f >(
-        [ & ]( auto &pos, auto i ) {
-            const auto P = Point3f( pos );
-            if ( i == 0 ) {
-                max = P;
-                min = P;
-            } else {
-                max = crimild::max( max, P );
-                min = crimild::min( min, P );
-            }
-        }
-    );
+   positions->each< Vector3f >(
+      [ & ]( auto &pos, auto i ) {
+         const auto P = Point3f( pos );
+         if ( i == 0 ) {
+            max = P;
+            min = P;
+         } else {
+            max = crimild::max( max, P );
+            min = crimild::min( min, P );
+         }
+      }
+   );
 
-    expandToContain( max );
-    expandToContain( min );
+   expandToContain( max );
+   expandToContain( min );
 }
 
 void AABBBoundingVolume::expandToContain( const BoundingVolume *input )
 {
-    expandToContain( input->getMin() );
-    expandToContain( input->getMax() );
+   expandToContain( input->getMin() );
+   expandToContain( input->getMax() );
 }
 
 int AABBBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-    return crimild::whichSide( plane, m_sphere );
+   return crimild::whichSide( plane, m_sphere );
 }
 
 bool AABBBoundingVolume::contains( const Point3f &point ) const
 {
-    const auto centerDiffSqr = distance2( getCenter(), point );
-    float radiusSqr = radius( m_sphere ) * radius( m_sphere );
-    return ( centerDiffSqr < radiusSqr );
+   const auto centerDiffSqr = distance2( getCenter(), point );
+   float radiusSqr = radius( m_sphere ) * radius( m_sphere );
+   return ( centerDiffSqr < radiusSqr );
 }
 
 bool AABBBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-    Real t0, t1;
-    if ( !intersect( ray, m_sphere, t0, t1 ) ) {
-        return false;
-    }
+   Real t0, t1;
+   if ( !intersect( ray, m_sphere, t0, t1 ) ) {
+      return false;
+   }
 
-    if ( !intersect( ray, m_box, t0, t1 ) ) {
-        return false;
-    }
+   if ( !intersect( ray, m_box, t0, t1 ) ) {
+      return false;
+   }
 
-    return true;
+   return true;
 }
 
 bool AABBBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-    return other->testIntersection( m_sphere );
+   return other->testIntersection( m_sphere );
 }
 
 bool AABBBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    // return Intersection::test( _sphere, sphere );
-    assert( false );
-    return false;
+   // return Intersection::test( _sphere, sphere );
+   assert( false );
+   return false;
 }
 
 bool AABBBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-    return whichSide( plane ) == 0;
+   return whichSide( plane ) == 0;
 }
 
 void AABBBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-    other->resolveIntersection( m_sphere, result );
+   other->resolveIntersection( m_sphere, result );
 }
 
 void AABBBoundingVolume::resolveIntersection( const Sphere &other, Transformation &result ) const
 {
-    /*
-    Vector3f direction = other.getCenter() - _sphere.getCenter();
-    float d = direction.getMagnitude();
-    float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
-    result.setTranslate( direction.normalize() * diff );
-    */
-    assert( false );
+   /*
+   Vector3f direction = other.getCenter() - _sphere.getCenter();
+   float d = direction.getMagnitude();
+   float diff = ( _sphere.getRadius() + other.getRadius() ) - d;
+   result.setTranslate( direction.normalize() * diff );
+   */
+   assert( false );
 }
 
 void AABBBoundingVolume::resolveIntersection( const Plane3 &plane, Transformation &result ) const

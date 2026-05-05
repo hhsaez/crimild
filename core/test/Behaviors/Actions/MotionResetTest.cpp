@@ -29,9 +29,9 @@
 
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
+#include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;
@@ -40,81 +40,81 @@ using namespace crimild::behaviors::actions;
 
 TEST( MotionReset, it_attaches_motion_state_component_on_init_if_not_present )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
+   auto node = crimild::alloc< Node >();
+   auto controller = node->attachComponent< BehaviorController >();
 
-    ASSERT_EQ( nullptr, node->getComponent< MotionState >() );
+   ASSERT_EQ( nullptr, node->getComponent< MotionState >() );
 
-    controller->execute( crimild::alloc< MotionReset >() );
+   controller->execute( crimild::alloc< MotionReset >() );
 
-    ASSERT_NE( nullptr, node->getComponent< MotionState >() );
+   ASSERT_NE( nullptr, node->getComponent< MotionState >() );
 }
 
 TEST( MotionReset, it_does_not_modify_existing_state_on_init_if_already_present )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
+   auto node = crimild::alloc< Node >();
+   auto controller = node->attachComponent< BehaviorController >();
 
-    auto motion = node->attachComponent< MotionState >();
-    motion->velocity = Vector3 { 1, 2, 3 };
-    motion->position = Point3f { 4, 5, 6 };
-    motion->steering = Vector3 { 7, 8, 9 };
+   auto motion = node->attachComponent< MotionState >();
+   motion->velocity = Vector3 { 1, 2, 3 };
+   motion->position = Point3f { 4, 5, 6 };
+   motion->steering = Vector3 { 7, 8, 9 };
 
-    controller->execute( crimild::alloc< MotionReset >() );
+   controller->execute( crimild::alloc< MotionReset >() );
 
-    ASSERT_NE( nullptr, node->getComponent< MotionState >() );
-    EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
-    EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
-    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
+   ASSERT_NE( nullptr, node->getComponent< MotionState >() );
+   EXPECT_EQ( ( Vector3 { 1, 2, 3 } ), motion->velocity );
+   EXPECT_EQ( ( Point3f { 4, 5, 6 } ), motion->position );
+   EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
 }
 
 TEST( MotionReset, it_fails_if_no_agent_exists )
 {
-    auto controller = crimild::alloc< BehaviorController >();
-    auto behavior = crimild::alloc< MotionReset >();
+   auto controller = crimild::alloc< BehaviorController >();
+   auto behavior = crimild::alloc< MotionReset >();
 
-    EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
+   EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
 }
 
 TEST( MotionReset, it_fails_if_executed_without_init )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
-    auto behavior = crimild::alloc< MotionReset >();
+   auto node = crimild::alloc< Node >();
+   auto controller = node->attachComponent< BehaviorController >();
+   auto behavior = crimild::alloc< MotionReset >();
 
-    EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
+   EXPECT_EQ( Behavior::State::FAILURE, behavior->step( controller->getContext() ) );
 }
 
 TEST( MotionReset, it_succeeds )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
-    auto behavior = crimild::alloc< MotionReset >();
+   auto node = crimild::alloc< Node >();
+   auto controller = node->attachComponent< BehaviorController >();
+   auto behavior = crimild::alloc< MotionReset >();
 
-    controller->execute( behavior );
+   controller->execute( behavior );
 
-    EXPECT_EQ( Behavior::State::SUCCESS, behavior->step( controller->getContext() ) );
+   EXPECT_EQ( Behavior::State::SUCCESS, behavior->step( controller->getContext() ) );
 }
 
 TEST( MotionReset, it_resets_motion_state_on_step )
 {
-    auto node = crimild::alloc< Node >();
-    auto controller = node->attachComponent< BehaviorController >();
+   auto node = crimild::alloc< Node >();
+   auto controller = node->attachComponent< BehaviorController >();
 
-    node->setLocal( translation( 10, 20, 30 ) );
+   node->setLocal( translation( 10, 20, 30 ) );
 
-    auto motion = node->attachComponent< MotionState >();
-    motion->steering = Vector3 { 7, 8, 9 };
+   auto motion = node->attachComponent< MotionState >();
+   motion->steering = Vector3 { 7, 8, 9 };
 
-    controller->execute( crimild::alloc< MotionReset >() );
+   controller->execute( crimild::alloc< MotionReset >() );
 
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
-    EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
+   EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+   EXPECT_EQ( ( Point3f { 0, 0, 0 } ), motion->position );
+   EXPECT_EQ( ( Vector3 { 7, 8, 9 } ), motion->steering );
 
-    controller->update( Clock {} );
+   controller->update( Clock {} );
 
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
-    EXPECT_EQ( ( Point3f { 10, 20, 30 } ), motion->position );
-    EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
+   EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->velocity );
+   EXPECT_EQ( ( Point3f { 10, 20, 30 } ), motion->position );
+   EXPECT_EQ( ( Vector3 { 0, 0, 0 } ), motion->steering );
 }

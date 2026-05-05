@@ -4,6 +4,8 @@
 #include "Nodes/Visitors/NodeConstVisitor.hpp"
 #include "Nodes/Visitors/NodeVisitor.hpp"
 
+#include <crimild/math/inverse.hpp>
+
 using namespace crimild;
 using namespace crimild::experimental;
 

@@ -3,6 +3,8 @@
 #include "Foundation/OpenGLUtils.hpp"
 #include "GLFW/glfw3.h"
 
+#include <crimild/math/io.hpp>
+
 using namespace crimild::universal;
 
 GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string title ) noexcept

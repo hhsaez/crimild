@@ -29,68 +29,68 @@
 #define CRIMILD_UI_LABEL_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+#include "crimild/math/ColorRGBA.hpp"
 
 namespace crimild {
 
-    class Text;
+   class Text;
 
-    namespace ui {
+   namespace ui {
 
-        class UIFrame;
+      class UIFrame;
 
-        class UILabel : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
+      class UILabel : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::ui::UILabel )
 
-        public:
-            enum class TextHorizontalAlignment {
-                Left,
-                Center,
-                Right,
-            };
+      public:
+         enum class TextHorizontalAlignment {
+            Left,
+            Center,
+            Right,
+         };
 
-            enum class TextVerticalAlignment {
-                Top,
-                Center,
-                Bottom,
-            };
+         enum class TextVerticalAlignment {
+            Top,
+            Center,
+            Bottom,
+         };
 
-        public:
-            UILabel( void );
-            UILabel( std::string text, const ColorRGBA &color = ColorRGBA::Constants::WHITE );
-            ~UILabel( void ) = default;
+      public:
+         UILabel( void );
+         UILabel( std::string text, const ColorRGBA &color = ColorRGBA::Constants::WHITE );
+         ~UILabel( void ) = default;
 
-            virtual void onAttach( void ) override;
-            virtual void start( void ) override;
-            virtual void update( const Clock & ) override;
+         virtual void onAttach( void ) override;
+         virtual void start( void ) override;
+         virtual void update( const Clock & ) override;
 
-            void setText( std::string text );
+         void setText( std::string text );
 
-            void setTextHorizontalAlignment( TextHorizontalAlignment value ) { _textHorizontalAlignment = value; }
-            TextHorizontalAlignment getTextHorizontalAlignment( void ) const { return _textHorizontalAlignment; }
+         void setTextHorizontalAlignment( TextHorizontalAlignment value ) { _textHorizontalAlignment = value; }
+         TextHorizontalAlignment getTextHorizontalAlignment( void ) const { return _textHorizontalAlignment; }
 
-            void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
-            TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
+         void setTextVerticalAlignment( TextVerticalAlignment value ) { _textVerticalAlignment = value; }
+         TextVerticalAlignment getTextVerticalAlignment( void ) const { return _textVerticalAlignment; }
 
-            void setTextColor( const ColorRGBA &value ) { _textColor = value; }
-            const ColorRGBA &getTextColor( void ) const { return _textColor; }
+         void setTextColor( const ColorRGBA &value ) { _textColor = value; }
+         const ColorRGBA &getTextColor( void ) const { return _textColor; }
 
-            void setTextSize( crimild::Real32 value ) { _textSize = value; }
-            crimild::Real32 getTextSize( void ) const { return _textSize; }
+         void setTextSize( crimild::Real32 value ) { _textSize = value; }
+         crimild::Real32 getTextSize( void ) const { return _textSize; }
 
-        private:
-            UIFrame *_frame = nullptr;
-            SharedPointer< Text > _text = nullptr;
-            TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
-            TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
-            ColorRGBA _textColor;
-            crimild::Real32 _textSize = 10.0f;
+      private:
+         UIFrame *_frame = nullptr;
+         SharedPointer< Text > _text = nullptr;
+         TextHorizontalAlignment _textHorizontalAlignment = TextHorizontalAlignment::Left;
+         TextVerticalAlignment _textVerticalAlignment = TextVerticalAlignment::Center;
+         ColorRGBA _textColor;
+         crimild::Real32 _textSize = 10.0f;
 
-        public:
-            void decode( coding::Decoder &decoder ) override;
-        };
+      public:
+         void decode( coding::Decoder &decoder ) override;
+      };
 
-    }
+   }
 
 }
 

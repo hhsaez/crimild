@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"

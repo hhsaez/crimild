@@ -28,7 +28,6 @@
 #include "Profiler.hpp"
 
 #include "Concurrency/JobScheduler.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugRenderHelper.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShaderProgram.hpp"

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,36 +31,35 @@
 #include "RenderState.hpp"
 
 namespace crimild {
-    
-	class ColorMaskState : public RenderState {
-    public:
-        static const SharedPointer< ColorMaskState > DISABLED;
-        static const SharedPointer< ColorMaskState > ENABLED;
 
-	public:
-		ColorMaskState( bool enabled, bool rMask, bool gMask, bool bMask, bool aMask );
-		virtual ~ColorMaskState( void );
+   class ColorMaskState : public RenderState {
+   public:
+      static const SharedPointer< ColorMaskState > DISABLED;
+      static const SharedPointer< ColorMaskState > ENABLED;
 
-		void setRMask( bool value ) { _rMask = value; }
-		bool getRMask( void ) const { return _rMask; }
+   public:
+      ColorMaskState( bool enabled, bool rMask, bool gMask, bool bMask, bool aMask );
+      virtual ~ColorMaskState( void );
 
-		void setGMask( bool value ) { _gMask = value; }
-		bool getGMask( void ) const { return _gMask; }
+      void setRMask( bool value ) { _rMask = value; }
+      bool getRMask( void ) const { return _rMask; }
 
-		void setBMask( bool value ) { _bMask = value; }
-		bool getBMask( void ) const { return _bMask; }
+      void setGMask( bool value ) { _gMask = value; }
+      bool getGMask( void ) const { return _gMask; }
 
-		void setAMask( bool value ) { _aMask = value; }
-		bool getAMask( void ) const { return _aMask; }
+      void setBMask( bool value ) { _bMask = value; }
+      bool getBMask( void ) const { return _bMask; }
 
-	private:
-		bool _rMask;
-		bool _gMask;
-		bool _bMask;
-		bool _aMask;
-	};
+      void setAMask( bool value ) { _aMask = value; }
+      bool getAMask( void ) const { return _aMask; }
+
+   private:
+      bool _rMask;
+      bool _gMask;
+      bool _bMask;
+      bool _aMask;
+   };
 
 }
 
 #endif
-

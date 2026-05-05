@@ -29,7 +29,6 @@
 
 #include "Commands/EchoConsoleCommand.hpp"
 #include "Commands/SetConsoleCommand.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 

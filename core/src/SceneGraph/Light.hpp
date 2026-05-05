@@ -28,11 +28,8 @@
 #ifndef CRIMILD_SCENEGRAPH_LIGHT_
 #define CRIMILD_SCENEGRAPH_LIGHT_
 
-#include "Crimild_Mathematics.hpp"
 #include "Node.hpp"
 #include "Rendering/Catalog.hpp"
-
-#include <crimild/foundation.hpp>
 
 namespace crimild {
 

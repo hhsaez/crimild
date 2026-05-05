@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -41,31 +40,31 @@ using namespace crimild;
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( SharedPointer< FrameGraphResource > const reflectionAtlas ) noexcept
 {
-    auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( "computeBRDFLUT" );
+   auto renderPass = crimild::alloc< RenderPass >();
+   renderPass->setName( "computeBRDFLUT" );
 
-    auto color = useColorAttachment( renderPass->getName() + "/color", Format::R32G32B32A32_SFLOAT );
+   auto color = useColorAttachment( renderPass->getName() + "/color", Format::R32G32B32A32_SFLOAT );
 
-    renderPass->attachments = { color };
+   renderPass->attachments = { color };
 
-    renderPass->extent = {
-        .scalingMode = ScalingMode::FIXED,
-        .width = 512.0f,
-        .height = 512.0f,
-    };
+   renderPass->extent = {
+      .scalingMode = ScalingMode::FIXED,
+      .width = 512.0f,
+      .height = 512.0f,
+   };
 
-    renderPass->reads( { reflectionAtlas } );
-    renderPass->writes( { color } );
-    renderPass->produces( { color } );
+   renderPass->reads( { reflectionAtlas } );
+   renderPass->writes( { color } );
+   renderPass->produces( { color } );
 
-    auto pipeline = [ & ] {
-        auto pipeline = crimild::alloc< GraphicsPipeline >();
-        pipeline->setProgram( [] {
-            auto program = crimild::alloc< ShaderProgram >(
-                Array< SharedPointer< Shader > > {
-                    crimild::alloc< Shader >(
-                        Shader::Stage::VERTEX,
-                        R"(
+   auto pipeline = [ & ] {
+      auto pipeline = crimild::alloc< GraphicsPipeline >();
+      pipeline->setProgram( [] {
+         auto program = crimild::alloc< ShaderProgram >(
+            Array< SharedPointer< Shader > > {
+               crimild::alloc< Shader >(
+                  Shader::Stage::VERTEX,
+                  R"(
                                 vec2 positions[ 6 ] = vec2[](
                                     vec2( -1.0, 1.0 ),
                                     vec2( -1.0, -1.0 ),
@@ -91,10 +90,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
                                     outTexCoord = texCoords[ gl_VertexIndex ];
                                 }
                             )"
-                    ),
-                    crimild::alloc< Shader >(
-                        Shader::Stage::FRAGMENT,
-                        R"(
+               ),
+               crimild::alloc< Shader >(
+                  Shader::Stage::FRAGMENT,
+                  R"(
                                 layout( location = 0 ) in vec2 inTexCoord;
 
                                 layout( location = 0 ) out vec4 outColor;
@@ -202,39 +201,39 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeBRDFLUT( Shared
                                     outColor = vec4( integratedBRDF, 0, 1 );
                                 }
                             )"
-                    ),
-                }
-            );
-            program->descriptorSetLayouts = {
-                [] {
-                    auto layout = crimild::alloc< DescriptorSetLayout >();
-                    layout->bindings = {};
-                    return layout;
-                }(),
-            };
-            return program;
-        }() );
-        pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
-        pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
-        return pipeline;
-    }();
+               ),
+            }
+         );
+         program->descriptorSetLayouts = {
+            [] {
+               auto layout = crimild::alloc< DescriptorSetLayout >();
+               layout->bindings = {};
+               return layout;
+            }(),
+         };
+         return program;
+      }() );
+      pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+      pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
+      return pipeline;
+   }();
 
-    auto viewport = ViewportDimensions {
-        .scalingMode = ScalingMode::RELATIVE,
-    };
+   auto viewport = ViewportDimensions {
+      .scalingMode = ScalingMode::RELATIVE,
+   };
 
-    return withConditionalGraphicsCommands(
-        renderPass,
-        [] {
-            // only render once when forced by render system reset
-            return false;
-        },
-        [ pipeline,
-          viewport ]( auto commandBuffer ) {
-            commandBuffer->setViewport( viewport );
-            commandBuffer->setScissor( viewport );
-            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-            commandBuffer->draw( 6 );
-        }
-    );
+   return withConditionalGraphicsCommands(
+      renderPass,
+      [] {
+         // only render once when forced by render system reset
+         return false;
+      },
+      [ pipeline,
+        viewport ]( auto commandBuffer ) {
+         commandBuffer->setViewport( viewport );
+         commandBuffer->setScissor( viewport );
+         commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+         commandBuffer->draw( 6 );
+      }
+   );
 }

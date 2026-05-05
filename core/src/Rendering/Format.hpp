@@ -28,9 +28,12 @@
 #ifndef CRIMILD_CORE_RENDERING_FORMAT_
 #define CRIMILD_CORE_RENDERING_FORMAT_
 
-#include "Crimild_Mathematics.hpp"
-
 #include <crimild/foundation/common/Types.hpp>
+#include <crimild/math/ColorRGB.hpp>
+#include <crimild/math/ColorRGBA.hpp>
+#include <crimild/math/Vector2.hpp>
+#include <crimild/math/Vector3.hpp>
+#include <crimild/math/Vector4.hpp>
 
 namespace crimild {
 

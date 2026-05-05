@@ -28,44 +28,43 @@
 #ifndef CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
 #define CRIMILD_CORE_COMPONENTS_UI_RESPONDER_
 
-#include "Crimild_Mathematics.hpp"
 #include "NodeComponent.hpp"
 #include "SceneGraph/Node.hpp"
 
 namespace crimild {
 
-    class BoundingVolume;
+   class BoundingVolume;
 
-    class UIResponder : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
+   class UIResponder : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::UIResponder )
 
-    private:
-        using CallbackType = std::function< bool( Node * ) >;
+   private:
+      using CallbackType = std::function< bool( Node * ) >;
 
-    public:
-        explicit UIResponder( CallbackType callback );
-        UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
-        virtual ~UIResponder( void );
+   public:
+      explicit UIResponder( CallbackType callback );
+      UIResponder( CallbackType callback, BoundingVolume *boundingVolume );
+      virtual ~UIResponder( void );
 
-        virtual void onAttach( void ) override;
-        virtual void onDetach( void ) override;
+      virtual void onAttach( void ) override;
+      virtual void onDetach( void ) override;
 
-        virtual void start( void ) override;
+      virtual void start( void ) override;
 
-        BoundingVolume *getBoundingVolume( void );
-        void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
-        void setBoundingVolume( BoundingVolume *boundingVolume );
+      BoundingVolume *getBoundingVolume( void );
+      void setBoundingVolume( SharedPointer< BoundingVolume > const &bv );
+      void setBoundingVolume( BoundingVolume *boundingVolume );
 
-        bool testIntersection( const Ray3 &ray );
+      bool testIntersection( const Ray3 &ray );
 
-        bool invoke( void );
+      bool invoke( void );
 
-        virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
+      virtual void renderDebugInfo( Renderer *renderer, Camera *camera ) override;
 
-    private:
-        CallbackType _callback;
-        SharedPointer< BoundingVolume > _boundingVolume;
-    };
+   private:
+      CallbackType _callback;
+      SharedPointer< BoundingVolume > _boundingVolume;
+   };
 
 }
 

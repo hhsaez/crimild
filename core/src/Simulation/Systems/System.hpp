@@ -28,10 +28,8 @@
 #ifndef CRIMILD_SIMULATION_SYSTEM_
 #define CRIMILD_SIMULATION_SYSTEM_
 
-#include "Crimild_Mathematics.hpp"
 #include "Simulation/Event.hpp"
 
-#include <crimild/foundation.hpp>
 #include <string>
 #include <vector>
 

@@ -27,16 +27,17 @@
 
 #include "Picking.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/math/distance.hpp>
 
 using namespace crimild;
 
 Picking::Picking( const Ray3 &tester, Picking::Results &results, FilterType filter )
-    : _tester( tester ),
-      _results( results ),
-      _filter( filter )
+   : _tester( tester ),
+     _results( results ),
+     _filter( filter )
 {
 }
 
@@ -46,30 +47,30 @@ Picking::~Picking( void )
 
 void Picking::traverse( Node *node )
 {
-    _results.reset();
+   _results.reset();
 
-    NodeVisitor::traverse( node );
+   NodeVisitor::traverse( node );
 
-    // sort nodes based on how close the ray is to
-    // intersecting the scene of each bounding volume
-    _results.sortCandidates( [ & ]( Node *first, Node *second ) -> bool {
-        return distance( _tester, first->getWorldBound()->getCenter() ) < distance( _tester, second->getWorldBound()->getCenter() );
-    } );
+   // sort nodes based on how close the ray is to
+   // intersecting the scene of each bounding volume
+   _results.sortCandidates( [ & ]( Node *first, Node *second ) -> bool {
+      return distance( _tester, first->getWorldBound()->getCenter() ) < distance( _tester, second->getWorldBound()->getCenter() );
+   } );
 }
 
 void Picking::visitNode( Node *node )
 {
-    if ( _filter == nullptr || _filter( node ) ) {
-        _results.pushCandidate( node );
-    }
+   if ( _filter == nullptr || _filter( node ) ) {
+      _results.pushCandidate( node );
+   }
 }
 
 void Picking::visitGroup( Group *group )
 {
-    visitNode( group );
-    group->forEachNode( [ & ]( Node *node ) {
-        if ( node->getWorldBound()->testIntersection( _tester ) ) {
-            node->accept( *this );
-        }
-    } );
+   visitNode( group );
+   group->forEachNode( [ & ]( Node *node ) {
+      if ( node->getWorldBound()->testIntersection( _tester ) ) {
+         node->accept( *this );
+      }
+   } );
 }

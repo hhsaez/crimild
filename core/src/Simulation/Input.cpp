@@ -27,7 +27,6 @@
 
 #include "Input.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Renderer.hpp"
 #include "Simulation/Event.hpp"
 
@@ -35,79 +34,79 @@ using namespace crimild;
 
 void Input::handle( const Event &e ) noexcept
 {
-    switch ( e.type ) {
-        case Event::Type::KEY_DOWN: {
-            _keys[ e.keyboard.key ] = 1;
+   switch ( e.type ) {
+      case Event::Type::KEY_DOWN: {
+         _keys[ e.keyboard.key ] = 1;
 
-            switch ( e.keyboard.key ) {
-                case CRIMILD_INPUT_KEY_A:
-                case CRIMILD_INPUT_KEY_LEFT:
-                    setAxis( Input::AXIS_HORIZONTAL, -1 );
-                    break;
+         switch ( e.keyboard.key ) {
+            case CRIMILD_INPUT_KEY_A:
+            case CRIMILD_INPUT_KEY_LEFT:
+               setAxis( Input::AXIS_HORIZONTAL, -1 );
+               break;
 
-                case CRIMILD_INPUT_KEY_D:
-                case CRIMILD_INPUT_KEY_RIGHT:
-                    setAxis( Input::AXIS_HORIZONTAL, +1 );
-                    break;
+            case CRIMILD_INPUT_KEY_D:
+            case CRIMILD_INPUT_KEY_RIGHT:
+               setAxis( Input::AXIS_HORIZONTAL, +1 );
+               break;
 
-                case CRIMILD_INPUT_KEY_W:
-                case CRIMILD_INPUT_KEY_UP:
-                    setAxis( Input::AXIS_VERTICAL, +1 );
-                    break;
+            case CRIMILD_INPUT_KEY_W:
+            case CRIMILD_INPUT_KEY_UP:
+               setAxis( Input::AXIS_VERTICAL, +1 );
+               break;
 
-                case CRIMILD_INPUT_KEY_S:
-                case CRIMILD_INPUT_KEY_DOWN:
-                    setAxis( Input::AXIS_VERTICAL, -1 );
-                    break;
+            case CRIMILD_INPUT_KEY_S:
+            case CRIMILD_INPUT_KEY_DOWN:
+               setAxis( Input::AXIS_VERTICAL, -1 );
+               break;
 
-                default:
-                    break;
-            }
-            break;
-        }
+            default:
+               break;
+         }
+         break;
+      }
 
-        case Event::Type::KEY_UP: {
-            _keys[ e.keyboard.key ] = 0;
+      case Event::Type::KEY_UP: {
+         _keys[ e.keyboard.key ] = 0;
 
-            switch ( e.keyboard.key ) {
-                case CRIMILD_INPUT_KEY_A:
-                case CRIMILD_INPUT_KEY_D:
-                case CRIMILD_INPUT_KEY_LEFT:
-                case CRIMILD_INPUT_KEY_RIGHT:
-                    setAxis( Input::AXIS_HORIZONTAL, 0 );
-                    break;
+         switch ( e.keyboard.key ) {
+            case CRIMILD_INPUT_KEY_A:
+            case CRIMILD_INPUT_KEY_D:
+            case CRIMILD_INPUT_KEY_LEFT:
+            case CRIMILD_INPUT_KEY_RIGHT:
+               setAxis( Input::AXIS_HORIZONTAL, 0 );
+               break;
 
-                case CRIMILD_INPUT_KEY_W:
-                case CRIMILD_INPUT_KEY_S:
-                case CRIMILD_INPUT_KEY_UP:
-                case CRIMILD_INPUT_KEY_DOWN:
-                    setAxis( Input::AXIS_VERTICAL, 0 );
-                    break;
+            case CRIMILD_INPUT_KEY_W:
+            case CRIMILD_INPUT_KEY_S:
+            case CRIMILD_INPUT_KEY_UP:
+            case CRIMILD_INPUT_KEY_DOWN:
+               setAxis( Input::AXIS_VERTICAL, 0 );
+               break;
 
-                default:
-                    break;
-            }
-            break;
-        }
+            default:
+               break;
+         }
+         break;
+      }
 
-        case Event::Type::MOUSE_MOTION: {
-            const auto pos = Vector2 { Real( e.motion.pos.x ), Real( e.motion.pos.y ) };
-            _mouseDelta = pos - _mousePos;
-            _mousePos = pos;
-            break;
-        }
+      case Event::Type::MOUSE_MOTION: {
+         const auto pos = Vector2 { Real( e.motion.pos.x ), Real( e.motion.pos.y ) };
+         _mouseDelta = pos - _mousePos;
+         _mousePos = pos;
+         break;
+      }
 
-        case Event::Type::MOUSE_BUTTON_DOWN: {
-            _mouseButtons[ e.button.button ] = 1;
-            break;
-        }
+      case Event::Type::MOUSE_BUTTON_DOWN: {
+         _mouseButtons[ e.button.button ] = 1;
+         break;
+      }
 
-        case Event::Type::MOUSE_BUTTON_UP: {
-            _mouseButtons[ e.button.button ] = 0;
-            break;
-        }
+      case Event::Type::MOUSE_BUTTON_UP: {
+         _mouseButtons[ e.button.button ] = 0;
+         break;
+      }
 
-        default:
-            break;
-    }
+      default:
+         break;
+   }
 }

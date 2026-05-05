@@ -27,39 +27,37 @@
 
 #include "MobiusStripPrimitive.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 MobiusStripPrimitive::MobiusStripPrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
+   : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = params.scale;
+   _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 15 } };
-    setInterval( interval );
-    generate();
+   ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 15 } };
+   setInterval( interval );
+   generate();
 }
 
 Vector3f MobiusStripPrimitive::evaluate( const Vector2f &domain ) const
 {
-    float u = domain[ 0 ];
-    float t = domain[ 1 ];
-    float major = 1.25f;
-    float a = 0.125f;
-    float b = 0.5f;
-    float phi = u / 2.0f;
+   float u = domain[ 0 ];
+   float t = domain[ 1 ];
+   float major = 1.25f;
+   float a = 0.125f;
+   float b = 0.5f;
+   float phi = u / 2.0f;
 
-    // general equation for an ellipse where phi is the angle
-    // between the major axis and the x axis
-    float x = a * cos( t ) * cos( phi ) - b * sin( t ) * sin( phi );
-    float y = a * cos( t ) * sin( phi ) + b * sin( t ) * cos( phi );
+   // general equation for an ellipse where phi is the angle
+   // between the major axis and the x axis
+   float x = a * cos( t ) * cos( phi ) - b * sin( t ) * sin( phi );
+   float y = a * cos( t ) * sin( phi ) + b * sin( t ) * cos( phi );
 
-    // sweep the ellipse along a circle, like a torus
-    Vector3f range = {
-        ( major + x ) * cos( u ),
-        ( major + x ) * sin( u ),
-        y,
-    };
-    return 0.5f * range * _scale;
+   // sweep the ellipse along a circle, like a torus
+   Vector3f range = {
+      ( major + x ) * cos( u ),
+      ( major + x ) * sin( u ),
+      y,
+   };
+   return 0.5f * range * _scale;
 }

@@ -28,10 +28,8 @@
 #ifndef CRIMILD_AUDIO_SOURCE_
 #define CRIMILD_AUDIO_SOURCE_
 
-#include "Crimild_Mathematics.hpp"
-
 #include <crimild/coding/Codable.hpp>
-#include <crimild/foundation.hpp>
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 

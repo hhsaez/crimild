@@ -27,7 +27,6 @@
 
 #include "NodeParticleRenderer.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 
@@ -43,33 +42,33 @@ NodeParticleRenderer::~NodeParticleRenderer( void )
 
 void NodeParticleRenderer::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->getAttrib( ParticleAttrib::POSITION );
+   _positions = particles->getAttrib( ParticleAttrib::POSITION );
 }
 
 void NodeParticleRenderer::update( Node *node, crimild::Real64 dt, ParticleData *particles )
 {
-    /*
-    const auto pCount = particles->getAliveCount();
-    if ( pCount == 0 ) {
-        return;
-    }
+   /*
+   const auto pCount = particles->getAliveCount();
+   if ( pCount == 0 ) {
+       return;
+   }
 
-        auto group = static_cast< Group * >( node );
+       auto group = static_cast< Group * >( node );
 
-        const auto ps = _positions->getData< Vector3f >();
+       const auto ps = _positions->getData< Vector3f >();
 
-        for ( int i = 0; i < pCount; i++ ) {
-                group->getNodeAt( i )->local().setTranslate( ps[ i ] );
-        }
-    */
+       for ( int i = 0; i < pCount; i++ ) {
+               group->getNodeAt( i )->local().setTranslate( ps[ i ] );
+       }
+   */
 }
 
 void NodeParticleRenderer::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleRenderer::encode( encoder );
+   ParticleSystemComponent::ParticleRenderer::encode( encoder );
 }
 
 void NodeParticleRenderer::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleRenderer::decode( decoder );
+   ParticleSystemComponent::ParticleRenderer::decode( decoder );
 }

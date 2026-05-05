@@ -28,7 +28,6 @@
 #ifndef CRIMILD_PRIMITIVES_SPHERE_
 #define CRIMILD_PRIMITIVES_SPHERE_
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 

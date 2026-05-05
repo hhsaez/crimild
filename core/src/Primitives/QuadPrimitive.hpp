@@ -28,74 +28,73 @@
 #ifndef CRIMILD_PRIMITIVES_QUAD_
 #define CRIMILD_PRIMITIVES_QUAD_
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 
 namespace crimild {
 
-    /**
-        \brief Constructs a quad primitive
+   /**
+       \brief Constructs a quad primitive
 
-        Builds a quad primitive using the provided params. The resulting primitive is
-        oriented in the XY-plane, with the front face pointing at the +Z coordinate.
+       Builds a quad primitive using the provided params. The resulting primitive is
+       oriented in the XY-plane, with the front face pointing at the +Z coordinate.
 
-        [-size,+size,0]------------------[+size,+size,0]
-              |                              |
-              |                              |
-              |                              |
-              |                              |
-              |                              |
-              |           [0,0,0]            |
-              |                              |
-              |                              |
-              |                              |
-              |                              |
-              |                              |
-        [-size,-size,0]------------------[+size,-size,0]
+       [-size,+size,0]------------------[+size,+size,0]
+             |                              |
+             |                              |
+             |                              |
+             |                              |
+             |                              |
+             |           [0,0,0]            |
+             |                              |
+             |                              |
+             |                              |
+             |                              |
+             |                              |
+       [-size,-size,0]------------------[+size,-size,0]
 
-        The quad vertices are centered at the local origin, and extend in the range [-size,+size],
-        so the actual width and height is twice the given size.
+       The quad vertices are centered at the local origin, and extend in the range [-size,+size],
+       so the actual width and height is twice the given size.
 
-        If the vertex layout requires normals to be generated, they will be created pointing
-        at the +Z direction.
+       If the vertex layout requires normals to be generated, they will be created pointing
+       at the +Z direction.
 
-        If the vertex layout requires texture coordinates to be generated, they will be
-        generated with the origin at the upper-left corner:
+       If the vertex layout requires texture coordinates to be generated, they will be
+       generated with the origin at the upper-left corner:
 
-        [0,0]--------------[1,0]
-          |                  |
-          |                  |
-          |                  |
-          |                  |
-          |                  |
-        [0,1]--------------[1,1]
+       [0,0]--------------[1,0]
+         |                  |
+         |                  |
+         |                  |
+         |                  |
+         |                  |
+       [0,1]--------------[1,1]
 
-        Other layout properties are ignored.
+       Other layout properties are ignored.
 
-        By default, we use TRIANGLES as primitive type, which may not be the most efficient
-        one, but it's the easiest one to integrate with other primitives and pipelines.
-     */
-    class QuadPrimitive : public Primitive {
-    public:
-        static SharedPointer< Primitive > UNIT_QUAD;
+       By default, we use TRIANGLES as primitive type, which may not be the most efficient
+       one, but it's the easiest one to integrate with other primitives and pipelines.
+    */
+   class QuadPrimitive : public Primitive {
+   public:
+      static SharedPointer< Primitive > UNIT_QUAD;
 
-    public:
-        struct Params {
-            Primitive::Type type = Primitive::Type::TRIANGLES;
-            Vector2f size = Vector2f::Constants::ONE;
-            VertexLayout layout = VertexP3N3TC2::getLayout();
-            Vector2f texCoordOffset = Vector2f::Constants::ZERO;
-            Vector2f texCoordScale = Vector2f::Constants::ONE;
-        };
+   public:
+      struct Params {
+         Primitive::Type type = Primitive::Type::TRIANGLES;
+         Vector2f size = Vector2f::Constants::ONE;
+         VertexLayout layout = VertexP3N3TC2::getLayout();
+         Vector2f texCoordOffset = Vector2f::Constants::ZERO;
+         Vector2f texCoordScale = Vector2f::Constants::ONE;
+      };
 
-    public:
-        QuadPrimitive( void ) noexcept;
-        explicit QuadPrimitive( const Params &params ) noexcept;
-        virtual ~QuadPrimitive( void ) = default;
-    };
+   public:
+      QuadPrimitive( void ) noexcept;
+      explicit QuadPrimitive( const Params &params ) noexcept;
+      virtual ~QuadPrimitive( void ) = default;
+   };
 
-    using QuadPrimitivePtr = SharedPointer< QuadPrimitive >;
+   using QuadPrimitivePtr = SharedPointer< QuadPrimitive >;
 
 }
 

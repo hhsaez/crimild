@@ -28,7 +28,6 @@
 #include "Importers/GLTFImporter.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Foundation/STBUtils.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageView.hpp"
@@ -37,8 +36,6 @@
 #include "Rendering/Vertex.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
-
-#include <crimild/foundation.hpp>
 
 // Tell TinyGLTF that STB is loaded elsewhere (see STBUtils.hpp/STBUtils.cpp)
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE

@@ -27,106 +27,104 @@
 
 #include "QuadPrimitive.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 SharedPointer< Primitive > QuadPrimitive::UNIT_QUAD = crimild::alloc< QuadPrimitive >( QuadPrimitive::Params {} );
 
 QuadPrimitive::QuadPrimitive( void ) noexcept
-    : QuadPrimitive( Params {} )
+   : QuadPrimitive( Params {} )
 {
 }
 
 QuadPrimitive::QuadPrimitive( const Params &params ) noexcept
-    : Primitive( params.type )
+   : Primitive( params.type )
 {
-    auto w = params.size.x;
-    auto h = params.size.y;
-    auto layout = params.layout;
-    auto texCoordOffset = params.texCoordOffset;
-    auto texCoordScale = params.texCoordScale;
+   auto w = params.size.x;
+   auto h = params.size.y;
+   auto layout = params.layout;
+   auto texCoordOffset = params.texCoordOffset;
+   auto texCoordScale = params.texCoordScale;
 
-    auto vertices = crimild::alloc< VertexBuffer >( layout, 4 );
+   auto vertices = crimild::alloc< VertexBuffer >( layout, 4 );
 
-    auto positions = vertices->get( VertexAttribute::Name::POSITION );
-    positions->set(
-        Array< Vector3f > {
-            Vector3f { -w, h, 0.0f },
-            Vector3f { -w, -h, 0.0f },
-            Vector3f { w, -h, 0.0f },
-            Vector3f { w, h, 0.0f },
-        }
-    );
+   auto positions = vertices->get( VertexAttribute::Name::POSITION );
+   positions->set(
+      Array< Vector3f > {
+         Vector3f { -w, h, 0.0f },
+         Vector3f { -w, -h, 0.0f },
+         Vector3f { w, -h, 0.0f },
+         Vector3f { w, h, 0.0f },
+      }
+   );
 
-    if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
-        auto normals = vertices->get( VertexAttribute::Name::NORMAL );
-        normals->set(
-            Array< Vector3f > {
-                Vector3f::Constants::UNIT_Z,
-                Vector3f::Constants::UNIT_Z,
-                Vector3f::Constants::UNIT_Z,
-                Vector3f::Constants::UNIT_Z,
+   if ( layout.hasAttribute( VertexAttribute::Name::NORMAL ) ) {
+      auto normals = vertices->get( VertexAttribute::Name::NORMAL );
+      normals->set(
+         Array< Vector3f > {
+            Vector3f::Constants::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
+            Vector3f::Constants::UNIT_Z,
+         }
+      );
+   }
+
+   if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
+      auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
+      texCoords->set(
+         Array< Vector2f > {
+            texCoordOffset + ( Vector2 { 0.0f, 0.0f } * texCoordScale ),
+            texCoordOffset + ( Vector2 { 0.0f, 1.0f } * texCoordScale ),
+            texCoordOffset + ( Vector2 { 1.0f, 1.0f } * texCoordScale ),
+            texCoordOffset + ( Vector2 { 1.0f, 0.0f } * texCoordScale ),
+         }
+      );
+   }
+
+   setVertexData( { vertices } );
+
+   if ( getType() == Primitive::Type::LINES ) {
+      setIndices(
+         crimild::alloc< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< UInt32 > {
+               0,
+               1,
+               1,
+               2,
+               2,
+               3,
+               3,
+               0,
             }
-        );
-    }
-
-    if ( layout.hasAttribute( VertexAttribute::Name::TEX_COORD ) ) {
-        auto texCoords = vertices->get( VertexAttribute::Name::TEX_COORD );
-        texCoords->set(
-            Array< Vector2f > {
-                texCoordOffset + ( Vector2 { 0.0f, 0.0f } * texCoordScale ),
-                texCoordOffset + ( Vector2 { 0.0f, 1.0f } * texCoordScale ),
-                texCoordOffset + ( Vector2 { 1.0f, 1.0f } * texCoordScale ),
-                texCoordOffset + ( Vector2 { 1.0f, 0.0f } * texCoordScale ),
+         )
+      );
+   } else if ( getType() == Primitive::Type::TRIANGLE_STRIP ) {
+      // make sure indices are in the right order
+      setIndices(
+         crimild::alloc< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< UInt32 > {
+               1,
+               2,
+               0,
+               3,
             }
-        );
-    }
-
-    setVertexData( { vertices } );
-
-    if ( getType() == Primitive::Type::LINES ) {
-        setIndices(
-            crimild::alloc< IndexBuffer >(
-                Format::INDEX_32_UINT,
-                Array< UInt32 > {
-                    0,
-                    1,
-                    1,
-                    2,
-                    2,
-                    3,
-                    3,
-                    0,
-                }
-            )
-        );
-    } else if ( getType() == Primitive::Type::TRIANGLE_STRIP ) {
-        // make sure indices are in the right order
-        setIndices(
-            crimild::alloc< IndexBuffer >(
-                Format::INDEX_32_UINT,
-                Array< UInt32 > {
-                    1,
-                    2,
-                    0,
-                    3,
-                }
-            )
-        );
-    } else {
-        setIndices(
-            crimild::alloc< IndexBuffer >(
-                Format::INDEX_32_UINT,
-                Array< UInt32 > {
-                    0,
-                    1,
-                    2,
-                    0,
-                    2,
-                    3,
-                }
-            )
-        );
-    }
+         )
+      );
+   } else {
+      setIndices(
+         crimild::alloc< IndexBuffer >(
+            Format::INDEX_32_UINT,
+            Array< UInt32 > {
+               0,
+               1,
+               2,
+               0,
+               2,
+               3,
+            }
+         )
+      );
+   }
 }

@@ -27,7 +27,6 @@
 
 #include "CameraSortParticleUpdater.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Camera.hpp"
 
 using namespace crimild;
@@ -42,59 +41,59 @@ CameraSortParticleUpdater::~CameraSortParticleUpdater( void )
 
 void CameraSortParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-    _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
-    _distances = particles->createAttribArray< Vector2f >( ParticleAttrib::SORT_REFERENCE );
+   _positions = particles->createAttribArray< Vector3f >( ParticleAttrib::POSITION );
+   _distances = particles->createAttribArray< Vector2f >( ParticleAttrib::SORT_REFERENCE );
 }
 
 void CameraSortParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
-    /*
-        const auto camera = Camera::getMainCamera();
-        auto cameraPos = camera->getWorld().getTranslate();
-        auto cameraDirection = camera->getWorld().computeDirection();
-        if ( !particles->shouldComputeInWorldSpace() ) {
-                // compute local camera pos only if we're not using
-                // the world space
-                node->getWorld().applyInverseToPoint( cameraPos, cameraPos );
-                node->getWorld().applyInverseToVector( cameraDirection, cameraDirection );
-        }
+   /*
+       const auto camera = Camera::getMainCamera();
+       auto cameraPos = camera->getWorld().getTranslate();
+       auto cameraDirection = camera->getWorld().computeDirection();
+       if ( !particles->shouldComputeInWorldSpace() ) {
+               // compute local camera pos only if we're not using
+               // the world space
+               node->getWorld().applyInverseToPoint( cameraPos, cameraPos );
+               node->getWorld().applyInverseToVector( cameraDirection, cameraDirection );
+       }
 
-        const auto pCount = particles->getAliveCount();
+       const auto pCount = particles->getAliveCount();
 
-        const auto ps = _positions->getData< Vector3f >();
-    auto ds = _distances->getData< Vector2f >();
+       const auto ps = _positions->getData< Vector3f >();
+   auto ds = _distances->getData< Vector2f >();
 
-        const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
+       const auto cameraPlane = Plane3f( cameraDirection, cameraPos );
 
-    // Step 1: Precompute distances to camera plane for each particle
-    for ( crimild::Size i = 0; i < pCount; ++i ) {
-        ds[ i ] = Vector2f( Distance::compute( cameraPlane, ps[ i ] ), i );
-    }
+   // Step 1: Precompute distances to camera plane for each particle
+   for ( crimild::Size i = 0; i < pCount; ++i ) {
+       ds[ i ] = Vector2f( Distance::compute( cameraPlane, ps[ i ] ), i );
+   }
 
-    // Step 2: Sort particle indices using distances
-    std::sort( ds, ds + pCount, []( const Vector2f &a, const Vector2f &b ) {
-        return a.x() > b.x();
-    });
+   // Step 2: Sort particle indices using distances
+   std::sort( ds, ds + pCount, []( const Vector2f &a, const Vector2f &b ) {
+       return a.x() > b.x();
+   });
 
-    // Step 3: reorder
-    for ( crimild::Size i = 0; i < pCount; ++i ) {
-        crimild::Size d = ds[ i ].y();
-        // The trick here is that we only need to swap if the index is
-        // greater than the current one, since it only need to reorder
-        // half of the collection.
-        if ( d > i ) {
-            particles->swap( d, i );
-        }
-    }
-    */
+   // Step 3: reorder
+   for ( crimild::Size i = 0; i < pCount; ++i ) {
+       crimild::Size d = ds[ i ].y();
+       // The trick here is that we only need to swap if the index is
+       // greater than the current one, since it only need to reorder
+       // half of the collection.
+       if ( d > i ) {
+           particles->swap( d, i );
+       }
+   }
+   */
 }
 
 void CameraSortParticleUpdater::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleUpdater::encode( encoder );
+   ParticleSystemComponent::ParticleUpdater::encode( encoder );
 }
 
 void CameraSortParticleUpdater::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleUpdater::decode( decoder );
+   ParticleSystemComponent::ParticleUpdater::decode( decoder );
 }

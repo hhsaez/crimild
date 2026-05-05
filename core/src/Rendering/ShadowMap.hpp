@@ -28,9 +28,12 @@
 #ifndef CRIMILD_CORE_RENDERING_SHADOW_MAP_
 #define CRIMILD_CORE_RENDERING_SHADOW_MAP_
 
-#include "Crimild_Mathematics.hpp"
+#include "crimild/foundation/common/SharedObject.hpp"
+#include "crimild/foundation/common/Types.hpp"
+#include "crimild/math/Matrix4.hpp"
+#include "crimild/math/Vector4.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/containers/Array.hpp>
 
 namespace crimild {
 

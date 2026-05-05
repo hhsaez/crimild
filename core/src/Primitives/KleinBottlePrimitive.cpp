@@ -27,38 +27,36 @@
 
 #include "KleinBottlePrimitive.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 KleinBottlePrimitive::KleinBottlePrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
+   : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = params.scale;
+   _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 15, 50 } };
-    setInterval( interval );
-    generate();
+   ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 15, 50 } };
+   setInterval( interval );
+   generate();
 }
 
 Vector3f KleinBottlePrimitive::evaluate( const Vector2f &domain ) const
 {
-    float v = 1.0f - domain[ 0 ];
-    float u = domain[ 1 ];
-    float x0 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( u ) * cos( v );
-    float y0 = 8 * sin( u ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * sin( u ) * cos( v );
-    float x1 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( v + Numericf::PI );
-    float y1 = 8 * sin( u );
+   float v = 1.0f - domain[ 0 ];
+   float u = domain[ 1 ];
+   float x0 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( u ) * cos( v );
+   float y0 = 8 * sin( u ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * sin( u ) * cos( v );
+   float x1 = 3 * cos( u ) * ( 1 + sin( u ) ) + ( 2 * ( 1 - cos( u ) / 2 ) ) * cos( v + Numericf::PI );
+   float y1 = 8 * sin( u );
 
-    Vector3f range = {
-        u < Numericf::PI ? x0 : x1,
-        u < Numericf::PI ? -y0 : -y1,
-        ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v ),
-    };
-    return .1f * range * _scale;
+   Vector3f range = {
+      u < Numericf::PI ? x0 : x1,
+      u < Numericf::PI ? -y0 : -y1,
+      ( -2 * ( 1 - cos( u ) / 2 ) ) * sin( v ),
+   };
+   return .1f * range * _scale;
 }
 
 bool KleinBottlePrimitive::InvertNormal( const Vector2f &domain ) const
 {
-    return domain[ 1 ] > 3 * Numericf::PI / 2;
+   return domain[ 1 ] > 3 * Numericf::PI / 2;
 }

@@ -3,7 +3,8 @@
 
 #include "Foundation/OpenGLUtils.hpp"
 
-#include <Crimild_Mathematics.hpp>
+#include <crimild/math/ColorRGBA.hpp>
+#include <crimild/math/Matrix4.hpp>
 #include <memory>
 #include <vector>
 

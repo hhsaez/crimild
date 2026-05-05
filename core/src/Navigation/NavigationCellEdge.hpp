@@ -28,10 +28,8 @@
 #ifndef CRIMILD_NAVIGATION_CELL_EDGE_
 #define CRIMILD_NAVIGATION_CELL_EDGE_
 
-#include "Crimild_Mathematics.hpp"
-
 #include <crimild/coding/Codable.hpp>
-#include <crimild/foundation.hpp>
+#include <crimild/math/LineSegment3.hpp>
 
 namespace crimild {
 

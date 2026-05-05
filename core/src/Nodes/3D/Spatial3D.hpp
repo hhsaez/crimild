@@ -2,8 +2,9 @@
 #define CRIMILD_CORE_NODES_3D_SPATIAL_
 
 #include "Common/Signal.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Nodes/Node.hpp"
+
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild::experimental {
 

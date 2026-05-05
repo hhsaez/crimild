@@ -27,12 +27,12 @@
 
 #include "FreeLookCameraComponent.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Simulation/Input.hpp"
 #include "Simulation/Simulation.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/origin.hpp>
 
 using namespace crimild;
 

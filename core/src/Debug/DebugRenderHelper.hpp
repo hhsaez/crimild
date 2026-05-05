@@ -1,9 +1,9 @@
 #ifndef CRIMILD_DEBUG_RENDER_HELPER_
 #define CRIMILD_DEBUG_RENDER_HELPER_
 
-#include "Crimild_Mathematics.hpp"
+#include "crimild/foundation/common/Types.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/Transformation.hpp>
 #include <string>
 
 namespace crimild {

@@ -28,7 +28,6 @@
 #ifndef CRIMILD_CORE_SCENE_GRAPH_TEXT_
 #define CRIMILD_CORE_SCENE_GRAPH_TEXT_
 
-#include "Crimild_Mathematics.hpp"
 #include "Geometry.hpp"
 #include "Group.hpp"
 #include "Rendering/Image.hpp"
@@ -36,69 +35,69 @@
 
 namespace crimild {
 
-    class Font;
+   class Font;
 
-    class Text : public Group {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Text )
+   class Text : public Group {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Text )
 
-    public:
-        enum class HorizontalAlignment {
-            LEFT,
-            RIGHT,
-            CENTER
-        };
+   public:
+      enum class HorizontalAlignment {
+         LEFT,
+         RIGHT,
+         CENTER
+      };
 
-    public:
-        Text( void );
-        virtual ~Text( void );
+   public:
+      Text( void );
+      virtual ~Text( void );
 
-        std::string getText( void ) const { return _text; }
-        void setText( std::string text );
+      std::string getText( void ) const { return _text; }
+      void setText( std::string text );
 
-        float getSize( void ) const { return _size; }
-        void setSize( float size );
+      float getSize( void ) const { return _size; }
+      void setSize( float size );
 
-        Font *getFont( void ) { return crimild::get_ptr( _font ); }
-        void setFont( Font *font );
-        void setFont( SharedPointer< Font > const &font );
+      Font *getFont( void ) { return crimild::get_ptr( _font ); }
+      void setFont( Font *font );
+      void setFont( SharedPointer< Font > const &font );
 
-        const ColorRGBA &getTextColor( void ) const { return _material->getDiffuse(); }
-        void setTextColor( const ColorRGBA &color ) { _material->setDiffuse( color ); }
+      const ColorRGBA &getTextColor( void ) const { return _material->getDiffuse(); }
+      void setTextColor( const ColorRGBA &color ) { _material->setDiffuse( color ); }
 
-        void setHorizontalAlignment( HorizontalAlignment alignment );
-        HorizontalAlignment getHorizontalAlignment( void ) const { return _horizontalAlignment; }
+      void setHorizontalAlignment( HorizontalAlignment alignment );
+      HorizontalAlignment getHorizontalAlignment( void ) const { return _horizontalAlignment; }
 
-        // bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
-        // void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
+      // bool isDepthTestEnabled( void ) const { return _material->getDepthState()->isEnabled(); }
+      // void setDepthTestEnabled( bool enabled ) { _material->getDepthState()->setEnabled( enabled ); }
 
-        // internal use only
-        Geometry *getGeometry( void ) { return crimild::get_ptr( _geometry ); }
+      // internal use only
+      Geometry *getGeometry( void ) { return crimild::get_ptr( _geometry ); }
 
-    public:
-        virtual void accept( NodeVisitor &visitor ) override;
+   public:
+      virtual void accept( NodeVisitor &visitor ) override;
 
-    private:
-        void updatePrimitive( void );
+   private:
+      void updatePrimitive( void );
 
-        std::string _text;
-        float _size;
-        SharedPointer< Font > _font;
-        SharedPointer< Geometry > _geometry;
-        SharedPointer< Primitive > _primitive;
-        SharedPointer< Material > _material;
-        HorizontalAlignment _horizontalAlignment = HorizontalAlignment::LEFT;
+      std::string _text;
+      float _size;
+      SharedPointer< Font > _font;
+      SharedPointer< Geometry > _geometry;
+      SharedPointer< Primitive > _primitive;
+      SharedPointer< Material > _material;
+      HorizontalAlignment _horizontalAlignment = HorizontalAlignment::LEFT;
 
-        /**
-                   \name Coding support
-                */
-        //@{
+      /**
+                 \name Coding support
+              */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

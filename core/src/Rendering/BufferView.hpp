@@ -28,159 +28,160 @@
 #ifndef CRIMILD_RENDERING_BUFFER_VIEW_
 #define CRIMILD_RENDERING_BUFFER_VIEW_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Buffer.hpp"
 #include "Rendering/FrameGraphResource.hpp"
 
+#include <crimild/math/Numeric.hpp>
+
 namespace crimild {
 
-    /**
-       \brief A subset of data in a buffer
-     */
-    class BufferView
-        : public coding::Codable,
-          public RenderResourceImpl< BufferView >,
-          public FrameGraphResource {
-        CRIMILD_IMPLEMENT_RTTI( crimild::BufferView )
+   /**
+      \brief A subset of data in a buffer
+    */
+   class BufferView
+      : public coding::Codable,
+        public RenderResourceImpl< BufferView >,
+        public FrameGraphResource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::BufferView )
 
-    public:
-        enum class Target {
-            GENERAL, //< Any target
-            VERTEX,
-            INDEX,
-            UNIFORM,
-            STAGING,
-            STORAGE,
-            IMAGE,
-            USER_DEFINED, //< custom target
-        };
+   public:
+      enum class Target {
+         GENERAL, //< Any target
+         VERTEX,
+         INDEX,
+         UNIFORM,
+         STAGING,
+         STORAGE,
+         IMAGE,
+         USER_DEFINED, //< custom target
+      };
 
-        // This is a hint to render devices so device memory
-        // is optimized accordingly
-        enum class Usage {
-            STATIC,
-            DYNAMIC,
-        };
+      // This is a hint to render devices so device memory
+      // is optimized accordingly
+      enum class Usage {
+         STATIC,
+         DYNAMIC,
+      };
 
-    public:
-        /**
-         * \brief Default constructor
-         *
-         * \remarks This is only used in order to comply with the Codable interface.
-         */
-        BufferView( void ) = default;
+   public:
+      /**
+       * \brief Default constructor
+       *
+       * \remarks This is only used in order to comply with the Codable interface.
+       */
+      BufferView( void ) = default;
 
-        /**
-           \brief Constructs a buffer view from an existing buffer
+      /**
+         \brief Constructs a buffer view from an existing buffer
 
-           \param offset (optional) Offset to the first element, in bytes
-           \param stride (optional) Stride in bytes between elements
-           \param length (optional) Total number of bytes in this view
+         \param offset (optional) Offset to the first element, in bytes
+         \param stride (optional) Stride in bytes between elements
+         \param length (optional) Total number of bytes in this view
 
-           If length is 0, it is assumed the view will corresponds to the segment starting
-           at 'offset' and ending at the end of the input buffer itself.
-         */
-        template< typename BufferImpl >
-        BufferView( Target target, BufferImpl buffer, crimild::Size offset = 0, crimild::Size stride = 0, crimild::Size length = 0 ) noexcept
-            : m_target( target ),
-              m_buffer( crimild::retain( buffer ) ),
-              m_offset( offset ),
-              m_stride( Numeric< crimild::Size >::max( sizeof( crimild::Byte ), stride ) ),
-              m_length( length )
-        {
-            if ( m_length == 0 ) {
-                m_length = buffer->getSize() - m_offset;
-            }
-        }
+         If length is 0, it is assumed the view will corresponds to the segment starting
+         at 'offset' and ending at the end of the input buffer itself.
+       */
+      template< typename BufferImpl >
+      BufferView( Target target, BufferImpl buffer, crimild::Size offset = 0, crimild::Size stride = 0, crimild::Size length = 0 ) noexcept
+         : m_target( target ),
+           m_buffer( crimild::retain( buffer ) ),
+           m_offset( offset ),
+           m_stride( Numeric< crimild::Size >::max( sizeof( crimild::Byte ), stride ) ),
+           m_length( length )
+      {
+         if ( m_length == 0 ) {
+            m_length = buffer->getSize() - m_offset;
+         }
+      }
 
-        virtual ~BufferView( void ) = default;
+      virtual ~BufferView( void ) = default;
 
-        inline Buffer *getBuffer( void ) noexcept { return crimild::get_ptr( m_buffer ); }
-        inline const Buffer *getBuffer( void ) const noexcept { return crimild::get_ptr( m_buffer ); }
+      inline Buffer *getBuffer( void ) noexcept { return crimild::get_ptr( m_buffer ); }
+      inline const Buffer *getBuffer( void ) const noexcept { return crimild::get_ptr( m_buffer ); }
 
-        /**
-           \brief Get target usage for this view
-         */
-        inline Target getTarget( void ) const noexcept { return m_target; }
+      /**
+         \brief Get target usage for this view
+       */
+      inline Target getTarget( void ) const noexcept { return m_target; }
 
-        inline void setUsage( Usage usage ) noexcept { m_usage = usage; }
-        inline Usage getUsage( void ) const noexcept { return m_usage; }
+      inline void setUsage( Usage usage ) noexcept { m_usage = usage; }
+      inline Usage getUsage( void ) const noexcept { return m_usage; }
 
-        /**
-           \brief Get number of bytes to the first element in the data buffer
-         */
-        inline crimild::Size getOffset( void ) const noexcept { return m_offset; }
+      /**
+         \brief Get number of bytes to the first element in the data buffer
+       */
+      inline crimild::Size getOffset( void ) const noexcept { return m_offset; }
 
-        /**
-           \brief Get stride between elements in the data buffer
-         */
-        inline crimild::Size getStride( void ) const noexcept { return m_stride; }
+      /**
+         \brief Get stride between elements in the data buffer
+       */
+      inline crimild::Size getStride( void ) const noexcept { return m_stride; }
 
-        /**
-           \brief Get length in bytes for this view
-         */
-        inline crimild::Size getLength( void ) const noexcept { return m_length; }
+      /**
+         \brief Get length in bytes for this view
+       */
+      inline crimild::Size getLength( void ) const noexcept { return m_length; }
 
-        /**
-           \brief Set length of the view
+      /**
+         \brief Set length of the view
 
-           The length value must be larger than the actual length of the buffer
-         */
-        inline void setLength( Size length ) noexcept { m_length = length; }
+         The length value must be larger than the actual length of the buffer
+       */
+      inline void setLength( Size length ) noexcept { m_length = length; }
 
-        /**
-           \brief Get count of elements
-         */
-        inline crimild::Size getCount( void ) const noexcept { return m_length / m_stride; }
+      /**
+         \brief Get count of elements
+       */
+      inline crimild::Size getCount( void ) const noexcept { return m_length / m_stride; }
 
-        inline crimild::Byte *getData( void ) noexcept { return m_buffer->getData() + m_offset; }
+      inline crimild::Byte *getData( void ) noexcept { return m_buffer->getData() + m_offset; }
 
-        inline const crimild::Byte *getData( void ) const noexcept { return m_buffer->getData() + m_offset; }
+      inline const crimild::Byte *getData( void ) const noexcept { return m_buffer->getData() + m_offset; }
 
-    private:
-        Target m_target;
-        SharedPointer< Buffer > m_buffer;
-        crimild::Size m_offset;
-        crimild::Size m_stride;
-        crimild::Size m_length;
-        Usage m_usage = Usage::STATIC;
+   private:
+      Target m_target;
+      SharedPointer< Buffer > m_buffer;
+      crimild::Size m_offset;
+      crimild::Size m_stride;
+      crimild::Size m_length;
+      Usage m_usage = Usage::STATIC;
 
-        /**
-         * \name FrameGraphResource impl
-         */
-        //@{
+      /**
+       * \name FrameGraphResource impl
+       */
+      //@{
 
-    public:
-        inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER_VIEW; }
+   public:
+      inline FrameGraphResource::Type getType( void ) const noexcept override { return FrameGraphResource::Type::BUFFER_VIEW; }
 
-        virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override
-        {
-            FrameGraphResource::setWrittenBy( op );
-            if ( m_buffer != nullptr ) {
-                m_buffer->setWrittenBy( op );
-            }
-        }
+      virtual void setWrittenBy( FrameGraphOperation *op ) noexcept override
+      {
+         FrameGraphResource::setWrittenBy( op );
+         if ( m_buffer != nullptr ) {
+            m_buffer->setWrittenBy( op );
+         }
+      }
 
-        virtual void setReadBy( FrameGraphOperation *op ) noexcept override
-        {
-            FrameGraphResource::setReadBy( op );
-            if ( m_buffer != nullptr ) {
-                m_buffer->setReadBy( op );
-            }
-        }
+      virtual void setReadBy( FrameGraphOperation *op ) noexcept override
+      {
+         FrameGraphResource::setReadBy( op );
+         if ( m_buffer != nullptr ) {
+            m_buffer->setReadBy( op );
+         }
+      }
 
-        //@}
+      //@}
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

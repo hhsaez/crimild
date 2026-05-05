@@ -65,4 +65,6 @@ target_compile_features( crimild_foundation PUBLIC cxx_std_20 )
 
 add_library( crimild::foundation ALIAS crimild_foundation )
 
-add_subdirectory( test )
+if ( CRIMILD_BUILD_TESTS )
+	add_subdirectory( test )
+endif ()

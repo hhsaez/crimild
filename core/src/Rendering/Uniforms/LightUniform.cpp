@@ -27,44 +27,45 @@
 
 #include "Rendering/Uniforms/LightUniform.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "SceneGraph/Light.hpp"
+
+#include <crimild/math/Vector4.hpp>
 
 using namespace crimild;
 
 LightUniform::LightUniform( Light *light ) noexcept
-    : UniformBuffer( LightProps {} ),
-      m_light( light )
+   : UniformBuffer( LightProps {} ),
+     m_light( light )
 {
-    // no-op
+   // no-op
 }
 
 void LightUniform::onPreRender( void ) noexcept
 {
-    auto &props = getValue< LightProps >();
+   auto &props = getValue< LightProps >();
 
-    props.type = static_cast< UInt32 >( m_light->getType() );
-    props.position = Vector4( m_light->getPosition() );
-    props.direction = Vector4( m_light->getDirection() );
-    // props.color = m_light->getColor();
-    props.attenuation = Vector4( m_light->getAttenuation() );
-    // props.ambient = m_light->getAmbient();
-    props.cutoff = Vector4f {
-        Numericf::cos( m_light->getInnerCutoff() ),
-        Numericf::cos( m_light->getOuterCutoff() ),
-        0.0f,
-        0.0f,
-    };
-    props.castShadows = m_light->castShadows() ? 1 : 0;
-    if ( m_light->castShadows() ) {
-        props.shadowBias = m_light->getShadowMap()->getBias();
-        props.cascadeSplits = m_light->getShadowMap()->getCascadeSplits();
-        for ( auto split = 0; split < 4; ++split ) {
-            props.lightSpaceMatrix[ split ] = m_light->getShadowMap()->getLightProjectionMatrix( split );
-        }
-        props.viewport = m_light->getShadowMap()->getViewport();
-    }
-    props.energy = m_light->getEnergy();
-    props.radius = m_light->getRadius();
+   props.type = static_cast< UInt32 >( m_light->getType() );
+   props.position = Vector4( m_light->getPosition() );
+   props.direction = Vector4( m_light->getDirection() );
+   // props.color = m_light->getColor();
+   props.attenuation = Vector4( m_light->getAttenuation() );
+   // props.ambient = m_light->getAmbient();
+   props.cutoff = Vector4f {
+      Numericf::cos( m_light->getInnerCutoff() ),
+      Numericf::cos( m_light->getOuterCutoff() ),
+      0.0f,
+      0.0f,
+   };
+   props.castShadows = m_light->castShadows() ? 1 : 0;
+   if ( m_light->castShadows() ) {
+      props.shadowBias = m_light->getShadowMap()->getBias();
+      props.cascadeSplits = m_light->getShadowMap()->getCascadeSplits();
+      for ( auto split = 0; split < 4; ++split ) {
+         props.lightSpaceMatrix[ split ] = m_light->getShadowMap()->getLightProjectionMatrix( split );
+      }
+      props.viewport = m_light->getShadowMap()->getViewport();
+   }
+   props.energy = m_light->getEnergy();
+   props.radius = m_light->getRadius();
 }

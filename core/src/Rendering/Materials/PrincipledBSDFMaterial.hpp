@@ -28,93 +28,92 @@
 #ifndef CRIMILD_CORE_RENDERING_PRINCIPLED_BSDF_
 #define CRIMILD_CORE_RENDERING_PRINCIPLED_BSDF_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Material.hpp"
 
 namespace crimild {
 
-    namespace materials {
+   namespace materials {
 
-        /**
-            \brief A PBR-based material
+      /**
+          \brief A PBR-based material
 
-            Based on Disney/Unreal PBR system
-        */
-        class PrincipledBSDF : public Material {
-            CRIMILD_IMPLEMENT_RTTI( crimild::materials::PrincipledBSDF )
+          Based on Disney/Unreal PBR system
+      */
+      class PrincipledBSDF : public Material {
+         CRIMILD_IMPLEMENT_RTTI( crimild::materials::PrincipledBSDF )
 
-        public:
-            struct Props {
-                alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
-                alignas( 4 ) Real32 metallic = 0;
-                alignas( 4 ) Real32 roughness = 0;
-                alignas( 4 ) Real32 ambientOcclusion = 1;
-                alignas( 4 ) Real32 transmission = 0;
-                alignas( 4 ) Real32 indexOfRefraction = 0;
-                alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
-            };
+      public:
+         struct Props {
+            alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
+            alignas( 4 ) Real32 metallic = 0;
+            alignas( 4 ) Real32 roughness = 0;
+            alignas( 4 ) Real32 ambientOcclusion = 1;
+            alignas( 4 ) Real32 transmission = 0;
+            alignas( 4 ) Real32 indexOfRefraction = 0;
+            alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
+         };
 
-        public:
-            PrincipledBSDF( void ) noexcept;
-            virtual ~PrincipledBSDF( void ) = default;
+      public:
+         PrincipledBSDF( void ) noexcept;
+         virtual ~PrincipledBSDF( void ) = default;
 
-            inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo; };
-            inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo; }
-            void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
-            const Texture *getAlbedoMap( void ) const noexcept;
-            Texture *getAlbedoMap( void ) noexcept;
+         inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo; };
+         inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo; }
+         void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
+         const Texture *getAlbedoMap( void ) const noexcept;
+         Texture *getAlbedoMap( void ) noexcept;
 
-            inline void setMetallic( const Real32 &metallic ) noexcept { getProps().metallic = metallic; };
-            inline Real32 getMetallic( void ) const noexcept { return getProps().metallic; }
-            void setMetallicMap( SharedPointer< Texture > const &metallicMap ) noexcept;
-            const Texture *getMetallicMap( void ) const noexcept;
-            Texture *getMetallicMap( void ) noexcept;
+         inline void setMetallic( const Real32 &metallic ) noexcept { getProps().metallic = metallic; };
+         inline Real32 getMetallic( void ) const noexcept { return getProps().metallic; }
+         void setMetallicMap( SharedPointer< Texture > const &metallicMap ) noexcept;
+         const Texture *getMetallicMap( void ) const noexcept;
+         Texture *getMetallicMap( void ) noexcept;
 
-            inline void setRoughness( const Real32 &roughness ) noexcept { getProps().roughness = roughness; };
-            inline Real32 getRoughness( void ) const noexcept { return getProps().roughness; }
-            void setRoughnessMap( SharedPointer< Texture > const &roughnessMap ) noexcept;
-            const Texture *getRoughnessMap( void ) const noexcept;
-            Texture *getRoughnessMap( void ) noexcept;
+         inline void setRoughness( const Real32 &roughness ) noexcept { getProps().roughness = roughness; };
+         inline Real32 getRoughness( void ) const noexcept { return getProps().roughness; }
+         void setRoughnessMap( SharedPointer< Texture > const &roughnessMap ) noexcept;
+         const Texture *getRoughnessMap( void ) const noexcept;
+         Texture *getRoughnessMap( void ) noexcept;
 
-            inline void setAmbientOcclusion( const Real32 &ambientOcclusion ) noexcept { getProps().ambientOcclusion = ambientOcclusion; };
-            inline Real32 getAmbientOcclusion( void ) const noexcept { return getProps().ambientOcclusion; }
-            void setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept;
-            const Texture *getAmbientOcclusionMap( void ) const noexcept;
-            Texture *getAmbientOcclusionMap( void ) noexcept;
+         inline void setAmbientOcclusion( const Real32 &ambientOcclusion ) noexcept { getProps().ambientOcclusion = ambientOcclusion; };
+         inline Real32 getAmbientOcclusion( void ) const noexcept { return getProps().ambientOcclusion; }
+         void setAmbientOcclusionMap( SharedPointer< Texture > const &ambientOcclusionMap ) noexcept;
+         const Texture *getAmbientOcclusionMap( void ) const noexcept;
+         Texture *getAmbientOcclusionMap( void ) noexcept;
 
-            void setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &roughnessMetallicMap ) noexcept;
-            const Texture *getCombinedRoughnessMetallicMap( void ) const noexcept;
-            Texture *getCombinedRoughnessMetallicMap( void ) noexcept;
+         void setCombinedRoughnessMetallicMap( SharedPointer< Texture > const &roughnessMetallicMap ) noexcept;
+         const Texture *getCombinedRoughnessMetallicMap( void ) const noexcept;
+         Texture *getCombinedRoughnessMetallicMap( void ) noexcept;
 
-            void setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept override;
-            const Texture *getNormalMap( void ) const noexcept;
-            Texture *getNormalMap( void ) noexcept override;
+         void setNormalMap( SharedPointer< Texture > const &normalMap ) noexcept override;
+         const Texture *getNormalMap( void ) const noexcept;
+         Texture *getNormalMap( void ) noexcept override;
 
-            inline void setTransmission( const Real32 &transmission ) noexcept { getProps().transmission = transmission; };
-            inline Real32 getTransmission( void ) const noexcept { return getProps().transmission; }
+         inline void setTransmission( const Real32 &transmission ) noexcept { getProps().transmission = transmission; };
+         inline Real32 getTransmission( void ) const noexcept { return getProps().transmission; }
 
-            inline void setIndexOfRefraction( const Real32 &indexOfRefraction ) noexcept { getProps().indexOfRefraction = indexOfRefraction; };
-            inline Real32 getIndexOfRefraction( void ) const noexcept { return getProps().indexOfRefraction; }
+         inline void setIndexOfRefraction( const Real32 &indexOfRefraction ) noexcept { getProps().indexOfRefraction = indexOfRefraction; };
+         inline Real32 getIndexOfRefraction( void ) const noexcept { return getProps().indexOfRefraction; }
 
-            inline void setEmissive( const ColorRGB &emissive ) noexcept { getProps().emissive = emissive; };
-            inline ColorRGB getEmissive( void ) const noexcept { return getProps().emissive; }
+         inline void setEmissive( const ColorRGB &emissive ) noexcept { getProps().emissive = emissive; };
+         inline ColorRGB getEmissive( void ) const noexcept { return getProps().emissive; }
 
-            Props &getProps( void ) noexcept;
-            const Props &getProps( void ) const noexcept;
+         Props &getProps( void ) noexcept;
+         const Props &getProps( void ) const noexcept;
 
-            /**
-                \name Coding support
-            */
-            //@{
+         /**
+             \name Coding support
+         */
+         //@{
 
-        public:
-            virtual void encode( coding::Encoder &encoder ) override;
-            virtual void decode( coding::Decoder &decoder ) override;
+      public:
+         virtual void encode( coding::Encoder &encoder ) override;
+         virtual void decode( coding::Decoder &decoder ) override;
 
-            //@}
-        };
+         //@}
+      };
 
-    }
+   }
 
 }
 

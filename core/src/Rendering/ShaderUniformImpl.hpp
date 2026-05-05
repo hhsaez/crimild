@@ -29,11 +29,8 @@
 #define CRIMILD_RENDERING_SHADER_UNIFORM_IMPL_
 
 #include "Common/Profiler.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Renderer.hpp"
 #include "ShaderUniform.hpp"
-
-#include <crimild/foundation.hpp>
 
 namespace crimild {
 

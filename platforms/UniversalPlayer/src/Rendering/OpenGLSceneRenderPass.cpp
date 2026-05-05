@@ -5,9 +5,6 @@
 #include "Rendering/OpenGLShaderProgram.hpp"
 #include "Rendering/OpenGLUnlitMaterialBindable.hpp"
 
-#include <Crimild.hpp>
-#include <Crimild_Mathematics.hpp>
-
 using namespace crimild::universal;
 
 void SceneRenderPass::operator()(

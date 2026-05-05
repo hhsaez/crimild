@@ -27,15 +27,14 @@
 
 #include "Visitors/IntersectWorld.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 
-#include "gtest/gtest.h"
-#include <crimild/foundation.hpp>
+#include <crimild/math/scale.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 

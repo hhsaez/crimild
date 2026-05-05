@@ -29,49 +29,50 @@
 #define CRIMILD_PARTICLE_UPDATER_ATTRACTOR_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Sphere.hpp>
 
 namespace crimild {
 
-    /**
-           \brief Attractor for a gravity system
+   /**
+          \brief Attractor for a gravity system
 
-           \remarks Use it before a position updater
-         */
-    class AttractorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
-        CRIMILD_IMPLEMENT_RTTI( crimild::AttractorParticleUpdater )
+          \remarks Use it before a position updater
+        */
+   class AttractorParticleUpdater : public ParticleSystemComponent::ParticleUpdater {
+      CRIMILD_IMPLEMENT_RTTI( crimild::AttractorParticleUpdater )
 
-    public:
-        AttractorParticleUpdater( void );
-        virtual ~AttractorParticleUpdater( void );
+   public:
+      AttractorParticleUpdater( void );
+      virtual ~AttractorParticleUpdater( void );
 
-        inline void setAttractor( const Sphere &value ) { _attractor = value; }
-        inline const Sphere &getAttractor( void ) const { return _attractor; }
+      inline void setAttractor( const Sphere &value ) { _attractor = value; }
+      inline const Sphere &getAttractor( void ) const { return _attractor; }
 
-        inline void setStrength( crimild::Real32 value ) { _strength = value; }
-        inline crimild::Real32 getStrength( void ) const { return _strength; }
+      inline void setStrength( crimild::Real32 value ) { _strength = value; }
+      inline crimild::Real32 getStrength( void ) const { return _strength; }
 
-        virtual void configure( Node *node, ParticleData *particles ) override;
-        virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
+      virtual void configure( Node *node, ParticleData *particles ) override;
+      virtual void update( Node *node, crimild::Real64 dt, ParticleData *particles ) override;
 
-    private:
-        Sphere _attractor;
-        crimild::Real32 _strength;
+   private:
+      Sphere _attractor;
+      crimild::Real32 _strength;
 
-        ParticleAttribArray *_positions = nullptr;
-        ParticleAttribArray *_accelerations = nullptr;
+      ParticleAttribArray *_positions = nullptr;
+      ParticleAttribArray *_accelerations = nullptr;
 
-        /**
-                        \name Coding support
-                */
-        //@{
+      /**
+                      \name Coding support
+              */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

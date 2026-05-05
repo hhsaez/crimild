@@ -27,7 +27,6 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "Visitors/FetchLights.hpp"
 
@@ -37,40 +36,40 @@ using namespace crimild;
 
 TEST( LightTest, construction )
 {
-    auto light = crimild::alloc< Light >();
+   auto light = crimild::alloc< Light >();
 
-    EXPECT_EQ( Light::Type::POINT, light->getType() );
-    EXPECT_EQ( ( Point3f { 0.0f, 0.0f, 0.0f } ), light->getPosition() );
-    EXPECT_EQ( ( Vector3f { 1.0f, 0.0f, 0.0f } ), light->getAttenuation() );
-    EXPECT_EQ( ( Vector3f { 0.0f, 0.0f, 0.0f } ), light->getDirection() );
-    EXPECT_EQ( ( ColorRGB { 1.0f, 1.0f, 1.0f } ), light->getColor() );
-    EXPECT_EQ( 0.0f, light->getOuterCutoff() );
-    EXPECT_EQ( 0.0f, light->getInnerCutoff() );
-    EXPECT_EQ( 0.0f, light->getExponent() );
+   EXPECT_EQ( Light::Type::POINT, light->getType() );
+   EXPECT_EQ( ( Point3f { 0.0f, 0.0f, 0.0f } ), light->getPosition() );
+   EXPECT_EQ( ( Vector3f { 1.0f, 0.0f, 0.0f } ), light->getAttenuation() );
+   EXPECT_EQ( ( Vector3f { 0.0f, 0.0f, 0.0f } ), light->getDirection() );
+   EXPECT_EQ( ( ColorRGB { 1.0f, 1.0f, 1.0f } ), light->getColor() );
+   EXPECT_EQ( 0.0f, light->getOuterCutoff() );
+   EXPECT_EQ( 0.0f, light->getInnerCutoff() );
+   EXPECT_EQ( 0.0f, light->getExponent() );
 }
 
 TEST( LightTest, fetchLights )
 {
-    auto group = crimild::alloc< Group >();
-    auto light1 = crimild::alloc< Light >();
-    auto light2 = crimild::alloc< Light >();
+   auto group = crimild::alloc< Group >();
+   auto light1 = crimild::alloc< Light >();
+   auto light2 = crimild::alloc< Light >();
 
-    group->attachNode( light1 );
-    group->attachNode( light2 );
+   group->attachNode( light1 );
+   group->attachNode( light2 );
 
-    FetchLights fetchLights;
-    group->perform( fetchLights );
+   FetchLights fetchLights;
+   group->perform( fetchLights );
 
-    EXPECT_TRUE( fetchLights.hasLights() );
+   EXPECT_TRUE( fetchLights.hasLights() );
 
-    int i = 0;
-    fetchLights.forEachLight( [ &i, light1, light2 ]( Light *light ) {
-        if ( i == 0 ) {
-            EXPECT_EQ( crimild::get_ptr( light1 ), light );
-        } else if ( i == 1 ) {
-            EXPECT_EQ( crimild::get_ptr( light2 ), light );
-        }
-        i++;
-    } );
-    EXPECT_EQ( 2, i );
+   int i = 0;
+   fetchLights.forEachLight( [ &i, light1, light2 ]( Light *light ) {
+      if ( i == 0 ) {
+         EXPECT_EQ( crimild::get_ptr( light1 ), light );
+      } else if ( i == 1 ) {
+         EXPECT_EQ( crimild::get_ptr( light2 ), light );
+      }
+      i++;
+   } );
+   EXPECT_EQ( 2, i );
 }

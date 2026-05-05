@@ -28,38 +28,39 @@
 #ifndef CRIMILD_COMPONENTS_ROTATION_
 #define CRIMILD_COMPONENTS_ROTATION_
 
-#include "Crimild_Mathematics.hpp"
 #include "NodeComponent.hpp"
+
+#include <crimild/math/Vector3.hpp>
 
 namespace crimild {
 
-    class [[deprecated]] RotationComponent : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
+   class [[deprecated]] RotationComponent : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::RotationComponent )
 
-    public:
-        RotationComponent( void ) = default;
-        RotationComponent( const Vector3f &axis, float speed );
-        ~RotationComponent( void ) = default;
+   public:
+      RotationComponent( void ) = default;
+      RotationComponent( const Vector3f &axis, float speed );
+      ~RotationComponent( void ) = default;
 
-        inline const Vector3f &getAxis( void ) const { return _axis; }
-        inline crimild::Real32 getSpeed( void ) const { return _speed; }
+      inline const Vector3f &getAxis( void ) const { return _axis; }
+      inline crimild::Real32 getSpeed( void ) const { return _speed; }
 
-        virtual void update( const Clock &c ) override;
+      virtual void update( const Clock &c ) override;
 
-    private:
-        Vector3f _axis;
-        crimild::Real32 _speed;
-        crimild::Real32 _time;
+   private:
+      Vector3f _axis;
+      crimild::Real32 _speed;
+      crimild::Real32 _time;
 
-        /**
-            \name Coding
-         */
-        //@{
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
-        //@}
-    };
+      /**
+          \name Coding
+       */
+      //@{
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
+      //@}
+   };
 
 }
 

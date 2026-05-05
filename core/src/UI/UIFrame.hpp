@@ -29,11 +29,9 @@
 #define CRIMILD_UI_FRAME_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "UIFrameConstraint.hpp"
 #include "UIFrameConstraintMaker.hpp"
-
-#include <crimild/foundation.hpp>
+#include "crimild/math/Rect.hpp"
 
 namespace crimild {
 

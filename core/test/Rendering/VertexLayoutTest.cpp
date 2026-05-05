@@ -27,227 +27,225 @@
 
 #include "Rendering/VertexLayout.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( VertexLayout, P3 )
 {
-    auto v = VertexLayout::P3;
+   auto v = VertexLayout::P3;
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
 }
 
 TEST( VertexLayout, P3_C3 )
 {
-    auto v = VertexLayout::P3_C3;
+   auto v = VertexLayout::P3_C3;
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( 3 * sizeof( crimild::Real32 ), v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 3 * sizeof( crimild::Real32 ), v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
 }
 
 TEST( VertexLayout, positionsOnly )
 {
-    auto v = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-    };
+   auto v = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+   };
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getSize() );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
 }
 
 TEST( VertexLayout, positionsAndNormals )
 {
-    auto v = VertexLayout()
-                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                 .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+   auto v = VertexLayout()
+               .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+               .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getSize() );
 
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
 }
 
 TEST( VertexLayout, hasAttribute )
 {
-    auto v = VertexLayout()
-                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                 .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+   auto v = VertexLayout()
+               .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+               .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
 
-    ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::POSITION ) );
-    ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::NORMAL ) );
-    ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::COLOR ) );
+   ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::POSITION ) );
+   ASSERT_TRUE( v.hasAttribute( VertexAttribute::Name::NORMAL ) );
+   ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_FALSE( v.hasAttribute( VertexAttribute::Name::COLOR ) );
 }
 
 TEST( VertexLayout, multipleAttributes )
 {
-    auto v = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
-    };
+   auto v = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+   };
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 6, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 9, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 9, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
 }
 
 TEST( VertexLayout, multipleAttributesDifferentOrder )
 {
-    auto v = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-    };
+   auto v = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+   };
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
 }
 
 TEST( VertexLayout, fromArray )
 {
-    auto attribs = Array< std::shared_ptr< VertexAttribute > > {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-    };
+   auto attribs = Array< std::shared_ptr< VertexAttribute > > {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+   };
 
-    auto v = VertexLayout( attribs );
+   auto v = VertexLayout( attribs );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
 }
 
 TEST( VertexLayout, eachAttribute )
 {
-    auto attribs = Array< std::shared_ptr< VertexAttribute > > {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-    };
+   auto attribs = Array< std::shared_ptr< VertexAttribute > > {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+   };
 
-    auto v = VertexLayout( attribs );
+   auto v = VertexLayout( attribs );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 
-    auto callCount = 0;
-    v.eachAttribute(
-        [ & ]( auto &attrib ) {
-            ASSERT_EQ( attribs[ callCount++ ]->getName(), attrib->getName() );
-        }
-    );
-    ASSERT_EQ( 4, callCount );
+   auto callCount = 0;
+   v.eachAttribute(
+      [ & ]( auto &attrib ) {
+         ASSERT_EQ( attribs[ callCount++ ]->getName(), attrib->getName() );
+      }
+   );
+   ASSERT_EQ( 4, callCount );
 }
 
 TEST( VertexLayout, withAttribute )
 {
-    auto v = VertexLayout()
-                 .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                 .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-                 .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
-                 .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+   auto v = VertexLayout()
+               .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+               .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
+               .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
+               .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
 
-    auto expected = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-    };
+   auto expected = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::TEX_COORD, utils::getFormat< Vector2f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+   };
 
-    ASSERT_EQ( expected, v );
+   ASSERT_EQ( expected, v );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 11, v.getSize() );
 
-    ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( 0, v.getAttributeOffset( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::POSITION ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::POSITION ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeOffset( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( Format::R32G32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::TEX_COORD ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 2, v.getAttributeSize( VertexAttribute::Name::TEX_COORD ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 5, v.getAttributeOffset( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::COLOR ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::COLOR ) );
 
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
-    ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 8, v.getAttributeOffset( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( Format::R32G32B32_SFLOAT, v.getAttributeFormat( VertexAttribute::Name::NORMAL ) );
+   ASSERT_EQ( sizeof( crimild::Real32 ) * 3, v.getAttributeSize( VertexAttribute::Name::NORMAL ) );
 }
 
 TEST( VertexLayout, equality )
 {
-    auto v1 = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-    };
+   auto v1 = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+   };
 
-    auto v2 = VertexLayout {
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
-        crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
-    };
+   auto v2 = VertexLayout {
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::POSITION, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::NORMAL, utils::getFormat< Vector3f >() ),
+      crimild::alloc< VertexAttribute >( VertexAttribute::Name::COLOR, utils::getFormat< ColorRGB >() ),
+   };
 
-    ASSERT_EQ( v1, v2 );
+   ASSERT_EQ( v1, v2 );
 }

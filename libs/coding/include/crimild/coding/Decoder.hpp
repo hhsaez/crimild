@@ -29,10 +29,17 @@
 #define CRIMILD_CORE_CODING_DECODER_
 
 #include "Codable.hpp"
-#include "Crimild_Mathematics.hpp"
 
-#include <crimild/foundation.hpp>
-// #include "Rendering/Extent.hpp"
+#include <crimild/math/ColorRGB.hpp>
+#include <crimild/math/ColorRGBA.hpp>
+#include <crimild/math/Matrix3.hpp>
+#include <crimild/math/Matrix4.hpp>
+#include <crimild/math/Point2.hpp>
+#include <crimild/math/Point3.hpp>
+#include <crimild/math/Vector3.hpp>
+#include <crimild/math/Vector4.hpp>
+
+// #Include "Rendering/Extent.hpp"
 // #include "Rendering/Format.hpp"
 // #include "Rendering/VertexAttribute.hpp"
 

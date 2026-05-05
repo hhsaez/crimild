@@ -1,5 +1,7 @@
 #include <Crimild.hpp>
 #include <Crimild_UniversalPlayer.hpp>
+#include <crimild/math/intersect.hpp>
+#include <crimild/math/lookAt.hpp>
 
 namespace crimild::experimental {
 

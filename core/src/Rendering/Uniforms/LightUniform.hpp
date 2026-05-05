@@ -28,41 +28,44 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_LIGHT_
 #define CRIMILD_RENDERING_UNIFORMS_LIGHT_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/UniformBuffer.hpp"
+
+#include <crimild/math/ColorRGBA.hpp>
+#include <crimild/math/Matrix4.hpp>
+#include <crimild/math/Vector4.hpp>
 
 namespace crimild {
 
-    class Light;
+   class Light;
 
-    class [[deprecated]] LightUniform : public UniformBuffer {
-    public:
-        struct LightProps {
-            alignas( 4 ) UInt32 type;
-            alignas( 16 ) Vector4f position;
-            alignas( 16 ) Vector4f direction;
-            alignas( 16 ) ColorRGBA ambient;
-            alignas( 16 ) ColorRGBA color;
-            alignas( 16 ) Vector4f attenuation;
-            alignas( 16 ) Vector4f cutoff;
-            alignas( 4 ) UInt32 castShadows;
-            alignas( 4 ) Real32 shadowBias;
-            alignas( 16 ) Vector4f cascadeSplits;
-            alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
-            alignas( 16 ) Vector4f viewport;
-            alignas( 4 ) Real32 energy;
-            alignas( 4 ) Real32 radius;
-        };
+   class [[deprecated]] LightUniform : public UniformBuffer {
+   public:
+      struct LightProps {
+         alignas( 4 ) UInt32 type;
+         alignas( 16 ) Vector4f position;
+         alignas( 16 ) Vector4f direction;
+         alignas( 16 ) ColorRGBA ambient;
+         alignas( 16 ) ColorRGBA color;
+         alignas( 16 ) Vector4f attenuation;
+         alignas( 16 ) Vector4f cutoff;
+         alignas( 4 ) UInt32 castShadows;
+         alignas( 4 ) Real32 shadowBias;
+         alignas( 16 ) Vector4f cascadeSplits;
+         alignas( 16 ) Matrix4f lightSpaceMatrix[ 4 ];
+         alignas( 16 ) Vector4f viewport;
+         alignas( 4 ) Real32 energy;
+         alignas( 4 ) Real32 radius;
+      };
 
-    public:
-        explicit LightUniform( Light *light ) noexcept;
-        virtual ~LightUniform( void ) = default;
+   public:
+      explicit LightUniform( Light *light ) noexcept;
+      virtual ~LightUniform( void ) = default;
 
-        void onPreRender( void ) noexcept override;
+      void onPreRender( void ) noexcept override;
 
-    private:
-        Light *m_light = nullptr;
-    };
+   private:
+      Light *m_light = nullptr;
+   };
 
 }
 

@@ -27,19 +27,17 @@
 
 #include "PlaneBoundingVolume.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 PlaneBoundingVolume::PlaneBoundingVolume( void )
-    : _center { 0.0f, 0.0f, 0.0f },
-      _plane { Normal3 { 0.0f, 1.0f, 0.0f }, 0.0f }
+   : _center { 0.0f, 0.0f, 0.0f },
+     _plane { Normal3 { 0.0f, 1.0f, 0.0f }, 0.0f }
 {
 }
 
 PlaneBoundingVolume::PlaneBoundingVolume( const Plane3 &plane )
-    : _center { 0.0f, 0.0f, 0.0f },
-      _plane( plane )
+   : _center { 0.0f, 0.0f, 0.0f },
+     _plane( plane )
 {
 }
 
@@ -85,52 +83,52 @@ void PlaneBoundingVolume::expandToContain( const BoundingVolume *input )
 
 int PlaneBoundingVolume::whichSide( const Plane3 &plane ) const
 {
-    return 0;
+   return 0;
 }
 
 bool PlaneBoundingVolume::contains( const Point3f &point ) const
 {
-    return false;
+   return false;
 }
 
 bool PlaneBoundingVolume::testIntersection( const Ray3 &ray ) const
 {
-    // return Intersection::test( _plane, ray );
-    return false;
+   // return Intersection::test( _plane, ray );
+   return false;
 }
 
 bool PlaneBoundingVolume::testIntersection( const BoundingVolume *other ) const
 {
-    return other->testIntersection( _plane );
+   return other->testIntersection( _plane );
 }
 
 bool PlaneBoundingVolume::testIntersection( const Sphere &sphere ) const
 {
-    // return sphere.whichSide( _plane ) == 0;
-    return false;
+   // return sphere.whichSide( _plane ) == 0;
+   return false;
 }
 
 bool PlaneBoundingVolume::testIntersection( const Plane3 &plane ) const
 {
-    return 0;
+   return 0;
 }
 
 void PlaneBoundingVolume::resolveIntersection( const BoundingVolume *other, Transformation &result ) const
 {
-    other->resolveIntersection( _plane, result );
+   other->resolveIntersection( _plane, result );
 }
 
 void PlaneBoundingVolume::resolveIntersection( const Sphere &sphere, Transformation &result ) const
 {
-    /*
-    float d = Distance::compute( _plane, sphere.getCenter() );
-    if ( d < sphere.getRadius() ) {
-        float diff = sphere.getRadius() - d;
-        result.setTranslate( diff * _plane.getNormal() );
-    } else {
-        result.setTranslate( 0.0f, 0.0f, 0.0f );
-    }
-    */
+   /*
+   float d = Distance::compute( _plane, sphere.getCenter() );
+   if ( d < sphere.getRadius() ) {
+       float diff = sphere.getRadius() - d;
+       result.setTranslate( diff * _plane.getNormal() );
+   } else {
+       result.setTranslate( 0.0f, 0.0f, 0.0f );
+   }
+   */
 }
 
 void PlaneBoundingVolume::resolveIntersection( const Plane3 &plane, Transformation &result ) const

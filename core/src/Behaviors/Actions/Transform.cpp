@@ -1,6 +1,5 @@
 #include "Transform.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <crimild/coding/Decoder.hpp>

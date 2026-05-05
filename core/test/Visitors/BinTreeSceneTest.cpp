@@ -28,7 +28,6 @@
 #include "Visitors/BinTreeScene.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
@@ -37,329 +36,331 @@
 #include "SceneGraph/Node_io.hpp"
 #include "SceneGraph/NullNode.hpp"
 
-#include "gtest/gtest.h"
+#include <crimild/math/origin.hpp>
+#include <crimild/math/translation.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( BinTreeScene, it_discards_an_empty_group )
 {
-    auto scene = crimild::alloc< Group >();
-    scene->setLocal( translation( 1, 2, 3 ) );
-    scene->setName( "a scene" );
+   auto scene = crimild::alloc< Group >();
+   scene->setLocal( translation( 1, 2, 3 ) );
+   scene->setName( "a scene" );
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_discards_all_empty_groups )
 {
-    auto scene = [] {
-        auto group = crimild::alloc< Group >();
-        group->attachNode(
-            [] {
-                auto group = crimild::alloc< Group >();
-                return group;
-            }()
-        );
-        return group;
-    }();
+   auto scene = [] {
+      auto group = crimild::alloc< Group >();
+      group->attachNode(
+         [] {
+            auto group = crimild::alloc< Group >();
+            return group;
+         }()
+      );
+      return group;
+   }();
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( NullNode::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_discards_all_groups_with_one_child )
 {
-    auto scene = [] {
-        auto group = crimild::alloc< Group >();
-        group->attachNode(
-            [] {
-                auto group = crimild::alloc< Group >();
-                group->attachNode(
-                    [] {
+   auto scene = [] {
+      auto group = crimild::alloc< Group >();
+      group->attachNode(
+         [] {
+            auto group = crimild::alloc< Group >();
+            group->attachNode(
+               [] {
+                  auto group = crimild::alloc< Group >();
+                  group->attachNode(
+                     [] {
                         auto group = crimild::alloc< Group >();
-                        group->attachNode(
-                            [] {
-                                auto group = crimild::alloc< Group >();
-                                group->attachNode( crimild::alloc< Geometry >() );
-                                return group;
-                            }()
-                        );
+                        group->attachNode( crimild::alloc< Geometry >() );
                         return group;
-                    }()
-                );
-                return group;
-            }()
-        );
-        return group;
-    }();
+                     }()
+                  );
+                  return group;
+               }()
+            );
+            return group;
+         }()
+      );
+      return group;
+   }();
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( Geometry::__CLASS_NAME, res->getClassName() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( Geometry::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_keeps_only_geometries )
 {
-    auto scene = [] {
-        auto group = crimild::alloc< Group >();
-        group->attachNode(
-            [] {
-                auto group = crimild::alloc< Group >();
-                group->attachNode(
-                    [] {
+   auto scene = [] {
+      auto group = crimild::alloc< Group >();
+      group->attachNode(
+         [] {
+            auto group = crimild::alloc< Group >();
+            group->attachNode(
+               [] {
+                  auto group = crimild::alloc< Group >();
+                  group->attachNode(
+                     [] {
                         auto group = crimild::alloc< Group >();
-                        group->attachNode(
-                            [] {
-                                auto group = crimild::alloc< Group >();
-                                group->attachNode( crimild::alloc< Geometry >() );
-                                return group;
-                            }()
-                        );
+                        group->attachNode( crimild::alloc< Geometry >() );
                         return group;
-                    }()
-                );
-                return group;
-            }()
-        );
-        group->attachNode( crimild::alloc< Geometry >() );
-        return group;
-    }();
+                     }()
+                  );
+                  return group;
+               }()
+            );
+            return group;
+         }()
+      );
+      group->attachNode( crimild::alloc< Geometry >() );
+      return group;
+   }();
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( std::string( Group::__CLASS_NAME ), std::string( res->getClassName() ) );
-    EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
-    EXPECT_EQ( Geometry::__CLASS_NAME, cast_ptr< Group >( res )->getNodeAt( 0 )->getClassName() );
-    EXPECT_EQ( Geometry::__CLASS_NAME, cast_ptr< Group >( res )->getNodeAt( 1 )->getClassName() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( std::string( Group::__CLASS_NAME ), std::string( res->getClassName() ) );
+   EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
+   EXPECT_EQ( Geometry::__CLASS_NAME, cast_ptr< Group >( res )->getNodeAt( 0 )->getClassName() );
+   EXPECT_EQ( Geometry::__CLASS_NAME, cast_ptr< Group >( res )->getNodeAt( 1 )->getClassName() );
 }
 
 TEST( BinTreeScene, it_handles_a_single_geometry )
 {
-    auto scene = [] {
-        auto geometry = crimild::alloc< Geometry >();
-        geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
-        geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
-        return geometry;
-    }();
-    scene->setLocal( translation( 1, 2, 3 ) );
-    scene->setName( "a scene" );
+   auto scene = [] {
+      auto geometry = crimild::alloc< Geometry >();
+      geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+      geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+      return geometry;
+   }();
+   scene->setLocal( translation( 1, 2, 3 ) );
+   scene->setName( "a scene" );
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( "a scene", res->getName() );
-    EXPECT_NE( nullptr, cast_ptr< Geometry >( res )->anyPrimitive() );
-    EXPECT_NE( nullptr, res->getComponent< MaterialComponent >() );
-    EXPECT_NE( nullptr, res->getComponent< MaterialComponent >()->first() );
-    EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( res->getLocal() ) );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( "a scene", res->getName() );
+   EXPECT_NE( nullptr, cast_ptr< Geometry >( res )->anyPrimitive() );
+   EXPECT_NE( nullptr, res->getComponent< MaterialComponent >() );
+   EXPECT_NE( nullptr, res->getComponent< MaterialComponent >()->first() );
+   EXPECT_EQ( ( Point3f { 1, 2, 3 } ), origin( res->getLocal() ) );
 }
 
 TEST( BinTreeScene, it_handles_a_group_with_a_single_child )
 {
-    auto scene = crimild::alloc< Group >();
-    scene->attachNode( crimild::alloc< Geometry >() );
+   auto scene = crimild::alloc< Group >();
+   scene->attachNode( crimild::alloc< Geometry >() );
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( Geometry::__CLASS_NAME, res->getClassName() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( Geometry::__CLASS_NAME, res->getClassName() );
 }
 
 TEST( BinTreeScene, it_handles_a_group_with_two_children )
 {
-    auto scene = crimild::alloc< Group >();
-    scene->attachNode( crimild::alloc< Geometry >() );
-    scene->attachNode( crimild::alloc< Geometry >() );
+   auto scene = crimild::alloc< Group >();
+   scene->attachNode( crimild::alloc< Geometry >() );
+   scene->attachNode( crimild::alloc< Geometry >() );
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( std::string( Group::__CLASS_NAME ), std::string( res->getClassName() ) );
-    EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( std::string( Group::__CLASS_NAME ), std::string( res->getClassName() ) );
+   EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
 }
 
 TEST( BinTreeScene, it_handles_a_group_with_three_children )
 {
-    auto scene = crimild::alloc< Group >();
-    scene->attachNode( crimild::alloc< Geometry >() );
-    scene->attachNode( crimild::alloc< Geometry >() );
-    scene->attachNode( crimild::alloc< Geometry >() );
+   auto scene = crimild::alloc< Group >();
+   scene->attachNode( crimild::alloc< Geometry >() );
+   scene->attachNode( crimild::alloc< Geometry >() );
+   scene->attachNode( crimild::alloc< Geometry >() );
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
-    EXPECT_EQ( 2, cast_ptr< Group >( cast_ptr< Group >( res )->getNodeAt( 0 ) )->getNodeCount() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_EQ( 2, cast_ptr< Group >( res )->getNodeCount() );
+   EXPECT_EQ( 2, cast_ptr< Group >( cast_ptr< Group >( res )->getNodeAt( 0 ) )->getNodeCount() );
 }
 
 TEST( BinTreeScene, it_handles_a_csg_node_with_one_child )
 {
-    auto scene = [] {
-        auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION );
-        csg->setLeft(
-            [] {
-                auto geometry = crimild::alloc< Geometry >();
-                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
-                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
-                return geometry;
-            }()
-        );
-        return csg;
-    }();
+   auto scene = [] {
+      auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION );
+      csg->setLeft(
+         [] {
+            auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+            geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+            return geometry;
+         }()
+      );
+      return csg;
+   }();
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getLeft() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getLeft() );
 }
 
 TEST( BinTreeScene, it_handles_a_csg_node_with_two_children )
 {
-    auto scene = [] {
-        auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION );
-        csg->setLeft(
-            [] {
-                auto geometry = crimild::alloc< Geometry >();
-                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
-                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
-                return geometry;
-            }()
-        );
-        csg->setRight(
-            [] {
-                auto geometry = crimild::alloc< Geometry >();
-                geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
-                geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
-                return geometry;
-            }()
-        );
-        return csg;
-    }();
+   auto scene = [] {
+      auto csg = crimild::alloc< CSGNode >( CSGNode::Operator::UNION );
+      csg->setLeft(
+         [] {
+            auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+            geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+            return geometry;
+         }()
+      );
+      csg->setRight(
+         [] {
+            auto geometry = crimild::alloc< Geometry >();
+            geometry->attachPrimitive( crimild::alloc< Primitive >( Primitive::Type::SPHERE ) );
+            geometry->attachComponent< MaterialComponent >( crimild::alloc< materials::PrincipledBSDF >() );
+            return geometry;
+         }()
+      );
+      return csg;
+   }();
 
-    BinTreeScene binTreeScene;
-    scene->perform( binTreeScene );
+   BinTreeScene binTreeScene;
+   scene->perform( binTreeScene );
 
-    auto res = binTreeScene.getResult();
+   auto res = binTreeScene.getResult();
 
-    EXPECT_NE( nullptr, res );
-    EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getLeft() );
-    EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getRight() );
+   EXPECT_NE( nullptr, res );
+   EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getLeft() );
+   EXPECT_NE( nullptr, cast_ptr< CSGNode >( res )->getRight() );
 }
 
 TEST( BinTreeScene, it_handles_a_parent_with_many_children )
 {
-    /**
-     * Original scene:
-     *       A
-     *   ____|____
-     *  /| | | | |\
-     * B C D E F G H
-     */
-    auto scene = crimild::alloc< Group >( "A" );
-    scene->attachNode( crimild::alloc< Geometry >( "B" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "C" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "D" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "E" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "F" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "G" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "H" ) );
-    scene->attachNode( crimild::alloc< Geometry >( "I" ) );
+   /**
+    * Original scene:
+    *       A
+    *   ____|____
+    *  /| | | | |\
+    * B C D E F G H
+    */
+   auto scene = crimild::alloc< Group >( "A" );
+   scene->attachNode( crimild::alloc< Geometry >( "B" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "C" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "D" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "E" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "F" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "G" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "H" ) );
+   scene->attachNode( crimild::alloc< Geometry >( "I" ) );
 
-    /**
-     * Optimized scene:
-     *        A
-     *    Z       W
-     *  Y   X   V   U
-     * B C D E F G H I
-     */
-    auto res = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE );
+   /**
+    * Optimized scene:
+    *        A
+    *    Z       W
+    *  Y   X   V   U
+    * B C D E F G H I
+    */
+   auto res = scene->perform< BinTreeScene >( BinTreeScene::SplitStrategy::NONE );
 
-    class AssignNames : public NodeVisitor {
-    public:
-        using Result = void;
+   class AssignNames : public NodeVisitor {
+   public:
+      using Result = void;
 
-    public:
-        void visitNode( Node *node ) noexcept override
-        {
-            assignName( node );
-        }
+   public:
+      void visitNode( Node *node ) noexcept override
+      {
+         assignName( node );
+      }
 
-        void visitGroup( Group *group ) noexcept override
-        {
-            assignName( group );
-            NodeVisitor::visitGroup( group );
-        }
+      void visitGroup( Group *group ) noexcept override
+      {
+         assignName( group );
+         NodeVisitor::visitGroup( group );
+      }
 
-    private:
-        void assignName( Node *node ) noexcept
-        {
-            if ( node->getName() == "" ) {
-                std::string name;
-                name += m_name--;
-                node->setName( name );
-            }
-        }
+   private:
+      void assignName( Node *node ) noexcept
+      {
+         if ( node->getName() == "" ) {
+            std::string name;
+            name += m_name--;
+            node->setName( name );
+         }
+      }
 
-    private:
-        char m_name = 'Z';
-    };
+   private:
+      char m_name = 'Z';
+   };
 
-    class DescribeScene : public NodeVisitor {
-    public:
-        using Result = std::string;
+   class DescribeScene : public NodeVisitor {
+   public:
+      using Result = std::string;
 
-    public:
-        std::string getResult( void ) const noexcept { return m_result; }
+   public:
+      std::string getResult( void ) const noexcept { return m_result; }
 
-        void visitNode( Node *node ) noexcept override
-        {
-            m_result += node->getName();
-        }
+      void visitNode( Node *node ) noexcept override
+      {
+         m_result += node->getName();
+      }
 
-        void visitGroup( Group *group ) noexcept override
-        {
-            m_result += group->getName();
-            NodeVisitor::visitGroup( group );
-        }
+      void visitGroup( Group *group ) noexcept override
+      {
+         m_result += group->getName();
+         NodeVisitor::visitGroup( group );
+      }
 
-    private:
-        std::string m_result;
-    };
+   private:
+      std::string m_result;
+   };
 
-    res->perform( AssignNames() );
-    EXPECT_EQ( "AZYBCXDEWVFGUHI", res->perform< DescribeScene >() );
+   res->perform( AssignNames() );
+   EXPECT_EQ( "AZYBCXDEWVFGUHI", res->perform< DescribeScene >() );
 }

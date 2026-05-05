@@ -27,7 +27,6 @@
 
 #include "RotationComponent.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/UpdateWorldState.hpp"
 

@@ -28,65 +28,64 @@
 #ifndef CRIMILD_PRIMITIVES_PARAMETRIC_
 #define CRIMILD_PRIMITIVES_PARAMETRIC_
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 
 namespace crimild {
 
-    class ParametricInterval {
-    public:
-        Vector2i divisions;
-        Vector2f upperBound;
-        Vector2f textureCount;
-    };
+   class ParametricInterval {
+   public:
+      Vector2i divisions;
+      Vector2f upperBound;
+      Vector2f textureCount;
+   };
 
-    class ParametricPrimitive : public Primitive {
-    public:
-        struct ColorMode {
-            enum class Type {
-                CONSTANT,
-                POSITIONS,
-            };
+   class ParametricPrimitive : public Primitive {
+   public:
+      struct ColorMode {
+         enum class Type {
+            CONSTANT,
+            POSITIONS,
+         };
 
-            Type type = Type::CONSTANT;
-            ColorRGB color = ColorRGB::Constants::WHITE;
-        };
+         Type type = Type::CONSTANT;
+         ColorRGB color = ColorRGB::Constants::WHITE;
+      };
 
-        struct Params {
-            Primitive::Type type = Primitive::Type::TRIANGLES;
-            VertexLayout layout = VertexP3N3::getLayout();
-            ColorMode colorMode;
-        };
+      struct Params {
+         Primitive::Type type = Primitive::Type::TRIANGLES;
+         VertexLayout layout = VertexP3N3::getLayout();
+         ColorMode colorMode;
+      };
 
-    public:
-        ParametricPrimitive( const Params &params ) noexcept;
-        virtual ~ParametricPrimitive( void ) = default;
+   public:
+      ParametricPrimitive( const Params &params ) noexcept;
+      virtual ~ParametricPrimitive( void ) = default;
 
-    protected:
-        void setInterval( const ParametricInterval &interval );
-        void generate( void );
-        virtual Vector3f evaluate( const Vector2f &domain ) const = 0;
-        virtual bool invertNormal( const Vector2f &domain ) const { return false; }
+   protected:
+      void setInterval( const ParametricInterval &interval );
+      void generate( void );
+      virtual Vector3f evaluate( const Vector2f &domain ) const = 0;
+      virtual bool invertNormal( const Vector2f &domain ) const { return false; }
 
-    private:
-        int getVertexCount( void ) const;
-        int getLineIndexCount( void ) const;
-        int getTriangleIndexCount( void ) const;
-        Vector2f computeDomain( float i, float j ) const;
-        void generateVertexBuffer( void );
-        void generateLineIndexBuffer( void );
-        void generateTriangleIndexBuffer( void );
+   private:
+      int getVertexCount( void ) const;
+      int getLineIndexCount( void ) const;
+      int getTriangleIndexCount( void ) const;
+      Vector2f computeDomain( float i, float j ) const;
+      void generateVertexBuffer( void );
+      void generateLineIndexBuffer( void );
+      void generateTriangleIndexBuffer( void );
 
-        VertexLayout _layout;
-        Vector2f _upperBound;
-        Vector2i _slices;
-        Vector2i _divisions;
-        Vector2f _textureCount;
-        ColorMode _colorMode;
-    };
+      VertexLayout _layout;
+      Vector2f _upperBound;
+      Vector2i _slices;
+      Vector2i _divisions;
+      Vector2f _textureCount;
+      ColorMode _colorMode;
+   };
 
-    using ParametricPrimitivePtr = SharedPointer< ParametricPrimitive >;
+   using ParametricPrimitivePtr = SharedPointer< ParametricPrimitive >;
 
 }
 

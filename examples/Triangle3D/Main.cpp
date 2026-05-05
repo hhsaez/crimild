@@ -1,5 +1,6 @@
 #include <Crimild.hpp>
 #include <Crimild_UniversalPlayer.hpp>
+#include <crimild/math/lookAt.hpp>
 
 using namespace crimild;
 using namespace crimild::universal;

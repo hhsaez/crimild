@@ -28,7 +28,6 @@
 #include "Rendering/Operations/Operations_ssao.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
 #include "Rendering/Pipeline.hpp"
@@ -39,58 +38,60 @@
 #include "Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp"
 #include "Simulation/Simulation.hpp"
 
+#include <crimild/math/Interpolation.hpp>
+
 using namespace crimild;
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::ssao( SharedPointer< FrameGraphResource > positions, SharedPointer< FrameGraphResource > normals ) noexcept
 {
-    // TODO: move this to a compute pass
-    auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( "ssao" );
+   // TODO: move this to a compute pass
+   auto renderPass = crimild::alloc< RenderPass >();
+   renderPass->setName( "ssao" );
 
-    auto color = useColorAttachment( "ssao/color" );
+   auto color = useColorAttachment( "ssao/color" );
 
-    renderPass->attachments = { color };
+   renderPass->attachments = { color };
 
-    auto pipeline = [ & ] {
-        auto pipeline = crimild::alloc< GraphicsPipeline >();
-        pipeline->setProgram(
-            [] {
-                auto program = crimild::alloc< ShaderProgram >(
-                    Array< SharedPointer< Shader > > {
-                        crimild::alloc< Shader >(
-                            Shader::Stage::VERTEX,
-                            CRIMILD_TO_STRING(
-                                vec2 positions[ 6 ] = vec2[](
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( -1.0, -1.0 ),
-                                    vec2( 1.0, -1.0 ),
+   auto pipeline = [ & ] {
+      auto pipeline = crimild::alloc< GraphicsPipeline >();
+      pipeline->setProgram(
+         [] {
+            auto program = crimild::alloc< ShaderProgram >(
+               Array< SharedPointer< Shader > > {
+                  crimild::alloc< Shader >(
+                     Shader::Stage::VERTEX,
+                     CRIMILD_TO_STRING(
+                        vec2 positions[ 6 ] = vec2[](
+                           vec2( -1.0, 1.0 ),
+                           vec2( -1.0, -1.0 ),
+                           vec2( 1.0, -1.0 ),
 
-                                    vec2( -1.0, 1.0 ),
-                                    vec2( 1.0, -1.0 ),
-                                    vec2( 1.0, 1.0 )
-                                );
+                           vec2( -1.0, 1.0 ),
+                           vec2( 1.0, -1.0 ),
+                           vec2( 1.0, 1.0 )
+                        );
 
-                                vec2 texCoords[ 6 ] = vec2[](
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 0.0, 1.0 ),
-                                    vec2( 1.0, 1.0 ),
+                        vec2 texCoords[ 6 ] = vec2[](
+                           vec2( 0.0, 0.0 ),
+                           vec2( 0.0, 1.0 ),
+                           vec2( 1.0, 1.0 ),
 
-                                    vec2( 0.0, 0.0 ),
-                                    vec2( 1.0, 1.0 ),
-                                    vec2( 1.0, 0.0 )
-                                );
+                           vec2( 0.0, 0.0 ),
+                           vec2( 1.0, 1.0 ),
+                           vec2( 1.0, 0.0 )
+                        );
 
-                                layout( location = 0 ) out vec2 outTexCoord;
+                        layout( location = 0 ) out vec2 outTexCoord;
 
-                                void main() {
-                                    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
-                                    outTexCoord = texCoords[ gl_VertexIndex ];
-                                }
-                            )
-                        ),
-                            crimild::alloc< Shader >(
-                                Shader::Stage::FRAGMENT,
-                                R"(
+                        void main() {
+                           gl_Position = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+                           outTexCoord = texCoords[ gl_VertexIndex ];
+                        }
+                     )
+                  ),
+                     crimild::alloc< Shader >(
+                        Shader::Stage::FRAGMENT,
+                        R"(
                                     layout( location = 0 ) in vec2 inTexCoord;
 
                                 layout( set = 0, binding = 0 ) uniform RenderPassUniforms {
@@ -158,190 +159,190 @@ vec3 color = vec3( occlusion );
 
                                         outColor = vec4( color, 1.0 );
                                     } )"
-                            ),
-                    }
-                );
-                program->descriptorSetLayouts = {
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                // samples
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // samples
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                            {
-                                // noise texture
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
+                     ),
+               }
+            );
+            program->descriptorSetLayouts = {
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        // samples
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        .descriptorType = DescriptorType::TEXTURE,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        .descriptorType = DescriptorType::TEXTURE,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // samples
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                     {
+                        // noise texture
+                        .descriptorType = DescriptorType::TEXTURE,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                  };
+                  return layout;
+               }(),
+            };
+            return program;
+         }()
+      );
+      pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+      pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
+      return pipeline;
+   }();
+
+   auto descriptors = [ & ] {
+      auto descriptorSet = crimild::alloc< DescriptorSet >();
+      descriptorSet->descriptors = {
+         // Descriptor {
+         //     .descriptorType = DescriptorType::UNIFORM_BUFFER,
+         //     // TODO: get camera that was used for rendering
+         //     .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
+         // },
+         Descriptor {
+            .descriptorType = DescriptorType::TEXTURE,
+            .obj = withResource( crimild::alloc< Texture >(), positions ),
+         },
+         Descriptor {
+            .descriptorType = DescriptorType::TEXTURE,
+            .obj = withResource( crimild::alloc< Texture >(), normals ),
+         },
+         Descriptor {
+            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            .obj = [ & ] {
+               auto settings = Simulation::getInstance()->getSettings();
+
+               struct Uniforms {
+                  alignas( 4 ) Real32 radius;
+                  alignas( 4 ) Real32 bias;
+                  alignas( 4 ) Real32 renderScale;
+                  alignas( 16 ) Vector3f samples[ 64 ];
+               };
+
+               auto data = Uniforms {
+                  .radius = settings->get< Real32 >( "video.ssao.radius", 5.0 ),
+                  .bias = settings->get< Real32 >( "video.ssao.bias", 0.05 ),
+                  .renderScale = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
+               };
+
+               std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
+               std::default_random_engine generator;
+               for ( auto i = 0l; i < 64; ++i ) {
+                  auto sample = normalize(
+                     Vector3f {
+                        distribution( generator ) * 2.0f - 1.0f,
+                        distribution( generator ) * 2.0f - 1.0f,
+                        distribution( generator ),
+                     }
+                  );
+                  // sample *= distribution( generator );
+                  //  Place larger weights on samples closer to the fragment
+                  auto scale = Real32( i ) / 64.0f;
+                  Interpolation::linear( 0.1f, 1.0f, scale * scale, scale );
+                  data.samples[ i ] = sample * scale;
+               }
+
+               return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
+                  [ data = data, settings ]() mutable {
+                     data.radius = settings->get< Real32 >( "video.ssao.radius", 5.0 );
+                     data.bias = settings->get< Real32 >( "video.ssao.bias", 0.05 );
+                     return data;
+                  }
+               );
+            }(),
+         },
+         Descriptor {
+            .descriptorType = DescriptorType::TEXTURE,
+            .obj = [] {
+               auto texture = crimild::alloc< Texture >();
+               texture->imageView = [] {
+                  // Kernel rotation texture
+                  auto imageView = crimild::alloc< ImageView >();
+                  imageView->image = [] {
+                     // auto data = ByteArray( 16 * 4 );
+                     auto data = Array< Vector4f >( 16 );
+                     std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
+                     std::default_random_engine generator;
+                     for ( auto i = 0l; i < data.size(); ++i ) {
+                        data[ i ] = Vector4f {
+                           distribution( generator ) * 2.0f - 1.0f,
+                           distribution( generator ) * 2.0f - 1.0f,
+                           0,
+                           0,
                         };
-                        return layout;
-                    }(),
-                };
-                return program;
-            }()
-        );
-        pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
-        pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
-        return pipeline;
-    }();
+                     }
 
-    auto descriptors = [ & ] {
-        auto descriptorSet = crimild::alloc< DescriptorSet >();
-        descriptorSet->descriptors = {
-            // Descriptor {
-            //     .descriptorType = DescriptorType::UNIFORM_BUFFER,
-            //     // TODO: get camera that was used for rendering
-            //     .obj = crimild::alloc< CameraViewProjectionUniform >( Camera::getMainCamera() ),
-            // },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), positions ),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = withResource( crimild::alloc< Texture >(), normals ),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = [ & ] {
-                    auto settings = Simulation::getInstance()->getSettings();
+                     auto image = crimild::alloc< Image >();
+                     image->extent = {
+                        .width = 4,
+                        .height = 4,
+                        .depth = 1,
+                     };
+                     image->format = Format::R32G32B32A32_SFLOAT;
+                     image->setBufferView(
+                        crimild::alloc< BufferView >(
+                           BufferView::Target::IMAGE,
+                           crimild::alloc< Buffer >(
+                              [ & ] {
+                                 auto bytes = ByteArray( data.size() * sizeof( Vector4f ) );
+                                 memcpy( bytes.getData(), data.getData(), bytes.size() );
+                                 return bytes;
+                              }()
+                           )
+                        )
+                     );
+                     return image;
+                  }();
+                  return imageView;
+               }();
+               texture->sampler = [] {
+                  auto sampler = crimild::alloc< Sampler >();
+                  sampler->setMinFilter( Sampler::Filter::NEAREST );
+                  sampler->setMagFilter( Sampler::Filter::NEAREST );
+                  sampler->setWrapMode( Sampler::WrapMode::REPEAT );
+                  return sampler;
+               }();
+               return texture;
+            }(),
+         },
+      };
+      return descriptorSet;
+   }();
 
-                    struct Uniforms {
-                        alignas( 4 ) Real32 radius;
-                        alignas( 4 ) Real32 bias;
-                        alignas( 4 ) Real32 renderScale;
-                        alignas( 16 ) Vector3f samples[ 64 ];
-                    };
+   auto settings = Simulation::getInstance()->getSettings();
 
-                    auto data = Uniforms {
-                        .radius = settings->get< Real32 >( "video.ssao.radius", 5.0 ),
-                        .bias = settings->get< Real32 >( "video.ssao.bias", 0.05 ),
-                        .renderScale = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
-                    };
+   renderPass->extent = {
+      .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
+      .width = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
+      .height = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
+   };
 
-                    std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
-                    std::default_random_engine generator;
-                    for ( auto i = 0l; i < 64; ++i ) {
-                        auto sample = normalize(
-                            Vector3f {
-                                distribution( generator ) * 2.0f - 1.0f,
-                                distribution( generator ) * 2.0f - 1.0f,
-                                distribution( generator ),
-                            }
-                        );
-                        // sample *= distribution( generator );
-                        //  Place larger weights on samples closer to the fragment
-                        auto scale = Real32( i ) / 64.0f;
-                        Interpolation::linear( 0.1f, 1.0f, scale * scale, scale );
-                        data.samples[ i ] = sample * scale;
-                    }
+   renderPass->reads( { positions, normals } );
+   renderPass->writes( { color } );
+   renderPass->produces( { color } );
 
-                    return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
-                        [ data = data, settings ]() mutable {
-                            data.radius = settings->get< Real32 >( "video.ssao.radius", 5.0 );
-                            data.bias = settings->get< Real32 >( "video.ssao.bias", 0.05 );
-                            return data;
-                        }
-                    );
-                }(),
-            },
-            Descriptor {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = [] {
-                    auto texture = crimild::alloc< Texture >();
-                    texture->imageView = [] {
-                        // Kernel rotation texture
-                        auto imageView = crimild::alloc< ImageView >();
-                        imageView->image = [] {
-                            // auto data = ByteArray( 16 * 4 );
-                            auto data = Array< Vector4f >( 16 );
-                            std::uniform_real_distribution< Real32 > distribution( 0.0f, 1.0f );
-                            std::default_random_engine generator;
-                            for ( auto i = 0l; i < data.size(); ++i ) {
-                                data[ i ] = Vector4f {
-                                    distribution( generator ) * 2.0f - 1.0f,
-                                    distribution( generator ) * 2.0f - 1.0f,
-                                    0,
-                                    0,
-                                };
-                            }
+   auto viewport = ViewportDimensions {
+      .scalingMode = ScalingMode::RELATIVE,
+   };
 
-                            auto image = crimild::alloc< Image >();
-                            image->extent = {
-                                .width = 4,
-                                .height = 4,
-                                .depth = 1,
-                            };
-                            image->format = Format::R32G32B32A32_SFLOAT;
-                            image->setBufferView(
-                                crimild::alloc< BufferView >(
-                                    BufferView::Target::IMAGE,
-                                    crimild::alloc< Buffer >(
-                                        [ & ] {
-                                            auto bytes = ByteArray( data.size() * sizeof( Vector4f ) );
-                                            memcpy( bytes.getData(), data.getData(), bytes.size() );
-                                            return bytes;
-                                        }()
-                                    )
-                                )
-                            );
-                            return image;
-                        }();
-                        return imageView;
-                    }();
-                    texture->sampler = [] {
-                        auto sampler = crimild::alloc< Sampler >();
-                        sampler->setMinFilter( Sampler::Filter::NEAREST );
-                        sampler->setMagFilter( Sampler::Filter::NEAREST );
-                        sampler->setWrapMode( Sampler::WrapMode::REPEAT );
-                        return sampler;
-                    }();
-                    return texture;
-                }(),
-            },
-        };
-        return descriptorSet;
-    }();
-
-    auto settings = Simulation::getInstance()->getSettings();
-
-    renderPass->extent = {
-        .scalingMode = ScalingMode::SWAPCHAIN_RELATIVE,
-        .width = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
-        .height = settings->get< Real32 >( "video.ssao.renderScale", 0.5f ),
-    };
-
-    renderPass->reads( { positions, normals } );
-    renderPass->writes( { color } );
-    renderPass->produces( { color } );
-
-    auto viewport = ViewportDimensions {
-        .scalingMode = ScalingMode::RELATIVE,
-    };
-
-    return withGraphicsCommands(
-        renderPass,
-        [ pipeline, descriptors, viewport ]( auto commandBuffer ) {
-            commandBuffer->setViewport( viewport );
-            commandBuffer->setScissor( viewport );
-            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-            commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
-            commandBuffer->draw( 6 );
-        }
-    );
+   return withGraphicsCommands(
+      renderPass,
+      [ pipeline, descriptors, viewport ]( auto commandBuffer ) {
+         commandBuffer->setViewport( viewport );
+         commandBuffer->setScissor( viewport );
+         commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+         commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors ) );
+         commandBuffer->draw( 6 );
+      }
+   );
 }

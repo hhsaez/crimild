@@ -28,51 +28,52 @@
 #ifndef CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 #define CRIMILD_COMPONENTS_FREE_LOOK_CAMERA_
 
-#include "Crimild_Mathematics.hpp"
 #include "Messaging/MessageQueue.hpp"
 #include "NodeComponent.hpp"
 #include "Simulation/Input.hpp"
 
+#include <crimild/math/Point3.hpp>
+
 namespace crimild {
 
-    class FreeLookCameraComponent
-        : public NodeComponent,
-          public Messenger {
-        CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
+   class FreeLookCameraComponent
+      : public NodeComponent,
+        public Messenger {
+      CRIMILD_IMPLEMENT_RTTI( crimild::FreeLookCameraComponent )
 
-    public:
-        inline Real32 getSpeed( void ) const noexcept { return _speed; }
-        inline void setSpeed( Real32 speed ) noexcept { _speed = speed; }
+   public:
+      inline Real32 getSpeed( void ) const noexcept { return _speed; }
+      inline void setSpeed( Real32 speed ) noexcept { _speed = speed; }
 
-        virtual void start( void ) override;
-        virtual void update( const Clock &c ) override;
+      virtual void start( void ) override;
+      virtual void update( const Clock &c ) override;
 
-        inline void setMouseLookButton( Int32 button ) noexcept { m_mouseLookButton = button; }
-        inline Int32 getMouseLookButton( void ) const noexcept { return m_mouseLookButton; }
+      inline void setMouseLookButton( Int32 button ) noexcept { m_mouseLookButton = button; }
+      inline Int32 getMouseLookButton( void ) const noexcept { return m_mouseLookButton; }
 
-    private:
-        Vector2f _lastMousePos;
-        crimild::Bool _initialized = false;
-        Real32 _speed = 1.0f;
+   private:
+      Vector2f _lastMousePos;
+      crimild::Bool _initialized = false;
+      Real32 _speed = 1.0f;
 
-        Point3f m_position = Point3f { 0, 0, 0 };
-        Real m_pitch = 0;
-        Real m_yaw = 0;
-        Real m_roll = 0;
+      Point3f m_position = Point3f { 0, 0, 0 };
+      Real m_pitch = 0;
+      Real m_yaw = 0;
+      Real m_roll = 0;
 
-        Int32 m_mouseLookButton = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
+      Int32 m_mouseLookButton = CRIMILD_INPUT_MOUSE_BUTTON_LEFT;
 
-        /**
-            \name Coding support
-        */
-        //@{
+      /**
+          \name Coding support
+      */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

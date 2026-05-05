@@ -29,23 +29,24 @@
 #define CRIMILD_COMPONENTS_PATH_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 
-    namespace components {
+   namespace components {
 
-        class Path : public NodeComponent {
-            CRIMILD_IMPLEMENT_RTTI( crimild::components::Path )
+      class Path : public NodeComponent {
+         CRIMILD_IMPLEMENT_RTTI( crimild::components::Path )
 
-        public:
-            Transformation evaluate( float t ) noexcept;
+      public:
+         Transformation evaluate( float t ) noexcept;
 
-        public:
-            virtual void renderDebugInfo( Renderer *, Camera * ) override;
-        };
+      public:
+         virtual void renderDebugInfo( Renderer *, Camera * ) override;
+      };
 
-    }
+   }
 
 }
 

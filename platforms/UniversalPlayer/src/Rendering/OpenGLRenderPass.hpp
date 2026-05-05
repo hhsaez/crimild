@@ -1,7 +1,7 @@
 #ifndef CRIMILD_OPENGL_RENDERING_RENDER_PASS_
 #define CRIMILD_OPENGL_RENDERING_RENDER_PASS_
 
-#include <Crimild_Mathematics.hpp>
+#include <crimild/math/ColorRGBA.hpp>
 #include <memory>
 
 namespace crimild {

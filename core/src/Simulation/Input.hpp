@@ -28,10 +28,10 @@
 #ifndef CRIMILD_SIMULATION_INPUT_
 #define CRIMILD_SIMULATION_INPUT_
 
-#include "Crimild_Mathematics.hpp"
-
 #include <array>
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/common/Singleton.hpp>
+#include <crimild/foundation/common/Types.hpp>
+#include <crimild/math/Vector2.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>

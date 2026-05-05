@@ -1,10 +1,11 @@
 #include "LookAt.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/lookAt.hpp>
+#include <crimild/math/origin.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;

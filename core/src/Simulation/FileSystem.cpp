@@ -27,10 +27,10 @@
 
 #include "FileSystem.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Exceptions/FileNotFoundException.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/log/Log.hpp>
+#include <crimild/math/Numeric.hpp>
 #include <fstream>
 
 using namespace crimild;

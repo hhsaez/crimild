@@ -3,6 +3,10 @@
 
 #include "Nodes/3D/Spatial3D.hpp"
 
+#include <crimild/math/Point2.hpp>
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/perspective.hpp>
+
 namespace crimild::experimental {
 
    class Camera3D : public Spatial3D {

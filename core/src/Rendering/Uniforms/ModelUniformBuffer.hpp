@@ -28,28 +28,28 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_MODEL_
 #define CRIMILD_RENDERING_UNIFORMS_MODEL_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "crimild/math/Matrix4.hpp"
 
 namespace crimild {
 
-    class Node;
+   class Node;
 
-    class ModelUniform : public UniformBuffer {
-    private:
-        struct Props {
-            Matrix4f model;
-        };
+   class ModelUniform : public UniformBuffer {
+   private:
+      struct Props {
+         Matrix4f model;
+      };
 
-    public:
-        explicit ModelUniform( Node *node ) noexcept;
-        ~ModelUniform( void ) = default;
+   public:
+      explicit ModelUniform( Node *node ) noexcept;
+      ~ModelUniform( void ) = default;
 
-        void onPreRender( void ) noexcept override;
+      void onPreRender( void ) noexcept override;
 
-    private:
-        Node *m_node = nullptr;
-    };
+   private:
+      Node *m_node = nullptr;
+   };
 
 }
 

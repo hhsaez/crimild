@@ -28,43 +28,42 @@
 #ifndef CRIMILD_CORE_RENDERING_PRINCIPLED_VOLUME_
 #define CRIMILD_CORE_RENDERING_PRINCIPLED_VOLUME_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Material.hpp"
 
 namespace crimild {
 
-    namespace materials {
+   namespace materials {
 
-        /**
-            \brief A volumetric material
-        */
-        class PrincipledVolume : public Material {
-            CRIMILD_IMPLEMENT_RTTI( crimild::materials::PrincipledVolume )
+      /**
+          \brief A volumetric material
+      */
+      class PrincipledVolume : public Material {
+         CRIMILD_IMPLEMENT_RTTI( crimild::materials::PrincipledVolume )
 
-        public:
-            struct Props {
-                alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
-                alignas( 4 ) Real density = 1;
-            };
+      public:
+         struct Props {
+            alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
+            alignas( 4 ) Real density = 1;
+         };
 
-        public:
-            PrincipledVolume( void ) noexcept;
-            virtual ~PrincipledVolume( void ) = default;
+      public:
+         PrincipledVolume( void ) noexcept;
+         virtual ~PrincipledVolume( void ) = default;
 
-            inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo; };
-            inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo; }
-            void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
-            const Texture *getAlbedoMap( void ) const noexcept;
-            Texture *getAlbedoMap( void ) noexcept;
+         inline void setAlbedo( const ColorRGB &albedo ) noexcept { getProps().albedo = albedo; };
+         inline ColorRGB getAlbedo( void ) const noexcept { return getProps().albedo; }
+         void setAlbedoMap( SharedPointer< Texture > const &albedoMap ) noexcept;
+         const Texture *getAlbedoMap( void ) const noexcept;
+         Texture *getAlbedoMap( void ) noexcept;
 
-            inline void setDensity( Real density ) noexcept { getProps().density = density; }
-            inline Real getDensity( void ) const noexcept { return getProps().density; }
+         inline void setDensity( Real density ) noexcept { getProps().density = density; }
+         inline Real getDensity( void ) const noexcept { return getProps().density; }
 
-            Props &getProps( void ) noexcept;
-            const Props &getProps( void ) const noexcept;
-        };
+         Props &getProps( void ) noexcept;
+         const Props &getProps( void ) const noexcept;
+      };
 
-    }
+   }
 
 }
 

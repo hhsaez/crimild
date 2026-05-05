@@ -29,7 +29,6 @@
 #define CRIMILD_PARTICLE_GENERATOR_DEFAULT_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 
 namespace crimild {
 

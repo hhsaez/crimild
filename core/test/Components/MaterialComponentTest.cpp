@@ -29,9 +29,9 @@
 
 #include "Rendering/Materials/UnlitMaterial.hpp"
 
-#include <Crimild_Mathematics.hpp>
 #include <crimild/coding/MemoryDecoder.hpp>
 #include <crimild/coding/MemoryEncoder.hpp>
+#include <crimild/math/isEqual.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

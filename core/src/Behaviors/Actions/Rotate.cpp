@@ -27,11 +27,11 @@
 
 #include "Behaviors/Actions/Rotate.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/rotation.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;

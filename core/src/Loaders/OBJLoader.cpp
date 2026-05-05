@@ -28,7 +28,6 @@
 #include "OBJLoader.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/ImageManager.hpp"
 #include "Rendering/ImageView.hpp"
@@ -36,8 +35,6 @@
 #include "Rendering/Sampler.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Simulation/FileSystem.hpp"
-
-#include <crimild/foundation.hpp>
 
 namespace crimild {
 

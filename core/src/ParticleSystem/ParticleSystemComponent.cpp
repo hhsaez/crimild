@@ -27,10 +27,11 @@
 
 #include "ParticleSystemComponent.hpp"
 
-using namespace crimild;
-
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/Numeric.hpp>
+
+using namespace crimild;
 
 ParticleSystemComponent::ParticleSystemComponent( void )
 {

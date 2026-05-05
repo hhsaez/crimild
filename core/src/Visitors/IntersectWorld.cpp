@@ -28,369 +28,373 @@
 #include "Visitors/IntersectWorld.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "Rendering/Materials/PrincipledVolumeMaterial.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Geometry.hpp"
 #include "SceneGraph/Group.hpp"
 
+#include <crimild/math/Random.hpp>
+#include <crimild/math/intersect.hpp>
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/isEqual.hpp>
+#include <crimild/math/isNaN.hpp>
 #include <unordered_set>
 
 using namespace crimild;
 
 void IntersectWorld::traverse( Node *node ) noexcept
 {
-    NodeVisitor::traverse( node );
+   NodeVisitor::traverse( node );
 
-    m_results.sort( []( auto &a, auto &b ) { return a.t < b.t; } );
+   m_results.sort( []( auto &a, auto &b ) { return a.t < b.t; } );
 }
 
 void IntersectWorld::visitGroup( Group *group ) noexcept
 {
-    if ( group->getLayer() == Node::Layer::SKYBOX ) {
-        return;
-    }
+   if ( group->getLayer() == Node::Layer::SKYBOX ) {
+      return;
+   }
 
-    if ( !group->getWorldBound()->testIntersection( m_ray ) ) {
-        // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
-        // return;
-    }
+   if ( !group->getWorldBound()->testIntersection( m_ray ) ) {
+      // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
+      // return;
+   }
 
-    NodeVisitor::visitGroup( group );
+   NodeVisitor::visitGroup( group );
 }
 
 void IntersectWorld::visitGeometry( Geometry *geometry ) noexcept
 {
-    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-        return;
-    }
+   if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+      return;
+   }
 
-    if ( geometry->getCullMode() != Node::CullMode::NEVER ) {
-        // Use world bounds for intersection test, wihch is cheaper
-        // The ray must be transformed since we're using the local bound.
-        // I think there is a bug here. We should be using worldBound
-        // instead, but that results in a wrong intersection test
-        // TODO(hernan): Seems like a bug. Fix it.
-        const auto R = inverse( geometry->getWorld() )( m_ray );
-        if ( !geometry->getLocalBound()->testIntersection( R ) ) {
-            // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
-            // return;
-        }
-    }
+   if ( geometry->getCullMode() != Node::CullMode::NEVER ) {
+      // Use world bounds for intersection test, wihch is cheaper
+      // The ray must be transformed since we're using the local bound.
+      // I think there is a bug here. We should be using worldBound
+      // instead, but that results in a wrong intersection test
+      // TODO(hernan): Seems like a bug. Fix it.
+      const auto R = inverse( geometry->getWorld() )( m_ray );
+      if ( !geometry->getLocalBound()->testIntersection( R ) ) {
+         // TODO(hernan): Rejecting nodes based on world bounds does not work 100% of the time
+         // return;
+      }
+   }
 
-    const auto isInVolume = [ & ] {
-        const auto firstMaterial = geometry->getComponent< MaterialComponent >()->first();
-        return firstMaterial != nullptr && ( firstMaterial->getClassName() == materials::PrincipledVolume::__CLASS_NAME );
-    }();
+   const auto isInVolume = [ & ] {
+      const auto firstMaterial = geometry->getComponent< MaterialComponent >()->first();
+      return firstMaterial != nullptr && ( firstMaterial->getClassName() == materials::PrincipledVolume::__CLASS_NAME );
+   }();
 
-    geometry->forEachPrimitive(
-        [ & ]( auto primitive ) {
-            intersect( geometry, primitive, isInVolume );
-        }
-    );
+   geometry->forEachPrimitive(
+      [ & ]( auto primitive ) {
+         intersect( geometry, primitive, isInVolume );
+      }
+   );
 }
 
 void IntersectWorld::visitCSGNode( CSGNode *csg ) noexcept
 {
-    // TODO: test intersection (needs worldstateupdate)
-    // TODO: not sure if intersection test should use local or world coordinate system
-    // TODO: if the former, remember to transform the ray!!
+   // TODO: test intersection (needs worldstateupdate)
+   // TODO: not sure if intersection test should use local or world coordinate system
+   // TODO: if the former, remember to transform the ray!!
 
-    if ( csg->getLeft() == nullptr || csg->getRight() == nullptr ) {
-        if ( auto left = csg->getLeft() ) {
-            left->accept( *this );
-        } else if ( auto right = csg->getRight() ) {
-            right->accept( *this );
-        }
-        return;
-    }
+   if ( csg->getLeft() == nullptr || csg->getRight() == nullptr ) {
+      if ( auto left = csg->getLeft() ) {
+         left->accept( *this );
+      } else if ( auto right = csg->getRight() ) {
+         right->accept( *this );
+      }
+      return;
+   }
 
-    auto beforeLeftSize = m_results.size();
-    if ( auto left = csg->getLeft() ) {
-        left->accept( *this );
-    }
-    auto afterLeftSize = m_results.size();
+   auto beforeLeftSize = m_results.size();
+   if ( auto left = csg->getLeft() ) {
+      left->accept( *this );
+   }
+   auto afterLeftSize = m_results.size();
 
-    auto beforeRightSize = m_results.size();
-    if ( auto right = csg->getRight() ) {
-        right->accept( *this );
-    }
-    auto afterRightSize = m_results.size();
+   auto beforeRightSize = m_results.size();
+   if ( auto right = csg->getRight() ) {
+      right->accept( *this );
+   }
+   auto afterRightSize = m_results.size();
 
-    auto leftIntersections = [ & ] {
-        std::vector< Result > res( afterLeftSize - beforeLeftSize );
-        for ( auto i = 0l; i < res.size(); ++i ) {
-            res[ i ] = m_results[ beforeLeftSize + i ];
-        }
-        return res;
-    }();
+   auto leftIntersections = [ & ] {
+      std::vector< Result > res( afterLeftSize - beforeLeftSize );
+      for ( auto i = 0l; i < res.size(); ++i ) {
+         res[ i ] = m_results[ beforeLeftSize + i ];
+      }
+      return res;
+   }();
 
-    auto rightIntersections = [ & ] {
-        std::vector< Result > res( afterRightSize - beforeRightSize );
-        for ( auto i = 0l; i < res.size(); ++i ) {
-            res[ i ] = m_results[ beforeRightSize + i ];
-        }
-        return res;
-    }();
+   auto rightIntersections = [ & ] {
+      std::vector< Result > res( afterRightSize - beforeRightSize );
+      for ( auto i = 0l; i < res.size(); ++i ) {
+         res[ i ] = m_results[ beforeRightSize + i ];
+      }
+      return res;
+   }();
 
-    auto allIntersections = [ & ] {
-        std::vector< Result > res( leftIntersections.size() + rightIntersections.size() );
-        auto i = Index( 0 );
-        for ( auto &x : leftIntersections ) {
-            res[ i++ ] = x;
-        }
-        for ( auto &x : rightIntersections ) {
-            res[ i++ ] = x;
-        }
-        std::sort(
-            std::begin( res ),
-            std::end( res ),
-            []( auto &a, auto &b ) { return a.t < b.t; }
-        );
-        return res;
-    }();
+   auto allIntersections = [ & ] {
+      std::vector< Result > res( leftIntersections.size() + rightIntersections.size() );
+      auto i = Index( 0 );
+      for ( auto &x : leftIntersections ) {
+         res[ i++ ] = x;
+      }
+      for ( auto &x : rightIntersections ) {
+         res[ i++ ] = x;
+      }
+      std::sort(
+         std::begin( res ),
+         std::end( res ),
+         []( auto &a, auto &b ) { return a.t < b.t; }
+      );
+      return res;
+   }();
 
-    auto intersectionAllowed = []( auto op, auto lHit, auto inL, auto inR ) {
-        switch ( op ) {
-            case CSGNode::Operator::UNION:
-                return ( lHit && !inR ) || ( !lHit && !inL );
-            case CSGNode::Operator::INTERSECTION:
-                return ( lHit && inR ) || ( !lHit && inL );
-            case CSGNode::Operator::DIFFERENCE:
-                return ( lHit && !inR ) || ( !lHit && inL );
-            default:
-                return false;
-        }
-    };
+   auto intersectionAllowed = []( auto op, auto lHit, auto inL, auto inR ) {
+      switch ( op ) {
+         case CSGNode::Operator::UNION:
+            return ( lHit && !inR ) || ( !lHit && !inL );
+         case CSGNode::Operator::INTERSECTION:
+            return ( lHit && inR ) || ( !lHit && inL );
+         case CSGNode::Operator::DIFFERENCE:
+            return ( lHit && !inR ) || ( !lHit && inL );
+         default:
+            return false;
+      }
+   };
 
-    auto filteredIntersections = [ & ] {
-        std::vector< Result > res;
+   auto filteredIntersections = [ & ] {
+      std::vector< Result > res;
 
-        auto inR = false;
-        auto inL = false;
+      auto inR = false;
+      auto inL = false;
 
-        for ( auto &i : allIntersections ) {
-            auto lHit = std::find_if(
-                            std::begin( leftIntersections ),
-                            std::end( leftIntersections ),
-                            [ & ]( auto &other ) {
-                                return i.geometry == other.geometry;
-                            }
-                        )
-                        != std::end( leftIntersections );
-            if ( intersectionAllowed( csg->getOperator(), lHit, inL, inR ) ) {
-                res.push_back( i );
-            }
+      for ( auto &i : allIntersections ) {
+         auto lHit = std::find_if(
+                        std::begin( leftIntersections ),
+                        std::end( leftIntersections ),
+                        [ & ]( auto &other ) {
+                           return i.geometry == other.geometry;
+                        }
+                     )
+                     != std::end( leftIntersections );
+         if ( intersectionAllowed( csg->getOperator(), lHit, inL, inR ) ) {
+            res.push_back( i );
+         }
 
-            if ( lHit ) {
-                inL = !inL;
-            } else {
-                inR = !inR;
-            }
-        }
+         if ( lHit ) {
+            inL = !inL;
+         } else {
+            inR = !inR;
+         }
+      }
 
-        return res;
-    }();
+      return res;
+   }();
 
-    m_results.resize( beforeLeftSize + filteredIntersections.size() );
-    auto i = Index( 0 );
-    for ( auto &x : filteredIntersections ) {
-        m_results[ beforeLeftSize + ( i++ ) ] = x;
-    }
+   m_results.resize( beforeLeftSize + filteredIntersections.size() );
+   auto i = Index( 0 );
+   for ( auto &x : filteredIntersections ) {
+      m_results[ beforeLeftSize + ( i++ ) ] = x;
+   }
 }
 
 void IntersectWorld::intersect( Geometry *geometry, Primitive *primitive, Bool isInVolume ) noexcept
 {
-    switch ( primitive->getType() ) {
-        case Primitive::Type::SPHERE: {
-            const auto S = Sphere {};
-            Real t0, t1;
-            if ( crimild::intersect( m_ray, S, geometry->getWorld(), t0, t1 ) ) {
-                auto pushResult = [ & ]( auto t ) {
-                    const auto P = m_ray( t );
-                    auto result = Result {
+   switch ( primitive->getType() ) {
+      case Primitive::Type::SPHERE: {
+         const auto S = Sphere {};
+         Real t0, t1;
+         if ( crimild::intersect( m_ray, S, geometry->getWorld(), t0, t1 ) ) {
+            auto pushResult = [ & ]( auto t ) {
+               const auto P = m_ray( t );
+               auto result = Result {
+                  .geometry = geometry,
+                  .t = t,
+                  .point = P,
+               };
+               result.setFaceNormal( m_ray, normal( S, geometry->getWorld(), P ) );
+               m_results.add( result );
+            };
+
+            if ( t0 >= numbers::EPSILON ) {
+               pushResult( t0 );
+            }
+
+            if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
+               pushResult( t1 );
+            }
+         }
+         break;
+      }
+
+      case Primitive::Type::PLANE: {
+         const auto P = Plane3 {};
+         Real t;
+         if ( crimild::intersect( m_ray, P, geometry->getWorld(), t ) && t >= numbers::EPSILON ) {
+            const auto p = m_ray( t );
+            auto result = Result {
+               .geometry = geometry,
+               .t = t,
+               .point = p,
+            };
+            result.setFaceNormal( m_ray, geometry->getWorld()( normal( P ) ) );
+            m_results.add( result );
+         }
+         break;
+      }
+
+      case Primitive::Type::BOX: {
+         const auto B = Box {};
+         Real t0, t1;
+         if ( crimild::intersect( m_ray, B, geometry->getWorld(), t0, t1 ) ) {
+            auto pushResult = [ & ]( auto t ) {
+               const auto P = m_ray( t );
+               auto result = Result {
+                  .geometry = geometry,
+                  .t = t,
+                  .point = P,
+               };
+               result.setFaceNormal( m_ray, normal( B, geometry->getWorld(), P ) );
+               m_results.add( result );
+            };
+
+            if ( isInVolume ) {
+               const bool enableDebug = true;
+               const bool debugging = enableDebug && Random::generate< Real >() < 0.00001;
+               if ( debugging )
+                  std::cerr << "\nt_min=" << t0 << ", t_max=" << t1 << '\n';
+
+               if ( t0 < 0 ) {
+                  t0 = 0;
+               }
+
+               if ( t1 > t0 ) {
+                  Real d = length( direction( m_ray ) );
+                  Real distanceInsideBoundary = ( t1 - t0 ) * d;
+                  Real density = [ & ] {
+                     if ( auto firstMaterial = geometry->getComponent< MaterialComponent >()->first() ) {
+                        return static_cast< materials::PrincipledVolume * >( firstMaterial )->getDensity();
+                     } else {
+                        return Real( numbers::EPSILON );
+                     }
+                  }();
+                  Real negInvDensity = Real( -1 ) / density;
+                  Real hitDistance = negInvDensity * std::log( Random::generate< Real >() );
+                  if ( hitDistance <= distanceInsideBoundary ) {
+                     Real t = t0 + hitDistance / d;
+                     const auto P = m_ray( t );
+
+                     if ( debugging ) {
+                        std::cerr << "hit_distance = " << hitDistance << '\n'
+                                  << "rec.t = " << t << '\n'
+                                  << "rec.p = " << P.x << ", " << P.y << ", " << P.z << '\n';
+                     }
+                     auto result = Result {
                         .geometry = geometry,
                         .t = t,
                         .point = P,
-                    };
-                    result.setFaceNormal( m_ray, normal( S, geometry->getWorld(), P ) );
-                    m_results.add( result );
-                };
+                        .normal = Normal3 { 1, 0, 0 }, // arbitrary
+                        .frontFace = true,             // arbitrary
+                     };
+                     m_results.add( result );
+                  }
+               }
+            } else {
+               if ( t0 >= numbers::EPSILON ) {
+                  pushResult( t0 );
+               }
 
-                if ( t0 >= numbers::EPSILON ) {
-                    pushResult( t0 );
-                }
-
-                if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-                    pushResult( t1 );
-                }
+               if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
+                  pushResult( t1 );
+               }
             }
-            break;
-        }
+         }
+         break;
+      }
 
-        case Primitive::Type::PLANE: {
-            const auto P = Plane3 {};
-            Real t;
-            if ( crimild::intersect( m_ray, P, geometry->getWorld(), t ) && t >= numbers::EPSILON ) {
-                const auto p = m_ray( t );
-                auto result = Result {
-                    .geometry = geometry,
-                    .t = t,
-                    .point = p,
-                };
-                result.setFaceNormal( m_ray, geometry->getWorld()( normal( P ) ) );
-                m_results.add( result );
+      case Primitive::Type::OPEN_CYLINDER:
+      case Primitive::Type::CYLINDER: {
+         const auto C = Cylinder { .closed = primitive->getType() != Primitive::Type::OPEN_CYLINDER };
+         Real t0, t1;
+         if ( crimild::intersect( m_ray, C, geometry->getWorld(), t0, t1 ) ) {
+            auto pushResult = [ & ]( auto t ) {
+               if ( isEqual( t, numbers::POSITIVE_INFINITY ) ) {
+                  return;
+               }
+               const auto P = m_ray( t );
+               auto result = Result {
+                  .geometry = geometry,
+                  .t = t,
+                  .point = P,
+               };
+               result.setFaceNormal( m_ray, normal( C, geometry->getWorld(), P ) );
+               m_results.add( result );
+            };
+
+            if ( t0 >= numbers::EPSILON ) {
+               pushResult( t0 );
             }
-            break;
-        }
 
-        case Primitive::Type::BOX: {
-            const auto B = Box {};
-            Real t0, t1;
-            if ( crimild::intersect( m_ray, B, geometry->getWorld(), t0, t1 ) ) {
-                auto pushResult = [ & ]( auto t ) {
-                    const auto P = m_ray( t );
-                    auto result = Result {
+            if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
+               pushResult( t1 );
+            }
+         }
+         break;
+      }
+
+      case Primitive::Type::TRIANGLES: {
+         auto positions = [ & ] {
+            BufferAccessor *positions = nullptr;
+            primitive->getVertexData().each(
+               [ & ]( auto vertices ) {
+                  if ( positions == nullptr ) {
+                     positions = vertices->get( VertexAttribute::Name::POSITION );
+                  }
+               }
+            );
+            return positions;
+         }();
+
+         if ( positions == nullptr ) {
+            return;
+         }
+
+         if ( auto indices = primitive->getIndices() ) {
+            // const auto N = indices->getIndexCount() / 3;
+            const auto N = indices->getIndexCount();
+            for ( auto i = 0; i < N; i += 3 ) {
+               const auto T = Triangle {
+                  positions->get< Point3f >( indices->getIndex( i + 0 ) ),
+                  positions->get< Point3f >( indices->getIndex( i + 1 ) ),
+                  positions->get< Point3f >( indices->getIndex( i + 2 ) ),
+               };
+
+               Real t;
+               if ( crimild::intersect( m_ray, T, geometry->getWorld(), t ) ) {
+                  if ( !isZero( t ) && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) ) {
+                     const auto P = m_ray( t );
+                     auto result = Result {
                         .geometry = geometry,
                         .t = t,
                         .point = P,
-                    };
-                    result.setFaceNormal( m_ray, normal( B, geometry->getWorld(), P ) );
-                    m_results.add( result );
-                };
-
-                if ( isInVolume ) {
-                    const bool enableDebug = true;
-                    const bool debugging = enableDebug && Random::generate< Real >() < 0.00001;
-                    if ( debugging )
-                        std::cerr << "\nt_min=" << t0 << ", t_max=" << t1 << '\n';
-
-                    if ( t0 < 0 ) {
-                        t0 = 0;
-                    }
-
-                    if ( t1 > t0 ) {
-                        Real d = length( direction( m_ray ) );
-                        Real distanceInsideBoundary = ( t1 - t0 ) * d;
-                        Real density = [ & ] {
-                            if ( auto firstMaterial = geometry->getComponent< MaterialComponent >()->first() ) {
-                                return static_cast< materials::PrincipledVolume * >( firstMaterial )->getDensity();
-                            } else {
-                                return Real( numbers::EPSILON );
-                            }
-                        }();
-                        Real negInvDensity = Real( -1 ) / density;
-                        Real hitDistance = negInvDensity * std::log( Random::generate< Real >() );
-                        if ( hitDistance <= distanceInsideBoundary ) {
-                            Real t = t0 + hitDistance / d;
-                            const auto P = m_ray( t );
-
-                            if ( debugging ) {
-                                std::cerr << "hit_distance = " << hitDistance << '\n'
-                                          << "rec.t = " << t << '\n'
-                                          << "rec.p = " << P.x << ", " << P.y << ", " << P.z << '\n';
-                            }
-                            auto result = Result {
-                                .geometry = geometry,
-                                .t = t,
-                                .point = P,
-                                .normal = Normal3 { 1, 0, 0 }, // arbitrary
-                                .frontFace = true,             // arbitrary
-                            };
-                            m_results.add( result );
-                        }
-                    }
-                } else {
-                    if ( t0 >= numbers::EPSILON ) {
-                        pushResult( t0 );
-                    }
-
-                    if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-                        pushResult( t1 );
-                    }
-                }
+                     };
+                     result.setFaceNormal( m_ray, normal( T, geometry->getWorld(), P ) );
+                     m_results.add( result );
+                  }
+               }
             }
-            break;
-        }
+         }
 
-        case Primitive::Type::OPEN_CYLINDER:
-        case Primitive::Type::CYLINDER: {
-            const auto C = Cylinder { .closed = primitive->getType() != Primitive::Type::OPEN_CYLINDER };
-            Real t0, t1;
-            if ( crimild::intersect( m_ray, C, geometry->getWorld(), t0, t1 ) ) {
-                auto pushResult = [ & ]( auto t ) {
-                    if ( isEqual( t, numbers::POSITIVE_INFINITY ) ) {
-                        return;
-                    }
-                    const auto P = m_ray( t );
-                    auto result = Result {
-                        .geometry = geometry,
-                        .t = t,
-                        .point = P,
-                    };
-                    result.setFaceNormal( m_ray, normal( C, geometry->getWorld(), P ) );
-                    m_results.add( result );
-                };
+         break;
+      }
 
-                if ( t0 >= numbers::EPSILON ) {
-                    pushResult( t0 );
-                }
-
-                if ( !isEqual( t0, t1 ) && t1 >= numbers::EPSILON ) {
-                    pushResult( t1 );
-                }
-            }
-            break;
-        }
-
-        case Primitive::Type::TRIANGLES: {
-            auto positions = [ & ] {
-                BufferAccessor *positions = nullptr;
-                primitive->getVertexData().each(
-                    [ & ]( auto vertices ) {
-                        if ( positions == nullptr ) {
-                            positions = vertices->get( VertexAttribute::Name::POSITION );
-                        }
-                    }
-                );
-                return positions;
-            }();
-
-            if ( positions == nullptr ) {
-                return;
-            }
-
-            if ( auto indices = primitive->getIndices() ) {
-                // const auto N = indices->getIndexCount() / 3;
-                const auto N = indices->getIndexCount();
-                for ( auto i = 0; i < N; i += 3 ) {
-                    const auto T = Triangle {
-                        positions->get< Point3f >( indices->getIndex( i + 0 ) ),
-                        positions->get< Point3f >( indices->getIndex( i + 1 ) ),
-                        positions->get< Point3f >( indices->getIndex( i + 2 ) ),
-                    };
-
-                    Real t;
-                    if ( crimild::intersect( m_ray, T, geometry->getWorld(), t ) ) {
-                        if ( !isZero( t ) && !isNaN( t ) && !isEqual( t, numbers::POSITIVE_INFINITY ) ) {
-                            const auto P = m_ray( t );
-                            auto result = Result {
-                                .geometry = geometry,
-                                .t = t,
-                                .point = P,
-                            };
-                            result.setFaceNormal( m_ray, normal( T, geometry->getWorld(), P ) );
-                            m_results.add( result );
-                        }
-                    }
-                }
-            }
-
-            break;
-        }
-
-        default:
-            break;
-    }
+      default:
+         break;
+   }
 }

@@ -27,8 +27,6 @@
 
 #include "Image.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
 #include <cstring>

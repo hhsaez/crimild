@@ -29,9 +29,8 @@
 #define CRIMILD_ANIMATION_SKELETON_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 

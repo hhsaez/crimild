@@ -27,7 +27,6 @@
 
 #include "UIFrame.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
 #include "UIFrameConstraint.hpp"

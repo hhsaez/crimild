@@ -28,7 +28,6 @@
 #ifndef CRIMILD_VISITORS_PICKING_
 #define CRIMILD_VISITORS_PICKING_
 
-#include "Crimild_Mathematics.hpp"
 #include "NodeVisitor.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
@@ -38,71 +37,71 @@
 
 namespace crimild {
 
-    class Picking : public NodeVisitor {
-    private:
-        typedef std::function< bool( Node * ) > FilterType;
+   class Picking : public NodeVisitor {
+   private:
+      typedef std::function< bool( Node * ) > FilterType;
 
-    public:
-        class Results {
-        public:
-            Results( void ) { }
-            ~Results( void ) { }
+   public:
+      class Results {
+      public:
+         Results( void ) { }
+         ~Results( void ) { }
 
-            void reset( void )
-            {
-                _candidates.clear();
+         void reset( void )
+         {
+            _candidates.clear();
+         }
+
+         void sortCandidates( std::function< bool( Node *, Node * ) > callback )
+         {
+            _candidates.sort( callback );
+         }
+
+         void pushCandidate( Node *candidate )
+         {
+            _candidates.push_back( candidate );
+         }
+
+         void foreachCandidate( std::function< void( Node * ) > callback )
+         {
+            auto cs = _candidates;
+            for ( auto c : cs ) {
+               callback( c );
+            }
+         }
+
+         bool hasResults( void )
+         {
+            return _candidates.size() > 0;
+         }
+
+         Node *getBestCandidate( void )
+         {
+            if ( !hasResults() ) {
+               return nullptr;
             }
 
-            void sortCandidates( std::function< bool( Node *, Node * ) > callback )
-            {
-                _candidates.sort( callback );
-            }
+            return _candidates.front();
+         }
 
-            void pushCandidate( Node *candidate )
-            {
-                _candidates.push_back( candidate );
-            }
+      private:
+         std::list< Node * > _candidates;
+      };
 
-            void foreachCandidate( std::function< void( Node * ) > callback )
-            {
-                auto cs = _candidates;
-                for ( auto c : cs ) {
-                    callback( c );
-                }
-            }
+   public:
+      Picking( const Ray3 &tester, Results &results, FilterType filter = nullptr );
+      virtual ~Picking( void );
 
-            bool hasResults( void )
-            {
-                return _candidates.size() > 0;
-            }
+      virtual void traverse( Node *node ) override;
 
-            Node *getBestCandidate( void )
-            {
-                if ( !hasResults() ) {
-                    return nullptr;
-                }
+      virtual void visitNode( Node *node ) override;
+      virtual void visitGroup( Group *node ) override;
 
-                return _candidates.front();
-            }
-
-        private:
-            std::list< Node * > _candidates;
-        };
-
-    public:
-        Picking( const Ray3 &tester, Results &results, FilterType filter = nullptr );
-        virtual ~Picking( void );
-
-        virtual void traverse( Node *node ) override;
-
-        virtual void visitNode( Node *node ) override;
-        virtual void visitGroup( Group *node ) override;
-
-    private:
-        Ray3 _tester;
-        Results &_results;
-        FilterType _filter;
-    };
+   private:
+      Ray3 _tester;
+      Results &_results;
+      FilterType _filter;
+   };
 
 }
 

@@ -29,47 +29,48 @@
 #define CRIMILD_CORE_BEHAVIORS_ACTIONS_CLAMP_POSITION_
 
 #include "Behaviors/Behavior.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Bounds3.hpp>
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            /**
-             * \brief Ensures an agent's position is always within limits
-             */
-            class ClampPosition : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ClampPosition )
+         /**
+          * \brief Ensures an agent's position is always within limits
+          */
+         class ClampPosition : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ClampPosition )
 
-            public:
-                virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         public:
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-                inline void setLimits( const Bounds3 &limits ) noexcept { m_limits = limits; }
-                inline const Bounds3 &getLimits( void ) const noexcept { return m_limits; }
+            inline void setLimits( const Bounds3 &limits ) noexcept { m_limits = limits; }
+            inline const Bounds3 &getLimits( void ) const noexcept { return m_limits; }
 
-            private:
-                Bounds3 m_limits = {
-                    .min = Point3f { -1, -1, -1 },
-                    .max = Point3f { 1, 1, 1 },
-                };
-
-                /**
-                    \name Coding support
-                */
-                //@{
-
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
-
-                //@}
+         private:
+            Bounds3 m_limits = {
+               .min = Point3f { -1, -1, -1 },
+               .max = Point3f { 1, 1, 1 },
             };
 
-        }
+            /**
+                \name Coding support
+            */
+            //@{
 
-    }
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
 
 }
 

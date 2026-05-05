@@ -27,7 +27,6 @@
 
 #include "SceneGraph/Light.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/ShadowMap.hpp"
 #include "Rendering/UniformBuffer.hpp"
@@ -37,7 +36,13 @@
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
-#include <crimild/foundation.hpp>
+#include <crimild/math/ceil.hpp>
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/lookAt.hpp>
+#include <crimild/math/max.hpp>
+#include <crimild/math/origin.hpp>
+#include <crimild/math/ortho.hpp>
+#include <crimild/math/perspective.hpp>
 
 using namespace crimild;
 

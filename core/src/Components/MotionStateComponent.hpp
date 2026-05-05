@@ -29,65 +29,67 @@
 #define CRIMILD_CORE_COMPONENTS_MOTION_STATE_
 
 #include "Components/NodeComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Point3.hpp>
+#include <crimild/math/Vector3.hpp>
 
 namespace crimild {
 
-    /**
-     * \brief State for motion behaviors
-     *
-     * This component stores the state required for motion behaviors to work
-     * correctly.
-     *
-     * \see crimild::behaviors::actions::MotionReset
-     * \see crimild::behaviors::actions::MotionApply
-     */
-    class MotionState : public NodeComponent {
-        CRIMILD_IMPLEMENT_RTTI( crimild::MotionState )
+   /**
+    * \brief State for motion behaviors
+    *
+    * This component stores the state required for motion behaviors to work
+    * correctly.
+    *
+    * \see crimild::behaviors::actions::MotionReset
+    * \see crimild::behaviors::actions::MotionApply
+    */
+   class MotionState : public NodeComponent {
+      CRIMILD_IMPLEMENT_RTTI( crimild::MotionState )
 
-    public:
-        /**
-         * \brief Current velocity
-         *
-         * This value is updated by crimild::behaviors::actions::MotionApply
-         */
-        Vector3f velocity = Vector3f::Constants::ZERO;
+   public:
+      /**
+       * \brief Current velocity
+       *
+       * This value is updated by crimild::behaviors::actions::MotionApply
+       */
+      Vector3f velocity = Vector3f::Constants::ZERO;
 
-        /**
-         * \brief Current position
-         *
-         * This value is set by crimild::behaviors::actions::MotionReset to be
-         * the same as the Node's current location.
-         *
-         * It is updated by crimild::behaviors::actions::MotionApply based on
-         * current velocity and steering force
-         */
-        Point3f position = Point3f::Constants::ZERO;
+      /**
+       * \brief Current position
+       *
+       * This value is set by crimild::behaviors::actions::MotionReset to be
+       * the same as the Node's current location.
+       *
+       * It is updated by crimild::behaviors::actions::MotionApply based on
+       * current velocity and steering force
+       */
+      Point3f position = Point3f::Constants::ZERO;
 
-        /**
-         * \brief Steering force
-         *
-         * This value is reset by crimild::behaviors::actions::MotionReset on
-         * every step.
-         */
-        Vector3f steering = Vector3f::Constants::ZERO;
+      /**
+       * \brief Steering force
+       *
+       * This value is reset by crimild::behaviors::actions::MotionReset on
+       * every step.
+       */
+      Vector3f steering = Vector3f::Constants::ZERO;
 
-        float maxVelocity = 1.0f;
-        float maxForce = 1.0f;
-        float mass = 0.0f;
-        float slowingRadius = 1.0f;
+      float maxVelocity = 1.0f;
+      float maxForce = 1.0f;
+      float mass = 0.0f;
+      float slowingRadius = 1.0f;
 
-        /**
-            \name Coding
-         */
-        //@{
+      /**
+          \name Coding
+       */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

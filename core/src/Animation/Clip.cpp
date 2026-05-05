@@ -31,6 +31,7 @@
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/Numeric.hpp>
 
 using namespace crimild;
 using namespace crimild::animation;

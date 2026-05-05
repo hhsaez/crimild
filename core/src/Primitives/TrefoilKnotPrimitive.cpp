@@ -27,48 +27,46 @@
 
 #include "TrefoilKnotPrimitive.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 TrefoilKnotPrimitive::TrefoilKnotPrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
+   : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _scale = params.scale;
+   _scale = params.scale;
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 100, 8 } };
-    setInterval( interval );
-    generate();
+   ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 100, 8 } };
+   setInterval( interval );
+   generate();
 }
 
 Vector3f TrefoilKnotPrimitive::evaluate( const Vector2f &domain ) const
 {
-    const float a = 0.5f;
-    const float b = 0.3f;
-    const float c = 0.5f;
-    const float d = 0.1f;
-    float u = ( Numericf::TWO_PI - domain[ 0 ] ) * 2;
-    float v = domain[ 1 ];
+   const float a = 0.5f;
+   const float b = 0.3f;
+   const float c = 0.5f;
+   const float d = 0.1f;
+   float u = ( Numericf::TWO_PI - domain[ 0 ] ) * 2;
+   float v = domain[ 1 ];
 
-    float r = a + b * cos( 1.5f * u );
-    float x = r * cos( u );
-    float y = r * sin( u );
-    float z = c * sin( 1.5f * u );
+   float r = a + b * cos( 1.5f * u );
+   float x = r * cos( u );
+   float y = r * sin( u );
+   float z = c * sin( 1.5f * u );
 
-    Vector3f dv = {
-        -1.5f * b * sin( 1.5f * u ) * cos( u ) - ( a + b * cos( 1.5f * u ) ) * sin( u ),
-        -1.5f * b * sin( 1.5f * u ) * sin( u ) + ( a + b * cos( 1.5f * u ) ) * cos( u ),
-        1.5f * c * cos( 1.5f * u ),
-    };
+   Vector3f dv = {
+      -1.5f * b * sin( 1.5f * u ) * cos( u ) - ( a + b * cos( 1.5f * u ) ) * sin( u ),
+      -1.5f * b * sin( 1.5f * u ) * sin( u ) + ( a + b * cos( 1.5f * u ) ) * cos( u ),
+      1.5f * c * cos( 1.5f * u ),
+   };
 
-    Vector3f q = normalize( dv );
-    Vector3f qvn = normalize( Vector3f { q[ 1 ], -q[ 0 ], 0.0f } );
-    Vector3f ww = cross( q, qvn );
+   Vector3f q = normalize( dv );
+   Vector3f qvn = normalize( Vector3f { q[ 1 ], -q[ 0 ], 0.0f } );
+   Vector3f ww = cross( q, qvn );
 
-    Vector3f range = {
-        x + d * ( qvn[ 0 ] * cos( v ) + ww[ 0 ] * sin( v ) ),
-        y + d * ( qvn[ 1 ] * cos( v ) + ww[ 1 ] * sin( v ) ),
-        z + d * ww[ 2 ] * sin( v ),
-    };
-    return range * _scale;
+   Vector3f range = {
+      x + d * ( qvn[ 0 ] * cos( v ) + ww[ 0 ] * sin( v ) ),
+      y + d * ( qvn[ 1 ] * cos( v ) + ww[ 1 ] * sin( v ) ),
+      z + d * ww[ 2 ] * sin( v ),
+   };
+   return range * _scale;
 }

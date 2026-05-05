@@ -57,7 +57,7 @@ target_link_libraries(
    crimild_universal_player
 
    PRIVATE crimild::foundation
-   PRIVATE Crimild::Mathematics
+   PRIVATE crimild::math
    PRIVATE crimild::coding
    PRIVATE Crimild::Core
    PRIVATE glfw

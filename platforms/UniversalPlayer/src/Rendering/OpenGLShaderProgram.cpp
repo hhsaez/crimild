@@ -2,7 +2,7 @@
 
 #include "OpenGLShader.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/get_ptr.hpp>
 
 using namespace crimild::opengl;
 

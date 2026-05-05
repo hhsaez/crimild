@@ -1,7 +1,7 @@
 #include "Spatial3D.hpp"
 
-#include "translation.hpp"
-
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>
 
 TEST( Spatial3D, no_spatial3D_ancestor )

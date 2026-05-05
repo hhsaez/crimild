@@ -27,39 +27,43 @@
 
 #include "Components/PathComponent.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Debug/DebugDrawManager.hpp"
 #include "SceneGraph/Group.hpp"
+
+#include <crimild/math/easing.hpp>
+#include <crimild/math/max.hpp>
+#include <crimild/math/min.hpp>
+#include <crimild/math/origin.hpp>
 
 using namespace crimild;
 using namespace crimild::components;
 
 Transformation Path::evaluate( float time ) noexcept
 {
-    auto group = getNode< Group >();
-    if ( !group->hasNodes() ) {
-        return Transformation::Constants::IDENTITY;
-    }
+   auto group = getNode< Group >();
+   if ( !group->hasNodes() ) {
+      return Transformation::Constants::IDENTITY;
+   }
 
-    const size_t N = group->getNodeCount() - 1;
-    const size_t idx0 = max( size_t( 0 ), min( size_t( floor( time * N ) ), N ) );
-    const size_t idx1 = max( size_t( 0 ), min( size_t( ceil( time * N ) ), N ) );
+   const size_t N = group->getNodeCount() - 1;
+   const size_t idx0 = max( size_t( 0 ), min( size_t( floor( time * N ) ), N ) );
+   const size_t idx1 = max( size_t( 0 ), min( size_t( ceil( time * N ) ), N ) );
 
-    const auto &t0 = group->getNodeAt( idx0 )->getWorld();
-    const auto &t1 = group->getNodeAt( idx1 )->getWorld();
-    const auto t = ( time * N ) - floor( time * N );
+   const auto &t0 = group->getNodeAt( idx0 )->getWorld();
+   const auto &t1 = group->getNodeAt( idx1 )->getWorld();
+   const auto t = ( time * N ) - floor( time * N );
 
-    return lerp( t0, t1, t );
+   return lerp( t0, t1, t );
 }
 
 void Path::renderDebugInfo( Renderer *, Camera * )
 {
-    const auto dt = 0.01f;
-    for ( auto t = 0.0f; t < 1.0f; t += dt ) {
-        const auto T0 = evaluate( t );
-        const auto T1 = evaluate( t + dt );
-        const auto P0 = origin( T0 );
-        DebugDrawManager::addLine( P0, origin( T1 ), ColorRGB { 1, 0, 1 } );
-        DebugDrawManager::addLine( P0, P0 + up( T0 ), ColorRGB { 1, 1, 0 } );
-    }
+   const auto dt = 0.01f;
+   for ( auto t = 0.0f; t < 1.0f; t += dt ) {
+      const auto T0 = evaluate( t );
+      const auto T1 = evaluate( t + dt );
+      const auto P0 = origin( T0 );
+      DebugDrawManager::addLine( P0, origin( T1 ), ColorRGB { 1, 0, 1 } );
+      DebugDrawManager::addLine( P0, P0 + up( T0 ), ColorRGB { 1, 1, 0 } );
+   }
 }

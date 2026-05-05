@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/Operations/OperationUtils.hpp"
@@ -38,121 +37,125 @@
 #include "SceneGraph/Camera.hpp"
 #include "SceneGraph/Geometry.hpp"
 
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/perspective.hpp>
+#include <crimild/math/rotation.hpp>
+
 using namespace crimild;
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeReflectionMap( SharedPointer< FrameGraphResource > const renderables ) noexcept
 {
-    auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( "computeReflectionMap" );
+   auto renderPass = crimild::alloc< RenderPass >();
+   renderPass->setName( "computeReflectionMap" );
 
-    auto color = useColorAttachment( "computeReflectionMap/color", Format::R32G32B32A32_SFLOAT );
-    auto depth = useDepthAttachment( "computeReflectionMap/depth" );
+   auto color = useColorAttachment( "computeReflectionMap/color", Format::R32G32B32A32_SFLOAT );
+   auto depth = useDepthAttachment( "computeReflectionMap/depth" );
 
-    renderPass->attachments = { color, depth };
+   renderPass->attachments = { color, depth };
 
-    // TODO: when creating the probe atlas, we can compute
-    // a different layout here
-    auto viewportLayout = Array< ViewportDimensions > {
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
-        },
-    };
+   // TODO: when creating the probe atlas, we can compute
+   // a different layout here
+   auto viewportLayout = Array< ViewportDimensions > {
+      {
+         .scalingMode = ScalingMode::RELATIVE,
+         .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
+      },
+   };
 
-    renderPass->extent = {
-        .scalingMode = ScalingMode::FIXED,
-        .width = 256.0f,
-        .height = 256.0f,
-    };
+   renderPass->extent = {
+      .scalingMode = ScalingMode::FIXED,
+      .width = 256.0f,
+      .height = 256.0f,
+   };
 
-    renderPass->reads( { renderables } );
-    renderPass->writes( { color, depth } );
-    renderPass->produces( { color, depth } );
+   renderPass->reads( { renderables } );
+   renderPass->writes( { color, depth } );
+   renderPass->produces( { color, depth } );
 
-    const auto pMatrix = perspective( 90.0f, 1.0f, 0.1f, 200.0f );
-    auto descriptors = Array< SharedPointer< DescriptorSet > >( 6 );
-    for ( auto face = 0l; face < 6; ++face ) {
-        auto ds = crimild::alloc< DescriptorSet >();
-        ds->descriptors = {
-            {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = [ & ] {
-                    struct Props {
-                        Matrix4f view;
-                        Matrix4f proj;
-                    };
+   const auto pMatrix = perspective( 90.0f, 1.0f, 0.1f, 200.0f );
+   auto descriptors = Array< SharedPointer< DescriptorSet > >( 6 );
+   for ( auto face = 0l; face < 6; ++face ) {
+      auto ds = crimild::alloc< DescriptorSet >();
+      ds->descriptors = {
+         {
+            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            .obj = [ & ] {
+               struct Props {
+                  Matrix4f view;
+                  Matrix4f proj;
+               };
 
-                    Transformation t;
-                    switch ( face ) {
-                        case 0: // positive x
-                            t = rotationY( numbers::PI_DIV_2 );
-                            break;
+               Transformation t;
+               switch ( face ) {
+                  case 0: // positive x
+                     t = rotationY( numbers::PI_DIV_2 );
+                     break;
 
-                        case 1: // negative x
-                            t = rotationY( -numbers::PI_DIV_2 );
-                            break;
+                  case 1: // negative x
+                     t = rotationY( -numbers::PI_DIV_2 );
+                     break;
 
-                        case 2: // positive y
-                            t = rotationX( numbers::PI_DIV_2 );
-                            break;
+                  case 2: // positive y
+                     t = rotationX( numbers::PI_DIV_2 );
+                     break;
 
-                        case 3: // negative y
-                            t = rotationX( -numbers::PI_DIV_2 );
-                            break;
+                  case 3: // negative y
+                     t = rotationX( -numbers::PI_DIV_2 );
+                     break;
 
-                        case 4: // positive z
-                            t = rotationY( numbers::PI );
-                            break;
+                  case 4: // positive z
+                     t = rotationY( numbers::PI );
+                     break;
 
-                        case 5: // negative z
-                            t = rotationY( 0 );
-                            break;
-                    }
+                  case 5: // negative z
+                     t = rotationY( 0 );
+                     break;
+               }
 
-                    // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = Matrix4( inverse( t ) ); // t.computeModelMatrix().getInverse();
+               // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+               const auto vMatrix = Matrix4( inverse( t ) ); // t.computeModelMatrix().getInverse();
 
-                    return crimild::alloc< UniformBuffer >(
-                        Props {
-                            .view = vMatrix,
-                            .proj = pMatrix,
-                        }
-                    );
-                }(),
-            },
-        };
-        descriptors[ face ] = ds;
-    }
+               return crimild::alloc< UniformBuffer >(
+                  Props {
+                     .view = vMatrix,
+                     .proj = pMatrix,
+                  }
+               );
+            }(),
+         },
+      };
+      descriptors[ face ] = ds;
+   }
 
-    return withConditionalGraphicsCommands(
-        renderPass,
-        [] {
-            // only render once when forced by render system reset
-            return false;
-        },
-        [ descriptors,
-          viewportLayout,
-          renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
-            auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
+   return withConditionalGraphicsCommands(
+      renderPass,
+      [] {
+         // only render once when forced by render system reset
+         return false;
+      },
+      [ descriptors,
+        viewportLayout,
+        renderables = crimild::cast_ptr< RenderableSet >( renderables ) ]( auto commandBuffer ) {
+         auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
 
-            for ( auto face = 0l; face < 6; ++face ) {
-                auto viewport = viewports[ face ];
+         for ( auto face = 0l; face < 6; ++face ) {
+            auto viewport = viewports[ face ];
 
-                commandBuffer->setViewport( viewport );
-                commandBuffer->setScissor( viewport );
-                renderables->eachGeometry(
-                    [ & ]( Geometry *geometry ) {
-                        auto primitive = geometry->anyPrimitive();
-                        auto material = geometry->getComponent< MaterialComponent >()->first();
+            commandBuffer->setViewport( viewport );
+            commandBuffer->setScissor( viewport );
+            renderables->eachGeometry(
+               [ & ]( Geometry *geometry ) {
+                  auto primitive = geometry->anyPrimitive();
+                  auto material = geometry->getComponent< MaterialComponent >()->first();
 
-                        commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
-                        commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors[ face ] ) );
-                        commandBuffer->bindDescriptorSet( material->getDescriptors() );
-                        commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
-                        commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
-                    }
-                );
-            }
-        }
-    );
+                  commandBuffer->bindGraphicsPipeline( material->getGraphicsPipeline() );
+                  commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors[ face ] ) );
+                  commandBuffer->bindDescriptorSet( material->getDescriptors() );
+                  commandBuffer->bindDescriptorSet( geometry->getDescriptors() );
+                  commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
+               }
+            );
+         }
+      }
+   );
 }

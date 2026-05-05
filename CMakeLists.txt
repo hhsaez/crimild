@@ -54,7 +54,7 @@ endif()
 
 # Add subdirectories
 add_subdirectory(libs/foundation)
-add_subdirectory(mathematics)
+add_subdirectory(libs/math)
 add_subdirectory(libs/coding)
 add_subdirectory(core)
 

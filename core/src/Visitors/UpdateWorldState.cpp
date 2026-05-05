@@ -27,7 +27,6 @@
 
 #include "UpdateWorldState.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/CSGNode.hpp"
 #include "SceneGraph/Group.hpp"
 #include "SceneGraph/Node.hpp"
@@ -44,58 +43,58 @@ UpdateWorldState::~UpdateWorldState( void )
 
 void UpdateWorldState::visitNode( Node *node )
 {
-    if ( node->worldIsCurrent() ) {
-        return;
-    }
+   if ( node->worldIsCurrent() ) {
+      return;
+   }
 
-    if ( node->hasParent() ) {
-        node->setWorld( node->getParent()->getWorld()( node->getLocal() ) );
-    } else {
-        node->setWorld( node->getLocal() );
-    }
+   if ( node->hasParent() ) {
+      node->setWorld( node->getParent()->getWorld()( node->getLocal() ) );
+   } else {
+      node->setWorld( node->getLocal() );
+   }
 
-    node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
+   node->worldBound()->computeFrom( node->getLocalBound(), node->getWorld() );
 }
 
 void UpdateWorldState::visitGroup( Group *group )
 {
-    visitNode( group );
-    NodeVisitor::visitGroup( group );
+   visitNode( group );
+   NodeVisitor::visitGroup( group );
 
-    if ( group->hasNodes() ) {
-        bool firstChild = true;
-        group->forEachNode( [ & ]( Node *node ) {
-            if ( firstChild ) {
-                firstChild = false;
-                group->worldBound()->computeFrom( node->getWorldBound() );
-            } else {
-                group->worldBound()->expandToContain( node->getWorldBound() );
-            }
-        } );
-    }
+   if ( group->hasNodes() ) {
+      bool firstChild = true;
+      group->forEachNode( [ & ]( Node *node ) {
+         if ( firstChild ) {
+            firstChild = false;
+            group->worldBound()->computeFrom( node->getWorldBound() );
+         } else {
+            group->worldBound()->expandToContain( node->getWorldBound() );
+         }
+      } );
+   }
 }
 
 void UpdateWorldState::visitCSGNode( CSGNode *csg )
 {
-    visitNode( csg );
-    NodeVisitor::visitCSGNode( csg );
+   visitNode( csg );
+   NodeVisitor::visitCSGNode( csg );
 
-    bool firstChild = true;
-    if ( auto left = csg->getLeft() ) {
-        if ( firstChild ) {
-            firstChild = false;
-            csg->worldBound()->computeFrom( left->getWorldBound() );
-        } else {
-            csg->worldBound()->expandToContain( left->getWorldBound() );
-        }
-    }
+   bool firstChild = true;
+   if ( auto left = csg->getLeft() ) {
+      if ( firstChild ) {
+         firstChild = false;
+         csg->worldBound()->computeFrom( left->getWorldBound() );
+      } else {
+         csg->worldBound()->expandToContain( left->getWorldBound() );
+      }
+   }
 
-    if ( auto right = csg->getRight() ) {
-        if ( firstChild ) {
-            firstChild = false;
-            csg->worldBound()->computeFrom( right->getWorldBound() );
-        } else {
-            csg->worldBound()->expandToContain( right->getWorldBound() );
-        }
-    }
+   if ( auto right = csg->getRight() ) {
+      if ( firstChild ) {
+         firstChild = false;
+         csg->worldBound()->computeFrom( right->getWorldBound() );
+      } else {
+         csg->worldBound()->expandToContain( right->getWorldBound() );
+      }
+   }
 }

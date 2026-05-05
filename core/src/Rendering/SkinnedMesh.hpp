@@ -28,10 +28,9 @@
 #ifndef CRIMILD_RENDERING_SKINNED_MESH_
 #define CRIMILD_RENDERING_SKINNED_MESH_
 
-#include "Crimild_Mathematics.hpp"
-
 #include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 

@@ -27,12 +27,10 @@
 
 #include "NavigationController.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "NavigationMeshContainer.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 
-#include <crimild/foundation.hpp>
 #include <list>
 
 using namespace crimild;

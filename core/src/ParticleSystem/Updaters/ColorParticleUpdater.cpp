@@ -27,8 +27,6 @@
 
 #include "ColorParticleUpdater.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
 using namespace crimild;
 
 ColorParticleUpdater::ColorParticleUpdater( void )
@@ -41,43 +39,43 @@ ColorParticleUpdater::~ColorParticleUpdater( void )
 
 void ColorParticleUpdater::configure( Node *node, ParticleData *particles )
 {
-    _startColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::START_COLOR );
-    _endColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::END_COLOR );
-    _colors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::COLOR );
-    _times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
-    _lifetimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
+   _startColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::START_COLOR );
+   _endColors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::END_COLOR );
+   _colors = particles->createAttribArray< ColorRGBA >( ParticleAttrib::COLOR );
+   _times = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::TIME );
+   _lifetimes = particles->createAttribArray< crimild::Real32 >( ParticleAttrib::LIFE_TIME );
 }
 
 void ColorParticleUpdater::update( Node *node, double dt, ParticleData *particles )
 {
-    /*
-        const auto count = particles->getAliveCount();
+   /*
+       const auto count = particles->getAliveCount();
 
-        auto startData = _startColors->getData< ColorRGBA >();
-        auto endData = _endColors->getData< ColorRGBA >();
-        auto colorData = _colors->getData< ColorRGBA >();
-        auto timeData = _times->getData< crimild::Real32 >();
-        auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
+       auto startData = _startColors->getData< ColorRGBA >();
+       auto endData = _endColors->getData< ColorRGBA >();
+       auto colorData = _colors->getData< ColorRGBA >();
+       auto timeData = _times->getData< crimild::Real32 >();
+       auto lifetimeData = _lifetimes->getData< crimild::Real32 >();
 
-        for ( crimild::Size i = 0; i < count; i++ ) {
-                const auto s0 = startData[ i ];
-                const auto s1 = endData[ i ];
+       for ( crimild::Size i = 0; i < count; i++ ) {
+               const auto s0 = startData[ i ];
+               const auto s1 = endData[ i ];
 
-                const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
+               const auto t = 1.0f - ( timeData[ i ] / lifetimeData[ i ] );
 
-                ColorRGBA c;
-                Interpolation::linear( s0, s1, t, c );
-                colorData[ i ] = c;
-        }
-    */
+               ColorRGBA c;
+               Interpolation::linear( s0, s1, t, c );
+               colorData[ i ] = c;
+       }
+   */
 }
 
 void ColorParticleUpdater::encode( coding::Encoder &encoder )
 {
-    ParticleSystemComponent::ParticleUpdater::encode( encoder );
+   ParticleSystemComponent::ParticleUpdater::encode( encoder );
 }
 
 void ColorParticleUpdater::decode( coding::Decoder &decoder )
 {
-    ParticleSystemComponent::ParticleUpdater::decode( decoder );
+   ParticleSystemComponent::ParticleUpdater::decode( decoder );
 }

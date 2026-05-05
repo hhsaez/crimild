@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,145 +28,144 @@
 #ifndef CRIMILD_FOUNDATION_STRING_UTILS_
 #define CRIMILD_FOUNDATION_STRING_UTILS_
 
-#include <string>
-#include <sstream>
-#include <vector>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace crimild {
 
-	class StringUtils {
-	public:
-		template< typename T >
-		static void toValue( std::string input, T &output )
-		{
-			std::stringstream str;
-			str << input;
-			str >> output;
-		}
+   class StringUtils {
+   public:
+      template< typename T >
+      static void toValue( std::string input, T &output )
+      {
+         std::stringstream str;
+         str << input;
+         str >> output;
+      }
 
-		template< typename T >
-		static std::vector< T > split( std::string input, char delim )
-		{
-			std::vector< T > result;
-			std::istringstream iss( input );
-			while ( !iss.eof() ) {
-				std::string str;
-				getline( iss, str, delim );
-				T value;
-				toValue< T >( str, value );
-				result.push_back( value );
-			}
-			return result;
-		}
+      template< typename T >
+      static std::vector< T > split( std::string input, char delim )
+      {
+         std::vector< T > result;
+         std::istringstream iss( input );
+         while ( !iss.eof() ) {
+            std::string str;
+            getline( iss, str, delim );
+            T value;
+            toValue< T >( str, value );
+            result.push_back( value );
+         }
+         return result;
+      }
 
-		static std::string replaceAll( std::string str, std::string from, std::string to ) 
-		{
-		    if ( from.empty() ) {
-		        return str;
-		    }
+      static std::string replaceAll( std::string str, std::string from, std::string to )
+      {
+         if ( from.empty() ) {
+            return str;
+         }
 
-		    size_t start_pos = 0;
-		    while ( ( start_pos = str.find( from, start_pos ) ) != std::string::npos ) {
-		        str.replace( start_pos, from.length(), to );
-		        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-		    }
+         size_t start_pos = 0;
+         while ( ( start_pos = str.find( from, start_pos ) ) != std::string::npos ) {
+            str.replace( start_pos, from.length(), to );
+            start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+         }
 
-		    return str;
-		}
+         return str;
+      }
 
-		static std::string getFileExtension( std::string path ) 
-		{
-			auto pos = path.find_last_of( "." );
-			if ( pos == std::string::npos ) {
-				return "";
-			}
+      static std::string getFileExtension( std::string path )
+      {
+         auto pos = path.find_last_of( "." );
+         if ( pos == std::string::npos ) {
+            return "";
+         }
 
-			return path.substr( pos + 1 );
-		}
+         return path.substr( pos + 1 );
+      }
 
-		static std::string splitLines( std::string input, int charsPerLine )
-		{
-			std::stringstream out;
-            
-            std::stringstream ss( input );
-            std::string buffer;
-            std::vector< std::string > lines;
-            while ( std::getline( ss, buffer, '\n' ) ) {
-                lines.push_back( buffer );
+      static std::string splitLines( std::string input, int charsPerLine )
+      {
+         std::stringstream out;
+
+         std::stringstream ss( input );
+         std::string buffer;
+         std::vector< std::string > lines;
+         while ( std::getline( ss, buffer, '\n' ) ) {
+            lines.push_back( buffer );
+         }
+
+         for ( auto line : lines ) {
+            std::stringstream str;
+            str << line;
+
+            int charCount = 0;
+            while ( !str.eof() ) {
+               std::string temp;
+               str >> temp;
+               charCount += temp.length() + 1;
+               if ( charCount >= charsPerLine ) {
+                  out << "\n";
+                  charCount = 0;
+               }
+
+               out << temp << " ";
             }
-            
-            for ( auto line : lines ) {
-                std::stringstream str;
-                str << line;
-                
-                int charCount = 0;
-                while ( !str.eof() ) {
-                    std::string temp;
-                    str >> temp;
-                    charCount += temp.length() + 1;
-                    if ( charCount >= charsPerLine ) {
-                        out << "\n";
-                        charCount = 0;
-                    }
-                    
-                    out << temp << " ";
-                }
-                out << "\n";
-            }
+            out << "\n";
+         }
 
-			return out.str();
-		}
-        
-        /**
-            \brief Read a string from a stream, including all white spaces
-         */
-        static std::string readFullString( std::istream &input )
-        {
-            std::string result;
-            input >> result;
-            
-            if ( !input.eof() ) {
-                // handle spaces in string
-                std::istreambuf_iterator< char > it( input ), end;
-                std::string temp;
-                std::copy( it, end, std::inserter( temp, temp.begin() ) );
-                if ( temp != "\r" ) result += temp;
-            }
-            
-            return result;
-        }
-        
-        static std::string toLower( const std::string &input )
-        {
-            std::string result( input );
-            std::transform( result.begin(), result.end(), result.begin(), ::tolower );
-            return result;
-        }
-        
-        template< typename ... Args >
-        static std::string toString( Args &&... args )
-        {
-            std::stringstream ss;
-            ( void ) std::initializer_list< int > {
-                (
-                 ss << args,
-                 0
-                 )...
-            };
-            
-            return ss.str();
-        }
+         return out.str();
+      }
 
-		static bool startsWith( const std::string &str, const std::string &prefix )
-		{
-			return str.length() >= prefix.length() && str.compare( 0, prefix.length(), prefix ) == 0;
-		}
+      /**
+          \brief Read a string from a stream, including all white spaces
+       */
+      static std::string readFullString( std::istream &input )
+      {
+         std::string result;
+         input >> result;
 
-	};
+         if ( !input.eof() ) {
+            // handle spaces in string
+            std::istreambuf_iterator< char > it( input ), end;
+            std::string temp;
+            std::copy( it, end, std::inserter( temp, temp.begin() ) );
+            if ( temp != "\r" )
+               result += temp;
+         }
+
+         return result;
+      }
+
+      static std::string toLower( const std::string &input )
+      {
+         std::string result( input );
+         std::transform( result.begin(), result.end(), result.begin(), ::tolower );
+         return result;
+      }
+
+      template< typename... Args >
+      static std::string toString( Args &&...args )
+      {
+         std::stringstream ss;
+         ( void ) std::initializer_list< int > {
+            (
+               ss << args,
+               0
+            )...
+         };
+
+         return ss.str();
+      }
+
+      static bool startsWith( const std::string &str, const std::string &prefix )
+      {
+         return str.length() >= prefix.length() && str.compare( 0, prefix.length(), prefix ) == 0;
+      }
+   };
 
 }
 
 #endif
-

@@ -28,9 +28,11 @@
 #ifndef CRIMILD_PARTICLE_SYSTEM_ATTRIB_ARRAY_
 #define CRIMILD_PARTICLE_SYSTEM_ATTRIB_ARRAY_
 
-#include "Crimild_Mathematics.hpp"
-
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/common/SharedObject.hpp>
+#include <crimild/foundation/common/Types.hpp>
+#include <crimild/foundation/containers/Array.hpp>
+#include <crimild/math/ColorRGBA.hpp>
+#include <crimild/math/Vector3.hpp>
 
 namespace crimild {
 

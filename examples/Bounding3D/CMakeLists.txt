@@ -13,7 +13,7 @@ target_include_directories(
 target_link_libraries(
     Bounding3D
     PRIVATE crimild::foundation
-    PRIVATE Crimild::Mathematics
+    PRIVATE crimild::math
     PRIVATE crimild::coding
     PRIVATE Crimild::Core
     PRIVATE Crimild::UniversalPlayer

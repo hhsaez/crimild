@@ -28,33 +28,32 @@
 #ifndef CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 #define CRIMILD_SCENE_GRAPH_SKYBOX_NODE_
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Geometry.hpp"
 
 namespace crimild {
 
-    class Texture;
+   class Texture;
 
-    class Skybox : public Geometry {
-        CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
+   class Skybox : public Geometry {
+      CRIMILD_IMPLEMENT_RTTI( crimild::Skybox )
 
-    public:
-        Skybox( void ) = default;
-        explicit Skybox( const ColorRGB &color ) noexcept;
-        explicit Skybox( SharedPointer< Texture > const &cubemap ) noexcept;
-        virtual ~Skybox( void ) = default;
+   public:
+      Skybox( void ) = default;
+      explicit Skybox( const ColorRGB &color ) noexcept;
+      explicit Skybox( SharedPointer< Texture > const &cubemap ) noexcept;
+      virtual ~Skybox( void ) = default;
 
-        /**
-                   \name Coding
-                */
-        //@{
+      /**
+                 \name Coding
+              */
+      //@{
 
-    public:
-        virtual void encode( coding::Encoder &encoder ) override;
-        virtual void decode( coding::Decoder &decoder ) override;
+   public:
+      virtual void encode( coding::Encoder &encoder ) override;
+      virtual void decode( coding::Decoder &decoder ) override;
 
-        //@}
-    };
+      //@}
+   };
 
 }
 

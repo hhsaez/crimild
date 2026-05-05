@@ -27,7 +27,6 @@
 
 #include "ColorParticleGenerator.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 using namespace crimild;

@@ -28,8 +28,9 @@
 #include "MotionReset.hpp"
 
 #include "Components/MotionStateComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
+
+#include <crimild/math/origin.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
@@ -37,53 +38,53 @@ using namespace crimild::behaviors::actions;
 
 void MotionReset::init( BehaviorContext *context )
 {
-    Behavior::init( context );
+   Behavior::init( context );
 
-    auto agent = context->getAgent();
-    if ( agent == nullptr ) {
-        return;
-    }
+   auto agent = context->getAgent();
+   if ( agent == nullptr ) {
+      return;
+   }
 
-    m_motion = agent->getComponent< MotionState >();
-    if ( m_motion == nullptr ) {
-        m_motion = agent->attachComponent< MotionState >();
-    }
+   m_motion = agent->getComponent< MotionState >();
+   if ( m_motion == nullptr ) {
+      m_motion = agent->attachComponent< MotionState >();
+   }
 }
 
 Behavior::State MotionReset::step( BehaviorContext *context )
 {
-    auto agent = context->getAgent();
-    if ( agent == nullptr ) {
-        CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
-        return Behavior::State::FAILURE;
-    }
+   auto agent = context->getAgent();
+   if ( agent == nullptr ) {
+      CRIMILD_LOG_WARNING( "Attempting to use MotionReset behavior without an agent" );
+      return Behavior::State::FAILURE;
+   }
 
-    if ( m_motion == nullptr ) {
-        CRIMILD_LOG_WARNING( "MotionState not initialized" );
-        return Behavior::State::FAILURE;
-    }
+   if ( m_motion == nullptr ) {
+      CRIMILD_LOG_WARNING( "MotionState not initialized" );
+      return Behavior::State::FAILURE;
+   }
 
-    m_motion->position = origin( agent->getLocal() );
-    m_motion->steering = Vector3f::Constants::ZERO;
+   m_motion->position = origin( agent->getLocal() );
+   m_motion->steering = Vector3f::Constants::ZERO;
 
-    // if ( context->hasTargets() ) {
-    //     auto target = context->getTargetAt( 0 );
-    //     const auto targetOrigin = origin( target->getLocal() );
-    //     context->setValue( "motion.target", targetOrigin );
-    // } else {
-    //     // set target to self so no motion will be applied
-    //     context->setValue( "motion.target", agentOrigin );
-    // }
+   // if ( context->hasTargets() ) {
+   //     auto target = context->getTargetAt( 0 );
+   //     const auto targetOrigin = origin( target->getLocal() );
+   //     context->setValue( "motion.target", targetOrigin );
+   // } else {
+   //     // set target to self so no motion will be applied
+   //     context->setValue( "motion.target", agentOrigin );
+   // }
 
-    return Behavior::State::SUCCESS;
+   return Behavior::State::SUCCESS;
 }
 
 void MotionReset::encode( coding::Encoder &encoder )
 {
-    Behavior::encode( encoder );
+   Behavior::encode( encoder );
 }
 
 void MotionReset::decode( coding::Decoder &decoder )
 {
-    Behavior::decode( decoder );
+   Behavior::decode( decoder );
 }

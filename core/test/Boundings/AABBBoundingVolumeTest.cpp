@@ -27,71 +27,72 @@
 
 #include "Boundings/AABBBoundingVolume.hpp"
 
-#include "Crimild_Mathematics.hpp"
-
-#include "gtest/gtest.h"
+#include <crimild/math/isEqual.hpp>
+#include <crimild/math/numbers.hpp>
+#include <crimild/math/translation.hpp>
+#include <gtest/gtest.h>
 
 using namespace crimild;
 
 TEST( AABBBoundingVolume, construction )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
 
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
-    EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
+   EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
+   EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
+   EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
+   EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, compute_from_simple_volume )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
-    auto other = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto other = crimild::alloc< AABBBoundingVolume >();
 
-    bb->computeFrom( crimild::get_ptr( other ) );
+   bb->computeFrom( crimild::get_ptr( other ) );
 
-    EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
-    EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
+   EXPECT_EQ( ( Point3f { 0, 0, 0 } ), bb->getCenter() );
+   EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
+   EXPECT_EQ( ( Point3f { -1, -1, -1 } ), bb->getMin() );
+   EXPECT_EQ( ( Point3f { 1, 1, 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, compute_from_transformed_volume )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
-    auto other = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto other = crimild::alloc< AABBBoundingVolume >();
 
-    bb->computeFrom( crimild::get_ptr( other ), translation( -1, 2, 3 ) );
+   bb->computeFrom( crimild::get_ptr( other ), translation( -1, 2, 3 ) );
 
-    EXPECT_EQ( ( Point3f { -1, 2, 3 } ), bb->getCenter() );
-    EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
-    EXPECT_EQ( ( Point3f { -1 - 1, 2 - 1, 3 - 1 } ), bb->getMin() );
-    EXPECT_EQ( ( Point3f { -1 + 1, 2 + 1, 3 + 1 } ), bb->getMax() );
+   EXPECT_EQ( ( Point3f { -1, 2, 3 } ), bb->getCenter() );
+   EXPECT_TRUE( isEqual( numbers::SQRT_3, bb->getRadius() ) );
+   EXPECT_EQ( ( Point3f { -1 - 1, 2 - 1, 3 - 1 } ), bb->getMin() );
+   EXPECT_EQ( ( Point3f { -1 + 1, 2 + 1, 3 + 1 } ), bb->getMax() );
 }
 
 TEST( AABBBoundingVolume, ray_intersection_hit )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
 
-    const auto R = Ray3 { { 0, 0, 5 }, { 0, 0, -1 } };
+   const auto R = Ray3 { { 0, 0, 5 }, { 0, 0, -1 } };
 
-    EXPECT_TRUE( bb->testIntersection( R ) );
+   EXPECT_TRUE( bb->testIntersection( R ) );
 }
 
 TEST( AABBBoundingVolume, ray_intersection_hit_sphere )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
 
-    const auto R = Ray3 { { numbers::SQRT_3 - numbers::EPSILON, 0, 5 }, { 0, 0, -1 } };
+   const auto R = Ray3 { { numbers::SQRT_3 - numbers::EPSILON, 0, 5 }, { 0, 0, -1 } };
 
-    EXPECT_FALSE( bb->testIntersection( R ) );
+   EXPECT_FALSE( bb->testIntersection( R ) );
 }
 
 TEST( AABBBoundingVolume, no_ray_intersection )
 {
-    auto bb = crimild::alloc< AABBBoundingVolume >();
+   auto bb = crimild::alloc< AABBBoundingVolume >();
 
-    const auto R = Ray3 { { numbers::SQRT_3 + numbers::EPSILON, 0, 5 }, { 0, 0, -1 } };
+   const auto R = Ray3 { { numbers::SQRT_3 + numbers::EPSILON, 0, 5 }, { 0, 0, -1 } };
 
-    EXPECT_FALSE( bb->testIntersection( R ) );
+   EXPECT_FALSE( bb->testIntersection( R ) );
 }

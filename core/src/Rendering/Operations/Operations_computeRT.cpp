@@ -28,7 +28,6 @@
 #include "Rendering/Operations/Operations_computeRT.hpp"
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
@@ -42,6 +41,11 @@
 #include "Simulation/Simulation.hpp"
 #include "Visitors/ApplyToGeometries.hpp"
 #include "Visitors/UpdateWorldState.hpp"
+
+#include <crimild/math/Triangle.hpp>
+#include <crimild/math/edges.hpp>
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/normal.hpp>
 
 using namespace crimild;
 
@@ -771,366 +775,366 @@ const auto BOUNCE_SRC = R"(
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeRT( void ) noexcept
 {
-    const Real resolutionScale = Simulation::getInstance()->getSettings()->get< Real >( "rt.scale", 1 );
-    const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
-    const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
+   const Real resolutionScale = Simulation::getInstance()->getSettings()->get< Real >( "rt.scale", 1 );
+   const int width = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.width", 1024 );
+   const int height = resolutionScale * Simulation::getInstance()->getSettings()->get< Int32 >( "video.height", 768 );
 
-    // Reset samples
-    Simulation::getInstance()->getSettings()->set( "rt.samples.count", 0 );
+   // Reset samples
+   Simulation::getInstance()->getSettings()->set( "rt.samples.count", 0 );
 
-    struct SphereDesc {
-        alignas( 16 ) Matrix4 invWorld;
-        alignas( 4 ) UInt32 materialID;
-    };
+   struct SphereDesc {
+      alignas( 16 ) Matrix4 invWorld;
+      alignas( 4 ) UInt32 materialID;
+   };
 
-    struct BoxDesc {
-        alignas( 16 ) Matrix4 invWorld;
-        alignas( 4 ) UInt32 materialID;
-    };
+   struct BoxDesc {
+      alignas( 16 ) Matrix4 invWorld;
+      alignas( 4 ) UInt32 materialID;
+   };
 
-    struct CylinderDesc {
-        alignas( 16 ) Matrix4 invWorld;
-        alignas( 4 ) UInt32 materialID;
-    };
+   struct CylinderDesc {
+      alignas( 16 ) Matrix4 invWorld;
+      alignas( 4 ) UInt32 materialID;
+   };
 
-    // Triangles are always in world space
-    struct TriangleDesc {
-        alignas( 16 ) Point3f p0;
-        alignas( 16 ) Point3f p1;
-        alignas( 16 ) Point3f p2;
-        alignas( 16 ) Vector3 e0;
-        alignas( 16 ) Vector3 e1;
-        alignas( 16 ) Normal3 n;
-        alignas( 4 ) UInt32 materialID;
-    };
+   // Triangles are always in world space
+   struct TriangleDesc {
+      alignas( 16 ) Point3f p0;
+      alignas( 16 ) Point3f p1;
+      alignas( 16 ) Point3f p2;
+      alignas( 16 ) Vector3 e0;
+      alignas( 16 ) Vector3 e1;
+      alignas( 16 ) Normal3 n;
+      alignas( 4 ) UInt32 materialID;
+   };
 
-    struct MaterialProps {
-        alignas( 4 ) Int32 type = 0; // 0: BSDF, 1: Volume
-        alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
-        alignas( 4 ) Real32 metallic = 0;
-        alignas( 4 ) Real32 roughness = 0;
-        alignas( 4 ) Real32 transmission = 0;
-        alignas( 4 ) Real32 indexOfRefraction = 0;
-        alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
-        alignas( 4 ) Real32 density = 1;
-    };
+   struct MaterialProps {
+      alignas( 4 ) Int32 type = 0; // 0: BSDF, 1: Volume
+      alignas( 16 ) ColorRGB albedo = ColorRGB::Constants::WHITE;
+      alignas( 4 ) Real32 metallic = 0;
+      alignas( 4 ) Real32 roughness = 0;
+      alignas( 4 ) Real32 transmission = 0;
+      alignas( 4 ) Real32 indexOfRefraction = 0;
+      alignas( 16 ) ColorRGB emissive = ColorRGB::Constants::BLACK;
+      alignas( 4 ) Real32 density = 1;
+   };
 
-    Array< SphereDesc > spheres;
-    Array< BoxDesc > boxes;
-    Array< CylinderDesc > cylinders;
-    Array< TriangleDesc > triangles;
-    Array< MaterialProps > materials;
-    Map< Material *, UInt32 > materialIds;
+   Array< SphereDesc > spheres;
+   Array< BoxDesc > boxes;
+   Array< CylinderDesc > cylinders;
+   Array< TriangleDesc > triangles;
+   Array< MaterialProps > materials;
+   Map< Material *, UInt32 > materialIds;
 
-    auto scene = Simulation::getInstance()->getScene();
-    if ( scene != nullptr ) {
-        scene->perform( UpdateWorldState() );
-        scene->perform(
-            ApplyToGeometries(
-                [ & ]( Geometry *geometry ) {
-                    if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
-                        return;
-                    }
+   auto scene = Simulation::getInstance()->getScene();
+   if ( scene != nullptr ) {
+      scene->perform( UpdateWorldState() );
+      scene->perform(
+         ApplyToGeometries(
+            [ & ]( Geometry *geometry ) {
+               if ( geometry->getLayer() == Node::Layer::SKYBOX ) {
+                  return;
+               }
 
-                    auto material = geometry->getComponent< MaterialComponent >()->first();
-                    if ( material == nullptr ) {
-                        return;
-                    }
+               auto material = geometry->getComponent< MaterialComponent >()->first();
+               if ( material == nullptr ) {
+                  return;
+               }
 
-                    Bool isVolume = material->getClassName() == materials::PrincipledVolume::__CLASS_NAME;
+               Bool isVolume = material->getClassName() == materials::PrincipledVolume::__CLASS_NAME;
 
-                    if ( !materialIds.contains( material ) ) {
-                        const UInt32 materialId = materials.size();
-                        if ( isVolume ) {
-                            const auto &props = static_cast< materials::PrincipledVolume * >( material )->getProps();
-                            materials.add(
-                                MaterialProps {
-                                    .type = 1,
-                                    .albedo = props.albedo,
-                                    .density = props.density,
-                                }
-                            );
-                        } else {
-                            const auto &props = static_cast< materials::PrincipledBSDF * >( material )->getProps();
-                            materials.add(
-                                MaterialProps {
-                                    .type = 0,
-                                    .albedo = props.albedo,
-                                    .metallic = props.metallic,
-                                    .roughness = props.roughness,
-                                    .transmission = props.transmission,
-                                    .indexOfRefraction = props.indexOfRefraction,
-                                    .emissive = props.emissive,
-                                }
-                            );
+               if ( !materialIds.contains( material ) ) {
+                  const UInt32 materialId = materials.size();
+                  if ( isVolume ) {
+                     const auto &props = static_cast< materials::PrincipledVolume * >( material )->getProps();
+                     materials.add(
+                        MaterialProps {
+                           .type = 1,
+                           .albedo = props.albedo,
+                           .density = props.density,
                         }
-                        materialIds.insert( material, materialId );
-                    }
-
-                    geometry->forEachPrimitive(
-                        [ & ]( auto primitive ) {
-                            if ( primitive->getType() == Primitive::Type::SPHERE ) {
-                                spheres.add(
-                                    {
-                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
-                                        .materialID = materialIds[ material ],
-                                    }
-                                );
-                            } else if ( primitive->getType() == Primitive::Type::BOX ) {
-                                boxes.add(
-                                    {
-                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
-                                        .materialID = materialIds[ material ],
-                                    }
-                                );
-                            } else if ( primitive->getType() == Primitive::Type::CYLINDER ) {
-                                cylinders.add(
-                                    {
-                                        .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
-                                        .materialID = materialIds[ material ],
-                                    }
-                                );
-                            } else if ( primitive->getType() == Primitive::Type::TRIANGLES ) {
-                                auto positions = [ & ] {
-                                    BufferAccessor *positions = nullptr;
-                                    primitive->getVertexData().each(
-                                        [ & ]( auto vertices ) {
-                                            if ( positions == nullptr ) {
-                                                positions = vertices->get( VertexAttribute::Name::POSITION );
-                                            }
-                                        }
-                                    );
-                                    return positions;
-                                }();
-
-                                if ( positions == nullptr ) {
-                                    return;
-                                }
-
-                                if ( auto indices = primitive->getIndices() ) {
-                                    const auto N = indices->getIndexCount();
-                                    for ( auto i = 0; i < N; i += 3 ) {
-                                        const auto T = Triangle {
-                                            .p0 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 0 ) ) ),
-                                            .p1 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 1 ) ) ),
-                                            .p2 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 2 ) ) ),
-                                        };
-
-                                        [[maybe_unused]] const auto [ e0, e1, e2 ] = edges( T );
-                                        triangles.add( {
-                                            .p0 = T.p0,
-                                            .p1 = T.p1,
-                                            .p2 = T.p2,
-                                            .e0 = e0,
-                                            .e1 = e1,
-                                            .n = normal( T, T.p0 ),
-                                            .materialID = materialIds[ material ],
-                                        } );
-                                    }
-                                }
-                            }
+                     );
+                  } else {
+                     const auto &props = static_cast< materials::PrincipledBSDF * >( material )->getProps();
+                     materials.add(
+                        MaterialProps {
+                           .type = 0,
+                           .albedo = props.albedo,
+                           .metallic = props.metallic,
+                           .roughness = props.roughness,
+                           .transmission = props.transmission,
+                           .indexOfRefraction = props.indexOfRefraction,
+                           .emissive = props.emissive,
                         }
-                    );
-                }
-            )
-        );
-    }
+                     );
+                  }
+                  materialIds.insert( material, materialId );
+               }
 
-    auto ds = crimild::alloc< DescriptorSet >();
-    ds->descriptors = Array< Descriptor > {
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = [ & ] {
-                struct BufferData {
-                    alignas( 16 ) Point3f origin = Point3f { 0, 0, 0 };
-                    alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
-                    alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
-                    alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
-                    alignas( 16 ) Vector2f uv = Vector2f { 0, 0 };
-                    alignas( 4 ) Int32 bounces = 0;
-                    alignas( 4 ) Int32 samples = 0;
-                };
+               geometry->forEachPrimitive(
+                  [ & ]( auto primitive ) {
+                     if ( primitive->getType() == Primitive::Type::SPHERE ) {
+                        spheres.add(
+                           {
+                              .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
+                              .materialID = materialIds[ material ],
+                           }
+                        );
+                     } else if ( primitive->getType() == Primitive::Type::BOX ) {
+                        boxes.add(
+                           {
+                              .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
+                              .materialID = materialIds[ material ],
+                           }
+                        );
+                     } else if ( primitive->getType() == Primitive::Type::CYLINDER ) {
+                        cylinders.add(
+                           {
+                              .invWorld = Matrix4( inverse( geometry->getWorld() ) ),
+                              .materialID = materialIds[ material ],
+                           }
+                        );
+                     } else if ( primitive->getType() == Primitive::Type::TRIANGLES ) {
+                        auto positions = [ & ] {
+                           BufferAccessor *positions = nullptr;
+                           primitive->getVertexData().each(
+                              [ & ]( auto vertices ) {
+                                 if ( positions == nullptr ) {
+                                    positions = vertices->get( VertexAttribute::Name::POSITION );
+                                 }
+                              }
+                           );
+                           return positions;
+                        }();
 
-                auto data = Array< BufferData >( width * height );
-                for ( auto y = 0; y < height; y++ ) {
-                    for ( auto x = 0; x < width; x++ ) {
-                        data[ y * width + x ].uv = Vector2 { Real( x ), Real( y ) };
-                    }
-                }
-                return crimild::alloc< StorageBuffer >( data );
-            }(),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-            .obj = [] {
-                struct Uniforms {
-                    alignas( 4 ) UInt32 sampleCount;
-                    alignas( 4 ) UInt32 maxSamples;
-                    alignas( 4 ) UInt32 bounces;
-                    alignas( 4 ) UInt32 seed;
-                    alignas( 16 ) Matrix4 cameraInvProj;
-                    alignas( 16 ) Matrix4 cameraWorld;
-                    alignas( 16 ) Point3f cameraOrigin;
-                    alignas( 16 ) Vector3 cameraRight;
-                    alignas( 16 ) Vector3 cameraUp;
-                    alignas( 4 ) Real32 cameraLensRadius;
-                    alignas( 4 ) Real32 cameraFocusDistance;
-                    alignas( 16 ) ColorRGB backgroundColor;
-                };
-
-                return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
-                    [] {
-                        auto settings = Simulation::getInstance()->getSettings();
-
-                        auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
-                        auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
-                        auto bounces = UInt32( 1 );                                           // settings->get< UInt32 >( "rt.bounces", 10 );
-                        auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
-                        auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
-                        auto backgroundColor = ColorRGB {
-                            settings->get< Real >( "rt.background_color.r", 0.5f ),
-                            settings->get< Real >( "rt.background_color.g", 0.7f ),
-                            settings->get< Real >( "rt.background_color.b", 1.0f ),
-                        };
-
-                        // Update sample count
-                        if ( sampleCount < maxSamples ) {
-                            sampleCount += 1;
+                        if ( positions == nullptr ) {
+                           return;
                         }
 
-                        static auto cameraInvProj = Matrix4::Constants::IDENTITY;
-                        static auto cameraWorld = Matrix4::Constants::IDENTITY;
+                        if ( auto indices = primitive->getIndices() ) {
+                           const auto N = indices->getIndexCount();
+                           for ( auto i = 0; i < N; i += 3 ) {
+                              const auto T = Triangle {
+                                 .p0 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 0 ) ) ),
+                                 .p1 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 1 ) ) ),
+                                 .p2 = geometry->getWorld()( positions->template get< Point3f >( indices->getIndex( i + 2 ) ) ),
+                              };
 
-                        auto cameraOrigin = Point3f::Constants::ZERO;
-                        auto cameraRight = Vector3::Constants::RIGHT;
-                        auto cameraUp = Vector3::Constants::UP;
-
-                        // auto camera = Camera::getMainCamera();
-                        Camera *camera = nullptr;
-                        if ( camera != nullptr ) {
-                            const auto invProj = inverse( camera->getProjectionMatrix() );
-                            if ( invProj != cameraInvProj ) {
-                                cameraInvProj = invProj;
-                                sampleCount = 1; // reset sampling
-                            }
-
-                            const auto world = Matrix4f( camera->getWorld() );
-                            if ( cameraWorld != world ) {
-                                cameraWorld = world;
-                                sampleCount = 1; // reset sampling
-                            }
-
-                            cameraOrigin = origin( camera->getWorld() );
-                            cameraRight = right( camera->getWorld() );
-                            cameraUp = up( camera->getWorld() );
-
-                            aperture = camera->getAperture();
-                            focusDist = camera->getFocusDistance();
+                              [[maybe_unused]] const auto [ e0, e1, e2 ] = edges( T );
+                              triangles.add( {
+                                 .p0 = T.p0,
+                                 .p1 = T.p1,
+                                 .p2 = T.p2,
+                                 .e0 = e0,
+                                 .e1 = e1,
+                                 .n = normal( T, T.p0 ),
+                                 .materialID = materialIds[ material ],
+                              } );
+                           }
                         }
+                     }
+                  }
+               );
+            }
+         )
+      );
+   }
 
-                        if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) ) {
-                            sampleCount = 1; // reset sampling
-                            bounces = 1;     // only one bounce during interaction
-                        }
+   auto ds = crimild::alloc< DescriptorSet >();
+   ds->descriptors = Array< Descriptor > {
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = [ & ] {
+            struct BufferData {
+               alignas( 16 ) Point3f origin = Point3f { 0, 0, 0 };
+               alignas( 16 ) Vector3 direction = Vector3 { 0, 0, 0 };
+               alignas( 16 ) ColorRGB sampleColor = ColorRGB { 1, 1, 1 };
+               alignas( 16 ) ColorRGB accumColor = ColorRGB { 0, 0, 0 };
+               alignas( 16 ) Vector2f uv = Vector2f { 0, 0 };
+               alignas( 4 ) Int32 bounces = 0;
+               alignas( 4 ) Int32 samples = 0;
+            };
 
-                        settings->set( "rt.samples.count", sampleCount );
+            auto data = Array< BufferData >( width * height );
+            for ( auto y = 0; y < height; y++ ) {
+               for ( auto x = 0; x < width; x++ ) {
+                  data[ y * width + x ].uv = Vector2 { Real( x ), Real( y ) };
+               }
+            }
+            return crimild::alloc< StorageBuffer >( data );
+         }(),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::UNIFORM_BUFFER,
+         .obj = [] {
+            struct Uniforms {
+               alignas( 4 ) UInt32 sampleCount;
+               alignas( 4 ) UInt32 maxSamples;
+               alignas( 4 ) UInt32 bounces;
+               alignas( 4 ) UInt32 seed;
+               alignas( 16 ) Matrix4 cameraInvProj;
+               alignas( 16 ) Matrix4 cameraWorld;
+               alignas( 16 ) Point3f cameraOrigin;
+               alignas( 16 ) Vector3 cameraRight;
+               alignas( 16 ) Vector3 cameraUp;
+               alignas( 4 ) Real32 cameraLensRadius;
+               alignas( 4 ) Real32 cameraFocusDistance;
+               alignas( 16 ) ColorRGB backgroundColor;
+            };
 
-                        static UInt32 seed = 0;
+            return crimild::alloc< CallbackUniformBuffer< Uniforms > >(
+               [] {
+                  auto settings = Simulation::getInstance()->getSettings();
 
-                        return Uniforms {
-                            .sampleCount = sampleCount,
-                            .maxSamples = maxSamples,
-                            .bounces = bounces,
-                            .seed = seed++, // Random::generate< UInt32 >( 0, 1000 ),
-                            .cameraInvProj = cameraInvProj,
-                            .cameraWorld = cameraWorld,
-                            .cameraOrigin = cameraOrigin,
-                            .cameraRight = cameraRight,
-                            .cameraUp = cameraUp,
-                            .cameraLensRadius = Real32( 0.5 ) * aperture,
-                            .cameraFocusDistance = focusDist,
-                            .backgroundColor = backgroundColor,
-                        };
-                    }
-                );
-            }(),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::UNIFORM_BUFFER,
-            .obj = [ & ] {
-                struct SceneUniforms {
-                    alignas( 4 ) UInt32 sphereCount = 0;
-                    alignas( 4 ) UInt32 boxCount = 0;
-                    alignas( 4 ) UInt32 cylinderCount = 0;
-                    alignas( 4 ) UInt32 triangleCount = 0;
-                    alignas( 4 ) UInt32 materialCount = 0;
-                };
+                  auto maxSamples = settings->get< UInt32 >( "rt.samples.max", 5000 );
+                  auto sampleCount = settings->get< UInt32 >( "rt.samples.count", 1 );
+                  auto bounces = UInt32( 1 );                                           // settings->get< UInt32 >( "rt.bounces", 10 );
+                  auto focusDist = settings->get< Real >( "rt.focusDist", Real( 10 ) ); // move to camera
+                  auto aperture = settings->get< Real >( "rt.aperture", Real( 0.1 ) );  // move to camera
+                  auto backgroundColor = ColorRGB {
+                     settings->get< Real >( "rt.background_color.r", 0.5f ),
+                     settings->get< Real >( "rt.background_color.g", 0.7f ),
+                     settings->get< Real >( "rt.background_color.b", 1.0f ),
+                  };
 
-                return crimild::alloc< UniformBuffer >( SceneUniforms {
-                    .sphereCount = UInt32( spheres.size() ),
-                    .boxCount = UInt32( boxes.size() ),
-                    .cylinderCount = UInt32( cylinders.size() ),
-                    .triangleCount = UInt32( triangles.size() ),
-                    .materialCount = UInt32( materials.size() ),
-                } );
-            }(),
-        },
-    };
+                  // Update sample count
+                  if ( sampleCount < maxSamples ) {
+                     sampleCount += 1;
+                  }
 
-    auto sceneDescriptors = crimild::alloc< DescriptorSet >();
-    sceneDescriptors->descriptors = Array< Descriptor > {
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( spheres.size() > 0 ? spheres : Array< SphereDesc > { SphereDesc {} } ),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( boxes.size() > 0 ? boxes : Array< BoxDesc > { BoxDesc {} } ),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( cylinders.size() > 0 ? cylinders : Array< CylinderDesc > { CylinderDesc {} } ),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( triangles.size() > 0 ? triangles : Array< TriangleDesc > { TriangleDesc {} } ),
-        },
-        Descriptor {
-            .descriptorType = DescriptorType::STORAGE_BUFFER,
-            .obj = crimild::alloc< StorageBuffer >( materials.size() > 0 ? materials : Array< MaterialProps > { MaterialProps {} } ),
-        },
-    };
+                  static auto cameraInvProj = Matrix4::Constants::IDENTITY;
+                  static auto cameraWorld = Matrix4::Constants::IDENTITY;
 
-    auto workgroup = [ width, height ] {
-        auto settings = Simulation::getInstance()->getSettings();
-        auto workers = settings->get< UInt32 >( "rt.workers", 4 );
+                  auto cameraOrigin = Point3f::Constants::ZERO;
+                  auto cameraRight = Vector3::Constants::RIGHT;
+                  auto cameraUp = Vector3::Constants::UP;
 
-        const UInt32 WORKGROUP_SIZE = 32;
-        const UInt32 MAX_X = ceil( width / WORKGROUP_SIZE );
-        const UInt32 MAX_Y = ceil( height / WORKGROUP_SIZE );
+                  // auto camera = Camera::getMainCamera();
+                  Camera *camera = nullptr;
+                  if ( camera != nullptr ) {
+                     const auto invProj = inverse( camera->getProjectionMatrix() );
+                     if ( invProj != cameraInvProj ) {
+                        cameraInvProj = invProj;
+                        sampleCount = 1; // reset sampling
+                     }
 
-        return DispatchWorkgroup {
-            .x = std::min( workers, MAX_X ),
-            .y = std::min( workers, MAX_Y ),
-            .z = 1,
-        };
-    }();
+                     const auto world = Matrix4f( camera->getWorld() );
+                     if ( cameraWorld != world ) {
+                        cameraWorld = world;
+                        sampleCount = 1; // reset sampling
+                     }
 
-    Simulation::getInstance()->getSettings()->set( "rt.workgroup.x", workgroup.x );
-    Simulation::getInstance()->getSettings()->set( "rt.workgroup.y", workgroup.y );
-    Simulation::getInstance()->getSettings()->set( "rt.workgroup.z", workgroup.z );
+                     cameraOrigin = origin( camera->getWorld() );
+                     cameraRight = right( camera->getWorld() );
+                     cameraUp = up( camera->getWorld() );
 
-    return computeImage(
-        Extent2D {
-            .width = Real32( width ),
-            .height = Real32( height ),
-        },
-        crimild::alloc< Shader >(
-            Shader::Stage::COMPUTE,
-            PRELUDE_SRC + SCATTER_SRC + HIT_SCENE_SRC + BOUNCE_SRC
-        ),
-        Format::R32G32B32A32_SFLOAT,
-        workgroup,
-        { ds, sceneDescriptors }
-    );
+                     aperture = camera->getAperture();
+                     focusDist = camera->getFocusDistance();
+                  }
+
+                  if ( Input::getInstance()->isMouseButtonDown( CRIMILD_INPUT_MOUSE_BUTTON_RIGHT ) ) {
+                     sampleCount = 1; // reset sampling
+                     bounces = 1;     // only one bounce during interaction
+                  }
+
+                  settings->set( "rt.samples.count", sampleCount );
+
+                  static UInt32 seed = 0;
+
+                  return Uniforms {
+                     .sampleCount = sampleCount,
+                     .maxSamples = maxSamples,
+                     .bounces = bounces,
+                     .seed = seed++, // Random::generate< UInt32 >( 0, 1000 ),
+                     .cameraInvProj = cameraInvProj,
+                     .cameraWorld = cameraWorld,
+                     .cameraOrigin = cameraOrigin,
+                     .cameraRight = cameraRight,
+                     .cameraUp = cameraUp,
+                     .cameraLensRadius = Real32( 0.5 ) * aperture,
+                     .cameraFocusDistance = focusDist,
+                     .backgroundColor = backgroundColor,
+                  };
+               }
+            );
+         }(),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::UNIFORM_BUFFER,
+         .obj = [ & ] {
+            struct SceneUniforms {
+               alignas( 4 ) UInt32 sphereCount = 0;
+               alignas( 4 ) UInt32 boxCount = 0;
+               alignas( 4 ) UInt32 cylinderCount = 0;
+               alignas( 4 ) UInt32 triangleCount = 0;
+               alignas( 4 ) UInt32 materialCount = 0;
+            };
+
+            return crimild::alloc< UniformBuffer >( SceneUniforms {
+               .sphereCount = UInt32( spheres.size() ),
+               .boxCount = UInt32( boxes.size() ),
+               .cylinderCount = UInt32( cylinders.size() ),
+               .triangleCount = UInt32( triangles.size() ),
+               .materialCount = UInt32( materials.size() ),
+            } );
+         }(),
+      },
+   };
+
+   auto sceneDescriptors = crimild::alloc< DescriptorSet >();
+   sceneDescriptors->descriptors = Array< Descriptor > {
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = crimild::alloc< StorageBuffer >( spheres.size() > 0 ? spheres : Array< SphereDesc > { SphereDesc {} } ),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = crimild::alloc< StorageBuffer >( boxes.size() > 0 ? boxes : Array< BoxDesc > { BoxDesc {} } ),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = crimild::alloc< StorageBuffer >( cylinders.size() > 0 ? cylinders : Array< CylinderDesc > { CylinderDesc {} } ),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = crimild::alloc< StorageBuffer >( triangles.size() > 0 ? triangles : Array< TriangleDesc > { TriangleDesc {} } ),
+      },
+      Descriptor {
+         .descriptorType = DescriptorType::STORAGE_BUFFER,
+         .obj = crimild::alloc< StorageBuffer >( materials.size() > 0 ? materials : Array< MaterialProps > { MaterialProps {} } ),
+      },
+   };
+
+   auto workgroup = [ width, height ] {
+      auto settings = Simulation::getInstance()->getSettings();
+      auto workers = settings->get< UInt32 >( "rt.workers", 4 );
+
+      const UInt32 WORKGROUP_SIZE = 32;
+      const UInt32 MAX_X = ceil( width / WORKGROUP_SIZE );
+      const UInt32 MAX_Y = ceil( height / WORKGROUP_SIZE );
+
+      return DispatchWorkgroup {
+         .x = std::min( workers, MAX_X ),
+         .y = std::min( workers, MAX_Y ),
+         .z = 1,
+      };
+   }();
+
+   Simulation::getInstance()->getSettings()->set( "rt.workgroup.x", workgroup.x );
+   Simulation::getInstance()->getSettings()->set( "rt.workgroup.y", workgroup.y );
+   Simulation::getInstance()->getSettings()->set( "rt.workgroup.z", workgroup.z );
+
+   return computeImage(
+      Extent2D {
+         .width = Real32( width ),
+         .height = Real32( height ),
+      },
+      crimild::alloc< Shader >(
+         Shader::Stage::COMPUTE,
+         PRELUDE_SRC + SCATTER_SRC + HIT_SCENE_SRC + BOUNCE_SRC
+      ),
+      Format::R32G32B32A32_SFLOAT,
+      workgroup,
+      { ds, sceneDescriptors }
+   );
 }

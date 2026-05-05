@@ -28,11 +28,10 @@
 #ifndef CRIMILD_RENDERING_RENDERER_
 #define CRIMILD_RENDERING_RENDERER_
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/Primitive.hpp"
 #include "SceneGraph/Light.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/Rect.hpp>
 #include <map>
 
 namespace crimild {

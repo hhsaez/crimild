@@ -28,150 +28,151 @@
 #ifndef CRIMILD_RENDERING_VERTEX_
 #define CRIMILD_RENDERING_VERTEX_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/VertexLayout.hpp"
+
+#include <crimild/math/isEqual.hpp>
 
 namespace crimild {
 
-    struct VertexP2 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION );
-        };
+   struct VertexP2 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION );
+      };
 
-        Vector2f position;
-    };
+      Vector2f position;
+   };
 
-    struct VertexP2C3 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
-                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
-        };
+   struct VertexP2C3 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
+            .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
+      };
 
-        Vector2f position;
-        ColorRGB color;
-    };
+      Vector2f position;
+      ColorRGB color;
+   };
 
-    struct VertexP2C3TC2 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
-                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
-        };
+   struct VertexP2C3TC2 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
+            .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
+            .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
+      };
 
-        crimild::Vector2f position;
-        crimild::ColorRGB color;
-        crimild::Vector2f texCoord;
-    };
+      crimild::Vector2f position;
+      crimild::ColorRGB color;
+      crimild::Vector2f texCoord;
+   };
 
-    struct VertexP2TC2C4 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
-                .withAttribute< ColorRGBA >( VertexAttribute::Name::COLOR );
-        };
+   struct VertexP2TC2C4 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector2f >( VertexAttribute::Name::POSITION )
+            .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD )
+            .withAttribute< ColorRGBA >( VertexAttribute::Name::COLOR );
+      };
 
-        crimild::Vector2f position;
-        crimild::Vector2f texCoord;
-        crimild::ColorRGBA color;
-    };
+      crimild::Vector2f position;
+      crimild::Vector2f texCoord;
+      crimild::ColorRGBA color;
+   };
 
-    struct VertexP3 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION );
-        }
+   struct VertexP3 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION );
+      }
 
-        crimild::Vector3f position;
-    };
+      crimild::Vector3f position;
+   };
 
-    struct VertexP3C3 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
-        }
+   struct VertexP3C3 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+            .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR );
+      }
 
-        Vector3f position;
-        ColorRGB color;
-    };
+      Vector3f position;
+      ColorRGB color;
+   };
 
-    struct VertexP3C3TC2 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
-                .withAttribute< Vector3f >( VertexAttribute::Name::TEX_COORD );
-        }
+   struct VertexP3C3TC2 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+            .withAttribute< ColorRGB >( VertexAttribute::Name::COLOR )
+            .withAttribute< Vector3f >( VertexAttribute::Name::TEX_COORD );
+      }
 
-        crimild::Vector3f position;
-        crimild::ColorRGB color;
-        crimild::Vector2f texCoord;
-    };
+      crimild::Vector3f position;
+      crimild::ColorRGB color;
+      crimild::Vector2f texCoord;
+   };
 
-    struct VertexP3N3 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
-        }
+   struct VertexP3N3 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+            .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL );
+      }
 
-        crimild::Vector3f position;
-        crimild::Vector3f normal;
-    };
+      crimild::Vector3f position;
+      crimild::Vector3f normal;
+   };
 
-    struct VertexP3N3TC2 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
-        }
+   struct VertexP3N3TC2 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+            .withAttribute< Vector3f >( VertexAttribute::Name::NORMAL )
+            .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
+      }
 
-        crimild::Vector3f position;
-        crimild::Vector3f normal;
-        crimild::Vector2f texCoord;
+      crimild::Vector3f position;
+      crimild::Vector3f normal;
+      crimild::Vector2f texCoord;
 
-        // This is requried to be able to use this vertex type in some containers, like maps
-        // See OBJLoader.cpp for a use example
-        friend bool operator==( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
-        {
-            return isEqual( lhs.position, rhs.position ) && isEqual( lhs.normal, rhs.normal ) && isEqual( lhs.texCoord, rhs.texCoord );
-        }
+      // This is requried to be able to use this vertex type in some containers, like maps
+      // See OBJLoader.cpp for a use example
+      friend bool operator==( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
+      {
+         return isEqual( lhs.position, rhs.position ) && isEqual( lhs.normal, rhs.normal ) && isEqual( lhs.texCoord, rhs.texCoord );
+      }
 
-        // This is requried to be able to use this vertex type in some containers, like maps
-        // See OBJLoader.cpp for a use example
-        friend bool operator<( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
-        {
-            return lhs.position.x < rhs.position.x
-                   && lhs.position.y < rhs.position.y
-                   && lhs.position.z < rhs.position.z;
-        }
-    };
+      // This is requried to be able to use this vertex type in some containers, like maps
+      // See OBJLoader.cpp for a use example
+      friend bool operator<( const VertexP3N3TC2 &lhs, const VertexP3N3TC2 &rhs ) noexcept
+      {
+         return lhs.position.x < rhs.position.x
+                && lhs.position.y < rhs.position.y
+                && lhs.position.z < rhs.position.z;
+      }
+   };
 
-    struct VertexP3TC2 {
-        static VertexLayout getLayout( void ) noexcept
-        {
-            return VertexLayout()
-                .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
-                .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
-        }
+   struct VertexP3TC2 {
+      static VertexLayout getLayout( void ) noexcept
+      {
+         return VertexLayout()
+            .withAttribute< Vector3f >( VertexAttribute::Name::POSITION )
+            .withAttribute< Vector2f >( VertexAttribute::Name::TEX_COORD );
+      }
 
-        crimild::Vector3f position;
-        crimild::Vector2f texCoord;
-    };
+      crimild::Vector3f position;
+      crimild::Vector2f texCoord;
+   };
 
 }
 

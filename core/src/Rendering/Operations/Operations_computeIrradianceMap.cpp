@@ -26,7 +26,6 @@
  */
 
 #include "Components/MaterialComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "Primitives/BoxPrimitive.hpp"
 #include "Rendering/DescriptorSet.hpp"
 #include "Rendering/Material.hpp"
@@ -37,54 +36,58 @@
 #include "Rendering/Sampler.hpp"
 #include "Rendering/UniformBuffer.hpp"
 
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/perspective.hpp>
+#include <crimild/math/rotation.hpp>
+
 using namespace crimild;
 
 SharedPointer< FrameGraphOperation > crimild::framegraph::computeIrradianceMap( SharedPointer< FrameGraphResource > const reflectionAtlas ) noexcept
 {
-    auto renderPass = crimild::alloc< RenderPass >();
-    renderPass->setName( "computeIrradianceMap" );
+   auto renderPass = crimild::alloc< RenderPass >();
+   renderPass->setName( "computeIrradianceMap" );
 
-    auto color = useColorAttachment( renderPass->getName() + "/color", Format::R32G32B32A32_SFLOAT );
+   auto color = useColorAttachment( renderPass->getName() + "/color", Format::R32G32B32A32_SFLOAT );
 
-    renderPass->attachments = { color };
+   renderPass->attachments = { color };
 
-    // TODO: when creating the probe atlas, we can compute
-    // a different layout here
-    auto viewportLayout = Array< ViewportDimensions > {
-        {
-            .scalingMode = ScalingMode::RELATIVE,
-            .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
-        },
-    };
+   // TODO: when creating the probe atlas, we can compute
+   // a different layout here
+   auto viewportLayout = Array< ViewportDimensions > {
+      {
+         .scalingMode = ScalingMode::RELATIVE,
+         .dimensions = Rectf { { 0, 0 }, { 1, 1 } },
+      },
+   };
 
-    renderPass->extent = {
-        .scalingMode = ScalingMode::FIXED,
-        .width = 256.0f,
-        .height = 256.0f,
-    };
+   renderPass->extent = {
+      .scalingMode = ScalingMode::FIXED,
+      .width = 256.0f,
+      .height = 256.0f,
+   };
 
-    renderPass->reads( { reflectionAtlas } );
-    renderPass->writes( { color } );
-    renderPass->produces( { color } );
+   renderPass->reads( { reflectionAtlas } );
+   renderPass->writes( { color } );
+   renderPass->produces( { color } );
 
-    auto primitive = crimild::alloc< BoxPrimitive >(
-        BoxPrimitive::Params {
-            .type = Primitive::Type::TRIANGLES,
-            .layout = VertexP3::getLayout(),
-            .size = Vector3f { 10.0f, 10.0f, 10.0f },
-            .invertFaces = true,
-        }
-    );
+   auto primitive = crimild::alloc< BoxPrimitive >(
+      BoxPrimitive::Params {
+         .type = Primitive::Type::TRIANGLES,
+         .layout = VertexP3::getLayout(),
+         .size = Vector3f { 10.0f, 10.0f, 10.0f },
+         .invertFaces = true,
+      }
+   );
 
-    auto pipeline = [ & ] {
-        auto pipeline = crimild::alloc< GraphicsPipeline >();
-        pipeline->setProgram(
-            [ & ] {
-                auto program = crimild::alloc< ShaderProgram >(
-                    Array< SharedPointer< Shader > > {
-                        crimild::alloc< Shader >(
-                            Shader::Stage::VERTEX,
-                            R"(
+   auto pipeline = [ & ] {
+      auto pipeline = crimild::alloc< GraphicsPipeline >();
+      pipeline->setProgram(
+         [ & ] {
+            auto program = crimild::alloc< ShaderProgram >(
+               Array< SharedPointer< Shader > > {
+                  crimild::alloc< Shader >(
+                     Shader::Stage::VERTEX,
+                     R"(
                             layout ( location = 0 ) in vec3 inPosition;
 
                             layout ( set = 0, binding = 0 ) uniform Uniforms {
@@ -100,10 +103,10 @@ SharedPointer< FrameGraphOperation > crimild::framegraph::computeIrradianceMap( 
                                 outPosition = inPosition;
                             }
                         )"
-                        ),
-                        crimild::alloc< Shader >(
-                            Shader::Stage::FRAGMENT,
-                            R"(
+                  ),
+                  crimild::alloc< Shader >(
+                     Shader::Stage::FRAGMENT,
+                     R"(
                             layout ( location = 0 ) in vec3 inPosition;
 
                             layout ( set = 1, binding = 0 ) uniform sampler2D uHDRMap;
@@ -234,140 +237,140 @@ vec4 textureCubeUV( sampler2D envMap, vec3 direction, vec4 viewport )
                                 outColor = vec4( irradiance, 1.0 );
                             }
                         )"
-                        ) }
-                );
-                program->vertexLayouts = { VertexLayout::P3 };
-                program->descriptorSetLayouts = {
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                                .stage = Shader::Stage::VERTEX,
-                            },
-                        };
-                        return layout;
-                    }(),
-                    [] {
-                        auto layout = crimild::alloc< DescriptorSetLayout >();
-                        layout->bindings = {
-                            {
-                                .descriptorType = DescriptorType::TEXTURE,
-                                .stage = Shader::Stage::FRAGMENT,
-                            },
-                        };
-                        return layout;
-                    }(),
-                };
-                return program;
-            }()
-        );
-        pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
-        pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
-        return pipeline;
-    }();
+                  ) }
+            );
+            program->vertexLayouts = { VertexLayout::P3 };
+            program->descriptorSetLayouts = {
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        .descriptorType = DescriptorType::UNIFORM_BUFFER,
+                        .stage = Shader::Stage::VERTEX,
+                     },
+                  };
+                  return layout;
+               }(),
+               [] {
+                  auto layout = crimild::alloc< DescriptorSetLayout >();
+                  layout->bindings = {
+                     {
+                        .descriptorType = DescriptorType::TEXTURE,
+                        .stage = Shader::Stage::FRAGMENT,
+                     },
+                  };
+                  return layout;
+               }(),
+            };
+            return program;
+         }()
+      );
+      pipeline->viewport = { .scalingMode = ScalingMode::DYNAMIC };
+      pipeline->scissor = { .scalingMode = ScalingMode::DYNAMIC };
+      return pipeline;
+   }();
 
-    auto environmentDescriptors = [ & ] {
-        auto descriptors = crimild::alloc< DescriptorSet >();
-        descriptors->descriptors = {
-            {
-                .descriptorType = DescriptorType::TEXTURE,
-                .obj = [ & ] {
-                    auto texture = withResource( crimild::alloc< Texture >(), reflectionAtlas );
-                    texture->sampler = [ & ] {
-                        auto sampler = crimild::alloc< Sampler >();
-                        sampler->setMinFilter( Sampler::Filter::LINEAR );
-                        sampler->setMagFilter( Sampler::Filter::LINEAR );
-                        sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
-                        sampler->setCompareOp( CompareOp::NEVER );
-                        return sampler;
-                    }();
-                    return texture;
-                }(),
-            },
-        };
-        return descriptors;
-    }();
+   auto environmentDescriptors = [ & ] {
+      auto descriptors = crimild::alloc< DescriptorSet >();
+      descriptors->descriptors = {
+         {
+            .descriptorType = DescriptorType::TEXTURE,
+            .obj = [ & ] {
+               auto texture = withResource( crimild::alloc< Texture >(), reflectionAtlas );
+               texture->sampler = [ & ] {
+                  auto sampler = crimild::alloc< Sampler >();
+                  sampler->setMinFilter( Sampler::Filter::LINEAR );
+                  sampler->setMagFilter( Sampler::Filter::LINEAR );
+                  sampler->setWrapMode( Sampler::WrapMode::CLAMP_TO_BORDER );
+                  sampler->setCompareOp( CompareOp::NEVER );
+                  return sampler;
+               }();
+               return texture;
+            }(),
+         },
+      };
+      return descriptors;
+   }();
 
-    // auto pMatrix = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();
-    const auto pMatrix = perspective( 90.0f, 1.0, 0.1f, 200.0f );
-    auto descriptors = Array< SharedPointer< DescriptorSet > >( 6 );
-    for ( auto face = 0l; face < 6; ++face ) {
-        auto ds = crimild::alloc< DescriptorSet >();
-        ds->descriptors = {
-            {
-                .descriptorType = DescriptorType::UNIFORM_BUFFER,
-                .obj = [ & ] {
-                    struct Props {
-                        Matrix4f view;
-                        Matrix4f proj;
-                    };
+   // auto pMatrix = Frustumf( 90.0f, 1.0f, 0.1f, 200.0f ).computeProjectionMatrix();
+   const auto pMatrix = perspective( 90.0f, 1.0, 0.1f, 200.0f );
+   auto descriptors = Array< SharedPointer< DescriptorSet > >( 6 );
+   for ( auto face = 0l; face < 6; ++face ) {
+      auto ds = crimild::alloc< DescriptorSet >();
+      ds->descriptors = {
+         {
+            .descriptorType = DescriptorType::UNIFORM_BUFFER,
+            .obj = [ & ] {
+               struct Props {
+                  Matrix4f view;
+                  Matrix4f proj;
+               };
 
-                    Transformation t;
-                    switch ( face ) {
-                        case 0: // positive x
-                            t = rotationY( numbers::PI_DIV_2 );
-                            break;
+               Transformation t;
+               switch ( face ) {
+                  case 0: // positive x
+                     t = rotationY( numbers::PI_DIV_2 );
+                     break;
 
-                        case 1: // negative x
-                            t = rotationY( -numbers::PI_DIV_2 );
-                            break;
+                  case 1: // negative x
+                     t = rotationY( -numbers::PI_DIV_2 );
+                     break;
 
-                        case 2: // positive y
-                            t = rotationX( numbers::PI_DIV_2 );
-                            break;
+                  case 2: // positive y
+                     t = rotationX( numbers::PI_DIV_2 );
+                     break;
 
-                        case 3: // negative y
-                            t = rotationX( -numbers::PI_DIV_2 );
-                            break;
+                  case 3: // negative y
+                     t = rotationX( -numbers::PI_DIV_2 );
+                     break;
 
-                        case 4: // positive z
-                            t = rotationY( numbers::PI );
-                            break;
+                  case 4: // positive z
+                     t = rotationY( numbers::PI );
+                     break;
 
-                        case 5: // negative z
-                            t = rotationY( 0 );
-                            break;
-                    }
+                  case 5: // negative z
+                     t = rotationY( 0 );
+                     break;
+               }
 
-                    // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
-                    const auto vMatrix = Matrix4f( inverse( t ) ); // t.computeModelMatrix().getInverse();
+               // t.setTranslate( Vector3f::ZERO ); // TODO (hernan): use probe's position
+               const auto vMatrix = Matrix4f( inverse( t ) ); // t.computeModelMatrix().getInverse();
 
-                    return crimild::alloc< UniformBuffer >(
-                        Props {
-                            .view = vMatrix,
-                            .proj = pMatrix,
-                        }
-                    );
-                }(),
-            },
-        };
-        descriptors[ face ] = ds;
-    }
+               return crimild::alloc< UniformBuffer >(
+                  Props {
+                     .view = vMatrix,
+                     .proj = pMatrix,
+                  }
+               );
+            }(),
+         },
+      };
+      descriptors[ face ] = ds;
+   }
 
-    return withConditionalGraphicsCommands(
-        renderPass,
-        [] {
-            // only render once when forced by render system reset
-            return false;
-        },
-        [ descriptors,
-          environmentDescriptors,
-          primitive,
-          pipeline,
-          viewportLayout ]( auto commandBuffer ) {
-            auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
+   return withConditionalGraphicsCommands(
+      renderPass,
+      [] {
+         // only render once when forced by render system reset
+         return false;
+      },
+      [ descriptors,
+        environmentDescriptors,
+        primitive,
+        pipeline,
+        viewportLayout ]( auto commandBuffer ) {
+         auto viewports = ViewportDimensions::cubeViewportsFrom( viewportLayout[ 0 ] );
 
-            for ( auto face = 0l; face < 6; ++face ) {
-                auto viewport = viewports[ face ];
+         for ( auto face = 0l; face < 6; ++face ) {
+            auto viewport = viewports[ face ];
 
-                commandBuffer->setViewport( viewport );
-                commandBuffer->setScissor( viewport );
-                commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
-                commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors[ face ] ) );
-                commandBuffer->bindDescriptorSet( crimild::get_ptr( environmentDescriptors ) );
-                commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
-            }
-        }
-    );
+            commandBuffer->setViewport( viewport );
+            commandBuffer->setScissor( viewport );
+            commandBuffer->bindGraphicsPipeline( crimild::get_ptr( pipeline ) );
+            commandBuffer->bindDescriptorSet( crimild::get_ptr( descriptors[ face ] ) );
+            commandBuffer->bindDescriptorSet( crimild::get_ptr( environmentDescriptors ) );
+            commandBuffer->drawPrimitive( crimild::get_ptr( primitive ) );
+         }
+      }
+   );
 }

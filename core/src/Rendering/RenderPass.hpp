@@ -28,7 +28,6 @@
 #ifndef CRIMILD_CORE_RENDERING_RENDER_PASS_
 #define CRIMILD_CORE_RENDERING_RENDER_PASS_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/CommandBuffer.hpp"
 #include "Rendering/Format.hpp"
 #include "Rendering/FrameGraphOperation.hpp"

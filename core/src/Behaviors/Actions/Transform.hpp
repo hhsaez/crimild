@@ -29,61 +29,62 @@
 #define CRIMILD_CORE_BEHAVIORS_TRANSFORM_
 
 #include "Behaviors/Behavior.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            class Transform : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
+         class Transform : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
 
-            public:
-                Transform( void );
-                explicit Transform(
-                    const crimild::Transformation &targetTransformation,
-                    crimild::Real32 duration,
-                    crimild::Bool computeInTargetSpace,
-                    crimild::Bool computeFromTargetPosition,
-                    crimild::Bool applyTranslation,
-                    crimild::Bool applyRotation
-                );
-                virtual ~Transform( void );
+         public:
+            Transform( void );
+            explicit Transform(
+               const crimild::Transformation &targetTransformation,
+               crimild::Real32 duration,
+               crimild::Bool computeInTargetSpace,
+               crimild::Bool computeFromTargetPosition,
+               crimild::Bool applyTranslation,
+               crimild::Bool applyRotation
+            );
+            virtual ~Transform( void );
 
-                virtual void init( BehaviorContext *context ) override;
-                virtual Behavior::State step( BehaviorContext *context ) override;
+            virtual void init( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-            private:
-                crimild::Transformation _targetTransformation;
-                crimild::Transformation _start;
-                crimild::Transformation _end;
+         private:
+            crimild::Transformation _targetTransformation;
+            crimild::Transformation _start;
+            crimild::Transformation _end;
 
-                crimild::Real32 _duration = 0;
-                crimild::Clock _clock;
+            crimild::Real32 _duration = 0;
+            crimild::Clock _clock;
 
-                crimild::Bool _computeInTargetSpace = false;
-                crimild::Bool _computeFromTargetPosition = false;
+            crimild::Bool _computeInTargetSpace = false;
+            crimild::Bool _computeFromTargetPosition = false;
 
-                crimild::Bool _applyTranslation = true;
-                crimild::Bool _applyRotation = true;
+            crimild::Bool _applyTranslation = true;
+            crimild::Bool _applyRotation = true;
 
-                /**
-                   \name Coding support
-                */
-                //@{
+            /**
+               \name Coding support
+            */
+            //@{
 
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                //@}
-            };
+            //@}
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

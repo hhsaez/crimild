@@ -28,10 +28,10 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_LIGHTING_
 #define CRIMILD_RENDERING_UNIFORMS_LIGHTING_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/UniformBuffer.hpp"
-
-#include <crimild/foundation.hpp>
+#include "crimild/math/ColorRGBA.hpp"
+#include "crimild/math/Matrix4.hpp"
+#include "crimild/math/Vector4.hpp"
 
 namespace crimild {
 

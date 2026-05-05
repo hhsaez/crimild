@@ -27,11 +27,11 @@
 
 #include "EulerAnglesParticleGenerator.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/Random.hpp>
 
 using namespace crimild;
 

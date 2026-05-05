@@ -29,7 +29,8 @@
 #define CRIMILD_PARTICLE_GENERATOR_RANDOM_VALUE_
 
 #include "../ParticleSystemComponent.hpp"
-#include "Crimild_Mathematics.hpp"
+
+#include <crimild/math/Random.hpp>
 
 namespace crimild {
 

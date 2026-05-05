@@ -27,11 +27,13 @@
 
 #include "Camera.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "Simulation/Settings.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/inverse.hpp>
+#include <crimild/math/origin.hpp>
+#include <crimild/math/perspective.hpp>
 
 using namespace crimild;
 

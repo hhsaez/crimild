@@ -27,7 +27,6 @@
 
 #include "NodePositionParticleGenerator.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Visitors/Apply.hpp"
 

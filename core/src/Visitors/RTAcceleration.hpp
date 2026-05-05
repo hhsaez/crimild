@@ -28,11 +28,11 @@
 #ifndef CRIMILD_VISITORS_RT_ACCELERATION_
 #define CRIMILD_VISITORS_RT_ACCELERATION_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/Vertex.hpp"
 #include "Visitors/NodeVisitor.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/max.hpp>
+#include <crimild/math/min.hpp>
 
 namespace crimild {
 

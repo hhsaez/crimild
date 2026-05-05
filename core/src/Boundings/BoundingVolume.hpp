@@ -28,9 +28,11 @@
 #ifndef CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 #define CRIMILD_CORE_BOUNDINGS_BOUNDING_VOLUME_
 
-#include "Crimild_Mathematics.hpp"
-
-#include <crimild/foundation.hpp>
+#include <crimild/foundation/common/SharedObject.hpp>
+#include <crimild/foundation/common/Types.hpp>
+#include <crimild/math/Plane3.hpp>
+#include <crimild/math/Sphere.hpp>
+#include <crimild/math/Transformation.hpp>
 
 namespace crimild {
 
@@ -38,7 +40,7 @@ namespace crimild {
    class Camera;
    class VertexBuffer;
 
-   class BoundingVolume : public SharedObject {
+   class [[deprecated]] BoundingVolume : public SharedObject {
    protected:
       BoundingVolume( void );
 
@@ -48,28 +50,61 @@ namespace crimild {
       virtual const Point3f &getCenter( void ) const = 0;
       virtual Real getRadius( void ) const = 0;
 
-      virtual SharedPointer< BoundingVolume > clone( void ) const { return nullptr; }
+      virtual SharedPointer< BoundingVolume > clone( void ) const
+      {
+         return nullptr;
+      }
 
-      const Point3f &getMin( void ) const { return _min; }
-      const Point3f &getMax( void ) const { return _max; }
+      const Point3f &getMin( void ) const
+      {
+         return _min;
+      }
+      const Point3f &getMax( void ) const
+      {
+         return _max;
+      }
 
    protected:
-      void setMin( const Point3f &min ) { _min = min; }
-      void setMax( const Point3f &max ) { _max = max; }
+      void setMin( const Point3f &min )
+      {
+         _min = min;
+      }
+      void setMax( const Point3f &max )
+      {
+         _max = max;
+      }
 
    private:
       Point3f _min;
       Point3f _max;
 
    public:
-      void setRAxis( const Vector3f &r ) { _r = r; }
-      const Vector3f &getRAxis( void ) const { return _r; }
+      void setRAxis( const Vector3f &r )
+      {
+         _r = r;
+      }
+      const Vector3f &getRAxis( void ) const
+      {
+         return _r;
+      }
 
-      void setSAxis( const Vector3f &s ) { _s = s; }
-      const Vector3f &getSAxis( void ) const { return _s; }
+      void setSAxis( const Vector3f &s )
+      {
+         _s = s;
+      }
+      const Vector3f &getSAxis( void ) const
+      {
+         return _s;
+      }
 
-      void setTAxis( const Vector3f &t ) { _t = t; }
-      const Vector3f &getTAxis( void ) const { return _t; }
+      void setTAxis( const Vector3f &t )
+      {
+         _t = t;
+      }
+      const Vector3f &getTAxis( void ) const
+      {
+         return _t;
+      }
 
    private:
       Vector3f _r;

@@ -2,8 +2,7 @@
 #include "crimild/coding/TextDecoder.hpp"
 #include "crimild/coding/TextEncoder.hpp"
 
-#include <Crimild_Mathematics.hpp>
-#include <crimild/foundation.hpp>
+#include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>
 
 namespace crimild {

@@ -28,44 +28,43 @@
 #ifndef CRIMILD_PRIMITIVES_BOX_
 #define CRIMILD_PRIMITIVES_BOX_
 
-#include "Crimild_Mathematics.hpp"
 #include "Primitive.hpp"
 #include "Rendering/Vertex.hpp"
 
 namespace crimild {
 
-    /**
-       \brief Construct a Box
-     */
-    class BoxPrimitive : public Primitive {
-    public:
-        static SharedPointer< Primitive > UNIT_BOX;
+   /**
+      \brief Construct a Box
+    */
+   class BoxPrimitive : public Primitive {
+   public:
+      static SharedPointer< Primitive > UNIT_BOX;
 
-    public:
-        struct Params {
-            Primitive::Type type = Primitive::Type::TRIANGLES;
-            VertexLayout layout = VertexP3N3TC2::getLayout();
-            Vector3f size = Vector3f::Constants::ONE;
+   public:
+      struct Params {
+         Primitive::Type type = Primitive::Type::TRIANGLES;
+         VertexLayout layout = VertexP3N3TC2::getLayout();
+         Vector3f size = Vector3f::Constants::ONE;
 
-            // When set to `true`, faces will be inverted generating a hollow box instead
-            // This is useful, for example, to quickly build a room.
-            Bool invertFaces = false;
-        };
+         // When set to `true`, faces will be inverted generating a hollow box instead
+         // This is useful, for example, to quickly build a room.
+         Bool invertFaces = false;
+      };
 
-    public:
-        /**
-           \brief Construct a box with positions, normals and texture coordinates of size 1, 1, 1
-         */
-        BoxPrimitive( void ) noexcept;
+   public:
+      /**
+         \brief Construct a box with positions, normals and texture coordinates of size 1, 1, 1
+       */
+      BoxPrimitive( void ) noexcept;
 
-        /**
-           \brief Construct a box with user defined layout and size
-         */
-        explicit BoxPrimitive( const Params &params ) noexcept;
-        virtual ~BoxPrimitive( void ) = default;
-    };
+      /**
+         \brief Construct a box with user defined layout and size
+       */
+      explicit BoxPrimitive( const Params &params ) noexcept;
+      virtual ~BoxPrimitive( void ) = default;
+   };
 
-    using BoxPrimitivePtr = SharedPointer< BoxPrimitive >;
+   using BoxPrimitivePtr = SharedPointer< BoxPrimitive >;
 
 }
 

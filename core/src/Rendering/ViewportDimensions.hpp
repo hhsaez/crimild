@@ -28,10 +28,9 @@
 #ifndef CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 #define CRIMILD_RENDERING_VIEWPORT_DIMENSIONS_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/ScalingMode.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/Rect.hpp>
 
 namespace crimild {
 

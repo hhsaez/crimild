@@ -28,30 +28,31 @@
 #ifndef CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
 #define CRIMILD_RENDERING_UNIFORMS_CAMERA_VIEW_PROJECTION_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/UniformBuffer.hpp"
+#include "crimild/math/Matrix4.hpp"
+#include "crimild/math/Vector2.hpp"
 
 namespace crimild {
 
-    class Camera;
+   class Camera;
 
-    class [[deprecated]] CameraViewProjectionUniform : public UniformBuffer {
-    private:
-        struct Props {
-            alignas( 16 ) Matrix4f view;
-            alignas( 16 ) Matrix4f proj;
-            alignas( 8 ) Vector2f viewport;
-        };
+   class [[deprecated]] CameraViewProjectionUniform : public UniformBuffer {
+   private:
+      struct Props {
+         alignas( 16 ) Matrix4f view;
+         alignas( 16 ) Matrix4f proj;
+         alignas( 8 ) Vector2f viewport;
+      };
 
-    public:
-        explicit CameraViewProjectionUniform( Camera *camera ) noexcept;
-        ~CameraViewProjectionUniform( void ) = default;
+   public:
+      explicit CameraViewProjectionUniform( Camera *camera ) noexcept;
+      ~CameraViewProjectionUniform( void ) = default;
 
-        void onPreRender( void ) noexcept override;
+      void onPreRender( void ) noexcept override;
 
-    private:
-        Camera *m_camera = nullptr;
-    };
+   private:
+      Camera *m_camera = nullptr;
+   };
 
 }
 

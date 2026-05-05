@@ -33,13 +33,13 @@
 #include "Behaviors/Decorators/Repeat.hpp"
 #include "Behaviors/withBehavior.hpp"
 #include "Components/MotionStateComponent.hpp"
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Event.hpp"
 #include "Simulation/Input.hpp"
 
 #include <crimild/coding/MemoryDecoder.hpp>
 #include <crimild/coding/MemoryEncoder.hpp>
+#include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>
 
 namespace crimild {

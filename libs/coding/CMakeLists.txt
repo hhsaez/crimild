@@ -40,11 +40,13 @@ target_include_directories(
 target_link_libraries(
     crimild_coding
     PUBLIC crimild::foundation
-    PUBLIC Crimild::Mathematics
+    PUBLIC crimild::math
 )
 
 target_compile_features( crimild_coding PUBLIC cxx_std_20 )
 
 add_library( crimild::coding ALIAS crimild_coding )
 
-add_subdirectory( test )
+if ( CRIMILD_BUILD_TESTS )
+	add_subdirectory( test )
+endif ()

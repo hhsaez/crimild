@@ -33,7 +33,7 @@
 #include "crimild/coding/MemoryDecoder.hpp"
 #include "crimild/coding/MemoryEncoder.hpp"
 
-#include <Crimild_Mathematics.hpp>
+#include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>
 
 using namespace crimild;

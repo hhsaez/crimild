@@ -28,10 +28,9 @@
 #ifndef CRIMILD_CORE_RENDERING_OPERATIONS_
 #define CRIMILD_CORE_RENDERING_OPERATIONS_
 
-#include "Crimild_Mathematics.hpp"
 #include "Rendering/DescriptorSet.hpp"
 
-#include <crimild/foundation.hpp>
+#include <crimild/math/Matrix3.hpp>
 
 namespace crimild {
 

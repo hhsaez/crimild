@@ -27,12 +27,14 @@
 
 #include "Behaviors/Actions/ClampPosition.hpp"
 
-#include "Crimild_Mathematics.hpp"
 #include "SceneGraph/Node.hpp"
 #include "Simulation/Simulation.hpp"
 
 #include <crimild/coding/Decoder.hpp>
 #include <crimild/coding/Encoder.hpp>
+#include <crimild/math/clamp.hpp>
+#include <crimild/math/origin.hpp>
+#include <crimild/math/translation.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;
