@@ -34,6 +34,8 @@
 #include "crimild/math/orthonormalization.hpp"
 #include "crimild/math/scale.hpp"
 
+#include <crimild/math/trigonometry.hpp>
+
 using namespace crimild;
 
 std::vector< DebugDrawManager::Renderable > DebugDrawManager::s_renderables;
