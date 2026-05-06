@@ -27,27 +27,29 @@
 
 #include "TorusPrimitive.hpp"
 
+#include <crimild/math/trigonometry.hpp>
+
 using namespace crimild;
 
 TorusPrimitive::TorusPrimitive( const Params &params ) noexcept
-    : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
+   : ParametricPrimitive( { params.type, params.layout, params.colorMode } )
 {
-    _majorRadius = params.majorRadius;
-    _minorRadius = params.minorRadius;
+   _majorRadius = params.majorRadius;
+   _minorRadius = params.minorRadius;
 
-    ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 10 } };
-    setInterval( interval );
-    generate();
+   ParametricInterval interval = { params.divisions, Vector2f { Numericf::TWO_PI, Numericf::TWO_PI }, Vector2f { 40, 10 } };
+   setInterval( interval );
+   generate();
 }
 
 Vector3f TorusPrimitive::evaluate( const Vector2f &domain ) const
 {
-    const float major = _majorRadius;
-    const float minor = _minorRadius;
-    float u = domain[ 0 ];
-    float v = domain[ 1 ];
-    float x = ( major + minor * cos( v ) ) * cos( u );
-    float y = ( major + minor * cos( v ) ) * sin( u );
-    float z = minor * sin( v );
-    return Vector3f { x, y, z };
+   const float major = _majorRadius;
+   const float minor = _minorRadius;
+   float u = domain[ 0 ];
+   float v = domain[ 1 ];
+   float x = ( major + minor * cos( v ) ) * cos( u );
+   float y = ( major + minor * cos( v ) ) * sin( u );
+   float z = minor * sin( v );
+   return Vector3f { x, y, z };
 }

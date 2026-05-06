@@ -27,6 +27,8 @@
 
 #include "MobiusStripPrimitive.hpp"
 
+#include <crimild/math/trigonometry.hpp>
+
 using namespace crimild;
 
 MobiusStripPrimitive::MobiusStripPrimitive( const Params &params ) noexcept

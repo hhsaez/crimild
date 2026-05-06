@@ -27,6 +27,8 @@
 
 #include "TrefoilKnotPrimitive.hpp"
 
+#include <crimild/math/trigonometry.hpp>
+
 using namespace crimild;
 
 TrefoilKnotPrimitive::TrefoilKnotPrimitive( const Params &params ) noexcept
