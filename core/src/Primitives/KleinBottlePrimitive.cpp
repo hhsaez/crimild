@@ -27,6 +27,8 @@
 
 #include "KleinBottlePrimitive.hpp"
 
+#include <crimild/math/trigonometry.hpp>
+
 using namespace crimild;
 
 KleinBottlePrimitive::KleinBottlePrimitive( const Params &params ) noexcept
