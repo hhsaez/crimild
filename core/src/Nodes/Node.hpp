@@ -22,31 +22,37 @@ namespace crimild::experimental {
       : public Entity,
         public Named {
    public:
-      virtual ~Node( void ) = default;
+      virtual ~Node( void ) noexcept;
 
       inline bool hasParent( void ) const
       {
-         return !m_parent.expired();
+         return m_parent != nullptr;
       }
 
       std::shared_ptr< Node > getParent( void ) const
       {
-         return m_parent.lock();
+         return retain( m_parent );
       }
 
       template< IsNode ParentNodeType >
       std::shared_ptr< ParentNodeType > getParent( void ) const
       {
-         return std::static_pointer_cast< ParentNodeType >( m_parent.lock() );
+         return std::static_pointer_cast< ParentNodeType >( retain( m_parent ) );
       }
 
       std::shared_ptr< Node > detachFromParent( void );
 
    private:
-      void setParent( std::shared_ptr< Node > const &newParent );
+      void setParent( Node *parent );
 
    private:
-      std::weak_ptr< Node > m_parent;
+      /**
+       * @brief Parent node
+       *
+       * Use a raw pointer so we can attach child nodes during
+       * construction.
+       */
+      Node *m_parent = nullptr;
 
    public:
       void attach( std::shared_ptr< Node > const &child );
@@ -60,6 +66,8 @@ namespace crimild::experimental {
       }
 
       void detach( std::shared_ptr< Node > const &child );
+
+      void detachAll( void );
 
       [[nodiscard]] bool hasChild( std::shared_ptr< Node > const &child ) const
       {

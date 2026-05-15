@@ -8,6 +8,11 @@
 
 using namespace crimild::experimental;
 
+Node::~Node( void ) noexcept
+{
+   detachAll();
+}
+
 std::shared_ptr< Node > Node::detachFromParent( void )
 {
    // Since we're detaching from our owner, keep a retained pointer so we're
@@ -19,7 +24,7 @@ std::shared_ptr< Node > Node::detachFromParent( void )
    return self;
 }
 
-void Node::setParent( std::shared_ptr< Node > const &parent )
+void Node::setParent( Node *parent )
 {
    m_parent = parent;
    perform< InvalidateHierarchy >();
@@ -37,7 +42,7 @@ void Node::attach( std::shared_ptr< Node > const &child )
 
    child->detachFromParent();
    m_children.push_back( child );
-   child->setParent( retain( this ) );
+   child->setParent( this );
 }
 
 void Node::detach( std::shared_ptr< Node > const &child )
@@ -53,6 +58,16 @@ void Node::detach( std::shared_ptr< Node > const &child )
    auto it = std::find( m_children.begin(), m_children.end(), child );
    m_children.erase( it );
    child->setParent( nullptr );
+}
+
+void Node::detachAll( void )
+{
+   for ( auto c : m_children ) {
+      if ( c != nullptr ) {
+         c->setParent( nullptr );
+      }
+   }
+   m_children.clear();
 }
 
 void Node::accept( NodeVisitor &visitor )
