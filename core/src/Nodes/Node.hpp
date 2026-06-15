@@ -24,6 +24,14 @@ namespace crimild::experimental {
    public:
       virtual ~Node( void ) noexcept;
 
+   public:
+      [[nodiscard]] bool isEnabled( void ) const { return m_enabled; }
+      void setEnabled( bool enabled ) { m_enabled = enabled; }
+
+   private:
+      bool m_enabled = true;
+
+   public:
       inline bool hasParent( void ) const
       {
          return m_parent != nullptr;
