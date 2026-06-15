@@ -1,6 +1,7 @@
 #ifndef CRIMILD_OPENGL_RENDERING_RENDER_PASS_SCENE_
 #define CRIMILD_OPENGL_RENDERING_RENDER_PASS_SCENE_
 
+#include <cstdint>
 #include <memory>
 
 namespace crimild {
