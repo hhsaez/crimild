@@ -1,6 +1,6 @@
 crimild_trace()
 
-add_library( crimild_core OBJECT )
+add_library( crimild_core STATIC )
 
 target_sources(
     crimild_core

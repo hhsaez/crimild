@@ -1,6 +1,6 @@
 crimild_trace()
 
-add_library( crimild_math OBJECT )
+add_library( crimild_math STATIC )
 
 target_sources(
   crimild_math

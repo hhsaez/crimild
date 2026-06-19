@@ -1,6 +1,6 @@
 crimild_trace()
 
-add_library( crimild_coding OBJECT )
+add_library( crimild_coding STATIC )
 
 target_sources(
   crimild_coding
