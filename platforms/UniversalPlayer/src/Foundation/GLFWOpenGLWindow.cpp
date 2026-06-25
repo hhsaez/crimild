@@ -30,6 +30,14 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
 
    glfwSetWindowUserPointer( m_window, this );
 
+   // Validate window's dimensions after creation
+   // It is possible the OS resizes the window to appropriated dimensions during creation
+   // For example, the window dimension could be too big for the screen.
+   int actualWidth, actualHeight;
+   glfwGetWindowSize( m_window, &actualWidth, &actualHeight );
+    m_width = actualWidth;
+    m_height = actualHeight;
+
    glfwSetWindowSizeCallback(
       m_window,
       []( GLFWwindow *window, int width, int height ) {
