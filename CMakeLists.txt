@@ -14,22 +14,13 @@ project(
 	LANGUAGES CXX
 )
 
-# Check if Crimild is the current project
-# This is useful when setting defaults, since some modules are
-# only available when Crimild is built as a standalone project.
-if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
-	set(CRIMILD_IS_MAIN_PROJECT ON)
-else()
-	set(CRIMILD_IS_MAIN_PROJECT OFF)
-endif()
-
 # Define build options here
-option(CRIMILD_BUILD_TESTS "Build tests?" ${CRIMILD_IS_MAIN_PROJECT})
-option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${CRIMILD_IS_MAIN_PROJECT})
-option(CRIMILD_BUILD_PLAYER "Build crimild player?" ${CRIMILD_IS_MAIN_PROJECT})
-option(CRIMILD_BUILD_UNIVERSAL_PLAYER "Build crimild universal player?" ${CRIMILD_IS_MAIN_PROJECT})
-option(CRIMILD_BUILD_EXAMPLES "Build examples?" ${CRIMILD_IS_MAIN_PROJECT})
-option(CRIMILD_BUILD_UNIVERSAL_EXAMPLES "Build examples using universal player?" ${CRIMILD_IS_MAIN_PROJECT})
+option(CRIMILD_BUILD_TESTS "Build tests?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_PLAYER "Build crimild player?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_UNIVERSAL_PLAYER "Build crimild universal player?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_EXAMPLES "Build examples?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_UNIVERSAL_EXAMPLES "Build examples using universal player?" ${PROJECT_IS_TOP_LEVEL})
 
 # Global tests setup
 # Individual directories have to enable their tests too.
