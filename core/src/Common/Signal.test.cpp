@@ -172,7 +172,7 @@ TEST( Signal, cleans_up_expired_connections )
    EXPECT_EQ( p1->seen, std::vector< int > { 10 } );
 }
 
-TEST( Signal, reentrant_modifications )
+TEST( Signal, reentrant_clear_affects_next_signal_trigger )
 {
    struct Probe {
       void record()
@@ -194,27 +194,46 @@ TEST( Signal, reentrant_modifications )
    s();
    EXPECT_EQ( s.size(), 0 );
    EXPECT_TRUE( p0->seen );
-   EXPECT_FALSE( p1->seen );
+   EXPECT_TRUE( p1->seen ); // executed because clear() does not affects it.
+}
 
-   auto p2 = std::make_shared< Probe >();
+TEST( Signal, delays_execution )
+{
+   struct Probe {
+      void record()
+      {
+         seen = true;
+      }
+
+      bool seen = false;
+   };
+
+   crimild::Signal<> s;
+   auto p = std::make_shared< Probe >();
    s.bind(
       [ & ]() {
-         s.bind( p2, &Probe::record );
+         s.bind( p, &Probe::record );
       }
    );
    EXPECT_EQ( s.size(), 1 );
    s();
    EXPECT_EQ( s.size(), 2 );
-   EXPECT_TRUE( p2->seen );
+   EXPECT_FALSE( p->seen );
+   s();
+   EXPECT_TRUE( p->seen ); // executed in the next trigger
 }
 
-TEST( Signal, reentrant_unbind_skips_pending_handler )
+TEST( Signal, defers_unbind_inside_callback_to_next_signal_trigger )
 {
    crimild::Signal<> s;
    bool secondCalled = false;
    crimild::Signal<>::ConnectionId secondId;
    s.bind( [ & ] { s.unbind( secondId ); } );
    secondId = s.bind( [ & ] { secondCalled = true; } );
+   s();
+   EXPECT_TRUE( secondCalled );
+   EXPECT_EQ( s.size(), 1 ); // called becaused unbind is deferred to next executed
+   secondCalled = false;
    s();
    EXPECT_FALSE( secondCalled );
 }
@@ -230,7 +249,25 @@ TEST( Signal, clear_then_bind )
       }
    );
    s();
+   EXPECT_FALSE( newCalled );
+   EXPECT_EQ( s.size(), 1 );
+   s();
    EXPECT_TRUE( newCalled );
+}
+
+TEST( Signal, bind_then_clear )
+{
+   crimild::Signal<> s;
+   bool newCalled = false;
+   s.bind(
+      [ & ] {
+         s.bind( [ & ] { newCalled = true; } );
+         s.clear();
+      }
+   );
+   s();
+   EXPECT_FALSE( newCalled );
+   EXPECT_EQ( s.size(), 0 );
 }
 
 TEST( Signal, binds_in_order )
@@ -239,11 +276,13 @@ TEST( Signal, binds_in_order )
    std::vector< int > order;
    s.bind(
       [ & ] {
-         s.bind( [ & ] { order.push_back( 2 ); } );
-         s.bind( [ & ] { order.push_back( 3 ); } );
-         order.push_back( 1 );
+         s.bind( [ & ] { order.push_back( 2 ); } ); // deferred
+         s.bind( [ & ] { order.push_back( 3 ); } ); // deferred
+         order.push_back( 1 );                      // each time
       }
    );
    s();
-   EXPECT_EQ( order, ( std::vector< int > { 1, 2, 3 } ) );
+   EXPECT_EQ( order, ( std::vector< int > { 1 } ) );
+   s();
+   EXPECT_EQ( order, ( std::vector< int > { 1, 1, 2, 3 } ) );
 }

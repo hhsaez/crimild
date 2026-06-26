@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <vector>
 
@@ -22,14 +21,13 @@ namespace crimild {
     *   owners (auto cleanup), and raw pointers (manual lifetime
     *   responsibility).
     * - `operator()` is const and begins by calling `cleanupExpiredConnections()`;
-    *   each dispatch then scans for the smallest id greater than the last
-    *   executed one so handlers can clear, unbind, or bind safely during
-    *   iteration (O(N²) worst case, but deterministic).
     * - Connection ids increase monotonically via `m_nextId`; `clear()` does
     *   not reset the counter, so id uniqueness must hold even when handlers
     *   churn.
     * - `cleanupExpiredConnections()` is const but mutates the vector thanks
     *   to the mutable storage.
+    * - Mutations while triggering a signal only affect future triggers. That
+    *   includes both binding and unbindings.
     *
     * @warning: This class is not thread-safe.
     */
@@ -102,7 +100,7 @@ namespace crimild {
             std::remove_if(
                m_connections.begin(),
                m_connections.end(),
-               [ &object ]( const Connection &conn ) {
+               [ object ]( const Connection &conn ) {
                   return !conn.owner.expired() && conn.owner.lock() == object;
                }
             ),
@@ -115,30 +113,15 @@ namespace crimild {
          // Cleanup expired connections first
          cleanupExpiredConnections();
 
-         // This is far from optimal, but allows mutating the connections
-         // when we're triggering signals.
-         // Keep traversal state using connection ids rather than iterators.
-         // After each handler runs, find the smallest id greater than the one
-         // just executed. This accepts an O(N^2) upper bound but simplifies
-         // bookkepping and still meets the desired behavior.
-         ConnectionId lastId = 0;
-         while ( true ) {
-            Connection *next = nullptr;
-            ConnectionId nextId = std::numeric_limits< ConnectionId >::max();
-
-            for ( auto &conn : m_connections ) {
-               if ( conn.id > lastId && conn.id < nextId ) {
-                  next = &conn;
-                  nextId = conn.id;
-               }
+         // Create a snapshot of connections, allowing mutating the signal
+         // while also triggering.
+         auto cs = m_connections;
+         for ( auto &c : cs ) {
+            if ( c.hasOwner && c.owner.expired() ) {
+               continue;
             }
 
-            if ( next == nullptr ) {
-               break; // no more handlers left with id > lastId
-            }
-
-            auto handler = next->handler; // copy callable to survive erasure
-            lastId = nextId;
+            auto handler = c.handler; // copy callable to survive erasure
             handler( args... );
          }
       }
