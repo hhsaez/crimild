@@ -23,10 +23,20 @@ void PrimitiveBindable::bind( void )
 
 void PrimitiveBindable::render( void )
 {
+   static std::unordered_map< Primitive::Type, GLenum > glPrimitiveTypes {
+      { Primitive::Type::TRIANGLES, GL_TRIANGLES },
+      { Primitive::Type::LINES, GL_LINES },
+   };
+
    auto primitive = getOwner< Primitive >();
    auto indices = primitive->getIndices();
 
-   glDrawElements( GL_TRIANGLES, indices->getIndexCount(), GL_UNSIGNED_INT, 0 );
+   glDrawElements(
+      glPrimitiveTypes[ primitive->getType() ],
+      indices->getIndexCount(),
+      GL_UNSIGNED_INT,
+      0
+   );
 }
 
 void PrimitiveBindable::unbind( void )
