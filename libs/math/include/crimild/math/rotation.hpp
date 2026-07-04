@@ -34,36 +34,46 @@
 
 namespace crimild {
 
-    /**
-     * \brief Creates a rotation transformation from an arbitrary axis and angle
-     *
-     * \warning It is assumed the input axis is already normalized
-     */
-    [[nodiscard]] static auto rotation( const Vector3 &axis, radians_t angle ) noexcept
-    {
-        return Transformation {
-            .rotate = Quaternion {
-                axis * real_t( std::sin( 0.5 * angle ) ),
-                real_t( std::cos( 0.5 * angle ) ),
-            },
-        };
-    }
+   /**
+    * \brief Creates a rotation transformation from an arbitrary axis and angle
+    *
+    * \warning It is assumed the input axis is already normalized
+    */
+   [[nodiscard]] static auto rotation( const Vector3 &axis, radians_t angle ) noexcept
+   {
+      return Transformation {
+         .rotate = Quaternion {
+            axis * real_t( std::sin( 0.5 * angle ) ),
+            real_t( std::cos( 0.5 * angle ) ),
+         },
+      };
+   }
 
-    [[nodiscard, maybe_unused]] static auto rotationX( radians_t angle ) noexcept
-    {
-        return rotation( Vector3::Constants::UNIT_X, angle );
-    }
+   [[nodiscard, maybe_unused]] static auto rotationX( radians_t angle ) noexcept
+   {
+      return rotation( Vector3::Constants::UNIT_X, angle );
+   }
 
-    // TODO: make this function constexpr
-    [[nodiscard, maybe_unused]] static auto rotationY( radians_t angle ) noexcept
-    {
-        return rotation( Vector3::Constants::UNIT_Y, angle );
-    }
+   // TODO: make this function constexpr
+   [[nodiscard, maybe_unused]] static auto rotationY( radians_t angle ) noexcept
+   {
+      return rotation( Vector3::Constants::UNIT_Y, angle );
+   }
 
-    [[nodiscard, maybe_unused]] static auto rotationZ( radians_t angle ) noexcept
-    {
-        return rotation( Vector3::Constants::UNIT_Z, angle );
-    }
+   [[nodiscard, maybe_unused]] static auto rotationZ( radians_t angle ) noexcept
+   {
+      return rotation( Vector3::Constants::UNIT_Z, angle );
+   }
+
+   /**
+    * \brief Returns a new transformation from the rotation component of the input one.
+    */
+   [[nodiscard]] static auto rotation( const Transformation &T ) noexcept
+   {
+      return Transformation {
+         .rotate = T.rotate,
+      };
+   }
 
 }
 

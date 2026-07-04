@@ -26,6 +26,8 @@ void PrimitiveBindable::render( void )
    static std::unordered_map< Primitive::Type, GLenum > glPrimitiveTypes {
       { Primitive::Type::TRIANGLES, GL_TRIANGLES },
       { Primitive::Type::LINES, GL_LINES },
+      { Primitive::Type::LINE_STRIP, GL_LINE_STRIP },
+      { Primitive::Type::LINE_LOOP, GL_LINE_LOOP },
    };
 
    auto primitive = getOwner< Primitive >();

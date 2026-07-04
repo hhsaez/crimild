@@ -53,6 +53,16 @@ namespace crimild {
       };
    }
 
+   /**
+    * \brief Returns a new transformation from the translation component of the input one.
+    */
+   [[nodiscard]] static auto translation( const Transformation &T ) noexcept
+   {
+      return Transformation {
+         .translate = T.translate,
+      };
+   }
+
 }
 
 #endif
