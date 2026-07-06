@@ -133,7 +133,20 @@ auto main( int argc, char *argv[] ) -> int
    crimild::universal::RenderPass render;
 
    while ( window.isOpen() ) {
-      render( window.getWidth(), window.getHeight(), geometry, camera );
+      render(
+         Rect {
+            .origin = {
+               0,
+               0,
+            },
+            .size = {
+               .width = window.getWidth(),
+               .height = window.getHeight(),
+            },
+         },
+         geometry,
+         camera
+      );
       window.swapBuffers();
       glfwSystem.update();
    }

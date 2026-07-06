@@ -70,16 +70,19 @@ namespace crimild::experimental {
 using namespace crimild::universal;
 
 void RenderPass::operator()(
-   uint32_t width,
-   uint32_t height,
+   Rect viewport,
    std::shared_ptr< experimental::Node > const &node,
    std::shared_ptr< experimental::Camera3D > const &camera,
    ColorRGBA clearColor
 ) const
 {
-   glViewport( 0, 0, width, height );
+   // TODO: Move this to a general setup function since we only need to enable it once.
+   glEnable( GL_SCISSOR_TEST );
+
+   glViewport( viewport.origin.x, viewport.origin.y, viewport.size.width, viewport.size.height );
+   glScissor( viewport.origin.x, viewport.origin.y, viewport.size.width, viewport.size.height );
    glClearColor( clearColor.r, clearColor.g, clearColor.b, clearColor.a );
-   glClear( GL_COLOR_BUFFER_BIT );
+   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
    node->perform< crimild::experimental::RenderScene >( camera );
 
