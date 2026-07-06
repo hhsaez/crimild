@@ -7,6 +7,7 @@
 #include "Rendering/OpenGLUnlitMaterialBindable.hpp"
 
 #include <Crimild.hpp>
+#include <Nodes/Visitors/NodeConstVisitor.hpp>
 
 namespace crimild::experimental {
 
@@ -17,6 +18,10 @@ namespace crimild::experimental {
 
       virtual void visitGeometry3D( const Geometry3D &geometry )
       {
+         if ( !geometry.isEnabled() ) {
+            return;
+         }
+
          if ( auto material = geometry.getMaterial() ) {
             if ( auto bindable = getMaterialBindable( material ) ) {
                bindable->bind();
@@ -36,6 +41,8 @@ namespace crimild::experimental {
                bindable->unbind();
             }
          }
+
+         NodeVoidConstVisitor::visitGeometry3D( geometry );
       }
 
    private:
