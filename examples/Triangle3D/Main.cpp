@@ -140,8 +140,8 @@ auto main( int argc, char *argv[] ) -> int
                0,
             },
             .size = {
-               .width = window.getWidth(),
-               .height = window.getHeight(),
+               .width = float( window.getWidth() ),
+               .height = float( window.getHeight() ),
             },
          },
          geometry,

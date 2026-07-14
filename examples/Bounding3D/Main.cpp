@@ -221,8 +221,8 @@ auto main( int argc, char *argv[] ) -> int
                0,
             },
             .size = {
-               .width = w,
-               .height = h,
+               .width = float( w ),
+               .height = float( h ),
             },
          },
          scene,
