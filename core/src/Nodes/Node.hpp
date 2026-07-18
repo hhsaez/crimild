@@ -91,6 +91,17 @@ namespace crimild::experimental {
          return std::static_pointer_cast< T >( m_children.at( index ) );
       }
 
+      template< IsNode NodeType >
+      std::shared_ptr< NodeType > getChild( void ) const
+      {
+         for ( const auto &c : m_children ) {
+            if ( auto node = std::dynamic_pointer_cast< NodeType >( c ) ) {
+               return node;
+            }
+         }
+         return nullptr;
+      }
+
       /**
        * @brief Get node children
        *
@@ -99,6 +110,19 @@ namespace crimild::experimental {
       const std::vector< std::shared_ptr< Node > > &getChildren( void ) const
       {
          return m_children;
+      }
+
+      template< IsNode NodeType >
+      std::vector< std::shared_ptr< NodeType > > getChildren( void ) const
+      {
+         std::vector< std::shared_ptr< NodeType > > ret;
+         ret.reserve( m_children.size() );
+         for ( const auto &c : m_children ) {
+            if ( auto node = std::dynamic_pointer_cast< NodeType >( c ) ) {
+               ret.push_back( std::move( node ) );
+            }
+         }
+         return ret;
       }
 
    private:

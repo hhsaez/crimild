@@ -13,7 +13,10 @@ void NodeConstVisitor::traverse( const Node &node )
 
 void NodeConstVisitor::visitNode( const Node &node )
 {
-   for ( auto &c : node.getChildren() ) {
+   // Create a snapshot of children in order to support mutating
+   // the original collection during traversal
+   const auto cs = node.getChildren();
+   for ( auto &c : cs ) {
       c->accept( *this );
    }
 }
