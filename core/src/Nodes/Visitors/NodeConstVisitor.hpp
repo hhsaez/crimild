@@ -34,7 +34,7 @@ namespace crimild::experimental {
    class NodeReducerConstVisitor : public NodeConstVisitor {
    public:
       using ResultType = ReducerResultType;
-      ResultType getResult( void ) const { return m_result; }
+      ResultType &getResult( void ) const { return m_result; }
 
       virtual ~NodeReducerConstVisitor( void ) = default;
 
