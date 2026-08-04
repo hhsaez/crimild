@@ -14,6 +14,8 @@ project(
 	LANGUAGES CXX
 )
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 # Define build options here
 option(CRIMILD_BUILD_TESTS "Build tests?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${PROJECT_IS_TOP_LEVEL})
