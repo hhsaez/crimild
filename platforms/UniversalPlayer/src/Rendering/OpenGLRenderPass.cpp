@@ -91,3 +91,16 @@ void RenderPass::operator()(
       CRIMILD_LOG_ERROR( "GL Error (", ( int ) error, ")" );
    }
 }
+
+void RenderPass::operator()(
+   std::shared_ptr< experimental::Node > const &node,
+   std::shared_ptr< experimental::Camera3D > const &camera
+) const
+{
+   node->perform< crimild::experimental::RenderScene >( camera );
+
+   auto error = glGetError();
+   if ( error != GL_NO_ERROR ) {
+      CRIMILD_LOG_ERROR( "GL Error (", ( int ) error, ")" );
+   }
+}

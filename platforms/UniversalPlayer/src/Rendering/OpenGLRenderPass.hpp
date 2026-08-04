@@ -34,6 +34,14 @@ namespace crimild::universal {
          std::shared_ptr< crimild::experimental::Camera3D > const &camera,
          ColorRGBA clearColor = ColorRGBA { 0.0f, 0.0f, 0.0f, 1.0f }
       ) const;
+
+      /**
+       * @brief Renders a scene without clearning
+       */
+      void operator()(
+         std::shared_ptr< crimild::experimental::Node > const &node,
+         std::shared_ptr< crimild::experimental::Camera3D > const &camera
+      ) const;
    };
 
 }
