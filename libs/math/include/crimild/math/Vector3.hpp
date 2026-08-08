@@ -28,6 +28,7 @@
 #ifndef CRIMILD_MATHEMATICS_VECTOR_3_
 #define CRIMILD_MATHEMATICS_VECTOR_3_
 
+#include "Tuple2.hpp"
 #include "Tuple3.hpp"
 #include "Tuple4.hpp"
 #include "types.hpp"
@@ -36,76 +37,80 @@
 
 namespace crimild {
 
-    template< ArithmeticType T >
-    class Vector3Impl : public Tuple3< Vector3Impl, T > {
-    public:
-        struct Constants {
-            static constexpr Vector3Impl ZERO = { 0, 0, 0 };
-            static constexpr Vector3Impl ONE = { 1, 1, 1 };
-            static constexpr Vector3Impl POSITIVE_INFINITY = {
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-                std::numeric_limits< T >::infinity(),
-            };
-            static constexpr Vector3Impl NEGATIVE_INFINITY = {
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-                -std::numeric_limits< T >::infinity(),
-            };
-            static constexpr Vector3Impl UNIT_X = { 1, 0, 0 };
-            static constexpr Vector3Impl UNIT_Y = { 0, 1, 0 };
-            static constexpr Vector3Impl UNIT_Z = { 0, 0, 1 };
-            static constexpr Vector3Impl RIGHT = { 1, 0, 0 };
-            static constexpr Vector3Impl UP = { 0, 1, 0 };
+   template< ArithmeticType T >
+   class Vector3Impl : public Tuple3< Vector3Impl, T > {
+   public:
+      struct Constants {
+         static constexpr Vector3Impl ZERO = { 0, 0, 0 };
+         static constexpr Vector3Impl ONE = { 1, 1, 1 };
+         static constexpr Vector3Impl POSITIVE_INFINITY = {
+            std::numeric_limits< T >::infinity(),
+            std::numeric_limits< T >::infinity(),
+            std::numeric_limits< T >::infinity(),
+         };
+         static constexpr Vector3Impl NEGATIVE_INFINITY = {
+            -std::numeric_limits< T >::infinity(),
+            -std::numeric_limits< T >::infinity(),
+            -std::numeric_limits< T >::infinity(),
+         };
+         static constexpr Vector3Impl UNIT_X = { 1, 0, 0 };
+         static constexpr Vector3Impl UNIT_Y = { 0, 1, 0 };
+         static constexpr Vector3Impl UNIT_Z = { 0, 0, 1 };
+         static constexpr Vector3Impl RIGHT = { 1, 0, 0 };
+         static constexpr Vector3Impl UP = { 0, 1, 0 };
 
-            /**
-             * @brief Forward vector
-             *
-             * Tuple3
-             *
-             * @ref Tuple3
-             *
-             * @ref crimild::Tuple3
-             *
-             * @ref crimild::Tuple3 "Tuple3"
-             *
-             * @see [Readme](mathematics/README.md)
-             */
-            static constexpr Vector3Impl FORWARD = { 0, 0, -1 };
-        };
+         /**
+          * @brief Forward vector
+          *
+          * Tuple3
+          *
+          * @ref Tuple3
+          *
+          * @ref crimild::Tuple3
+          *
+          * @ref crimild::Tuple3 "Tuple3"
+          *
+          * @see [Readme](mathematics/README.md)
+          */
+         static constexpr Vector3Impl FORWARD = { 0, 0, -1 };
+      };
 
-    public:
-        using Tuple3< Vector3Impl, T >::x;
-        using Tuple3< Vector3Impl, T >::y;
-        using Tuple3< Vector3Impl, T >::z;
+   public:
+      using Tuple3< Vector3Impl, T >::x;
+      using Tuple3< Vector3Impl, T >::y;
+      using Tuple3< Vector3Impl, T >::z;
 
-        constexpr Vector3Impl( void ) noexcept = default;
+      constexpr Vector3Impl( void ) noexcept = default;
 
-        constexpr Vector3Impl( T x, T y, T z ) noexcept
-            : Tuple3< Vector3Impl, T >( x, y, z )
-        {
-        }
+      constexpr Vector3Impl( T x, T y, T z ) noexcept
+         : Tuple3< Vector3Impl, T >( x, y, z )
+      {
+      }
 
-        template< ArithmeticType U >
-        constexpr explicit Vector3Impl( U value ) noexcept
-            : Tuple3< Vector3Impl, T >( value ) { }
+      template< ArithmeticType U >
+      constexpr explicit Vector3Impl( U value ) noexcept
+         : Tuple3< Vector3Impl, T >( value ) { }
 
-        template< template< typename > class OtherDerived, ArithmeticType U >
-        constexpr explicit Vector3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
-            : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr explicit Vector3Impl( const Tuple2< OtherDerived, U > &other ) noexcept
+         : Tuple3< Vector3Impl, T >( other.x, other.y, 0 ) { }
 
-        template< template< typename > class OtherDerived, ArithmeticType U >
-        constexpr explicit Vector3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
-            : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr explicit Vector3Impl( const Tuple3< OtherDerived, U > &other ) noexcept
+         : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
-        ~Vector3Impl( void ) noexcept = default;
-    };
+      template< template< typename > class OtherDerived, ArithmeticType U >
+      constexpr explicit Vector3Impl( const Tuple4< OtherDerived, U > &other ) noexcept
+         : Tuple3< Vector3Impl, T >( other.x, other.y, other.z ) { }
 
-    using Vector3 = Vector3Impl< real_t >;
-    using Vector3f = Vector3Impl< float >;
-    using Vector3d = Vector3Impl< double >;
-    using Vector3i = Vector3Impl< int32_t >;
-    using Vector3ui = Vector3Impl< uint32_t >;
+      ~Vector3Impl( void ) noexcept = default;
+   };
+
+   using Vector3 = Vector3Impl< real_t >;
+   using Vector3f = Vector3Impl< float >;
+   using Vector3d = Vector3Impl< double >;
+   using Vector3i = Vector3Impl< int32_t >;
+   using Vector3ui = Vector3Impl< uint32_t >;
 
 }
 
