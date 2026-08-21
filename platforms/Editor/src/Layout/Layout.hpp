@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_LAYOUT_
 #define CRIMILD_EDITOR_LAYOUT_
 
-#include "Rendering/Extent.hpp"
+#include <crimild/core/Rendering/Extent.hpp>
 
 #include <crimild/coding/Codable.hpp>
 #include <crimild/foundation.hpp>

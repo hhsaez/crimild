@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
 #define CRIMILD_PHYSICS_FOUNDATION_BULLET_UTILS_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 #include "btBulletDynamicsCommon.h"
 

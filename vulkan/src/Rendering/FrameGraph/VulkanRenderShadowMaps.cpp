@@ -27,8 +27,8 @@
 
 #include "Rendering/FrameGraph/VulkanRenderShadowMaps.hpp"
 
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/UniformBuffer.hpp"
+#include <crimild/core/Rendering/ShaderProgram.hpp>
+#include <crimild/core/Rendering/UniformBuffer.hpp>
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanDescriptor.hpp"
 #include "Rendering/VulkanDescriptorPool.hpp"
@@ -41,7 +41,7 @@
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
-#include "SceneGraph/Camera.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
 
 namespace crimild::vulkan::framegraph {
 

@@ -30,7 +30,7 @@
 
 #include "Foundation/GLFWUtils.hpp"
 #include "Rendering/VulkanSurface.hpp"
-#include "Simulation/Event.hpp"
+#include <crimild/core/Simulation/Event.hpp>
 
 namespace crimild {
 

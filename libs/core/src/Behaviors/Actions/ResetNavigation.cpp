@@ -1,0 +1,40 @@
+#include <crimild/core/Behaviors/Actions/ResetNavigation.hpp>
+
+#include <crimild/core/Navigation/NavigationController.hpp>
+#include <crimild/core/SceneGraph/Node.hpp>
+
+using namespace crimild;
+using namespace crimild::behaviors;
+using namespace crimild::behaviors::actions;
+using namespace crimild::navigation;
+
+ResetNavigation::ResetNavigation( void )
+{
+}
+
+ResetNavigation::~ResetNavigation( void )
+{
+}
+
+Behavior::State ResetNavigation::step( BehaviorContext *context )
+{
+    assert( false && "TODO" );
+#if 0
+	auto agent = context->getAgent();
+	auto nav = agent->getComponent< NavigationController >();
+	if ( nav != nullptr ) {
+		nav->teleport( agent->getLocal().getTranslate() );
+	}
+#endif
+    return Behavior::State::SUCCESS;
+}
+
+void ResetNavigation::encode( coding::Encoder &encoder )
+{
+    Behavior::encode( encoder );
+}
+
+void ResetNavigation::decode( coding::Decoder &decoder )
+{
+    Behavior::decode( decoder );
+}

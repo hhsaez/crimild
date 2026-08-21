@@ -28,7 +28,7 @@
 #ifndef CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 #define CRIMILD_VULKAN_RENDERING_SHADER_COMPILER_
 
-#include "Rendering/Shader.hpp"
+#include <crimild/core/Rendering/Shader.hpp>
 
 #include <crimild/foundation.hpp>
 #include <string>

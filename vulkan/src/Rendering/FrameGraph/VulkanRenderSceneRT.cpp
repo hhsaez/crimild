@@ -27,18 +27,18 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneRT.hpp"
 
-#include "Rendering/Buffer.hpp"
-#include "Rendering/BufferAccessor.hpp"
-#include "Rendering/BufferView.hpp"
+#include <crimild/core/Rendering/Buffer.hpp>
+#include <crimild/core/Rendering/BufferAccessor.hpp>
+#include <crimild/core/Rendering/BufferView.hpp>
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "Simulation/Settings.hpp"
-#include "Visitors/BinTreeScene.hpp"
-#include "Visitors/ShallowCopy.hpp"
-#include "Visitors/UpdateWorldState.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
+#include <crimild/core/Simulation/Settings.hpp>
+#include <crimild/core/Visitors/BinTreeScene.hpp>
+#include <crimild/core/Visitors/ShallowCopy.hpp>
+#include <crimild/core/Visitors/UpdateWorldState.hpp>
 
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;

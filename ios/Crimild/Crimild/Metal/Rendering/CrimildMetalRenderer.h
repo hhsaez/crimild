@@ -28,7 +28,7 @@
 #ifndef CRIMILD_METAL_RENDERING_RENDERER_
 #define CRIMILD_METAL_RENDERING_RENDERER_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 #if !TARGET_OS_SIMULATOR
 

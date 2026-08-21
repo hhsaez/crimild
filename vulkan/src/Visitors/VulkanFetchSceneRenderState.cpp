@@ -27,11 +27,11 @@
 
 #include "Visitors/VulkanFetchSceneRenderState.hpp"
 
-#include "Components/MaterialComponent.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
-#include "Rendering/Materials/UnlitMaterial.hpp"
-#include "SceneGraph/Geometry.hpp"
+#include <crimild/core/Components/MaterialComponent.hpp>
+#include <crimild/core/Primitives/Primitive.hpp>
+#include <crimild/core/Rendering/Materials/PrincipledBSDFMaterial.hpp>
+#include <crimild/core/Rendering/Materials/UnlitMaterial.hpp>
+#include <crimild/core/SceneGraph/Geometry.hpp>
 
 using namespace crimild;
 using namespace crimild::vulkan;

@@ -1,7 +1,7 @@
 #ifndef CRIMILD_OPENGL_RENDERING_BINDABLE_
 #define CRIMILD_OPENGL_RENDERING_BINDABLE_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild::opengl {
 

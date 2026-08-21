@@ -1,7 +1,7 @@
 #ifndef CRIMILD_EXAMPLES_BRICKS_COMPONENTS_BRICK_
 #define CRIMILD_EXAMPLES_BRICKS_COMPONENTS_BRICK_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Scripting.hpp>
 
 namespace crimild {

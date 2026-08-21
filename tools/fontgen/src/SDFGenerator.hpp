@@ -26,7 +26,7 @@
 #ifndef CRIMILD_TOOLS_FONTGEN_SDF_GENERATOR_
 #define CRIMILD_TOOLS_FONTGEN_SDF_GENERATOR_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild {
 

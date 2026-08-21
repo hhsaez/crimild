@@ -28,7 +28,7 @@
 #ifndef CRIMILD_OPENAL_AUDIO_WAV_AUDIO_SOURCE_
 #define CRIMILD_OPENAL_AUDIO_WAV_AUDIO_SOURCE_
 
-#include "Audio/AudioSource.hpp"
+#include <crimild/core/Audio/AudioSource.hpp>
 
 namespace crimild {
 

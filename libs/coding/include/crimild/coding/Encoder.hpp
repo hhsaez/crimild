@@ -28,6 +28,7 @@
 #ifndef CRIMILD_CORE_CODING_ENCODER_
 #define CRIMILD_CORE_CODING_ENCODER_
 
+#include <crimild/foundation/common/SharedObject.hpp>
 #include <crimild/math/ColorRGB.hpp>
 #include <crimild/math/ColorRGBA.hpp>
 #include <crimild/math/Matrix3.hpp>
@@ -36,12 +37,6 @@
 #include <crimild/math/Point3.hpp>
 #include <crimild/math/Vector3.hpp>
 #include <crimild/math/Vector4.hpp>
-
-// #include "Rendering/Extent.hpp"
-// #include "Rendering/Format.hpp"
-// #include "Rendering/VertexAttribute.hpp"
-
-#include <crimild/foundation/common/SharedObject.hpp>
 #include <sstream>
 
 namespace crimild {

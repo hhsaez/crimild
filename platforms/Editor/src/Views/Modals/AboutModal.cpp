@@ -27,7 +27,7 @@
 
 #include "Views/Modals/AboutModal.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 using namespace crimild;
 using namespace crimild::editor;

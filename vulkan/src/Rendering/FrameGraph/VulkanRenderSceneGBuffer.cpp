@@ -27,8 +27,8 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneGBuffer.hpp"
 
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
-#include "Rendering/UniformBuffer.hpp"
+#include <crimild/core/Rendering/Materials/PrincipledBSDFMaterial.hpp>
+#include <crimild/core/Rendering/UniformBuffer.hpp>
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
@@ -38,7 +38,7 @@
 #include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
-#include "SceneGraph/Camera.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
 
 using namespace crimild::vulkan;
 using namespace crimild::vulkan::framegraph;

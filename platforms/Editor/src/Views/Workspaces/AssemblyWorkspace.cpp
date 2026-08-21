@@ -5,7 +5,7 @@
 #include "Views/Panels/Scene3D/Scene3DPanel.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorWindow.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 using namespace crimild::editor;
 

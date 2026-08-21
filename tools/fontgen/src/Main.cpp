@@ -1,7 +1,7 @@
 #include "FontAtlasGenerator.hpp"
 #include "SDFGenerator.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 using namespace crimild;
 using namespace crimild::tools::fontgen;
@@ -21,7 +21,7 @@ void buildHeaderFile( std::string fontName )
         return;
     }
 
-    out << "#include <Rendering/Image.hpp>";
+    out << "#include <crimild/core/Rendering/Image.hpp>";
     out << "\n";
     out << "\nusing namespace crimild;";
     out << "\n";

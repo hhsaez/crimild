@@ -28,7 +28,7 @@
 #ifndef CRIMILD_METAL_VERTEX_BUFFER_OBJECT_CATALOG_
 #define CRIMILD_METAL_VERTEX_BUFFER_OBJECT_CATALOG_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 #import <Metal/Metal.h>
 

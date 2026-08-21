@@ -29,7 +29,7 @@
 #import "CrimildView.h"
 #import "CrimildAVAudioManager.h"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Scripting.hpp>
 
 //#define CRIMILD_IOS_ENABLE_METAL 1

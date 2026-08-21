@@ -27,7 +27,7 @@
 
 #include "VulkanImage.hpp"
 
-#include "Rendering/Image.hpp"
+#include <crimild/core/Rendering/Image.hpp>
 #include "Rendering/VulkanPhysicalDevice.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 

@@ -36,7 +36,7 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanSwapchain.hpp"
-#include "Simulation/Settings.hpp"
+#include <crimild/core/Simulation/Settings.hpp>
 
 using namespace crimild;
 using namespace crimild::player;

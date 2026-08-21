@@ -27,8 +27,8 @@
 
 #include "Rendering/VulkanGraphicsPipeline.hpp"
 
-#include "Primitives/Primitive.hpp"
-#include "Rendering/ShaderProgram.hpp"
+#include <crimild/core/Primitives/Primitive.hpp>
+#include <crimild/core/Rendering/ShaderProgram.hpp>
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanShaderModule.hpp"
 

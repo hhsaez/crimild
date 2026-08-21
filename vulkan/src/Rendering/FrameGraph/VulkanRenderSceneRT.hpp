@@ -30,7 +30,7 @@
 
 #include "Crimild_Mathematics.hpp"
 #include "Rendering/FrameGraph/VulkanRenderBase.hpp"
-#include "Visitors/RTAcceleration.hpp"
+#include <crimild/core/Visitors/RTAcceleration.hpp>
 
 #include <future>
 

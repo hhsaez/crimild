@@ -28,7 +28,7 @@
 #ifndef CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_TEXTURE_
 #define CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_TEXTURE_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild {
     

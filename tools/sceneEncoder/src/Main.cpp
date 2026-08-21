@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Import.hpp>
 #include <Crimild_Scripting.hpp>
 

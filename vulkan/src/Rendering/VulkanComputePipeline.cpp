@@ -27,7 +27,7 @@
 
 #include "Rendering/VulkanComputePipeline.hpp"
 
-#include "Rendering/ShaderProgram.hpp"
+#include <crimild/core/Rendering/ShaderProgram.hpp>
 #include "Rendering/VulkanDescriptorSetLayout.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanShaderModule.hpp"

@@ -28,7 +28,7 @@
 #ifndef CRIMILD_METAL_SHADER_PROGRAMS_FORWARD_
 #define CRIMILD_METAL_SHADER_PROGRAMS_FORWARD_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild {
     

@@ -59,3 +59,6 @@ build*
 *.crimild.json
 recent_projects.txt
 .vs/
+
+compile_commands.json
+.cache

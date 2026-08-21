@@ -9,7 +9,7 @@ function( CRIMILD_ADD_EXAMPLE EXAMPLE_NAME EXAMPLE_SOURCES )
         PRIVATE crimild::foundation
         PRIVATE Crimild::Mathematics
         PRIVATE crimild::coding
-        PRIVATE Crimild::Core
+        PRIVATE crimild::core
         PRIVATE Crimild::Vulkan
         PRIVATE Crimild::Player
     )

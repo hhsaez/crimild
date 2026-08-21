@@ -33,7 +33,7 @@
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
-#include "Simulation/Simulation.hpp"
+#include <crimild/core/Simulation/Simulation.hpp>
 
 using namespace crimild::editor;
 

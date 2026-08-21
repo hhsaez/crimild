@@ -25,18 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_SDL.hpp>
 #include <Crimild_OpenGL.hpp>
 
-#include "UI/UIFrame.hpp"
-#include "UI/UICanvas.hpp"
-#include "UI/UIBackground.hpp"
-#include "UI/UIButton.hpp"
-#include "UI/UILabel.hpp"
-#include "UI/UIFrameConstraint.hpp"
-#include "UI/UIFrameConstraintMaker.hpp"
-#include "Boundings/Box2DBoundingVolume.hpp"
+#include <crimild/core/UI/UIFrame.hpp>
+#include <crimild/core/UI/UICanvas.hpp>
+#include <crimild/core/UI/UIBackground.hpp>
+#include <crimild/core/UI/UIButton.hpp>
+#include <crimild/core/UI/UILabel.hpp>
+#include <crimild/core/UI/UIFrameConstraint.hpp>
+#include <crimild/core/UI/UIFrameConstraintMaker.hpp>
+#include <crimild/core/Boundings/Box2DBoundingVolume.hpp>
 
 using namespace crimild;
 using namespace crimild::rendergraph;

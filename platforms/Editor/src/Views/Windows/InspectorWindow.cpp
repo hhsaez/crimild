@@ -31,7 +31,7 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderDeviceCache.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
-#include "SceneGraph/Node.hpp"
+#include <crimild/core/SceneGraph/Node.hpp>
 #include "SceneGraph/PrefabNode.hpp"
 #include "Simulation/Editor.hpp"
 

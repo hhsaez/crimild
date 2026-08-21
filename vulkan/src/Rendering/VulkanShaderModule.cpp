@@ -27,8 +27,8 @@
 
 #include "Rendering/VulkanShaderModule.hpp"
 
-#include "Rendering/Shader.hpp"
-#include "Rendering/ShaderProgram.hpp"
+#include <crimild/core/Rendering/Shader.hpp>
+#include <crimild/core/Rendering/ShaderProgram.hpp>
 #include "Rendering/VulkanRenderDevice.hpp"
 
 using namespace crimild;

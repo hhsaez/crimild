@@ -27,8 +27,8 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneDebug.hpp"
 
-#include "Debug/DebugDrawManager.hpp"
-#include "Rendering/ShaderProgram.hpp"
+#include <crimild/core/Debug/DebugDrawManager.hpp>
+#include <crimild/core/Rendering/ShaderProgram.hpp>
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanFramebuffer.hpp"
 #include "Rendering/VulkanGraphicsPipeline.hpp"
@@ -36,12 +36,12 @@
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Light.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
+#include <crimild/core/SceneGraph/Geometry.hpp>
+#include <crimild/core/SceneGraph/Light.hpp>
 #include "Simulation/Editor.hpp"
-#include "Simulation/Simulation.hpp"
-#include "Visitors/NodeVisitor.hpp"
+#include <crimild/core/Simulation/Simulation.hpp>
+#include <crimild/core/Visitors/NodeVisitor.hpp>
 
 using namespace crimild;
 using namespace crimild::vulkan;

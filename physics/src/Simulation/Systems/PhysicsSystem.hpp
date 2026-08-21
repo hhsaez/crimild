@@ -28,7 +28,7 @@
 #ifndef CRIMILD_PHYSICS_SIMULATION_SYSTEMS_PHYSICS_
 #define CRIMILD_PHYSICS_SIMULATION_SYSTEMS_PHYSICS_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 #include "Foundation/PhysicsContext.hpp"
 

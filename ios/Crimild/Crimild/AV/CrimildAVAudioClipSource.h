@@ -31,7 +31,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-#include "Audio/AudioSource.hpp"
+#include <crimild/core/Audio/AudioSource.hpp>
 
 namespace crimild {
     
