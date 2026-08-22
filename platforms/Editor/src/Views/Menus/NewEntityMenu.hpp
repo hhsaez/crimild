@@ -3,7 +3,7 @@
 
 #include "Foundation/ImGuiUtils.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild::editor {
 

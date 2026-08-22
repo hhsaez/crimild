@@ -27,7 +27,7 @@
 
 #include "Rendering/VulkanDescriptorSet.hpp"
 
-#include "Rendering/BufferView.hpp"
+#include <crimild/core/Rendering/BufferView.hpp>
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanDescriptorPool.hpp"
 #include "Rendering/VulkanDescriptorSetLayout.hpp"

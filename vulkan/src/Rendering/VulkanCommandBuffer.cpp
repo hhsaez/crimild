@@ -27,9 +27,9 @@
 
 #include "Rendering/VulkanCommandBuffer.hpp"
 
-#include "Primitives/Primitive.hpp"
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
+#include <crimild/core/Primitives/Primitive.hpp>
+#include <crimild/core/Rendering/IndexBuffer.hpp>
+#include <crimild/core/Rendering/VertexBuffer.hpp>
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanComputePipeline.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"

@@ -27,10 +27,10 @@
 
 #include "Rendering/FrameGraph/VulkanRenderSceneLighting.hpp"
 
-#include "Primitives/SpherePrimitive.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/UniformBuffer.hpp"
-#include "Rendering/Vertex.hpp"
+#include <crimild/core/Primitives/SpherePrimitive.hpp>
+#include <crimild/core/Rendering/ShaderProgram.hpp>
+#include <crimild/core/Rendering/UniformBuffer.hpp>
+#include <crimild/core/Rendering/Vertex.hpp>
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanDescriptorPool.hpp"
 #include "Rendering/VulkanDescriptorSet.hpp"
@@ -42,7 +42,7 @@
 #include "Rendering/VulkanRenderPass.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
-#include "SceneGraph/Camera.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
 
 using namespace crimild;
 using namespace crimild::vulkan;

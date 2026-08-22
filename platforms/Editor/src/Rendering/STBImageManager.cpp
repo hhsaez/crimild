@@ -28,7 +28,7 @@
 #include "Rendering/STBImageManager.hpp"
 
 #include "Foundation/STBUtils.hpp"
-#include "Rendering/Image.hpp"
+#include <crimild/core/Rendering/Image.hpp>
 
 #include <crimild/foundation.hpp>
 

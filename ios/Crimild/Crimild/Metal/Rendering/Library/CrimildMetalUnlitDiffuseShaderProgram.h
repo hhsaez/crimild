@@ -28,7 +28,7 @@
 #ifndef CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_DIFFUSE_
 #define CRIMILD_METAL_SHADER_PROGRAMS_UNLIT_DIFFUSE_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild {
     

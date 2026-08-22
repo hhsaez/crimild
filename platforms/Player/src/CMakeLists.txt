@@ -24,7 +24,7 @@ target_link_libraries(
     PRIVATE crimild::foundation
     PRIVATE Crimild::Mathematics
     PRIVATE crimild::coding
-    PRIVATE Crimild::Core
+    PRIVATE crimild::core
     PRIVATE Crimild::Vulkan
     PRIVATE glfw
 )

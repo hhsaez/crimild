@@ -26,7 +26,7 @@
 #ifndef CRIMILD_TOOLS_FONTGEN_FONT_ATLAS_GENERATOR_
 #define CRIMILD_TOOLS_FONTGEN_FONT_ATLAS_GENERATOR_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

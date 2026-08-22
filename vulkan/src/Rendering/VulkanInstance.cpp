@@ -28,7 +28,7 @@
 #include "Rendering/VulkanInstance.hpp"
 
 #include "Rendering/VulkanPhysicalDevice.hpp"
-#include "Simulation/Settings.hpp"
+#include <crimild/core/Simulation/Settings.hpp>
 #include "VulkanRenderDevice.hpp"
 
 using namespace crimild;

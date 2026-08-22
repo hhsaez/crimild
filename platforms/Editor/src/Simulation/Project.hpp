@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_SIMULATION_PROJECT_
 #define CRIMILD_EDITOR_SIMULATION_PROJECT_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <filesystem>
 
 namespace crimild {

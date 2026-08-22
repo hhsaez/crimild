@@ -52,7 +52,7 @@
 #include "Views/Workspaces/Workspace.hpp"
 #include "Views/Workspaces/WorkspaceManager.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Vulkan.hpp>
 
 #define IMGUI_VULKAN_DEBUG_REPORT

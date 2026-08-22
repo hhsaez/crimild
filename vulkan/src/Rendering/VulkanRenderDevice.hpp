@@ -29,9 +29,9 @@
 #define CRIMILD_VULKAN_RENDERING_RENDER_DEVICE_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/UniformBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
+#include <crimild/core/Rendering/IndexBuffer.hpp>
+#include <crimild/core/Rendering/UniformBuffer.hpp>
+#include <crimild/core/Rendering/VertexBuffer.hpp>
 #include "Rendering/VulkanFramebufferAttachment.hpp"
 #include "Rendering/VulkanShaderCompiler.hpp"
 

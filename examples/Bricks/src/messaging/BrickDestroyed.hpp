@@ -1,7 +1,7 @@
 #ifndef CRIMILD_EXAMPLE_BRICKS_MESSAGING_BRICK_DESTROYED_
 #define CRIMILD_EXAMPLE_BRICKS_MESSAGING_BRICK_DESTROYED_
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild {
 

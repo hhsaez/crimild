@@ -36,8 +36,8 @@
 #include "Rendering/VulkanSemaphore.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
 #include "Rendering/VulkanSurface.hpp"
-#include "SceneGraph/Light.hpp"
-#include "Simulation/Event.hpp"
+#include <crimild/core/SceneGraph/Light.hpp>
+#include <crimild/core/Simulation/Event.hpp>
 
 #include <array>
 #include <set>

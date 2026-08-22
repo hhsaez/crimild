@@ -28,7 +28,7 @@
 #ifndef CRIMILD_IOS_AV_AUDIO_MUSIC_SOURCE_
 #define CRIMILD_IOS_AV_AUDIO_MUSIC_SOURCE_
 
-#include "Audio/AudioSource.hpp"
+#include <crimild/core/Audio/AudioSource.hpp>
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>

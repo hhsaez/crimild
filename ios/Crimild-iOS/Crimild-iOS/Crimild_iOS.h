@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "Crimild.hpp"
+#import <crimild/core.hpp>
 
 #import "CrimildViewController.h"
 

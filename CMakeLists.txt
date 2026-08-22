@@ -45,11 +45,8 @@ if(WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
-# Add subdirectories
-add_subdirectory(libs/foundation)
-add_subdirectory(libs/math)
-add_subdirectory(libs/coding)
-add_subdirectory(core)
+# Add libs
+add_subdirectory(libs)
 
 # Configure Vulkan
 if(CRIMILD_BUILD_EDITOR OR CRIMILD_BUILD_PLAYER)

@@ -29,7 +29,7 @@
 #define CRIMILD_OPENAL_SIMULATION_SYSTEMS_AUDIO_
 
 #include "Foundation/Containers/Array.hpp"
-#include "Simulation/Systems/AudioSystem.hpp"
+#include <crimild/core/Simulation/Systems/AudioSystem.hpp>
 
 namespace crimild {
 

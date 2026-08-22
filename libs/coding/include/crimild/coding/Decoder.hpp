@@ -28,8 +28,7 @@
 #ifndef CRIMILD_CORE_CODING_DECODER_
 #define CRIMILD_CORE_CODING_DECODER_
 
-#include "Codable.hpp"
-
+#include <crimild/coding/Codable.hpp>
 #include <crimild/math/ColorRGB.hpp>
 #include <crimild/math/ColorRGBA.hpp>
 #include <crimild/math/Matrix3.hpp>
@@ -38,10 +37,6 @@
 #include <crimild/math/Point3.hpp>
 #include <crimild/math/Vector3.hpp>
 #include <crimild/math/Vector4.hpp>
-
-// #Include "Rendering/Extent.hpp"
-// #include "Rendering/Format.hpp"
-// #include "Rendering/VertexAttribute.hpp"
 
 namespace crimild {
 

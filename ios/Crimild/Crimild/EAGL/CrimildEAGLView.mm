@@ -27,7 +27,7 @@
 
 #import "CrimildEAGLView.h"
 
-#import <Crimild.hpp>
+#import <crimild/core.hpp>
 #import <Crimild_OpenGL.hpp>
 
 @interface CrimildEAGLView () {

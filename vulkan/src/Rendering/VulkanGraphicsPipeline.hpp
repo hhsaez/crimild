@@ -29,11 +29,11 @@
 #define CRIMILD_VULKAN_RENDERING_GRAPHICS_PIPELINE_
 
 #include "Foundation/VulkanUtils.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Rendering/ColorBlendState.hpp"
-#include "Rendering/DepthStencilState.hpp"
-#include "Rendering/RasterizationState.hpp"
-#include "Rendering/VertexLayout.hpp"
+#include <crimild/core/Primitives/Primitive.hpp>
+#include <crimild/core/Rendering/ColorBlendState.hpp>
+#include <crimild/core/Rendering/DepthStencilState.hpp>
+#include <crimild/core/Rendering/RasterizationState.hpp>
+#include <crimild/core/Rendering/VertexLayout.hpp>
 
 namespace crimild {
 

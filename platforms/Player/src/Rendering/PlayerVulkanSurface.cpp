@@ -28,7 +28,7 @@
 #include "Rendering/PlayerVulkanSurface.hpp"
 
 #include "Rendering/VulkanInstance.hpp"
-#include "Simulation/Simulation.hpp"
+#include <crimild/core/Simulation/Simulation.hpp>
 
 using namespace crimild;
 

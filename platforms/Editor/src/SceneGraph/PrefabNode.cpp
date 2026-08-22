@@ -27,9 +27,9 @@
 
 #include "SceneGraph/PrefabNode.hpp"
 
-#include "Visitors/ShallowCopy.hpp"
-#include "Visitors/StartComponents.hpp"
-#include "Visitors/UpdateWorldState.hpp"
+#include <crimild/core/Visitors/ShallowCopy.hpp>
+#include <crimild/core/Visitors/StartComponents.hpp>
+#include <crimild/core/Visitors/UpdateWorldState.hpp>
 
 #include <crimild/foundation.hpp>
 

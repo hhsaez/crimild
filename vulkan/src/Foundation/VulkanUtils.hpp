@@ -30,7 +30,7 @@
 
 #include "Foundation/VulkanInitializers.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <crimild/foundation.hpp>
 #include <vulkan/vulkan.h>
 

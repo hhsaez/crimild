@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 using namespace crimild;
 using namespace crimild::behaviors;

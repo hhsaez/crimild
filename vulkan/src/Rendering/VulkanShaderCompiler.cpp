@@ -27,7 +27,7 @@
 
 #include "Rendering/VulkanShaderCompiler.hpp"
 
-#include "Rendering/Shader.hpp"
+#include <crimild/core/Rendering/Shader.hpp>
 
 #include <crimild/foundation.hpp>
 

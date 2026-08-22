@@ -30,7 +30,7 @@
 
 #include "Foundation/GLFWUtils.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Mathematics.hpp>
 #include <memory>
 #include <string>

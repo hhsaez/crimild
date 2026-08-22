@@ -30,7 +30,7 @@
 
 #include "Crimild_Mathematics.hpp"
 #include "Foundation/VulkanUtils.hpp"
-#include "SceneGraph/Light.hpp"
+#include <crimild/core/SceneGraph/Light.hpp>
 
 #include <unordered_map>
 #include <unordered_set>

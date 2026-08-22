@@ -27,7 +27,7 @@
 
 #import "CrimildView.h"
 
-#import <Crimild.hpp>
+#import <crimild/core.hpp>
 
 @implementation CrimildView
 

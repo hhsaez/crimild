@@ -28,7 +28,7 @@
 #ifndef CRIMILD_EDITOR_RENDERING_IMAGE_MANAGER_
 #define CRIMILD_EDITOR_RENDERING_IMAGE_MANAGER_
 
-#include "Rendering/ImageManager.hpp"
+#include <crimild/core/Rendering/ImageManager.hpp>
 
 namespace crimild {
 

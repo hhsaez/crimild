@@ -27,18 +27,18 @@
 
 #include "Rendering/VulkanRenderDeviceCache.hpp"
 
-#include "Rendering/Image.hpp"
-#include "Rendering/ImageView.hpp"
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/Sampler.hpp"
-#include "Rendering/UniformBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
+#include <crimild/core/Rendering/Image.hpp>
+#include <crimild/core/Rendering/ImageView.hpp>
+#include <crimild/core/Rendering/IndexBuffer.hpp>
+#include <crimild/core/Rendering/Sampler.hpp>
+#include <crimild/core/Rendering/UniformBuffer.hpp>
+#include <crimild/core/Rendering/VertexBuffer.hpp>
 #include "Rendering/VulkanBuffer.hpp"
 #include "Rendering/VulkanImage.hpp"
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanSampler.hpp"
 #include "Rendering/VulkanShadowMap.hpp"
-#include "SceneGraph/Light.hpp"
+#include <crimild/core/SceneGraph/Light.hpp>
 
 using namespace crimild;
 using namespace crimild::vulkan;

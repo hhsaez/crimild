@@ -27,7 +27,7 @@
 
 #include "Rendering/FrameGraph/VulkanComputeImageMix.hpp"
 
-#include "Rendering/ShaderProgram.hpp"
+#include <crimild/core/Rendering/ShaderProgram.hpp>
 #include "Rendering/VulkanCommandBuffer.hpp"
 #include "Rendering/VulkanComputePipeline.hpp"
 #include "Rendering/VulkanDescriptor.hpp"

@@ -27,8 +27,8 @@
 
 #include "VulkanUtils.hpp"
 
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/ViewportDimensions.hpp"
+#include <crimild/core/Rendering/IndexBuffer.hpp>
+#include <crimild/core/Rendering/ViewportDimensions.hpp>
 
 #include <set>
 

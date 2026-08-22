@@ -28,7 +28,7 @@
 #include "Foundation/GLFWUtils.hpp"
 #include "Rendering/PlayerWindow.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 #include <Crimild_Vulkan.hpp>
 
 static void glfw_error_callback( int error, const char *description )

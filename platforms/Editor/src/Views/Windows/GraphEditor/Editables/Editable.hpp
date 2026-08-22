@@ -4,7 +4,7 @@
 #include "Views/Windows/GraphEditor/GraphEditorContext.hpp"
 #include "Views/Windows/GraphEditor/GraphEditorTypes.hpp"
 
-#include <Crimild.hpp>
+#include <crimild/core.hpp>
 
 namespace crimild::editor::editables {
 

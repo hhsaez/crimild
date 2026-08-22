@@ -28,7 +28,7 @@
 #ifndef CRIMILD_DESKTOP_SCENE_GRAPH_NODE_
 #define CRIMILD_DESKTOP_SCENE_GRAPH_NODE_
 
-#include "SceneGraph/Group.hpp"
+#include <crimild/core/SceneGraph/Group.hpp>
 
 #include <filesystem>
 #include <unordered_map>

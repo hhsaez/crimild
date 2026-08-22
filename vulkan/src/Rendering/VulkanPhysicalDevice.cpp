@@ -30,7 +30,7 @@
 #include "Rendering/VulkanInstance.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanSurface.hpp"
-#include "Simulation/Settings.hpp"
+#include <crimild/core/Simulation/Settings.hpp>
 
 namespace crimild {
 

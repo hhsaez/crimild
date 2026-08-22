@@ -27,7 +27,7 @@
 
 #include "CrimildAVAudioClipSource.h"
 
-#include "Exceptions/FileNotFoundException.hpp"
+#include <crimild/core/Exceptions/FileNotFoundException.hpp>
 
 using namespace crimild;
 using namespace crimild::audio;

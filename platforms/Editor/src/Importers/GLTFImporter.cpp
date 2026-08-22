@@ -27,15 +27,15 @@
 
 #include "Importers/GLTFImporter.hpp"
 
-#include "Components/MaterialComponent.hpp"
+#include <crimild/core/Components/MaterialComponent.hpp>
 #include "Foundation/STBUtils.hpp"
-#include "Primitives/Primitive.hpp"
-#include "Rendering/ImageView.hpp"
-#include "Rendering/Materials/PrincipledBSDFMaterial.hpp"
-#include "Rendering/Sampler.hpp"
-#include "Rendering/Vertex.hpp"
-#include "SceneGraph/Geometry.hpp"
-#include "SceneGraph/Group.hpp"
+#include <crimild/core/Primitives/Primitive.hpp>
+#include <crimild/core/Rendering/ImageView.hpp>
+#include <crimild/core/Rendering/Materials/PrincipledBSDFMaterial.hpp>
+#include <crimild/core/Rendering/Sampler.hpp>
+#include <crimild/core/Rendering/Vertex.hpp>
+#include <crimild/core/SceneGraph/Geometry.hpp>
+#include <crimild/core/SceneGraph/Group.hpp>
 
 // Tell TinyGLTF that STB is loaded elsewhere (see STBUtils.hpp/STBUtils.cpp)
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE

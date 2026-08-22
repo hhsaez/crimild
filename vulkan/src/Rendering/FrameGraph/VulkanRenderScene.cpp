@@ -34,9 +34,9 @@
 #include "Rendering/VulkanImageView.hpp"
 #include "Rendering/VulkanRenderDevice.hpp"
 #include "Rendering/VulkanRenderTarget.hpp"
-#include "SceneGraph/Camera.hpp"
-#include "SceneGraph/Node.hpp"
-#include "Simulation/Simulation.hpp"
+#include <crimild/core/SceneGraph/Camera.hpp>
+#include <crimild/core/SceneGraph/Node.hpp>
+#include <crimild/core/Simulation/Simulation.hpp>
 #include "Visitors/VulkanFetchSceneRenderState.hpp"
 
 using namespace crimild::vulkan;

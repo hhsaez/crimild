@@ -6,8 +6,8 @@
 #include "Rendering/OpenGLShaderProgram.hpp"
 #include "Rendering/OpenGLUnlitMaterialBindable.hpp"
 
-#include <Crimild.hpp>
-#include <Nodes/Visitors/NodeConstVisitor.hpp>
+#include <crimild/core.hpp>
+#include <crimild/core/Nodes/Visitors/NodeConstVisitor.hpp>
 
 namespace crimild::experimental {
 

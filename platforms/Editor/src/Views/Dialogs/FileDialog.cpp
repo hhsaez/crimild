@@ -27,7 +27,7 @@
 
 #include "Views/Dialogs/FileDialog.hpp"
 
-#include "Concurrency/Async.hpp"
+#include <crimild/core/Concurrency/Async.hpp>
 #include "Simulation/Editor.hpp"
 
 #include <filesystem>
