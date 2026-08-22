@@ -7,6 +7,7 @@ target_sources(
 
   INTERFACE include/crimild/foundation.hpp
 
+  PUBLIC include/crimild/foundation/common/Enableable.hpp
   PUBLIC include/crimild/foundation/common/KeyValuePair.hpp
   PUBLIC include/crimild/foundation/common/Macros.hpp
   PUBLIC include/crimild/foundation/common/NamedObject.hpp
