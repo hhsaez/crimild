@@ -1,5 +1,4 @@
-#include <crimild/core/Nodes/3D/Spatial3D.hpp>
-
+#include <crimild/core/experimental/nodes/3d/Spatial3D.hpp>
 #include <crimild/math/inverse.hpp>
 #include <crimild/math/translation.hpp>
 #include <gtest/gtest.h>

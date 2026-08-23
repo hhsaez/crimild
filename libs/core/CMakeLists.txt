@@ -2,6 +2,9 @@ crimild_trace()
 
 add_library( crimild_core STATIC )
 
+add_subdirectory( include )
+add_subdirectory( src )
+
 target_sources(
     crimild_core
 
@@ -581,25 +584,6 @@ target_sources(
     src/Visitors/UpdateComponents.cpp
     src/Visitors/UpdateRenderState.cpp
     src/Visitors/UpdateWorldState.cpp
-
-    PUBLIC include/crimild/core/Nodes/Node.hpp
-    PRIVATE src/Nodes/Node.cpp
-
-    PUBLIC include/crimild/core/Nodes/3D/Camera3D.hpp
-    PRIVATE src/Nodes/3D/Camera3D.cpp
-    PUBLIC include/crimild/core/Nodes/3D/Geometry3D.hpp
-    PRIVATE src/Nodes/3D/Geometry3D.cpp
-    PUBLIC include/crimild/core/Nodes/3D/Spatial3D.hpp
-    PRIVATE src/Nodes/3D/Spatial3D.cpp
-
-    PUBLIC include/crimild/core/Nodes/Visitors/NodeVisitor.hpp
-    PRIVATE src/Nodes/Visitors/NodeVisitor.cpp
-    PUBLIC include/crimild/core/Nodes/Visitors/NodeConstVisitor.hpp
-    PRIVATE src/Nodes/Visitors/NodeConstVisitor.cpp
-    PUBLIC include/crimild/core/Nodes/Visitors/InvalidateHierarchy.hpp
-    PRIVATE src/Nodes/Visitors/InvalidateHierarchy.cpp
-    PUBLIC include/crimild/core/Nodes/Visitors/InvalidateWorldState.hpp
-    PRIVATE src/Nodes/Visitors/InvalidateWorldState.cpp
 )
 
 target_include_directories(

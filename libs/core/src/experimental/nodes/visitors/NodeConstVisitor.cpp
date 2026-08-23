@@ -1,0 +1,31 @@
+#include <crimild/core/experimental/nodes/3d/Geometry3D.hpp>
+#include <crimild/core/experimental/nodes/3d/Spatial3D.hpp>
+#include <crimild/core/experimental/nodes/Node.hpp>
+#include <crimild/core/experimental/nodes/visitors/NodeConstVisitor.hpp>
+
+using namespace crimild::experimental;
+
+void NodeConstVisitor::traverse( const Node &node )
+{
+   node.accept( *this );
+}
+
+void NodeConstVisitor::visitNode( const Node &node )
+{
+   // Create a snapshot of children in order to support mutating
+   // the original collection during traversal
+   const auto cs = node.getChildren();
+   for ( auto &c : cs ) {
+      c->accept( *this );
+   }
+}
+
+void NodeConstVisitor::visitSpatial3D( const Spatial3D &spatial )
+{
+   visitNode( spatial );
+}
+
+void NodeConstVisitor::visitGeometry3D( const Geometry3D &geometry )
+{
+   visitSpatial3D( geometry );
+}

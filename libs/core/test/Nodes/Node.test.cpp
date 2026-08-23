@@ -1,5 +1,4 @@
-#include <crimild/core/Nodes/Node.hpp>
-
+#include <crimild/core/experimental/nodes/Node.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

@@ -1,5 +1,4 @@
-#include <crimild/core/Nodes/3D/Geometry3D.hpp>
-
+#include <crimild/core/experimental/nodes/3d/Geometry3D.hpp>
 #include <gtest/gtest.h>
 
 TEST( Geometry3D, construction )

@@ -1,7 +1,7 @@
+![cmake workflow](https://github.com/hhsaez/crimild/actions/workflows/build.yml/badge.svg)
+
 # Crimild
 A scene graph based framework for interactive 3D applications
-
-![cmake workflow](https://github.com/hhsaez/crimild/actions/workflows/build.yml/badge.svg)
 
 ![image](./cover.png)
 
@@ -31,7 +31,7 @@ cmake .
 
 ### Unix Makefiles
 ```
-cmake . -Bbuild
+cmake . -B build
 cmake --build build -- -j8
 ```
 

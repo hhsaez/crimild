@@ -131,12 +131,6 @@
 #include <crimild/core/Navigation/NavigationMesh.hpp>
 #include <crimild/core/Navigation/NavigationMeshContainer.hpp>
 #include <crimild/core/Navigation/NavigationMeshOBJ.hpp>
-#include <crimild/core/Nodes/3D/Camera3D.hpp>
-#include <crimild/core/Nodes/3D/Geometry3D.hpp>
-#include <crimild/core/Nodes/3D/Spatial3D.hpp>
-#include <crimild/core/Nodes/Node.hpp>
-#include <crimild/core/Nodes/Visitors/NodeConstVisitor.hpp>
-#include <crimild/core/Nodes/Visitors/NodeVisitor.hpp>
 #include <crimild/core/ParticleSystem/Generators/AccelerationParticleGenerator.hpp>
 #include <crimild/core/ParticleSystem/Generators/BoxPositionParticleGenerator.hpp>
 #include <crimild/core/ParticleSystem/Generators/ColorParticleGenerator.hpp>
@@ -272,6 +266,12 @@
 #include <crimild/core/Visitors/UpdateComponents.hpp>
 #include <crimild/core/Visitors/UpdateRenderState.hpp>
 #include <crimild/core/Visitors/UpdateWorldState.hpp>
+#include <crimild/core/experimental/nodes/3d/Camera3D.hpp>
+#include <crimild/core/experimental/nodes/3d/Geometry3D.hpp>
+#include <crimild/core/experimental/nodes/3d/Spatial3D.hpp>
+#include <crimild/core/experimental/nodes/Node.hpp>
+#include <crimild/core/experimental/nodes/visitors/NodeConstVisitor.hpp>
+#include <crimild/core/experimental/nodes/visitors/NodeVisitor.hpp>
 #include <crimild/core/init.hpp>
 
 #endif
