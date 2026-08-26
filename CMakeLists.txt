@@ -21,6 +21,7 @@ option(CRIMILD_BUILD_TESTS "Build tests?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_EDITOR "Build crimild editor?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_PLAYER "Build crimild player?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_UNIVERSAL_PLAYER "Build crimild universal player?" ${PROJECT_IS_TOP_LEVEL})
+option(CRIMILD_BUILD_PLATFORM_UNIVERSAL "Build crimild universal platform?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_EXAMPLES "Build examples?" ${PROJECT_IS_TOP_LEVEL})
 option(CRIMILD_BUILD_UNIVERSAL_EXAMPLES "Build examples using universal player?" ${PROJECT_IS_TOP_LEVEL})
 

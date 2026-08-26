@@ -1,5 +1,7 @@
 #include <crimild/core/experimental/systems/Runner.hpp>
 #include <crimild/core/init.hpp>
+#include <crimild/foundation/common/Version.hpp>
+#include <crimild/foundation/log/LogOutputHandler.hpp>
 #include <filesystem>
 
 using namespace crimild::experimental::systems;
@@ -20,19 +22,18 @@ Runner::Runner( int argc, char **argv ) noexcept
 
 Runner::~Runner( void ) noexcept
 {
+   detachAll();
+
    CRIMILD_LOG_INFO( "Terminated" );
 }
 
-Runner::State Runner::onExecute( void )
+System::State Runner::onUpdate( void )
 {
-   auto behavior = getBehavior();
-   if ( behavior == nullptr ) {
-      return State::FAILURE;
+   while ( true ) {
+      auto ret = System::onUpdate();
+      if ( ret != State::RUNNING ) {
+         return ret;
+      }
    }
-
-   State ret;
-   do {
-      ret = behavior->execute();
-   } while ( ret != State::FAILURE );
-   return ret;
+   return State::SUCCESS;
 }

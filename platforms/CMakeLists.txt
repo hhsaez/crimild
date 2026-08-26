@@ -11,3 +11,7 @@ endif()
 if ( CRIMILD_BUILD_UNIVERSAL_PLAYER )
     add_subdirectory( UniversalPlayer )
 endif()
+
+if ( CRIMILD_BUILD_PLATFORM_UNIVERSAL )
+  add_subdirectory( universal )
+endif()

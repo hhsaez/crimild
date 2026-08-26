@@ -35,8 +35,8 @@ GLFWOpenGLWindow::GLFWOpenGLWindow( uint32_t width, uint32_t height, std::string
    // For example, the window dimension could be too big for the screen.
    int actualWidth, actualHeight;
    glfwGetWindowSize( m_window, &actualWidth, &actualHeight );
-    m_width = actualWidth;
-    m_height = actualHeight;
+   m_width = actualWidth;
+   m_height = actualHeight;
 
    glfwSetWindowSizeCallback(
       m_window,
@@ -155,6 +155,6 @@ void GLFWOpenGLWindow::swapBuffers( void ) const
 std::pair< uint32_t, uint32_t > GLFWOpenGLWindow::getRenderSize( void ) const
 {
    int fbw, fbh;
-   glfwGetFramebufferSize( m_window, &fbw, &fbh );
+   n glfwGetFramebufferSize( m_window, &fbw, &fbh );
    return std::make_pair( fbw, fbh );
 }
