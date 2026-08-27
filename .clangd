@@ -1,2 +1,6 @@
 Style:
   AngledHeaders: ["crimild/.*"]
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+
