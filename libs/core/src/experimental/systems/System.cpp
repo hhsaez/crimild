@@ -17,16 +17,16 @@ void System::detachAll( void )
    m_children.clear();
 }
 
-System::State System::update( void )
+System::State System::update( const Context &ctx )
 {
    if ( m_state == State::FAILURE ) {
       return State::FAILURE;
    }
-   m_state = onUpdate();
+   m_state = onUpdate( ctx );
    return m_state;
 }
 
-System::State System::onUpdate( void )
+System::State System::onUpdate( const Context &ctx )
 {
    auto ret = State::SUCCESS;
 
@@ -34,7 +34,7 @@ System::State System::onUpdate( void )
    // it during traversal.
    auto cs = getChildren();
    for ( auto s : cs ) {
-      switch ( s->update() ) {
+      switch ( s->update( ctx ) ) {
          case State::FAILURE:
             return State::FAILURE;
          case State::RUNNING:

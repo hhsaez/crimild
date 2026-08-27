@@ -15,9 +15,9 @@ GLFWWindow::~GLFWWindow( void ) noexcept
    }
 }
 
-GLFWWindow::State GLFWWindow::onUpdate( void )
+GLFWWindow::State GLFWWindow::onUpdate( const experimental::systems::Context &ctx )
 {
-   if ( !setup() ) {
+   if ( !setup( ctx ) ) {
       return State::FAILURE;
    }
 
@@ -27,7 +27,7 @@ GLFWWindow::State GLFWWindow::onUpdate( void )
 
    glfwMakeContextCurrent( m_window );
 
-   if ( System::onUpdate() == State::FAILURE ) {
+   if ( System::onUpdate( ctx ) == State::FAILURE ) {
       return State::FAILURE;
    }
 
@@ -37,14 +37,18 @@ GLFWWindow::State GLFWWindow::onUpdate( void )
    return State::RUNNING;
 }
 
-bool GLFWWindow::setup( void )
+bool GLFWWindow::setup( const experimental::systems::Context &ctx )
 {
    if ( m_window != nullptr ) {
       // already initialized
       return true;
    }
 
-   CRIMILD_LOG_INFO( "Creating window (", m_width, "x", m_height, ")" );
+   if ( auto size = ctx.get( experimental::systems::keys::WindowSize ) ) {
+      m_size = *size;
+   }
+
+   CRIMILD_LOG_INFO( "Creating window (", m_size.width, "x", m_size.height, ")" );
 
    std::string title = "Crimild";
 
@@ -59,7 +63,7 @@ bool GLFWWindow::setup( void )
    // platforms, but recommended.
    glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
 
-   m_window = glfwCreateWindow( m_width, m_height, title.c_str(), nullptr, nullptr );
+   m_window = glfwCreateWindow( m_size.width, m_size.height, title.c_str(), nullptr, nullptr );
    if ( m_window == nullptr ) {
       CRIMILD_LOG_ERROR( "Failed to create GLFW window" );
       return false;
@@ -72,8 +76,7 @@ bool GLFWWindow::setup( void )
    // For example, the window dimension could be too big for the screen.
    int actualWidth, actualHeight;
    glfwGetWindowSize( m_window, &actualWidth, &actualHeight );
-   m_width = actualWidth;
-   m_height = actualHeight;
+   m_size = { .width = actualWidth, .height = actualHeight };
 
    glfwSetWindowSizeCallback(
       m_window,
@@ -81,8 +84,7 @@ bool GLFWWindow::setup( void )
          auto windowInstance = static_cast< GLFWWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
             CRIMILD_LOG_DEBUG( "Window resized", Vector2i { width, height } );
-            windowInstance->m_width = width;
-            windowInstance->m_height = height;
+            windowInstance->m_size = { .width = width, .height = height };
          }
       }
    );

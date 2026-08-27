@@ -27,10 +27,10 @@ Runner::~Runner( void ) noexcept
    CRIMILD_LOG_INFO( "Terminated" );
 }
 
-System::State Runner::onUpdate( void )
+System::State Runner::onUpdate( const Context &ctx )
 {
    while ( true ) {
-      auto ret = System::onUpdate();
+      auto ret = System::onUpdate( ctx );
       if ( ret != State::RUNNING ) {
          return ret;
       }

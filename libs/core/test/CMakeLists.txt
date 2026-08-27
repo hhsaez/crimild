@@ -81,9 +81,6 @@ target_include_directories(
 
 target_link_libraries(
     crimild_core_test
-    PRIVATE crimild::foundation
-    PRIVATE crimild::math
-    PRIVATE crimild::coding
     PRIVATE crimild::core
     PRIVATE gtest gmock
 )

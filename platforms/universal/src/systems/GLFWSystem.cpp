@@ -42,8 +42,8 @@ GLFWSystem::~GLFWSystem( void ) noexcept
    }
 }
 
-GLFWSystem::State GLFWSystem::onUpdate( void )
+GLFWSystem::State GLFWSystem::onUpdate( const Context &ctx )
 {
    glfwPollEvents();
-   return System::onUpdate();
+   return System::onUpdate( ctx );
 }

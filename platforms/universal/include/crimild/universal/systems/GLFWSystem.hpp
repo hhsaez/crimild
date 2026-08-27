@@ -11,7 +11,7 @@ namespace crimild::universal::systems {
       virtual ~GLFWSystem( void ) noexcept;
 
    protected:
-      virtual State onUpdate( void ) override;
+      virtual State onUpdate( const experimental::systems::Context &ctx ) override;
    };
 
 }

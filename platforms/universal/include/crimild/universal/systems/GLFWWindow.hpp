@@ -8,20 +8,19 @@ struct GLFWwindow;
 
 namespace crimild::universal::systems {
 
-   class GLFWWindow : public crimild::experimental::systems::System {
+   class GLFWWindow : public experimental::systems::System {
    public:
       virtual ~GLFWWindow( void ) noexcept;
 
    protected:
-      virtual State onUpdate( void ) override;
+      virtual State onUpdate( const experimental::systems::Context &ctx ) override;
 
    private:
-      bool setup( void );
+      bool setup( const experimental::systems::Context &ctx );
 
    private:
       GLFWwindow *m_window = nullptr;
-      uint32_t m_width = 1024;
-      uint32_t m_height = 768;
+      Size2i m_size;
    };
 
 }

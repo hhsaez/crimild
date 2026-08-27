@@ -11,7 +11,7 @@ namespace crimild::experimental::systems {
       virtual ~Runner( void ) noexcept;
 
    protected:
-      virtual System::State onUpdate( void ) override;
+      virtual System::State onUpdate( const Context &ctx ) override;
    };
 
 }
