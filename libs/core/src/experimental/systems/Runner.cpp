@@ -1,8 +1,10 @@
 #include <crimild/core/experimental/systems/Runner.hpp>
 #include <crimild/core/init.hpp>
 #include <crimild/foundation/common/Version.hpp>
+#include <crimild/foundation/log/Log.hpp>
 #include <crimild/foundation/log/LogOutputHandler.hpp>
 #include <filesystem>
+#include <memory>
 
 using namespace crimild::experimental::systems;
 

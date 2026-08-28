@@ -3,7 +3,14 @@
 
 #include <crimild/core/Simulation/Clock.hpp>
 #include <crimild/math/Size2.hpp>
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <unordered_set>
+#include <variant>
 
 namespace crimild {
 
