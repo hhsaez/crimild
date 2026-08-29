@@ -19,17 +19,6 @@ GLFWSystem::GLFWSystem( void ) noexcept
       setState( State::FAILURE );
       CRIMILD_LOG_FATAL( "Cannot initialize GLFW System" );
    }
-
-#if defined( CRIMILD_PLATFORM_WIN32 ) || defined( CRIMILD_PLATFORM_LINUX )
-   // TODO: Maybe move this to a different system?
-   int version = gladLoadGL( glfwGetProcAddress );
-   if ( version == 0 ) {
-      CRIMILD_LOG_FATAL( "Failed to initialized GLAD" );
-      setState( State::FAILURE );
-   } else {
-      CRIMILG_LOG_INFO( "GLAD Initialized (v", version, ")" );
-   }
-#endif
 }
 
 GLFWSystem::~GLFWSystem( void ) noexcept

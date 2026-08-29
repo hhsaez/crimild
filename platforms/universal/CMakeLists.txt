@@ -10,32 +10,34 @@ target_include_directories(
 
   PUBLIC include
   PRIVATE src
+
+  PRIVATE ${Crimild_SOURCE_DIR}/third-party/glfw/include
 )
 
 if ( WIN32 OR LINUX )
-   target_include_directories(
-      crimild_universal
+  target_include_directories(
+    crimild_universal
 
-      PRIVATE ${Crimild_SOURCE_DIR}/third-party/glad/include
-   )
+    PRIVATE ${Crimild_SOURCE_DIR}/third-party/glad/include
+  )
 endif()
 
 target_link_libraries(
-   crimild_universal
+  crimild_universal
 
-   PRIVATE crimild::foundation
-   PRIVATE crimild::math
-   PRIVATE crimild::coding
-   PRIVATE crimild::core
-   PRIVATE glfw
+  PRIVATE crimild::foundation
+  PRIVATE crimild::math
+  PRIVATE crimild::coding
+  PRIVATE crimild::core
+  PRIVATE glfw
 )
 
 if (APPLE)
-   target_link_libraries(
-      crimild_universal
-
-      PRIVATE "-framework OpenGL"
-   )
+  target_link_libraries(
+    crimild_universal
+    
+    PRIVATE "-framework OpenGL"
+  )
 endif()
 
 add_library( crimild::universal ALIAS crimild_universal )

@@ -1,4 +1,5 @@
 #include <crimild/foundation.hpp>
+#include <crimild/foundation/log/Log.hpp>
 #include <crimild/math/Vector2.hpp>
 #include <crimild/math/io.hpp>
 #include <crimild/universal/foundation/GLUtils.hpp>
@@ -104,6 +105,18 @@ bool GLFWWindow::setup( const experimental::systems::Context &ctx )
    int fbw, fbh;
    glfwGetFramebufferSize( m_window, &fbw, &fbh );
    CRIMILD_LOG_INFO( "Created framebuffer ", Vector2i { fbw, fbh } );
+
+#if defined( CRIMILD_PLATFORM_WIN32 ) || defined( CRIMILD_PLATFORM_LINUX )
+   // TODO: Glad needs to be initialized only once for ALL windows.
+   // Maybe move this to another system?
+   int version = gladLoadGL( glfwGetProcAddress );
+   if ( version == 0 ) {
+      CRIMILD_LOG_FATAL( "Failed to initialized GLAD" );
+      setState( State::FAILURE );
+   } else {
+      CRIMILD_LOG_INFO( "GLAD Initialized (v", version, ")" );
+   }
+#endif
 
    return true;
 }

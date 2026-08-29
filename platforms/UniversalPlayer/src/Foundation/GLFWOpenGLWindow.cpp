@@ -155,6 +155,6 @@ void GLFWOpenGLWindow::swapBuffers( void ) const
 std::pair< uint32_t, uint32_t > GLFWOpenGLWindow::getRenderSize( void ) const
 {
    int fbw, fbh;
-   n glfwGetFramebufferSize( m_window, &fbw, &fbh );
+   glfwGetFramebufferSize( m_window, &fbw, &fbh );
    return std::make_pair( fbw, fbh );
 }

@@ -1,6 +1,8 @@
 #ifndef CRIMILD_UNIVERSAL_FOUNDATION_GL_UTILS_
 #define CRIMILD_UNIVERSAL_FOUNDATION_GL_UTILS_
 
+#include <crimild/foundation/common/Macros.hpp>
+
 // clang-format off
 #ifdef CRIMILD_PLATFORM_DESKTOP
    #ifdef CRIMILD_PLATFORM_OSX
