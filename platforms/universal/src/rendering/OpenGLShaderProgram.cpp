@@ -1,0 +1,70 @@
+#include "OpenGLShaderProgram.hpp"
+
+#include "OpenGLShader.hpp"
+
+#include <crimild/foundation/log/Log.hpp>
+#include <crimild/math/get_ptr.hpp>
+
+using namespace crimild::universal;
+
+ShaderProgram::ShaderProgram( std::vector< std::shared_ptr< Shader > > const &shaders ) noexcept
+   : m_shaders( shaders )
+{
+   CRIMILD_LOG_TRACE();
+
+   m_id = glCreateProgram();
+   for ( auto &shader : m_shaders ) {
+      glAttachShader( m_id, shader->getId() );
+   }
+   glLinkProgram( m_id );
+   GLint linkSuccess;
+   glGetProgramiv( m_id, GL_LINK_STATUS, &linkSuccess );
+   if ( linkSuccess == GL_FALSE ) {
+      GLint logLength;
+      glGetProgramiv( m_id, GL_INFO_LOG_LENGTH, &logLength );
+      if ( logLength > 0 ) {
+         std::vector< char > log( logLength );
+         glGetProgramInfoLog( m_id, logLength, nullptr, log.data() );
+         CRIMILD_LOG_ERROR( "Shader program link failed: ", log.data() );
+      }
+   }
+}
+
+ShaderProgram::~ShaderProgram( void ) noexcept
+{
+   if ( m_id != GL_NONE ) {
+      unload();
+   }
+}
+
+void ShaderProgram::bind( void )
+{
+   glUseProgram( m_id );
+}
+
+void ShaderProgram::unbind( void )
+{
+   glUseProgram( GL_NONE );
+}
+
+void ShaderProgram::unload( void )
+{
+   CRIMILD_LOG_TRACE();
+
+   m_shaders.clear();
+
+   if ( m_id != GL_NONE ) {
+      glDeleteProgram( m_id );
+      m_id = GL_NONE;
+   }
+}
+
+void ShaderProgram::setUniform( const char *name, const crimild::Matrix4f &value )
+{
+   glUniformMatrix4fv( glGetUniformLocation( m_id, name ), 1, GL_FALSE, get_ptr( value ) );
+}
+
+void ShaderProgram::setUniform( const char *name, const crimild::ColorRGBA &value )
+{
+   glUniform4f( glGetUniformLocation( m_id, name ), value.r, value.g, value.b, value.a );
+}

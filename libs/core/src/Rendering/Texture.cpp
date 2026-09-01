@@ -25,14 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <crimild/core/Rendering/Texture.hpp>
-
+#include <crimild/coding/Decoder.hpp>
+#include <crimild/coding/Encoder.hpp>
 #include <crimild/core/Rendering/Image.hpp>
 #include <crimild/core/Rendering/ImageView.hpp>
 #include <crimild/core/Rendering/Sampler.hpp>
-
-#include <crimild/coding/Decoder.hpp>
-#include <crimild/coding/Encoder.hpp>
+#include <crimild/core/Rendering/Texture.hpp>
 #include <crimild/foundation.hpp>
 
 using namespace crimild;
@@ -57,8 +55,34 @@ SharedPointer< Texture > Texture::fromRGBANoise( UInt32 size ) noexcept
 SharedPointer< Texture > Texture::ONE = [] {
    auto texture = crimild::alloc< Texture >();
    texture->imageView = [ & ] {
+      // Using Image::ONE here is undefined behavior because
+      // C++ does not guarantee initialization order between
+      // Image.cpp and Texture.cpp. If this file initializes
+      // first, Image::ONE might be null.
       auto imageView = crimild::alloc< ImageView >();
-      imageView->image = Image::ONE;
+      imageView->image = [] {
+         auto image = crimild::alloc< Image >();
+         image->extent = {
+            .width = 1,
+            .height = 1,
+            .depth = 1,
+         };
+         image->format = Format::R8G8B8A8_UNORM;
+         image->setBufferView(
+            crimild::alloc< BufferView >(
+               BufferView::Target::IMAGE,
+               crimild::alloc< Buffer >(
+                  ByteArray {
+                     0xFF,
+                     0xFF,
+                     0xFF,
+                     0xFF,
+                  }
+               )
+            )
+         );
+         return image;
+      }();
       return imageView;
    }();
    texture->sampler = [ & ] {

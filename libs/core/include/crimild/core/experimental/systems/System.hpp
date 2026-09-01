@@ -19,6 +19,7 @@ namespace crimild {
    namespace experimental {
 
       class Node;
+      class Camera3D;
 
    }
 
@@ -43,6 +44,7 @@ namespace crimild::experimental::systems {
       inline constexpr Key< Size2i > WindowSize { "crimild.systems.window.size" };
       inline constexpr Key< Size2i > RenderSize { "crimild.systems.render.size" };
       inline constexpr Key< std::shared_ptr< Node > > Scene { "crimild.systems.scene" };
+      inline constexpr Key< std::shared_ptr< Camera3D > > Camera { "crimild.systems.camera" };
 
    }
 
@@ -54,7 +56,8 @@ namespace crimild::experimental::systems {
          Size2i,
          std::string,
          std::shared_ptr< Entity >,
-         std::shared_ptr< Node > >;
+         std::shared_ptr< Node >,
+         std::shared_ptr< Camera3D > >;
 
    public:
       virtual ~Context( void ) noexcept = default;
@@ -96,7 +99,7 @@ namespace crimild::experimental::systems {
       template< typename T >
       bool contains( Key< T > key ) const
       {
-         return m_values.contains( key.name ) || ( m_parent != nullptr && m_parent->contains( key ) );
+         return m_values.contains( std::string { key.name } ) || ( m_parent != nullptr && m_parent->contains( key ) );
       }
 
       void clear( void )

@@ -5,5 +5,7 @@ target_sources(
 
   PRIVATE GLFWSystem.cpp
   PRIVATE GLFWWindow.cpp
+  PRIVATE RenderSystem.hpp
+  PRIVATE RenderSystem.cpp
   PRIVATE UniversalSceneRunner.cpp
 )

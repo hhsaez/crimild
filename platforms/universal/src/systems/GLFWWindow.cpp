@@ -10,10 +10,14 @@ using namespace crimild::universal::systems;
 GLFWWindow::~GLFWWindow( void ) noexcept
 {
    CRIMILD_LOG_INFO( "Destroying GLFW Window" );
+
+   detachAll();
+
    if ( m_window != nullptr ) {
       glfwDestroyWindow( m_window );
       m_window = nullptr;
    }
+   CRIMILD_LOG_INFO( "GLFW Window Destroyed" );
 }
 
 GLFWWindow::State GLFWWindow::onUpdate( const experimental::systems::Context &ctx )
@@ -105,6 +109,8 @@ bool GLFWWindow::setup( const experimental::systems::Context &ctx )
    int fbw, fbh;
    glfwGetFramebufferSize( m_window, &fbw, &fbh );
    CRIMILD_LOG_INFO( "Created framebuffer ", Vector2i { fbw, fbh } );
+
+   glfwMakeContextCurrent( m_window );
 
 #if defined( CRIMILD_PLATFORM_WIN32 ) || defined( CRIMILD_PLATFORM_LINUX )
    // TODO: Glad needs to be initialized only once for ALL windows.
