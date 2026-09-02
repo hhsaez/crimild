@@ -1,5 +1,6 @@
 #include <crimild/foundation.hpp>
 #include <crimild/foundation/log/Log.hpp>
+#include <crimild/math/Size2.hpp>
 #include <crimild/math/Vector2.hpp>
 #include <crimild/math/io.hpp>
 #include <crimild/universal/foundation/GLUtils.hpp>
@@ -32,7 +33,29 @@ GLFWWindow::State GLFWWindow::onUpdate( const experimental::systems::Context &ct
 
    glfwMakeContextCurrent( m_window );
 
-   if ( System::onUpdate( ctx ) == State::FAILURE ) {
+   // Override window's dimensions after creation
+   // It is possible the OS resizes the window to appropriated dimensions during creation
+   // For example, the window dimension could be too big for the screen.
+   auto ctx2 = ctx;
+   ctx2.set(
+      experimental::systems::keys::WindowSize,
+      [ this ] {
+         int w, h;
+         glfwGetWindowSize( m_window, &w, &h );
+         return crimild::Size2i { w, h };
+      }()
+   );
+   // Same for framebuffer size
+   ctx2.set(
+      experimental::systems::keys::FramebufferSize,
+      [ this ] {
+         int w, h;
+         glfwGetFramebufferSize( m_window, &w, &h );
+         return crimild::Size2i { w, h };
+      }()
+   );
+
+   if ( System::onUpdate( ctx2 ) == State::FAILURE ) {
       return State::FAILURE;
    }
 
@@ -89,7 +112,7 @@ bool GLFWWindow::setup( const experimental::systems::Context &ctx )
          auto windowInstance = static_cast< GLFWWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
             CRIMILD_LOG_DEBUG( "Window resized", Vector2i { width, height } );
-            windowInstance->m_size = { .width = width, .height = height };
+            //            windowInstance->m_size = { .width = width, .height = height };
          }
       }
    );
@@ -100,6 +123,7 @@ bool GLFWWindow::setup( const experimental::systems::Context &ctx )
          auto windowInstance = static_cast< GLFWWindow * >( glfwGetWindowUserPointer( window ) );
          if ( windowInstance ) {
             CRIMILD_LOG_DEBUG( "Resizing framebuffer", Vector2i { width, height } );
+            windowInstance->m_size = { .width = width, .height = height };
             // windowInstance->m_width = width;
             // windowInstance->m_height = height;
          }

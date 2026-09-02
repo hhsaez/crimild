@@ -117,25 +117,25 @@ RenderSystem::State RenderSystem::onUpdate( const Context &ctx )
       return State::FAILURE;
    }
 
-   const auto windowSize = ctx.get( keys::WindowSize ).value();
-   const auto windowAspect = float( windowSize.width ) / float( windowSize.height );
+   const auto targetSize = ctx.get( keys::FramebufferSize ).value();
+   const auto targetAspect = float( targetSize.width ) / float( targetSize.height );
 
-   const auto renderSize = ctx.get( keys::RenderSize ).value_or( windowSize );
+   const auto renderSize = ctx.get( keys::RenderSize ).value_or( targetSize );
    const float renderAspect = float( renderSize.width ) / float( renderSize.height );
 
    float l, r, t, b;
-   if ( windowAspect >= renderAspect ) {
-      float scale = windowSize.height / renderSize.height;
+   if ( targetAspect >= renderAspect ) {
+      float scale = targetSize.height / renderSize.height;
       r = renderSize.width * scale;
       b = renderSize.height * scale;
-      l = 0.5f * ( windowSize.width - r );
+      l = 0.5f * ( targetSize.width - r );
       t = 0.0f;
    } else {
-      float scale = windowSize.width / renderSize.width;
+      float scale = targetSize.width / renderSize.width;
       r = renderSize.width * scale;
       b = renderSize.height * scale;
       l = 0.0f;
-      t = 0.5f * ( windowSize.height - b );
+      t = 0.5f * ( targetSize.height - b );
    }
 
    auto camera = *ctx.get( keys::Camera );

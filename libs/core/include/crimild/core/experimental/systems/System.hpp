@@ -42,6 +42,7 @@ namespace crimild::experimental::systems {
    namespace keys {
 
       inline constexpr Key< Size2i > WindowSize { "crimild.systems.window.size" };
+      inline constexpr Key< Size2i > FramebufferSize { "crimild.systems.framebuffer.size" };
       inline constexpr Key< Size2i > RenderSize { "crimild.systems.render.size" };
       inline constexpr Key< std::shared_ptr< Node > > Scene { "crimild.systems.scene" };
       inline constexpr Key< std::shared_ptr< Camera3D > > Camera { "crimild.systems.camera" };
