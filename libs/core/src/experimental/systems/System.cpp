@@ -7,13 +7,59 @@ System::~System( void ) noexcept
    detachAll();
 }
 
-void System::attach( std::shared_ptr< System > const &system )
+std::shared_ptr< System > System::detachFromParent( void )
 {
-   m_children.insert( system );
+   // Since we're detaching from our owner, keep a retained pointer so we're
+   // not destroyed yet.
+   auto self = retain( this );
+   if ( auto parent = getParent() ) {
+      parent->detach( self );
+   }
+   return self;
+}
+
+void System::setParent( System *parent )
+{
+   m_parent = parent;
+}
+
+void System::attach( std::shared_ptr< System > const &child )
+{
+   if ( child == nullptr ) {
+      return;
+   }
+
+   if ( child->getParent().get() == this ) {
+      return;
+   }
+
+   child->detachFromParent();
+   m_children.insert( child );
+   child->setParent( this );
+}
+
+void System::detach( std::shared_ptr< System > const &child )
+{
+   if ( child == nullptr ) {
+      return;
+   }
+
+   if ( child->getParent().get() != this ) {
+      return;
+   }
+
+   auto it = std::find( m_children.begin(), m_children.end(), child );
+   m_children.erase( it );
+   child->setParent( nullptr );
 }
 
 void System::detachAll( void )
 {
+   for ( auto c : m_children ) {
+      if ( c != nullptr ) {
+         c->setParent( nullptr );
+      }
+   }
    m_children.clear();
 }
 

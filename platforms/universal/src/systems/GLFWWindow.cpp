@@ -148,5 +148,44 @@ bool GLFWWindow::setup( const experimental::systems::Context &ctx )
    }
 #endif
 
+   glfwSetKeyCallback(
+      m_window,
+      []( GLFWwindow *window, int key, int scancode, int action, int mods ) {
+         auto self = static_cast< GLFWWindow * >( glfwGetWindowUserPointer( window ) );
+         if ( self != nullptr && self->m_window == window ) {
+            const auto info = KeyInfo {
+               .key = UInt32( key ),
+               .scancode = UInt32( scancode ),
+               .mod = UInt32( mods ),
+            };
+
+            if ( action == GLFW_PRESS ) {
+               self->onKeyPressed( info );
+            } else if ( action == GLFW_RELEASE ) {
+               self->onKeyReleased( info );
+            } else if ( action == GLFW_REPEAT ) {
+               self->onKeyRepeated( info );
+            }
+         }
+      }
+   );
+
+   glfwSetMouseButtonCallback(
+      m_window,
+      []( GLFWwindow *window, int button, int action, int mods ) {
+         auto self = static_cast< GLFWWindow * >( glfwGetWindowUserPointer( window ) );
+         if ( self != nullptr && self->m_window == window ) {
+            double x, y;
+            glfwGetCursorPos( window, &x, &y );
+
+            if ( action == GLFW_PRESS ) {
+               self->onMouseButtonPressed( button, x, y );
+            } else if ( action == GLFW_RELEASE ) {
+               self->onMouseButtonReleased( button, x, y );
+            }
+         }
+      }
+   );
+
    return true;
 }

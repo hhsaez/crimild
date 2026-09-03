@@ -1,7 +1,10 @@
 #ifndef CRIMILD_EXPERIMENTAL_SYSTEMS_SYSTEM_
 #define CRIMILD_EXPERIMENTAL_SYSTEMS_SYSTEM_
 
+#include <crimild/core/Entity/Entity.hpp>
 #include <crimild/core/Simulation/Clock.hpp>
+#include <crimild/foundation/common/Enableable.hpp>
+#include <crimild/foundation/memory/Memory.hpp>
 #include <crimild/math/Size2.hpp>
 #include <cstdint>
 #include <memory>
@@ -113,9 +116,46 @@ namespace crimild::experimental::systems {
       std::unordered_map< std::string, Value > m_values;
    };
 
-   class System {
+   class System;
+
+   template< class T >
+   concept IsSystem = std::is_base_of_v< System, T >;
+
+   class System
+      : public Entity,
+        public Enableable {
    public:
       virtual ~System( void ) noexcept;
+
+      inline bool hasParent( void ) const
+      {
+         return m_parent != nullptr;
+      }
+
+      std::shared_ptr< System > getParent( void ) const
+      {
+         return retain( m_parent );
+      }
+
+      template< IsSystem ParentSystemType >
+      std::shared_ptr< ParentSystemType > getParent( void ) const
+      {
+         return std::static_pointer_cast< ParentSystemType >( retain( m_parent ) );
+      }
+
+      std::shared_ptr< System > detachFromParent( void );
+
+   private:
+      void setParent( System *parent );
+
+   private:
+      /**
+       * @brief Parent system
+       *
+       * Use a raw pointer so we can attach child systems during
+       * construction.
+       */
+      System *m_parent = nullptr;
 
    public:
       inline bool hasChildren( void ) const { return !m_children.empty(); }
@@ -130,6 +170,8 @@ namespace crimild::experimental::systems {
 
       void attach( std::shared_ptr< System > const &system );
 
+      void detach( std::shared_ptr< System > const &child );
+
       void detachAll( void );
 
       inline std::unordered_set< std::shared_ptr< System > > &getChildren( void ) { return m_children; }
@@ -139,6 +181,7 @@ namespace crimild::experimental::systems {
 
    public:
       enum class State {
+         READY,
          RUNNING,
          SUCCESS,
          FAILURE,
@@ -154,7 +197,7 @@ namespace crimild::experimental::systems {
       virtual State onUpdate( const Context &ctx );
 
    private:
-      State m_state = State::SUCCESS;
+      State m_state = State::READY;
    };
 
 }
