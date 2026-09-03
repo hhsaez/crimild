@@ -17,6 +17,7 @@
 #include <crimild/math/Matrix4.hpp>
 #include <crimild/math/Rect.hpp>
 #include <crimild/math/ortho.hpp>
+#include <crimild/universal/systems/DebugSystem.hpp>
 #include <memory>
 
 namespace crimild::experimental {
@@ -168,6 +169,14 @@ RenderSystem::State RenderSystem::onUpdate( const Context &ctx )
       camera,
       0.05 * crimild::ColorRGBA { 1.0f, 0.0f, 1.0f, 0.0f }
    );
+
+   if ( auto debugSystem = DebugSystem::getInstance() ) {
+      if ( debugSystem->isEnabled() ) {
+         if ( auto scene = debugSystem->getScene() ) {
+            render( scene, camera );
+         }
+      }
+   }
 
    return State::SUCCESS;
 }

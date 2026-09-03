@@ -2,6 +2,7 @@
 #include "systems/RenderSystem.hpp"
 #include "systems/SimulationSystem.hpp"
 
+#include <crimild/universal/systems/DebugSystem.hpp>
 #include <crimild/universal/systems/GLFWSystem.hpp>
 #include <crimild/universal/systems/GLFWWindow.hpp>
 #include <crimild/universal/systems/UniversalSceneRunner.hpp>
@@ -18,6 +19,7 @@ SceneRunner::SceneRunner( int argc, char **argv ) noexcept
          glfw->attach(
             [] {
                auto window = std::make_shared< GLFWWindow >();
+               window->attach< DebugSystem >();
                window->attach< GLFWInputSystem >();
                // TODO: simulation should be window independent
                window->attach< SimulationSystem >();

@@ -3,6 +3,7 @@ crimild_trace()
 target_sources(
   crimild_universal
 
+  PRIVATE DebugSystem.cpp
   PRIVATE GLFWInputSystem.hpp
   PRIVATE GLFWInputSystem.cpp
   PRIVATE GLFWSystem.cpp

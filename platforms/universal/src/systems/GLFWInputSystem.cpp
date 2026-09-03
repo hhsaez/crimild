@@ -1,6 +1,7 @@
 #include "systems/GLFWInputSystem.hpp"
 
 #include <crimild/foundation/log/Log.hpp>
+#include <crimild/universal/systems/DebugSystem.hpp>
 #include <crimild/universal/systems/GLFWWindow.hpp>
 
 using namespace crimild::universal::systems;
@@ -70,7 +71,9 @@ GLFWInputSystem::State GLFWInputSystem::onUpdate( const Context &ctx )
                      break;
 
                   case CRIMILD_INPUT_KEY_TAB:
-                     // arcadia::systems::DebugSystem::getInstance()->toggleEnabled();
+                     if ( auto debugSystem = DebugSystem::getInstance() ) {
+                        debugSystem->toggleEnabled();
+                     }
                      break;
                }
             }
