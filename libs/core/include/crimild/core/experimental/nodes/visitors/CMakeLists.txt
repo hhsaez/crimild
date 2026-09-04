@@ -6,5 +6,6 @@ target_sources(
 
   PUBLIC InvalidateHierarchy.hpp
   PUBLIC InvalidateWorldState.hpp
+  PUBLIC Select.hpp
   PUBLIC Tick.hpp
 )

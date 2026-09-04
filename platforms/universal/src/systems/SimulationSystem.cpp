@@ -28,5 +28,5 @@ SimulationSystem::State SimulationSystem::onUpdate( const Context &ctx )
       return State::FAILURE;
    }
 
-   return State::SUCCESS;
+   return System::onUpdate( ctx );
 }

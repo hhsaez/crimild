@@ -30,18 +30,27 @@
 
 #include "Cylinder.hpp"
 #include "Sphere.hpp"
+#include "Transformation.hpp"
+#include "max.hpp"
+
+#include <crimild/math/types.hpp>
 
 namespace crimild {
 
-    [[nodiscard]] inline constexpr const real_t &radius( const Sphere &s ) noexcept
-    {
-        return s.radius;
-    }
+   [[nodiscard]] inline constexpr const real_t &radius( const Sphere &s ) noexcept
+   {
+      return s.radius;
+   }
 
-    [[nodiscard]] inline constexpr real_t radius( const Cylinder &c ) noexcept
-    {
-        return c.radius;
-    }
+   [[nodiscard]] inline constexpr real_t radius( const Cylinder &c ) noexcept
+   {
+      return c.radius;
+   }
+
+   [[nodiscard]] inline constexpr real_t radius( const Transformation &T )
+   {
+      return real_t( 0.5 ) * max( T.scale );
+   }
 
 }
 
