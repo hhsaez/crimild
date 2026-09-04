@@ -8,6 +8,8 @@ target_sources(
   PRIVATE GLFWInputSystem.cpp
   PRIVATE GLFWSystem.cpp
   PRIVATE GLFWWindow.cpp
+  PRIVATE PhysicsSystem.hpp
+  PRIVATE PhysicsSystem.cpp
   PRIVATE RenderSystem.hpp
   PRIVATE RenderSystem.cpp
   PRIVATE SimulationSystem.hpp

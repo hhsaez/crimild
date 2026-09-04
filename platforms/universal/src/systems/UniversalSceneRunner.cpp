@@ -1,4 +1,5 @@
 #include "systems/GLFWInputSystem.hpp"
+#include "systems/PhysicsSystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/SimulationSystem.hpp"
 
@@ -9,6 +10,7 @@
 #include <memory>
 
 using namespace crimild::universal::systems;
+using namespace crimild::experimental::systems;
 
 SceneRunner::SceneRunner( int argc, char **argv ) noexcept
    : experimental::systems::Runner( argc, argv )
@@ -23,6 +25,7 @@ SceneRunner::SceneRunner( int argc, char **argv ) noexcept
                window->attach< GLFWInputSystem >();
                // TODO: simulation should be window independent
                window->attach< SimulationSystem >();
+               window->attach< PhysicsSystem >();
                window->attach< RenderSystem >();
                return window;
             }()
