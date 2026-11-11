@@ -1,11 +1,22 @@
 #include <crimild/core/experimental/behaviors/composites/Sequence.hpp>
 #include <gtest/gtest.h>
+#include <functional>
 #include <vector>
 
 namespace {
    using crimild::experimental::behaviors::Behavior;
    using crimild::experimental::behaviors::composites::Sequence;
    using State = Behavior::State;
+
+   class CallbackBehavior : public Behavior {
+   public:
+      std::function< State() > callback;
+
+      State onExecute( void ) override
+      {
+         return callback();
+      }
+   };
 
    class RecordingBehavior : public Behavior {
    public:
@@ -104,4 +115,38 @@ TEST( ExperimentalSequence, reevaluates_earlier_children_on_each_execution )
    calls.clear();
    EXPECT_EQ( sequence.execute(), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+}
+
+TEST( ExperimentalSequence, defers_children_attached_during_execution_until_next_traversal )
+{
+   Sequence sequence;
+   std::vector< int > calls;
+   auto appended = std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls );
+   auto mutator = std::make_shared< CallbackBehavior >();
+   bool attached = false;
+   mutator->callback = [&] {
+      calls.push_back( 1 );
+      if ( !attached ) {
+         // Force reallocation of the original vector while it is being traversed.
+         const auto capacity = sequence.getBehaviors().capacity();
+         while ( sequence.getBehaviors().size() <= capacity ) {
+            sequence.attach( appended );
+         }
+         attached = true;
+      }
+      return State::SUCCESS;
+   };
+   sequence.attach( mutator );
+   sequence.attach( std::make_shared< RecordingBehavior >( 2, State::SUCCESS, calls ) );
+
+   EXPECT_EQ( sequence.execute(), State::SUCCESS );
+   EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
+   EXPECT_EQ( appended->getState(), State::READY );
+
+   calls.clear();
+   EXPECT_EQ( sequence.execute(), State::SUCCESS );
+   std::vector< int > expected( sequence.getBehaviors().size(), 3 );
+   expected[ 0 ] = 1;
+   expected[ 1 ] = 2;
+   EXPECT_EQ( calls, expected );
 }
