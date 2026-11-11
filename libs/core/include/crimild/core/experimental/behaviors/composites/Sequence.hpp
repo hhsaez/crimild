@@ -11,20 +11,19 @@ namespace crimild::experimental::behaviors::composites {
 
       virtual State onExecute( void ) override
       {
-         State ret = State::SUCCESS;
-         auto behaviors = getBehaviors();
-         for ( auto b : behaviors ) {
+         // Reevaluate from the first child on every execution, stopping as soon
+         // as a child fails or needs more time.
+         for ( const auto &b : getBehaviors() ) {
             switch ( b->execute() ) {
                case State::FAILURE:
                   return State::FAILURE;
                case State::RUNNING:
-                  ret = State::RUNNING;
-                  break;
+                  return State::RUNNING;
                default:
                   break;
             }
          }
-         return ret;
+         return State::SUCCESS;
       }
    };
 
