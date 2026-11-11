@@ -12,578 +12,576 @@ target_sources(
 
     PUBLIC include/crimild/core/init.hpp
 
-    PUBLIC
-    include/crimild/core/Animation/Accumulator.hpp
-    include/crimild/core/Animation/Animation.hpp
-    include/crimild/core/Animation/Channel.hpp
-    include/crimild/core/Animation/ChannelImpl.hpp
-    include/crimild/core/Animation/Clip.hpp
-    include/crimild/core/Animation/Skeleton.hpp
-    include/crimild/core/Assemblies/Assembly.hpp
-    include/crimild/core/Audio/AudioListener.hpp
-    include/crimild/core/Audio/AudioSource.hpp
-    include/crimild/core/Behaviors/Actions/AnimateContextValue.hpp
-    include/crimild/core/Behaviors/Actions/AnimateParticleSystem.hpp
-    include/crimild/core/Behaviors/Actions/AnimateSettingValue.hpp
-    include/crimild/core/Behaviors/Actions/ClampPosition.hpp
-    include/crimild/core/Behaviors/Actions/ClampPositionToView.hpp
-    include/crimild/core/Behaviors/Actions/ClearTargets.hpp
-    include/crimild/core/Behaviors/Actions/CopyTransformFromTarget.hpp
-    include/crimild/core/Behaviors/Actions/EnableNode.hpp
-    include/crimild/core/Behaviors/Actions/ExecuteBehavior.hpp
-    include/crimild/core/Behaviors/Actions/ExecuteBehaviorOnTarget.hpp
-    include/crimild/core/Behaviors/Actions/FindTarget.hpp
-    include/crimild/core/Behaviors/Actions/FollowPath.hpp
-    include/crimild/core/Behaviors/Actions/LoadScene.hpp
-    include/crimild/core/Behaviors/Actions/LookAt.hpp
-    include/crimild/core/Behaviors/Actions/MotionApply.hpp
-    include/crimild/core/Behaviors/Actions/MotionAvoidOthers.hpp
-    include/crimild/core/Behaviors/Actions/MotionAvoidWalls.hpp
-    include/crimild/core/Behaviors/Actions/MotionComputePathToTarget.hpp
-    include/crimild/core/Behaviors/Actions/MotionFromInput.hpp
-    include/crimild/core/Behaviors/Actions/MotionReset.hpp
-    include/crimild/core/Behaviors/Actions/MotionSeek.hpp
-    include/crimild/core/Behaviors/Actions/PrintMessage.hpp
-    include/crimild/core/Behaviors/Actions/ResetNavigation.hpp
-    include/crimild/core/Behaviors/Actions/Rotate.hpp
-    include/crimild/core/Behaviors/Actions/SetContextValue.hpp
-    include/crimild/core/Behaviors/Actions/SetSettingValue.hpp
-    include/crimild/core/Behaviors/Actions/Success.hpp
-    include/crimild/core/Behaviors/Actions/Transform.hpp
-    include/crimild/core/Behaviors/Actions/Trigger.hpp
-    include/crimild/core/Behaviors/Actions/Wait.hpp
-    include/crimild/core/Behaviors/Composites/Composite.hpp
-    include/crimild/core/Behaviors/Composites/Parallel.hpp
-    include/crimild/core/Behaviors/Composites/Selector.hpp
-    include/crimild/core/Behaviors/Composites/Sequence.hpp
-    include/crimild/core/Behaviors/Conditions/DistanceToTarget.hpp
-    include/crimild/core/Behaviors/Conditions/HasTargets.hpp
-    include/crimild/core/Behaviors/Conditions/IsAtTarget.hpp
-    include/crimild/core/Behaviors/Conditions/TestContextValue.hpp
-    include/crimild/core/Behaviors/Conditions/TestInputAxis.hpp
-    include/crimild/core/Behaviors/Conditions/TestSettingValue.hpp
-    include/crimild/core/Behaviors/Decorators/Decorator.hpp
-    include/crimild/core/Behaviors/Decorators/Inverter.hpp
-    include/crimild/core/Behaviors/Decorators/Repeat.hpp
-    include/crimild/core/Behaviors/Decorators/RepeatUntilFail.hpp
-    include/crimild/core/Behaviors/Decorators/RepeatUntilSuccess.hpp
-    include/crimild/core/Behaviors/Decorators/Succeeder.hpp
-    include/crimild/core/Behaviors/Decorators/Throttle.hpp
-    include/crimild/core/Behaviors/Behavior.hpp
-    include/crimild/core/Behaviors/BehaviorContext.hpp
-    include/crimild/core/Behaviors/BehaviorController.hpp
-    include/crimild/core/Behaviors/BehaviorTree.hpp
-    include/crimild/core/Behaviors/withBehavior.hpp
-    include/crimild/core/Boundings/AABBBoundingVolume.hpp
-    include/crimild/core/Boundings/BoundingVolume.hpp
-    include/crimild/core/Boundings/Box2DBoundingVolume.hpp
-    include/crimild/core/Boundings/OrientedBoxBoundingVolume.hpp
-    include/crimild/core/Boundings/PlaneBoundingVolume.hpp
-    include/crimild/core/Boundings/SphereBoundingVolume.hpp
-    include/crimild/core/Common/Profiler.hpp
-    include/crimild/core/Common/Signal.hpp
-    include/crimild/core/Common/Variant.hpp
-    include/crimild/core/Components/AnimatorComponent.hpp
-    include/crimild/core/Components/AudioListenerComponent.hpp
-    include/crimild/core/Components/AudioSourceComponent.hpp
-    include/crimild/core/Components/BillboardComponent.hpp
-    include/crimild/core/Components/FreeLookCameraComponent.hpp
-    include/crimild/core/Components/LambdaComponent.hpp
-    include/crimild/core/Components/MaterialComponent.hpp
-    include/crimild/core/Components/MotionStateComponent.hpp
-    include/crimild/core/Components/NodeComponent.hpp
-    include/crimild/core/Components/NodeComponentCatalog.hpp
-    include/crimild/core/Components/OrbitComponent.hpp
-    include/crimild/core/Components/PathComponent.hpp
-    include/crimild/core/Components/RenderStateComponent.hpp
-    include/crimild/core/Components/RotationComponent.hpp
-    include/crimild/core/Components/SingleValueComponent.hpp
-    include/crimild/core/Components/SkinnedMeshComponent.hpp
-    include/crimild/core/Components/TimerComponent.hpp
-    include/crimild/core/Components/UIResponder.hpp
-    include/crimild/core/Concurrency/Async.hpp
-    include/crimild/core/Concurrency/debounce.hpp
-    include/crimild/core/Concurrency/Job.hpp
-    include/crimild/core/Concurrency/JobScheduler.hpp
-    include/crimild/core/Concurrency/WorkStealingDeque.hpp
-    include/crimild/core/Debug/DebugDrawManager.hpp
-    include/crimild/core/Debug/DebugRenderComponent.hpp
-    include/crimild/core/Debug/DebugRenderHelper.hpp
-    include/crimild/core/Debug/SceneDebugDump.hpp
-    include/crimild/core/Entity/Entity.hpp
-    include/crimild/core/Entity/Extension.hpp
-    include/crimild/core/Exceptions/Exception.hpp
-    include/crimild/core/Exceptions/FileNotFoundException.hpp
-    include/crimild/core/Exceptions/HasParentException.hpp
-    include/crimild/core/Exceptions/InvalidFileFormatException.hpp
-    include/crimild/core/Exceptions/RuntimeException.hpp
-    include/crimild/core/Loaders/OBJLoader.hpp
-    include/crimild/core/Messaging/MessageQueue.hpp
-    include/crimild/core/Navigation/NavigationCell.hpp
-    include/crimild/core/Navigation/NavigationCellEdge.hpp
-    include/crimild/core/Navigation/NavigationController.hpp
-    include/crimild/core/Navigation/NavigationMesh.hpp
-    include/crimild/core/Navigation/NavigationMeshContainer.hpp
-    include/crimild/core/Navigation/NavigationMeshOBJ.hpp
-    include/crimild/core/ParticleSystem/Generators/AccelerationParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/BoxPositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/CirclePositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/ColorParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/DefaultValueParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/EulerAnglesParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/GridPositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/NodePositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/OrbitPositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/RandomValueParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/SpherePositionParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/SphereVelocityParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/TimeParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/UniformScaleParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/Generators/VelocityParticleGenerator.hpp
-    include/crimild/core/ParticleSystem/ParticleAttribArray.hpp
-    include/crimild/core/ParticleSystem/ParticleData.hpp
-    include/crimild/core/ParticleSystem/ParticleSystemComponent.hpp
-    include/crimild/core/ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.hpp
-    include/crimild/core/ParticleSystem/Renderers/InstancedParticleRenderer.hpp
-    include/crimild/core/ParticleSystem/Renderers/NodeParticleRenderer.hpp
-    include/crimild/core/ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp
-    include/crimild/core/ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp
-    include/crimild/core/ParticleSystem/Updaters/AttractorParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/CameraSortParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/ColorParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/EulerParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/FloorParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/PositionColorParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/PositionVelocityParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/TimeParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/VelocityColorParticleUpdater.hpp
-    include/crimild/core/ParticleSystem/Updaters/ZSortParticleUpdater.hpp
-    include/crimild/core/Primitives/ArcPrimitive.hpp
-    include/crimild/core/Primitives/ArrowPrimitive.hpp
-    include/crimild/core/Primitives/BoxPrimitive.hpp
-    include/crimild/core/Primitives/ConePrimitive.hpp
-    include/crimild/core/Primitives/CylinderPrimitive.hpp
-    include/crimild/core/Primitives/KleinBottlePrimitive.hpp
-    include/crimild/core/Primitives/MobiusStripPrimitive.hpp
-    include/crimild/core/Primitives/NewellTeapotPrimitive.hpp
-    include/crimild/core/Primitives/ParametricPrimitive.hpp
-    include/crimild/core/Primitives/ParametricSpherePrimitive.hpp
-    include/crimild/core/Primitives/Primitive.hpp
-    include/crimild/core/Primitives/QuadPrimitive.hpp
-    include/crimild/core/Primitives/SpherePrimitive.hpp
-    include/crimild/core/Primitives/TorusPrimitive.hpp
-    include/crimild/core/Primitives/TrefoilKnotPrimitive.hpp
-    include/crimild/core/Rendering/Buffer.hpp
-    include/crimild/core/Rendering/BufferAccessor.hpp
-    include/crimild/core/Rendering/BufferView.hpp
-    include/crimild/core/Rendering/Catalog.hpp
-    include/crimild/core/Rendering/ColorBlendState.hpp
-    include/crimild/core/Rendering/ColorMaskState.hpp
-    include/crimild/core/Rendering/CommandBuffer.hpp
-    include/crimild/core/Rendering/CompareOp.hpp
-    include/crimild/core/Rendering/ComputePass.hpp
-    include/crimild/core/Rendering/DepthStencilState.hpp
-    include/crimild/core/Rendering/DescriptorSet.hpp
-    include/crimild/core/Rendering/Extent.hpp
-    include/crimild/core/Rendering/Font.hpp
-    include/crimild/core/Rendering/Format.hpp
-    include/crimild/core/Rendering/Framebuffer.hpp
-    include/crimild/core/Rendering/FrameGraphOperation.hpp
-    include/crimild/core/Rendering/FrameGraphResource.hpp
-    include/crimild/core/Rendering/Image.hpp
-    include/crimild/core/Rendering/ImageManager.hpp
-    include/crimild/core/Rendering/ImageTGA.hpp
-    include/crimild/core/Rendering/ImageView.hpp
-    include/crimild/core/Rendering/IndexBuffer.hpp
-    include/crimild/core/Rendering/Material.hpp
-    include/crimild/core/Rendering/Materials/PrincipledBSDFMaterial.hpp
-    include/crimild/core/Rendering/Materials/PrincipledVolumeMaterial.hpp
-    include/crimild/core/Rendering/Materials/SkyboxMaterial.hpp
-    include/crimild/core/Rendering/Materials/UnlitMaterial.hpp
-    include/crimild/core/Rendering/Materials/WorldGridMaterial.hpp
-    include/crimild/core/Rendering/Operations/Operations.hpp
-    include/crimild/core/Rendering/Operations/Operations_computeBuffer.hpp
-    include/crimild/core/Rendering/Operations/Operations_computeImage.hpp
-    include/crimild/core/Rendering/Operations/Operations_computeRT.hpp
-    include/crimild/core/Rendering/Operations/Operations_debugLightCascades.hpp
-    include/crimild/core/Rendering/Operations/Operations_debugShadowAtlas.hpp
-    include/crimild/core/Rendering/Operations/Operations_softRT.hpp
-    include/crimild/core/Rendering/Operations/Operations_ssao.hpp
-    include/crimild/core/Rendering/Operations/OperationUtils.hpp
-    include/crimild/core/Rendering/Pipeline.hpp
-    src/Rendering/Programs/LitShaderProgram.frag
-    include/crimild/core/Rendering/Programs/LitShaderProgram.hpp
-    src/Rendering/Programs/LitShaderProgram.vert
-    include/crimild/core/Rendering/Programs/SkyboxShaderProgram.hpp
-    include/crimild/core/Rendering/Programs/UnlitShaderProgram.hpp
-    include/crimild/core/Rendering/RasterizationState.hpp
-    include/crimild/core/Rendering/RenderableSet.hpp
-    include/crimild/core/Rendering/Renderer.hpp
-    include/crimild/core/Rendering/RenderPass.hpp
-    include/crimild/core/Rendering/RenderQueue.hpp
-    include/crimild/core/Rendering/RenderResource.hpp
-    include/crimild/core/Rendering/RenderState.hpp
-    include/crimild/core/Rendering/Sampler.hpp
-    include/crimild/core/Rendering/ScalingMode.hpp
-    include/crimild/core/Rendering/ScenePass.hpp
-    include/crimild/core/Rendering/Shader.hpp
-    include/crimild/core/Rendering/ShaderLibrary.hpp
-    include/crimild/core/Rendering/ShaderLocation.hpp
-    include/crimild/core/Rendering/ShaderProgram.hpp
-    include/crimild/core/Rendering/ShaderProgramLibrary.hpp
-    include/crimild/core/Rendering/ShaderUniform.hpp
-    include/crimild/core/Rendering/ShaderUniformImpl.hpp
-    include/crimild/core/Rendering/ShadowMap.hpp
-    include/crimild/core/Rendering/SkinnedMesh.hpp
-    include/crimild/core/Rendering/StorageBuffer.hpp
-    include/crimild/core/Rendering/Swapchain.hpp
-    include/crimild/core/Rendering/SystemFont.hpp
-    include/crimild/core/Rendering/SystemFontData.hpp
-    include/crimild/core/Rendering/Texture.hpp
-    include/crimild/core/Rendering/UniformBuffer.hpp
-    include/crimild/core/Rendering/Uniforms/CallbackUniformBuffer.hpp
-    include/crimild/core/Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp
-    include/crimild/core/Rendering/Uniforms/LightingUniform.hpp
-    include/crimild/core/Rendering/Uniforms/LightUniform.hpp
-    include/crimild/core/Rendering/Uniforms/ModelUniformBuffer.hpp
-    include/crimild/core/Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp
-    include/crimild/core/Rendering/Vertex.hpp
-    include/crimild/core/Rendering/VertexAttribute.hpp
-    include/crimild/core/Rendering/VertexBuffer.hpp
-    include/crimild/core/Rendering/VertexLayout.hpp
-    include/crimild/core/Rendering/ViewportDimensions.hpp
-    include/crimild/core/Rendering/Viewport.hpp
-    include/crimild/core/SceneGraph/Camera.hpp
-    include/crimild/core/SceneGraph/CSGNode.hpp
-    include/crimild/core/SceneGraph/Geometry.hpp
-    include/crimild/core/SceneGraph/Group.hpp
-    include/crimild/core/SceneGraph/Light.hpp
-    include/crimild/core/SceneGraph/Node.hpp
-    include/crimild/core/SceneGraph/Node_io.hpp
-    include/crimild/core/SceneGraph/Node_withTransformation.hpp
-    include/crimild/core/SceneGraph/NullNode.hpp
-    include/crimild/core/SceneGraph/Skybox.hpp
-    include/crimild/core/SceneGraph/Switch.hpp
-    include/crimild/core/SceneGraph/Text.hpp
-    include/crimild/core/Simulation/AssetManager.hpp
-    include/crimild/core/Simulation/Clock.hpp
-    include/crimild/core/Simulation/Console/Commands/EchoConsoleCommand.hpp
-    include/crimild/core/Simulation/Console/Commands/SetConsoleCommand.hpp
-    include/crimild/core/Simulation/Console/Console.hpp
-    include/crimild/core/Simulation/Console/ConsoleCommand.hpp
-    include/crimild/core/Simulation/Event.hpp
-    include/crimild/core/Simulation/FileSystem.hpp
-    include/crimild/core/Simulation/Input.hpp
-    include/crimild/core/Simulation/Settings.hpp
-    include/crimild/core/Simulation/Simulation.hpp
-    include/crimild/core/Simulation/Systems/AudioSystem.hpp
-    include/crimild/core/Simulation/Systems/CaptureSystem.hpp
-    include/crimild/core/Simulation/Systems/ConsoleSystem.hpp
-    include/crimild/core/Simulation/Systems/DebugSystem.hpp
-    include/crimild/core/Simulation/Systems/RenderSystem.hpp
-    include/crimild/core/Simulation/Systems/StreamingSystem.hpp
-    include/crimild/core/Simulation/Systems/System.hpp
-    include/crimild/core/Simulation/Systems/UISystem.hpp
-    include/crimild/core/Simulation/Systems/UpdateSystem.hpp
-    include/crimild/core/UI/UIBackground.hpp
-    include/crimild/core/UI/UIButton.hpp
-    include/crimild/core/UI/UICanvas.hpp
-    include/crimild/core/UI/UIFrame.hpp
-    include/crimild/core/UI/UIFrameConstraint.hpp
-    include/crimild/core/UI/UIFrameConstraintMaker.hpp
-    include/crimild/core/UI/UILabel.hpp
-    include/crimild/core/Visitors/Apply.hpp
-    include/crimild/core/Visitors/ApplyToGeometries.hpp
-    include/crimild/core/Visitors/BinTreeScene.hpp
-    include/crimild/core/Visitors/ComputeRenderQueue.hpp
-    include/crimild/core/Visitors/FetchCameras.hpp
-    include/crimild/core/Visitors/FetchGeometries.hpp
-    include/crimild/core/Visitors/FetchLights.hpp
-    include/crimild/core/Visitors/IntersectWorld.hpp
-    include/crimild/core/Visitors/NodeVisitor.hpp
-    include/crimild/core/Visitors/ParallelApply.hpp
-    include/crimild/core/Visitors/Picking.hpp
-    include/crimild/core/Visitors/RTAcceleration.hpp
-    include/crimild/core/Visitors/SelectNodes.hpp
-    include/crimild/core/Visitors/ShallowCopy.hpp
-    include/crimild/core/Visitors/StartComponents.hpp
-    include/crimild/core/Visitors/UpdateComponents.hpp
-    include/crimild/core/Visitors/UpdateRenderState.hpp
-    include/crimild/core/Visitors/UpdateWorldState.hpp
+    PUBLIC include/crimild/core/Animation/Accumulator.hpp
+    PUBLIC include/crimild/core/Animation/Animation.hpp
+    PUBLIC include/crimild/core/Animation/Channel.hpp
+    PUBLIC include/crimild/core/Animation/ChannelImpl.hpp
+    PUBLIC include/crimild/core/Animation/Clip.hpp
+    PUBLIC include/crimild/core/Animation/Skeleton.hpp
+    PUBLIC include/crimild/core/Assemblies/Assembly.hpp
+    PUBLIC include/crimild/core/Audio/AudioListener.hpp
+    PUBLIC include/crimild/core/Audio/AudioSource.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/AnimateContextValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/AnimateParticleSystem.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/AnimateSettingValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ClampPosition.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ClampPositionToView.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ClearTargets.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/CopyTransformFromTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/EnableNode.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ExecuteBehavior.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ExecuteBehaviorOnTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/FindTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/FollowPath.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/LoadScene.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/LookAt.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionApply.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionAvoidOthers.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionAvoidWalls.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionComputePathToTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionFromInput.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionReset.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/MotionSeek.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/PrintMessage.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/ResetNavigation.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/Rotate.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/SetContextValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/SetSettingValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/Success.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/Transform.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/Trigger.hpp
+    PUBLIC include/crimild/core/Behaviors/Actions/Wait.hpp
+    PUBLIC include/crimild/core/Behaviors/Composites/Composite.hpp
+    PUBLIC include/crimild/core/Behaviors/Composites/Parallel.hpp
+    PUBLIC include/crimild/core/Behaviors/Composites/Selector.hpp
+    PUBLIC include/crimild/core/Behaviors/Composites/Sequence.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/DistanceToTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/HasTargets.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/IsAtTarget.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/TestContextValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/TestInputAxis.hpp
+    PUBLIC include/crimild/core/Behaviors/Conditions/TestSettingValue.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/Decorator.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/Inverter.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/Repeat.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/RepeatUntilFail.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/RepeatUntilSuccess.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/Succeeder.hpp
+    PUBLIC include/crimild/core/Behaviors/Decorators/Throttle.hpp
+    PUBLIC include/crimild/core/Behaviors/Behavior.hpp
+    PUBLIC include/crimild/core/Behaviors/BehaviorContext.hpp
+    PUBLIC include/crimild/core/Behaviors/BehaviorController.hpp
+    PUBLIC include/crimild/core/Behaviors/BehaviorTree.hpp
+    PUBLIC include/crimild/core/Behaviors/withBehavior.hpp
+    PUBLIC include/crimild/core/Boundings/AABBBoundingVolume.hpp
+    PUBLIC include/crimild/core/Boundings/BoundingVolume.hpp
+    PUBLIC include/crimild/core/Boundings/Box2DBoundingVolume.hpp
+    PUBLIC include/crimild/core/Boundings/OrientedBoxBoundingVolume.hpp
+    PUBLIC include/crimild/core/Boundings/PlaneBoundingVolume.hpp
+    PUBLIC include/crimild/core/Boundings/SphereBoundingVolume.hpp
+    PUBLIC include/crimild/core/Common/Profiler.hpp
+    PUBLIC include/crimild/core/Common/Signal.hpp
+    PUBLIC include/crimild/core/Common/Variant.hpp
+    PUBLIC include/crimild/core/Components/AnimatorComponent.hpp
+    PUBLIC include/crimild/core/Components/AudioListenerComponent.hpp
+    PUBLIC include/crimild/core/Components/AudioSourceComponent.hpp
+    PUBLIC include/crimild/core/Components/BillboardComponent.hpp
+    PUBLIC include/crimild/core/Components/FreeLookCameraComponent.hpp
+    PUBLIC include/crimild/core/Components/LambdaComponent.hpp
+    PUBLIC include/crimild/core/Components/MaterialComponent.hpp
+    PUBLIC include/crimild/core/Components/MotionStateComponent.hpp
+    PUBLIC include/crimild/core/Components/NodeComponent.hpp
+    PUBLIC include/crimild/core/Components/NodeComponentCatalog.hpp
+    PUBLIC include/crimild/core/Components/OrbitComponent.hpp
+    PUBLIC include/crimild/core/Components/PathComponent.hpp
+    PUBLIC include/crimild/core/Components/RenderStateComponent.hpp
+    PUBLIC include/crimild/core/Components/RotationComponent.hpp
+    PUBLIC include/crimild/core/Components/SingleValueComponent.hpp
+    PUBLIC include/crimild/core/Components/SkinnedMeshComponent.hpp
+    PUBLIC include/crimild/core/Components/TimerComponent.hpp
+    PUBLIC include/crimild/core/Components/UIResponder.hpp
+    PUBLIC include/crimild/core/Concurrency/Async.hpp
+    PUBLIC include/crimild/core/Concurrency/debounce.hpp
+    PUBLIC include/crimild/core/Concurrency/Job.hpp
+    PUBLIC include/crimild/core/Concurrency/JobScheduler.hpp
+    PUBLIC include/crimild/core/Concurrency/WorkStealingDeque.hpp
+    PUBLIC include/crimild/core/Debug/DebugDrawManager.hpp
+    PUBLIC include/crimild/core/Debug/DebugRenderComponent.hpp
+    PUBLIC include/crimild/core/Debug/DebugRenderHelper.hpp
+    PUBLIC include/crimild/core/Debug/SceneDebugDump.hpp
+    PUBLIC include/crimild/core/Entity/Entity.hpp
+    PUBLIC include/crimild/core/Entity/Extension.hpp
+    PUBLIC include/crimild/core/Exceptions/Exception.hpp
+    PUBLIC include/crimild/core/Exceptions/FileNotFoundException.hpp
+    PUBLIC include/crimild/core/Exceptions/HasParentException.hpp
+    PUBLIC include/crimild/core/Exceptions/InvalidFileFormatException.hpp
+    PUBLIC include/crimild/core/Exceptions/RuntimeException.hpp
+    PUBLIC include/crimild/core/Loaders/OBJLoader.hpp
+    PUBLIC include/crimild/core/Messaging/MessageQueue.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationCell.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationCellEdge.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationController.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationMesh.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationMeshContainer.hpp
+    PUBLIC include/crimild/core/Navigation/NavigationMeshOBJ.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/AccelerationParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/BoxPositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/CirclePositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/ColorParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/DefaultValueParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/EulerAnglesParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/GridPositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/NodePositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/OrbitPositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/RandomValueParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/SpherePositionParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/SphereVelocityParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/TimeParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/UniformScaleParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Generators/VelocityParticleGenerator.hpp
+    PUBLIC include/crimild/core/ParticleSystem/ParticleAttribArray.hpp
+    PUBLIC include/crimild/core/ParticleSystem/ParticleData.hpp
+    PUBLIC include/crimild/core/ParticleSystem/ParticleSystemComponent.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Renderers/InstancedParticleRenderer.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Renderers/NodeParticleRenderer.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Renderers/OrientedQuadParticleRenderer.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Renderers/PointSpriteParticleRenderer.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/AttractorParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/CameraSortParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/ColorParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/EulerParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/FloorParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/PositionColorParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/PositionVelocityParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/SetAttribValueParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/TimeParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/UniformScaleParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/VelocityColorParticleUpdater.hpp
+    PUBLIC include/crimild/core/ParticleSystem/Updaters/ZSortParticleUpdater.hpp
+    PUBLIC include/crimild/core/Primitives/ArcPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/ArrowPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/BoxPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/ConePrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/CylinderPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/KleinBottlePrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/MobiusStripPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/NewellTeapotPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/ParametricPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/ParametricSpherePrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/Primitive.hpp
+    PUBLIC include/crimild/core/Primitives/QuadPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/SpherePrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/TorusPrimitive.hpp
+    PUBLIC include/crimild/core/Primitives/TrefoilKnotPrimitive.hpp
+    PUBLIC include/crimild/core/Rendering/Buffer.hpp
+    PUBLIC include/crimild/core/Rendering/BufferAccessor.hpp
+    PUBLIC include/crimild/core/Rendering/BufferView.hpp
+    PUBLIC include/crimild/core/Rendering/Catalog.hpp
+    PUBLIC include/crimild/core/Rendering/ColorBlendState.hpp
+    PUBLIC include/crimild/core/Rendering/ColorMaskState.hpp
+    PUBLIC include/crimild/core/Rendering/CommandBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/CompareOp.hpp
+    PUBLIC include/crimild/core/Rendering/ComputePass.hpp
+    PUBLIC include/crimild/core/Rendering/DepthStencilState.hpp
+    PUBLIC include/crimild/core/Rendering/DescriptorSet.hpp
+    PUBLIC include/crimild/core/Rendering/Extent.hpp
+    PUBLIC include/crimild/core/Rendering/Font.hpp
+    PUBLIC include/crimild/core/Rendering/Format.hpp
+    PUBLIC include/crimild/core/Rendering/Framebuffer.hpp
+    PUBLIC include/crimild/core/Rendering/FrameGraphOperation.hpp
+    PUBLIC include/crimild/core/Rendering/FrameGraphResource.hpp
+    PUBLIC include/crimild/core/Rendering/Image.hpp
+    PUBLIC include/crimild/core/Rendering/ImageManager.hpp
+    PUBLIC include/crimild/core/Rendering/ImageTGA.hpp
+    PUBLIC include/crimild/core/Rendering/ImageView.hpp
+    PUBLIC include/crimild/core/Rendering/IndexBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Material.hpp
+    PUBLIC include/crimild/core/Rendering/Materials/PrincipledBSDFMaterial.hpp
+    PUBLIC include/crimild/core/Rendering/Materials/PrincipledVolumeMaterial.hpp
+    PUBLIC include/crimild/core/Rendering/Materials/SkyboxMaterial.hpp
+    PUBLIC include/crimild/core/Rendering/Materials/UnlitMaterial.hpp
+    PUBLIC include/crimild/core/Rendering/Materials/WorldGridMaterial.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_computeBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_computeImage.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_computeRT.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_debugLightCascades.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_debugShadowAtlas.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_softRT.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/Operations_ssao.hpp
+    PUBLIC include/crimild/core/Rendering/Operations/OperationUtils.hpp
+    PUBLIC include/crimild/core/Rendering/Pipeline.hpp
+    PUBLIC src/Rendering/Programs/LitShaderProgram.frag
+    PUBLIC include/crimild/core/Rendering/Programs/LitShaderProgram.hpp
+    PUBLIC src/Rendering/Programs/LitShaderProgram.vert
+    PUBLIC include/crimild/core/Rendering/Programs/SkyboxShaderProgram.hpp
+    PUBLIC include/crimild/core/Rendering/Programs/UnlitShaderProgram.hpp
+    PUBLIC include/crimild/core/Rendering/RasterizationState.hpp
+    PUBLIC include/crimild/core/Rendering/RenderableSet.hpp
+    PUBLIC include/crimild/core/Rendering/Renderer.hpp
+    PUBLIC include/crimild/core/Rendering/RenderPass.hpp
+    PUBLIC include/crimild/core/Rendering/RenderQueue.hpp
+    PUBLIC include/crimild/core/Rendering/RenderResource.hpp
+    PUBLIC include/crimild/core/Rendering/RenderState.hpp
+    PUBLIC include/crimild/core/Rendering/Sampler.hpp
+    PUBLIC include/crimild/core/Rendering/ScalingMode.hpp
+    PUBLIC include/crimild/core/Rendering/ScenePass.hpp
+    PUBLIC include/crimild/core/Rendering/Shader.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderLibrary.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderLocation.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderProgram.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderProgramLibrary.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderUniform.hpp
+    PUBLIC include/crimild/core/Rendering/ShaderUniformImpl.hpp
+    PUBLIC include/crimild/core/Rendering/ShadowMap.hpp
+    PUBLIC include/crimild/core/Rendering/SkinnedMesh.hpp
+    PUBLIC include/crimild/core/Rendering/StorageBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Swapchain.hpp
+    PUBLIC include/crimild/core/Rendering/SystemFont.hpp
+    PUBLIC include/crimild/core/Rendering/SystemFontData.hpp
+    PUBLIC include/crimild/core/Rendering/Texture.hpp
+    PUBLIC include/crimild/core/Rendering/UniformBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/CallbackUniformBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/CameraViewProjectionUniformBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/LightingUniform.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/LightUniform.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/ModelUniformBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Uniforms/ModelViewProjectionUniformBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/Vertex.hpp
+    PUBLIC include/crimild/core/Rendering/VertexAttribute.hpp
+    PUBLIC include/crimild/core/Rendering/VertexBuffer.hpp
+    PUBLIC include/crimild/core/Rendering/VertexLayout.hpp
+    PUBLIC include/crimild/core/Rendering/ViewportDimensions.hpp
+    PUBLIC include/crimild/core/Rendering/Viewport.hpp
+    PUBLIC include/crimild/core/SceneGraph/Camera.hpp
+    PUBLIC include/crimild/core/SceneGraph/CSGNode.hpp
+    PUBLIC include/crimild/core/SceneGraph/Geometry.hpp
+    PUBLIC include/crimild/core/SceneGraph/Group.hpp
+    PUBLIC include/crimild/core/SceneGraph/Light.hpp
+    PUBLIC include/crimild/core/SceneGraph/Node.hpp
+    PUBLIC include/crimild/core/SceneGraph/Node_io.hpp
+    PUBLIC include/crimild/core/SceneGraph/Node_withTransformation.hpp
+    PUBLIC include/crimild/core/SceneGraph/NullNode.hpp
+    PUBLIC include/crimild/core/SceneGraph/Skybox.hpp
+    PUBLIC include/crimild/core/SceneGraph/Switch.hpp
+    PUBLIC include/crimild/core/SceneGraph/Text.hpp
+    PUBLIC include/crimild/core/Simulation/AssetManager.hpp
+    PUBLIC include/crimild/core/Simulation/Clock.hpp
+    PUBLIC include/crimild/core/Simulation/Console/Commands/EchoConsoleCommand.hpp
+    PUBLIC include/crimild/core/Simulation/Console/Commands/SetConsoleCommand.hpp
+    PUBLIC include/crimild/core/Simulation/Console/Console.hpp
+    PUBLIC include/crimild/core/Simulation/Console/ConsoleCommand.hpp
+    PUBLIC include/crimild/core/Simulation/Event.hpp
+    PUBLIC include/crimild/core/Simulation/FileSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Input.hpp
+    PUBLIC include/crimild/core/Simulation/Settings.hpp
+    PUBLIC include/crimild/core/Simulation/Simulation.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/AudioSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/CaptureSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/ConsoleSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/DebugSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/RenderSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/StreamingSystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/System.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/UISystem.hpp
+    PUBLIC include/crimild/core/Simulation/Systems/UpdateSystem.hpp
+    PUBLIC include/crimild/core/UI/UIBackground.hpp
+    PUBLIC include/crimild/core/UI/UIButton.hpp
+    PUBLIC include/crimild/core/UI/UICanvas.hpp
+    PUBLIC include/crimild/core/UI/UIFrame.hpp
+    PUBLIC include/crimild/core/UI/UIFrameConstraint.hpp
+    PUBLIC include/crimild/core/UI/UIFrameConstraintMaker.hpp
+    PUBLIC include/crimild/core/UI/UILabel.hpp
+    PUBLIC include/crimild/core/Visitors/Apply.hpp
+    PUBLIC include/crimild/core/Visitors/ApplyToGeometries.hpp
+    PUBLIC include/crimild/core/Visitors/BinTreeScene.hpp
+    PUBLIC include/crimild/core/Visitors/ComputeRenderQueue.hpp
+    PUBLIC include/crimild/core/Visitors/FetchCameras.hpp
+    PUBLIC include/crimild/core/Visitors/FetchGeometries.hpp
+    PUBLIC include/crimild/core/Visitors/FetchLights.hpp
+    PUBLIC include/crimild/core/Visitors/IntersectWorld.hpp
+    PUBLIC include/crimild/core/Visitors/NodeVisitor.hpp
+    PUBLIC include/crimild/core/Visitors/ParallelApply.hpp
+    PUBLIC include/crimild/core/Visitors/Picking.hpp
+    PUBLIC include/crimild/core/Visitors/RTAcceleration.hpp
+    PUBLIC include/crimild/core/Visitors/SelectNodes.hpp
+    PUBLIC include/crimild/core/Visitors/ShallowCopy.hpp
+    PUBLIC include/crimild/core/Visitors/StartComponents.hpp
+    PUBLIC include/crimild/core/Visitors/UpdateComponents.hpp
+    PUBLIC include/crimild/core/Visitors/UpdateRenderState.hpp
+    PUBLIC include/crimild/core/Visitors/UpdateWorldState.hpp
 
-    PRIVATE
-    src/Animation/Animation.cpp
-    src/Animation/Channel.cpp
-    src/Animation/Clip.cpp
-    src/Animation/Skeleton.cpp
-    src/Assemblies/Assembly.cpp
-    src/Audio/AudioListener.cpp
-    src/Audio/AudioSource.cpp
-    src/Behaviors/Actions/AnimateContextValue.cpp
-    src/Behaviors/Actions/AnimateParticleSystem.cpp
-    src/Behaviors/Actions/AnimateSettingValue.cpp
-    src/Behaviors/Actions/ClampPosition.cpp
-    src/Behaviors/Actions/ClampPositionToView.cpp
-    src/Behaviors/Actions/ClearTargets.cpp
-    src/Behaviors/Actions/CopyTransformFromTarget.cpp
-    src/Behaviors/Actions/EnableNode.cpp
-    src/Behaviors/Actions/ExecuteBehavior.cpp
-    src/Behaviors/Actions/ExecuteBehaviorOnTarget.cpp
-    src/Behaviors/Actions/FindTarget.cpp
-    src/Behaviors/Actions/FollowPath.cpp
-    src/Behaviors/Actions/LoadScene.cpp
-    src/Behaviors/Actions/LookAt.cpp
-    src/Behaviors/Actions/MotionApply.cpp
-    src/Behaviors/Actions/MotionAvoidOthers.cpp
-    src/Behaviors/Actions/MotionAvoidWalls.cpp
-    src/Behaviors/Actions/MotionComputePathToTarget.cpp
-    src/Behaviors/Actions/MotionFromInput.cpp
-    src/Behaviors/Actions/MotionReset.cpp
-    src/Behaviors/Actions/MotionSeek.cpp
-    src/Behaviors/Actions/PrintMessage.cpp
-    src/Behaviors/Actions/ResetNavigation.cpp
-    src/Behaviors/Actions/Rotate.cpp
-    src/Behaviors/Actions/SetContextValue.cpp
-    src/Behaviors/Actions/SetSettingValue.cpp
-    src/Behaviors/Actions/Success.cpp
-    src/Behaviors/Actions/Transform.cpp
-    src/Behaviors/Actions/Trigger.cpp
-    src/Behaviors/Actions/Wait.cpp
-    src/Behaviors/Composites/Composite.cpp
-    src/Behaviors/Composites/Parallel.cpp
-    src/Behaviors/Composites/Selector.cpp
-    src/Behaviors/Composites/Sequence.cpp
-    src/Behaviors/Conditions/DistanceToTarget.cpp
-    src/Behaviors/Conditions/HasTargets.cpp
-    src/Behaviors/Conditions/IsAtTarget.cpp
-    src/Behaviors/Conditions/TestContextValue.cpp
-    src/Behaviors/Conditions/TestInputAxis.cpp
-    src/Behaviors/Conditions/TestSettingValue.cpp
-    src/Behaviors/Decorators/Decorator.cpp
-    src/Behaviors/Decorators/Inverter.cpp
-    src/Behaviors/Decorators/Repeat.cpp
-    src/Behaviors/Decorators/RepeatUntilFail.cpp
-    src/Behaviors/Decorators/RepeatUntilSuccess.cpp
-    src/Behaviors/Decorators/Succeeder.cpp
-    src/Behaviors/Behavior.cpp
-    src/Behaviors/BehaviorContext.cpp
-    src/Behaviors/BehaviorController.cpp
-    src/Behaviors/BehaviorTree.cpp
-    src/Boundings/AABBBoundingVolume.cpp
-    src/Boundings/BoundingVolume.cpp
-    src/Boundings/Box2DBoundingVolume.cpp
-    src/Boundings/OrientedBoxBoundingVolume.cpp
-    src/Boundings/PlaneBoundingVolume.cpp
-    src/Boundings/SphereBoundingVolume.cpp
-    src/Common/Profiler.cpp
-    src/Common/Variant.cpp
-    src/Components/AudioListenerComponent.cpp
-    src/Components/AudioSourceComponent.cpp
-    src/Components/BillboardComponent.cpp
-    src/Components/FreeLookCameraComponent.cpp
-    src/Components/LambdaComponent.cpp
-    src/Components/MaterialComponent.cpp
-    src/Components/MotionStateComponent.cpp
-    src/Components/NodeComponent.cpp
-    src/Components/OrbitComponent.cpp
-    src/Components/PathComponent.cpp
-    src/Components/RenderStateComponent.cpp
-    src/Components/RotationComponent.cpp
-    src/Components/SkinnedMeshComponent.cpp
-    src/Components/TimerComponent.cpp
-    src/Components/UIResponder.cpp
-    src/Concurrency/Async.cpp
-    src/Concurrency/Job.cpp
-    src/Concurrency/JobScheduler.cpp
-    src/init.cpp
-    src/Debug/DebugDrawManager.cpp
-    src/Debug/DebugRenderComponent.cpp
-    src/Debug/DebugRenderHelper.cpp
-    src/Debug/SceneDebugDump.cpp
-    src/Entity/Entity.cpp
-    src/Loaders/OBJLoader.cpp
-    src/Messaging/MessageQueue.cpp
-    src/Navigation/NavigationCell.cpp
-    src/Navigation/NavigationCellEdge.cpp
-    src/Navigation/NavigationController.cpp
-    src/Navigation/NavigationMesh.cpp
-    src/Navigation/NavigationMeshContainer.cpp
-    src/Navigation/NavigationMeshOBJ.cpp
-    src/ParticleSystem/Generators/AccelerationParticleGenerator.cpp
-    src/ParticleSystem/Generators/BoxPositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/CirclePositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/ColorParticleGenerator.cpp
-    src/ParticleSystem/Generators/EulerAnglesParticleGenerator.cpp
-    src/ParticleSystem/Generators/GridPositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/NodePositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/OrbitPositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/SpherePositionParticleGenerator.cpp
-    src/ParticleSystem/Generators/SphereVelocityParticleGenerator.cpp
-    src/ParticleSystem/Generators/TimeParticleGenerator.cpp
-    src/ParticleSystem/Generators/UniformScaleParticleGenerator.cpp
-    src/ParticleSystem/Generators/VelocityParticleGenerator.cpp
-    src/ParticleSystem/ParticleAttribArray.cpp
-    src/ParticleSystem/ParticleData.cpp
-    src/ParticleSystem/ParticleSystemComponent.cpp
-    src/ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.cpp
-    src/ParticleSystem/Renderers/InstancedParticleRenderer.cpp
-    src/ParticleSystem/Renderers/NodeParticleRenderer.cpp
-    src/ParticleSystem/Renderers/OrientedQuadParticleRenderer.cpp
-    src/ParticleSystem/Renderers/PointSpriteParticleRenderer.cpp
-    src/ParticleSystem/Updaters/AttractorParticleUpdater.cpp
-    src/ParticleSystem/Updaters/CameraSortParticleUpdater.cpp
-    src/ParticleSystem/Updaters/ColorParticleUpdater.cpp
-    src/ParticleSystem/Updaters/EulerParticleUpdater.cpp
-    src/ParticleSystem/Updaters/FloorParticleUpdater.cpp
-    src/ParticleSystem/Updaters/PositionColorParticleUpdater.cpp
-    src/ParticleSystem/Updaters/PositionVelocityParticleUpdater.cpp
-    src/ParticleSystem/Updaters/TimeParticleUpdater.cpp
-    src/ParticleSystem/Updaters/UniformScaleParticleUpdater.cpp
-    src/ParticleSystem/Updaters/VelocityColorParticleUpdater.cpp
-    src/ParticleSystem/Updaters/ZSortParticleUpdater.cpp
-    src/Primitives/ArcPrimitive.cpp
-    src/Primitives/ArrowPrimitive.cpp
-    src/Primitives/BoxPrimitive.cpp
-    src/Primitives/ConePrimitive.cpp
-    src/Primitives/CylinderPrimitive.cpp
-    src/Primitives/KleinBottlePrimitive.cpp
-    src/Primitives/MobiusStripPrimitive.cpp
-    src/Primitives/NewellTeapotPrimitive.cpp
-    src/Primitives/ParametricPrimitive.cpp
-    src/Primitives/ParametricSpherePrimitive.cpp
-    src/Primitives/Primitive.cpp
-    src/Primitives/QuadPrimitive.cpp
-    src/Primitives/SpherePrimitive.cpp
-    src/Primitives/TorusPrimitive.cpp
-    src/Primitives/TrefoilKnotPrimitive.cpp
-    src/Rendering/Buffer.cpp
-    src/Rendering/BufferAccessor.cpp
-    src/Rendering/BufferView.cpp
-    src/Rendering/ColorMaskState.cpp
-    src/Rendering/CommandBuffer.cpp
-    src/Rendering/Font.cpp
-    src/Rendering/FrameGraphOperation.cpp
-    src/Rendering/FrameGraphResource.cpp
-    src/Rendering/Image.cpp
-    src/Rendering/ImageManager.cpp
-    src/Rendering/ImageTGA.cpp
-    src/Rendering/ImageView.cpp
-    src/Rendering/IndexBuffer.cpp
-    src/Rendering/Material.cpp
-    src/Rendering/Materials/PrincipledBSDFMaterial.cpp
-    src/Rendering/Materials/PrincipledVolumeMaterial.cpp
-    src/Rendering/Materials/SkyboxMaterial.cpp
-    src/Rendering/Materials/UnlitMaterial.cpp
-    src/Rendering/Materials/WorldGridMaterial.cpp
-    src/Rendering/Operations/Operations_blend.cpp
-    src/Rendering/Operations/Operations_brightPassFilter.cpp
-    src/Rendering/Operations/Operations_channel.cpp
-    src/Rendering/Operations/Operations_computeBRDFLUT.cpp
-    src/Rendering/Operations/Operations_computeBuffer.cpp
-    src/Rendering/Operations/Operations_computeImage.cpp
-    src/Rendering/Operations/Operations_computeIrradianceMap.cpp
-    src/Rendering/Operations/Operations_computePrefilterMap.cpp
-    src/Rendering/Operations/Operations_computeReflectionMap.cpp
-    src/Rendering/Operations/Operations_computeRT.cpp
-    src/Rendering/Operations/Operations_convolution.cpp
-    src/Rendering/Operations/Operations_debug.cpp
-    src/Rendering/Operations/Operations_debugLightCascades.cpp
-    src/Rendering/Operations/Operations_debugShadowAtlas.cpp
-    src/Rendering/Operations/Operations_fetchRenderables.cpp
-    src/Rendering/Operations/Operations_forwardUnlitPass.cpp
-    src/Rendering/Operations/Operations_gaussianBlur.cpp
-    src/Rendering/Operations/Operations_gBufferPass.cpp
-    src/Rendering/Operations/Operations_grayscale.cpp
-    src/Rendering/Operations/Operations_iblPass.cpp
-    src/Rendering/Operations/Operations_invert.cpp
-    src/Rendering/Operations/Operations_lightingPass.cpp
-    src/Rendering/Operations/Operations_present.cpp
-    src/Rendering/Operations/Operations_renderShadowAtlas.cpp
-    src/Rendering/Operations/Operations_shader.cpp
-    src/Rendering/Operations/Operations_softRT.cpp
-    src/Rendering/Operations/Operations_ssao.cpp
-    src/Rendering/Operations/Operations_tonemapping.cpp
-    src/Rendering/Operations/OperationUtils.cpp
-    src/Rendering/Programs/LitShaderProgram.cpp
-    src/Rendering/Programs/SkyboxShaderProgram.cpp
-    src/Rendering/Programs/UnlitShaderProgram.cpp
-    src/Rendering/Renderer.cpp
-    src/Rendering/RenderPass.cpp
-    src/Rendering/RenderQueue.cpp
-    src/Rendering/RenderState.cpp
-    src/Rendering/Sampler.cpp
-    src/Rendering/Shader.cpp
-    src/Rendering/ShaderLocation.cpp
-    src/Rendering/ShaderProgram.cpp
-    src/Rendering/ShaderProgramLibrary.cpp
-    src/Rendering/ShaderUniform.cpp
-    src/Rendering/ShaderUniformImpl.cpp
-    src/Rendering/ShadowMap.cpp
-    src/Rendering/SkinnedMesh.cpp
-    src/Rendering/StorageBuffer.cpp
-    src/Rendering/SystemFont.cpp
-    src/Rendering/Texture.cpp
-    src/Rendering/Uniforms/CameraViewProjectionUniformBuffer.cpp
-    src/Rendering/Uniforms/LightingUniform.cpp
-    src/Rendering/Uniforms/LightUniform.cpp
-    src/Rendering/Uniforms/ModelUniformBuffer.cpp
-    src/Rendering/Uniforms/ModelViewProjectionUniformBuffer.cpp
-    src/Rendering/VertexAttribute.cpp
-    src/Rendering/VertexBuffer.cpp
-    src/Rendering/VertexLayout.cpp
-    src/SceneGraph/Camera.cpp
-    src/SceneGraph/CSGNode.cpp
-    src/SceneGraph/Geometry.cpp
-    src/SceneGraph/Group.cpp
-    src/SceneGraph/Light.cpp
-    src/SceneGraph/Node.cpp
-    src/SceneGraph/Skybox.cpp
-    src/SceneGraph/Switch.cpp
-    src/SceneGraph/Text.cpp
-    src/Simulation/AssetManager.cpp
-    src/Simulation/Clock.cpp
-    src/Simulation/Console/Commands/EchoConsoleCommand.cpp
-    src/Simulation/Console/Commands/SetConsoleCommand.cpp
-    src/Simulation/Console/Console.cpp
-    src/Simulation/FileSystem.cpp
-    src/Simulation/Input.cpp
-    src/Simulation/Settings.cpp
-    src/Simulation/Simulation.cpp
-    src/Simulation/Systems/CaptureSystem.cpp
-    src/Simulation/Systems/ConsoleSystem.cpp
-    src/Simulation/Systems/DebugSystem.cpp
-    src/Simulation/Systems/RenderSystem.cpp
-    src/Simulation/Systems/StreamingSystem.cpp
-    src/Simulation/Systems/System.cpp
-    src/Simulation/Systems/UISystem.cpp
-    src/Simulation/Systems/UpdateSystem.cpp
-    src/UI/UIBackground.cpp
-    src/UI/UIButton.cpp
-    src/UI/UICanvas.cpp
-    src/UI/UIFrame.cpp
-    src/UI/UIFrameConstraint.cpp
-    src/UI/UIFrameConstraintMaker.cpp
-    src/UI/UILabel.cpp
-    src/Visitors/Apply.cpp
-    src/Visitors/ApplyToGeometries.cpp
-    src/Visitors/BinTreeScene.cpp
-    src/Visitors/ComputeRenderQueue.cpp
-    src/Visitors/FetchCameras.cpp
-    src/Visitors/FetchGeometries.cpp
-    src/Visitors/FetchLights.cpp
-    src/Visitors/IntersectWorld.cpp
-    src/Visitors/NodeVisitor.cpp
-    src/Visitors/ParallelApply.cpp
-    src/Visitors/Picking.cpp
-    src/Visitors/RTAcceleration.cpp
-    src/Visitors/SelectNodes.cpp
-    src/Visitors/ShallowCopy.cpp
-    src/Visitors/StartComponents.cpp
-    src/Visitors/UpdateComponents.cpp
-    src/Visitors/UpdateRenderState.cpp
-    src/Visitors/UpdateWorldState.cpp
+    PRIVATE src/Animation/Animation.cpp
+    PRIVATE src/Animation/Channel.cpp
+    PRIVATE src/Animation/Clip.cpp
+    PRIVATE src/Animation/Skeleton.cpp
+    PRIVATE src/Assemblies/Assembly.cpp
+    PRIVATE src/Audio/AudioListener.cpp
+    PRIVATE src/Audio/AudioSource.cpp
+    PRIVATE src/Behaviors/Actions/AnimateContextValue.cpp
+    PRIVATE src/Behaviors/Actions/AnimateParticleSystem.cpp
+    PRIVATE src/Behaviors/Actions/AnimateSettingValue.cpp
+    PRIVATE src/Behaviors/Actions/ClampPosition.cpp
+    PRIVATE src/Behaviors/Actions/ClampPositionToView.cpp
+    PRIVATE src/Behaviors/Actions/ClearTargets.cpp
+    PRIVATE src/Behaviors/Actions/CopyTransformFromTarget.cpp
+    PRIVATE src/Behaviors/Actions/EnableNode.cpp
+    PRIVATE src/Behaviors/Actions/ExecuteBehavior.cpp
+    PRIVATE src/Behaviors/Actions/ExecuteBehaviorOnTarget.cpp
+    PRIVATE src/Behaviors/Actions/FindTarget.cpp
+    PRIVATE src/Behaviors/Actions/FollowPath.cpp
+    PRIVATE src/Behaviors/Actions/LoadScene.cpp
+    PRIVATE src/Behaviors/Actions/LookAt.cpp
+    PRIVATE src/Behaviors/Actions/MotionApply.cpp
+    PRIVATE src/Behaviors/Actions/MotionAvoidOthers.cpp
+    PRIVATE src/Behaviors/Actions/MotionAvoidWalls.cpp
+    PRIVATE src/Behaviors/Actions/MotionComputePathToTarget.cpp
+    PRIVATE src/Behaviors/Actions/MotionFromInput.cpp
+    PRIVATE src/Behaviors/Actions/MotionReset.cpp
+    PRIVATE src/Behaviors/Actions/MotionSeek.cpp
+    PRIVATE src/Behaviors/Actions/PrintMessage.cpp
+    PRIVATE src/Behaviors/Actions/ResetNavigation.cpp
+    PRIVATE src/Behaviors/Actions/Rotate.cpp
+    PRIVATE src/Behaviors/Actions/SetContextValue.cpp
+    PRIVATE src/Behaviors/Actions/SetSettingValue.cpp
+    PRIVATE src/Behaviors/Actions/Success.cpp
+    PRIVATE src/Behaviors/Actions/Transform.cpp
+    PRIVATE src/Behaviors/Actions/Trigger.cpp
+    PRIVATE src/Behaviors/Actions/Wait.cpp
+    PRIVATE src/Behaviors/Composites/Composite.cpp
+    PRIVATE src/Behaviors/Composites/Parallel.cpp
+    PRIVATE src/Behaviors/Composites/Selector.cpp
+    PRIVATE src/Behaviors/Composites/Sequence.cpp
+    PRIVATE src/Behaviors/Conditions/DistanceToTarget.cpp
+    PRIVATE src/Behaviors/Conditions/HasTargets.cpp
+    PRIVATE src/Behaviors/Conditions/IsAtTarget.cpp
+    PRIVATE src/Behaviors/Conditions/TestContextValue.cpp
+    PRIVATE src/Behaviors/Conditions/TestInputAxis.cpp
+    PRIVATE src/Behaviors/Conditions/TestSettingValue.cpp
+    PRIVATE src/Behaviors/Decorators/Decorator.cpp
+    PRIVATE src/Behaviors/Decorators/Inverter.cpp
+    PRIVATE src/Behaviors/Decorators/Repeat.cpp
+    PRIVATE src/Behaviors/Decorators/RepeatUntilFail.cpp
+    PRIVATE src/Behaviors/Decorators/RepeatUntilSuccess.cpp
+    PRIVATE src/Behaviors/Decorators/Succeeder.cpp
+    PRIVATE src/Behaviors/Behavior.cpp
+    PRIVATE src/Behaviors/BehaviorContext.cpp
+    PRIVATE src/Behaviors/BehaviorController.cpp
+    PRIVATE src/Behaviors/BehaviorTree.cpp
+    PRIVATE src/Boundings/AABBBoundingVolume.cpp
+    PRIVATE src/Boundings/BoundingVolume.cpp
+    PRIVATE src/Boundings/Box2DBoundingVolume.cpp
+    PRIVATE src/Boundings/OrientedBoxBoundingVolume.cpp
+    PRIVATE src/Boundings/PlaneBoundingVolume.cpp
+    PRIVATE src/Boundings/SphereBoundingVolume.cpp
+    PRIVATE src/Common/Profiler.cpp
+    PRIVATE src/Common/Variant.cpp
+    PRIVATE src/Components/AudioListenerComponent.cpp
+    PRIVATE src/Components/AudioSourceComponent.cpp
+    PRIVATE src/Components/BillboardComponent.cpp
+    PRIVATE src/Components/FreeLookCameraComponent.cpp
+    PRIVATE src/Components/LambdaComponent.cpp
+    PRIVATE src/Components/MaterialComponent.cpp
+    PRIVATE src/Components/MotionStateComponent.cpp
+    PRIVATE src/Components/NodeComponent.cpp
+    PRIVATE src/Components/OrbitComponent.cpp
+    PRIVATE src/Components/PathComponent.cpp
+    PRIVATE src/Components/RenderStateComponent.cpp
+    PRIVATE src/Components/RotationComponent.cpp
+    PRIVATE src/Components/SkinnedMeshComponent.cpp
+    PRIVATE src/Components/TimerComponent.cpp
+    PRIVATE src/Components/UIResponder.cpp
+    PRIVATE src/Concurrency/Async.cpp
+    PRIVATE src/Concurrency/Job.cpp
+    PRIVATE src/Concurrency/JobScheduler.cpp
+    PRIVATE src/init.cpp
+    PRIVATE src/Debug/DebugDrawManager.cpp
+    PRIVATE src/Debug/DebugRenderComponent.cpp
+    PRIVATE src/Debug/DebugRenderHelper.cpp
+    PRIVATE src/Debug/SceneDebugDump.cpp
+    PRIVATE src/Entity/Entity.cpp
+    PRIVATE src/Loaders/OBJLoader.cpp
+    PRIVATE src/Messaging/MessageQueue.cpp
+    PRIVATE src/Navigation/NavigationCell.cpp
+    PRIVATE src/Navigation/NavigationCellEdge.cpp
+    PRIVATE src/Navigation/NavigationController.cpp
+    PRIVATE src/Navigation/NavigationMesh.cpp
+    PRIVATE src/Navigation/NavigationMeshContainer.cpp
+    PRIVATE src/Navigation/NavigationMeshOBJ.cpp
+    PRIVATE src/ParticleSystem/Generators/AccelerationParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/BoxPositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/CirclePositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/ColorParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/EulerAnglesParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/GridPositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/NodePositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/OrbitPositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/SpherePositionParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/SphereVelocityParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/TimeParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/UniformScaleParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/Generators/VelocityParticleGenerator.cpp
+    PRIVATE src/ParticleSystem/ParticleAttribArray.cpp
+    PRIVATE src/ParticleSystem/ParticleData.cpp
+    PRIVATE src/ParticleSystem/ParticleSystemComponent.cpp
+    PRIVATE src/ParticleSystem/Renderers/AnimatedSpriteParticleRenderer.cpp
+    PRIVATE src/ParticleSystem/Renderers/InstancedParticleRenderer.cpp
+    PRIVATE src/ParticleSystem/Renderers/NodeParticleRenderer.cpp
+    PRIVATE src/ParticleSystem/Renderers/OrientedQuadParticleRenderer.cpp
+    PRIVATE src/ParticleSystem/Renderers/PointSpriteParticleRenderer.cpp
+    PRIVATE src/ParticleSystem/Updaters/AttractorParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/CameraSortParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/ColorParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/EulerParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/FloorParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/PositionColorParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/PositionVelocityParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/TimeParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/UniformScaleParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/VelocityColorParticleUpdater.cpp
+    PRIVATE src/ParticleSystem/Updaters/ZSortParticleUpdater.cpp
+    PRIVATE src/Primitives/ArcPrimitive.cpp
+    PRIVATE src/Primitives/ArrowPrimitive.cpp
+    PRIVATE src/Primitives/BoxPrimitive.cpp
+    PRIVATE src/Primitives/ConePrimitive.cpp
+    PRIVATE src/Primitives/CylinderPrimitive.cpp
+    PRIVATE src/Primitives/KleinBottlePrimitive.cpp
+    PRIVATE src/Primitives/MobiusStripPrimitive.cpp
+    PRIVATE src/Primitives/NewellTeapotPrimitive.cpp
+    PRIVATE src/Primitives/ParametricPrimitive.cpp
+    PRIVATE src/Primitives/ParametricSpherePrimitive.cpp
+    PRIVATE src/Primitives/Primitive.cpp
+    PRIVATE src/Primitives/QuadPrimitive.cpp
+    PRIVATE src/Primitives/SpherePrimitive.cpp
+    PRIVATE src/Primitives/TorusPrimitive.cpp
+    PRIVATE src/Primitives/TrefoilKnotPrimitive.cpp
+    PRIVATE src/Rendering/Buffer.cpp
+    PRIVATE src/Rendering/BufferAccessor.cpp
+    PRIVATE src/Rendering/BufferView.cpp
+    PRIVATE src/Rendering/ColorMaskState.cpp
+    PRIVATE src/Rendering/CommandBuffer.cpp
+    PRIVATE src/Rendering/Font.cpp
+    PRIVATE src/Rendering/FrameGraphOperation.cpp
+    PRIVATE src/Rendering/FrameGraphResource.cpp
+    PRIVATE src/Rendering/Image.cpp
+    PRIVATE src/Rendering/ImageManager.cpp
+    PRIVATE src/Rendering/ImageTGA.cpp
+    PRIVATE src/Rendering/ImageView.cpp
+    PRIVATE src/Rendering/IndexBuffer.cpp
+    PRIVATE src/Rendering/Material.cpp
+    PRIVATE src/Rendering/Materials/PrincipledBSDFMaterial.cpp
+    PRIVATE src/Rendering/Materials/PrincipledVolumeMaterial.cpp
+    PRIVATE src/Rendering/Materials/SkyboxMaterial.cpp
+    PRIVATE src/Rendering/Materials/UnlitMaterial.cpp
+    PRIVATE src/Rendering/Materials/WorldGridMaterial.cpp
+    PRIVATE src/Rendering/Operations/Operations_blend.cpp
+    PRIVATE src/Rendering/Operations/Operations_brightPassFilter.cpp
+    PRIVATE src/Rendering/Operations/Operations_channel.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeBRDFLUT.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeBuffer.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeImage.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeIrradianceMap.cpp
+    PRIVATE src/Rendering/Operations/Operations_computePrefilterMap.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeReflectionMap.cpp
+    PRIVATE src/Rendering/Operations/Operations_computeRT.cpp
+    PRIVATE src/Rendering/Operations/Operations_convolution.cpp
+    PRIVATE src/Rendering/Operations/Operations_debug.cpp
+    PRIVATE src/Rendering/Operations/Operations_debugLightCascades.cpp
+    PRIVATE src/Rendering/Operations/Operations_debugShadowAtlas.cpp
+    PRIVATE src/Rendering/Operations/Operations_fetchRenderables.cpp
+    PRIVATE src/Rendering/Operations/Operations_forwardUnlitPass.cpp
+    PRIVATE src/Rendering/Operations/Operations_gaussianBlur.cpp
+    PRIVATE src/Rendering/Operations/Operations_gBufferPass.cpp
+    PRIVATE src/Rendering/Operations/Operations_grayscale.cpp
+    PRIVATE src/Rendering/Operations/Operations_iblPass.cpp
+    PRIVATE src/Rendering/Operations/Operations_invert.cpp
+    PRIVATE src/Rendering/Operations/Operations_lightingPass.cpp
+    PRIVATE src/Rendering/Operations/Operations_present.cpp
+    PRIVATE src/Rendering/Operations/Operations_renderShadowAtlas.cpp
+    PRIVATE src/Rendering/Operations/Operations_shader.cpp
+    PRIVATE src/Rendering/Operations/Operations_softRT.cpp
+    PRIVATE src/Rendering/Operations/Operations_ssao.cpp
+    PRIVATE src/Rendering/Operations/Operations_tonemapping.cpp
+    PRIVATE src/Rendering/Operations/OperationUtils.cpp
+    PRIVATE src/Rendering/Programs/LitShaderProgram.cpp
+    PRIVATE src/Rendering/Programs/SkyboxShaderProgram.cpp
+    PRIVATE src/Rendering/Programs/UnlitShaderProgram.cpp
+    PRIVATE src/Rendering/Renderer.cpp
+    PRIVATE src/Rendering/RenderPass.cpp
+    PRIVATE src/Rendering/RenderQueue.cpp
+    PRIVATE src/Rendering/RenderState.cpp
+    PRIVATE src/Rendering/Sampler.cpp
+    PRIVATE src/Rendering/Shader.cpp
+    PRIVATE src/Rendering/ShaderLocation.cpp
+    PRIVATE src/Rendering/ShaderProgram.cpp
+    PRIVATE src/Rendering/ShaderProgramLibrary.cpp
+    PRIVATE src/Rendering/ShaderUniform.cpp
+    PRIVATE src/Rendering/ShaderUniformImpl.cpp
+    PRIVATE src/Rendering/ShadowMap.cpp
+    PRIVATE src/Rendering/SkinnedMesh.cpp
+    PRIVATE src/Rendering/StorageBuffer.cpp
+    PRIVATE src/Rendering/SystemFont.cpp
+    PRIVATE src/Rendering/Texture.cpp
+    PRIVATE src/Rendering/Uniforms/CameraViewProjectionUniformBuffer.cpp
+    PRIVATE src/Rendering/Uniforms/LightingUniform.cpp
+    PRIVATE src/Rendering/Uniforms/LightUniform.cpp
+    PRIVATE src/Rendering/Uniforms/ModelUniformBuffer.cpp
+    PRIVATE src/Rendering/Uniforms/ModelViewProjectionUniformBuffer.cpp
+    PRIVATE src/Rendering/VertexAttribute.cpp
+    PRIVATE src/Rendering/VertexBuffer.cpp
+    PRIVATE src/Rendering/VertexLayout.cpp
+    PRIVATE src/SceneGraph/Camera.cpp
+    PRIVATE src/SceneGraph/CSGNode.cpp
+    PRIVATE src/SceneGraph/Geometry.cpp
+    PRIVATE src/SceneGraph/Group.cpp
+    PRIVATE src/SceneGraph/Light.cpp
+    PRIVATE src/SceneGraph/Node.cpp
+    PRIVATE src/SceneGraph/Skybox.cpp
+    PRIVATE src/SceneGraph/Switch.cpp
+    PRIVATE src/SceneGraph/Text.cpp
+    PRIVATE src/Simulation/AssetManager.cpp
+    PRIVATE src/Simulation/Clock.cpp
+    PRIVATE src/Simulation/Console/Commands/EchoConsoleCommand.cpp
+    PRIVATE src/Simulation/Console/Commands/SetConsoleCommand.cpp
+    PRIVATE src/Simulation/Console/Console.cpp
+    PRIVATE src/Simulation/FileSystem.cpp
+    PRIVATE src/Simulation/Input.cpp
+    PRIVATE src/Simulation/Settings.cpp
+    PRIVATE src/Simulation/Simulation.cpp
+    PRIVATE src/Simulation/Systems/CaptureSystem.cpp
+    PRIVATE src/Simulation/Systems/ConsoleSystem.cpp
+    PRIVATE src/Simulation/Systems/DebugSystem.cpp
+    PRIVATE src/Simulation/Systems/RenderSystem.cpp
+    PRIVATE src/Simulation/Systems/StreamingSystem.cpp
+    PRIVATE src/Simulation/Systems/System.cpp
+    PRIVATE src/Simulation/Systems/UISystem.cpp
+    PRIVATE src/Simulation/Systems/UpdateSystem.cpp
+    PRIVATE src/UI/UIBackground.cpp
+    PRIVATE src/UI/UIButton.cpp
+    PRIVATE src/UI/UICanvas.cpp
+    PRIVATE src/UI/UIFrame.cpp
+    PRIVATE src/UI/UIFrameConstraint.cpp
+    PRIVATE src/UI/UIFrameConstraintMaker.cpp
+    PRIVATE src/UI/UILabel.cpp
+    PRIVATE src/Visitors/Apply.cpp
+    PRIVATE src/Visitors/ApplyToGeometries.cpp
+    PRIVATE src/Visitors/BinTreeScene.cpp
+    PRIVATE src/Visitors/ComputeRenderQueue.cpp
+    PRIVATE src/Visitors/FetchCameras.cpp
+    PRIVATE src/Visitors/FetchGeometries.cpp
+    PRIVATE src/Visitors/FetchLights.cpp
+    PRIVATE src/Visitors/IntersectWorld.cpp
+    PRIVATE src/Visitors/NodeVisitor.cpp
+    PRIVATE src/Visitors/ParallelApply.cpp
+    PRIVATE src/Visitors/Picking.cpp
+    PRIVATE src/Visitors/RTAcceleration.cpp
+    PRIVATE src/Visitors/SelectNodes.cpp
+    PRIVATE src/Visitors/ShallowCopy.cpp
+    PRIVATE src/Visitors/StartComponents.cpp
+    PRIVATE src/Visitors/UpdateComponents.cpp
+    PRIVATE src/Visitors/UpdateRenderState.cpp
+    PRIVATE src/Visitors/UpdateWorldState.cpp
 )
 
 target_include_directories(
