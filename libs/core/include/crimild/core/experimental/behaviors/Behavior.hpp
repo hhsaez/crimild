@@ -3,12 +3,14 @@
 
 #include <crimild/core/Entity/Entity.hpp>
 #include <crimild/foundation/common/Enableable.hpp>
+#include <crimild/foundation/common/Named.hpp>
 
 namespace crimild::experimental::behaviors {
 
    class Behavior
       : public Entity,
-        public Enableable {
+        public Enableable,
+        public Named {
    public:
       enum class State {
          READY,
