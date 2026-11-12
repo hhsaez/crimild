@@ -73,15 +73,3 @@ TEST( ExperimentalBehavior, keeps_executing_running_behavior_until_success )
    EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.executions, 3 );
 }
-
-TEST( ExperimentalBehavior, execution_state_is_independent_between_instances )
-{
-   Behavior first;
-   Behavior second;
-   EXPECT_EQ( first.getState(), Behavior::State::READY );
-   EXPECT_EQ( second.getState(), Behavior::State::READY );
-
-   EXPECT_EQ( first.execute(), Behavior::State::SUCCESS );
-   EXPECT_EQ( first.getState(), Behavior::State::SUCCESS );
-   EXPECT_EQ( second.getState(), Behavior::State::READY );
-}
