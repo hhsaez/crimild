@@ -2,11 +2,13 @@
 #include <gtest/gtest.h>
 
 namespace {
+
    using crimild::experimental::behaviors::Behavior;
    class TestComposite : public crimild::experimental::behaviors::composites::Composite {
    public:
       TestComposite( void ) = default;
    };
+
 }
 
 TEST( ExperimentalComposite, starts_without_children )

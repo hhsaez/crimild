@@ -21,6 +21,7 @@ namespace crimild::experimental::behaviors::composites {
    private:
       std::vector< std::shared_ptr< Behavior > > m_behaviors;
    };
+
 }
 
 #endif

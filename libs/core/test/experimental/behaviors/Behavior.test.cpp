@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 namespace {
+
    using crimild::experimental::behaviors::Behavior;
 
    class TestBehavior : public Behavior {
@@ -15,19 +16,19 @@ namespace {
          return result;
       }
    };
+
 }
 
-TEST( ExperimentalBehavior, supports_naming_through_named_interface )
+TEST( ExperimentalBehavior, supports_naming )
 {
    Behavior behavior;
-   crimild::Named &named = behavior;
-   EXPECT_TRUE( named.getName().empty() );
+   EXPECT_TRUE( behavior.getName().empty() );
 
-   named.setName( "Patrol" );
+   behavior.setName( "Patrol" );
    EXPECT_EQ( behavior.getName(), "Patrol" );
 
    behavior.setName( "Chase" );
-   EXPECT_EQ( named.getName(), "Chase" );
+   EXPECT_EQ( behavior.getName(), "Chase" );
 }
 
 TEST( ExperimentalBehavior, starts_ready_without_executing )
@@ -55,20 +56,32 @@ TEST( ExperimentalBehavior, stores_each_execution_result )
    EXPECT_EQ( behavior.executions, 3 );
 }
 
-TEST( ExperimentalBehavior, executes_again_while_running )
+TEST( ExperimentalBehavior, keeps_executing_running_behavior_until_success )
 {
    TestBehavior behavior;
+   EXPECT_EQ( behavior.getState(), Behavior::State::READY );
+
+   // onExecute() requests another tick until the action reports completion.
    EXPECT_EQ( behavior.execute(), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.execute(), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.executions, 2 );
+
+   behavior.result = Behavior::State::SUCCESS;
+   EXPECT_EQ( behavior.execute(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.executions, 3 );
 }
 
 TEST( ExperimentalBehavior, execution_state_is_independent_between_instances )
 {
-   TestBehavior first;
-   TestBehavior second;
-   first.execute();
-   EXPECT_EQ( first.getState(), Behavior::State::RUNNING );
+   Behavior first;
+   Behavior second;
+   EXPECT_EQ( first.getState(), Behavior::State::READY );
    EXPECT_EQ( second.getState(), Behavior::State::READY );
-   EXPECT_EQ( second.executions, 0 );
+
+   EXPECT_EQ( first.execute(), Behavior::State::SUCCESS );
+   EXPECT_EQ( first.getState(), Behavior::State::SUCCESS );
+   EXPECT_EQ( second.getState(), Behavior::State::READY );
 }
