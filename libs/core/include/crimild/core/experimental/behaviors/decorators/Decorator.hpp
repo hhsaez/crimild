@@ -12,10 +12,7 @@ namespace crimild::experimental::behaviors::decorators {
    public:
       virtual ~Decorator( void ) noexcept = default;
 
-      void attach( std::shared_ptr< Behavior > const &behavior )
-      {
-         m_behavior = behavior;
-      }
+      void attach( std::shared_ptr< Behavior > const &behavior );
 
       inline std::shared_ptr< Behavior > getBehavior( void ) const { return m_behavior; }
 
