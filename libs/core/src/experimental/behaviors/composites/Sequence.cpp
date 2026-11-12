@@ -3,7 +3,7 @@
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-Behavior::State Sequence::onExecute( void )
+Behavior::State Sequence::update( void )
 {
    // Reevaluate from the first child on every execution, stopping as soon
    // as a child fails or needs more time.
@@ -11,7 +11,7 @@ Behavior::State Sequence::onExecute( void )
    // on the next traversal without invalidating this one.
    const auto behaviors = getBehaviors();
    for ( const auto &b : behaviors ) {
-      switch ( b->execute() ) {
+      switch ( b->tick() ) {
          case State::FAILURE:
             return State::FAILURE;
          case State::RUNNING:
