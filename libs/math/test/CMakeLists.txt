@@ -5,36 +5,34 @@ add_executable( crimild_math_test )
 target_sources(
     crimild_math_test
 
-    PRIVATE
-    Bounds3Test.cpp
-    BoxTest.cpp
-    ColorRGBATest.cpp
-    ColorRGBTest.cpp
-    CylinderTest.cpp
-    intersectTest.cpp
-    Matrix3Test.cpp
-    Matrix4Test.cpp
-    maxTest.cpp
-    minTest.cpp
-    Normal3Test.cpp
-    Plane3Test.cpp
-    Point2Test.cpp
-    Point3Test.cpp
-    QuaternionTest.cpp
-    Ray3Test.cpp
-    RectTest.cpp
-    reflectTest.cpp
-    roundTest.cpp
-    SphereTest.cpp
-    TransformationTest.cpp
-    TriangleTest.cpp
-    UtilsTest.cpp
-    Vector2Test.cpp
-    Vector3Test.cpp
-    Vector4Test.cpp
+    PRIVATE Bounds3Test.cpp
+    PRIVATE BoxTest.cpp
+    PRIVATE ColorRGBATest.cpp
+    PRIVATE ColorRGBTest.cpp
+    PRIVATE CylinderTest.cpp
+    PRIVATE intersectTest.cpp
+    PRIVATE Matrix3Test.cpp
+    PRIVATE Matrix4Test.cpp
+    PRIVATE maxTest.cpp
+    PRIVATE minTest.cpp
+    PRIVATE Normal3Test.cpp
+    PRIVATE Plane3Test.cpp
+    PRIVATE Point2Test.cpp
+    PRIVATE Point3Test.cpp
+    PRIVATE QuaternionTest.cpp
+    PRIVATE Ray3Test.cpp
+    PRIVATE RectTest.cpp
+    PRIVATE reflectTest.cpp
+    PRIVATE roundTest.cpp
+    PRIVATE SphereTest.cpp
+    PRIVATE TransformationTest.cpp
+    PRIVATE TriangleTest.cpp
+    PRIVATE UtilsTest.cpp
+    PRIVATE Vector2Test.cpp
+    PRIVATE Vector3Test.cpp
+    PRIVATE Vector4Test.cpp
 
-    PRIVATE
-    TestRunner.cpp
+    PRIVATE TestRunner.cpp
 )
 
 target_include_directories(

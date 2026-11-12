@@ -5,128 +5,126 @@ add_executable( crimild_editor )
 target_sources(
     crimild_editor
 
-	PRIVATE
-    Foundation/GLFWUtils.hpp
-    Foundation/ImGuiUtils.cpp
-    Foundation/ImGuiUtils.hpp
-    Foundation/STBUtils.cpp
-    Foundation/STBUtils.hpp
+    PRIVATE Foundation/GLFWUtils.hpp
+    PRIVATE Foundation/ImGuiUtils.cpp
+    PRIVATE Foundation/ImGuiUtils.hpp
+    PRIVATE Foundation/STBUtils.cpp
+    PRIVATE Foundation/STBUtils.hpp
 
-    Importers/GLTFImporter.cpp
-    Importers/GLTFImporter.hpp
+    PRIVATE Importers/GLTFImporter.cpp
+    PRIVATE Importers/GLTFImporter.hpp
 
-    Views/View.hpp
-    Views/View.cpp
-    Views/Dialogs/Dialog.cpp
-    Views/Dialogs/Dialog.hpp
-    Views/Dialogs/FileDialog.cpp
-    Views/Dialogs/FileDialog.hpp
+    PRIVATE Views/View.hpp
+    PRIVATE Views/View.cpp
+    PRIVATE Views/Dialogs/Dialog.cpp
+    PRIVATE Views/Dialogs/Dialog.hpp
+    PRIVATE Views/Dialogs/FileDialog.cpp
+    PRIVATE Views/Dialogs/FileDialog.hpp
 
-    Views/Menus/MainMenu/MainMenu.cpp
-    Views/Menus/MainMenu/MainMenu.hpp
-    Views/Menus/NewEntityMenu.hpp
+    PRIVATE Views/Menus/MainMenu/MainMenu.cpp
+    PRIVATE Views/Menus/MainMenu/MainMenu.hpp
+    PRIVATE Views/Menus/NewEntityMenu.hpp
 
-    Views/Modals/AboutModal.cpp
-    Views/Modals/AboutModal.hpp
-    Views/Modals/AlertModal.cpp
-    Views/Modals/AlertModal.hpp
-    Views/Modals/Modal.cpp
-    Views/Modals/Modal.hpp
+    PRIVATE Views/Modals/AboutModal.cpp
+    PRIVATE Views/Modals/AboutModal.hpp
+    PRIVATE Views/Modals/AlertModal.cpp
+    PRIVATE Views/Modals/AlertModal.hpp
+    PRIVATE Views/Modals/Modal.cpp
+    PRIVATE Views/Modals/Modal.hpp
 
-    Views/Panels/Scene3D/Scene3DPanel.cpp
-    Views/Panels/Scene3D/Scene3DPanel.hpp
+    PRIVATE Views/Panels/Scene3D/Scene3DPanel.cpp
+    PRIVATE Views/Panels/Scene3D/Scene3DPanel.hpp
 
-    Views/Specials/ImGuiDemoWindow.hpp
-    Views/Specials/ImGuiDemoWindow.cpp
-    Views/Windows/BehaviorsWindow.cpp
-    Views/Windows/BehaviorsWindow.hpp
-    Views/Windows/FileSystemWindow.hpp
-    Views/Windows/FileSystemWindow.cpp
+    PRIVATE Views/Specials/ImGuiDemoWindow.hpp
+    PRIVATE Views/Specials/ImGuiDemoWindow.cpp
+    PRIVATE Views/Windows/BehaviorsWindow.cpp
+    PRIVATE Views/Windows/BehaviorsWindow.hpp
+    PRIVATE Views/Windows/FileSystemWindow.hpp
+    PRIVATE Views/Windows/FileSystemWindow.cpp
 
-    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.cpp
-    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.hpp
-    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.cpp
-    Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.hpp
-    
-    Views/Windows/GraphEditor/Editables/Editable.cpp
-    Views/Windows/GraphEditor/Editables/Editable.hpp
-    
-    Views/Windows/GraphEditor/Builders.cpp
-    Views/Windows/GraphEditor/Builders.hpp    
-    Views/Windows/GraphEditor/GraphEditorContext.hpp
-    Views/Windows/GraphEditor/GraphEditorTypes.hpp
-    Views/Windows/GraphEditor/GraphEditorWindow.cpp
-    Views/Windows/GraphEditor/GraphEditorWindow.hpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.cpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/GroupRenderer.hpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.cpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Renderers/SceneGraph/NodeRenderer.hpp
 
-    Views/Windows/InspectorWindow.hpp
-    Views/Windows/InspectorWindow.cpp
-    Views/Windows/LogWindow.hpp
-    Views/Windows/LogWindow.cpp
-    Views/Windows/PlaybackControlsWindow.cpp
-    Views/Windows/PlaybackCOntrolsWindow.hpp
-    Views/Windows/Scene3DWindow.hpp
-    Views/Windows/Scene3DWindow.cpp
-    Views/Windows/SceneRTWindow.cpp
-    Views/Windows/SceneRTWindow.hpp
-    Views/Windows/SceneWindow.hpp
-    Views/Windows/SceneWindow.cpp
-    Views/Windows/SimulationWindow.hpp
-    Views/Windows/SimulationWindow.cpp
-    Views/Windows/TimelineWindow.hpp
-    Views/Windows/TimelineWindow.cpp
-    Views/Windows/Window.hpp
-    Views/Windows/Window.cpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Editable.cpp
+    PRIVATE Views/Windows/GraphEditor/Editables/Editable.hpp
 
-    Views/Workspaces/Workspace.hpp
-    Views/Workspaces/Workspace.cpp
-    Views/Workspaces/AssemblyWorkspace.hpp
-    Views/Workspaces/AssemblyWorkspace.cpp
-    Views/Workspaces/WorkspaceManager.hpp
-    Views/Workspaces/WorkspaceManager.cpp
+    PRIVATE Views/Windows/GraphEditor/Builders.cpp
+    PRIVATE Views/Windows/GraphEditor/Builders.hpp
+    PRIVATE Views/Windows/GraphEditor/GraphEditorContext.hpp
+    PRIVATE Views/Windows/GraphEditor/GraphEditorTypes.hpp
+    PRIVATE Views/Windows/GraphEditor/GraphEditorWindow.cpp
+    PRIVATE Views/Windows/GraphEditor/GraphEditorWindow.hpp
 
-    Layout/Layout.hpp
-    Layout/Layout.cpp
-    Layout/LayoutManager.hpp
-    Layout/LayoutManager.cpp
+    PRIVATE Views/Windows/InspectorWindow.hpp
+    PRIVATE Views/Windows/InspectorWindow.cpp
+    PRIVATE Views/Windows/LogWindow.hpp
+    PRIVATE Views/Windows/LogWindow.cpp
+    PRIVATE Views/Windows/PlaybackControlsWindow.cpp
+    PRIVATE Views/Windows/PlaybackCOntrolsWindow.hpp
+    PRIVATE Views/Windows/Scene3DWindow.hpp
+    PRIVATE Views/Windows/Scene3DWindow.cpp
+    PRIVATE Views/Windows/SceneRTWindow.cpp
+    PRIVATE Views/Windows/SceneRTWindow.hpp
+    PRIVATE Views/Windows/SceneWindow.hpp
+    PRIVATE Views/Windows/SceneWindow.cpp
+    PRIVATE Views/Windows/SimulationWindow.hpp
+    PRIVATE Views/Windows/SimulationWindow.cpp
+    PRIVATE Views/Windows/TimelineWindow.hpp
+    PRIVATE Views/Windows/TimelineWindow.cpp
+    PRIVATE Views/Windows/Window.hpp
+    PRIVATE Views/Windows/Window.cpp
 
-    Rendering/GLFWVulkanSurface.cpp
-    Rendering/GLFWVUlkanSurface.hpp
-    Rendering/STBImageManager.cpp
-    Rendering/STBImageManager.hpp
+    PRIVATE Views/Workspaces/Workspace.hpp
+    PRIVATE Views/Workspaces/Workspace.cpp
+    PRIVATE Views/Workspaces/AssemblyWorkspace.hpp
+    PRIVATE Views/Workspaces/AssemblyWorkspace.cpp
+    PRIVATE Views/Workspaces/WorkspaceManager.hpp
+    PRIVATE Views/Workspaces/WorkspaceManager.cpp
 
-    Rendering/FrameGraph/VulkanRenderSceneDebug.cpp
-    Rendering/FrameGraph/VulkanRenderSceneDebug.hpp
+    PRIVATE Layout/Layout.hpp
+    PRIVATE Layout/Layout.cpp
+    PRIVATE Layout/LayoutManager.hpp
+    PRIVATE Layout/LayoutManager.cpp
 
-    SceneGraph/PrefabNode.cpp
-    SceneGraph/PrefabNode.hpp
-    Simulation/Editor.hpp
+    PRIVATE Rendering/GLFWVulkanSurface.cpp
+    PRIVATE Rendering/GLFWVUlkanSurface.hpp
+    PRIVATE Rendering/STBImageManager.cpp
+    PRIVATE Rendering/STBImageManager.hpp
 
-    Simulation/Editor.cpp
-    Simulation/Project.hpp
-    Simulation/Project.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneDebug.cpp
+    PRIVATE Rendering/FrameGraph/VulkanRenderSceneDebug.hpp
 
-    Main.cpp
+    PRIVATE SceneGraph/PrefabNode.cpp
+    PRIVATE SceneGraph/PrefabNode.hpp
+    PRIVATE Simulation/Editor.hpp
 
-    PRIVATE
-	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_tables.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_demo.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_draw.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_widgets.cpp
-    ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_glfw.cpp
-    ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_vulkan.cpp
+    PRIVATE Simulation/Editor.cpp
+    PRIVATE Simulation/Project.hpp
+    PRIVATE Simulation/Project.cpp
 
-	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImGuizmo.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImCurveEdit.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImSequencer.cpp
-	${PROJECT_SOURCE_DIR}/third-party/imguizmo/GraphEditor.cpp
+    PRIVATE Main.cpp
 
-	${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog/ImGuiFileDialog.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/imgui.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_tables.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_demo.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_draw.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui/imgui_widgets.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_glfw.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui//backends/imgui_impl_vulkan.cpp
 
-    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/crude_json.cpp
-    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_canvas.cpp
-    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor.cpp
-    ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor_api.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImGuizmo.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImCurveEdit.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/ImSequencer.cpp
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imguizmo/GraphEditor.cpp
+
+	PRIVATE ${PROJECT_SOURCE_DIR}/third-party/ImGuiFileDialog/ImGuiFileDialog.cpp
+
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/crude_json.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_canvas.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/third-party/imgui-node-editor/imgui_node_editor_api.cpp
 )
 
 target_include_directories(

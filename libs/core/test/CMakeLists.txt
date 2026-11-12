@@ -5,72 +5,70 @@ add_executable( crimild_core_test )
 target_sources(
     crimild_core_test
 
-    PRIVATE
+    PRIVATE Common/Signal.test.cpp
 
-    Common/Signal.test.cpp
+    PRIVATE Assemblies/Assembly.test.cpp
 
-    Assemblies/Assembly.test.cpp
+    PRIVATE Nodes/Node.test.cpp
 
-    Nodes/Node.test.cpp
-
-    Nodes/3D/Geometry3D.test.cpp
-    Nodes/3D/Spatial3D.test.cpp
+    PRIVATE Nodes/3D/Geometry3D.test.cpp
+    PRIVATE Nodes/3D/Spatial3D.test.cpp
     
-    Behaviors/Actions/MotionApplyTest.cpp
-    Behaviors/Actions/MotionFromInputTest.cpp
-    Behaviors/Actions/MotionResetTest.cpp
-    Behaviors/Actions/RotateTest.cpp
-    Behaviors/BehaviorContextTest.cpp
-    Behaviors/BehaviorControllerTest.cpp
-    Behaviors/BehaviorTreeTest.cpp
-    Boundings/AABBBoundingVolumeTest.cpp
-    Components/MaterialComponentTest.cpp
-    Components/MotionStateComponentTest.cpp
-    Entity/Entity.test.cpp
-    Messaging/MessageQueueTest.cpp
-    Primitives/PrimitiveTest.cpp
-    Primitives/QuadPrimitiveTest.cpp
-    Rendering/AttachmentTest.cpp
-    Rendering/BufferAccessorTest.cpp
-    Rendering/BufferTest.cpp
-    Rendering/BufferViewTest.cpp
-    Rendering/CameraTest.cpp
-    Rendering/CommandBufferTest.cpp
-    Rendering/DescriptorSetTest.cpp
-    Rendering/ImageTest.cpp
-    Rendering/ImageViewTest.cpp
-    Rendering/IndexBufferTest.cpp
-    Rendering/Materials/PrincipledBSDFMaterialTest.cpp
-    Rendering/Materials/UnlitMaterialTest.cpp
-    Rendering/MaterialTest.cpp
-    Rendering/PipelineTest.cpp
-    Rendering/RenderPassTest.cpp
-    Rendering/SamplerTest.cpp
-    Rendering/ShaderProgramTest.cpp
-    Rendering/ShaderTest.cpp
-    Rendering/SkinnedMeshTest.cpp
-    Rendering/TextureTest.cpp
-    Rendering/UniformBufferTest.cpp
-    Rendering/VertexAttributeTest.cpp
-    Rendering/VertexBufferTest.cpp
-    Rendering/VertexLayoutTest.cpp
-    Rendering/VertexTest.cpp
-    SceneGraph/GeometryTest.cpp
-    SceneGraph/GroupTest.cpp
-    SceneGraph/LightTest.cpp
-    SceneGraph/NodeTest.cpp
-    Simulation/InputTest.cpp
-    Simulation/SimulationTest.cpp
-    TestRunner.cpp
-    Utils/MockComponent.hpp
-    Utils/MockMessageHandler.hpp
-    Utils/MockVisitor.hpp
-    Visitors/BinTreeSceneTest.cpp
-    Visitors/IntersectWorldTest.cpp
-    Visitors/NodeVisitorTest.cpp
-    Visitors/RTAccelerationTest.cpp
-    Visitors/UpdateRenderStateTest.cpp
-    Visitors/UpdateWorldStateTest.cpp
+    PRIVATE Behaviors/Actions/MotionApplyTest.cpp
+    PRIVATE Behaviors/Actions/MotionFromInputTest.cpp
+    PRIVATE Behaviors/Actions/MotionResetTest.cpp
+    PRIVATE Behaviors/Actions/RotateTest.cpp
+    PRIVATE Behaviors/BehaviorContextTest.cpp
+    PRIVATE Behaviors/BehaviorControllerTest.cpp
+    PRIVATE Behaviors/BehaviorTreeTest.cpp
+    PRIVATE Boundings/AABBBoundingVolumeTest.cpp
+    PRIVATE Components/MaterialComponentTest.cpp
+    PRIVATE Components/MotionStateComponentTest.cpp
+    PRIVATE Entity/Entity.test.cpp
+    PRIVATE Messaging/MessageQueueTest.cpp
+    PRIVATE Primitives/PrimitiveTest.cpp
+    PRIVATE Primitives/QuadPrimitiveTest.cpp
+    PRIVATE Rendering/AttachmentTest.cpp
+    PRIVATE Rendering/BufferAccessorTest.cpp
+    PRIVATE Rendering/BufferTest.cpp
+    PRIVATE Rendering/BufferViewTest.cpp
+    PRIVATE Rendering/CameraTest.cpp
+    PRIVATE Rendering/CommandBufferTest.cpp
+    PRIVATE Rendering/DescriptorSetTest.cpp
+    PRIVATE Rendering/ImageTest.cpp
+    PRIVATE Rendering/ImageViewTest.cpp
+    PRIVATE Rendering/IndexBufferTest.cpp
+    PRIVATE Rendering/Materials/PrincipledBSDFMaterialTest.cpp
+    PRIVATE Rendering/Materials/UnlitMaterialTest.cpp
+    PRIVATE Rendering/MaterialTest.cpp
+    PRIVATE Rendering/PipelineTest.cpp
+    PRIVATE Rendering/RenderPassTest.cpp
+    PRIVATE Rendering/SamplerTest.cpp
+    PRIVATE Rendering/ShaderProgramTest.cpp
+    PRIVATE Rendering/ShaderTest.cpp
+    PRIVATE Rendering/SkinnedMeshTest.cpp
+    PRIVATE Rendering/TextureTest.cpp
+    PRIVATE Rendering/UniformBufferTest.cpp
+    PRIVATE Rendering/VertexAttributeTest.cpp
+    PRIVATE Rendering/VertexBufferTest.cpp
+    PRIVATE Rendering/VertexLayoutTest.cpp
+    PRIVATE Rendering/VertexTest.cpp
+    PRIVATE SceneGraph/GeometryTest.cpp
+    PRIVATE SceneGraph/GroupTest.cpp
+    PRIVATE SceneGraph/LightTest.cpp
+    PRIVATE SceneGraph/NodeTest.cpp
+    PRIVATE Simulation/InputTest.cpp
+    PRIVATE Simulation/SimulationTest.cpp
+    PRIVATE TestRunner.cpp
+    PRIVATE Utils/MockComponent.hpp
+    PRIVATE Utils/MockMessageHandler.hpp
+    PRIVATE Utils/MockVisitor.hpp
+    PRIVATE Visitors/BinTreeSceneTest.cpp
+    PRIVATE Visitors/IntersectWorldTest.cpp
+    PRIVATE Visitors/NodeVisitorTest.cpp
+    PRIVATE Visitors/RTAccelerationTest.cpp
+    PRIVATE Visitors/UpdateRenderStateTest.cpp
+    PRIVATE Visitors/UpdateWorldStateTest.cpp
 )
 
 target_include_directories(
