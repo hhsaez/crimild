@@ -4,6 +4,7 @@
 namespace {
 
    using crimild::experimental::behaviors::Behavior;
+
    class TestDecorator : public crimild::experimental::behaviors::decorators::Decorator {
    public:
       TestDecorator( void ) = default;
