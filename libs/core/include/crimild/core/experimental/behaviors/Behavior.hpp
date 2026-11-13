@@ -17,6 +17,7 @@ namespace crimild::experimental::behaviors {
          SUCCESS,
          FAILURE,
          RUNNING,
+         ABORTED,
       };
 
    public:
@@ -27,13 +28,17 @@ namespace crimild::experimental::behaviors {
       // Advance the current activation, or start a new one after completion.
       State tick( void );
 
+      // Interrupt a running activation; repeated calls have no effect.
+      void abort( void );
+
+   protected:
       // Called once before an activation's first update.
       virtual void initialize( void );
 
       virtual State update( void );
 
-      // Called after completion, with the final state already stored.
-      virtual void terminate( State state );
+      // Called after completion or interruption, with the final state stored.
+      virtual void terminate( void );
 
    private:
       State m_state = State::READY;

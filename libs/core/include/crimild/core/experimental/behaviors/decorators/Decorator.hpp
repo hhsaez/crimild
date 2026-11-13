@@ -16,6 +16,10 @@ namespace crimild::experimental::behaviors::decorators {
 
       inline std::shared_ptr< Behavior > getBehavior( void ) const { return m_behavior; }
 
+   protected:
+      // Overrides should chain here to abort the running child.
+      virtual void terminate( void ) override;
+
    private:
       std::shared_ptr< Behavior > m_behavior;
    };
