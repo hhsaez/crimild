@@ -1,6 +1,3 @@
-# 2026-11-13
-- Keep discussion notes in one file so an idea can be captured in a line, even when it produces no code change.
-
 ## Earlier undated TODOs
 - [ ] Handle user interaction (clicks)
 - [ ] Cache parent 3D
@@ -11,167 +8,238 @@
 - [ ] Shaders should be reused between all instances of the same material. They are stateless, except for the OpenGL ID.
 - [ ] Fix window dimensions for different DPI.
 
-# 2026-04-04
-- Now that I have visitors, I'm working on rendering something again.
-- I'm using the `Bounding3D` example
-- I'm not planning on fixing selection today. I'll leave that for next week.
-- Update: I ended up fixing it :)
+# 2025-06-20
+- I decided to start logging here so later I can use LLMs to have more context on what I do I do need to be extra careful when merging conflicts, but it should be fine since I'm using one file per date (famous last words).
+- Maybe I can use it for the blog too... Maybe
+- Also, I might move this logs to their own repo, so they don't polute the main one. Maybe.
+- Worked on centralizing loading and saving assets (i.e. assemblies) from `Project` class. I think this is going to be changed in the future to a more robust solution, like using an EntityManager plus FileSystem utlities.
+- I'm thinking on moving FileSystem to its own package. Or at least to Foundation
+- I realized that a Project is load after the `LayoutManager` has been initialized. So, I changed the way layouts are loaded in order for them to use the project's root directory to save the layout file, provided there is an active proejct. Otherwise, the layout is empty.
+- Load/Saving assemblies works!!
+- TODO: I'm not sure where the graph config file is saved. I set it to use the root path of the current project, but I'm not seeing any file there. Maybe it's not used?
 
-# 2026-04-03
-- Working on unit tests for `crimild::experimental::Spatial3D`
-- Working on a common interface for `ParentNode` and fixing mixins.
+# 2025-06-21
+* Now that persistence is finaly done (for now) for assemblies, I'm moving forward with the editor.
+* I'm trying to get rid of the dockspace, since I don't really need to re-arrange panels when editing and assembly. But I do need resizing, so I'm considering using a splitter. I noticed one is used in the demo project for the graph editor, so I'm starting there.
+* Spent some time trying to create a reusable Splitter component without luck. I don't have a good understanding of ImGui's rendering process yet. Still, I managed to make a splitter work by reusing code from the graph demo. It's not ideal nor reusable in other components, but it works, even nested.
+* Next step is to render some actual panels in each of the splitter sections.
 
-# 2026-04-02
-- Working on unit tests for `crimild::experimental::Spatial3D`
+# 2025-06-22
+* Contiuing work from yesterday.
+* I realized the graph editor is always rendered as a dockable window (because it's a Window instead of just a View). I'm considering refactoring this next so it's more reusable.
+* I have a working prototype for the Assembly workspace using splitters instead of dockspace. It looks ugly, but it works!
+* I made so the 3D Scene is rendered in the Assembly workspace, but I still need to figure out how to render the same scene we're editing.
+* For object selection, I'm considering keeping some context in the assembly itself, maybe as an extension that may or may not get saved along with the assembly.
 
-# 2026-04-01
-- Working on unit tests for `crimild::experimental::Spatial3D`
+## TODO
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [x] Fix splitter max size
+- [x] Render Scene3D in a splitter panel
+- [ ] Render File System in a splitter panel
 
-# 2026-03-28
-- [x] CMake presets
-- Learning about cmake presets and how to use them here.
-- I created a prefix for Linux. We'll do the same for windows and mac later
-- Still having isssues with LSP and Emacs on Linux.
-- Working on Nodes and Visitors
+# 2025-06-24
+- Working on figuring out how to render the assembly in the Scene3D panel
+- I also need to figure out how to handle object selection. I'm thinking on saving the selected object in an Editable extension in the Assembly itself. That way it will be saved as part of the Assembly.
+- I made it so it renders the scene in the assembly, but nothing is shown in the Scene3D panel. What am I missing?
 
-# 2026-03-24
-- Continue working on a formal definition for assemblies
+## TODO
+- [ ] Make the framegraph process to handle scenes from an Assambly
+- [ ] Render the assembly in the Scene3D panel
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-03-23
-- Considering representing assemblies as ASTs (abstract syntax trees)
+# 2025-06-25
+- I was trying to understad why I was not seeing renderables in the Scene3D panel
+- Switching the the "albedo" view, did show the cube!!
+- Since there are no lights, I can't see anything in the normal view.
 
-# 2026-03-12
-- Still analyzing the benefits/cons of having a base class Node with children
-  1. Uniform tree API everywhere: You can attach/traverse/reparent any gameplay object the same way.
-  2. Simpler engine plumbing: Serialization, editor tooling, scene loading, signals, lifecycle callbacks, and traversal systems target one abstraction.
-  3. Composability: Mixing concerns (render, audio, gameplay, UI helpers) in one tree is easy, including intermediary utility nodes.
-  4. Lower cognitive overhead: Users learn one mental model: "everything is a node in a scene tree"
-  5. Faster prototyping: You can build features quickly without creating a new hierarchy type each time.
-- Switch nodes can be implemented by just enabling/disabling specific children
-- Same for MultiSwitch/LODs/etc
-- `getChildren` vs `getActiveChildren`
+## TODO
+- [ ] Add lights to the Assembly graph
+- [ ] Add a transformation node to the Assembly graph
+- [x] Make the framegraph process to handle scenes from an Assambly
+- [x] Render the assembly in the Scene3D panel
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-02-19
-- Trying and fixing selection issues due to ray/bounding intersection not working correctly.
-- Found the problem: window dimensions (getWidth(), getHeight()) are returning sizes multiplied by DPI. A 1024x768 window is being returned as 2048x1536. Then, the ray calculation incorrect produces the wrong value due to invalid NDC coordinates.
-- How should I fix this?
+# 2025-06-27
+- Adding lights to the scene. It was surprisingly easy to do :)
+- Working on showing all available entities in the Assembly in the left panel
+- I realized I'm mixing UniqueId with NodeId. I need to use the former one only.
+- I also realized that I need to move `Assembly` to `Crimild::Core` (or to its own package). Right now it's part of the Editor, which prevents it from being loaded correctly when I implement players.
 
-# 2026-02-18
-- Working on boundings and selection.
-- New boundings example.
-- Selectable nodes as decorators.
-- I don't mind overusing dynamic cast. It keeps things simpler and I'm keepining contained to a single algorithm. It should be fine (famous last words).
-- I implemented clicking by using rays. Simple.
-- I like that I'm able to reuse all the math tricks I made for ray tracing rendering, specially the inverse ray trick to test intersection with shapes.
-- Clicking still don't work as expected. I guess there's something wrong in transforming coordinates to NDC.
+## TODO
+- [x] Add lights to the Assembly graph
+- [ ] Show available nodes in graph's left panel
+- [ ] Prefer using `UniqueID` instead of `ax::NodeEditor::NodeId`
+- [ ] Show selected nodes in graph's left panel
+- [ ] Show selected node's context menu
+- [ ] Show link's context menu
+- [ ] Show pin's context menu (?)
+- [ ] Allow detaching nodes
+- [ ] Allow re-parenting nodes
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-02-15
-- Improving material workflow and binding
-- Allow unlit materials to bind different colors
-- Allow extensions to be attached with name overrides
+# 2025-06-28
+- Working on showing all available entities in the Assembly in the left panel
+- I need to figure out what to do with `NodeId` vs `UniqueID`
+- I noticed something weird on saved assemblies. It seems data on assembly files are appended and/or duplicated somehow. Files get bigger and bigger. And take a lot of time to load/save.
+- I'm now listing the available entities in the Assembly in the left panel. It allows selection (and multiple selection with CTRL).
+- I started working on showing the current entity context menu (i.e. when right-clicking it). I want to be able to delete entities or re-parent them.
 
-# 2026-02-14
-- Working on a new example for Bounding3D classes
+## TODO
+- [ ] Fix assembly file size increasing bug.
+- [x] Show available nodes in graph's left panel
+- [x] Prefer using `UniqueID` instead of `ax::NodeEditor::NodeId`
+- [x] Show selected nodes in graph's left panel
+- [ ] Show selected node's context menu
+- [ ] Show link's context menu
+- [ ] Show pin's context menu (?)
+- [ ] Allow detaching nodes
+- [ ] Allow re-parenting nodes
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-02-12
-- ImageTGA is quite old and it was not using the new way of declaring images with buffer views
-- I feel like I need to deprecate the entire engine and start over :P
+# 2025-07-01
+- I started working on showing the current entity context menu (i.e. when right-clicking it). I want to be able to delete entities or re-parent them.
+- The issue with assembly files getting bigger and bigger keeps happening and it's becoming annoying. It takes a really long time to reload an assembly after a while. I'm deleting the file and recreate the assembly when it happens, but I'm going to need to find the cause sooner rather than later.
+- I just realized why I need to use different IDs for nodes, links and pins. I cannot use Crimild's UniqueID because it is possible for the same entity to appear more than once in the same graph. Consider the case where we have two Variable nodes pointing to the same entity as a way to decluter the graph. Also, it is possible that an entity is linked with more than one node. I need to refactor this in order to **decouple entities from their representation in the graph editor**.
 
-# 2026-02-11
-- Fixed triangle example. Now it uses a texture for vertex coloring
+## TODO
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Fix assembly file size increasing bug.
+- [x] Show selected node's context menu
+- [ ] Show link's context menu
+- [ ] Show pin's context menu (?)
+- [x] Allow deleting nodes
+- [ ] Allow detaching nodes
+- [ ] Allow re-parenting nodes
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-02-07
-- Continue improving the basic OpenGL-based render pass
-- Crimild works on Linux too
+# 2025-07-03
+- Thinking about handling nodes, links and pins. I don't like having to represent them separately from the actual nodes in the assembly.
+- Plot twist: turns out I'm already using unique IDs for links and pins (but not for nodes). Maybe I need to store them in the GraphEditorContext instead?
+- Move link management to graph's context. I like it better.
+- I need to move link rendering to context too and the "renderer" will only deal with link creation/update/removal. Then, I can do the same for pins.
 
-# 2026-02-06
-- I finally render a triangle using the new crimild::nodes hierarchy
+## TODO
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Fix assembly file size increasing bug.
+- [ ] Show link's context menu
+- [ ] Show pin's context menu (?)
+- [ ] Allow detaching nodes
+- [ ] Allow re-parenting nodes
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-02-05
-- Moving forward with implementing Triangle3D as an example using the new assembly classes
+# 2025-07-07
+- Working on showing the context menu for links (it works only for nodes atm)
+- Move link management to graph's context. I like it better.
+- I need to move link rendering to context too and the "renderer" will only deal with link creation/update/removal. Then, I can do the same for pins.
+- The increasing file size for assemblies is really annoying at this point.
+- Now that linking/de-linking works, it's much easier to create scenes.
 
-# 2026-01-30
-- I finally feel like I'm moving forward
-- Creating new classes for nodes (Node, Spatial3D, Geometry3D)
-- Creating new tests
+## TODO
+- [x] Show link's context menu
+- [x] Delete links
+- [x] Allow detaching nodes
+- [x] Allow re-parenting nodes
+- [ ] Fix assembly file size increasing bug.
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Show pin's context menu (do I need this?)
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-01-29
-- I finally decided to go with classes for the new scene hierarchy instead of implementing a graph with views.
-- Moving forward, I now need to work on how the Spatial3D class works and propagates invalidation across the hierarchy
+# 2025-07-08
+- I decided to finally start working on the text encoder. I think this is going to be extremelly helpful for debugging the bug causing increasing file size for encoded assemblies.
 
-# 2026-01-22
-- Continue working on Assembly representation
-- I feel like I'm going deeper into a rabit hole without end.
-- Now I'm trying with a more simpler approach: Node as an entity with parent/children. And then forget about groups
+## TODO
+- [ ] Text encoding
+- [ ] Fix assembly file size increasing bug.
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Show pin's context menu (do I need this?)
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
 
-# 2026-01-21
-- Continue working on Assembly representation
-- I'm not convinced about the who "ownership" concept for entities. How owns a Resource?
-- I think I need a better separation of concerns. A Node has a parent. A resource has consumers.
-
-# 2026-01-19
-- Working on assemblies as classes with entities having an owner, which may be different from the scene traversal parent.
-- Using Signal<> as a way to invalidate transformations for children
-- Got a first implementation working for Spatial3D and children updates for world state.
-
-# 2026-01-15
-- Working on understanding how to represent Assemblies, entities and their relationships
-- I'm no longer conviced that an actual graph is the best approach. It makes traversing the scene a very complex process.
-- Alternatively, implementing a DAG with just classes might be the best approach. The graph is left for editing only (which is done by the ImGui library)
-- Keep it simple.
-- A DAG is friendlier to execution too.
-- The question is, how to represent parent/child relationships? How's the owner of an entity?
-- I found a bug in my custom allocator regarding default alignment set to 4 bytes instead of 8 (or more). This lead to an investigation that resulting in a future deprecation of that allocator, in favor of standard allocation using std::make_shared and std:make_unique, which are more cache friendly.
-- https://github.com/hhsaez/crimild/issues/93
-
-# 2026-01-14
-- Continue working on Assemblies, graphs and entities
-- I always considered the graph editor and the scene view as different panels in the editor, but connected. But what if they are the same panel and suddenly all nodes in the graph editor have a physical representation in the 3D world? That's easy to visualize for a 3D model, but what if a behavior has a position and visual geometry that can be manipulated, translated and assigned, all in the 3D space? It would really be like playing with Legos, right?
-
-# 2026-01-12
-- Continue working on Assemblies, graphs and entities
-- The current pain point is how to support a group of entities and also hierarchical 3D transformations.
-
-# 2025-11-19
-- Moving Assembly to Crimild::Core library
-
-# 2025-11-14
-- Finished adding tests for `Signal` class.
-
-# 2025-11-13
-- Continue working on improving `Signal` class by adding more unit tests and documentation.
-
-# 2025-11-12
-- Finally started working on unit tests for `Signal` class
-
-# 2025-10-24
-- Today I merged the `assemblies_experimental` branch to `master`. It was long overdue
-- From now on, I would like to focus on smaller PRs, if possible.
-
-# 2025-10-13
-- Getting back into dev mode after a while. Feels like I need to learn everything again.
-- I decided to keep everything as simple as possible and I'm going to continue using VS Code as my main editor (instead of Emacs).
-- I removed the TODO list from this file, in favor of using a dedicated tool (like a canvas in Obsidian).
-
-# 2025-08-28
-- [x] Add keyboard signals to `GLFWOpenGLWindow`
-- I decided to have all log notes on a single file. It's a lot easier that way and avoid duplicating a lot of text.
-
-# 2025-08-16
-- [x] Universal OpenGL Player: Textures
-- Continue working the `UniversalPlayer` library. It's based on OpenGL so it can be used in as many platforms as possible.
-- I decided to make as simple/complex as needed. No extra features will be added unless they are required by clients.
+# 2025-07-09
 - Continue working on the text encoder.
-- I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
 
-# 2025-08-15
-- I create the `UniversalPlayer` library. It's based on OpenGL so it can be used in as many platforms as possible.
+## TODO
+- [ ] Text encoding
+- [ ] Fix assembly file size increasing bug.
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Show pin's context menu (do I need this?)
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+
+# 2025-07-14
 - Continue working on the text encoder.
-- I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
+- Using Copilot to help me write some unit tests for encoders. I was hoping for it to be smarter, but it lacks a lot of context given the complexity of writing tests for encoding.
+- It took me a while, but I managed to make a test for encoding strings. Maybe I should have started with simpler cases, like numbers.
+
+## TODO
+- [ ] Unit tests for memory encoder/decoder
+- [ ] Text encoding
+- [ ] Fix assembly file size increasing bug.
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Show pin's context menu (do I need this?)
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+
+# 2025-07-15
+- Continue working on adding more tests to memory encoder. Copilot is a lot better now for replicating unit tests given the one for strings I created yesterday. Still not good to come up with more complex cases, though.
+- Continue working on the text encoder.
+
+## TODO
+- [x] Unit tests for memory encoder
+- [ ] Text encoding
+- [ ] Unit tests for memory decoder
+- [ ] Text decoding
+- [ ] Fix assembly file size increasing bug.
+- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
+- [ ] Show pin's context menu (do I need this?)
+- [ ] Move `Assembly` to `Crimild::Core`
+- [ ] Add a transformation node to the Assembly graph
+- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
+- [ ] Render File System in a splitter panel
+- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+
+# 2025-07-17
+- Continue working on the text encoder.
+- I'm considering creating an `Identifiable` (alt: `Unique`, `UniquelyIdentifiable`) providing the abstraction for getting a UniqueID. This class should be part of the Crimild/Foundation package. Right now, `UniqueID` is part of Crimild/Coding and an internal type of `Codable` which doesn't make much sense anymore given the importance of having a tool for getting an unique ID for any object.
+- Also, should I use string-based UIDs?
+- Add metadata to encoded files so we can use it later when decoding to create accurate loading progress output. For example, by indicating how many objects need to be loaded during encoding we can provide an estimate of how many objects are left to load when decoding.
+- I'm dealing with a frustrating exception when trying to run one of the tests that uses `setName()`. Something is wrong here and I can't tell why. Neither is Copilot...
 
 
 ## TODO
-- [ ] Universal OpenGL Player
 - [ ] Text encoding
 - [ ] Unit tests for memory decoder
 - [ ] Text decoding
@@ -188,16 +256,12 @@
 - [ ] Create `Identifiable` class. See comments [here](./20250717_hhsaez.md)
 - [ ] Use string-based UIDs
 
-# 2025-08-08
-- Using `crimild::Entity` as base for more classes (Material, Primitive, etc). I think this is great for bindable objects in OpenGL/Vulkan
+# 2025-07-18
 - Continue working on the text encoder.
 - I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
 
 
 ## TODO
-- [x] Extend VertexBuffer from Entity
-- [x] Extend IndexBuffer from Entity
-- [x] Extend UniformBuffer from Entity
 - [ ] Text encoding
 - [ ] Unit tests for memory decoder
 - [ ] Text decoding
@@ -241,12 +305,16 @@
 - [ ] Create `Identifiable` class. See comments [here](./20250717_hhsaez.md)
 - [ ] Use string-based UIDs
 
-# 2025-07-18
+# 2025-08-08
+- Using `crimild::Entity` as base for more classes (Material, Primitive, etc). I think this is great for bindable objects in OpenGL/Vulkan
 - Continue working on the text encoder.
 - I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
 
 
 ## TODO
+- [x] Extend VertexBuffer from Entity
+- [x] Extend IndexBuffer from Entity
+- [x] Extend UniformBuffer from Entity
 - [ ] Text encoding
 - [ ] Unit tests for memory decoder
 - [ ] Text decoding
@@ -263,15 +331,14 @@
 - [ ] Create `Identifiable` class. See comments [here](./20250717_hhsaez.md)
 - [ ] Use string-based UIDs
 
-# 2025-07-17
+# 2025-08-15
+- I create the `UniversalPlayer` library. It's based on OpenGL so it can be used in as many platforms as possible.
 - Continue working on the text encoder.
-- I'm considering creating an `Identifiable` (alt: `Unique`, `UniquelyIdentifiable`) providing the abstraction for getting a UniqueID. This class should be part of the Crimild/Foundation package. Right now, `UniqueID` is part of Crimild/Coding and an internal type of `Codable` which doesn't make much sense anymore given the importance of having a tool for getting an unique ID for any object.
-- Also, should I use string-based UIDs?
-- Add metadata to encoded files so we can use it later when decoding to create accurate loading progress output. For example, by indicating how many objects need to be loaded during encoding we can provide an estimate of how many objects are left to load when decoding.
-- I'm dealing with a frustrating exception when trying to run one of the tests that uses `setName()`. Something is wrong here and I can't tell why. Neither is Copilot...
+- I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
 
 
 ## TODO
+- [ ] Universal OpenGL Player
 - [ ] Text encoding
 - [ ] Unit tests for memory decoder
 - [ ] Text decoding
@@ -288,225 +355,158 @@
 - [ ] Create `Identifiable` class. See comments [here](./20250717_hhsaez.md)
 - [ ] Use string-based UIDs
 
-# 2025-07-15
-- Continue working on adding more tests to memory encoder. Copilot is a lot better now for replicating unit tests given the one for strings I created yesterday. Still not good to come up with more complex cases, though.
+# 2025-08-16
+- [x] Universal OpenGL Player: Textures
+- Continue working the `UniversalPlayer` library. It's based on OpenGL so it can be used in as many platforms as possible.
+- I decided to make as simple/complex as needed. No extra features will be added unless they are required by clients.
 - Continue working on the text encoder.
+- I'm dealing with a frustrating exception (memory access violation) when trying to run one of the tests that uses `setName()`. Something is wrong with `crimild::alloc` but I can't tell what it is, and neither does Copilot (which is more frustrating). Everything works with `std::make_shared` though.
 
-## TODO
-- [x] Unit tests for memory encoder
-- [ ] Text encoding
-- [ ] Unit tests for memory decoder
-- [ ] Text decoding
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2025-08-28
+- [x] Add keyboard signals to `GLFWOpenGLWindow`
+- I decided to have all log notes on a single file. It's a lot easier that way and avoid duplicating a lot of text.
 
-# 2025-07-14
-- Continue working on the text encoder.
-- Using Copilot to help me write some unit tests for encoders. I was hoping for it to be smarter, but it lacks a lot of context given the complexity of writing tests for encoding.
-- It took me a while, but I managed to make a test for encoding strings. Maybe I should have started with simpler cases, like numbers.
+# 2025-10-13
+- Getting back into dev mode after a while. Feels like I need to learn everything again.
+- I decided to keep everything as simple as possible and I'm going to continue using VS Code as my main editor (instead of Emacs).
+- I removed the TODO list from this file, in favor of using a dedicated tool (like a canvas in Obsidian).
 
-## TODO
-- [ ] Unit tests for memory encoder/decoder
-- [ ] Text encoding
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2025-10-24
+- Today I merged the `assemblies_experimental` branch to `master`. It was long overdue
+- From now on, I would like to focus on smaller PRs, if possible.
 
-# 2025-07-09
-- Continue working on the text encoder.
+# 2025-11-12
+- Finally started working on unit tests for `Signal` class
 
-## TODO
-- [ ] Text encoding
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2025-11-13
+- Continue working on improving `Signal` class by adding more unit tests and documentation.
 
-# 2025-07-08
-- I decided to finally start working on the text encoder. I think this is going to be extremelly helpful for debugging the bug causing increasing file size for encoded assemblies.
+# 2025-11-14
+- Finished adding tests for `Signal` class.
 
-## TODO
-- [ ] Text encoding
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2025-11-19
+- Moving Assembly to Crimild::Core library
 
-# 2025-07-07
-- Working on showing the context menu for links (it works only for nodes atm)
-- Move link management to graph's context. I like it better.
-- I need to move link rendering to context too and the "renderer" will only deal with link creation/update/removal. Then, I can do the same for pins.
-- The increasing file size for assemblies is really annoying at this point.
-- Now that linking/de-linking works, it's much easier to create scenes.
+# 2026-01-12
+- Continue working on Assemblies, graphs and entities
+- The current pain point is how to support a group of entities and also hierarchical 3D transformations.
 
-## TODO
-- [x] Show link's context menu
-- [x] Delete links
-- [x] Allow detaching nodes
-- [x] Allow re-parenting nodes
-- [ ] Fix assembly file size increasing bug.
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Show pin's context menu (do I need this?)
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-01-14
+- Continue working on Assemblies, graphs and entities
+- I always considered the graph editor and the scene view as different panels in the editor, but connected. But what if they are the same panel and suddenly all nodes in the graph editor have a physical representation in the 3D world? That's easy to visualize for a 3D model, but what if a behavior has a position and visual geometry that can be manipulated, translated and assigned, all in the 3D space? It would really be like playing with Legos, right?
 
-# 2025-07-03
-- Thinking about handling nodes, links and pins. I don't like having to represent them separately from the actual nodes in the assembly.
-- Plot twist: turns out I'm already using unique IDs for links and pins (but not for nodes). Maybe I need to store them in the GraphEditorContext instead?
-- Move link management to graph's context. I like it better.
-- I need to move link rendering to context too and the "renderer" will only deal with link creation/update/removal. Then, I can do the same for pins.
+# 2026-01-15
+- Working on understanding how to represent Assemblies, entities and their relationships
+- I'm no longer conviced that an actual graph is the best approach. It makes traversing the scene a very complex process.
+- Alternatively, implementing a DAG with just classes might be the best approach. The graph is left for editing only (which is done by the ImGui library)
+- Keep it simple.
+- A DAG is friendlier to execution too.
+- The question is, how to represent parent/child relationships? How's the owner of an entity?
+- I found a bug in my custom allocator regarding default alignment set to 4 bytes instead of 8 (or more). This lead to an investigation that resulting in a future deprecation of that allocator, in favor of standard allocation using std::make_shared and std:make_unique, which are more cache friendly.
+- https://github.com/hhsaez/crimild/issues/93
 
-## TODO
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Fix assembly file size increasing bug.
-- [ ] Show link's context menu
-- [ ] Show pin's context menu (?)
-- [ ] Allow detaching nodes
-- [ ] Allow re-parenting nodes
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-01-19
+- Working on assemblies as classes with entities having an owner, which may be different from the scene traversal parent.
+- Using Signal<> as a way to invalidate transformations for children
+- Got a first implementation working for Spatial3D and children updates for world state.
 
-# 2025-07-01
-- I started working on showing the current entity context menu (i.e. when right-clicking it). I want to be able to delete entities or re-parent them.
-- The issue with assembly files getting bigger and bigger keeps happening and it's becoming annoying. It takes a really long time to reload an assembly after a while. I'm deleting the file and recreate the assembly when it happens, but I'm going to need to find the cause sooner rather than later.
-- I just realized why I need to use different IDs for nodes, links and pins. I cannot use Crimild's UniqueID because it is possible for the same entity to appear more than once in the same graph. Consider the case where we have two Variable nodes pointing to the same entity as a way to decluter the graph. Also, it is possible that an entity is linked with more than one node. I need to refactor this in order to **decouple entities from their representation in the graph editor**.
+# 2026-01-21
+- Continue working on Assembly representation
+- I'm not convinced about the who "ownership" concept for entities. How owns a Resource?
+- I think I need a better separation of concerns. A Node has a parent. A resource has consumers.
 
-## TODO
-- [ ] Use unique IDs for nodes, links and pins. See comments [here](./20250701_hhsaez.md)
-- [ ] Fix assembly file size increasing bug.
-- [x] Show selected node's context menu
-- [ ] Show link's context menu
-- [ ] Show pin's context menu (?)
-- [x] Allow deleting nodes
-- [ ] Allow detaching nodes
-- [ ] Allow re-parenting nodes
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-01-22
+- Continue working on Assembly representation
+- I feel like I'm going deeper into a rabit hole without end.
+- Now I'm trying with a more simpler approach: Node as an entity with parent/children. And then forget about groups
 
-# 2025-06-28
-- Working on showing all available entities in the Assembly in the left panel
-- I need to figure out what to do with `NodeId` vs `UniqueID`
-- I noticed something weird on saved assemblies. It seems data on assembly files are appended and/or duplicated somehow. Files get bigger and bigger. And take a lot of time to load/save.
-- I'm now listing the available entities in the Assembly in the left panel. It allows selection (and multiple selection with CTRL).
-- I started working on showing the current entity context menu (i.e. when right-clicking it). I want to be able to delete entities or re-parent them.
+# 2026-01-29
+- I finally decided to go with classes for the new scene hierarchy instead of implementing a graph with views.
+- Moving forward, I now need to work on how the Spatial3D class works and propagates invalidation across the hierarchy
 
-## TODO
-- [ ] Fix assembly file size increasing bug.
-- [x] Show available nodes in graph's left panel
-- [x] Prefer using `UniqueID` instead of `ax::NodeEditor::NodeId`
-- [x] Show selected nodes in graph's left panel
-- [ ] Show selected node's context menu
-- [ ] Show link's context menu
-- [ ] Show pin's context menu (?)
-- [ ] Allow detaching nodes
-- [ ] Allow re-parenting nodes
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-01-30
+- I finally feel like I'm moving forward
+- Creating new classes for nodes (Node, Spatial3D, Geometry3D)
+- Creating new tests
 
-# 2025-06-27
-- Adding lights to the scene. It was surprisingly easy to do :)
-- Working on showing all available entities in the Assembly in the left panel
-- I realized I'm mixing UniqueId with NodeId. I need to use the former one only.
-- I also realized that I need to move `Assembly` to `Crimild::Core` (or to its own package). Right now it's part of the Editor, which prevents it from being loaded correctly when I implement players.
+# 2026-02-05
+- Moving forward with implementing Triangle3D as an example using the new assembly classes
 
-## TODO
-- [x] Add lights to the Assembly graph
-- [ ] Show available nodes in graph's left panel
-- [ ] Prefer using `UniqueID` instead of `ax::NodeEditor::NodeId`
-- [ ] Show selected nodes in graph's left panel
-- [ ] Show selected node's context menu
-- [ ] Show link's context menu
-- [ ] Show pin's context menu (?)
-- [ ] Allow detaching nodes
-- [ ] Allow re-parenting nodes
-- [ ] Move `Assembly` to `Crimild::Core`
-- [ ] Add a transformation node to the Assembly graph
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-02-06
+- I finally render a triangle using the new crimild::nodes hierarchy
 
-# 2025-06-25
-- I was trying to understad why I was not seeing renderables in the Scene3D panel
-- Switching the the "albedo" view, did show the cube!!
-- Since there are no lights, I can't see anything in the normal view.
+# 2026-02-07
+- Continue improving the basic OpenGL-based render pass
+- Crimild works on Linux too
 
-## TODO
-- [ ] Add lights to the Assembly graph
-- [ ] Add a transformation node to the Assembly graph
-- [x] Make the framegraph process to handle scenes from an Assambly
-- [x] Render the assembly in the Scene3D panel
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-02-11
+- Fixed triangle example. Now it uses a texture for vertex coloring
 
-# 2025-06-24
-- Working on figuring out how to render the assembly in the Scene3D panel
-- I also need to figure out how to handle object selection. I'm thinking on saving the selected object in an Editable extension in the Assembly itself. That way it will be saved as part of the Assembly.
-- I made it so it renders the scene in the assembly, but nothing is shown in the Scene3D panel. What am I missing?
+# 2026-02-12
+- ImageTGA is quite old and it was not using the new way of declaring images with buffer views
+- I feel like I need to deprecate the entire engine and start over :P
 
-## TODO
-- [ ] Make the framegraph process to handle scenes from an Assambly
-- [ ] Render the assembly in the Scene3D panel
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [ ] Render File System in a splitter panel
-- [ ] Handle object selection in Scene3D (maybe storing in the Assembly's Editable extension?)
+# 2026-02-14
+- Working on a new example for Bounding3D classes
 
-# 2025-06-22
-* Contiuing work from yesterday.
-* I realized the graph editor is always rendered as a dockable window (because it's a Window instead of just a View). I'm considering refactoring this next so it's more reusable.
-* I have a working prototype for the Assembly workspace using splitters instead of dockspace. It looks ugly, but it works!
-* I made so the 3D Scene is rendered in the Assembly workspace, but I still need to figure out how to render the same scene we're editing.
-* For object selection, I'm considering keeping some context in the assembly itself, maybe as an extension that may or may not get saved along with the assembly.
+# 2026-02-15
+- Improving material workflow and binding
+- Allow unlit materials to bind different colors
+- Allow extensions to be attached with name overrides
 
-## TODO
-- [ ] Simplify `View` hierarchy. Just have a `draw()` virtual functional. Windows, Modals and other subclasses may include a `drawContent` as needed.
-- [x] Fix splitter max size
-- [x] Render Scene3D in a splitter panel
-- [ ] Render File System in a splitter panel
+# 2026-02-18
+- Working on boundings and selection.
+- New boundings example.
+- Selectable nodes as decorators.
+- I don't mind overusing dynamic cast. It keeps things simpler and I'm keepining contained to a single algorithm. It should be fine (famous last words).
+- I implemented clicking by using rays. Simple.
+- I like that I'm able to reuse all the math tricks I made for ray tracing rendering, specially the inverse ray trick to test intersection with shapes.
+- Clicking still don't work as expected. I guess there's something wrong in transforming coordinates to NDC.
 
-# 2025-06-21
-* Now that persistence is finaly done (for now) for assemblies, I'm moving forward with the editor.
-* I'm trying to get rid of the dockspace, since I don't really need to re-arrange panels when editing and assembly. But I do need resizing, so I'm considering using a splitter. I noticed one is used in the demo project for the graph editor, so I'm starting there.
-* Spent some time trying to create a reusable Splitter component without luck. I don't have a good understanding of ImGui's rendering process yet. Still, I managed to make a splitter work by reusing code from the graph demo. It's not ideal nor reusable in other components, but it works, even nested.
-* Next step is to render some actual panels in each of the splitter sections.
+# 2026-02-19
+- Trying and fixing selection issues due to ray/bounding intersection not working correctly.
+- Found the problem: window dimensions (getWidth(), getHeight()) are returning sizes multiplied by DPI. A 1024x768 window is being returned as 2048x1536. Then, the ray calculation incorrect produces the wrong value due to invalid NDC coordinates.
+- How should I fix this?
 
-# 2025-06-20
-- I decided to start logging here so later I can use LLMs to have more context on what I do I do need to be extra careful when merging conflicts, but it should be fine since I'm using one file per date (famous last words).
-- Maybe I can use it for the blog too... Maybe
-- Also, I might move this logs to their own repo, so they don't polute the main one. Maybe.
-- Worked on centralizing loading and saving assets (i.e. assemblies) from `Project` class. I think this is going to be changed in the future to a more robust solution, like using an EntityManager plus FileSystem utlities.
-- I'm thinking on moving FileSystem to its own package. Or at least to Foundation
-- I realized that a Project is load after the `LayoutManager` has been initialized. So, I changed the way layouts are loaded in order for them to use the project's root directory to save the layout file, provided there is an active proejct. Otherwise, the layout is empty.
-- Load/Saving assemblies works!!
-- TODO: I'm not sure where the graph config file is saved. I set it to use the root path of the current project, but I'm not seeing any file there. Maybe it's not used?
+# 2026-03-12
+- Still analyzing the benefits/cons of having a base class Node with children
+  1. Uniform tree API everywhere: You can attach/traverse/reparent any gameplay object the same way.
+  2. Simpler engine plumbing: Serialization, editor tooling, scene loading, signals, lifecycle callbacks, and traversal systems target one abstraction.
+  3. Composability: Mixing concerns (render, audio, gameplay, UI helpers) in one tree is easy, including intermediary utility nodes.
+  4. Lower cognitive overhead: Users learn one mental model: "everything is a node in a scene tree"
+  5. Faster prototyping: You can build features quickly without creating a new hierarchy type each time.
+- Switch nodes can be implemented by just enabling/disabling specific children
+- Same for MultiSwitch/LODs/etc
+- `getChildren` vs `getActiveChildren`
+
+# 2026-03-23
+- Considering representing assemblies as ASTs (abstract syntax trees)
+
+# 2026-03-24
+- Continue working on a formal definition for assemblies
+
+# 2026-03-28
+- [x] CMake presets
+- Learning about cmake presets and how to use them here.
+- I created a prefix for Linux. We'll do the same for windows and mac later
+- Still having isssues with LSP and Emacs on Linux.
+- Working on Nodes and Visitors
+
+# 2026-04-01
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
+# 2026-04-02
+- Working on unit tests for `crimild::experimental::Spatial3D`
+
+# 2026-04-03
+- Working on unit tests for `crimild::experimental::Spatial3D`
+- Working on a common interface for `ParentNode` and fixing mixins.
+
+# 2026-04-04
+- Now that I have visitors, I'm working on rendering something again.
+- I'm using the `Bounding3D` example
+- I'm not planning on fixing selection today. I'll leave that for next week.
+- Update: I ended up fixing it :)
+
+# 2026-11-13
+- Keep discussion notes in one file so an idea can be captured in a line, even when it produces no code change.
