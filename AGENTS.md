@@ -26,9 +26,19 @@ your own suggestions.
   and leave room for a reply. Once the project accepts a decision, carry
   it forward. Reopen it when new evidence changes the tradeoff.
 
-Consult the root `.log` when revisiting a design. Under an ISO date, keep
-one short bullet per decision and its reason, open question, or agreed
-next step. Skip anything already explained in the commit history.
+## Project journal
+
+Consult the root `.log` when revisiting a design. Record reasoning, open
+questions, and agreed next steps that the commit history leaves out.
+
+- Append under `# YYYY-MM-DD`, oldest date first. Reuse today's heading.
+  Add a date only when there is something to record.
+- Keep one thought per bullet. Use `-` for an observation or decision.
+  For a decision, include the reason and, when useful, what would change it.
+- Use `?` for an open question and `•` for a concrete, agreed next step.
+  When the step is done, replace its `•` with `×` on the original line.
+- Append answers and reversals under the date they happen. Link a commit
+  or PR if it resolves an entry. Preserve historical wording and notation.
 
 ## C++ formatting
 
