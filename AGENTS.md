@@ -2,6 +2,16 @@
 
 Crimild is a C++20 engine: https://github.com/hhsaez/crimild.
 
+## C++ formatting
+
+- Use the repository's `.clang-format` with clang-format 20 or newer.
+- Format changed C++ files and check them before submitting:
+
+  ```sh
+  clang-format -i path/to/changed.cpp
+  clang-format --dry-run --Werror path/to/changed.cpp
+  ```
+
 ## CMake source declarations
 
 - In ordinary `target_sources()` lists, put an explicit `PRIVATE`, `PUBLIC`, or
