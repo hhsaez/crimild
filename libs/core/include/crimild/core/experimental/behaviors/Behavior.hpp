@@ -3,18 +3,21 @@
 
 #include <crimild/core/Entity/Entity.hpp>
 #include <crimild/foundation/common/Enableable.hpp>
+#include <crimild/foundation/common/Named.hpp>
 
 namespace crimild::experimental::behaviors {
 
    class Behavior
       : public Entity,
-        public Enableable {
+        public Enableable,
+        public Named {
    public:
       enum class State {
          READY,
          SUCCESS,
          FAILURE,
          RUNNING,
+         ABORTED,
       };
 
    public:
@@ -22,16 +25,20 @@ namespace crimild::experimental::behaviors {
 
       inline State getState( void ) const { return m_state; }
 
-      State execute( void )
-      {
-         m_state = onExecute();
-         return m_state;
-      }
+      // Advance the current activation, or start a new one after completion.
+      State tick( void );
 
-      virtual State onExecute( void )
-      {
-         return State::SUCCESS;
-      }
+      // Interrupt a running activation; repeated calls have no effect.
+      void abort( void );
+
+   protected:
+      // Called once before an activation's first update.
+      virtual void initialize( void );
+
+      virtual State update( void );
+
+      // Called after completion or interruption, with the final state stored.
+      virtual void terminate( void );
 
    private:
       State m_state = State::READY;
