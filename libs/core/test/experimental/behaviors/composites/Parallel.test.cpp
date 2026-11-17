@@ -194,8 +194,9 @@ TEST( experimental_Parallel, attachments_during_activation_wait_until_restart )
    mutator->callback = [ & ] {
       if ( !attached ) {
          const auto capacity = parallel.getBehaviors().capacity();
+         parallel.attach( appended );
          while ( parallel.getBehaviors().size() <= capacity ) {
-            parallel.attach( appended );
+            parallel.attach( std::make_shared< Child >( 2, State::SUCCESS, calls ) );
          }
          attached = true;
       }

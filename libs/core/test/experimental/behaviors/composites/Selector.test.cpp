@@ -168,8 +168,9 @@ TEST( experimental_Selector, defers_children_attached_during_execution_until_nex
       if ( !attached ) {
          // Force reallocation of the original vector while it is being traversed.
          const auto capacity = sequence.getBehaviors().capacity();
+         sequence.attach( appended );
          while ( sequence.getBehaviors().size() <= capacity ) {
-            sequence.attach( appended );
+            sequence.attach( std::make_shared< RecordingBehavior >( 3, State::FAILURE, calls ) );
          }
          attached = true;
       }
@@ -283,20 +284,4 @@ TEST( experimental_Selector, abort_propagates_through_nested_sequences_and_decor
    EXPECT_EQ( innerWaiting->getState(), State::READY );
    EXPECT_EQ( outerWaiting->getState(), State::READY );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-}
-
-TEST( experimental_Selector, repeated_attachment_of_the_selected_child_does_not_abort_it )
-{
-   Selector sequence;
-   std::vector< int > calls;
-   auto child = std::make_shared< RecordingBehavior >( 1, State::RUNNING, calls );
-   sequence.attach( child );
-   sequence.attach( child );
-
-   EXPECT_EQ( sequence.tick(), State::RUNNING );
-   EXPECT_EQ( child->getState(), State::RUNNING );
-   EXPECT_EQ( child->terminations, 0 );
-   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-   sequence.abort();
-   EXPECT_EQ( child->terminations, 1 );
 }

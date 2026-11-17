@@ -1,4 +1,5 @@
 #include <crimild/core/experimental/behaviors/Behavior.hpp>
+#include <functional>
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
@@ -24,16 +25,24 @@ namespace {
    public:
       std::vector< std::string > calls;
       std::vector< State > terminationStates;
+      std::function< void() > onInitialize;
+      std::function< void() > onUpdate;
 
    protected:
       void initialize( void ) override
       {
          calls.push_back( "initialize" );
+         if ( onInitialize ) {
+            onInitialize();
+         }
       }
 
       State update( void ) override
       {
          calls.push_back( "update" );
+         if ( onUpdate ) {
+            onUpdate();
+         }
          return TestBehavior::update();
       }
 
@@ -226,5 +235,39 @@ TEST( experimental_Behavior, rejects_lifecycle_states_returned_by_update )
       TestBehavior behavior;
       behavior.result = state;
       EXPECT_DEBUG_DEATH( behavior.tick(), "update\\(\\) must return SUCCESS, FAILURE, or RUNNING" );
+   }
+}
+
+TEST( experimental_Behavior, abort_during_initialize_skips_update_and_terminates_once )
+{
+   LifecycleBehavior behavior;
+   behavior.onInitialize = [ & ] {
+      behavior.abort();
+   };
+   EXPECT_EQ( behavior.tick(), Behavior::State::ABORTED );
+   EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "terminate" } ) );
+   EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
+}
+
+TEST( experimental_Behavior, abort_during_update_preserves_cancellation_on_first_and_later_ticks )
+{
+   for ( const bool firstTick : { true, false } ) {
+      for ( const auto result : { Behavior::State::SUCCESS, Behavior::State::FAILURE, Behavior::State::RUNNING } ) {
+         LifecycleBehavior behavior;
+         if ( !firstTick ) {
+            ASSERT_EQ( behavior.tick(), Behavior::State::RUNNING );
+         }
+         behavior.result = result;
+         behavior.onUpdate = [ & ] {
+            behavior.abort();
+            behavior.abort();
+         };
+         EXPECT_EQ( behavior.tick(), Behavior::State::ABORTED );
+         EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
+         behavior.onUpdate = nullptr;
+         behavior.result = Behavior::State::SUCCESS;
+         EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
+         EXPECT_EQ( behavior.terminationStates.size(), 2 );
+      }
    }
 }

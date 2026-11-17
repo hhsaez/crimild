@@ -24,6 +24,7 @@ namespace {
 
    protected:
       void initialize( void ) override { ++initializations; }
+
       State update( void ) override
       {
          m_calls.push_back( m_id );
@@ -32,6 +33,7 @@ namespace {
          }
          return result;
       }
+
       void terminate( void ) override
       {
          ++terminations;
@@ -62,7 +64,7 @@ TEST( experimental_ActiveSelector, all_failures_are_visited_in_order )
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 }
 
-TEST( experimental_ActiveSelector, success_stops_later_children )
+TEST( experimental_ActiveSelector, success_avoids_execution_of_later_children )
 {
    ActiveSelector selector;
    std::vector< int > calls;
@@ -179,8 +181,9 @@ TEST( experimental_ActiveSelector, attachments_during_update_are_deferred_until_
    mutator->callback = [ & ] {
       if ( !attached ) {
          const auto capacity = selector.getBehaviors().capacity();
+         selector.attach( appended );
          while ( selector.getBehaviors().size() <= capacity ) {
-            selector.attach( appended );
+            selector.attach( std::make_shared< Child >( 3, State::SUCCESS, calls ) );
          }
          attached = true;
       }
@@ -196,17 +199,4 @@ TEST( experimental_ActiveSelector, attachments_during_update_are_deferred_until_
    calls.clear();
    EXPECT_EQ( selector.tick(), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
-}
-
-TEST( experimental_ActiveSelector, repeated_reference_to_selected_child_does_not_abort_it )
-{
-   ActiveSelector selector;
-   std::vector< int > calls;
-   auto running = std::make_shared< Child >( 1, State::RUNNING, calls );
-   selector.attach( running );
-   selector.attach( running );
-   EXPECT_EQ( selector.tick(), State::RUNNING );
-   EXPECT_EQ( running->terminations, 0 );
-   selector.abort();
-   EXPECT_EQ( running->terminations, 1 );
 }

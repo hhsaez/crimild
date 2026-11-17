@@ -14,6 +14,12 @@
   `terminate()` once. Calling it on a behavior that is not running has no effect.
 - Composite and decorator termination must abort any children that remain running.
   Overrides of `terminate()` must chain to their base implementation for cleanup.
+- An activation is running before `initialize()` and `update()` are called, so
+  cancellation works during the first tick. `tick()` preserves cancellation inside
+  a hook without calling termination twice.
+- Composite traversal stops immediately after a child cancels the activation,
+  before accessing activation data that termination may have cleared. A cancelled
+  child cancels its selecting composite through `abort()`.
 - A subsequent `tick()` starts a new activation after completion or cancellation.
 
 Invalid `update()` results violate the contract and trigger a debug assertion in

@@ -14,7 +14,16 @@ void Selector::initialize( void )
 Behavior::State Selector::update( void )
 {
    while ( m_currentBehavior < m_activeBehaviors.size() ) {
-      const auto state = m_activeBehaviors[ m_currentBehavior ]->tick();
+      // Retain the child locally: cancellation can clear the activation snapshot.
+      const auto child = m_activeBehaviors[ m_currentBehavior ];
+      const auto state = child->tick();
+      if ( getState() == State::ABORTED ) {
+         return State::RUNNING;
+      }
+      if ( state == State::ABORTED ) {
+         abort();
+         return State::RUNNING;
+      }
       if ( state != State::FAILURE ) {
          return state;
       }

@@ -1,6 +1,11 @@
+#include <crimild/core/experimental/behaviors/composites/ActiveSelector.hpp>
 #include <crimild/core/experimental/behaviors/composites/Composite.hpp>
+#include <crimild/core/experimental/behaviors/composites/Parallel.hpp>
+#include <crimild/core/experimental/behaviors/composites/Selector.hpp>
+#include <crimild/core/experimental/behaviors/composites/Sequence.hpp>
 #include <functional>
 #include <gtest/gtest.h>
+#include <type_traits>
 
 namespace {
 
@@ -26,9 +31,18 @@ namespace {
       State terminatedWith = State::READY;
       int terminations = 0;
       std::function< void() > onTerminate;
+      std::function< void() > onUpdate;
+      int updates = 0;
 
    protected:
-      State update( void ) override { return result; }
+      State update( void ) override
+      {
+         ++updates;
+         if ( onUpdate ) {
+            onUpdate();
+         }
+         return result;
+      }
 
       void terminate( void ) override
       {
@@ -132,4 +146,32 @@ TEST( experimental_Composite, termination_keeps_a_snapshot_when_callbacks_attach
    for ( std::size_t i = 2; i < composite.getBehaviors().size(); ++i ) {
       EXPECT_EQ( composite.getBehaviors()[ i ]->getState(), State::READY );
    }
+}
+
+namespace {
+
+   template< class T >
+   class experimental_CompositeCancellation : public testing::Test { };
+   using CompositeTypes = testing::Types<
+      crimild::experimental::behaviors::composites::Sequence,
+      crimild::experimental::behaviors::composites::Selector,
+      crimild::experimental::behaviors::composites::ActiveSelector,
+      crimild::experimental::behaviors::composites::Parallel >;
+   TYPED_TEST_SUITE( experimental_CompositeCancellation, CompositeTypes );
+
+}
+
+TYPED_TEST( experimental_CompositeCancellation, child_abort_cancels_parent_instead_of_returning_a_result_from_update )
+{
+   TypeParam parent;
+   auto child = std::make_shared< TrackedBehavior >();
+   auto later = std::make_shared< TrackedBehavior >();
+   parent.attach( child );
+   parent.attach( later );
+   child->onUpdate = [ & ] {
+      child->abort();
+   };
+   EXPECT_EQ( parent.tick(), State::ABORTED );
+   EXPECT_EQ( later->updates, 0 );
+   EXPECT_EQ( child->terminations, 1 );
 }
