@@ -32,7 +32,7 @@ jobs:
                     - name: "Ubuntu (Debug)"
                       os: ubuntu-latest
                       cmake_args: "-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang"
-                      build_type: Release
+                      build_type: Debug
                       crimild_build_flags: "-DCRIMILD_BUILD_TESTS=ON -DCRIMILD_BUILD_EDITOR=OFF -DCRIMILD_BUILD_PLAYER=OFF -DCRIMILD_BUILD_EXAMPLES=OFF -DCRIMILD_BUILD_UNIVERSAL_PLAYER=OFF -DCRIMILD_BUILD_UNIVERSAL_EXAMPLES=OFF -DCRIMILD_BUILD_PLATFORM_UNIVERSAL=OFF"
                     - name: "Mac OSX (Release)"
                       os: macos-latest
@@ -53,9 +53,8 @@ jobs:
             - if: matrix.os == 'ubuntu-latest'
               name: Setup Linux
               run: |
-                  sudo apt update
-                  sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
-                  sudo apt install clang-14
+                  sudo apt-get update
+                  sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev clang
 
             - name: Prepare Vulkan SDK
               uses: humbletim/setup-vulkan-sdk@v1.2.1
