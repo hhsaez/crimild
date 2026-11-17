@@ -16,7 +16,7 @@ namespace crimild::experimental::behaviors::composites {
 
       void attach( std::shared_ptr< Behavior > const &behavior );
 
-      inline const std::vector< std::shared_ptr< Behavior > > &getBehaviros( void ) const { return m_behaviors; }
+      inline const std::vector< std::shared_ptr< Behavior > > &getBehaviors( void ) const { return m_behaviors; }
 
    private:
       std::vector< std::shared_ptr< Behavior > > m_behaviors;
