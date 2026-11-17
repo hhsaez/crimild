@@ -28,6 +28,7 @@
 #ifndef CRIMILD_FOUNDATION_
 #define CRIMILD_FOUNDATION_
 
+#include "crimild/foundation/common/Invariant.hpp"
 #include "crimild/foundation/common/Macros.hpp"
 #include "crimild/foundation/common/Named.hpp"
 #include "crimild/foundation/common/NamedObject.hpp"

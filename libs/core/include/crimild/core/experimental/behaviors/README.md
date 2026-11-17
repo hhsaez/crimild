@@ -22,5 +22,6 @@
   child cancels its selecting composite through `abort()`.
 - A subsequent `tick()` starts a new activation after completion or cancellation.
 
-Invalid `update()` results violate the contract and trigger a debug assertion in
-`tick()`. Cancellation is exercised through `abort()`, not an `ABORTED` return.
+Invalid `update()` results violate the contract and trigger `CRIMILD_INVARIANT`
+in debug builds inside `tick()`. Release builds evaluate neither invariant
+argument. Cancellation is exercised through `abort()`, not an `ABORTED` return.

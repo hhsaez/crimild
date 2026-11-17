@@ -3,6 +3,7 @@ add_executable( crimild_foundation_test )
 target_sources( 
     crimild_foundation_test
 
+    PRIVATE common/Invariant.test.cpp
     PRIVATE common/NamedObjectTest.cpp
     PRIVATE common/RTTITest.cpp
     PRIVATE common/VersionTest.cpp
