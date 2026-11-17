@@ -1,3 +1,4 @@
+#include <cassert>
 #include <crimild/core/experimental/behaviors/Behavior.hpp>
 
 using namespace crimild::experimental::behaviors;
@@ -8,7 +9,9 @@ Behavior::State Behavior::tick( void )
       initialize();
    }
 
-   m_state = update();
+   const auto result = update();
+   assert( ( result == State::SUCCESS || result == State::FAILURE || result == State::RUNNING ) && "update() must return SUCCESS, FAILURE, or RUNNING" );
+   m_state = result;
 
    if ( m_state != State::RUNNING ) {
       terminate();

@@ -169,22 +169,6 @@ TEST( experimental_ActiveSelector, abort_cleans_up_once_and_next_tick_restarts )
    EXPECT_EQ( running->initializations, 2 );
 }
 
-TEST( experimental_ActiveSelector, aborted_child_stops_selection_and_cancels_previous_work )
-{
-   ActiveSelector selector;
-   std::vector< int > calls;
-   auto first = std::make_shared< Child >( 1, State::FAILURE, calls );
-   auto later = std::make_shared< Child >( 2, State::RUNNING, calls );
-   selector.attach( first );
-   selector.attach( later );
-   ASSERT_EQ( selector.tick(), State::RUNNING );
-   first->result = State::ABORTED;
-   calls.clear();
-   EXPECT_EQ( selector.tick(), State::ABORTED );
-   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-   EXPECT_EQ( later->terminatedWith, State::ABORTED );
-}
-
 TEST( experimental_ActiveSelector, attachments_during_update_are_deferred_until_next_tick )
 {
    ActiveSelector selector;

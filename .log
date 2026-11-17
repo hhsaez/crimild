@@ -515,3 +515,4 @@
 - Sequence remembers its running child; earlier successful conditions are not reevaluated during the activation. Snapshot children at initialization so attachments take effect on the next activation.
 - Selector and ActiveSelector inherit directly from Composite: remembered traversal belongs to Selector, while ActiveSelector reevaluates priority each tick and cancels displaced work.
 - Parallel initially requires all children to succeed and stops on any failure; children progress on the same thread, with completion tracked per activation so old SUCCESS states do not suppress a restart.
+- Document subsystem contracts under INVARIANTS. Behavior update() returns only SUCCESS, FAILURE, or RUNNING; READY and ABORTED belong to lifecycle infrastructure. Assert this contract in debug builds and test cancellation through abort().

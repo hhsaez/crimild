@@ -125,23 +125,6 @@ TEST( experimental_Parallel, early_failure_leaves_unstarted_children_ready )
    EXPECT_EQ( later->getState(), State::READY );
 }
 
-TEST( experimental_Parallel, aborted_child_propagates_and_cancels_siblings )
-{
-   Parallel parallel;
-   std::vector< int > calls;
-   auto running = std::make_shared< Child >( 1, State::RUNNING, calls );
-   auto aborted = std::make_shared< Child >( 2, State::ABORTED, calls );
-   auto later = std::make_shared< Child >( 3, State::SUCCESS, calls );
-   parallel.attach( running );
-   parallel.attach( aborted );
-   parallel.attach( later );
-   EXPECT_EQ( parallel.tick(), State::ABORTED );
-   EXPECT_EQ( running->terminatedWith, State::ABORTED );
-   EXPECT_EQ( running->terminations, 1 );
-   EXPECT_EQ( aborted->terminations, 1 );
-   EXPECT_EQ( later->getState(), State::READY );
-}
-
 TEST( experimental_Parallel, abort_propagates_to_nested_running_children_once )
 {
    Parallel parallel;

@@ -35,6 +35,8 @@ namespace crimild::experimental::behaviors {
       // Called once before an activation's first update.
       virtual void initialize( void );
 
+      // Must return SUCCESS, FAILURE, or RUNNING.
+      // READY and ABORTED are managed exclusively by the lifecycle infrastructure.
       virtual State update( void );
 
       // Called after completion or interruption, with the final state stored.

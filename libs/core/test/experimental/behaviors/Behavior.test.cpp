@@ -219,3 +219,12 @@ TEST( experimental_Behavior, ticking_after_abort_starts_a_new_activation )
    EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "terminate", "initialize", "update" } ) );
    EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
 }
+
+TEST( experimental_Behavior, rejects_lifecycle_states_returned_by_update )
+{
+   for ( const auto state : { Behavior::State::READY, Behavior::State::ABORTED } ) {
+      TestBehavior behavior;
+      behavior.result = state;
+      EXPECT_DEBUG_DEATH( behavior.tick(), "update\\(\\) must return SUCCESS, FAILURE, or RUNNING" );
+   }
+}

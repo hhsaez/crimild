@@ -18,7 +18,7 @@ Behavior::State Parallel::update( void )
          continue;
       }
       const auto state = m_activeBehaviors[ i ]->tick();
-      if ( state == State::FAILURE || state == State::ABORTED ) {
+      if ( state == State::FAILURE ) {
          return state;
       }
       m_completed[ i ] = state == State::SUCCESS;

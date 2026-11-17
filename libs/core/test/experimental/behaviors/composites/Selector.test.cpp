@@ -285,22 +285,6 @@ TEST( experimental_Selector, abort_propagates_through_nested_sequences_and_decor
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
 }
 
-TEST( experimental_Selector, aborted_child_stops_the_selector_without_starting_later_children )
-{
-   Selector sequence;
-   std::vector< int > calls;
-   auto child = std::make_shared< RecordingBehavior >( 1, State::ABORTED, calls );
-   auto later = std::make_shared< RecordingBehavior >( 2, State::FAILURE, calls );
-   sequence.attach( child );
-   sequence.attach( later );
-
-   EXPECT_EQ( sequence.tick(), State::ABORTED );
-   EXPECT_EQ( sequence.getState(), State::ABORTED );
-   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-   EXPECT_EQ( child->terminations, 1 );
-   EXPECT_EQ( later->getState(), State::READY );
-}
-
 TEST( experimental_Selector, repeated_attachment_of_the_selected_child_does_not_abort_it )
 {
    Selector sequence;
