@@ -8,11 +8,11 @@ namespace {
    class TestBehavior : public Behavior {
    public:
       State result = State::RUNNING;
-      int executions = 0;
+      int updates = 0;
 
-      State onExecute( void ) override
+      State update( void ) override
       {
-         ++executions;
+         ++updates;
          return result;
       }
    };
@@ -31,45 +31,45 @@ TEST( ExperimentalBehavior, supports_naming )
    EXPECT_EQ( behavior.getName(), "Chase" );
 }
 
-TEST( ExperimentalBehavior, starts_ready_without_executing )
+TEST( ExperimentalBehavior, starts_ready_without_ticking )
 {
    TestBehavior behavior;
    EXPECT_EQ( behavior.getState(), Behavior::State::READY );
-   EXPECT_EQ( behavior.executions, 0 );
+   EXPECT_EQ( behavior.updates, 0 );
 }
 
-TEST( ExperimentalBehavior, default_execution_succeeds )
+TEST( ExperimentalBehavior, default_tick_succeeds )
 {
    Behavior behavior;
-   EXPECT_EQ( behavior.execute(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
 }
 
-TEST( ExperimentalBehavior, stores_each_execution_result )
+TEST( ExperimentalBehavior, stores_each_tick_result )
 {
    TestBehavior behavior;
    for ( const auto state : { Behavior::State::RUNNING, Behavior::State::SUCCESS, Behavior::State::FAILURE } ) {
       behavior.result = state;
-      EXPECT_EQ( behavior.execute(), state );
+      EXPECT_EQ( behavior.tick(), state );
       EXPECT_EQ( behavior.getState(), state );
    }
-   EXPECT_EQ( behavior.executions, 3 );
+   EXPECT_EQ( behavior.updates, 3 );
 }
 
-TEST( ExperimentalBehavior, keeps_executing_running_behavior_until_success )
+TEST( ExperimentalBehavior, keeps_ticking_running_behavior_until_success )
 {
    TestBehavior behavior;
    EXPECT_EQ( behavior.getState(), Behavior::State::READY );
 
-   // onExecute() requests another tick until the action reports completion.
-   EXPECT_EQ( behavior.execute(), Behavior::State::RUNNING );
+   // update() requests another tick until the action reports completion.
+   EXPECT_EQ( behavior.tick(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
-   EXPECT_EQ( behavior.execute(), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
-   EXPECT_EQ( behavior.executions, 2 );
+   EXPECT_EQ( behavior.updates, 2 );
 
    behavior.result = Behavior::State::SUCCESS;
-   EXPECT_EQ( behavior.execute(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
-   EXPECT_EQ( behavior.executions, 3 );
+   EXPECT_EQ( behavior.updates, 3 );
 }

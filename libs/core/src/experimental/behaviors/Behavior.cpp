@@ -2,13 +2,13 @@
 
 using namespace crimild::experimental::behaviors;
 
-Behavior::State Behavior::execute( void )
+Behavior::State Behavior::tick( void )
 {
-   m_state = onExecute();
+   m_state = update();
    return m_state;
 }
 
-Behavior::State Behavior::onExecute( void )
+Behavior::State Behavior::update( void )
 {
    return State::SUCCESS;
 }
