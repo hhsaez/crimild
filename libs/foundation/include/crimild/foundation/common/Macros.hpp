@@ -28,7 +28,11 @@
 #ifndef CRIMILD_MACROS_
 #define CRIMILD_MACROS_
 
+#include <cassert>
 #include <string>
+
+// Conditions must be side-effect-free; use a string literal for the message.
+#define CRIMILD_INVARIANT( CONDITION, MESSAGE ) assert( ( CONDITION ) && ( MESSAGE ) )
 
 #if !defined( NDEBUG )
    #define CRIMILD_DEBUG 1
@@ -106,6 +110,7 @@ namespace crimild {
 
       return fqn.substr( begin, end - begin );
    }
+
 }
 
 #define CRIMILD_CURRENT_FUNCTION_NAME ::crimild::getFunctionName( CRIMILD_CURRENT_FUNCTION )

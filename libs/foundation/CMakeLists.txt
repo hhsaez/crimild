@@ -9,7 +9,6 @@ target_sources(
 
   PUBLIC include/crimild/foundation/common/Enableable.hpp
   PUBLIC include/crimild/foundation/common/KeyValuePair.hpp
-  PUBLIC include/crimild/foundation/common/Invariant.hpp
   PUBLIC include/crimild/foundation/common/Macros.hpp
   PUBLIC include/crimild/foundation/common/NamedObject.hpp
   PUBLIC include/crimild/foundation/common/ObjectFactory.hpp
@@ -44,7 +43,6 @@ target_sources(
   PUBLIC include/crimild/foundation/policies/CachePolicy.hpp
   PUBLIC include/crimild/foundation/policies/ThreadingPolicy.hpp
 
-  PRIVATE src/common/Invariant.cpp
   PRIVATE src/common/NamedObject.cpp
   PRIVATE src/common/ObjectFactory.cpp
   PRIVATE src/common/Version.cpp

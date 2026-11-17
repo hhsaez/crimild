@@ -1,5 +1,5 @@
 #include <crimild/core/experimental/behaviors/Behavior.hpp>
-#include <crimild/foundation/common/Invariant.hpp>
+#include <crimild/foundation/common/Macros.hpp>
 
 using namespace crimild::experimental::behaviors;
 
