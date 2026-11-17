@@ -17,6 +17,19 @@ namespace {
    };
 }
 
+TEST( ExperimentalBehavior, supports_naming_through_named_interface )
+{
+   Behavior behavior;
+   crimild::Named &named = behavior;
+   EXPECT_TRUE( named.getName().empty() );
+
+   named.setName( "Patrol" );
+   EXPECT_EQ( behavior.getName(), "Patrol" );
+
+   behavior.setName( "Chase" );
+   EXPECT_EQ( named.getName(), "Chase" );
+}
+
 TEST( ExperimentalBehavior, starts_ready_without_executing )
 {
    TestBehavior behavior;
