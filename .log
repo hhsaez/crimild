@@ -513,3 +513,4 @@
 
 # 2026-11-17
 - Sequence remembers its running child; earlier successful conditions are not reevaluated during the activation. Snapshot children at initialization so attachments take effect on the next activation.
+- Selector and ActiveSelector inherit directly from Composite: remembered traversal belongs to Selector, while ActiveSelector reevaluates priority each tick and cancels displaced work.

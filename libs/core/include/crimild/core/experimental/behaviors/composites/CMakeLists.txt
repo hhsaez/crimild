@@ -3,4 +3,6 @@ target_sources(
 
   PUBLIC Composite.hpp
   PUBLIC Sequence.hpp
+  PUBLIC Selector.hpp
+  PUBLIC ActiveSelector.hpp
 )

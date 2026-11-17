@@ -3,4 +3,6 @@ target_sources(
 
   PRIVATE Composite.cpp
   PRIVATE Sequence.cpp
+  PRIVATE Selector.cpp
+  PRIVATE ActiveSelector.cpp
 )
