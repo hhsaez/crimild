@@ -24,16 +24,9 @@ namespace crimild::experimental::behaviors {
 
       inline State getState( void ) const { return m_state; }
 
-      State execute( void )
-      {
-         m_state = onExecute();
-         return m_state;
-      }
+      State execute( void );
 
-      virtual State onExecute( void )
-      {
-         return State::SUCCESS;
-      }
+      virtual State onExecute( void );
 
    private:
       State m_state = State::READY;
