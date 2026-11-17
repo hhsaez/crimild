@@ -24,9 +24,16 @@ namespace crimild::experimental::behaviors {
 
       inline State getState( void ) const { return m_state; }
 
+      // Advance the current activation, or start a new one after completion.
       State tick( void );
 
+      // Called once before an activation's first update.
+      virtual void initialize( void );
+
       virtual State update( void );
+
+      // Called after completion, with the final state already stored.
+      virtual void terminate( State state );
 
    private:
       State m_state = State::READY;
