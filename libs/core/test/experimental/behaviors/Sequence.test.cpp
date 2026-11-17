@@ -1,9 +1,10 @@
 #include <crimild/core/experimental/behaviors/composites/Sequence.hpp>
-#include <gtest/gtest.h>
 #include <functional>
+#include <gtest/gtest.h>
 #include <vector>
 
 namespace {
+
    using crimild::experimental::behaviors::Behavior;
    using crimild::experimental::behaviors::composites::Sequence;
    using State = Behavior::State;
@@ -37,6 +38,7 @@ namespace {
       int m_id;
       std::vector< int > &m_calls;
    };
+
 }
 
 TEST( ExperimentalSequence, empty_sequence_succeeds )
@@ -124,7 +126,7 @@ TEST( ExperimentalSequence, defers_children_attached_during_execution_until_next
    auto appended = std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls );
    auto mutator = std::make_shared< CallbackBehavior >();
    bool attached = false;
-   mutator->callback = [&] {
+   mutator->callback = [ & ] {
       calls.push_back( 1 );
       if ( !attached ) {
          // Force reallocation of the original vector while it is being traversed.

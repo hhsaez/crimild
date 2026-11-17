@@ -2,11 +2,13 @@
 #include <gtest/gtest.h>
 
 namespace {
+
    using crimild::experimental::behaviors::Behavior;
    class TestDecorator : public crimild::experimental::behaviors::decorators::Decorator {
    public:
       TestDecorator( void ) = default;
    };
+
 }
 
 TEST( ExperimentalDecorator, starts_without_a_child )
