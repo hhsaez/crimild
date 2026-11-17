@@ -10,6 +10,7 @@ target_sources(
     PRIVATE experimental/behaviors/composites/Sequence.test.cpp
     PRIVATE experimental/behaviors/composites/Selector.test.cpp
     PRIVATE experimental/behaviors/composites/ActiveSelector.test.cpp
+    PRIVATE experimental/behaviors/composites/Parallel.test.cpp
     PRIVATE experimental/behaviors/decorators/Decorator.test.cpp
 
     PRIVATE Common/Signal.test.cpp

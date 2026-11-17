@@ -5,4 +5,5 @@ target_sources(
   PUBLIC Sequence.hpp
   PUBLIC Selector.hpp
   PUBLIC ActiveSelector.hpp
+  PUBLIC Parallel.hpp
 )
