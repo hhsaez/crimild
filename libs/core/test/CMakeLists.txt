@@ -6,9 +6,9 @@ target_sources(
     crimild_core_test
 
     PRIVATE experimental/behaviors/Behavior.test.cpp
-    PRIVATE experimental/behaviors/Composite.test.cpp
-    PRIVATE experimental/behaviors/Decorator.test.cpp
-    PRIVATE experimental/behaviors/Sequence.test.cpp
+    PRIVATE experimental/behaviors/composites/Composite.test.cpp
+    PRIVATE experimental/behaviors/composites/Sequence.test.cpp
+    PRIVATE experimental/behaviors/decorators/Decorator.test.cpp
 
     PRIVATE Common/Signal.test.cpp
 
