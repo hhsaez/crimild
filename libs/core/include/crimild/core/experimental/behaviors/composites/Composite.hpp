@@ -18,6 +18,10 @@ namespace crimild::experimental::behaviors::composites {
 
       inline const std::vector< std::shared_ptr< Behavior > > &getBehaviors( void ) const { return m_behaviors; }
 
+   protected:
+      // Overrides should chain here to abort running children.
+      virtual void terminate( void ) override;
+
    private:
       std::vector< std::shared_ptr< Behavior > > m_behaviors;
    };

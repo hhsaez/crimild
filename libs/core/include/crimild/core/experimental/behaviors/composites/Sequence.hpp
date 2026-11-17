@@ -9,6 +9,7 @@ namespace crimild::experimental::behaviors::composites {
    public:
       virtual ~Sequence( void ) noexcept = default;
 
+   protected:
       virtual State update( void ) override;
    };
 

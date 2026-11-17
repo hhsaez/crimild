@@ -11,13 +11,15 @@ Behavior::State Sequence::update( void )
    // on the next traversal without invalidating this one.
    const auto behaviors = getBehaviors();
    for ( const auto &b : behaviors ) {
-      switch ( b->tick() ) {
-         case State::FAILURE:
-            return State::FAILURE;
-         case State::RUNNING:
-            return State::RUNNING;
-         default:
-            break;
+      const auto state = b->tick();
+      if ( state != State::SUCCESS ) {
+         // An earlier child can take control while a later child is running.
+         for ( const auto &other : behaviors ) {
+            if ( other != nullptr && other != b ) {
+               other->abort();
+            }
+         }
+         return state;
       }
    }
    return State::SUCCESS;

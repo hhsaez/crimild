@@ -11,14 +11,25 @@ Behavior::State Behavior::tick( void )
    m_state = update();
 
    if ( m_state != State::RUNNING ) {
-      terminate( m_state );
+      terminate();
    }
 
    return m_state;
 }
 
+void Behavior::abort( void )
+{
+   if ( m_state != State::RUNNING ) {
+      return;
+   }
+
+   m_state = State::ABORTED;
+   terminate();
+}
+
 void Behavior::initialize( void )
 {
+   // no-op
 }
 
 Behavior::State Behavior::update( void )
@@ -26,6 +37,7 @@ Behavior::State Behavior::update( void )
    return State::SUCCESS;
 }
 
-void Behavior::terminate( State )
+void Behavior::terminate( void )
 {
+   // no-op
 }
