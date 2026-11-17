@@ -29,10 +29,13 @@ namespace {
       }
 
       State result;
+      int initializations = 0;
       int terminations = 0;
       State terminatedWith = State::READY;
 
    protected:
+      void initialize( void ) override { ++initializations; }
+
       State update( void ) override
       {
          m_calls.push_back( m_id );
@@ -123,7 +126,7 @@ TEST( experimental_Sequence, proceeds_when_running_child_succeeds )
    EXPECT_EQ( calls, ( std::vector< int > { 1, 1, 2 } ) );
 }
 
-TEST( experimental_Sequence, reevaluates_earlier_children_on_each_execution )
+TEST( experimental_Sequence, resumes_running_child_without_reevaluating_successful_children )
 {
    Sequence sequence;
    std::vector< int > calls;
@@ -131,18 +134,29 @@ TEST( experimental_Sequence, reevaluates_earlier_children_on_each_execution )
    auto action = std::make_shared< RecordingBehavior >( 2, State::RUNNING, calls );
    sequence.attach( condition );
    sequence.attach( action );
+   sequence.attach( std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls ) );
 
-   EXPECT_EQ( sequence.tick(), State::RUNNING );
+   ASSERT_EQ( sequence.tick(), State::RUNNING );
    condition->result = State::FAILURE;
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::RUNNING );
+   EXPECT_EQ( calls, ( std::vector< int > { 2 } ) );
+   EXPECT_EQ( action->initializations, 1 );
+   EXPECT_EQ( action->terminations, 0 );
+
+   action->result = State::SUCCESS;
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::SUCCESS );
+   EXPECT_EQ( calls, ( std::vector< int > { 2, 3 } ) );
+   EXPECT_EQ( action->initializations, 1 );
+   EXPECT_EQ( action->terminations, 1 );
+
    calls.clear();
    EXPECT_EQ( sequence.tick(), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-   EXPECT_EQ( action->getState(), State::ABORTED );
-   EXPECT_EQ( action->terminatedWith, State::ABORTED );
-   EXPECT_EQ( action->terminations, 1 );
 }
 
-TEST( experimental_Sequence, defers_children_attached_during_execution_until_next_traversal )
+TEST( experimental_Sequence, defers_children_attached_during_execution_until_next_activation )
 {
    Sequence sequence;
    std::vector< int > calls;
@@ -176,32 +190,71 @@ TEST( experimental_Sequence, defers_children_attached_during_execution_until_nex
    EXPECT_EQ( calls, expected );
 }
 
-TEST( experimental_Sequence, earlier_running_child_aborts_a_previously_running_later_child )
+TEST( experimental_Sequence, restarts_from_first_child_after_abort )
 {
    Sequence sequence;
    std::vector< int > calls;
-   auto earlier = std::make_shared< RecordingBehavior >( 1, State::SUCCESS, calls );
-   auto later = std::make_shared< RecordingBehavior >( 2, State::RUNNING, calls );
-   sequence.attach( earlier );
-   sequence.attach( later );
+   auto first = std::make_shared< RecordingBehavior >( 1, State::SUCCESS, calls );
+   auto running = std::make_shared< RecordingBehavior >( 2, State::RUNNING, calls );
+   sequence.attach( first );
+   sequence.attach( running );
    ASSERT_EQ( sequence.tick(), State::RUNNING );
 
-   earlier->result = State::RUNNING;
-   calls.clear();
-   EXPECT_EQ( sequence.tick(), State::RUNNING );
-   EXPECT_EQ( sequence.getState(), State::RUNNING );
-   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
-   EXPECT_EQ( later->getState(), State::ABORTED );
-   EXPECT_EQ( later->terminations, 1 );
+   sequence.abort();
+   sequence.abort();
+   EXPECT_EQ( running->getState(), State::ABORTED );
+   EXPECT_EQ( running->terminations, 1 );
+   EXPECT_EQ( running->terminatedWith, State::ABORTED );
 
-   EXPECT_EQ( sequence.tick(), State::RUNNING );
-   EXPECT_EQ( later->terminations, 1 );
-
-   earlier->result = State::SUCCESS;
    calls.clear();
    EXPECT_EQ( sequence.tick(), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
-   EXPECT_EQ( later->getState(), State::RUNNING );
+   EXPECT_EQ( running->initializations, 2 );
+}
+
+TEST( experimental_Sequence, running_child_failure_stops_and_next_activation_restarts )
+{
+   Sequence sequence;
+   std::vector< int > calls;
+   auto running = std::make_shared< RecordingBehavior >( 2, State::RUNNING, calls );
+   auto later = std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls );
+   sequence.attach( std::make_shared< RecordingBehavior >( 1, State::SUCCESS, calls ) );
+   sequence.attach( running );
+   sequence.attach( later );
+   ASSERT_EQ( sequence.tick(), State::RUNNING );
+
+   running->result = State::FAILURE;
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::FAILURE );
+   EXPECT_EQ( calls, ( std::vector< int > { 2 } ) );
+   EXPECT_EQ( later->getState(), State::READY );
+   EXPECT_EQ( running->terminations, 1 );
+
+   running->result = State::SUCCESS;
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::SUCCESS );
+   EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
+}
+
+TEST( experimental_Sequence, attachments_while_running_wait_until_next_activation )
+{
+   Sequence sequence;
+   std::vector< int > calls;
+   auto running = std::make_shared< RecordingBehavior >( 1, State::RUNNING, calls );
+   auto appended = std::make_shared< RecordingBehavior >( 2, State::SUCCESS, calls );
+   sequence.attach( running );
+   ASSERT_EQ( sequence.tick(), State::RUNNING );
+   sequence.attach( appended );
+
+   running->result = State::SUCCESS;
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::SUCCESS );
+   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+   EXPECT_EQ( appended->getState(), State::READY );
+
+   calls.clear();
+   EXPECT_EQ( sequence.tick(), State::SUCCESS );
+   EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
 }
 
 TEST( experimental_Sequence, abort_propagates_through_nested_sequences_and_decorators )

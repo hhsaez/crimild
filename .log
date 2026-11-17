@@ -510,3 +510,6 @@
 
 # 2026-11-13
 - Keep discussion notes in one file so an idea can be captured in a line, even when it produces no code change.
+
+# 2026-11-17
+- Sequence remembers its running child; earlier successful conditions are not reevaluated during the activation. Snapshot children at initialization so attachments take effect on the next activation.

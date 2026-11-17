@@ -3,24 +3,29 @@
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
+void Sequence::initialize( void )
+{
+   // Freeze the child list for this activation so callbacks can safely attach
+   // children without changing the remembered traversal.
+   m_activeBehaviors = getBehaviors();
+   m_currentBehavior = 0;
+}
+
 Behavior::State Sequence::update( void )
 {
-   // Reevaluate from the first child on every execution, stopping as soon
-   // as a child fails or needs more time.
-   // Snapshot the children so attachments during execution take effect
-   // on the next traversal without invalidating this one.
-   const auto behaviors = getBehaviors();
-   for ( const auto &b : behaviors ) {
-      const auto state = b->tick();
+   while ( m_currentBehavior < m_activeBehaviors.size() ) {
+      const auto state = m_activeBehaviors[ m_currentBehavior ]->tick();
       if ( state != State::SUCCESS ) {
-         // An earlier child can take control while a later child is running.
-         for ( const auto &other : behaviors ) {
-            if ( other != nullptr && other != b ) {
-               other->abort();
-            }
-         }
          return state;
       }
+      ++m_currentBehavior;
    }
    return State::SUCCESS;
+}
+
+void Sequence::terminate( void )
+{
+   Composite::terminate();
+   m_activeBehaviors.clear();
+   m_currentBehavior = 0;
 }
