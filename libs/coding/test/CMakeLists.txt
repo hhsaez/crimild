@@ -1,16 +1,3 @@
-add_executable( crimild_coding_test )
-
-target_sources(
-  crimild_coding_test
-  PRIVATE
-    ../src/crimild/coding/Codable.test.cpp
-    ../src/crimild/coding/MemoryEncoder.test.cpp
-    ../src/crimild/coding/TextCoding.test.cpp
-    ../src/crimild/coding/TextDecoder.test.cpp
-    ../src/crimild/coding/TextEncoder.test.cpp
-    ../src/crimild/coding/TestRunner.cpp
-)
-
 target_link_libraries(
   crimild_coding_test
   PRIVATE crimild::foundation
