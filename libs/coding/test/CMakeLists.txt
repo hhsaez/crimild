@@ -8,7 +8,7 @@ target_sources(
     ../src/crimild/coding/TextCoding.test.cpp
     ../src/crimild/coding/TextDecoder.test.cpp
     ../src/crimild/coding/TextEncoder.test.cpp
-    TestRunner.cpp
+    ../src/crimild/coding/TestRunner.cpp
 )
 
 target_link_libraries(
