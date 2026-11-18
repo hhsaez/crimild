@@ -1,9 +1,10 @@
+add_executable( crimild_coding_test )
+
 target_sources(
   crimild_coding_test
 
   PRIVATE TestRunner.cpp
 )
-
 
 target_link_libraries(
   crimild_coding_test

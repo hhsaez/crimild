@@ -2,12 +2,6 @@ crimild_trace()
 
 add_library( crimild_coding STATIC )
 
-if ( CRIMILD_BUILD_TESTS )
-  add_executable( crimild_coding_test )
-endif ()
-
-add_subdirectory( src )
-
 target_include_directories(
   crimild_coding
   PUBLIC
@@ -28,3 +22,5 @@ add_library( crimild::coding ALIAS crimild_coding )
 if ( CRIMILD_BUILD_TESTS )
   add_subdirectory( test )
 endif ()
+
+add_subdirectory( src )
