@@ -6,10 +6,9 @@ target_sources(
   crimild_core_test
 
   PRIVATE TestRunner.cpp
-  PRIVATE Utils/MockComponent.hpp
-  PRIVATE Utils/MockMessageHandler.hpp
-  PRIVATE Utils/MockVisitor.hpp
 )
+
+add_subdirectory( Utils )
 
 target_include_directories(
   crimild_core_test
