@@ -28,16 +28,16 @@
 #ifndef CRIMILD_CODING_
 #define CRIMILD_CODING_
 
-#include "Codable.hpp"
-#include "Decoder.hpp"
-#include "EncodedData.hpp"
-#include "EncodedObject.hpp"
-#include "Encoder.hpp"
-#include "FileDecoder.hpp"
-#include "FileEncoder.hpp"
-#include "MemoryDecoder.hpp"
-#include "MemoryEncoder.hpp"
-#include "Tags.hpp"
+#include "coding/Codable.hpp"
+#include "coding/Decoder.hpp"
+#include "coding/EncodedData.hpp"
+#include "coding/EncodedObject.hpp"
+#include "coding/Encoder.hpp"
+#include "coding/FileDecoder.hpp"
+#include "coding/FileEncoder.hpp"
+#include "coding/MemoryDecoder.hpp"
+#include "coding/MemoryEncoder.hpp"
+#include "coding/Tags.hpp"
 
 namespace crimild::coding {
 

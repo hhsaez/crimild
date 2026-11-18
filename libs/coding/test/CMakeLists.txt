@@ -1,31 +1,24 @@
 add_executable( crimild_coding_test )
 
-target_sources( 
+target_sources(
   crimild_coding_test
-
-  PRIVATE CodableTest.cpp
-  PRIVATE MemoryEncoderTest.cpp
-  PRIVATE TextCodingTest.cpp
-  PRIVATE TextDecoderTest.cpp
-  PRIVATE TextEncoderTest.cpp
-
-  PRIVATE TestRunner.cpp
+  PRIVATE
+    ../src/crimild/coding/Codable.test.cpp
+    ../src/crimild/coding/MemoryEncoder.test.cpp
+    ../src/crimild/coding/TextCoding.test.cpp
+    ../src/crimild/coding/TextDecoder.test.cpp
+    ../src/crimild/coding/TextEncoder.test.cpp
+    TestRunner.cpp
 )
 
-target_include_directories(
-  crimild_coding_test
-  PRIVATE .
-  PRIVATE ../src
-)
-
-target_link_libraries( 
+target_link_libraries(
   crimild_coding_test
   PRIVATE crimild::foundation
-  PRIVATE crimild::coding 
+  PRIVATE crimild::coding
   PRIVATE gtest gmock
 )
 
-gtest_discover_tests( 
+gtest_discover_tests(
   crimild_coding_test
   WORKING_DIRECTORY ${PROJECT_DIR}
   PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
