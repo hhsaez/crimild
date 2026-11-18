@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """Check file ownership and target separation in migrated first-party libraries.
 
-Only libraries in COLOCATED_LIBRARIES are enforced. An absent layout is skipped
-so this checker can land before an incremental migration is merged.
+Only libraries in COLOCATED_LIBRARIES are enforced. A missing required layout
+is an error; non-enrolled libraries are unaffected.
 """
 from pathlib import Path
 
 from check_cmake_sources import source_calls
 
-COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math")
-SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx"}
+COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math", "libs/core")
+SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx", ".frag", ".vert"}
 SOURCE_TARGETS = {
     "coding": ("crimild_coding", "crimild_coding_test"),
     "foundation": ("crimild_foundation", "crimild_foundation_test"),
     "math": ("crimild_math", "crimild_math_test"),
+    "core": ("crimild_core", "crimild_core_test"),
 }
 
 

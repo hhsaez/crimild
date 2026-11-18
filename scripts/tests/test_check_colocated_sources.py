@@ -73,6 +73,16 @@ class ColocatedSourceTest(unittest.TestCase):
             errors = checker.check_library(library, "math", require_layout=True)
             self.assertTrue(any("required colocated source layout" in e for e in errors))
 
+    def test_core_layout_is_required(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            library = Path(temporary) / "core"
+            errors = checker.check_library(library, "core", require_layout=True)
+            self.assertTrue(any("required colocated source layout" in e for e in errors))
+
+    def test_unregistered_shader_asset_is_rejected(self):
+        (self.source / "LitShaderProgram.frag").write_text("// shader")
+        self.assertTrue(any("LitShaderProgram.frag: expected exactly one" in e for e in self.check()))
+
     def test_unmigrated_library_is_skipped(self):
         with tempfile.TemporaryDirectory() as temporary:
             self.assertEqual(checker.check_library(Path(temporary) / "coding", "coding"), [])
