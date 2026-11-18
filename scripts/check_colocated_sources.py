@@ -8,16 +8,21 @@ from pathlib import Path
 
 from check_cmake_sources import source_calls
 
-COLOCATED_LIBRARIES = ("libs/coding",)
+COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation")
 SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx"}
-SOURCE_TARGETS = {"coding": ("crimild_coding", "crimild_coding_test")}
+SOURCE_TARGETS = {
+    "coding": ("crimild_coding", "crimild_coding_test"),
+    "foundation": ("crimild_foundation", "crimild_foundation_test"),
+}
 
 
-def check_library(library: Path, name: str):
+def check_library(library: Path, name: str, *, require_layout=False):
     errors = []
     src = library / "src"
     migrated_root = src / "crimild" / name
     if not migrated_root.is_dir():
+        if require_layout:
+            errors.append(f"{migrated_root}: required colocated source layout is missing")
         return errors
 
     library_target, test_target = SOURCE_TARGETS[name]
@@ -72,7 +77,7 @@ def check_repo(root: Path):
     errors = []
     for relative in COLOCATED_LIBRARIES:
         library = root / relative
-        errors.extend(check_library(library, Path(relative).name))
+        errors.extend(check_library(library, Path(relative).name, require_layout=True))
     return errors
 
 

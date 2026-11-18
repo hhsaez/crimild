@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Common/Named.hpp"
+#include <crimild/foundation/common/Named.hpp>
 
 #include "gtest/gtest.h"
 

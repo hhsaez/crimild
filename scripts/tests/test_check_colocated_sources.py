@@ -61,6 +61,12 @@ class ColocatedSourceTest(unittest.TestCase):
             "target_sources(crimild_coding PRIVATE ../other.cpp)\n")
         self.assertTrue(any("source entry must be local" in e for e in self.check()))
 
+    def test_required_library_without_layout_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            library = Path(temporary) / "foundation"
+            errors = checker.check_library(library, "foundation", require_layout=True)
+            self.assertTrue(any("required colocated source layout" in e for e in errors))
+
     def test_unmigrated_library_is_skipped(self):
         with tempfile.TemporaryDirectory() as temporary:
             self.assertEqual(checker.check_library(Path(temporary) / "coding", "coding"), [])
