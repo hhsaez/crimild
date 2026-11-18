@@ -1,0 +1,6 @@
+add_subdirectory( common )
+add_subdirectory( containers )
+add_subdirectory( filesystem )
+add_subdirectory( log )
+add_subdirectory( memory )
+add_subdirectory( policies )
