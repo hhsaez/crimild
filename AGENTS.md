@@ -50,6 +50,38 @@ questions, and agreed next steps that the commit history leaves out.
   clang-format --dry-run --Werror path/to/changed.cpp
   ```
 
+## Source organization
+
+For libraries adopting the colocated layout, keep related headers,
+implementations, and feature tests together.
+
+- Use `src/crimild/<module>/` as the build-time public include namespace root.
+  Preserve existing `#include <crimild/...>` spelling during migrations.
+- Put a feature's `.hpp`, `.cpp`, and `*.test.cpp` beside each other.
+  Compile `*.test.cpp` only into the corresponding test executable.
+- Keep standalone test infrastructure, such as `TestRunner.cpp`, shared
+  fixtures, and test utilities, under `test/`, not alongside production code.
+- Place a `CMakeLists.txt` in every source directory and register that
+  directory's own files using `target_sources()`. Parent directories use
+  `add_subdirectory()`. Do not centralize file lists at the library root.
+- Preserve the distinction between public and private headers; making an
+  include directory PUBLIC does not make every header a supported public API.
+- Create test executables in the directory where `gtest_discover_tests()`
+  is called. CMake requires both operations to happen in the same directory.
+- Apply the colocated layout incrementally. Do not restructure unrelated
+  libraries when migrating a single module.
+
+### Structural migrations
+
+- Make mechanical moves and CMake/include-path changes without changing
+  functionality. Check relative includes after moving headers.
+- Verify the affected library builds and its tests run. Check representative
+  public `#include <crimild/...>` paths from a consumer target.
+- Run `python3 scripts/check_colocated_sources.py` in addition to the CMake
+  source-style checker. Its allowlist expands as libraries are migrated.
+- Do not declare success from a pushed commit or queued CI check. Report
+  unverified platforms and failing checks explicitly.
+
 ## CMake source declarations
 
 - In ordinary `target_sources()` lists, put an explicit `PRIVATE`, `PUBLIC`, or
