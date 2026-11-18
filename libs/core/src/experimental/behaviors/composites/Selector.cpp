@@ -1,0 +1,40 @@
+#include <crimild/core/experimental/behaviors/composites/Selector.hpp>
+
+using namespace crimild::experimental::behaviors;
+using namespace crimild::experimental::behaviors::composites;
+
+void Selector::initialize( void )
+{
+   // Freeze the child list for this activation so callbacks can safely attach
+   // children without changing the remembered traversal.
+   m_activeBehaviors = getBehaviors();
+   m_currentBehavior = 0;
+}
+
+Behavior::State Selector::update( void )
+{
+   while ( m_currentBehavior < m_activeBehaviors.size() ) {
+      // Retain the child locally: cancellation can clear the activation snapshot.
+      const auto child = m_activeBehaviors[ m_currentBehavior ];
+      const auto state = child->tick();
+      if ( getState() == State::ABORTED ) {
+         return State::RUNNING;
+      }
+      if ( state == State::ABORTED ) {
+         abort();
+         return State::RUNNING;
+      }
+      if ( state != State::FAILURE ) {
+         return state;
+      }
+      ++m_currentBehavior;
+   }
+   return State::FAILURE;
+}
+
+void Selector::terminate( void )
+{
+   Composite::terminate();
+   m_activeBehaviors.clear();
+   m_currentBehavior = 0;
+}

@@ -1,0 +1,27 @@
+#ifndef CRIMILD_EXPERIMENTAL_BEHAVIORS_COMPOSITES_SELECTOR_
+#define CRIMILD_EXPERIMENTAL_BEHAVIORS_COMPOSITES_SELECTOR_
+
+#include <crimild/core/experimental/behaviors/composites/Composite.hpp>
+#include <cstddef>
+
+namespace crimild::experimental::behaviors::composites {
+
+   // Tries children in order until one succeeds, resuming a running child.
+   // Attachments take effect when the next activation begins.
+   class Selector : public Composite {
+   public:
+      virtual ~Selector( void ) noexcept = default;
+
+   protected:
+      virtual void initialize( void ) override;
+      virtual State update( void ) override;
+      virtual void terminate( void ) override;
+
+   private:
+      std::vector< std::shared_ptr< Behavior > > m_activeBehaviors;
+      std::size_t m_currentBehavior = 0;
+   };
+
+}
+
+#endif

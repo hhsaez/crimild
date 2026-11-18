@@ -2,30 +2,24 @@
 #define CRIMILD_EXPERIMENTAL_BEHAVIORS_COMPOSITES_SEQUENCE_
 
 #include <crimild/core/experimental/behaviors/composites/Composite.hpp>
+#include <cstddef>
 
 namespace crimild::experimental::behaviors::composites {
 
+   // Runs children in order, resuming the running child on subsequent ticks.
+   // Attachments take effect when the next activation begins.
    class Sequence : public Composite {
    public:
       virtual ~Sequence( void ) noexcept = default;
 
-      virtual State onExecute( void ) override
-      {
-         State ret = State::SUCCESS;
-         auto behaviors = getBehaviors();
-         for ( auto b : behaviors ) {
-            switch ( b->execute() ) {
-               case State::FAILURE:
-                  return State::FAILURE;
-               case State::RUNNING:
-                  ret = State::RUNNING;
-                  break;
-               default:
-                  break;
-            }
-         }
-         return ret;
-      }
+   protected:
+      virtual void initialize( void ) override;
+      virtual State update( void ) override;
+      virtual void terminate( void ) override;
+
+   private:
+      std::vector< std::shared_ptr< Behavior > > m_activeBehaviors;
+      std::size_t m_currentBehavior = 0;
    };
 
 }
