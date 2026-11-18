@@ -8,11 +8,12 @@ from pathlib import Path
 
 from check_cmake_sources import source_calls
 
-COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation")
+COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math")
 SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx"}
 SOURCE_TARGETS = {
     "coding": ("crimild_coding", "crimild_coding_test"),
     "foundation": ("crimild_foundation", "crimild_foundation_test"),
+    "math": ("crimild_math", "crimild_math_test"),
 }
 
 

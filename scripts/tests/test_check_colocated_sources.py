@@ -67,6 +67,12 @@ class ColocatedSourceTest(unittest.TestCase):
             errors = checker.check_library(library, "foundation", require_layout=True)
             self.assertTrue(any("required colocated source layout" in e for e in errors))
 
+    def test_math_layout_is_required(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            library = Path(temporary) / "math"
+            errors = checker.check_library(library, "math", require_layout=True)
+            self.assertTrue(any("required colocated source layout" in e for e in errors))
+
     def test_unmigrated_library_is_skipped(self):
         with tempfile.TemporaryDirectory() as temporary:
             self.assertEqual(checker.check_library(Path(temporary) / "coding", "coding"), [])
