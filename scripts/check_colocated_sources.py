@@ -10,7 +10,10 @@ from check_cmake_sources import source_calls
 
 COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation")
 SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx"}
-SOURCE_TARGETS = {\n    "coding": ("crimild_coding", "crimild_coding_test"),\n    "foundation": ("crimild_foundation", "crimild_foundation_test"),\n}
+SOURCE_TARGETS = {
+    "coding": ("crimild_coding", "crimild_coding_test"),
+    "foundation": ("crimild_foundation", "crimild_foundation_test"),
+}
 
 
 def check_library(library: Path, name: str, *, require_layout=False):
