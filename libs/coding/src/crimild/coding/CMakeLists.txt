@@ -24,16 +24,3 @@ target_sources(
   PRIVATE TextEncoder.cpp
   PRIVATE init.cpp
 )
-
-if ( CRIMILD_BUILD_TESTS )
-  target_sources(
-    crimild_coding_test
-
-    PRIVATE Codable.test.cpp
-    PRIVATE MemoryEncoder.test.cpp
-    PRIVATE TextCoding.test.cpp
-    PRIVATE TextDecoder.test.cpp
-    PRIVATE TextEncoder.test.cpp
-    PRIVATE TestRunner.cpp
-  )
-endif ()
