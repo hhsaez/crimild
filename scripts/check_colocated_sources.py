@@ -21,6 +21,8 @@ def check_library(library: Path, name: str, *, require_layout=False):
     src = library / "src"
     migrated_root = src / "crimild" / name
     if not migrated_root.is_dir():
+        if require_layout:
+            errors.append(f"{migrated_root}: required colocated source layout is missing")
         return errors
 
     library_target, test_target = SOURCE_TARGETS[name]
