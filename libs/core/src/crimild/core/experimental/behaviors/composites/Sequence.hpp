@@ -7,7 +7,7 @@
 namespace crimild::experimental::behaviors::composites {
 
    // Runs children in order, resuming the running child on subsequent ticks.
-   // Attachments take effect when the next activation begins.
+   // Structural edits abort the current activation; the next tick starts fresh.
    class Sequence : public Composite {
    public:
       virtual ~Sequence( void ) noexcept = default;

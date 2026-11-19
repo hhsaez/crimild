@@ -7,7 +7,7 @@
 namespace crimild::experimental::behaviors::composites {
 
    // Tries children in order until one succeeds, resuming a running child.
-   // Attachments take effect when the next activation begins.
+   // Structural edits abort the current activation; the next tick starts fresh.
    class Selector : public Composite {
    public:
       virtual ~Selector( void ) noexcept = default;

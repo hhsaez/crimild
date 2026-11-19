@@ -12,9 +12,12 @@ namespace crimild::experimental::behaviors::composites {
       Composite( void ) noexcept = default;
 
    public:
-      virtual ~Composite( void ) noexcept = default;
+      virtual ~Composite( void ) noexcept;
 
+      // Automatically detaches from the previous owner; cycles are logged and rejected.
       void attach( std::shared_ptr< Behavior > const &behavior );
+
+      virtual void detach( std::shared_ptr< Behavior > const &behavior ) override;
 
       inline const std::vector< std::shared_ptr< Behavior > > &getBehaviors( void ) const { return m_behaviors; }
 

@@ -40,6 +40,13 @@ questions, and agreed next steps that the commit history leaves out.
 - Append answers and reversals under the date they happen. Link a commit
   or PR if it resolves an entry. Preserve historical wording and notation.
 
+## Error handling
+
+- Do not introduce `throw` expressions in new or modified code. Use
+  `CRIMILD_LOG_ERROR` and return an appropriate failure result for the API.
+- Do not refactor existing exception-using code just to apply this rule unless
+  explicitly requested.
+
 ## C++ formatting
 
 - Use the repository's `.clang-format` with clang-format 20 or newer.

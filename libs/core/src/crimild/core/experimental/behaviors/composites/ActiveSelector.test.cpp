@@ -171,31 +171,26 @@ TEST( experimental_ActiveSelector, abort_cleans_up_once_and_next_tick_restarts )
    EXPECT_EQ( running->initializations, 2 );
 }
 
-TEST( experimental_ActiveSelector, attachments_during_update_are_deferred_until_next_tick )
+TEST( experimental_ActiveSelector, attachment_during_update_aborts_and_stops_selection )
 {
    ActiveSelector selector;
    std::vector< int > calls;
    auto mutator = std::make_shared< Child >( 1, State::FAILURE, calls );
-   auto appended = std::make_shared< Child >( 3, State::SUCCESS, calls );
    bool attached = false;
    mutator->callback = [ & ] {
       if ( !attached ) {
+         attached = true;
          const auto capacity = selector.getBehaviors().capacity();
-         selector.attach( appended );
          while ( selector.getBehaviors().size() <= capacity ) {
             selector.attach( std::make_shared< Child >( 3, State::SUCCESS, calls ) );
          }
-         attached = true;
       }
    };
-   auto running = std::make_shared< Child >( 2, State::RUNNING, calls );
    selector.attach( mutator );
-   selector.attach( running );
-   ASSERT_EQ( selector.tick(), State::RUNNING );
-   EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
-   EXPECT_EQ( appended->getState(), State::READY );
-
-   running->result = State::FAILURE;
+   selector.attach( std::make_shared< Child >( 2, State::FAILURE, calls ) );
+   EXPECT_EQ( selector.tick(), State::ABORTED );
+   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+   EXPECT_EQ( mutator->terminations, 1 );
    calls.clear();
    EXPECT_EQ( selector.tick(), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );

@@ -156,32 +156,28 @@ TEST( experimental_Sequence, resumes_running_child_without_reevaluating_successf
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
 }
 
-TEST( experimental_Sequence, defers_children_attached_during_execution_until_next_activation )
+TEST( experimental_Sequence, attachment_during_execution_aborts_and_stops_traversal )
 {
    Sequence sequence;
    std::vector< int > calls;
-   auto appended = std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls );
    auto mutator = std::make_shared< CallbackBehavior >();
    bool attached = false;
    mutator->callback = [ & ] {
       calls.push_back( 1 );
       if ( !attached ) {
-         // Force reallocation of the original vector while it is being traversed.
+         attached = true;
          const auto capacity = sequence.getBehaviors().capacity();
-         sequence.attach( appended );
          while ( sequence.getBehaviors().size() <= capacity ) {
             sequence.attach( std::make_shared< RecordingBehavior >( 3, State::SUCCESS, calls ) );
          }
-         attached = true;
       }
       return State::SUCCESS;
    };
    sequence.attach( mutator );
    sequence.attach( std::make_shared< RecordingBehavior >( 2, State::SUCCESS, calls ) );
-
-   EXPECT_EQ( sequence.tick(), State::SUCCESS );
-   EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
-   EXPECT_EQ( appended->getState(), State::READY );
+   EXPECT_EQ( sequence.tick(), State::ABORTED );
+   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+   EXPECT_EQ( mutator->getState(), State::ABORTED );
 
    calls.clear();
    EXPECT_EQ( sequence.tick(), State::SUCCESS );
@@ -237,7 +233,7 @@ TEST( experimental_Sequence, running_child_failure_stops_and_next_activation_res
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 }
 
-TEST( experimental_Sequence, attachments_while_running_wait_until_next_activation )
+TEST( experimental_Sequence, attachment_while_running_aborts_and_restarts_with_new_children )
 {
    Sequence sequence;
    std::vector< int > calls;
@@ -246,13 +242,12 @@ TEST( experimental_Sequence, attachments_while_running_wait_until_next_activatio
    sequence.attach( running );
    ASSERT_EQ( sequence.tick(), State::RUNNING );
    sequence.attach( appended );
-
-   running->result = State::SUCCESS;
-   calls.clear();
-   EXPECT_EQ( sequence.tick(), State::SUCCESS );
-   EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+   EXPECT_EQ( sequence.getState(), State::ABORTED );
+   EXPECT_EQ( running->getState(), State::ABORTED );
+   EXPECT_EQ( running->terminations, 1 );
    EXPECT_EQ( appended->getState(), State::READY );
 
+   running->result = State::SUCCESS;
    calls.clear();
    EXPECT_EQ( sequence.tick(), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );

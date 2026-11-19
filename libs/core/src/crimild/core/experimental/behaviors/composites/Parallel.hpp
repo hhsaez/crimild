@@ -7,7 +7,7 @@
 namespace crimild::experimental::behaviors::composites {
 
    // Ticks unfinished children each tick; all must succeed and any failure stops.
-   // Attachments take effect when the next activation begins.
+   // Structural edits abort the current activation; the next tick starts fresh.
    class Parallel : public Composite {
    public:
       virtual ~Parallel( void ) noexcept = default;
