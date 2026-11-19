@@ -45,26 +45,24 @@ argument. Cancellation is exercised through `abort()`, not an `ABORTED` return.
 - Structural edits replace the earlier deferred-attachment policy: the next tick
   restarts traversal with a fresh snapshot, rather than resuming the edited one.
 
-## Monitor
+## ActiveSequence
 
-`composites::Monitor` derives directly from `Composite`. Attach exactly two children
-in order: a condition subtree and an action subtree. An incomplete or oversized
-monitor logs an error and fails without ticking either branch.
+`composites::ActiveSequence` starts traversal at the first child on every tick.
+It continues only after `SUCCESS`, returns the first `FAILURE` or `RUNNING`, and
+succeeds when all children succeed. An empty active sequence succeeds. When an
+earlier child blocks traversal, later running children are aborted before returning.
+Child cancellation cancels the active sequence and stops traversal immediately.
 
-Each tick evaluates the condition subtree first. `SUCCESS` is a passing instant
-check; `RUNNING` means a monitoring condition remains valid and active. Both permit
-the action subtree to tick. `FAILURE` stops the monitor and aborts its running action
-before any further action update. Action success or failure completes the monitor
-with that result and aborts any condition still running. Cancellation of either
-branch cancels the monitor; external cancellation propagates to both branches.
+Conditions remain reusable instant checks: `SUCCESS` means true and `FAILURE`
+means false. For example, attach `EnemyInRange` followed by a remembered `Sequence`
+of aim and fire-burst actions. Each tick rechecks range while the inner sequence
+resumes its current action. If range becomes false, the running action is aborted
+before another update. Rechecking does not reinitialize a still-running child.
 
-For example, attach a target-visible monitoring condition followed by a `Sequence`
-of approach and attack actions. The sequence retains its progress while the monitor
-rechecks visibility each tick. For several continuously monitored assumptions, use
-a `Parallel` of conditions that return `RUNNING` while valid and `FAILURE` when
-invalid. The condition subtree controls how its descendants are reevaluated;
-putting instant checks in a remembered sequence with a running child would still
-skip the earlier checks.
+Put multiple actions inside a remembered `Sequence` when their progress should be
+preserved. Successful children attached directly to `ActiveSequence` are ticked
+again on subsequent ticks and can repeat their side effects. A `RUNNING` condition
+blocks later actions; it does not authorize them to run alongside the condition.
 
-Structural edits follow the normal composite ownership and cancellation rules.
-The next tick evaluates the current two branches from the start.
+Structural edits follow the normal composite ownership and cancellation rules;
+the next tick starts traversal again with the current children.

@@ -3,10 +3,10 @@ target_sources(
 
   PRIVATE ActiveSelector.cpp
   PUBLIC ActiveSelector.hpp
+  PRIVATE ActiveSequence.cpp
+  PUBLIC ActiveSequence.hpp
   PRIVATE Composite.cpp
   PUBLIC Composite.hpp
-  PRIVATE Monitor.cpp
-  PUBLIC Monitor.hpp
   PRIVATE Parallel.cpp
   PUBLIC Parallel.hpp
   PRIVATE Selector.cpp
@@ -20,8 +20,8 @@ if ( CRIMILD_BUILD_TESTS )
     crimild_core_test
 
     PRIVATE ActiveSelector.test.cpp
+    PRIVATE ActiveSequence.test.cpp
     PRIVATE Composite.test.cpp
-    PRIVATE Monitor.test.cpp
     PRIVATE Parallel.test.cpp
     PRIVATE Selector.test.cpp
     PRIVATE Sequence.test.cpp

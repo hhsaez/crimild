@@ -1,4 +1,5 @@
 #include <crimild/core/experimental/behaviors/composites/ActiveSelector.hpp>
+#include <crimild/core/experimental/behaviors/composites/ActiveSequence.hpp>
 #include <crimild/core/experimental/behaviors/composites/Composite.hpp>
 #include <crimild/core/experimental/behaviors/composites/Parallel.hpp>
 #include <crimild/core/experimental/behaviors/composites/Selector.hpp>
@@ -224,6 +225,7 @@ namespace {
       crimild::experimental::behaviors::composites::Sequence,
       crimild::experimental::behaviors::composites::Selector,
       crimild::experimental::behaviors::composites::ActiveSelector,
+      crimild::experimental::behaviors::composites::ActiveSequence,
       crimild::experimental::behaviors::composites::Parallel >;
    TYPED_TEST_SUITE( experimental_CompositeCancellation, CompositeTypes );
 
