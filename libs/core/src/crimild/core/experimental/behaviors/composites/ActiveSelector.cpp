@@ -5,7 +5,7 @@ using namespace crimild::experimental::behaviors::composites;
 
 Behavior::State ActiveSelector::update( void )
 {
-   // Snapshot the children so attachments from callbacks become visible next tick.
+   // Keep children alive if a callback edits the collection and aborts us.
    const auto behaviors = getBehaviors();
    for ( const auto &behavior : behaviors ) {
       const auto state = behavior->tick();

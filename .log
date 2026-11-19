@@ -516,3 +516,9 @@
 - Selector and ActiveSelector inherit directly from Composite: remembered traversal belongs to Selector, while ActiveSelector reevaluates priority each tick and cancels displaced work.
 - Parallel initially requires all children to succeed and stops on any failure; children progress on the same thread, with completion tracked per activation so old SUCCESS states do not suppress a restart.
 - Document subsystem contracts under INVARIANTS. Behavior update() returns only SUCCESS, FAILURE, or RUNNING; READY and ABORTED belong to lifecycle infrastructure. Assert this contract in debug builds and test cancellation through abort().
+- Behavior instances require one structural parent because execution state is stored per object. Reject cycles and foreign owners; require explicit detachment so construction mistakes cannot silently reparent a branch.
+- Structural edits now abort active composites/decorators and restart on the next tick, replacing deferred attachments. Keep runtime editing small by stopping traversal rather than repairing an activation snapshot.
+- Review spacing is local readability feedback, not a formatting or lint convention.
+
+# 2026-11-19
+- Choose ActiveSequence over Monitor: reusable SUCCESS/FAILURE conditions cover the guard checks, and a nested remembered Sequence preserves action progress (#108).

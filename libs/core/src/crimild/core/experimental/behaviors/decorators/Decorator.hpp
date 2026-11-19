@@ -10,9 +10,12 @@ namespace crimild::experimental::behaviors::decorators {
       Decorator( void ) noexcept = default;
 
    public:
-      virtual ~Decorator( void ) noexcept = default;
+      virtual ~Decorator( void ) noexcept;
 
+      // Automatically reparents the child; null detaches it, and cycles are rejected.
       void attach( std::shared_ptr< Behavior > const &behavior );
+
+      virtual void detach( std::shared_ptr< Behavior > const &behavior ) override;
 
       inline std::shared_ptr< Behavior > getBehavior( void ) const { return m_behavior; }
 

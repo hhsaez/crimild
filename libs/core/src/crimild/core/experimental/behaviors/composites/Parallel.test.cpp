@@ -184,34 +184,31 @@ TEST( experimental_Parallel, restarts_after_failure_and_abort )
    EXPECT_EQ( second->initializations, 3 );
 }
 
-TEST( experimental_Parallel, attachments_during_activation_wait_until_restart )
+TEST( experimental_Parallel, attachment_during_update_aborts_and_stops_traversal )
 {
    Parallel parallel;
    std::vector< int > calls;
-   auto mutator = std::make_shared< Child >( 1, State::RUNNING, calls );
-   auto appended = std::make_shared< Child >( 2, State::SUCCESS, calls );
+   auto mutator = std::make_shared< Child >( 1, State::SUCCESS, calls );
    bool attached = false;
    mutator->callback = [ & ] {
       if ( !attached ) {
-         const auto capacity = parallel.getBehaviors().capacity();
-         parallel.attach( appended );
-         while ( parallel.getBehaviors().size() <= capacity ) {
-            parallel.attach( std::make_shared< Child >( 2, State::SUCCESS, calls ) );
-         }
          attached = true;
+         const auto capacity = parallel.getBehaviors().capacity();
+         while ( parallel.getBehaviors().size() <= capacity ) {
+            parallel.attach( std::make_shared< Child >( 3, State::SUCCESS, calls ) );
+         }
       }
    };
    parallel.attach( mutator );
-   ASSERT_EQ( parallel.tick(), State::RUNNING );
-   EXPECT_EQ( appended->getState(), State::READY );
-   mutator->result = State::SUCCESS;
-   calls.clear();
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   parallel.attach( std::make_shared< Child >( 2, State::SUCCESS, calls ) );
+   EXPECT_EQ( parallel.tick(), State::ABORTED );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
+   EXPECT_EQ( mutator->terminations, 1 );
 
    calls.clear();
    EXPECT_EQ( parallel.tick(), State::SUCCESS );
-   std::vector< int > expected( parallel.getBehaviors().size(), 2 );
+   std::vector< int > expected( parallel.getBehaviors().size(), 3 );
    expected[ 0 ] = 1;
+   expected[ 1 ] = 2;
    EXPECT_EQ( calls, expected );
 }
