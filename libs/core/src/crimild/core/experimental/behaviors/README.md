@@ -44,3 +44,27 @@ argument. Cancellation is exercised through `abort()`, not an `ABORTED` return.
   cancels its selecting composite through `abort()`.
 - Structural edits replace the earlier deferred-attachment policy: the next tick
   restarts traversal with a fresh snapshot, rather than resuming the edited one.
+
+## Monitor
+
+`composites::Monitor` derives directly from `Composite`. Attach exactly two children
+in order: a condition subtree and an action subtree. An incomplete or oversized
+monitor logs an error and fails without ticking either branch.
+
+Each tick evaluates the condition subtree first. `SUCCESS` is a passing instant
+check; `RUNNING` means a monitoring condition remains valid and active. Both permit
+the action subtree to tick. `FAILURE` stops the monitor and aborts its running action
+before any further action update. Action success or failure completes the monitor
+with that result and aborts any condition still running. Cancellation of either
+branch cancels the monitor; external cancellation propagates to both branches.
+
+For example, attach a target-visible monitoring condition followed by a `Sequence`
+of approach and attack actions. The sequence retains its progress while the monitor
+rechecks visibility each tick. For several continuously monitored assumptions, use
+a `Parallel` of conditions that return `RUNNING` while valid and `FAILURE` when
+invalid. The condition subtree controls how its descendants are reevaluated;
+putting instant checks in a remembered sequence with a running child would still
+skip the earlier checks.
+
+Structural edits follow the normal composite ownership and cancellation rules.
+The next tick evaluates the current two branches from the start.

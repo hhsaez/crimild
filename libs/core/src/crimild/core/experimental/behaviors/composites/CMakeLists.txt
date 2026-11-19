@@ -5,6 +5,8 @@ target_sources(
   PUBLIC ActiveSelector.hpp
   PRIVATE Composite.cpp
   PUBLIC Composite.hpp
+  PRIVATE Monitor.cpp
+  PUBLIC Monitor.hpp
   PRIVATE Parallel.cpp
   PUBLIC Parallel.hpp
   PRIVATE Selector.cpp
@@ -19,6 +21,7 @@ if ( CRIMILD_BUILD_TESTS )
 
     PRIVATE ActiveSelector.test.cpp
     PRIVATE Composite.test.cpp
+    PRIVATE Monitor.test.cpp
     PRIVATE Parallel.test.cpp
     PRIVATE Selector.test.cpp
     PRIVATE Sequence.test.cpp
