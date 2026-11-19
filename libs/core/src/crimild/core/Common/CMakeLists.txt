@@ -13,6 +13,5 @@ if ( CRIMILD_BUILD_TESTS )
     crimild_core_test
 
     PRIVATE Signal.test.cpp
-    PRIVATE Variant.test.cpp
   )
 endif ()

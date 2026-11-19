@@ -20,7 +20,6 @@ if ( CRIMILD_BUILD_TESTS )
   target_sources(
     crimild_core_test
 
-    PRIVATE Clock.test.cpp
     PRIVATE Input.test.cpp
     PRIVATE Simulation.test.cpp
   )

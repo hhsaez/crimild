@@ -83,6 +83,22 @@ class ColocatedSourceTest(unittest.TestCase):
         (self.source / "LitShaderProgram.frag").write_text("// shader")
         self.assertTrue(any("LitShaderProgram.frag: expected exactly one" in e for e in self.check()))
 
+    def test_known_preexisting_unregistered_core_tests_are_exempt(self):
+        core = self.root / "libs" / "core"
+        location = core / "src" / "crimild" / "core" / "Assemblies"
+        location.mkdir(parents=True)
+        (core / "test").mkdir()
+        (core / "src" / "CMakeLists.txt").write_text("add_subdirectory(crimild)\n")
+        (core / "src" / "crimild" / "CMakeLists.txt").write_text("add_subdirectory(core)\n")
+        (core / "src" / "crimild" / "core" / "CMakeLists.txt").write_text("add_subdirectory(Assemblies)\n")
+        (core / "test" / "CMakeLists.txt").write_text("")
+        (location / "CMakeLists.txt").write_text("")
+        (location / "AssemblyDAG.test.cpp").write_text("// preexisting unregistered test\n")
+        self.assertEqual(checker.check_library(core, "core", require_layout=True), [])
+        (location / "NewUnregistered.test.cpp").write_text("// new unregistered test\n")
+        errors = checker.check_library(core, "core", require_layout=True)
+        self.assertTrue(any("NewUnregistered.test.cpp: expected exactly one" in e for e in errors))
+
     def test_unmigrated_library_is_skipped(self):
         with tempfile.TemporaryDirectory() as temporary:
             self.assertEqual(checker.check_library(Path(temporary) / "coding", "coding"), [])

@@ -10,6 +10,5 @@ if ( CRIMILD_BUILD_TESTS )
     crimild_core_test
 
     PRIVATE Assembly.test.cpp
-    PRIVATE AssemblyDAG.test.cpp
   )
 endif ()

@@ -9,6 +9,16 @@ from pathlib import Path
 from check_cmake_sources import source_calls
 
 COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math", "libs/core")
+# Feature tests that already existed but were deliberately not compiled before
+# the core file-layout migration. Keep them colocated without enabling them.
+UNREGISTERED_FEATURE_TESTS = {
+    "core": frozenset({
+        "Assemblies/AssemblyDAG.test.cpp",
+        "Common/Variant.test.cpp",
+        "Simulation/Clock.test.cpp",
+    }),
+}
+
 SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx", ".frag", ".vert"}
 SOURCE_TARGETS = {
     "coding": ("crimild_coding", "crimild_coding_test"),
@@ -69,8 +79,14 @@ def check_library(library: Path, name: str, *, require_layout=False):
                 errors.append(f"{source}: test infrastructure belongs in test/")
             if source.name.endswith(".test.cpp") and not source.is_relative_to(src):
                 errors.append(f"{source}: feature tests belong next to their sources")
-            if declared.get(source, 0) != 1:
-                errors.append(f"{source}: expected exactly one local target_sources() entry, found {declared.get(source, 0)}")
+            count = declared.get(source, 0)
+            legacy_unregistered = (
+                source.is_relative_to(migrated_root)
+                and source.relative_to(migrated_root).as_posix()
+                in UNREGISTERED_FEATURE_TESTS.get(name, ())
+            )
+            if count != 1 and not (legacy_unregistered and count == 0):
+                errors.append(f"{source}: expected exactly one local target_sources() entry, found {count}")
 
     return errors
 
