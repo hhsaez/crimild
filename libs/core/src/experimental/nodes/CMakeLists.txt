@@ -1,8 +1,0 @@
-add_subdirectory( 3d )
-add_subdirectory( visitors )
-
-target_sources(
-  crimild_core
-
-  PRIVATE Node.cpp
-)

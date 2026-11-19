@@ -1,19 +1,30 @@
 #!/usr/bin/env python3
 """Check file ownership and target separation in migrated first-party libraries.
 
-Only libraries in COLOCATED_LIBRARIES are enforced. An absent layout is skipped
-so this checker can land before an incremental migration is merged.
+Only libraries in COLOCATED_LIBRARIES are enforced. A missing required layout
+is an error; non-enrolled libraries are unaffected.
 """
 from pathlib import Path
 
 from check_cmake_sources import source_calls
 
-COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math")
-SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx"}
+COLOCATED_LIBRARIES = ("libs/coding", "libs/foundation", "libs/math", "libs/core")
+# Feature tests that already existed but were deliberately not compiled before
+# the core file-layout migration. Keep them colocated without enabling them.
+UNREGISTERED_FEATURE_TESTS = {
+    "core": frozenset({
+        "Assemblies/AssemblyDAG.test.cpp",
+        "Common/Variant.test.cpp",
+        "Simulation/Clock.test.cpp",
+    }),
+}
+
+SOURCE_EXTENSIONS = {".hpp", ".h", ".cpp", ".cc", ".cxx", ".frag", ".vert"}
 SOURCE_TARGETS = {
     "coding": ("crimild_coding", "crimild_coding_test"),
     "foundation": ("crimild_foundation", "crimild_foundation_test"),
     "math": ("crimild_math", "crimild_math_test"),
+    "core": ("crimild_core", "crimild_core_test"),
 }
 
 
@@ -68,8 +79,14 @@ def check_library(library: Path, name: str, *, require_layout=False):
                 errors.append(f"{source}: test infrastructure belongs in test/")
             if source.name.endswith(".test.cpp") and not source.is_relative_to(src):
                 errors.append(f"{source}: feature tests belong next to their sources")
-            if declared.get(source, 0) != 1:
-                errors.append(f"{source}: expected exactly one local target_sources() entry, found {declared.get(source, 0)}")
+            count = declared.get(source, 0)
+            legacy_unregistered = (
+                source.is_relative_to(migrated_root)
+                and source.relative_to(migrated_root).as_posix()
+                in UNREGISTERED_FEATURE_TESTS.get(name, ())
+            )
+            if count != 1 and not (legacy_unregistered and count == 0):
+                errors.append(f"{source}: expected exactly one local target_sources() entry, found {count}")
 
     return errors
 
