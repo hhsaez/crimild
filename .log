@@ -519,3 +519,6 @@
 - Behavior instances require one structural parent because execution state is stored per object. Reject cycles and foreign owners; require explicit detachment so construction mistakes cannot silently reparent a branch.
 - Structural edits now abort active composites/decorators and restart on the next tick, replacing deferred attachments. Keep runtime editing small by stopping traversal rather than repairing an activation snapshot.
 - Review spacing is local readability feedback, not a formatting or lint convention.
+
+# 2026-11-19
+- Choose ActiveSequence over Monitor: reusable SUCCESS/FAILURE conditions cover the guard checks, and a nested remembered Sequence preserves action progress (#108).
