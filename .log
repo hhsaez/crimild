@@ -527,3 +527,4 @@
 - Use std::variant for Blackboard values, starting with Context's existing alternatives and extending the list when behaviors need more types. Entity references should cover most game data; std::any's open type set is not needed yet.
 - Blackboard accepts typed keys and dynamic string names for the same entries. Own the names and return optional copies; leave Systems Context's storage and typed-only API unchanged for now.
 - Start with a shared blackboard instance for cooperating behaviors. Scoped lookup and behavior lifecycle integration remain separate steps so sibling communication does not require automatic scope creation.
+- Keep Blackboard in crimild::experimental as the engine's preferred information-exchange abstraction, including future context, settings, and global-object discussions. Its shared-knowledge metaphor and academic roots are intentional; revisit the choice together if a concrete use case no longer fits.

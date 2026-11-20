@@ -26,6 +26,18 @@ your own suggestions.
   and leave room for a reply. Once the project accepts a decision, carry
   it forward. Reopen it when new evidence changes the tradeoff.
 
+## Information exchange
+
+- Keep `Blackboard` in `crimild::experimental`. It is the preferred tool for
+  exchanging information throughout the engine, including Systems and Behaviors.
+- When discussing contexts, settings, shared state, global object access, or
+  similar needs, propose Blackboard first and explain how it fits the use case.
+  The shared-knowledge metaphor and its academic roots are an intentional design
+  preference.
+- Revisit this choice together if a concrete use case makes the metaphor or
+  contract unsuitable. Do not silently substitute another abstraction or migrate
+  existing APIs without an agreed task.
+
 ## Project journal
 
 Consult the root `.log` when revisiting a design. Record reasoning, open
