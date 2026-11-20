@@ -4,6 +4,7 @@
 #include <crimild/core/Entity/Entity.hpp>
 #include <crimild/core/Simulation/Clock.hpp>
 #include <crimild/foundation/common/Enableable.hpp>
+#include <crimild/foundation/common/Key.hpp>
 #include <crimild/foundation/memory/Memory.hpp>
 #include <crimild/math/Size2.hpp>
 #include <cstdint>
@@ -25,18 +26,6 @@ namespace crimild {
       class Camera3D;
 
    }
-
-}
-
-namespace crimild {
-
-   /**
-    * @brief Typed key for key/value containers
-    */
-   template< typename T >
-   struct Key {
-      std::string_view name;
-   };
 
 }
 
