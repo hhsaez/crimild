@@ -13,15 +13,15 @@ namespace crimild::experimental::behaviors::decorators {
       virtual ~Decorator( void ) noexcept;
 
       // Automatically reparents the child; null detaches it, and cycles are rejected.
-      void attach( std::shared_ptr< Behavior > const &behavior );
+      void attach( std::shared_ptr< Behavior > const &behavior, std::shared_ptr< Blackboard > const &blackboard = nullptr );
 
-      virtual void detach( std::shared_ptr< Behavior > const &behavior ) override;
+      virtual void detach( std::shared_ptr< Behavior > const &behavior, std::shared_ptr< Blackboard > const &blackboard = nullptr ) override;
 
       inline std::shared_ptr< Behavior > getBehavior( void ) const { return m_behavior; }
 
    protected:
       // Overrides should chain here to abort the running child.
-      virtual void terminate( void ) override;
+      virtual void terminate( std::shared_ptr< Blackboard > const &blackboard ) override;
 
    private:
       std::shared_ptr< Behavior > m_behavior;

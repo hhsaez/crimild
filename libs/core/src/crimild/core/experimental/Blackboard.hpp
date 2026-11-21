@@ -1,6 +1,7 @@
 #ifndef CRIMILD_CORE_EXPERIMENTAL_BLACKBOARD_
 #define CRIMILD_CORE_EXPERIMENTAL_BLACKBOARD_
 
+#include <crimild/core/experimental/Resource.hpp>
 #include <crimild/foundation/common/Key.hpp>
 #include <crimild/math/Size2.hpp>
 #include <cstdint>
@@ -28,10 +29,12 @@ namespace crimild::experimental {
     * @brief Shared data accessed through typed keys or dynamic names
     *
     * Callers that need to exchange values use the same blackboard instance.
-    * Copying a blackboard copies its entries; Entity references remain shared.
+    * As a Resource, a blackboard is non-copyable; share its identity through handles.
     * Key names are owned by the blackboard, and get() returns a copy.
     */
-   class Blackboard {
+   class Blackboard : public Resource {
+      CRIMILD_IMPLEMENT_RTTI( crimild::experimental::Blackboard )
+
    public:
       using Value = std::variant<
          bool,

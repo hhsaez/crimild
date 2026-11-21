@@ -2,6 +2,7 @@
 #define CRIMILD_BEHAVIORS_BEHAVIOR_
 
 #include <crimild/core/Entity/Entity.hpp>
+#include <crimild/core/experimental/Blackboard.hpp>
 #include <crimild/foundation/common/Enableable.hpp>
 #include <crimild/foundation/common/Named.hpp>
 #include <memory>
@@ -42,36 +43,40 @@ namespace crimild::experimental::behaviors {
       inline std::shared_ptr< Behavior > getParent( void ) const { return retain( m_parent ); }
 
       // Detach from the current owner, retaining this behavior during the move.
-      std::shared_ptr< Behavior > detachFromParent( void );
+      std::shared_ptr< Behavior > detachFromParent( std::shared_ptr< Blackboard > const &blackboard = nullptr );
 
       inline State getState( void ) const { return m_state; }
 
       // Advance the current activation, or start a new one after completion.
-      State tick( void );
+      // The caller supplies the same non-null board for all calls in an activation.
+      State tick( std::shared_ptr< Blackboard > const &blackboard );
 
-      // Interrupt a running activation; repeated calls have no effect.
-      void abort( void );
+      // Interrupt a running activation using its board; repeated calls have no effect.
+      void abort( std::shared_ptr< Blackboard > const &blackboard );
 
    protected:
       // Reject invalid ownership before changing a collection or aborting work.
       bool canAttach( const Behavior *child ) const;
 
+      // Construction can omit the board; edits that interrupt work cannot.
+      bool canEdit( const Behavior *child, std::shared_ptr< Blackboard > const &blackboard ) const;
+
       // Called once before an activation's first update.
-      virtual void initialize( void );
+      virtual void initialize( std::shared_ptr< Blackboard > const &blackboard );
 
       // Must return SUCCESS, FAILURE, or RUNNING.
       // READY and ABORTED are managed exclusively by the lifecycle infrastructure.
-      virtual State update( void );
+      virtual State update( std::shared_ptr< Blackboard > const &blackboard );
 
       // Called after completion or interruption, with the final state stored.
-      virtual void terminate( void );
+      virtual void terminate( std::shared_ptr< Blackboard > const &blackboard );
 
    private:
       friend class composites::Composite;
       friend class decorators::Decorator;
 
       // Hierarchy owners override this hook; leaves have no children to detach.
-      virtual void detach( std::shared_ptr< Behavior > const &behavior );
+      virtual void detach( std::shared_ptr< Behavior > const &behavior, std::shared_ptr< Blackboard > const &blackboard = nullptr );
 
       inline void setParent( Behavior *parent ) noexcept { m_parent = parent; }
 

@@ -15,15 +15,15 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~Composite( void ) noexcept;
 
       // Automatically detaches from the previous owner; cycles are logged and rejected.
-      void attach( std::shared_ptr< Behavior > const &behavior );
+      void attach( std::shared_ptr< Behavior > const &behavior, std::shared_ptr< Blackboard > const &blackboard = nullptr );
 
-      virtual void detach( std::shared_ptr< Behavior > const &behavior ) override;
+      virtual void detach( std::shared_ptr< Behavior > const &behavior, std::shared_ptr< Blackboard > const &blackboard = nullptr ) override;
 
       inline const std::vector< std::shared_ptr< Behavior > > &getBehaviors( void ) const { return m_behaviors; }
 
    protected:
       // Overrides should chain here to abort running children.
-      virtual void terminate( void ) override;
+      virtual void terminate( std::shared_ptr< Blackboard > const &blackboard ) override;
 
    private:
       std::vector< std::shared_ptr< Behavior > > m_behaviors;
