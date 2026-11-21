@@ -13,9 +13,9 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~Parallel( void ) noexcept = default;
 
    protected:
-      virtual void initialize( void ) override;
-      virtual State update( void ) override;
-      virtual void terminate( void ) override;
+      virtual void initialize( std::shared_ptr< Blackboard > const &blackboard ) override;
+      virtual State update( std::shared_ptr< Blackboard > const &blackboard ) override;
+      virtual void terminate( std::shared_ptr< Blackboard > const &blackboard ) override;
 
    private:
       std::vector< std::shared_ptr< Behavior > > m_activeBehaviors;

@@ -1,5 +1,35 @@
 # Experimental behaviors
 
+## Blackboards
+
+`crimild::experimental::Blackboard` is a Resource (and therefore an Entity).
+Its variant-backed entries can be accessed with typed keys or dynamic names.
+
+Pass `std::shared_ptr<Blackboard> const&` to `tick()` and `abort()`. The same
+handle reaches `initialize()`, `update()`, `terminate()`, and child behaviors.
+Siblings exchange information through the same board, and entries persist across
+ticks. The caller supplies the same board throughout an activation, including
+cancellation; Behavior does not store or validate the board's identity.
+
+The caller owns the board between calls. Execution temporarily retains it across
+callbacks, but base Behavior has no Blackboard member. A subclass may explicitly
+retain it when necessary; avoid strong ownership cycles through Entity entries.
+Abort running work with its board before releasing the execution owner.
+
+A null board passed to `tick()` logs an error and returns `FAILURE` without
+changing the activation. A null board cannot abort running work; the request is
+logged and rejected without changing state. Aborting inactive work remains a no-op.
+
+`attach()`, `detach()`, and `detachFromParent()` accept an optional board argument.
+Construction and no-op edits can omit it. An edit involving a running owner or
+child requires its activation's board; missing-board edits are logged and rejected
+before cancellation or collection changes. Automatic reparenting forwards the
+supplied board to both owners. For owners using different boards, explicitly
+detach with the old board, then attach with the destination's board.
+
+Systems Context migration, scoped lookup, and Blackboard entry serialization
+remain separate work. Resource inheritance does not add serialization of entries.
+
 ## INVARIANTS
 
 - `update()` must return `SUCCESS`, `FAILURE`, or `RUNNING`.
