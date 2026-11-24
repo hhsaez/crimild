@@ -27,6 +27,7 @@ namespace {
       std::vector< State > terminationStates;
       std::function< void() > onInitialize;
       std::function< void() > onUpdate;
+      std::function< void( State ) > onTerminate;
 
    protected:
       void initialize( void ) override
@@ -46,10 +47,14 @@ namespace {
          return TestBehavior::update();
       }
 
-      void terminate( void ) override
+      void terminate( State state ) override
       {
          calls.push_back( "terminate" );
-         terminationStates.push_back( getState() );
+         terminationStates.push_back( state );
+         EXPECT_EQ( state, getState() );
+         if ( onTerminate ) {
+            onTerminate( state );
+         }
       }
    };
 
@@ -269,5 +274,27 @@ TEST( experimental_Behavior, abort_during_update_preserves_cancellation_on_first
          EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
          EXPECT_EQ( behavior.terminationStates.size(), 2 );
       }
+   }
+}
+
+TEST( experimental_Behavior, termination_exposes_the_final_state_and_recursive_abort_does_not_repeat_cleanup )
+{
+   for ( const auto reason : { Behavior::State::SUCCESS, Behavior::State::FAILURE, Behavior::State::ABORTED } ) {
+      LifecycleBehavior behavior;
+      behavior.onTerminate = [ & ]( Behavior::State state ) {
+         EXPECT_EQ( state, reason );
+         ASSERT_EQ( behavior.getState(), reason );
+         behavior.abort();
+         behavior.abort();
+      };
+      ASSERT_EQ( behavior.tick(), Behavior::State::RUNNING );
+      if ( reason == Behavior::State::ABORTED ) {
+         behavior.abort();
+      } else {
+         behavior.result = reason;
+         EXPECT_EQ( behavior.tick(), reason );
+      }
+      EXPECT_EQ( behavior.getState(), reason );
+      EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { reason } ) );
    }
 }

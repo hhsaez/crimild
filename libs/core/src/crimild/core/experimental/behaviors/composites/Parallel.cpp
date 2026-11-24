@@ -36,9 +36,9 @@ Behavior::State Parallel::update( void )
    return allCompleted ? State::SUCCESS : State::RUNNING;
 }
 
-void Parallel::terminate( void )
+void Parallel::terminate( State state )
 {
-   Composite::terminate();
+   Composite::terminate( state );
    m_activeBehaviors.clear();
    m_completed.clear();
 }

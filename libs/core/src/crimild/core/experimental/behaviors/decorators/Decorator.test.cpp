@@ -42,10 +42,11 @@ namespace {
          return State::RUNNING;
       }
 
-      void terminate( void ) override
+      void terminate( State state ) override
       {
          ++terminations;
-         terminatedWith = getState();
+         terminatedWith = state;
+         EXPECT_EQ( state, getState() );
       }
    };
 

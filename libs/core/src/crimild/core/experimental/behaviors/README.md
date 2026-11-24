@@ -8,12 +8,19 @@
 - A newly constructed behavior is `READY`.
 - `tick()` starts a new activation when the behavior is not already `RUNNING`,
   calling `initialize()` once before the activation's first `update()`.
-- Returning `SUCCESS` or `FAILURE` completes the activation and calls `terminate()`
-  once, with the final state already stored.
+- Returning `SUCCESS` or `FAILURE` completes the activation and calls
+  `terminate(state)` once, with the final state already stored in `getState()`.
 - `abort()` interrupts a running activation, stores `ABORTED`, and calls
-  `terminate()` once. Calling it on a behavior that is not running has no effect.
+  `terminate(ABORTED)` once. Calling it on a behavior that is not running has no effect.
 - Composite and decorator termination must abort any children that remain running.
-  Overrides of `terminate()` must chain to their base implementation for cleanup.
+  Overrides of `terminate(state)` must chain to their base implementation with the
+  same state for cleanup. Running children are interrupted through `abort()`, so
+  they receive `terminate(ABORTED)` even when the parent completed normally.
+- `terminate(state)` receives only `SUCCESS`, `FAILURE`, or `ABORTED`; the argument
+  agrees with `getState()`. State is stored before cleanup, so an `abort()` called
+  recursively during termination has no effect.
+- Cleanup depends on resources or handles captured during execution. Termination,
+  cancellation, attachment, and detachment do not require an execution context.
 - A subsequent `tick()` starts a new activation after completion or cancellation.
 
 Invalid `update()` results violate the contract and trigger `CRIMILD_INVARIANT`

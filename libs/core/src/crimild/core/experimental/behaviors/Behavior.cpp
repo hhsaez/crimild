@@ -27,7 +27,7 @@ Behavior::State Behavior::tick( void )
    m_state = result;
 
    if ( m_state != State::RUNNING ) {
-      terminate();
+      terminate( m_state );
    }
 
    return m_state;
@@ -40,7 +40,7 @@ void Behavior::abort( void )
    }
 
    m_state = State::ABORTED;
-   terminate();
+   terminate( State::ABORTED );
 }
 
 void Behavior::initialize( void )
@@ -53,7 +53,7 @@ Behavior::State Behavior::update( void )
    return State::SUCCESS;
 }
 
-void Behavior::terminate( void )
+void Behavior::terminate( State state )
 {
    // no-op
 }

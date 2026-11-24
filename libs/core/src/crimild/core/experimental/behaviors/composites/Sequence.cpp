@@ -31,9 +31,9 @@ Behavior::State Sequence::update( void )
    return State::SUCCESS;
 }
 
-void Sequence::terminate( void )
+void Sequence::terminate( State state )
 {
-   Composite::terminate();
+   Composite::terminate( state );
    m_activeBehaviors.clear();
    m_currentBehavior = 0;
 }

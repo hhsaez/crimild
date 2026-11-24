@@ -23,7 +23,7 @@ namespace crimild::experimental::behaviors::composites {
 
    protected:
       // Overrides should chain here to abort running children.
-      virtual void terminate( void ) override;
+      virtual void terminate( State state ) override;
 
    private:
       std::vector< std::shared_ptr< Behavior > > m_behaviors;

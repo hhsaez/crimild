@@ -56,7 +56,7 @@ void Decorator::detach( std::shared_ptr< Behavior > const &behavior )
    }
 }
 
-void Decorator::terminate( void )
+void Decorator::terminate( State state )
 {
    if ( auto behavior = getBehavior() ) {
       behavior->abort();

@@ -15,7 +15,7 @@ namespace crimild::experimental::behaviors::composites {
    protected:
       virtual void initialize( void ) override;
       virtual State update( void ) override;
-      virtual void terminate( void ) override;
+      virtual void terminate( State state ) override;
 
    private:
       std::vector< std::shared_ptr< Behavior > > m_activeBehaviors;

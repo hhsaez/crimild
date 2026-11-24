@@ -42,10 +42,11 @@ namespace {
          return result;
       }
 
-      void terminate( void ) override
+      void terminate( State state ) override
       {
          ++terminations;
-         terminatedWith = getState();
+         terminatedWith = state;
+         EXPECT_EQ( state, getState() );
       }
 
    private:
