@@ -1,6 +1,7 @@
 target_sources(
   crimild_core
   PUBLIC Blackboard.hpp
+  PUBLIC Resource.hpp
 )
 
 if ( CRIMILD_BUILD_TESTS )

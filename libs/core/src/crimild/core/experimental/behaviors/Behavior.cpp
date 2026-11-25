@@ -2,12 +2,19 @@
 #include <crimild/foundation/common/Macros.hpp>
 #include <crimild/foundation/log/Log.hpp>
 
+using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 
-Behavior::State Behavior::tick( void )
+Behavior::State Behavior::tick( std::shared_ptr< Blackboard > const &blackboard )
 {
+   // Keep the argument alive across callbacks that release the caller's handle.
+   const auto board = blackboard;
+   if ( board == nullptr ) {
+      CRIMILD_LOG_ERROR( "Behavior tick requires a Blackboard" );
+      return State::FAILURE;
+   }
    if ( m_state != State::RUNNING ) {
-      initialize();
+      initialize( board );
       CRIMILD_INVARIANT(
          m_state == State::RUNNING || m_state == State::ABORTED,
          "initialize() must call Behavior::initialize()"
@@ -17,7 +24,7 @@ Behavior::State Behavior::tick( void )
       }
    }
 
-   const auto result = update();
+   const auto result = update( board );
    // abort() has already stored the result and performed cleanup.
    if ( m_state == State::ABORTED ) {
       return m_state;
@@ -45,12 +52,12 @@ void Behavior::abort( void )
    terminate( State::ABORTED );
 }
 
-void Behavior::initialize( void )
+void Behavior::initialize( std::shared_ptr< Blackboard > const &blackboard )
 {
    m_state = State::RUNNING;
 }
 
-Behavior::State Behavior::update( void )
+Behavior::State Behavior::update( std::shared_ptr< Blackboard > const &blackboard )
 {
    return State::SUCCESS;
 }

@@ -136,18 +136,17 @@ TEST( experimental_Blackboard, null_entity_is_distinct_from_a_missing_entry )
    EXPECT_EQ( board.get( Target ), std::nullopt );
 }
 
-TEST( experimental_Blackboard, copies_have_independent_entries_and_shared_entities )
+TEST( experimental_Blackboard, shared_handles_access_the_same_resource )
 {
-   Blackboard original;
-   original.set( Count, 1u );
-   original.set( Target, std::make_shared< Entity >() );
-   auto copy = original;
-   copy.set( Count, 2u );
-   EXPECT_EQ( original.get( Count ), 1u );
-   EXPECT_EQ( copy.get( Count ), 2u );
-   EXPECT_EQ( original.get( Target ), copy.get( Target ) );
-   copy.clear();
-   EXPECT_TRUE( original.contains( Target ) );
+   const auto original = std::make_shared< Blackboard >();
+   original->set( Count, 1u );
+   original->set( Target, std::make_shared< Entity >() );
+   const auto handle = original;
+   handle->set( Count, 2u );
+   EXPECT_EQ( original->get( Count ), 2u );
+   EXPECT_EQ( original->get( Target ), handle->get( Target ) );
+   handle->clear();
+   EXPECT_FALSE( original->contains( Target ) );
 }
 
 TEST( experimental_Blackboard, shared_instance_exchanges_a_target_between_callers )
@@ -196,4 +195,15 @@ TEST( experimental_Blackboard, existing_system_context_uses_the_same_key_declara
    EXPECT_EQ( board.get( keys::WindowSize ), ( Size2i { 640, 480 } ) );
    EXPECT_EQ( ctx.get( keys::WindowSize ), ( Size2i { 640, 480 } ) );
    EXPECT_EQ( copy.get( keys::WindowSize ), ( Size2i { 800, 600 } ) );
+}
+
+TEST( experimental_Blackboard, is_a_resource_that_can_be_exchanged_as_an_entity )
+{
+   const auto board = std::make_shared< Blackboard >();
+   std::shared_ptr< crimild::experimental::Resource > resource = board;
+   std::shared_ptr< Entity > entity = resource;
+   EXPECT_STREQ( entity->getClassName(), "crimild::experimental::Blackboard" );
+   Blackboard other;
+   other.set( Target, entity );
+   EXPECT_EQ( std::dynamic_pointer_cast< Blackboard >( other.get( Target ).value() ), board );
 }

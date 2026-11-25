@@ -1,5 +1,33 @@
 # Experimental behaviors
 
+## Blackboards
+
+`crimild::experimental::Blackboard` is a Resource (and therefore an Entity).
+Its variant-backed entries can be accessed with typed keys or dynamic names.
+
+Pass a non-null `std::shared_ptr<Blackboard> const&` to `tick()`. The same
+board reaches `initialize()`, `update()`, and child ticks. Siblings exchange
+information through one board, and entries persist across ticks. The caller
+supplies the same board throughout an activation; Behavior does not store or
+validate its identity. Base initialization sets RUNNING; overrides chain to their
+immediate base first.
+
+The caller owns the board between calls. A tick temporarily retains its argument
+across callbacks that release the caller's handle, but base Behavior has no
+Blackboard member. A null board logs an error and returns FAILURE without changing
+the activation.
+
+Cleanup receives `terminate(state)` with SUCCESS, FAILURE, or ABORTED, matching
+`getState()`. `abort()`, `attach()`, `detach()`, and `detachFromParent()` receive no
+Blackboard. Structural changes still abort active work and propagate cancellation
+to running children, including when automatically reparenting between trees that
+use different boards. Cleanup relies on resources or handles captured during
+execution. A subclass may retain a weak board reference for optional bookkeeping,
+but must still clean up when that board has expired.
+
+Systems Context migration, scoped lookup, and Blackboard entry serialization
+remain separate work. Resource inheritance does not add serialization of entries.
+
 ## INVARIANTS
 
 - `update()` must return `SUCCESS`, `FAILURE`, or `RUNNING`.

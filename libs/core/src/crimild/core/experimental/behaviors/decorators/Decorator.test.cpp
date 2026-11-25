@@ -5,6 +5,7 @@
 
 namespace {
 
+   using crimild::experimental::Blackboard;
    using crimild::experimental::behaviors::Behavior;
    using State = Behavior::State;
 
@@ -18,10 +19,10 @@ namespace {
       State result = State::RUNNING;
 
    protected:
-      State update( void ) override
+      State update( std::shared_ptr< Blackboard > const &blackboard ) override
       {
          if ( auto child = getBehavior() ) {
-            child->tick();
+            child->tick( blackboard );
          }
          return result;
       }
@@ -34,7 +35,7 @@ namespace {
       std::function< void() > onUpdate;
 
    protected:
-      State update( void ) override
+      State update( std::shared_ptr< Blackboard > const &blackboard ) override
       {
          if ( onUpdate ) {
             onUpdate();
@@ -54,12 +55,14 @@ namespace {
 
 TEST( experimental_Decorator, starts_without_a_child )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    TestDecorator decorator;
    EXPECT_EQ( decorator.getBehavior(), nullptr );
 }
 
 TEST( experimental_Decorator, attaches_child_without_executing_it )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    TestDecorator decorator;
    auto child = std::make_shared< Behavior >();
    decorator.attach( child );
@@ -69,6 +72,7 @@ TEST( experimental_Decorator, attaches_child_without_executing_it )
 
 TEST( experimental_Decorator, replaces_existing_child )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    TestDecorator decorator;
    auto first = std::make_shared< Behavior >();
    auto second = std::make_shared< Behavior >();
@@ -79,10 +83,11 @@ TEST( experimental_Decorator, replaces_existing_child )
 
 TEST( experimental_Decorator, abort_propagates_to_the_running_child_once )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    ControlledDecorator decorator;
    auto child = std::make_shared< TrackedBehavior >();
    decorator.attach( child );
-   ASSERT_EQ( decorator.tick(), State::RUNNING );
+   ASSERT_EQ( decorator.tick( blackboard ), State::RUNNING );
 
    decorator.abort();
    decorator.abort();
@@ -95,14 +100,16 @@ TEST( experimental_Decorator, abort_propagates_to_the_running_child_once )
 
 TEST( experimental_Decorator, abort_without_a_child_is_safe )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    ControlledDecorator decorator;
-   ASSERT_EQ( decorator.tick(), State::RUNNING );
+   ASSERT_EQ( decorator.tick( blackboard ), State::RUNNING );
    decorator.abort();
    EXPECT_EQ( decorator.getState(), State::ABORTED );
 }
 
 TEST( experimental_Decorator, completion_aborts_a_child_that_is_still_running )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    for ( const auto result : { State::SUCCESS, State::FAILURE } ) {
       SCOPED_TRACE( static_cast< int >( result ) );
       ControlledDecorator decorator;
@@ -110,7 +117,7 @@ TEST( experimental_Decorator, completion_aborts_a_child_that_is_still_running )
       auto child = std::make_shared< TrackedBehavior >();
       decorator.attach( child );
 
-      EXPECT_EQ( decorator.tick(), result );
+      EXPECT_EQ( decorator.tick( blackboard ), result );
       EXPECT_EQ( child->getState(), State::ABORTED );
       EXPECT_EQ( child->terminations, 1 );
    }
@@ -118,18 +125,19 @@ TEST( experimental_Decorator, completion_aborts_a_child_that_is_still_running )
 
 TEST( experimental_Decorator, replacing_a_running_child_aborts_the_previous_activation )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    ControlledDecorator decorator;
    auto previous = std::make_shared< TrackedBehavior >();
    auto replacement = std::make_shared< TrackedBehavior >();
    decorator.attach( previous );
-   ASSERT_EQ( decorator.tick(), State::RUNNING );
+   ASSERT_EQ( decorator.tick( blackboard ), State::RUNNING );
 
    decorator.attach( replacement );
 
    EXPECT_EQ( previous->getState(), State::ABORTED );
    EXPECT_EQ( previous->terminations, 1 );
    EXPECT_EQ( replacement->getState(), State::READY );
-   ASSERT_EQ( decorator.tick(), State::RUNNING );
+   ASSERT_EQ( decorator.tick( blackboard ), State::RUNNING );
    decorator.abort();
    EXPECT_EQ( replacement->getState(), State::ABORTED );
    EXPECT_EQ( replacement->terminations, 1 );
@@ -138,10 +146,11 @@ TEST( experimental_Decorator, replacing_a_running_child_aborts_the_previous_acti
 
 TEST( experimental_Decorator, reattaching_the_same_child_keeps_its_activation_running )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    ControlledDecorator decorator;
    auto child = std::make_shared< TrackedBehavior >();
    decorator.attach( child );
-   ASSERT_EQ( decorator.tick(), State::RUNNING );
+   ASSERT_EQ( decorator.tick( blackboard ), State::RUNNING );
 
    decorator.attach( child );
 
@@ -153,6 +162,7 @@ TEST( experimental_Decorator, reattaching_the_same_child_keeps_its_activation_ru
 
 TEST( experimental_Decorator, attachment_automatically_reparents_and_prevents_cycles )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    auto parent = std::make_shared< TestDecorator >();
    auto nested = std::make_shared< TestDecorator >();
    auto destination = std::make_shared< TestDecorator >();
@@ -171,6 +181,7 @@ TEST( experimental_Decorator, attachment_automatically_reparents_and_prevents_cy
 
 TEST( experimental_Decorator, replacement_and_destruction_clear_parent_pointers )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    auto previous = std::make_shared< Behavior >();
    auto child = std::make_shared< Behavior >();
    {
@@ -185,23 +196,24 @@ TEST( experimental_Decorator, replacement_and_destruction_clear_parent_pointers 
 
 TEST( experimental_Decorator, replacement_during_first_and_later_ticks_preserves_abort )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    for ( const bool firstTick : { true, false } ) {
       auto decorator = std::make_shared< ControlledDecorator >();
       auto child = std::make_shared< TrackedBehavior >();
       auto replacement = std::make_shared< TrackedBehavior >();
       decorator->attach( child );
       if ( !firstTick ) {
-         ASSERT_EQ( decorator->tick(), State::RUNNING );
+         ASSERT_EQ( decorator->tick( blackboard ), State::RUNNING );
       }
       child->onUpdate = [ & ] {
          decorator->attach( replacement );
       };
-      EXPECT_EQ( decorator->tick(), State::ABORTED );
+      EXPECT_EQ( decorator->tick( blackboard ), State::ABORTED );
       EXPECT_EQ( child->terminations, 1 );
       EXPECT_FALSE( child->hasParent() );
       EXPECT_EQ( replacement->getParent(), decorator );
       EXPECT_EQ( replacement->getState(), State::READY );
-      EXPECT_EQ( decorator->tick(), State::RUNNING );
+      EXPECT_EQ( decorator->tick( blackboard ), State::RUNNING );
       decorator->abort();
       EXPECT_EQ( replacement->terminations, 1 );
    }
@@ -209,14 +221,15 @@ TEST( experimental_Decorator, replacement_during_first_and_later_ticks_preserves
 
 TEST( experimental_Decorator, reparenting_between_composite_and_decorator_cancels_active_work )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    auto sequence = std::make_shared< crimild::experimental::behaviors::composites::Sequence >();
    auto decorator = std::make_shared< ControlledDecorator >();
    auto child = std::make_shared< TrackedBehavior >();
    auto foreign = std::make_shared< TrackedBehavior >();
    decorator->attach( child );
    sequence->attach( foreign );
-   ASSERT_EQ( decorator->tick(), State::RUNNING );
-   ASSERT_EQ( sequence->tick(), State::RUNNING );
+   ASSERT_EQ( decorator->tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence->tick( blackboard ), State::RUNNING );
    sequence->attach( child );
    EXPECT_EQ( decorator->getState(), State::ABORTED );
    EXPECT_EQ( sequence->getState(), State::ABORTED );
@@ -229,7 +242,7 @@ TEST( experimental_Decorator, reparenting_between_composite_and_decorator_cancel
    EXPECT_EQ( foreign->getParent(), decorator );
    ASSERT_EQ( sequence->getBehaviors().size(), 1 );
    EXPECT_EQ( sequence->getBehaviors().front(), child );
-   EXPECT_EQ( decorator->tick(), State::RUNNING );
+   EXPECT_EQ( decorator->tick( blackboard ), State::RUNNING );
    decorator->abort();
    EXPECT_EQ( foreign->terminations, 2 );
 }

@@ -13,8 +13,8 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~Selector( void ) noexcept = default;
 
    protected:
-      virtual void initialize( void ) override;
-      virtual State update( void ) override;
+      virtual void initialize( std::shared_ptr< Blackboard > const &blackboard ) override;
+      virtual State update( std::shared_ptr< Blackboard > const &blackboard ) override;
       virtual void terminate( State state ) override;
 
    private:
