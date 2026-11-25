@@ -1,6 +1,7 @@
 target_sources(
   crimild_foundation
   PUBLIC Enableable.hpp
+  PUBLIC Key.hpp
   PUBLIC KeyValuePair.hpp
   PUBLIC Macros.hpp
   PUBLIC Named.hpp
