@@ -32,53 +32,53 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            class Rotate : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Rotate );
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Rotate : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Rotate );
 
-            public:
-                Rotate( void ) = default;
-                Rotate( const Vector3f &axis, Radians angle ) noexcept;
-                virtual ~Rotate( void ) = default;
+         public:
+            Rotate( void ) = default;
+            Rotate( const Vector3f &axis, Radians angle ) noexcept;
+            virtual ~Rotate( void ) = default;
 
-                [[nodiscard]] inline const Vector3f &getAxis( void ) const { return m_axis; }
-                inline void setAxis( const Vector3f &axis ) noexcept { m_axis = axis; }
+            [[nodiscard]] inline const Vector3f &getAxis( void ) const { return m_axis; }
+            inline void setAxis( const Vector3f &axis ) noexcept { m_axis = axis; }
 
-                [[nodiscard]] inline Radians getAngle( void ) const { return m_angle; }
-                inline void setAngle( Radians angle ) noexcept { m_angle = angle; }
+            [[nodiscard]] inline Radians getAngle( void ) const { return m_angle; }
+            inline void setAngle( Radians angle ) noexcept { m_angle = angle; }
 
-                void init( BehaviorContext *context ) noexcept override;
-                Behavior::State step( BehaviorContext *context ) noexcept override;
+            void init( BehaviorContext *context ) noexcept override;
+            Behavior::State step( BehaviorContext *context ) noexcept override;
 
-            private:
-                // Transformation m_transform;
-                Vector3f m_axis;
-                Radians m_angle;
-                Clock m_clock;
+         private:
+            // Transformation m_transform;
+            Vector3f m_axis;
+            Radians m_angle;
+            Clock m_clock;
 
-                /**
-                    \name Coding support
-                */
-                //@{
+            /**
+                \name Coding support
+            */
+            //@{
 
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                //@}
-            };
+            //@}
+         };
 
-            [[nodiscard]] inline SharedPointer< Rotate > rotate( const Vector3f &axis, Radians angle ) noexcept
-            {
-                return crimild::alloc< Rotate >( axis, angle );
-            }
+         [[nodiscard]] [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] inline SharedPointer< Rotate > rotate( const Vector3f &axis, Radians angle ) noexcept
+         {
+            return crimild::alloc< Rotate >( axis, angle );
+         }
 
-        }
+      }
 
-    }
+   }
 
 }
 

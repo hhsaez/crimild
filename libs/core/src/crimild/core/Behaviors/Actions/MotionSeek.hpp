@@ -5,36 +5,35 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			class MotionSeek : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( huntsman::behaviors::actions::MotionSeek )
-				
-			public:
-				explicit MotionSeek( void );
-				virtual ~MotionSeek( void );
-				
-				virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] MotionSeek : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( huntsman::behaviors::actions::MotionSeek )
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+         public:
+            explicit MotionSeek( void );
+            virtual ~MotionSeek( void );
 
-		}
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-	}
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
 
 }
 
 #endif
-

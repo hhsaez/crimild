@@ -5,36 +5,35 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			class MotionComputePathToTarget : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionComputePathToTarget )
-				
-			public:
-				explicit MotionComputePathToTarget( void );
-				virtual ~MotionComputePathToTarget( void );
-				
-				virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] MotionComputePathToTarget : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionComputePathToTarget )
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+         public:
+            explicit MotionComputePathToTarget( void );
+            virtual ~MotionComputePathToTarget( void );
 
-		}
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-	}
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
 
 }
 
 #endif
-

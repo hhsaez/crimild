@@ -36,7 +36,7 @@ namespace crimild {
 
       class Behavior;
 
-      class [[deprecated]] BehaviorTree : public coding::Codable {
+      class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] BehaviorTree : public coding::Codable {
          CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorTree )
 
       public:

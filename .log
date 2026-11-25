@@ -522,3 +522,7 @@
 
 # 2026-11-19
 - Choose ActiveSequence over Monitor: reusable SUCCESS/FAILURE conditions cover the guard checks, and a nested remembered Sequence preserves action progress (#108).
+
+# 2026-11-25
+- Deprecate the complete legacy behavior API with compiler attributes so concrete behaviors and helpers warn at their call sites, not just the base class. Keep runtime behavior and serialized RTTI names intact for existing callers.
+- Develop new behavior trees under crimild::experimental::behaviors. Deprecation is independent of the pending lifecycle and Blackboard PRs; migrating legacy callers and filling gaps in the new API remain separate work.

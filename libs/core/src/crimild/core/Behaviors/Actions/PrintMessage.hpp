@@ -32,44 +32,44 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
+
+         /**
+                             \brief An action that prints a message to the log
+                     */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] PrintMessage : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::PrintMessage )
+
+         public:
+            PrintMessage( void );
+            explicit PrintMessage( std::string message );
+            virtual ~PrintMessage( void );
+
+            [[nodiscard]] inline const std::string &getMessage( void ) const noexcept { return _message; }
+            inline void setMessage( std::string message ) noexcept { _message = message; }
+
+            virtual Behavior::State step( BehaviorContext *context ) override;
+
+         private:
+            std::string _message;
 
             /**
-				\brief An action that prints a message to the log
-			*/
-            class PrintMessage : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::PrintMessage )
+                               \name Coding support
+                            */
+            //@{
 
-            public:
-                PrintMessage( void );
-                explicit PrintMessage( std::string message );
-                virtual ~PrintMessage( void );
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                [[nodiscard]] inline const std::string &getMessage( void ) const noexcept { return _message; }
-                inline void setMessage( std::string message ) noexcept { _message = message; }
+            //@}
+         };
 
-                virtual Behavior::State step( BehaviorContext *context ) override;
+      }
 
-            private:
-                std::string _message;
-
-                /**
-				   \name Coding support
-				*/
-                //@{
-
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
-
-                //@}
-            };
-
-        }
-
-    }
+   }
 
 }
 

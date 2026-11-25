@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,43 +32,42 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			/**
-			   \warning This behavior must be applied to a particle system
-			 */
-			class AnimateParticleSystem : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::AnimateParticleSystem )
-				
-			public:
-				AnimateParticleSystem( void );
-				explicit AnimateParticleSystem( crimild::Bool animate );
-				virtual ~AnimateParticleSystem( void );
-				
-				virtual Behavior::State step( BehaviorContext *context ) override;
+         /**
+            \warning This behavior must be applied to a particle system
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] AnimateParticleSystem : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::AnimateParticleSystem )
 
-			private:
-				crimild::Bool _animate;
-				
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+         public:
+            AnimateParticleSystem( void );
+            explicit AnimateParticleSystem( crimild::Bool animate );
+            virtual ~AnimateParticleSystem( void );
 
-		}
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-	}
-		
+         private:
+            crimild::Bool _animate;
+
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
+
 }
 
 #endif
-

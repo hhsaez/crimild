@@ -5,36 +5,35 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			class MotionAvoidWalls : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionAvoidWalls )
-				
-			public:
-				explicit MotionAvoidWalls( void );
-				virtual ~MotionAvoidWalls( void );
-				
-				virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] MotionAvoidWalls : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionAvoidWalls )
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+         public:
+            explicit MotionAvoidWalls( void );
+            virtual ~MotionAvoidWalls( void );
 
-		}
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-	}
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
 
 }
 
 #endif
-

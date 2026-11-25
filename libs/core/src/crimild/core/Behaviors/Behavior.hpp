@@ -30,7 +30,6 @@
 
 #include <crimild/core/Behaviors/BehaviorContext.hpp>
 #include <crimild/core/Messaging/MessageQueue.hpp>
-
 #include <crimild/foundation.hpp>
 
 namespace crimild {
@@ -40,7 +39,7 @@ namespace crimild {
       /**
          \brief A simple struct for sending messages between behaviors
        */
-      struct BehaviorEvent {
+      struct [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] BehaviorEvent {
          std::string name;
       };
 
@@ -53,8 +52,8 @@ namespace crimild {
       /**
          \brief Base class for behaviors
       */
-      class Behavior : public coding::Codable,
-                       public crimild::Messenger {
+      class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Behavior : public coding::Codable,
+                                                                                                                            public crimild::Messenger {
       public:
          enum class State {
             SUCCESS,
@@ -93,7 +92,8 @@ namespace crimild {
          //@}
       };
 
-      using BehaviorPtr = crimild::SharedPointer< Behavior >;
+      using BehaviorPtr [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] = crimild::SharedPointer< Behavior >;
+
    }
 
 }
