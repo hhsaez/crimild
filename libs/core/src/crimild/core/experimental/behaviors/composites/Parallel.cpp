@@ -4,7 +4,7 @@ using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-void Parallel::initialize( std::shared_ptr< Blackboard > const &blackboard )
+void Parallel::initialize( Blackboard &blackboard )
 {
    Composite::initialize( blackboard );
    m_activeBehaviors = getBehaviors();
@@ -12,7 +12,7 @@ void Parallel::initialize( std::shared_ptr< Blackboard > const &blackboard )
    m_completed.assign( m_activeBehaviors.size(), false );
 }
 
-Behavior::State Parallel::update( std::shared_ptr< Blackboard > const &blackboard )
+Behavior::State Parallel::update( Blackboard &blackboard )
 {
    bool allCompleted = true;
    for ( std::size_t i = 0; i < m_activeBehaviors.size(); ++i ) {

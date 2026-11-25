@@ -41,6 +41,11 @@ your own suggestions.
 - Strong storage for global objects, or a configurable ownership policy (possibly
   a template), is a future design discussion driven by a concrete use case. Keep
   the current Blackboard weak; do not introduce storage policies preemptively.
+- Behavior execution borrows `Blackboard&` through `tick`, `initialize`, and
+  `update`. The caller keeps the board alive for the entire root tick, locking a
+  weak handle once at that boundary when needed. Do not add per-node ownership
+  copies or null checks. Behaviors that need a handle can explicitly use
+  `retain(&blackboard)` when the board already has shared ownership.
 - Revisit this choice together if a concrete use case makes the metaphor or
   contract unsuitable. Do not silently substitute another abstraction or migrate
   existing APIs without an agreed task.

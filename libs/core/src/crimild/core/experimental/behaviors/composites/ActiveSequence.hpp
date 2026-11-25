@@ -13,7 +13,7 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~ActiveSequence( void ) noexcept = default;
 
    protected:
-      virtual State update( std::shared_ptr< Blackboard > const &blackboard ) override;
+      virtual State update( Blackboard &blackboard ) override;
    };
 
 }

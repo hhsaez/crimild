@@ -21,7 +21,7 @@ namespace {
       int updates = 0;
 
    protected:
-      State update( std::shared_ptr< Blackboard > const &blackboard ) override
+      State update( Blackboard &blackboard ) override
       {
          ++updates;
          return result;
@@ -37,7 +37,7 @@ namespace {
       std::function< void( State ) > onTerminate;
 
    protected:
-      void initialize( std::shared_ptr< Blackboard > const &blackboard ) override
+      void initialize( Blackboard &blackboard ) override
       {
          TestBehavior::initialize( blackboard );
          calls.push_back( "initialize" );
@@ -46,7 +46,7 @@ namespace {
          }
       }
 
-      State update( std::shared_ptr< Blackboard > const &blackboard ) override
+      State update( Blackboard &blackboard ) override
       {
          calls.push_back( "update" );
          if ( onUpdate ) {
@@ -93,7 +93,7 @@ TEST( experimental_Behavior, default_tick_succeeds )
 {
    const auto blackboard = std::make_shared< Blackboard >();
    Behavior behavior;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
 }
 
@@ -103,7 +103,7 @@ TEST( experimental_Behavior, stores_each_tick_result )
    TestBehavior behavior;
    for ( const auto state : { Behavior::State::RUNNING, Behavior::State::SUCCESS, Behavior::State::FAILURE } ) {
       behavior.result = state;
-      EXPECT_EQ( behavior.tick( blackboard ), state );
+      EXPECT_EQ( behavior.tick( *blackboard ), state );
       EXPECT_EQ( behavior.getState(), state );
    }
    EXPECT_EQ( behavior.updates, 3 );
@@ -116,14 +116,14 @@ TEST( experimental_Behavior, keeps_ticking_running_behavior_until_success )
    EXPECT_EQ( behavior.getState(), Behavior::State::READY );
 
    // update( blackboard ) requests another tick until the action reports completion.
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.updates, 2 );
 
    behavior.result = Behavior::State::SUCCESS;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.getState(), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.updates, 3 );
 }
@@ -134,7 +134,7 @@ TEST( experimental_Behavior, initializes_before_the_first_update )
    LifecycleBehavior behavior;
    EXPECT_TRUE( behavior.calls.empty() );
 
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.getState(), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update" } ) );
    EXPECT_TRUE( behavior.terminationStates.empty() );
@@ -145,7 +145,7 @@ TEST( experimental_Behavior, running_ticks_do_not_repeat_initialization_or_termi
    const auto blackboard = std::make_shared< Blackboard >();
    LifecycleBehavior behavior;
    for ( int tick = 0; tick < 3; ++tick ) {
-      EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+      EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    }
 
    EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "update", "update" } ) );
@@ -160,7 +160,7 @@ TEST( experimental_Behavior, immediate_completion_terminates_with_the_stored_fin
       LifecycleBehavior behavior;
       behavior.result = result;
 
-      EXPECT_EQ( behavior.tick( blackboard ), result );
+      EXPECT_EQ( behavior.tick( *blackboard ), result );
       EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "terminate" } ) );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { result } ) );
    }
@@ -172,10 +172,10 @@ TEST( experimental_Behavior, running_activation_terminates_once_when_it_complete
    for ( const auto result : { Behavior::State::SUCCESS, Behavior::State::FAILURE } ) {
       SCOPED_TRACE( static_cast< int >( result ) );
       LifecycleBehavior behavior;
-      ASSERT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+      ASSERT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
 
       behavior.result = result;
-      EXPECT_EQ( behavior.tick( blackboard ), result );
+      EXPECT_EQ( behavior.tick( *blackboard ), result );
       EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "update", "terminate" } ) );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { result } ) );
    }
@@ -188,15 +188,15 @@ TEST( experimental_Behavior, ticking_after_completion_starts_a_new_activation )
       SCOPED_TRACE( static_cast< int >( result ) );
       LifecycleBehavior behavior;
       behavior.result = result;
-      ASSERT_EQ( behavior.tick( blackboard ), result );
+      ASSERT_EQ( behavior.tick( *blackboard ), result );
 
       behavior.result = Behavior::State::RUNNING;
-      EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+      EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
       EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "terminate", "initialize", "update" } ) );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { result } ) );
 
       behavior.result = result;
-      EXPECT_EQ( behavior.tick( blackboard ), result );
+      EXPECT_EQ( behavior.tick( *blackboard ), result );
       EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "terminate", "initialize", "update", "update", "terminate" } ) );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { result, result } ) );
    }
@@ -206,7 +206,7 @@ TEST( experimental_Behavior, abort_terminates_a_running_activation_once_without_
 {
    const auto blackboard = std::make_shared< Blackboard >();
    LifecycleBehavior behavior;
-   ASSERT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   ASSERT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
 
    behavior.abort();
    behavior.abort();
@@ -234,7 +234,7 @@ TEST( experimental_Behavior, abort_after_completion_preserves_the_result_without
       SCOPED_TRACE( static_cast< int >( result ) );
       LifecycleBehavior behavior;
       behavior.result = result;
-      ASSERT_EQ( behavior.tick( blackboard ), result );
+      ASSERT_EQ( behavior.tick( *blackboard ), result );
 
       behavior.abort();
 
@@ -248,10 +248,10 @@ TEST( experimental_Behavior, ticking_after_abort_starts_a_new_activation )
 {
    const auto blackboard = std::make_shared< Blackboard >();
    LifecycleBehavior behavior;
-   ASSERT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   ASSERT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    behavior.abort();
 
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "update", "terminate", "initialize", "update" } ) );
    EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
 }
@@ -262,7 +262,7 @@ TEST( experimental_Behavior, rejects_lifecycle_states_returned_by_update )
    for ( const auto state : { Behavior::State::READY, Behavior::State::ABORTED } ) {
       TestBehavior behavior;
       behavior.result = state;
-      EXPECT_DEBUG_DEATH( behavior.tick( blackboard ), "update\\(\\) must return SUCCESS, FAILURE, or RUNNING" );
+      EXPECT_DEBUG_DEATH( behavior.tick( *blackboard ), "update\\(\\) must return SUCCESS, FAILURE, or RUNNING" );
    }
 }
 
@@ -273,7 +273,7 @@ TEST( experimental_Behavior, abort_during_initialize_skips_update_and_terminates
    behavior.onInitialize = [ & ] {
       behavior.abort();
    };
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::ABORTED );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::ABORTED );
    EXPECT_EQ( behavior.calls, ( std::vector< std::string > { "initialize", "terminate" } ) );
    EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
 }
@@ -285,18 +285,18 @@ TEST( experimental_Behavior, abort_during_update_preserves_cancellation_on_first
       for ( const auto result : { Behavior::State::SUCCESS, Behavior::State::FAILURE, Behavior::State::RUNNING } ) {
          LifecycleBehavior behavior;
          if ( !firstTick ) {
-            ASSERT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+            ASSERT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
          }
          behavior.result = result;
          behavior.onUpdate = [ & ] {
             behavior.abort();
             behavior.abort();
          };
-         EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::ABORTED );
+         EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::ABORTED );
          EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
          behavior.onUpdate = nullptr;
          behavior.result = Behavior::State::SUCCESS;
-         EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::SUCCESS );
+         EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::SUCCESS );
          EXPECT_EQ( behavior.terminationStates.size(), 2 );
       }
    }
@@ -313,12 +313,12 @@ TEST( experimental_Behavior, termination_exposes_the_final_state_and_recursive_a
          behavior.abort();
          behavior.abort();
       };
-      ASSERT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+      ASSERT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
       if ( reason == Behavior::State::ABORTED ) {
          behavior.abort();
       } else {
          behavior.result = reason;
-         EXPECT_EQ( behavior.tick( blackboard ), reason );
+         EXPECT_EQ( behavior.tick( *blackboard ), reason );
       }
       EXPECT_EQ( behavior.getState(), reason );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { reason } ) );
@@ -333,7 +333,7 @@ TEST( experimental_Behavior, initializer_owns_the_running_transition_on_first_an
       std::vector< State > entryStates;
 
    protected:
-      void initialize( std::shared_ptr< Blackboard > const &blackboard ) override
+      void initialize( Blackboard &blackboard ) override
       {
          const auto previous = getState();
          TestBehavior::initialize( blackboard );
@@ -343,14 +343,14 @@ TEST( experimental_Behavior, initializer_owns_the_running_transition_on_first_an
    };
    Initializer behavior;
    behavior.result = Behavior::State::SUCCESS;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::SUCCESS );
    behavior.result = Behavior::State::FAILURE;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::FAILURE );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::FAILURE );
    behavior.result = Behavior::State::RUNNING;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::RUNNING );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::RUNNING );
    behavior.abort();
    behavior.result = Behavior::State::SUCCESS;
-   EXPECT_EQ( behavior.tick( blackboard ), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.tick( *blackboard ), Behavior::State::SUCCESS );
    EXPECT_EQ( behavior.entryStates, ( std::vector< Behavior::State > {
                                        Behavior::State::READY,
                                        Behavior::State::SUCCESS,
@@ -364,10 +364,10 @@ TEST( experimental_Behavior, initialization_must_chain_to_the_base_implementatio
    const auto blackboard = std::make_shared< Blackboard >();
    class MissingBase : public TestBehavior {
    protected:
-      void initialize( std::shared_ptr< Blackboard > const &blackboard ) override { }
+      void initialize( Blackboard &blackboard ) override { }
    };
    MissingBase behavior;
-   EXPECT_DEBUG_DEATH( behavior.tick( blackboard ), "must call Behavior::initialize" );
+   EXPECT_DEBUG_DEATH( behavior.tick( *blackboard ), "must call Behavior::initialize" );
 }
 
 namespace {
@@ -376,8 +376,8 @@ namespace {
    public:
       State result = State::RUNNING;
       std::vector< Blackboard * > seen;
-      std::function< void( std::shared_ptr< Blackboard > const & ) > onTick;
-      std::function< void( std::shared_ptr< Blackboard > const & ) > onStop;
+      std::function< void( Blackboard & ) > onTick;
+      std::function< void( Blackboard & ) > onStop;
       std::shared_ptr< Blackboard > retained;
       std::shared_ptr< crimild::Entity > reservation;
       std::vector< State > terminationStates;
@@ -386,19 +386,19 @@ namespace {
       std::weak_ptr< Blackboard > cleanupBoard;
 
    protected:
-      void initialize( std::shared_ptr< Blackboard > const &board ) override
+      void initialize( Blackboard &board ) override
       {
          Behavior::initialize( board );
-         cleanupBoard = board;
-         reservation = board->get< std::shared_ptr< crimild::Entity > >( "reservation" ).value_or( nullptr );
-         seen.push_back( board.get() );
-         board->set( "started", true );
+         cleanupBoard = retain( &board );
+         reservation = board.get< std::shared_ptr< crimild::Entity > >( "reservation" ).value_or( nullptr );
+         seen.push_back( &board );
+         board.set( "started", true );
       }
 
-      State update( std::shared_ptr< Blackboard > const &board ) override
+      State update( Blackboard &board ) override
       {
-         seen.push_back( board.get() );
-         EXPECT_EQ( board->get< bool >( "started" ), true );
+         seen.push_back( &board );
+         EXPECT_EQ( board.get< bool >( "started" ), true );
          if ( onTick ) {
             onTick( board );
          }
@@ -416,7 +416,7 @@ namespace {
             seen.push_back( board.get() );
             board->set( "stopped", true );
             if ( onStop ) {
-               onStop( board );
+               onStop( *board );
             }
          }
       }
@@ -429,14 +429,14 @@ TEST( experimental_Behavior, execution_hooks_share_the_board_and_termination_rec
    for ( const auto finish : { Behavior::State::SUCCESS, Behavior::State::FAILURE, Behavior::State::ABORTED } ) {
       const auto board = std::make_shared< Blackboard >();
       BoardAction action;
-      EXPECT_EQ( action.tick( board ), Behavior::State::RUNNING );
+      EXPECT_EQ( action.tick( *board ), Behavior::State::RUNNING );
       EXPECT_FALSE( board->contains( "stopped" ) );
       if ( finish == Behavior::State::ABORTED ) {
          action.abort();
          action.abort();
       } else {
          action.result = finish;
-         EXPECT_EQ( action.tick( board ), finish );
+         EXPECT_EQ( action.tick( *board ), finish );
       }
       EXPECT_EQ( board->get< bool >( "stopped" ), true );
       EXPECT_EQ( action.terminationStates, ( std::vector< Behavior::State > { finish } ) );
@@ -447,18 +447,28 @@ TEST( experimental_Behavior, execution_hooks_share_the_board_and_termination_rec
    }
 }
 
-TEST( experimental_Behavior, only_retains_the_argument_during_the_call )
+TEST( experimental_Behavior, caller_locks_the_board_for_the_root_tick )
 {
-   BoardAction action;
+   crimild::experimental::behaviors::composites::Sequence root;
+   auto action = std::make_shared< BoardAction >();
+   root.attach( action );
    auto board = std::make_shared< Blackboard >();
    std::weak_ptr< Blackboard > lifetime = board;
-   action.onTick = [ &board, &lifetime ]( auto const &passed ) {
+   action->onTick = [ &board, &lifetime ]( auto &passed ) {
       board.reset();
       EXPECT_FALSE( lifetime.expired() );
-      passed->set( "available", true );
+      EXPECT_EQ( lifetime.use_count(), 1 );
+      passed.set( "available", true );
    };
-   EXPECT_EQ( action.tick( board ), Behavior::State::RUNNING );
+   if ( auto locked = lifetime.lock() ) {
+      EXPECT_EQ( root.tick( *locked ), Behavior::State::RUNNING );
+      EXPECT_EQ( locked->get< bool >( "available" ), true );
+   } else {
+      FAIL() << "The execution board must be available before ticking the root";
+   }
    EXPECT_TRUE( lifetime.expired() );
+   root.abort();
+   EXPECT_EQ( action->terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
 }
 
 TEST( experimental_Behavior, subclass_can_explicitly_retain_the_board )
@@ -466,34 +476,35 @@ TEST( experimental_Behavior, subclass_can_explicitly_retain_the_board )
    BoardAction action;
    auto board = std::make_shared< Blackboard >();
    std::weak_ptr< Blackboard > lifetime = board;
-   action.onTick = [ &action ]( auto const &passed ) {
-      action.retained = passed;
+   action.onTick = [ &action ]( auto &passed ) {
+      action.retained = retain( &passed );
    };
-   EXPECT_EQ( action.tick( board ), Behavior::State::RUNNING );
+   EXPECT_EQ( action.tick( *board ), Behavior::State::RUNNING );
    board.reset();
    EXPECT_FALSE( lifetime.expired() );
-   action.onStop = [ &action ]( auto const &passed ) {
+   action.onStop = [ &action ]( auto &passed ) {
       action.retained.reset();
-      EXPECT_EQ( passed->template get< bool >( "started" ), true );
+      EXPECT_EQ( passed.template get< bool >( "started" ), true );
    };
    action.abort();
    EXPECT_TRUE( lifetime.expired() );
    EXPECT_EQ( action.getState(), Behavior::State::ABORTED );
 }
 
-TEST( experimental_Behavior, tick_requires_a_board_but_abort_does_not )
+TEST( experimental_Behavior, execution_can_borrow_a_stack_board_without_shared_ownership )
 {
-   BoardAction action;
-   EXPECT_EQ( action.tick( nullptr ), Behavior::State::FAILURE );
-   EXPECT_EQ( action.getState(), Behavior::State::READY );
-   EXPECT_TRUE( action.seen.empty() );
-   const auto board = std::make_shared< Blackboard >();
-   action.tick( board );
-   EXPECT_EQ( action.tick( nullptr ), Behavior::State::FAILURE );
-   EXPECT_EQ( action.getState(), Behavior::State::RUNNING );
-   EXPECT_FALSE( board->contains( "stopped" ) );
+   Blackboard board;
+   LifecycleBehavior action;
+   action.onInitialize = [ &board ] {
+      board.set( "started", true );
+   };
+   action.onUpdate = [ &board ] {
+      EXPECT_EQ( board.get< bool >( "started" ), true );
+   };
+   EXPECT_EQ( action.tick( board ), Behavior::State::RUNNING );
+   EXPECT_TRUE( board.weak_from_this().expired() );
    action.abort();
-   EXPECT_EQ( board->get< bool >( "stopped" ), true );
+   EXPECT_EQ( action.terminationStates, ( std::vector< Behavior::State > { Behavior::State::ABORTED } ) );
 }
 
 namespace {
@@ -505,7 +516,7 @@ namespace {
       ForwardingDecorator() = default;
 
    protected:
-      State update( std::shared_ptr< Blackboard > const &board ) override
+      State update( Blackboard &board ) override
       {
          return getBehavior()->tick( board );
       }
@@ -525,12 +536,15 @@ TEST( experimental_Behavior, every_composite_forwards_the_board_across_ticks_and
    for ( const auto &root : roots ) {
       const auto board = std::make_shared< Blackboard >();
       auto action = std::make_shared< BoardAction >();
-      action->onTick = []( auto const &passed ) {
-         passed->set( "ticks", passed->template get< uint32_t >( "ticks" ).value_or( 0 ) + 1 );
+      action->onTick = []( auto &passed ) {
+         EXPECT_EQ( passed.weak_from_this().use_count(), 1 );
+         passed.set( "ticks", passed.template get< uint32_t >( "ticks" ).value_or( 0 ) + 1 );
       };
-      root->attach( action );
-      EXPECT_EQ( root->tick( board ), Behavior::State::RUNNING );
-      EXPECT_EQ( root->tick( board ), Behavior::State::RUNNING );
+      auto decorator = std::make_shared< ForwardingDecorator >();
+      decorator->attach( action );
+      root->attach( decorator );
+      EXPECT_EQ( root->tick( *board ), Behavior::State::RUNNING );
+      EXPECT_EQ( root->tick( *board ), Behavior::State::RUNNING );
       EXPECT_EQ( board->get< uint32_t >( "ticks" ), 2u );
       root->abort();
       EXPECT_EQ( board->get< bool >( "stopped" ), true );
@@ -547,19 +561,19 @@ TEST( experimental_Behavior, sequence_siblings_share_a_target_and_preserve_data_
    const auto target = std::make_shared< crimild::Entity >();
    auto findTarget = std::make_shared< BoardAction >();
    findTarget->result = Behavior::State::SUCCESS;
-   findTarget->onTick = [ &target ]( auto const &passed ) {
-      passed->set( "target", target );
+   findTarget->onTick = [ &target ]( auto &passed ) {
+      passed.set( "target", target );
    };
    auto shoot = std::make_shared< BoardAction >();
-   shoot->onTick = [ &target ]( auto const &passed ) {
-      EXPECT_EQ( passed->template get< std::shared_ptr< crimild::Entity > >( "target" ), target );
-      passed->set( "shots", passed->template get< uint32_t >( "shots" ).value_or( 0 ) + 1 );
+   shoot->onTick = [ &target ]( auto &passed ) {
+      EXPECT_EQ( passed.template get< std::shared_ptr< crimild::Entity > >( "target" ), target );
+      passed.set( "shots", passed.template get< uint32_t >( "shots" ).value_or( 0 ) + 1 );
    };
    composites::Sequence root;
    root.attach( findTarget );
    root.attach( shoot );
-   EXPECT_EQ( root.tick( board ), Behavior::State::RUNNING );
-   EXPECT_EQ( root.tick( board ), Behavior::State::RUNNING );
+   EXPECT_EQ( root.tick( *board ), Behavior::State::RUNNING );
+   EXPECT_EQ( root.tick( *board ), Behavior::State::RUNNING );
    EXPECT_EQ( findTarget->seen.size(), 3u ); // initialize, update, terminate only once
    EXPECT_EQ( board->get< uint32_t >( "shots" ), 2u );
    root.abort();
@@ -573,7 +587,7 @@ TEST( experimental_Behavior, running_tree_edits_cancel_without_a_board )
       const auto child = std::make_shared< BoardAction >();
       const auto replacement = std::make_shared< BoardAction >();
       root.attach( child );
-      ASSERT_EQ( root.tick( board ), Behavior::State::RUNNING );
+      ASSERT_EQ( root.tick( *board ), Behavior::State::RUNNING );
       // No-op edits do not need a board or interrupt execution.
       root.attach( child );
       EXPECT_EQ( root.getState(), Behavior::State::RUNNING );
@@ -601,8 +615,8 @@ TEST( experimental_Behavior, automatic_reparenting_between_distinct_boards_clean
    const auto previous = std::make_shared< BoardAction >();
    source.attach( child );
    destination.attach( previous );
-   ASSERT_EQ( source.tick( sourceBoard ), Behavior::State::RUNNING );
-   ASSERT_EQ( destination.tick( destinationBoard ), Behavior::State::RUNNING );
+   ASSERT_EQ( source.tick( *sourceBoard ), Behavior::State::RUNNING );
+   ASSERT_EQ( destination.tick( *destinationBoard ), Behavior::State::RUNNING );
    destination.attach( child );
    EXPECT_EQ( child->seen.back(), sourceBoard.get() );
    EXPECT_EQ( previous->seen.back(), destinationBoard.get() );
@@ -610,7 +624,7 @@ TEST( experimental_Behavior, automatic_reparenting_between_distinct_boards_clean
    EXPECT_EQ( destination.getState(), Behavior::State::ABORTED );
    EXPECT_EQ( sourceBoard->get< bool >( "stopped" ), true );
    EXPECT_EQ( destinationBoard->get< bool >( "stopped" ), true );
-   EXPECT_EQ( destination.tick( destinationBoard ), Behavior::State::RUNNING );
+   EXPECT_EQ( destination.tick( *destinationBoard ), Behavior::State::RUNNING );
    EXPECT_EQ( child->seen.back(), destinationBoard.get() );
    destination.abort();
 }
@@ -623,7 +637,7 @@ TEST( experimental_Behavior, abort_cleans_up_captured_resources_after_the_board_
    std::weak_ptr< crimild::Entity > resourceLifetime = reservation;
    std::weak_ptr< Blackboard > boardLifetime = board;
    board->set( "reservation", reservation );
-   EXPECT_EQ( action.tick( board ), Behavior::State::RUNNING );
+   EXPECT_EQ( action.tick( *board ), Behavior::State::RUNNING );
    reservation.reset();
    board.reset();
    EXPECT_TRUE( boardLifetime.expired() );

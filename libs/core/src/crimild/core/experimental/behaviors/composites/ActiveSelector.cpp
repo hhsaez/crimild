@@ -4,7 +4,7 @@ using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-Behavior::State ActiveSelector::update( std::shared_ptr< Blackboard > const &blackboard )
+Behavior::State ActiveSelector::update( Blackboard &blackboard )
 {
    // Keep children alive if a callback edits the collection and aborts us.
    const auto behaviors = getBehaviors();

@@ -5,7 +5,7 @@ using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-Behavior::State ActiveSequence::update( std::shared_ptr< Blackboard > const &blackboard )
+Behavior::State ActiveSequence::update( Blackboard &blackboard )
 {
    // Retain children across callbacks that edit the collection and abort us.
    const auto behaviors = getBehaviors();

@@ -31,13 +31,13 @@ namespace {
       std::function< void() > onTerminate;
 
    protected:
-      void initialize( std::shared_ptr< Blackboard > const &blackboard ) override
+      void initialize( Blackboard &blackboard ) override
       {
          Behavior::initialize( blackboard );
          ++initializations;
       }
 
-      State update( std::shared_ptr< Blackboard > const &blackboard ) override
+      State update( Blackboard &blackboard ) override
       {
          m_calls.push_back( m_id );
          if ( callback ) {
@@ -67,7 +67,7 @@ TEST( experimental_ActiveSequence, empty_sequence_succeeds )
 {
    const auto blackboard = std::make_shared< Blackboard >();
    ActiveSequence sequence;
-   EXPECT_EQ( sequence.tick( blackboard ), State::SUCCESS );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::SUCCESS );
 }
 
 TEST( experimental_ActiveSequence, all_successes_complete_in_attachment_order )
@@ -78,7 +78,7 @@ TEST( experimental_ActiveSequence, all_successes_complete_in_attachment_order )
    for ( int id : { 1, 2, 3 } ) {
       sequence.attach( std::make_shared< Child >( id, State::SUCCESS, calls ) );
    }
-   EXPECT_EQ( sequence.tick( blackboard ), State::SUCCESS );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 }
 
@@ -93,7 +93,7 @@ TEST( experimental_ActiveSequence, failure_or_running_stops_before_unstarted_lat
       sequence.attach( std::make_shared< Child >( 1, State::SUCCESS, calls ) );
       sequence.attach( blocker );
       sequence.attach( later );
-      EXPECT_EQ( sequence.tick( blackboard ), result );
+      EXPECT_EQ( sequence.tick( *blackboard ), result );
       EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
       EXPECT_EQ( later->getState(), State::READY );
       EXPECT_EQ( later->initializations, 0 );
@@ -109,10 +109,10 @@ TEST( experimental_ActiveSequence, rechecks_successful_conditions_without_reinit
    auto action = std::make_shared< Child >( 2, State::RUNNING, calls );
    sequence.attach( condition );
    sequence.attach( action );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
 
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( condition->initializations, 2 );
    EXPECT_EQ( action->initializations, 1 );
@@ -132,18 +132,18 @@ TEST( experimental_ActiveSequence, nested_remembered_sequence_preserves_action_p
    actions->attach( burst );
    sequence.attach( condition );
    sequence.attach( actions );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 3 } ) );
    EXPECT_EQ( aim->initializations, 1 );
    EXPECT_EQ( burst->initializations, 1 );
 
    condition->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::FAILURE );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( actions->getState(), State::ABORTED );
    EXPECT_EQ( burst->terminatedWith, State::ABORTED );
@@ -162,21 +162,21 @@ TEST( experimental_ActiveSequence, earlier_running_child_aborts_later_work_and_w
    actions->attach( action );
    sequence.attach( first );
    sequence.attach( actions );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
 
    first->result = State::RUNNING;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( actions->getState(), State::ABORTED );
    EXPECT_EQ( action->terminatedWith, State::ABORTED );
    EXPECT_EQ( action->terminations, 1 );
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( action->terminations, 1 );
 
    first->result = State::SUCCESS;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( action->initializations, 2 );
 }
@@ -189,9 +189,9 @@ TEST( experimental_ActiveSequence, directly_attached_successful_actions_are_repe
    auto completed = std::make_shared< Child >( 1, State::SUCCESS, calls );
    sequence.attach( completed );
    sequence.attach( std::make_shared< Child >( 2, State::RUNNING, calls ) );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( completed->initializations, 2 );
 }
@@ -207,16 +207,16 @@ TEST( experimental_ActiveSequence, each_condition_is_checked_before_work_and_fai
    sequence.attach( first );
    sequence.attach( second );
    sequence.attach( action );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    second->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::FAILURE );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( action->terminatedWith, State::ABORTED );
 
    first->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::FAILURE );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( action->terminations, 1 );
 }
@@ -229,10 +229,10 @@ TEST( experimental_ActiveSequence, running_child_can_complete_without_waiting_an
    auto action = std::make_shared< Child >( 1, State::RUNNING, calls );
    sequence.attach( action );
    sequence.attach( std::make_shared< Child >( 2, State::SUCCESS, calls ) );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    action->result = State::SUCCESS;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::SUCCESS );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( action->initializations, 1 );
 }
@@ -247,10 +247,10 @@ TEST( experimental_ActiveSequence, starts_fresh_after_success_or_failure )
       auto action = std::make_shared< Child >( 2, result, calls );
       sequence.attach( condition );
       sequence.attach( action );
-      ASSERT_EQ( sequence.tick( blackboard ), result );
+      ASSERT_EQ( sequence.tick( *blackboard ), result );
       action->result = State::RUNNING;
       calls.clear();
-      EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+      EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
       EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
       EXPECT_EQ( condition->initializations, 2 );
       EXPECT_EQ( action->initializations, 2 );
@@ -264,12 +264,12 @@ TEST( experimental_ActiveSequence, external_abort_cleans_running_work_once_and_n
    std::vector< int > calls;
    auto action = std::make_shared< Child >( 1, State::RUNNING, calls );
    sequence.attach( action );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    sequence.abort();
    sequence.abort();
    EXPECT_EQ( action->terminatedWith, State::ABORTED );
    EXPECT_EQ( action->terminations, 1 );
-   EXPECT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( action->initializations, 2 );
 }
 
@@ -285,12 +285,12 @@ TEST( experimental_ActiveSequence, action_abort_cancels_parent_on_first_and_late
       sequence.attach( action );
       sequence.attach( later );
       if ( !firstTick ) {
-         ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+         ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
       }
       action->callback = [ & ] {
          action->abort();
       };
-      EXPECT_EQ( sequence.tick( blackboard ), State::ABORTED );
+      EXPECT_EQ( sequence.tick( *blackboard ), State::ABORTED );
       EXPECT_EQ( action->terminatedWith, State::ABORTED );
       EXPECT_EQ( action->terminations, 1 );
       EXPECT_EQ( later->getState(), State::READY );
@@ -307,13 +307,13 @@ TEST( experimental_ActiveSequence, cleanup_edit_aborts_traversal_and_preserves_a
    auto appended = std::make_shared< Child >( 3, State::SUCCESS, calls );
    sequence.attach( guard );
    sequence.attach( action );
-   ASSERT_EQ( sequence.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( sequence.tick( *blackboard ), State::RUNNING );
    action->onTerminate = [ & ] {
       sequence.attach( appended );
    };
    guard->result = State::RUNNING;
    calls.clear();
-   EXPECT_EQ( sequence.tick( blackboard ), State::ABORTED );
+   EXPECT_EQ( sequence.tick( *blackboard ), State::ABORTED );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( action->terminations, 1 );
    EXPECT_EQ( guard->terminatedWith, State::ABORTED );
@@ -333,10 +333,10 @@ TEST( experimental_ActiveSequence, failed_guard_allows_selector_fallback_in_the_
    sequence->attach( action );
    root.attach( sequence );
    root.attach( fallback );
-   ASSERT_EQ( root.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( root.tick( *blackboard ), State::RUNNING );
    condition->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( root.tick( blackboard ), State::RUNNING );
+   EXPECT_EQ( root.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 3 } ) );
    EXPECT_EQ( action->terminatedWith, State::ABORTED );
    EXPECT_EQ( action->terminations, 1 );
@@ -356,10 +356,10 @@ TEST( experimental_ActiveSequence, failed_guard_cancels_a_parallel_group_before_
    sequence->attach( action );
    root.attach( sequence );
    root.attach( radio );
-   ASSERT_EQ( root.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( root.tick( *blackboard ), State::RUNNING );
    condition->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( root.tick( blackboard ), State::FAILURE );
+   EXPECT_EQ( root.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( action->terminatedWith, State::ABORTED );
    EXPECT_EQ( radio->terminatedWith, State::ABORTED );

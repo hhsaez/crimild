@@ -18,17 +18,29 @@ board.set(Target, std::weak_ptr<Entity>{enemy});  // same storage from a weak in
 auto target = board.get(Target);                 // optional<shared_ptr<Entity>>
 ```
 
-Pass a non-null `std::shared_ptr<Blackboard> const&` to `tick()`. The same
-board reaches `initialize()`, `update()`, and child ticks. Siblings exchange
+Pass `Blackboard&` to `tick()`, `initialize()`, and `update()`. The same
+board reference reaches child ticks. Siblings exchange
 information through one board, and entries persist across ticks. The caller
 supplies the same board throughout an activation; Behavior does not store or
 validate its identity. Base initialization sets RUNNING; overrides chain to their
 immediate base first.
 
-The caller owns the board between calls. A tick temporarily retains its argument
-across callbacks that release the caller's handle, but base Behavior has no
-Blackboard member. A null board logs an error and returns FAILURE without changing
-the activation.
+The caller keeps the board alive until the root tick returns, including across
+callbacks that release other owners. When the caller holds a weak handle, lock it
+once before entering the tree:
+
+```cpp
+if (auto board = weakBoard.lock()) {
+   root.tick(*board);
+}
+```
+
+Execution borrows the board without per-node reference-count updates or null
+checks. Base Behavior has no Blackboard member. A behavior that needs a handle
+beyond the call can explicitly use `retain(&blackboard)` to obtain a shared pointer,
+then store it as shared or weak according to its lifetime needs. Retaining requires
+an existing shared owner; a stack board can be borrowed by behaviors that do not
+retain it.
 
 Cleanup receives `terminate(state)` with SUCCESS, FAILURE, or ABORTED, matching
 `getState()`. `abort()`, `attach()`, `detach()`, and `detachFromParent()` receive no

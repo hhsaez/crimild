@@ -24,7 +24,7 @@ namespace {
       State result = State::RUNNING;
 
    protected:
-      State update( std::shared_ptr< Blackboard > const &blackboard ) override { return result; }
+      State update( Blackboard &blackboard ) override { return result; }
    };
 
    class TrackedBehavior : public Behavior {
@@ -37,7 +37,7 @@ namespace {
       int updates = 0;
 
    protected:
-      State update( std::shared_ptr< Blackboard > const &blackboard ) override
+      State update( Blackboard &blackboard ) override
       {
          ++updates;
          if ( onUpdate ) {
@@ -91,12 +91,12 @@ TEST( experimental_Composite, abort_propagates_only_to_running_children )
    auto completed = std::make_shared< TrackedBehavior >();
    auto waiting = std::make_shared< TrackedBehavior >();
    completed->result = State::SUCCESS;
-   ASSERT_EQ( running->tick( blackboard ), State::RUNNING );
-   ASSERT_EQ( completed->tick( blackboard ), State::SUCCESS );
+   ASSERT_EQ( running->tick( *blackboard ), State::RUNNING );
+   ASSERT_EQ( completed->tick( *blackboard ), State::SUCCESS );
    composite.attach( running );
    composite.attach( completed );
    composite.attach( waiting );
-   ASSERT_EQ( composite.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( composite.tick( *blackboard ), State::RUNNING );
 
    composite.abort();
    composite.abort();
@@ -119,10 +119,10 @@ TEST( experimental_Composite, completion_aborts_children_that_are_still_running 
       ControlledComposite composite;
       composite.result = result;
       auto child = std::make_shared< TrackedBehavior >();
-      ASSERT_EQ( child->tick( blackboard ), State::RUNNING );
+      ASSERT_EQ( child->tick( *blackboard ), State::RUNNING );
       composite.attach( child );
 
-      EXPECT_EQ( composite.tick( blackboard ), result );
+      EXPECT_EQ( composite.tick( *blackboard ), result );
       EXPECT_EQ( child->getState(), State::ABORTED );
       EXPECT_EQ( child->terminations, 1 );
    }
@@ -142,9 +142,9 @@ TEST( experimental_Composite, termination_keeps_a_snapshot_when_callbacks_attach
    };
    composite.attach( first );
    composite.attach( second );
-   ASSERT_EQ( first->tick( blackboard ), State::RUNNING );
-   ASSERT_EQ( second->tick( blackboard ), State::RUNNING );
-   ASSERT_EQ( composite.tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( first->tick( *blackboard ), State::RUNNING );
+   ASSERT_EQ( second->tick( *blackboard ), State::RUNNING );
+   ASSERT_EQ( composite.tick( *blackboard ), State::RUNNING );
 
    composite.abort();
 
@@ -164,7 +164,7 @@ TEST( experimental_Composite, rejects_cycles_without_interrupting_execution )
    auto child = std::make_shared< Behavior >();
    parent->attach( nested );
    nested->attach( child );
-   ASSERT_EQ( parent->tick( blackboard ), State::RUNNING );
+   ASSERT_EQ( parent->tick( *blackboard ), State::RUNNING );
    parent->attach( parent );
    nested->attach( parent );
    EXPECT_EQ( parent->getState(), State::RUNNING );
@@ -184,8 +184,8 @@ TEST( experimental_Composite, duplicate_attachment_and_unrelated_detachment_are_
    ControlledComposite parent;
    auto child = std::make_shared< TrackedBehavior >();
    parent.attach( child );
-   child->tick( blackboard );
-   parent.tick( blackboard );
+   child->tick( *blackboard );
+   parent.tick( *blackboard );
    parent.attach( child );
    parent.attach( nullptr );
    parent.detach( std::make_shared< Behavior >() );
@@ -202,8 +202,8 @@ TEST( experimental_Composite, explicit_detachment_cancels_before_moving_child )
    auto destination = std::make_shared< TestComposite >();
    auto child = std::make_shared< TrackedBehavior >();
    parent.attach( child );
-   child->tick( blackboard );
-   parent.tick( blackboard );
+   child->tick( *blackboard );
+   parent.tick( *blackboard );
    parent.detach( parent.getBehaviors().front() );
    EXPECT_EQ( parent.getState(), State::ABORTED );
    EXPECT_TRUE( parent.getBehaviors().empty() );
@@ -254,7 +254,7 @@ TYPED_TEST( experimental_CompositeCancellation, edits_during_first_and_later_tic
          parent.attach( child );
          parent.attach( later );
          if ( !firstTick ) {
-            ASSERT_EQ( parent.tick( blackboard ), State::RUNNING );
+            ASSERT_EQ( parent.tick( *blackboard ), State::RUNNING );
          }
          const auto previousUpdates = later->updates;
          child->onUpdate = [ & ] {
@@ -264,7 +264,7 @@ TYPED_TEST( experimental_CompositeCancellation, edits_during_first_and_later_tic
                parent.attach( appended );
             }
          };
-         EXPECT_EQ( parent.tick( blackboard ), State::ABORTED );
+         EXPECT_EQ( parent.tick( *blackboard ), State::ABORTED );
          EXPECT_EQ( child->terminations, 1 );
          EXPECT_EQ( child->terminatedWith, State::ABORTED );
          EXPECT_EQ( later->updates, previousUpdates );
@@ -273,7 +273,7 @@ TYPED_TEST( experimental_CompositeCancellation, edits_during_first_and_later_tic
             EXPECT_FALSE( child->hasParent() );
          }
          child->onUpdate = nullptr;
-         EXPECT_EQ( parent.tick( blackboard ), State::RUNNING );
+         EXPECT_EQ( parent.tick( *blackboard ), State::RUNNING );
          parent.abort();
       }
    }
@@ -290,7 +290,7 @@ TYPED_TEST( experimental_CompositeCancellation, child_abort_cancels_parent_inste
    child->onUpdate = [ & ] {
       child->abort();
    };
-   EXPECT_EQ( parent.tick( blackboard ), State::ABORTED );
+   EXPECT_EQ( parent.tick( *blackboard ), State::ABORTED );
    EXPECT_EQ( later->updates, 0 );
    EXPECT_EQ( child->terminations, 1 );
 }
@@ -320,10 +320,10 @@ TEST( experimental_Composite, attachment_automatically_reparents_and_cancels_bot
    auto sibling = std::make_shared< TrackedBehavior >();
    source.attach( child );
    destination.attach( sibling );
-   child->tick( blackboard );
-   sibling->tick( blackboard );
-   source.tick( blackboard );
-   destination.tick( blackboard );
+   child->tick( *blackboard );
+   sibling->tick( *blackboard );
+   source.tick( *blackboard );
+   destination.tick( *blackboard );
    destination.attach( source.getBehaviors().front() );
    EXPECT_TRUE( source.getBehaviors().empty() );
    ASSERT_EQ( destination.getBehaviors().size(), 2 );
@@ -367,7 +367,7 @@ TYPED_TEST( experimental_CompositeCancellation, reparenting_the_current_child_st
    child->onUpdate = [ & ] {
       destination->attach( child );
    };
-   EXPECT_EQ( source.tick( blackboard ), State::ABORTED );
+   EXPECT_EQ( source.tick( *blackboard ), State::ABORTED );
    EXPECT_EQ( child->terminations, 1 );
    EXPECT_EQ( child->getParent(), destination );
    EXPECT_EQ( later->updates, 0 );

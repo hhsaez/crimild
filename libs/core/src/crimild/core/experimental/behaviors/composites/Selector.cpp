@@ -4,7 +4,7 @@ using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-void Selector::initialize( std::shared_ptr< Blackboard > const &blackboard )
+void Selector::initialize( Blackboard &blackboard )
 {
    Composite::initialize( blackboard );
    // Each activation starts with a fresh snapshot. Structural edits abort it.
@@ -12,7 +12,7 @@ void Selector::initialize( std::shared_ptr< Blackboard > const &blackboard )
    m_currentBehavior = 0;
 }
 
-Behavior::State Selector::update( std::shared_ptr< Blackboard > const &blackboard )
+Behavior::State Selector::update( Blackboard &blackboard )
 {
    while ( m_currentBehavior < m_activeBehaviors.size() ) {
       // Retain the child locally: cancellation can clear the activation snapshot.
