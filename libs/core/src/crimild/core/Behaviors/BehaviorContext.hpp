@@ -28,10 +28,9 @@
 #ifndef CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 #define CRIMILD_CORE_BEHAVIORS_BEHAVIOR_CONTEXT_
 
+#include <crimild/coding/Codable.hpp>
 #include <crimild/core/Common/Variant.hpp>
 #include <crimild/core/Simulation/Clock.hpp>
-
-#include <crimild/coding/Codable.hpp>
 #include <crimild/math/Vector3.hpp>
 #include <crimild/math/Vector4.hpp>
 #include <functional>
@@ -47,7 +46,7 @@ namespace crimild {
       /**
                        \brief Stores an inmutable value for the context
               */
-      class BehaviorContextValue : public coding::Codable {
+      class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] BehaviorContextValue : public coding::Codable {
          CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContextValue )
       public:
          BehaviorContextValue( void );
@@ -78,7 +77,7 @@ namespace crimild {
 
                  \todo Add support for value observers
               */
-      class BehaviorContext : public coding::Codable {
+      class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] BehaviorContext : public coding::Codable {
          CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorContext )
 
       public:

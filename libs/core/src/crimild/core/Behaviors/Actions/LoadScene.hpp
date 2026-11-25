@@ -32,38 +32,38 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            class LoadScene : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions )
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] LoadScene : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions )
 
-            public:
-                LoadScene( void ) = default;
-                explicit LoadScene( std::string sceneFileName );
-                virtual ~LoadScene( void ) = default;
+         public:
+            LoadScene( void ) = default;
+            explicit LoadScene( std::string sceneFileName );
+            virtual ~LoadScene( void ) = default;
 
-                virtual Behavior::State step( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-            private:
-                std::string _sceneFileName;
+         private:
+            std::string _sceneFileName;
 
-                /**
-				   \name Coding support
-				*/
-                //@{
+            /**
+                               \name Coding support
+                            */
+            //@{
 
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                //@}
-            };
+            //@}
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

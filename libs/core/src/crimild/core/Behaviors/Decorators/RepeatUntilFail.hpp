@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,34 +32,33 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace decorators {
+      namespace decorators {
 
-			/**
-			   \brief A behavior that repeats its child behavior until it fails
-			 */
-			class RepeatUntilFail : public Decorator {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::RepeatUntilFail )
-				
-			public:
-				explicit RepeatUntilFail( void );
-				virtual ~RepeatUntilFail( void );
+         /**
+            \brief A behavior that repeats its child behavior until it fails
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] RepeatUntilFail : public Decorator {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::RepeatUntilFail )
 
-				/**
-				   \brief Executes the child behavior
+         public:
+            explicit RepeatUntilFail( void );
+            virtual ~RepeatUntilFail( void );
 
-				   If the behavior fails, returns SUCCESS. Otherwise, it keeps
-				   executing the behavior indefinitely
-				 */
-				virtual Behavior::State step( BehaviorContext *context ) override;
-			};
+            /**
+               \brief Executes the child behavior
 
-		}
+               If the behavior fails, returns SUCCESS. Otherwise, it keeps
+               executing the behavior indefinitely
+             */
+            virtual Behavior::State step( BehaviorContext *context ) override;
+         };
 
-	}
-	
+      }
+
+   }
+
 }
 
 #endif
-

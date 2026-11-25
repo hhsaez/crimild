@@ -32,41 +32,41 @@
 
 namespace crimild {
 
-    class MotionState;
+   class MotionState;
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            class MotionFromInput : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionFromInput )
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] MotionFromInput : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionFromInput )
 
-            public:
-                virtual void init( BehaviorContext *context ) override;
-                virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         public:
+            virtual void init( BehaviorContext *context ) override;
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
 
-                inline float getSpeed( void ) const noexcept { return m_speed; }
-                inline void setSpeed( float value ) noexcept { m_speed = value; }
+            inline float getSpeed( void ) const noexcept { return m_speed; }
+            inline void setSpeed( float value ) noexcept { m_speed = value; }
 
-            private:
-                MotionState *m_motion = nullptr;
-                float m_speed = 1.0f;
+         private:
+            MotionState *m_motion = nullptr;
+            float m_speed = 1.0f;
 
-                /**
-                     \name Coding support
-                */
-                //@{
+            /**
+                 \name Coding support
+            */
+            //@{
 
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                //@}
-            };
+            //@}
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

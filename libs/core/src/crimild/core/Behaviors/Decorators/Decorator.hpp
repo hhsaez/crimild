@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,55 +32,54 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace decorators {
+      namespace decorators {
 
-			/**
-			   \brief A behavior that alters the way its child works
-			*/
-			class Decorator : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators:: Decorator )
-			protected:
-				explicit Decorator( void );
+         /**
+            \brief A behavior that alters the way its child works
+         */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Decorator : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Decorator )
+         protected:
+            explicit Decorator( void );
 
-			public:
-				virtual ~Decorator( void );
-				
-				virtual void init( BehaviorContext *context ) override;
+         public:
+            virtual ~Decorator( void );
 
-				/**
-				   \brief Executes the child behavior
+            virtual void init( BehaviorContext *context ) override;
 
-				   \remarks By default, the returned state matches the
-				   one of the child behavior. If there is no behavior
-				   attached to a decorator, the result is FAILURE
-				 */
-				virtual Behavior::State step( BehaviorContext *context ) override;
+            /**
+               \brief Executes the child behavior
 
-				void setBehavior( BehaviorPtr const &behavior ) { _decoratedBehavior = behavior; }
-				Behavior *getBehavior( void ) { return crimild::get_ptr( _decoratedBehavior ); }
-				
-			private:
-				BehaviorPtr _decoratedBehavior;
+               \remarks By default, the returned state matches the
+               one of the child behavior. If there is no behavior
+               attached to a decorator, the result is FAILURE
+             */
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+            void setBehavior( BehaviorPtr const &behavior ) { _decoratedBehavior = behavior; }
+            Behavior *getBehavior( void ) { return crimild::get_ptr( _decoratedBehavior ); }
 
-		}
+         private:
+            BehaviorPtr _decoratedBehavior;
 
-	}
-	
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
+
 }
 
 #endif
-

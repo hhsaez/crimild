@@ -32,46 +32,46 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace decorators {
+      namespace decorators {
 
-            /**
-               \brief Executes the child behavior at most once in the given time frame
-             */
-            class Throttle : public Decorator {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Throttle )
+         /**
+            \brief Executes the child behavior at most once in the given time frame
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Throttle : public Decorator {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Throttle )
 
-            public:
-                inline void setTimeout( Real timeout ) noexcept { m_timeout = timeout; }
-                inline Real getTimeout( void ) const noexcept { return m_timeout; }
+         public:
+            inline void setTimeout( Real timeout ) noexcept { m_timeout = timeout; }
+            inline Real getTimeout( void ) const noexcept { return m_timeout; }
 
-                virtual Behavior::State step( BehaviorContext *context ) noexcept override
-                {
-                    m_clock.tick();
-                    if ( m_clock.getAccumTime() >= m_timeout ) {
-                        m_clock.reset();
-                        return Decorator::step( context );
-                    }
-                    return Behavior::State::RUNNING;
-                }
-
-            private:
-                Real m_timeout = 0;
-                Clock m_clock;
-            };
-
-            [[nodiscard]] inline SharedPointer< Throttle > throttle( BehaviorPtr behavior, Real timeout ) noexcept
+            virtual Behavior::State step( BehaviorContext *context ) noexcept override
             {
-                auto t = crimild::alloc< Throttle >();
-                t->setTimeout( timeout );
-                t->setBehavior( behavior );
-                return t;
+               m_clock.tick();
+               if ( m_clock.getAccumTime() >= m_timeout ) {
+                  m_clock.reset();
+                  return Decorator::step( context );
+               }
+               return Behavior::State::RUNNING;
             }
 
-        }
+         private:
+            Real m_timeout = 0;
+            Clock m_clock;
+         };
 
-    }
+         [[nodiscard]] [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] inline SharedPointer< Throttle > throttle( BehaviorPtr behavior, Real timeout ) noexcept
+         {
+            auto t = crimild::alloc< Throttle >();
+            t->setTimeout( timeout );
+            t->setBehavior( behavior );
+            return t;
+         }
+
+      }
+
+   }
 
 }
 
