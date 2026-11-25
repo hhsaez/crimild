@@ -531,9 +531,14 @@
 - Make Blackboard a Resource deriving from Entity, and pass shared-pointer parameters through the complete behavior lifecycle. Keep the board out of base Behavior's members so retaining it is an explicit ownership choice rather than an automatic cycle risk.
 - Tree edits accept a board for cancellation; construction can omit it, but edits involving running work reject a missing board. Automatic reparenting uses one board for both owners; moving between distinct boards requires explicit detachment with the old board before attaching with the new one.
 
+# 2026-11-22
+- Use weak pointer storage for Blackboard Entity/Node/Camera entries. Accept shared or weak inputs, lock on reads, and return optional shared pointers (nullopt when expired or empty). The board exchanges information without taking ownership of referenced objects; values such as scalars and strings remain stored directly.
+? Consider strong storage for global objects or a configurable ownership policy, possibly templated, only when a concrete use case needs it. This is a future refactor; the current board always stores pointers weakly, and a separate global-object structure may be more appropriate.
+
 # 2026-11-24
 - Use one terminate(state) hook for SUCCESS, FAILURE, and ABORTED, with the stored state set before cleanup. abort() remains a parameterless, idempotent lifecycle operation, and composites/decorators abort remaining running children so each child receives its own cancellation reason.
 - Keep termination and structural edits independent of Blackboard. Behaviors capture the resources or handles required for cleanup during execution. Land this lifecycle contract in its own PR from master before rebasing the Blackboard work in #114; Blackboard parameters for tick/initialize/update belong to that later integration.
 
 # 2026-11-25
 - Behavior::initialize() owns the transition to RUNNING; derived initializers call their immediate base first so custom initialization can be cancelled. tick() restarts previously aborted activations, but still stops before update if the new initialization aborts (#115).
+- Stack #114 directly on #115 before merge. Blackboard parameters belong only to tick/initialize/update; terminate(state), abort(), attachment, detachment, and reparenting remain board-free. Capture cleanup resources during execution so cancellation still works after the board expires and automatic reparenting can cancel owners using different boards.

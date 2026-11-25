@@ -34,6 +34,13 @@ your own suggestions.
   similar needs, propose Blackboard first and explain how it fits the use case.
   The shared-knowledge metaphor and its academic roots are an intentional design
   preference.
+- Blackboard stores Entity, Node, and Camera references weakly. Accept shared or
+  weak pointer inputs, and lock references on reads to return optional shared
+  pointers (`nullopt` if expired or empty). Object lifetime belongs to an owner
+  outside the board; scalar and string entries remain ordinary values.
+- Strong storage for global objects, or a configurable ownership policy (possibly
+  a template), is a future design discussion driven by a concrete use case. Keep
+  the current Blackboard weak; do not introduce storage policies preemptively.
 - Revisit this choice together if a concrete use case makes the metaphor or
   contract unsuitable. Do not silently substitute another abstraction or migrate
   existing APIs without an agreed task.

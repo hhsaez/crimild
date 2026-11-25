@@ -4,6 +4,19 @@
 
 `crimild::experimental::Blackboard` is a Resource (and therefore an Entity).
 Its variant-backed entries can be accessed with typed keys or dynamic names.
+Entity, Node, and Camera pointers are stored as `weak_ptr`, whether the input is
+shared or weak. Pointer reads return `optional<shared_ptr<T>>`, locking the weak
+reference; missing, mismatched, empty, or expired references return `nullopt`.
+`contains()` checks the name only, so an expired entry can still be present.
+Objects need an owner outside the board. A successful read keeps an object alive
+only while the returned shared pointer is held; scalar and string values are copied.
+
+```cpp
+Key<std::shared_ptr<Entity>> Target { "ai.target" };
+board.set(Target, enemy);                        // weak storage from a shared input
+board.set(Target, std::weak_ptr<Entity>{enemy});  // same storage from a weak input
+auto target = board.get(Target);                 // optional<shared_ptr<Entity>>
+```
 
 Pass a non-null `std::shared_ptr<Blackboard> const&` to `tick()`. The same
 board reaches `initialize()`, `update()`, and child ticks. Siblings exchange
@@ -27,6 +40,8 @@ but must still clean up when that board has expired.
 
 Systems Context migration, scoped lookup, and Blackboard entry serialization
 remain separate work. Resource inheritance does not add serialization of entries.
+Strong storage for global objects or a configurable ownership policy (possibly
+templated) may be considered in a future iteration; the current board is weak.
 
 ## INVARIANTS
 

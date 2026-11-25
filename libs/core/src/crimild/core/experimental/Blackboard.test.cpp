@@ -109,7 +109,7 @@ TEST( experimental_Blackboard, reads_return_copies )
    EXPECT_EQ( board.get( Name ), "guard" );
 }
 
-TEST( experimental_Blackboard, entity_keys_accept_derived_instances_and_keep_them_alive )
+TEST( experimental_Blackboard, entity_keys_accept_derived_instances_without_keeping_them_alive )
 {
    Blackboard board;
    std::weak_ptr< Node > lifetime;
@@ -118,19 +118,19 @@ TEST( experimental_Blackboard, entity_keys_accept_derived_instances_and_keep_the
       lifetime = node;
       board.set( Target, node );
       EXPECT_EQ( board.get( Target ).value(), node );
+      EXPECT_EQ( board.get< std::shared_ptr< Node > >( Target.name ), std::nullopt );
    }
-   EXPECT_FALSE( lifetime.expired() );
-   EXPECT_EQ( board.get< std::shared_ptr< Node > >( Target.name ), std::nullopt );
-   EXPECT_TRUE( board.erase( Target ) );
    EXPECT_TRUE( lifetime.expired() );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+   EXPECT_TRUE( board.contains( Target ) );
+   EXPECT_TRUE( board.erase( Target ) );
 }
 
-TEST( experimental_Blackboard, null_entity_is_distinct_from_a_missing_entry )
+TEST( experimental_Blackboard, empty_entity_references_return_nullopt_but_keep_the_name )
 {
    Blackboard board;
    board.set( Target, nullptr );
-   ASSERT_TRUE( board.get( Target ).has_value() );
-   EXPECT_EQ( board.get( Target ).value(), nullptr );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
    EXPECT_TRUE( board.contains( Target ) );
    board.erase( Target );
    EXPECT_EQ( board.get( Target ), std::nullopt );
@@ -140,7 +140,8 @@ TEST( experimental_Blackboard, shared_handles_access_the_same_resource )
 {
    const auto original = std::make_shared< Blackboard >();
    original->set( Count, 1u );
-   original->set( Target, std::make_shared< Entity >() );
+   const auto target = std::make_shared< Entity >();
+   original->set( Target, target );
    const auto handle = original;
    handle->set( Count, 2u );
    EXPECT_EQ( original->get( Count ), 2u );
@@ -206,4 +207,98 @@ TEST( experimental_Blackboard, is_a_resource_that_can_be_exchanged_as_an_entity 
    Blackboard other;
    other.set( Target, entity );
    EXPECT_EQ( std::dynamic_pointer_cast< Blackboard >( other.get( Target ).value() ), board );
+}
+
+TEST( experimental_Blackboard, shared_and_weak_inputs_use_the_same_weak_storage_for_every_pointer_type )
+{
+   const auto check = []< typename T >( std::shared_ptr< T > object ) {
+      Blackboard board;
+      const Key< std::shared_ptr< T > > key { "object" };
+      const Key< std::weak_ptr< T > > weakKey { "object" };
+      std::weak_ptr< T > weak = object;
+      board.set( key, object );
+      EXPECT_EQ( board.get( key ), object );
+      board.set( key, weak );
+      EXPECT_EQ( board.get( key ), object );
+      board.set( weakKey, object );
+      EXPECT_EQ( board.get( weakKey ), object );
+      board.set( weakKey, weak );
+      EXPECT_EQ( board.get( weakKey ), object );
+      const std::string name = "object";
+      board.set( name, object );
+      EXPECT_EQ( board.get< std::shared_ptr< T > >( name ), object );
+      board.set( name, weak );
+      EXPECT_EQ( board.get< std::shared_ptr< T > >( name ), object );
+      EXPECT_EQ( board.get< std::weak_ptr< T > >( name ), object );
+      object.reset();
+      EXPECT_TRUE( weak.expired() );
+      EXPECT_EQ( board.get( key ), std::nullopt );
+      EXPECT_EQ( board.get( weakKey ), std::nullopt );
+      EXPECT_EQ( board.get< std::shared_ptr< T > >( name ), std::nullopt );
+      EXPECT_TRUE( board.contains( key ) );
+   };
+   check( std::make_shared< Entity >() );
+   check( std::make_shared< Node >() );
+   check( std::make_shared< Camera3D >() );
+}
+
+TEST( experimental_Blackboard, weak_derived_inputs_work_with_base_entity_read_keys )
+{
+   Blackboard board;
+   auto node = std::make_shared< Node >();
+   board.set( Target, std::weak_ptr< Node > { node } );
+   EXPECT_EQ( board.get( Target ), node );
+   node.reset();
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+}
+
+TEST( experimental_Blackboard, a_locked_read_temporarily_owns_the_object )
+{
+   Blackboard board;
+   auto entity = std::make_shared< Entity >();
+   std::weak_ptr< Entity > lifetime = entity;
+   board.set( Target, entity );
+   auto read = board.get( Target );
+   ASSERT_TRUE( read.has_value() );
+   entity.reset();
+   EXPECT_FALSE( lifetime.expired() );
+   EXPECT_EQ( board.get( Target ), read );
+   read.reset();
+   EXPECT_TRUE( lifetime.expired() );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+}
+
+TEST( experimental_Blackboard, empty_expired_and_temporary_inputs_do_not_create_an_owner )
+{
+   Blackboard board;
+   board.set( Target, std::weak_ptr< Entity > {} );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+   std::weak_ptr< Entity > expired;
+   {
+      auto entity = std::make_shared< Entity >();
+      expired = entity;
+   }
+   board.set( Target, expired );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+   board.set( Target, std::make_shared< Entity >() );
+   EXPECT_EQ( board.get( Target ), std::nullopt );
+   EXPECT_TRUE( board.contains( Target ) );
+}
+
+TEST( experimental_Blackboard, a_board_can_reference_an_owner_without_creating_a_strong_cycle )
+{
+   struct Owner : Entity {
+      std::shared_ptr< Blackboard > board = std::make_shared< Blackboard >();
+   };
+   std::weak_ptr< Owner > ownerLifetime;
+   std::weak_ptr< Blackboard > boardLifetime;
+   {
+      auto owner = std::make_shared< Owner >();
+      ownerLifetime = owner;
+      boardLifetime = owner->board;
+      owner->board->set( Target, owner );
+      EXPECT_EQ( owner->board->get( Target ), owner );
+   }
+   EXPECT_TRUE( ownerLifetime.expired() );
+   EXPECT_TRUE( boardLifetime.expired() );
 }

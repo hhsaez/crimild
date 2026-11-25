@@ -25,12 +25,35 @@ namespace crimild::experimental {
    class Node;
    class Camera3D;
 
+   namespace detail {
+
+      // Pointer inputs are stored weakly and read back through shared ownership.
+      template< typename T >
+      struct BlackboardTypes {
+         using Stored = T;
+         using Read = T;
+      };
+
+      template< typename T >
+      struct BlackboardTypes< std::weak_ptr< T > > {
+         using Stored = std::weak_ptr< T >;
+         using Read = std::shared_ptr< T >;
+      };
+
+      template< typename T >
+      struct BlackboardTypes< std::shared_ptr< T > > : BlackboardTypes< std::weak_ptr< T > > { };
+
+   }
+
    /**
     * @brief Shared data accessed through typed keys or dynamic names
     *
     * Callers that need to exchange values use the same blackboard instance.
     * As a Resource, a blackboard is non-copyable; share its identity through handles.
     * Key names are owned by the blackboard, and get() returns a copy.
+    * Entity references are always stored weakly, even when set() receives a shared
+    * pointer. Reads lock them and return an optional shared pointer; expired or
+    * empty references return nullopt. The object must have an owner elsewhere.
     */
    class Blackboard : public Resource {
       CRIMILD_IMPLEMENT_RTTI( crimild::experimental::Blackboard )
@@ -42,14 +65,14 @@ namespace crimild::experimental {
          float,
          Size2i,
          std::string,
-         std::shared_ptr< Entity >,
-         std::shared_ptr< Node >,
-         std::shared_ptr< Camera3D > >;
+         std::weak_ptr< Entity >,
+         std::weak_ptr< Node >,
+         std::weak_ptr< Camera3D > >;
 
       virtual ~Blackboard( void ) noexcept = default;
 
       /**
-       * @brief Store a value of the key's declared type, replacing any existing entry
+       * @brief Replace the named entry, converting pointer inputs to weak storage
        */
       template< typename T >
       void set( Key< T > key, std::type_identity_t< T > value )
@@ -57,31 +80,45 @@ namespace crimild::experimental {
          set< T >( key.name, std::move( value ) );
       }
 
+      // A shared-pointer read key accepts weak inputs, including derived objects.
+      template< typename T, typename U >
+      void set( Key< std::shared_ptr< T > > key, std::weak_ptr< U > value )
+      {
+         set( key.name, std::weak_ptr< T > { std::move( value ) } );
+      }
+
       template< typename T >
       void set( std::string_view name, T value )
       {
+         using Stored = typename detail::BlackboardTypes< T >::Stored;
          m_values.insert_or_assign(
             std::string { name },
-            Value { std::in_place_type< T >, std::move( value ) }
+            Value { std::in_place_type< Stored >, Stored { std::move( value ) } }
          );
       }
 
       /**
-       * @brief Return a copy, or nullopt if the name is absent or the type differs
+       * @brief Return a copy or locked shared pointer; nullopt for missing,
+       * mismatched, empty, or expired entries
        */
       template< typename T >
-      std::optional< T > get( Key< T > key ) const
+      std::optional< typename detail::BlackboardTypes< T >::Read > get( Key< T > key ) const
       {
          return get< T >( key.name );
       }
 
       template< typename T >
-      std::optional< T > get( std::string_view name ) const
+      std::optional< typename detail::BlackboardTypes< T >::Read > get( std::string_view name ) const
       {
+         using Types = detail::BlackboardTypes< T >;
          const auto it = m_values.find( std::string { name } );
          if ( it != m_values.end() ) {
-            if ( const auto value = std::get_if< T >( &it->second ) ) {
-               return *value;
+            if ( const auto value = std::get_if< typename Types::Stored >( &it->second ) ) {
+               if constexpr ( std::is_same_v< typename Types::Stored, typename Types::Read > ) {
+                  return *value;
+               } else if ( auto locked = value->lock() ) {
+                  return locked;
+               }
             }
          }
          return std::nullopt;
