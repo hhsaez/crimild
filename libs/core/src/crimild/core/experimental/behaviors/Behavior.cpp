@@ -7,12 +7,14 @@ using namespace crimild::experimental::behaviors;
 Behavior::State Behavior::tick( void )
 {
    if ( m_state != State::RUNNING ) {
-      m_state = State::RUNNING;
       initialize();
-   }
-
-   if ( m_state == State::ABORTED ) {
-      return m_state;
+      CRIMILD_INVARIANT(
+         m_state == State::RUNNING || m_state == State::ABORTED,
+         "initialize() must call Behavior::initialize()"
+      );
+      if ( m_state == State::ABORTED ) {
+         return m_state;
+      }
    }
 
    const auto result = update();
@@ -45,7 +47,7 @@ void Behavior::abort( void )
 
 void Behavior::initialize( void )
 {
-   // no-op
+   m_state = State::RUNNING;
 }
 
 Behavior::State Behavior::update( void )

@@ -57,6 +57,7 @@ namespace crimild::experimental::behaviors {
       bool canAttach( const Behavior *child ) const;
 
       // Called once before an activation's first update.
+      // Sets RUNNING. Overrides must call their base implementation first.
       virtual void initialize( void );
 
       // Must return SUCCESS, FAILURE, or RUNNING.

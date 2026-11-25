@@ -34,7 +34,11 @@ namespace {
       State terminatedWith = State::READY;
 
    protected:
-      void initialize( void ) override { ++initializations; }
+      void initialize( void ) override
+      {
+         Behavior::initialize();
+         ++initializations;
+      }
 
       State update( void ) override
       {

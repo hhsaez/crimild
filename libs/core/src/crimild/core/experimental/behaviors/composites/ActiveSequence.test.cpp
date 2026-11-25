@@ -30,7 +30,11 @@ namespace {
       std::function< void() > onTerminate;
 
    protected:
-      void initialize( void ) override { ++initializations; }
+      void initialize( void ) override
+      {
+         Behavior::initialize();
+         ++initializations;
+      }
 
       State update( void ) override
       {

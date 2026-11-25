@@ -526,3 +526,6 @@
 # 2026-11-24
 - Use one terminate(state) hook for SUCCESS, FAILURE, and ABORTED, with the stored state set before cleanup. abort() remains a parameterless, idempotent lifecycle operation, and composites/decorators abort remaining running children so each child receives its own cancellation reason.
 - Keep termination and structural edits independent of Blackboard. Behaviors capture the resources or handles required for cleanup during execution. Land this lifecycle contract in its own PR from master before rebasing the Blackboard work in #114; Blackboard parameters for tick/initialize/update belong to that later integration.
+
+# 2026-11-25
+- Behavior::initialize() owns the transition to RUNNING; derived initializers call their immediate base first so custom initialization can be cancelled. tick() restarts previously aborted activations, but still stops before update if the new initialization aborts (#115).

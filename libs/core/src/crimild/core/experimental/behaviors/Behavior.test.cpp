@@ -32,6 +32,7 @@ namespace {
    protected:
       void initialize( void ) override
       {
+         TestBehavior::initialize();
          calls.push_back( "initialize" );
          if ( onInitialize ) {
             onInitialize();
@@ -297,4 +298,47 @@ TEST( experimental_Behavior, termination_exposes_the_final_state_and_recursive_a
       EXPECT_EQ( behavior.getState(), reason );
       EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { reason } ) );
    }
+}
+
+TEST( experimental_Behavior, initializer_owns_the_running_transition_on_first_and_restarted_activations )
+{
+   class Initializer : public TestBehavior {
+   public:
+      std::vector< State > entryStates;
+
+   protected:
+      void initialize( void ) override
+      {
+         const auto previous = getState();
+         TestBehavior::initialize();
+         entryStates.push_back( previous );
+         EXPECT_EQ( getState(), State::RUNNING );
+      }
+   };
+   Initializer behavior;
+   behavior.result = Behavior::State::SUCCESS;
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
+   behavior.result = Behavior::State::FAILURE;
+   EXPECT_EQ( behavior.tick(), Behavior::State::FAILURE );
+   behavior.result = Behavior::State::RUNNING;
+   EXPECT_EQ( behavior.tick(), Behavior::State::RUNNING );
+   behavior.abort();
+   behavior.result = Behavior::State::SUCCESS;
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.entryStates, ( std::vector< Behavior::State > {
+                                       Behavior::State::READY,
+                                       Behavior::State::SUCCESS,
+                                       Behavior::State::FAILURE,
+                                       Behavior::State::ABORTED,
+                                    } ) );
+}
+
+TEST( experimental_Behavior, initialization_must_chain_to_the_base_implementation )
+{
+   class MissingBase : public TestBehavior {
+   protected:
+      void initialize( void ) override { }
+   };
+   MissingBase behavior;
+   EXPECT_DEBUG_DEATH( behavior.tick(), "must call Behavior::initialize" );
 }
