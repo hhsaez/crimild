@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_BEHAVIORS_TRANSFORM_
 
 #include <crimild/core/Behaviors/Behavior.hpp>
-
 #include <crimild/math/Transformation.hpp>
 
 namespace crimild {
@@ -38,7 +37,7 @@ namespace crimild {
 
       namespace actions {
 
-         class Transform : public Behavior {
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Transform : public Behavior {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Transform );
 
          public:

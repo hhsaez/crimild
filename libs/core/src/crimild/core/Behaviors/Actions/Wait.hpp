@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,42 +32,41 @@
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			class Wait : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Wait )
-				
-			public:
-				Wait( void );
-				explicit Wait( crimild::Real32 duration );
-				virtual ~Wait( void );
-				
-				virtual void init( BehaviorContext *context ) override;
-				virtual Behavior::State step( BehaviorContext *context ) override;
-				
-			private:
-				float _duration;
-				crimild::Clock _clock;
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Wait : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Wait )
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+         public:
+            Wait( void );
+            explicit Wait( crimild::Real32 duration );
+            virtual ~Wait( void );
 
-		}
+            virtual void init( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-	}
-	
+         private:
+            float _duration;
+            crimild::Clock _clock;
+
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
+
 }
 
 #endif
-

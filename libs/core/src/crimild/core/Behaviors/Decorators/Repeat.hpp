@@ -32,43 +32,43 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace decorators {
+      namespace decorators {
+
+         /**
+            \brief A behavior that repeats its child behavior a number of times
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Repeat : public Decorator {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
+
+         public:
+            Repeat( void ) = default;
+            explicit Repeat( crimild::Int16 times ) noexcept;
+            virtual ~Repeat( void ) = default;
+
+            virtual void init( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
+
+         private:
+            crimild::Int16 _times = -1;
+            crimild::Int16 _loopCount = 0;
 
             /**
-               \brief A behavior that repeats its child behavior a number of times
+                \name Coding support
              */
-            class Repeat : public Decorator {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::decorators::Repeat )
+            //@{
 
-            public:
-                Repeat( void ) = default;
-                explicit Repeat( crimild::Int16 times ) noexcept;
-                virtual ~Repeat( void ) = default;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-                virtual void init( BehaviorContext *context ) override;
-                virtual Behavior::State step( BehaviorContext *context ) override;
+            //@}
+         };
 
-            private:
-                crimild::Int16 _times = -1;
-                crimild::Int16 _loopCount = 0;
+      }
 
-                /**
-                    \name Coding support
-                 */
-                //@{
-
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
-
-                //@}
-            };
-
-        }
-
-    }
+   }
 
 }
 

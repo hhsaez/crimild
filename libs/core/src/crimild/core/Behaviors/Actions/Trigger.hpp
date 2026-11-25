@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Hernan Saez
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
  *     * Neither the name of the <organization> nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,54 +29,52 @@
 #define CRIMILD_CORE_BEHAVIORS_ACTIONS_TRIGGER_
 
 #include <crimild/core/Behaviors/Behavior.hpp>
-
 #include <list>
 
 namespace crimild {
 
-	namespace behaviors {
+   namespace behaviors {
 
-		namespace actions {
+      namespace actions {
 
-			class Trigger : public Behavior {
-				CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Trigger )
-				
-			public:
-				static void each( std::function< void( std::string ) > const &callback );
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Trigger : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::Trigger )
 
-			private:
-				static std::list< Trigger * > _allTriggers;
+         public:
+            static void each( std::function< void( std::string ) > const &callback );
 
-			public:
-				Trigger( void );
-				explicit Trigger( std::string triggerName );
-				virtual ~Trigger( void );
+         private:
+            static std::list< Trigger * > _allTriggers;
 
-				inline const std::string &getTriggerName( void ) const { return _triggerName; }
+         public:
+            Trigger( void );
+            explicit Trigger( std::string triggerName );
+            virtual ~Trigger( void );
 
-				virtual void init( BehaviorContext *context ) override;
-				virtual Behavior::State step( BehaviorContext *context ) override;
-				
-			private:
-				std::string _triggerName;
+            inline const std::string &getTriggerName( void ) const { return _triggerName; }
 
-				/**
-				   \name Coding support
-				*/
-				//@{
-				
-			public:
-				virtual void encode( coding::Encoder &encoder ) override;
-				virtual void decode( coding::Decoder &decoder ) override;
-				
-				//@}
-			};
+            virtual void init( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-		}
+         private:
+            std::string _triggerName;
 
-	}
-	
+            /**
+               \name Coding support
+            */
+            //@{
+
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
+
+            //@}
+         };
+
+      }
+
+   }
+
 }
 
 #endif
-

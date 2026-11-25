@@ -32,41 +32,41 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace composites {
+      namespace composites {
 
-            /**
-               \brief Execute all children sequentially
+         /**
+            \brief Execute all children sequentially
 
-               This behavior succeedes only if all of its children do.
-            */
-            class Sequence : public Composite {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Sequence )
+            This behavior succeedes only if all of its children do.
+         */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Sequence : public Composite {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Sequence )
 
-            public:
-                Sequence( void ) = default;
+         public:
+            Sequence( void ) = default;
 
-                explicit Sequence( std::vector< SharedPointer< Behavior > > const &bs ) noexcept
-                {
-                    for ( auto &b : bs ) {
-                        attachBehavior( b );
-                    }
-                }
+            explicit Sequence( std::vector< SharedPointer< Behavior > > const &bs ) noexcept
+            {
+               for ( auto &b : bs ) {
+                  attachBehavior( b );
+               }
+            }
 
-                virtual ~Sequence( void ) = default;
+            virtual ~Sequence( void ) = default;
 
-                virtual void init( BehaviorContext *context ) override;
+            virtual void init( BehaviorContext *context ) override;
 
-                virtual Behavior::State step( BehaviorContext *context ) override;
+            virtual Behavior::State step( BehaviorContext *context ) override;
 
-            private:
-                int _currentBehavior = 0;
-            };
+         private:
+            int _currentBehavior = 0;
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

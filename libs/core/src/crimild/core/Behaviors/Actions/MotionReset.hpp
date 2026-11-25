@@ -32,49 +32,49 @@
 
 namespace crimild {
 
-    class MotionState;
+   class MotionState;
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
+
+         /**
+          * \brief Resets motion state and create default values if needed.
+          *
+          * During initialization, this behavior will fetch the current motion
+          * state (position, velocity and steering) from the agent or attach one
+          * if none is present. Therefore, this behavior is usually the first
+          * one in the a sequence of motion behaviors.
+          *
+          * During each step, the agent's position is copied to the corresponding
+          * field in motion state. Steering is reset too. Velocity is **not**
+          * changed, though.
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] MotionReset : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionReset )
+
+         public:
+            virtual void init( crimild::behaviors::BehaviorContext *context ) override;
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+
+         private:
+            MotionState *m_motion = nullptr;
 
             /**
-             * \brief Resets motion state and create default values if needed.
-             *
-             * During initialization, this behavior will fetch the current motion
-             * state (position, velocity and steering) from the agent or attach one
-             * if none is present. Therefore, this behavior is usually the first
-             * one in the a sequence of motion behaviors.
-             *
-             * During each step, the agent's position is copied to the corresponding
-             * field in motion state. Steering is reset too. Velocity is **not**
-             * changed, though.
-             */
-            class MotionReset : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::MotionReset )
+               \name Coding support
+            */
+            //@{
 
-            public:
-                virtual void init( crimild::behaviors::BehaviorContext *context ) override;
-                virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-            private:
-                MotionState *m_motion = nullptr;
+            //@}
+         };
 
-                /**
-                   \name Coding support
-                */
-                //@{
+      }
 
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
-
-                //@}
-            };
-
-        }
-
-    }
+   }
 
 }
 

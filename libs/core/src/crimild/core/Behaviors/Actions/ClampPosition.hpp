@@ -29,7 +29,6 @@
 #define CRIMILD_CORE_BEHAVIORS_ACTIONS_CLAMP_POSITION_
 
 #include <crimild/core/Behaviors/Behavior.hpp>
-
 #include <crimild/math/Bounds3.hpp>
 
 namespace crimild {
@@ -41,7 +40,7 @@ namespace crimild {
          /**
           * \brief Ensures an agent's position is always within limits
           */
-         class ClampPosition : public Behavior {
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] ClampPosition : public Behavior {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ClampPosition )
 
          public:
