@@ -32,48 +32,48 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace composites {
+      namespace composites {
+
+         /**
+                        \brief A behavior with one or more children
+                     */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] Composite : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Composite )
+
+         protected:
+            Composite( void ) = default;
+
+         public:
+            virtual ~Composite( void ) = default;
+
+            virtual void init( BehaviorContext *context ) override;
+
+            void attachBehavior( BehaviorPtr const &behavior );
+            void setBehavior( BehaviorPtr const &behavior, size_t index ) noexcept;
+            void detachBehavior( BehaviorPtr const &behavior );
+            size_t getBehaviorCount( void ) const;
+            Behavior *getBehaviorAt( size_t index );
+
+         private:
+            Array< BehaviorPtr > _behaviors;
 
             /**
-			   \brief A behavior with one or more children
-			*/
-            class Composite : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::composites::Composite )
+                               \name Coding support
+                            */
+            //@{
 
-            protected:
-                Composite( void ) = default;
+         public:
+            virtual void encode( coding::Encoder &encoder ) override;
+            virtual void decode( coding::Decoder &decoder ) override;
 
-            public:
-                virtual ~Composite( void ) = default;
+            //@}
+         };
 
-                virtual void init( BehaviorContext *context ) override;
+      }
 
-                void attachBehavior( BehaviorPtr const &behavior );
-                void setBehavior( BehaviorPtr const &behavior, size_t index ) noexcept;
-                void detachBehavior( BehaviorPtr const &behavior );
-                size_t getBehaviorCount( void ) const;
-                Behavior *getBehaviorAt( size_t index );
-
-            private:
-                Array< BehaviorPtr > _behaviors;
-
-                /**
-				   \name Coding support
-				*/
-                //@{
-
-            public:
-                virtual void encode( coding::Encoder &encoder ) override;
-                virtual void decode( coding::Decoder &decoder ) override;
-
-                //@}
-            };
-
-        }
-
-    }
+   }
 
 }
 

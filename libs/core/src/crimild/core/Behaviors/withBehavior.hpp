@@ -33,15 +33,15 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        [[nodiscard]] inline SharedPointer< Node > withBehavior( SharedPointer< Node > const &node, SharedPointer< Behavior > const &behavior ) noexcept
-        {
-            node->attachComponent< BehaviorController >()->execute( behavior );
-            return node;
-        }
+      [[nodiscard]] [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] inline SharedPointer< Node > withBehavior( SharedPointer< Node > const &node, SharedPointer< Behavior > const &behavior ) noexcept
+      {
+         node->attachComponent< BehaviorController >()->execute( behavior );
+         return node;
+      }
 
-    }
+   }
 
 }
 

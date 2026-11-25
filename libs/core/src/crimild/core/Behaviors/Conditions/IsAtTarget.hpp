@@ -2,7 +2,6 @@
 #define CRIMILD_CORE_BEHAVIORS_CONDITIONS_IS_AT_TARGET_
 
 #include <crimild/core/Behaviors/Behavior.hpp>
-
 #include <crimild/math/Numeric.hpp>
 
 namespace crimild {
@@ -11,7 +10,7 @@ namespace crimild {
 
       namespace conditions {
 
-         class IsAtTarget : public Behavior {
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] IsAtTarget : public Behavior {
             CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::IsAtTarget )
 
          public:

@@ -542,3 +542,5 @@
 # 2026-11-25
 - Behavior::initialize() owns the transition to RUNNING; derived initializers call their immediate base first so custom initialization can be cancelled. tick() restarts previously aborted activations, but still stops before update if the new initialization aborts (#115).
 - Stack #114 directly on #115 before merge. Blackboard parameters belong only to tick/initialize/update; terminate(state), abort(), attachment, detachment, and reparenting remain board-free. Capture cleanup resources during execution so cancellation still works after the board expires and automatic reparenting can cancel owners using different boards.
+- Deprecate the complete legacy behavior API with compiler attributes so concrete behaviors and helpers warn at their call sites, not just the base class. Keep runtime behavior and serialized RTTI names intact for existing callers.
+- Develop new behavior trees under crimild::experimental::behaviors. Deprecation is independent of the pending lifecycle and Blackboard PRs; migrating legacy callers and filling gaps in the new API remain separate work.

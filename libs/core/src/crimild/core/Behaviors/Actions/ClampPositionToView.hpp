@@ -32,24 +32,24 @@
 
 namespace crimild {
 
-    namespace behaviors {
+   namespace behaviors {
 
-        namespace actions {
+      namespace actions {
 
-            /**
-             * \brief Ensures an agent's position is within camera's view frustum
-             */
-            class ClampPositionToView : public Behavior {
-                CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ClampPositionToView )
+         /**
+          * \brief Ensures an agent's position is within camera's view frustum
+          */
+         class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] ClampPositionToView : public Behavior {
+            CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::actions::ClampPositionToView )
 
-            public:
-                virtual void init( crimild::behaviors::BehaviorContext *context ) override;
-                virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
-            };
+         public:
+            virtual void init( crimild::behaviors::BehaviorContext *context ) override;
+            virtual crimild::behaviors::Behavior::State step( crimild::behaviors::BehaviorContext *context ) override;
+         };
 
-        }
+      }
 
-    }
+   }
 
 }
 

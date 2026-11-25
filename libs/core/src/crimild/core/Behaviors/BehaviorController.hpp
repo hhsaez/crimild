@@ -30,7 +30,6 @@
 
 #include <crimild/core/Components/NodeComponent.hpp>
 #include <crimild/core/Messaging/MessageQueue.hpp>
-
 #include <crimild/foundation.hpp>
 
 namespace crimild {
@@ -40,7 +39,7 @@ namespace crimild {
       class Behavior;
       class BehaviorContext;
 
-      class BehaviorController
+      class [[deprecated( "Legacy behavior API; use crimild::experimental::behaviors for new behavior trees" )]] BehaviorController
          : public crimild::NodeComponent,
            public crimild::Messenger {
          CRIMILD_IMPLEMENT_RTTI( crimild::behaviors::BehaviorController )
