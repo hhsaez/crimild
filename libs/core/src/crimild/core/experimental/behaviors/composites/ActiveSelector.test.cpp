@@ -23,7 +23,11 @@ namespace {
       std::function< void() > callback;
 
    protected:
-      void initialize( void ) override { ++initializations; }
+      void initialize( void ) override
+      {
+         Behavior::initialize();
+         ++initializations;
+      }
 
       State update( void ) override
       {
@@ -34,10 +38,11 @@ namespace {
          return result;
       }
 
-      void terminate( void ) override
+      void terminate( State state ) override
       {
          ++terminations;
-         terminatedWith = getState();
+         terminatedWith = state;
+         EXPECT_EQ( state, getState() );
       }
 
    private:

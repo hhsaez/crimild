@@ -52,12 +52,12 @@ void Composite::detach( std::shared_ptr< Behavior > const &behavior )
    child->setParent( nullptr );
 }
 
-void Composite::terminate( void )
+void Composite::terminate( State state )
 {
    // Keep callbacks that modify the collection from invalidating traversal.
    const auto behaviors = getBehaviors();
    for ( const auto &behavior : behaviors ) {
-      if ( behavior->m_parent == this ) {
+      if ( behavior->m_parent == this && behavior->getState() == State::RUNNING ) {
          behavior->abort();
       }
    }

@@ -5,6 +5,7 @@ using namespace crimild::experimental::behaviors::composites;
 
 void Parallel::initialize( void )
 {
+   Composite::initialize();
    m_activeBehaviors = getBehaviors();
    // Completion belongs to this activation, regardless of a child's old state.
    m_completed.assign( m_activeBehaviors.size(), false );
@@ -36,9 +37,9 @@ Behavior::State Parallel::update( void )
    return allCompleted ? State::SUCCESS : State::RUNNING;
 }
 
-void Parallel::terminate( void )
+void Parallel::terminate( State state )
 {
-   Composite::terminate();
+   Composite::terminate( state );
    m_activeBehaviors.clear();
    m_completed.clear();
 }

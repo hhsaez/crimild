@@ -57,14 +57,16 @@ namespace crimild::experimental::behaviors {
       bool canAttach( const Behavior *child ) const;
 
       // Called once before an activation's first update.
+      // Sets RUNNING. Overrides must call their base implementation first.
       virtual void initialize( void );
 
       // Must return SUCCESS, FAILURE, or RUNNING.
       // READY and ABORTED are managed exclusively by the lifecycle infrastructure.
       virtual State update( void );
 
-      // Called after completion or interruption, with the final state stored.
-      virtual void terminate( void );
+      // Called once after completion or interruption, with getState() already set
+      // to SUCCESS, FAILURE, or ABORTED, matching the supplied state.
+      virtual void terminate( State state );
 
    private:
       friend class composites::Composite;

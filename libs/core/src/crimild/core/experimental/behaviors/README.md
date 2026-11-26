@@ -8,12 +8,22 @@
 - A newly constructed behavior is `READY`.
 - `tick()` starts a new activation when the behavior is not already `RUNNING`,
   calling `initialize()` once before the activation's first `update()`.
-- Returning `SUCCESS` or `FAILURE` completes the activation and calls `terminate()`
-  once, with the final state already stored.
+- `Behavior::initialize()` sets the state to `RUNNING`. Overrides must call their
+  immediate base implementation first, before custom initialization or callbacks.
+  After initialization, `tick()` asserts that the state is `RUNNING` or `ABORTED`.
+- Returning `SUCCESS` or `FAILURE` completes the activation and calls
+  `terminate(state)` once, with the final state already stored in `getState()`.
 - `abort()` interrupts a running activation, stores `ABORTED`, and calls
-  `terminate()` once. Calling it on a behavior that is not running has no effect.
+  `terminate(ABORTED)` once. Calling it on a behavior that is not running has no effect.
 - Composite and decorator termination must abort any children that remain running.
-  Overrides of `terminate()` must chain to their base implementation for cleanup.
+  Overrides of `terminate(state)` must chain to their base implementation with the
+  same state for cleanup. Running children are interrupted through `abort()`, so
+  they receive `terminate(ABORTED)` even when the parent completed normally.
+- `terminate(state)` receives only `SUCCESS`, `FAILURE`, or `ABORTED`; the argument
+  agrees with `getState()`. State is stored before cleanup, so an `abort()` called
+  recursively during termination has no effect.
+- Cleanup depends on resources or handles captured during execution. Termination,
+  cancellation, attachment, and detachment do not require an execution context.
 - A subsequent `tick()` starts a new activation after completion or cancellation.
 
 Invalid `update()` results violate the contract and trigger `CRIMILD_INVARIANT`
@@ -36,9 +46,11 @@ argument. Cancellation is exercised through `abort()`, not an `ABORTED` return.
   collection change, the composite or decorator aborts its active activation.
   Detachment also aborts the detached child if it is running.
 - Parent destruction clears the parent pointers of retained children.
-- An activation is running before `initialize()` and `update()` are called, so
-  cancellation also works during its first tick. Cancellation inside a hook is
-  preserved by `tick()` without calling termination twice.
+- Base initialization enters `RUNNING` before derived initialization work, so
+  cancellation also works during the first tick. Cancellation inside a hook is
+  preserved by `tick()` without calling termination twice. An `ABORTED` result
+  from an earlier activation restarts on the next tick; an abort during the new
+  initialization skips that tick's update.
 - Traversal stops immediately after a child tick cancels the activation, before
   accessing activation data that termination may have cleared. A cancelled child
   cancels its selecting composite through `abort()`.

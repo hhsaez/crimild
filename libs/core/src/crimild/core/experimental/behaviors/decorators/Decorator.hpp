@@ -21,7 +21,7 @@ namespace crimild::experimental::behaviors::decorators {
 
    protected:
       // Overrides should chain here to abort the running child.
-      virtual void terminate( void ) override;
+      virtual void terminate( State state ) override;
 
    private:
       std::shared_ptr< Behavior > m_behavior;

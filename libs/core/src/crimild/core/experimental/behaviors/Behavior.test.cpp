@@ -27,10 +27,12 @@ namespace {
       std::vector< State > terminationStates;
       std::function< void() > onInitialize;
       std::function< void() > onUpdate;
+      std::function< void( State ) > onTerminate;
 
    protected:
       void initialize( void ) override
       {
+         TestBehavior::initialize();
          calls.push_back( "initialize" );
          if ( onInitialize ) {
             onInitialize();
@@ -46,10 +48,14 @@ namespace {
          return TestBehavior::update();
       }
 
-      void terminate( void ) override
+      void terminate( State state ) override
       {
          calls.push_back( "terminate" );
-         terminationStates.push_back( getState() );
+         terminationStates.push_back( state );
+         EXPECT_EQ( state, getState() );
+         if ( onTerminate ) {
+            onTerminate( state );
+         }
       }
    };
 
@@ -270,4 +276,69 @@ TEST( experimental_Behavior, abort_during_update_preserves_cancellation_on_first
          EXPECT_EQ( behavior.terminationStates.size(), 2 );
       }
    }
+}
+
+TEST( experimental_Behavior, termination_exposes_the_final_state_and_recursive_abort_does_not_repeat_cleanup )
+{
+   for ( const auto reason : { Behavior::State::SUCCESS, Behavior::State::FAILURE, Behavior::State::ABORTED } ) {
+      LifecycleBehavior behavior;
+      behavior.onTerminate = [ & ]( Behavior::State state ) {
+         EXPECT_EQ( state, reason );
+         ASSERT_EQ( behavior.getState(), reason );
+         behavior.abort();
+         behavior.abort();
+      };
+      ASSERT_EQ( behavior.tick(), Behavior::State::RUNNING );
+      if ( reason == Behavior::State::ABORTED ) {
+         behavior.abort();
+      } else {
+         behavior.result = reason;
+         EXPECT_EQ( behavior.tick(), reason );
+      }
+      EXPECT_EQ( behavior.getState(), reason );
+      EXPECT_EQ( behavior.terminationStates, ( std::vector< Behavior::State > { reason } ) );
+   }
+}
+
+TEST( experimental_Behavior, initializer_owns_the_running_transition_on_first_and_restarted_activations )
+{
+   class Initializer : public TestBehavior {
+   public:
+      std::vector< State > entryStates;
+
+   protected:
+      void initialize( void ) override
+      {
+         const auto previous = getState();
+         TestBehavior::initialize();
+         entryStates.push_back( previous );
+         EXPECT_EQ( getState(), State::RUNNING );
+      }
+   };
+   Initializer behavior;
+   behavior.result = Behavior::State::SUCCESS;
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
+   behavior.result = Behavior::State::FAILURE;
+   EXPECT_EQ( behavior.tick(), Behavior::State::FAILURE );
+   behavior.result = Behavior::State::RUNNING;
+   EXPECT_EQ( behavior.tick(), Behavior::State::RUNNING );
+   behavior.abort();
+   behavior.result = Behavior::State::SUCCESS;
+   EXPECT_EQ( behavior.tick(), Behavior::State::SUCCESS );
+   EXPECT_EQ( behavior.entryStates, ( std::vector< Behavior::State > {
+                                       Behavior::State::READY,
+                                       Behavior::State::SUCCESS,
+                                       Behavior::State::FAILURE,
+                                       Behavior::State::ABORTED,
+                                    } ) );
+}
+
+TEST( experimental_Behavior, initialization_must_chain_to_the_base_implementation )
+{
+   class MissingBase : public TestBehavior {
+   protected:
+      void initialize( void ) override { }
+   };
+   MissingBase behavior;
+   EXPECT_DEBUG_DEATH( behavior.tick(), "must call Behavior::initialize" );
 }

@@ -5,6 +5,7 @@ using namespace crimild::experimental::behaviors::composites;
 
 void Selector::initialize( void )
 {
+   Composite::initialize();
    // Each activation starts with a fresh snapshot. Structural edits abort it.
    m_activeBehaviors = getBehaviors();
    m_currentBehavior = 0;
@@ -31,9 +32,9 @@ Behavior::State Selector::update( void )
    return State::FAILURE;
 }
 
-void Selector::terminate( void )
+void Selector::terminate( State state )
 {
-   Composite::terminate();
+   Composite::terminate( state );
    m_activeBehaviors.clear();
    m_currentBehavior = 0;
 }
