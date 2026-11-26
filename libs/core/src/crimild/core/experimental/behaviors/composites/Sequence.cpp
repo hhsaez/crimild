@@ -1,22 +1,23 @@
 #include <crimild/core/experimental/behaviors/composites/Sequence.hpp>
 
+using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-void Sequence::initialize( void )
+void Sequence::initialize( Blackboard &blackboard )
 {
-   Composite::initialize();
+   Composite::initialize( blackboard );
    // Each activation starts with a fresh snapshot. Structural edits abort it.
    m_activeBehaviors = getBehaviors();
    m_currentBehavior = 0;
 }
 
-Behavior::State Sequence::update( void )
+Behavior::State Sequence::update( Blackboard &blackboard )
 {
    while ( m_currentBehavior < m_activeBehaviors.size() ) {
       // Retain the child locally: cancellation can clear the activation snapshot.
       const auto child = m_activeBehaviors[ m_currentBehavior ];
-      const auto state = child->tick();
+      const auto state = child->tick( blackboard );
       if ( getState() == State::ABORTED ) {
          return State::RUNNING;
       }

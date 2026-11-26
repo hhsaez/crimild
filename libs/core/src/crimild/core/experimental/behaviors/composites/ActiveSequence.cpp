@@ -1,15 +1,16 @@
 #include <crimild/core/experimental/behaviors/composites/ActiveSequence.hpp>
 #include <cstddef>
 
+using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 using namespace crimild::experimental::behaviors::composites;
 
-Behavior::State ActiveSequence::update( void )
+Behavior::State ActiveSequence::update( Blackboard &blackboard )
 {
    // Retain children across callbacks that edit the collection and abort us.
    const auto behaviors = getBehaviors();
    for ( std::size_t i = 0; i < behaviors.size(); ++i ) {
-      const auto state = behaviors[ i ]->tick();
+      const auto state = behaviors[ i ]->tick( blackboard );
       if ( getState() == State::ABORTED ) {
          return State::RUNNING;
       }

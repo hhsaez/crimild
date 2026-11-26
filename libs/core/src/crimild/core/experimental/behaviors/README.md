@@ -1,5 +1,60 @@
 # Experimental behaviors
 
+## Blackboards
+
+`crimild::experimental::Blackboard` is a Resource (and therefore an Entity).
+Its variant-backed entries can be accessed with typed keys or dynamic names.
+Entity, Node, and Camera pointers are stored as `weak_ptr`, whether the input is
+shared or weak. Pointer reads return `optional<shared_ptr<T>>`, locking the weak
+reference; missing, mismatched, empty, or expired references return `nullopt`.
+`contains()` checks the name only, so an expired entry can still be present.
+Objects need an owner outside the board. A successful read keeps an object alive
+only while the returned shared pointer is held; scalar and string values are copied.
+
+```cpp
+Key<std::shared_ptr<Entity>> Target { "ai.target" };
+board.set(Target, enemy);                        // weak storage from a shared input
+board.set(Target, std::weak_ptr<Entity>{enemy});  // same storage from a weak input
+auto target = board.get(Target);                 // optional<shared_ptr<Entity>>
+```
+
+Pass `Blackboard&` to `tick()`, `initialize()`, and `update()`. The same
+board reference reaches child ticks. Siblings exchange
+information through one board, and entries persist across ticks. The caller
+supplies the same board throughout an activation; Behavior does not store or
+validate its identity. Base initialization sets RUNNING; overrides chain to their
+immediate base first.
+
+The caller keeps the board alive until the root tick returns, including across
+callbacks that release other owners. When the caller holds a weak handle, lock it
+once before entering the tree:
+
+```cpp
+if (auto board = weakBoard.lock()) {
+   root.tick(*board);
+}
+```
+
+Execution borrows the board without per-node reference-count updates or null
+checks. Base Behavior has no Blackboard member. A behavior that needs a handle
+beyond the call can explicitly use `retain(&blackboard)` to obtain a shared pointer,
+then store it as shared or weak according to its lifetime needs. Retaining requires
+an existing shared owner; a stack board can be borrowed by behaviors that do not
+retain it.
+
+Cleanup receives `terminate(state)` with SUCCESS, FAILURE, or ABORTED, matching
+`getState()`. `abort()`, `attach()`, `detach()`, and `detachFromParent()` receive no
+Blackboard. Structural changes still abort active work and propagate cancellation
+to running children, including when automatically reparenting between trees that
+use different boards. Cleanup relies on resources or handles captured during
+execution. A subclass may retain a weak board reference for optional bookkeeping,
+but must still clean up when that board has expired.
+
+Systems Context migration, scoped lookup, and Blackboard entry serialization
+remain separate work. Resource inheritance does not add serialization of entries.
+Strong storage for global objects or a configurable ownership policy (possibly
+templated) may be considered in a future iteration; the current board is weak.
+
 ## INVARIANTS
 
 - `update()` must return `SUCCESS`, `FAILURE`, or `RUNNING`.

@@ -2,12 +2,13 @@
 #include <crimild/foundation/common/Macros.hpp>
 #include <crimild/foundation/log/Log.hpp>
 
+using namespace crimild::experimental;
 using namespace crimild::experimental::behaviors;
 
-Behavior::State Behavior::tick( void )
+Behavior::State Behavior::tick( Blackboard &blackboard )
 {
    if ( m_state != State::RUNNING ) {
-      initialize();
+      initialize( blackboard );
       CRIMILD_INVARIANT(
          m_state == State::RUNNING || m_state == State::ABORTED,
          "initialize() must call Behavior::initialize()"
@@ -17,7 +18,7 @@ Behavior::State Behavior::tick( void )
       }
    }
 
-   const auto result = update();
+   const auto result = update( blackboard );
    // abort() has already stored the result and performed cleanup.
    if ( m_state == State::ABORTED ) {
       return m_state;
@@ -45,12 +46,12 @@ void Behavior::abort( void )
    terminate( State::ABORTED );
 }
 
-void Behavior::initialize( void )
+void Behavior::initialize( Blackboard &blackboard )
 {
    m_state = State::RUNNING;
 }
 
-Behavior::State Behavior::update( void )
+Behavior::State Behavior::update( Blackboard &blackboard )
 {
    return State::SUCCESS;
 }

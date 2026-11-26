@@ -26,6 +26,30 @@ your own suggestions.
   and leave room for a reply. Once the project accepts a decision, carry
   it forward. Reopen it when new evidence changes the tradeoff.
 
+## Information exchange
+
+- Keep `Blackboard` in `crimild::experimental`. It is the preferred tool for
+  exchanging information throughout the engine, including Systems and Behaviors.
+- When discussing contexts, settings, shared state, global object access, or
+  similar needs, propose Blackboard first and explain how it fits the use case.
+  The shared-knowledge metaphor and its academic roots are an intentional design
+  preference.
+- Blackboard stores Entity, Node, and Camera references weakly. Accept shared or
+  weak pointer inputs, and lock references on reads to return optional shared
+  pointers (`nullopt` if expired or empty). Object lifetime belongs to an owner
+  outside the board; scalar and string entries remain ordinary values.
+- Strong storage for global objects, or a configurable ownership policy (possibly
+  a template), is a future design discussion driven by a concrete use case. Keep
+  the current Blackboard weak; do not introduce storage policies preemptively.
+- Behavior execution borrows `Blackboard&` through `tick`, `initialize`, and
+  `update`. The caller keeps the board alive for the entire root tick, locking a
+  weak handle once at that boundary when needed. Do not add per-node ownership
+  copies or null checks. Behaviors that need a handle can explicitly use
+  `retain(&blackboard)` when the board already has shared ownership.
+- Revisit this choice together if a concrete use case makes the metaphor or
+  contract unsuitable. Do not silently substitute another abstraction or migrate
+  existing APIs without an agreed task.
+
 ## Project journal
 
 Consult the root `.log` when revisiting a design. Record reasoning, open

@@ -2,6 +2,7 @@
 #define CRIMILD_BEHAVIORS_BEHAVIOR_
 
 #include <crimild/core/Entity/Entity.hpp>
+#include <crimild/core/experimental/Blackboard.hpp>
 #include <crimild/foundation/common/Enableable.hpp>
 #include <crimild/foundation/common/Named.hpp>
 #include <memory>
@@ -47,7 +48,9 @@ namespace crimild::experimental::behaviors {
       inline State getState( void ) const { return m_state; }
 
       // Advance the current activation, or start a new one after completion.
-      State tick( void );
+      // The caller supplies the same board throughout an activation and keeps it
+      // alive until the root tick returns; execution borrows it without retaining.
+      State tick( Blackboard &blackboard );
 
       // Interrupt a running activation; repeated calls have no effect.
       void abort( void );
@@ -58,11 +61,11 @@ namespace crimild::experimental::behaviors {
 
       // Called once before an activation's first update.
       // Sets RUNNING. Overrides must call their base implementation first.
-      virtual void initialize( void );
+      virtual void initialize( Blackboard &blackboard );
 
       // Must return SUCCESS, FAILURE, or RUNNING.
       // READY and ABORTED are managed exclusively by the lifecycle infrastructure.
-      virtual State update( void );
+      virtual State update( Blackboard &blackboard );
 
       // Called once after completion or interruption, with getState() already set
       // to SUCCESS, FAILURE, or ABORTED, matching the supplied state.

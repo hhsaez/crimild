@@ -5,6 +5,7 @@
 
 namespace {
 
+   using crimild::experimental::Blackboard;
    using crimild::experimental::behaviors::Behavior;
    using crimild::experimental::behaviors::composites::Parallel;
    using State = Behavior::State;
@@ -22,13 +23,13 @@ namespace {
       std::function< void() > callback;
 
    protected:
-      void initialize( void ) override
+      void initialize( Blackboard &blackboard ) override
       {
-         Behavior::initialize();
+         Behavior::initialize( blackboard );
          ++initializations;
       }
 
-      State update( void ) override
+      State update( Blackboard &blackboard ) override
       {
          m_calls.push_back( m_id );
          if ( callback ) {
@@ -52,23 +53,26 @@ namespace {
 
 TEST( experimental_Parallel, empty_parallel_succeeds )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
 }
 
 TEST( experimental_Parallel, all_successes_complete_in_attachment_order )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    for ( int id : { 1, 2, 3 } ) {
       parallel.attach( std::make_shared< Child >( id, State::SUCCESS, calls ) );
    }
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 }
 
 TEST( experimental_Parallel, ticks_all_unfinished_children_and_skips_completed_ones )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto first = std::make_shared< Child >( 1, State::RUNNING, calls );
@@ -77,12 +81,12 @@ TEST( experimental_Parallel, ticks_all_unfinished_children_and_skips_completed_o
    parallel.attach( first );
    parallel.attach( second );
    parallel.attach( third );
-   ASSERT_EQ( parallel.tick(), State::RUNNING );
+   ASSERT_EQ( parallel.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2, 3 } ) );
 
    first->result = State::SUCCESS;
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::RUNNING );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 3 } ) );
    EXPECT_EQ( second->initializations, 1 );
    EXPECT_EQ( third->initializations, 1 );
@@ -90,13 +94,14 @@ TEST( experimental_Parallel, ticks_all_unfinished_children_and_skips_completed_o
 
    third->result = State::SUCCESS;
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 3 } ) );
    EXPECT_EQ( third->terminations, 1 );
 }
 
 TEST( experimental_Parallel, failure_stops_traversal_and_aborts_running_siblings )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto first = std::make_shared< Child >( 1, State::RUNNING, calls );
@@ -105,11 +110,11 @@ TEST( experimental_Parallel, failure_stops_traversal_and_aborts_running_siblings
    parallel.attach( first );
    parallel.attach( failing );
    parallel.attach( later );
-   ASSERT_EQ( parallel.tick(), State::RUNNING );
+   ASSERT_EQ( parallel.tick( *blackboard ), State::RUNNING );
 
    failing->result = State::FAILURE;
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::FAILURE );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( first->terminatedWith, State::ABORTED );
    EXPECT_EQ( later->terminatedWith, State::ABORTED );
@@ -121,18 +126,20 @@ TEST( experimental_Parallel, failure_stops_traversal_and_aborts_running_siblings
 
 TEST( experimental_Parallel, early_failure_leaves_unstarted_children_ready )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    parallel.attach( std::make_shared< Child >( 1, State::FAILURE, calls ) );
    auto later = std::make_shared< Child >( 2, State::SUCCESS, calls );
    parallel.attach( later );
-   EXPECT_EQ( parallel.tick(), State::FAILURE );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::FAILURE );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( later->getState(), State::READY );
 }
 
 TEST( experimental_Parallel, abort_propagates_to_nested_running_children_once )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto nested = std::make_shared< Parallel >();
@@ -141,7 +148,7 @@ TEST( experimental_Parallel, abort_propagates_to_nested_running_children_once )
    nested->attach( action );
    parallel.attach( nested );
    parallel.attach( sibling );
-   ASSERT_EQ( parallel.tick(), State::RUNNING );
+   ASSERT_EQ( parallel.tick( *blackboard ), State::RUNNING );
    parallel.abort();
    parallel.abort();
    EXPECT_EQ( nested->getState(), State::ABORTED );
@@ -153,14 +160,15 @@ TEST( experimental_Parallel, abort_propagates_to_nested_running_children_once )
 
 TEST( experimental_Parallel, next_activation_reruns_previously_successful_children )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto child = std::make_shared< Child >( 1, State::SUCCESS, calls );
-   ASSERT_EQ( child->tick(), State::SUCCESS );
+   ASSERT_EQ( child->tick( *blackboard ), State::SUCCESS );
    parallel.attach( child );
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 1 } ) );
    EXPECT_EQ( child->initializations, 3 );
    EXPECT_EQ( child->terminations, 3 );
@@ -168,23 +176,24 @@ TEST( experimental_Parallel, next_activation_reruns_previously_successful_childr
 
 TEST( experimental_Parallel, restarts_after_failure_and_abort )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto first = std::make_shared< Child >( 1, State::SUCCESS, calls );
    auto second = std::make_shared< Child >( 2, State::FAILURE, calls );
    parallel.attach( first );
    parallel.attach( second );
-   ASSERT_EQ( parallel.tick(), State::FAILURE );
+   ASSERT_EQ( parallel.tick( *blackboard ), State::FAILURE );
 
    second->result = State::RUNNING;
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::RUNNING );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::RUNNING );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    parallel.abort();
 
    second->result = State::SUCCESS;
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
    EXPECT_EQ( calls, ( std::vector< int > { 1, 2 } ) );
    EXPECT_EQ( first->initializations, 3 );
    EXPECT_EQ( second->initializations, 3 );
@@ -192,6 +201,7 @@ TEST( experimental_Parallel, restarts_after_failure_and_abort )
 
 TEST( experimental_Parallel, attachment_during_update_aborts_and_stops_traversal )
 {
+   const auto blackboard = std::make_shared< Blackboard >();
    Parallel parallel;
    std::vector< int > calls;
    auto mutator = std::make_shared< Child >( 1, State::SUCCESS, calls );
@@ -207,12 +217,12 @@ TEST( experimental_Parallel, attachment_during_update_aborts_and_stops_traversal
    };
    parallel.attach( mutator );
    parallel.attach( std::make_shared< Child >( 2, State::SUCCESS, calls ) );
-   EXPECT_EQ( parallel.tick(), State::ABORTED );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::ABORTED );
    EXPECT_EQ( calls, ( std::vector< int > { 1 } ) );
    EXPECT_EQ( mutator->terminations, 1 );
 
    calls.clear();
-   EXPECT_EQ( parallel.tick(), State::SUCCESS );
+   EXPECT_EQ( parallel.tick( *blackboard ), State::SUCCESS );
    std::vector< int > expected( parallel.getBehaviors().size(), 3 );
    expected[ 0 ] = 1;
    expected[ 1 ] = 2;

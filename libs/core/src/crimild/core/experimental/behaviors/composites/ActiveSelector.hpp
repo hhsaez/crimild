@@ -11,7 +11,7 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~ActiveSelector( void ) noexcept = default;
 
    protected:
-      virtual State update( void ) override;
+      virtual State update( Blackboard &blackboard ) override;
    };
 
 }

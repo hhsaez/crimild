@@ -13,8 +13,8 @@ namespace crimild::experimental::behaviors::composites {
       virtual ~Parallel( void ) noexcept = default;
 
    protected:
-      virtual void initialize( void ) override;
-      virtual State update( void ) override;
+      virtual void initialize( Blackboard &blackboard ) override;
+      virtual State update( Blackboard &blackboard ) override;
       virtual void terminate( State state ) override;
 
    private:
