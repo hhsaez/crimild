@@ -23,7 +23,7 @@ namespace crimild::experimental {
          }
 
          if ( auto onTick = dynamic_cast< OnTick * >( &node ) ) {
-            onTick->triggered( m_clock );
+            onTick->trigger( m_clock );
          }
          crimild::experimental::NodeVoidVisitor::visitNode( node );
       }

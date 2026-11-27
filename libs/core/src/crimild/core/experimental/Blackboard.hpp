@@ -1,6 +1,7 @@
 #ifndef CRIMILD_CORE_EXPERIMENTAL_BLACKBOARD_
 #define CRIMILD_CORE_EXPERIMENTAL_BLACKBOARD_
 
+#include <crimild/core/Simulation/Clock.hpp>
 #include <crimild/core/experimental/Resource.hpp>
 #include <crimild/foundation/common/Key.hpp>
 #include <crimild/math/Size2.hpp>
@@ -65,6 +66,7 @@ namespace crimild::experimental {
          float,
          Size2i,
          std::string,
+         Clock,
          std::weak_ptr< Entity >,
          std::weak_ptr< Node >,
          std::weak_ptr< Camera3D > >;

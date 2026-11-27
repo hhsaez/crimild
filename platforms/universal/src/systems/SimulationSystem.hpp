@@ -1,19 +1,14 @@
 #ifndef CRIMILD_UNIVERSAL_SYSTEMS_SIMULATION_
 #define CRIMILD_UNIVERSAL_SYSTEMS_SIMULATION_
 
-#include <crimild/core/experimental/systems/System.hpp>
+#include <crimild/core/experimental/systems/TickSystem.hpp>
 
 namespace crimild::universal::systems {
 
-   class SimulationSystem : public crimild::experimental::systems::System {
-   private:
-      using State = crimild::experimental::systems::System::State;
-      using Context = crimild::experimental::systems::Context;
-
+   class [[deprecated( "Use crimild::experimental::systems::TickSystem" )]] SimulationSystem
+      : public crimild::experimental::systems::TickSystem {
    public:
-      virtual ~SimulationSystem( void ) noexcept = default;
-
-      virtual State onUpdate( const Context &ctx ) override;
+      using TickSystem::onUpdate;
    };
 
 }

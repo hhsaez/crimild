@@ -13,7 +13,6 @@ target_sources(
   PRIVATE RenderSystem.hpp
   PRIVATE RenderSystem.cpp
   PRIVATE SimulationSystem.hpp
-  PRIVATE SimulationSystem.cpp
   
   PRIVATE UniversalSceneRunner.cpp
 )

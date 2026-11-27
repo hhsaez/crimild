@@ -545,3 +545,9 @@
 - Deprecate the complete legacy behavior API with compiler attributes so concrete behaviors and helpers warn at their call sites, not just the base class. Keep runtime behavior and serialized RTTI names intact for existing callers.
 - Develop new behavior trees under crimild::experimental::behaviors. Deprecation is independent of the pending lifecycle and Blackboard PRs; migrating legacy callers and filling gaps in the new API remain separate work.
 - Pass Blackboard& through tick/initialize/update in #114 to require a valid instance without per-node null checks or shared-pointer reference-count updates. The caller keeps the board alive until the root tick returns, locking a weak handle once before traversal when needed. A behavior can explicitly use retain(&blackboard) for a shared or weak handle when the board already has shared ownership; base Behavior retains no board.
+
+# 2026-11-27
+- Use Event itself as the scene-level owner of a behavior and Blackboard handle; a separate BehaviorEvent base adds no distinction. Events have separate behavior instances and may share boards. Replacing either handle aborts active work first; root execution pins both handles across callbacks.
+- Add Clock values to Blackboard and publish a Clock copy before OnTick execution. Keep the visitor-based traversal for the first integration, extract it into core TickSystem, and retain the universal SimulationSystem name as a deprecated compatibility class.
+- Keep this iteration focused on Event, OnTick, TickSystem, and tests. Other events and collision support remain separate. Future OnCollision handlers must complete synchronously with SUCCESS or FAILURE; ongoing decisions belong to the tick-driven tree initially.
+• Wire disabling, detaching, or removing event nodes to abort running behaviors in a follow-up. This PR only skips disabled nodes; automatic node lifecycle cancellation is not implemented yet.

@@ -62,6 +62,37 @@ TEST( experimental_Blackboard, typed_and_dynamic_keys_access_the_same_entry )
    EXPECT_TRUE( board.contains( Count ) );
 }
 
+TEST( experimental_Blackboard, stores_clock_values_as_independent_copies )
+{
+   Blackboard board;
+   const Key< crimild::Clock > clockKey { "test.clock" };
+   crimild::Clock clock( 0.125 );
+   clock.setCurrentTime( 12.0 );
+   clock.setLastTime( 11.875 );
+   clock.setAccumTime( 3.0 );
+   clock.setTimeScale( 0.5 );
+   clock.setIgnoreGlobalTimeScale( true );
+   board.set( clockKey, clock );
+   clock.setDeltaTime( 99.0 );
+
+   auto typed = board.get( clockKey );
+   const auto dynamic = board.get< crimild::Clock >( "test.clock" );
+   ASSERT_TRUE( typed );
+   ASSERT_TRUE( dynamic );
+   EXPECT_DOUBLE_EQ( typed->getDeltaTime(), 0.125 );
+   EXPECT_DOUBLE_EQ( dynamic->getCurrentTime(), 12.0 );
+   EXPECT_DOUBLE_EQ( typed->getLastTime(), 11.875 );
+   EXPECT_DOUBLE_EQ( typed->getAccumTime(), 3.0 );
+   EXPECT_DOUBLE_EQ( typed->getTimeScale(), 0.5 );
+   EXPECT_TRUE( typed->shouldIgnoreGlobalTimeScale() );
+
+   typed->setDeltaTime( 8.0 );
+   EXPECT_DOUBLE_EQ( board.get( clockKey )->getDeltaTime(), 0.125 );
+   board.set( "test.clock", clock );
+   EXPECT_DOUBLE_EQ( board.get( clockKey )->getDeltaTime(), 99.0 );
+   EXPECT_EQ( board.get< float >( "test.clock" ), std::nullopt );
+}
+
 TEST( experimental_Blackboard, names_are_copied_and_compared_by_content )
 {
    Blackboard board;
