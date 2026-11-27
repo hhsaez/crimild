@@ -7,8 +7,20 @@
 
 namespace crimild::experimental {
 
+   namespace keys {
+
+      inline constexpr Key< crimild::Clock > Clock { "crimild.clock" };
+
+   }
+
    class OnTick : public Event {
    public:
+      using Event::trigger;
+
+      // Publish a Clock value before executing the behavior.
+      virtual State trigger( const crimild::Clock &clock );
+
+      // Existing signal subscribers are notified after behavior execution.
       crimild::Signal< const crimild::Clock & > triggered;
 
    public:

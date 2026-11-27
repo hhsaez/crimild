@@ -55,6 +55,12 @@ remain separate work. Resource inheritance does not add serialization of entries
 Strong storage for global objects or a configurable ownership policy (possibly
 templated) may be considered in a future iteration; the current board is weak.
 
+Scene Event nodes now supply the root execution boundary: they hold the behavior
+and Blackboard handles, while OnTick publishes a Clock value before execution.
+See [Event behavior execution](../nodes/events/README.md) for ownership,
+replacement, and TickSystem integration. Node disable/removal cancellation remains
+a follow-up; this integration does not add those node lifecycle hooks.
+
 ## INVARIANTS
 
 - `update()` must return `SUCCESS`, `FAILURE`, or `RUNNING`.

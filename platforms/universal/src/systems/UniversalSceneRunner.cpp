@@ -1,8 +1,8 @@
 #include "systems/GLFWInputSystem.hpp"
 #include "systems/PhysicsSystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/SimulationSystem.hpp"
 
+#include <crimild/core/experimental/systems/TickSystem.hpp>
 #include <crimild/universal/systems/DebugSystem.hpp>
 #include <crimild/universal/systems/GLFWSystem.hpp>
 #include <crimild/universal/systems/GLFWWindow.hpp>
@@ -24,7 +24,7 @@ SceneRunner::SceneRunner( int argc, char **argv ) noexcept
                window->attach< DebugSystem >();
                window->attach< GLFWInputSystem >();
                // TODO: simulation should be window independent
-               window->attach< SimulationSystem >();
+               window->attach< TickSystem >();
                window->attach< PhysicsSystem >();
                window->attach< RenderSystem >();
                return window;
